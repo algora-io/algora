@@ -35,3 +35,17 @@ algora-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore env files
+.env
+.env*.local
+.env.dev
+.env.prod
+.env.staging
+
+# Ignore local files
+/tmp
+/.local
+/priv/cache
+*.patch
+/.fly
+/xref*

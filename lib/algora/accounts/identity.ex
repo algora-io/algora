@@ -7,11 +7,10 @@ defmodule Algora.Accounts.Identity do
   # providers
   @github "github"
 
-  @derive {Inspect, except: [:provider_token, :provider_refresh_token, :provider_meta]}
+  @derive {Inspect, except: [:provider_token, :provider_meta]}
   schema "identities" do
     field :provider, :string
     field :provider_token, :string
-    field :provider_refresh_token, :string
     field :provider_email, :string
     field :provider_login, :string
     field :provider_name, :string, virtual: true

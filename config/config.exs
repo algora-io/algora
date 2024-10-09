@@ -8,6 +8,9 @@
 import Config
 
 config :algora,
+  title: "Algora",
+  description:
+    "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
   admin_emails: ["zafer@algora.io", "ioannis@algora.io"],
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime]
@@ -37,7 +40,7 @@ config :esbuild,
   version: "0.17.11",
   algora: [
     args:
-      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+      ~w(js/app.ts --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]

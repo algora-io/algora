@@ -44,14 +44,6 @@ defmodule AlgoraWeb.OAuthCallbackController do
     redirect(conn, to: "/")
   end
 
-  defp verify_session(conn, key, token) do
-    if Plug.Crypto.secure_compare(token, get_session(conn, key)) do
-      {:ok, token}
-    else
-      {:error, "#{key} is invalid"}
-    end
-  end
-
   def sign_out(conn, _) do
     AlgoraWeb.UserAuth.log_out_user(conn)
   end

@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :fetch_current_user
-    plug :put_root_layout, html: {AlgoraWeb.Layouts, :root}
+    plug :put_root_layout, {AlgoraWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -20,23 +20,18 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through :browser
 
-    get "/oauth/callbacks/:provider", OAuthCallbackController, :new
-  end
-
-  scope "/", AlgoraWeb do
-    pipe_through :browser
-
     get "/", PageController, :home
-  end
-
-  scope "/", AlgoraWeb do
-    pipe_through :browser
-
+    get "/oauth/callbacks/:provider", OAuthCallbackController, :new
     delete "/auth/logout", OAuthCallbackController, :sign_out
-  end
 
-  live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Nav] do
-    live "/auth/login", AlgoraWeb.SignInLive, :index
+    live_session :authenticated,
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.Nav] do
+      live "/user/settings", SettingsLive, :edit
+    end
+
+    live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Nav] do
+      live "/auth/login", SignInLive, :index
+    end
   end
 
   # Other scopes may use custom stacks.

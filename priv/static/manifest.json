@@ -1,0 +1,20 @@
+{
+  "short_name": "Algora Console",
+  "name": "Algora Console",
+  "icons": [
+    {
+      "src": "/images/logo-192px.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo-512px.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "fullscreen",
+  "theme_color": "#5533bd",
+  "background_color": "#5533bd"
+}

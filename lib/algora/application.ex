@@ -16,6 +16,7 @@ defmodule Algora.Application do
       {Finch, name: Algora.Finch},
       # Start a worker by calling: Algora.Worker.start_link(arg)
       # {Algora.Worker, arg},
+      Algora.Stargazer,
       # Start to serve requests, typically the last entry
       AlgoraWeb.Endpoint
     ]

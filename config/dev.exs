@@ -1,5 +1,9 @@
 import Config
 
+config :algora, :github,
+  client_id: System.get_env("GITHUB_CLIENT_ID"),
+  client_secret: System.get_env("GITHUB_CLIENT_SECRET")
+
 # Configure your database
 config :algora, Algora.Repo,
   url: System.get_env("DATABASE_URL"),

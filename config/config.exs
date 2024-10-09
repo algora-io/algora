@@ -8,6 +8,7 @@
 import Config
 
 config :algora,
+  admin_emails: ["zafer@algora.io", "ioannis@algora.io"],
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime]
 

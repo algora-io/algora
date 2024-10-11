@@ -11,6 +11,9 @@ defmodule Algora.Payments.Transaction do
 
     belongs_to :account, Algora.Payments.Account
     belongs_to :customer, Algora.Payments.Customer
+    belongs_to :bounty, Algora.Bounties.Bounty
+    belongs_to :claim, Algora.Bounties.Claim
+    belongs_to :project, Algora.Projects.Project
 
     timestamps()
   end

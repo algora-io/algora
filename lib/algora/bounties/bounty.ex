@@ -10,6 +10,7 @@ defmodule Algora.Bounties.Bounty do
     belongs_to :user, Algora.Accounts.User
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
+    has_many :transactions, Algora.Payments.Transaction
 
     timestamps()
   end

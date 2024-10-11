@@ -8,6 +8,7 @@ defmodule Algora.Projects.Project do
     belongs_to :user, Algora.Accounts.User
     has_many :milestones, Algora.Projects.Milestone
     has_many :assignees, Algora.Projects.Assignee
+    has_many :transactions, Algora.Payments.Transaction
 
     timestamps()
   end

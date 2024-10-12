@@ -10,10 +10,27 @@ defmodule Algora.Accounts.User do
     field :provider_login, :string
     field :provider_meta, :map
 
+    field :type, Ecto.Enum, values: [:individual, :organization], default: :individual
     field :email, :string
     field :name, :string
     field :handle, :string
+    field :bio, :string
     field :avatar_url, :string
+    field :location, :string
+    field :stargazers_count, :integer, default: 0
+    field :domain, :string
+    field :tech_stack, {:array, :string}, default: []
+    field :featured, :boolean, default: false
+    field :priority, :integer, default: 0
+    field :fee_pct, :integer, default: 19
+    field :seeded, :boolean, default: false
+    field :activated, :boolean, default: false
+    field :max_open_attempts, :integer, default: 3
+    field :manual_assignment, :boolean, default: false
+
+    field :bounty_mode, Ecto.Enum,
+      values: [:community, :experts_only, :public],
+      default: :community
 
     field :website_url, :string
     field :twitter_url, :string
@@ -39,22 +56,40 @@ defmodule Algora.Accounts.User do
   A user changeset for github registration.
   """
   def github_registration_changeset(info, primary_email, emails, token) do
-    %{"login" => handle, "avatar_url" => avatar_url, "html_url" => website_url} = info
-
     identity_changeset =
       Identity.github_registration_changeset(info, primary_email, emails, token)
 
     if identity_changeset.valid? do
       params = %{
-        "handle" => handle,
+        "handle" => info["login"],
         "email" => primary_email,
         "name" => get_change(identity_changeset, :provider_name),
-        "avatar_url" => avatar_url,
-        "website_url" => website_url
+        "bio" => info["bio"],
+        "location" => info["location"],
+        "avatar_url" => info["avatar_url"],
+        "website_url" => info["blog"],
+        "github_url" => info["html_url"],
+        "provider" => "github",
+        "provider_id" => to_string(info["id"]),
+        "provider_login" => info["login"],
+        "provider_meta" => info
       }
 
       %User{}
-      |> cast(params, [:email, :name, :handle, :avatar_url, :website_url])
+      |> cast(params, [
+        :handle,
+        :email,
+        :name,
+        :bio,
+        :location,
+        :avatar_url,
+        :website_url,
+        :github_url,
+        :provider,
+        :provider_id,
+        :provider_login,
+        :provider_meta
+      ])
       |> validate_required([:email, :name, :handle])
       |> validate_handle()
       |> validate_email()

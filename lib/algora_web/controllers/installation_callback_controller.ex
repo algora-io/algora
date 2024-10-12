@@ -7,7 +7,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
   alias Algora.Installations
   alias Algora.Github
 
-  def handle(conn, params) do
+  def new(conn, params) do
     case validate_query_params(params) do
       {:ok, %{setup_action: "install", installation_id: installation_id}} ->
         handle_installation(conn, installation_id)
@@ -48,11 +48,8 @@ defmodule AlgoraWeb.InstallationCallbackController do
         redirect_url = determine_redirect_url(conn, org, user)
         redirect(conn, to: redirect_url)
 
-      {:error, code} ->
-        Logger.error("❌ Installation callback failed",
-          user: %{id: user.id, handle: user.handle},
-          code: code
-        )
+      {:error, error} ->
+        Logger.error("❌ Installation callback failed: #{inspect(error)}")
 
         redirect(conn, to: "/user/installations")
     end
@@ -67,7 +64,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
          {:ok, org} <- upsert_org(conn, user, installation, account) do
       {:ok, org, github_handle}
     else
-      {:error, code} -> {:error, code}
+      {:error, error} -> {:error, error}
     end
   end
 

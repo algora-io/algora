@@ -1,4 +1,11 @@
 defmodule Algora.Github do
+  # TODO: Make this dynamic
+  defp app_slug, do: "algora-dev"
+
+  def install_url() do
+    "https://github.com/apps/#{app_slug()}/installations/new"
+  end
+
   def authorize_url(return_to \\ nil) do
     redirect_query = if return_to, do: URI.encode_query(return_to: return_to)
 
@@ -42,17 +49,17 @@ defmodule Algora.Github do
     end
   end
 
+  def fetch(access_token, path, method \\ "GET") do
+    http("api.github.com", method, path, [], [
+      {"accept", "application/vnd.github.v3+json"},
+      {"Authorization", "token #{access_token}"}
+    ])
+  end
+
   defp fetch_user_info({:error, _reason} = error), do: error
 
   defp fetch_user_info({:ok, token}) do
-    resp =
-      http(
-        "api.github.com",
-        "GET",
-        "/user",
-        [],
-        [{"accept", "application/vnd.github.v3+json"}, {"Authorization", "token #{token}"}]
-      )
+    resp = fetch(token, "/user")
 
     case resp do
       {:ok, info} -> {:ok, %{info: Jason.decode!(info), token: token}}
@@ -63,14 +70,7 @@ defmodule Algora.Github do
   defp fetch_emails({:error, _} = err), do: err
 
   defp fetch_emails({:ok, user}) do
-    resp =
-      http(
-        "api.github.com",
-        "GET",
-        "/user/emails",
-        [],
-        [{"accept", "application/vnd.github.v3+json"}, {"Authorization", "token #{user.token}"}]
-      )
+    resp = fetch(user.token, "/user/emails")
 
     case resp do
       {:ok, info} ->
@@ -80,6 +80,14 @@ defmodule Algora.Github do
       {:error, _reason} = err ->
         err
     end
+  end
+
+  def get_user_by_username(access_token, username) do
+    fetch(access_token, "/users/#{username}")
+  end
+
+  def find_installation(access_token, installation_id) do
+    fetch(access_token, "/user/installations/#{installation_id}")
   end
 
   defp client_id, do: Algora.config([:github, :client_id])
@@ -126,20 +134,5 @@ defmodule Algora.Github do
 
   defp primary_email(emails) do
     Enum.find(emails, fn email -> email["primary"] end)["email"] || Enum.at(emails, 0)
-  end
-
-  def fetch(access_token, path, method \\ "GET") do
-    http("api.github.com", method, path, [], [
-      {"accept", "application/vnd.github.v3+json"},
-      {"Authorization", "token #{access_token}"}
-    ])
-  end
-
-  def get_user_by_username(access_token, username) do
-    fetch(access_token, "/users/#{username}")
-  end
-
-  def find_installation(access_token, installation_id) do
-    fetch(access_token, "/user/installations/#{installation_id}")
   end
 end

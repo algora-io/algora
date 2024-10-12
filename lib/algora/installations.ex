@@ -1,4 +1,5 @@
 defmodule Algora.Installations do
+  import Ecto.Query
   alias Algora.Repo
   alias Algora.Installations.Installation
 
@@ -25,4 +26,8 @@ defmodule Algora.Installations do
 
   def get_installation(id), do: Repo.get(Installation, id)
   def get_installation!(id), do: Repo.get!(Installation, id)
+
+  def list_user_installations(user_id) do
+    Repo.all(from(i in Installation, where: i.user_id == ^user_id))
+  end
 end

@@ -94,41 +94,22 @@ defmodule Algora.Github do
   defp secret, do: Algora.config([:github, :client_secret])
 
   defp http(host, method, path, query, headers, body \\ "") do
-    {:ok, conn} = Mint.HTTP.connect(:https, host, 443)
+    query_string = URI.encode_query([{:client_id, client_id()} | query])
+    url = "https://#{host}#{path}?#{query_string}"
 
-    path = path <> "?" <> URI.encode_query([{:client_id, client_id()} | query])
+    headers = [{"Content-Type", "application/json"} | headers]
 
-    {:ok, conn, ref} =
-      Mint.HTTP.request(
-        conn,
-        method,
-        path,
-        headers,
-        body
-      )
+    request = Finch.build(method, url, headers, body)
 
-    receive_resp(conn, ref, nil, nil, false)
-  end
+    case Finch.request(request, Algora.Finch) do
+      {:ok, %Finch.Response{status: 200, body: body}} ->
+        {:ok, body}
 
-  defp receive_resp(conn, ref, status, data, done?) do
-    receive do
-      message ->
-        {:ok, conn, responses} = Mint.HTTP.stream(conn, message)
+      {:ok, %Finch.Response{status: status, body: body}} ->
+        {:error, {status, body}}
 
-        {new_status, new_data, done?} =
-          Enum.reduce(responses, {status, data, done?}, fn
-            {:status, ^ref, new_status}, {_old_status, data, done?} -> {new_status, data, done?}
-            {:headers, ^ref, _headers}, acc -> acc
-            {:data, ^ref, binary}, {status, nil, done?} -> {status, binary, done?}
-            {:data, ^ref, binary}, {status, data, done?} -> {status, data <> binary, done?}
-            {:done, ^ref}, {status, data, _done?} -> {status, data, true}
-          end)
-
-        cond do
-          done? and new_status == 200 -> {:ok, new_data}
-          done? -> {:error, {new_status, new_data}}
-          !done? -> receive_resp(conn, ref, new_status, new_data, done?)
-        end
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

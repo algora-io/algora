@@ -1,8 +1,8 @@
-defmodule Algora.Payments.Transaction do
+defmodule Algora.Payments.BalanceTransaction do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "transactions" do
+  schema "balance_transactions" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map
@@ -10,13 +10,8 @@ defmodule Algora.Payments.Transaction do
     field :succeeded_at, :utc_datetime
     field :amount, :decimal
     field :currency, :string
-    field :type, Ecto.Enum, values: [:charge, :transfer]
-
-    belongs_to :account, Algora.Payments.Account
-    belongs_to :customer, Algora.Payments.Customer
-    belongs_to :bounty, Algora.Bounties.Bounty
-    belongs_to :claim, Algora.Bounties.Claim
-    belongs_to :project, Algora.Projects.Project
+    field :type, :string
+    field :reporting_category, :string
 
     timestamps()
   end

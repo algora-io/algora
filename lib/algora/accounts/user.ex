@@ -30,6 +30,8 @@ defmodule Algora.Accounts.User do
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project
     has_many :repositories, Algora.Work.Repository
+    has_many :installations, Algora.Installations.Installation
+
     timestamps()
   end
 

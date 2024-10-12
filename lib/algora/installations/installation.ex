@@ -15,7 +15,7 @@ defmodule Algora.Installations.Installation do
 
   def changeset(installation, attrs) do
     installation
-    |> cast(attrs, [:provider, :provider_id, :provider_meta])
-    |> validate_required([:provider, :provider_id])
+    |> cast(attrs, [:provider, :provider_id, :provider_login, :provider_meta])
+    |> validate_required([:provider, :provider_id, :provider_login, :provider_meta])
   end
 end

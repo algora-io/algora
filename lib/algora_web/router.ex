@@ -22,6 +22,7 @@ defmodule AlgoraWeb.Router do
 
     get "/", PageController, :home
     get "/oauth/callbacks/:provider", OAuthCallbackController, :new
+    get "/callbacks/:provider/installation", InstallationCallbackController, :new
     delete "/auth/logout", OAuthCallbackController, :sign_out
 
     live_session :authenticated,

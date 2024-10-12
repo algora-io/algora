@@ -127,4 +127,19 @@ defmodule Algora.Github do
   defp primary_email(emails) do
     Enum.find(emails, fn email -> email["primary"] end)["email"] || Enum.at(emails, 0)
   end
+
+  def fetch(access_token, path, method \\ "GET") do
+    http("api.github.com", method, path, [], [
+      {"accept", "application/vnd.github.v3+json"},
+      {"Authorization", "token #{access_token}"}
+    ])
+  end
+
+  def get_user_by_username(access_token, username) do
+    fetch(access_token, "/users/#{username}")
+  end
+
+  def find_installation(access_token, installation_id) do
+    fetch(access_token, "/user/installations/#{installation_id}")
+  end
 end

@@ -2,6 +2,7 @@ defmodule AlgoraWeb.SettingsLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
 
   def render(assigns) do
     ~H"""
@@ -30,7 +31,7 @@ defmodule AlgoraWeb.SettingsLive do
   def mount(_params, _session, socket) do
     %{current_user: current_user} = socket.assigns
 
-    changeset = Accounts.change_settings(current_user, %{})
+    changeset = User.settings_changeset(current_user, %{})
 
     {:ok,
      socket
@@ -41,7 +42,7 @@ defmodule AlgoraWeb.SettingsLive do
   def handle_event("validate", %{"user" => params}, socket) do
     changeset =
       socket.assigns.current_user
-      |> Accounts.change_settings(params)
+      |> User.settings_changeset(params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}

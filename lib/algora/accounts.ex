@@ -6,7 +6,11 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.{User, Identity}
 
   def list_users(opts) do
-    Repo.all(from u in User, limit: ^Keyword.fetch!(opts, :limit))
+    Repo.all(
+      from u in User,
+        where: u.type == "individual",
+        limit: ^Keyword.fetch!(opts, :limit)
+    )
   end
 
   def get_users_map(user_ids) when is_list(user_ids) do
@@ -14,11 +18,11 @@ defmodule Algora.Accounts do
   end
 
   def admin?(%User{} = user) do
-    user.email in Algora.config([:admin_emails])
+    user.email in Algora.config(:admin_emails)
   end
 
   def update_settings(%User{} = user, attrs) do
-    user |> change_settings(attrs) |> Repo.update()
+    user |> User.settings_changeset(attrs) |> Repo.update()
   end
 
   ## Database getters
@@ -96,10 +100,6 @@ defmodule Algora.Accounts do
       )
 
     Repo.one(query)
-  end
-
-  def change_settings(%User{} = user, attrs) do
-    User.settings_changeset(user, attrs)
   end
 
   defp update_github_token(%User{} = user, new_token) do

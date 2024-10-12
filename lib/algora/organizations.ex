@@ -3,6 +3,7 @@ defmodule Algora.Organizations do
 
   alias Algora.Accounts.User
   alias Algora.Organizations.Org
+  alias Algora.Organizations.Member
   alias Algora.Repo
 
   def create_organization(params) do
@@ -15,6 +16,12 @@ defmodule Algora.Organizations do
     org
     |> Org.changeset(params)
     |> Repo.update()
+  end
+
+  def create_member(org, user) do
+    %Member{}
+    |> Member.changeset(%{org_id: org.id, user_id: user.id})
+    |> Repo.insert()
   end
 
   def get_org_by(fields), do: Repo.get_by(Org, fields)

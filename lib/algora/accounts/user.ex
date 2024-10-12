@@ -102,6 +102,12 @@ defmodule Algora.Accounts.User do
     end
   end
 
+  def org_registration_changeset(org, params) do
+    org
+    |> cast(params, [:handle, :email, :website_url, :location, :bio])
+    |> validate_required([:handle, :email])
+  end
+
   def settings_changeset(%User{} = user, params) do
     user
     |> cast(params, [:handle, :name])

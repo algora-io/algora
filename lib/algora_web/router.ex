@@ -28,6 +28,7 @@ defmodule AlgoraWeb.Router do
     live_session :authenticated,
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.Nav] do
       live "/user/settings", SettingsLive, :edit
+      live "/user/installations", InstallationsLive, :index
     end
 
     live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Nav] do

@@ -104,7 +104,12 @@ defmodule Algora.Accounts do
 
   @spec get_access_token(%User{}) :: {:ok, String.t()} | {:error, atom()}
   def get_access_token(%User{} = user) do
-    Repo.one(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github"))
+    with identity <-
+           Repo.one(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github")) do
+      {:ok, identity.provider_token}
+    else
+      _ -> {:error, :not_found}
+    end
   end
 
   defp update_github_token(%User{} = user, new_token) do

@@ -26,7 +26,7 @@ defmodule AlgoraWeb.Router do
     delete "/auth/logout", OAuthCallbackController, :sign_out
 
     live_session :authenticated,
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.Nav] do
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}] do
       live "/user/settings", SettingsLive, :edit
       live "/user/installations", InstallationsLive, :index
     end
@@ -40,7 +40,7 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/jobs", Org.JobsLive, :index
     end
 
-    live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Nav] do
+    live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/auth/login", SignInLive, :index
     end
   end

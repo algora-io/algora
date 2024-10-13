@@ -250,6 +250,50 @@ const Hooks = {
       window.addEventListener("scroll", onScroll, { passive: true });
     },
   },
+  MobileMenu: {
+    mounted() {
+      this.menuOpen = false;
+      this.backdrop = this.el.querySelector("#menu-backdrop");
+      this.menuContainer = this.el.querySelector("#menu-container");
+      this.closeButton = this.el.querySelector("#close-button");
+      this.closeMenuButton = this.el.querySelector("#close-menu-button");
+      this.openButton = this.el.querySelector("#open-button");
+      this.openMenuButton = this.el.querySelector("#open-menu-button");
+
+      this.closeMenuButton.addEventListener("click", () => this.toggleMenu());
+      this.openMenuButton.addEventListener("click", () => this.toggleMenu());
+    },
+
+    toggleMenu() {
+      this.menuOpen = !this.menuOpen;
+
+      if (this.menuOpen) {
+        this.backdrop.classList.remove("opacity-0");
+        this.backdrop.classList.add("opacity-100");
+
+        this.menuContainer.classList.remove("-translate-x-full");
+        this.menuContainer.classList.add("translate-x-0");
+
+        this.closeButton.classList.remove("opacity-0");
+        this.closeButton.classList.add("opacity-100");
+
+        this.openButton.classList.remove("opacity-100");
+        this.openButton.classList.add("opacity-0");
+      } else {
+        this.backdrop.classList.remove("opacity-100");
+        this.backdrop.classList.add("opacity-0");
+
+        this.menuContainer.classList.remove("translate-x-0");
+        this.menuContainer.classList.add("-translate-x-full");
+
+        this.closeButton.classList.remove("opacity-100");
+        this.closeButton.classList.add("opacity-0");
+
+        this.openButton.classList.remove("opacity-0");
+        this.openButton.classList.add("opacity-100");
+      }
+    },
+  },
   CopyToClipboard: {
     value() {
       return this.el.dataset.value;

@@ -62,44 +62,44 @@
                 <div class="text-xs font-semibold leading-6 text-gray-400">Overview</div>
                 <ul role="list" class="-mx-2 mt-2 space-y-1">
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-home" /> Dashboard
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/bounties"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-diamond" /> Bounties
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/projects"}
                       class="group flex gap-x-3 rounded-md bg-gray-800 p-2 text-sm font-semibold leading-6 text-white"
                     >
                       <.icon name="tabler-affiliate" /> Projects
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/jobs"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-briefcase" /> Jobs
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/community"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-world" /> Community
-                    </a>
+                    </.link>
                   </li>
                 </ul>
               </li>
@@ -107,36 +107,36 @@
                 <div class="text-xs font-semibold leading-6 text-gray-400">Settings</div>
                 <ul role="list" class="-mx-2 mt-2 space-y-1">
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/settings"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-settings" /> General
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/members"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-users" /> Members
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/github-bot"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-robot" /> GitHub Bot
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/integrations"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-webhook" /> Integrations
-                    </a>
+                    </.link>
                   </li>
                 </ul>
               </li>
@@ -144,36 +144,36 @@
                 <div class="text-xs font-semibold leading-6 text-gray-400">Resources</div>
                 <ul role="list" class="-mx-2 mt-2 space-y-1">
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/slash-commands"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-terminal" /> Slash Commands
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/documentation"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-script" /> Documentation
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/widgets"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-code" /> Widgets
-                    </a>
+                    </.link>
                   </li>
                   <li>
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/org/#{@org_handle}/sdk"}
                       class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
                     >
                       <.icon name="tabler-sdk" /> SDK
-                    </a>
+                    </.link>
                   </li>
                 </ul>
               </li>
@@ -196,46 +196,44 @@
             <div class="text-xs font-semibold leading-6 text-gray-400">Overview</div>
             <ul role="list" class="-mx-2 mt-2 space-y-1">
               <li>
-                <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :dashboard, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-home" /> Dashboard
-                </a>
+                </.link>
               </li>
               <li>
-                <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/bounties"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :bounties, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-diamond" /> Bounties
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md bg-gray-800 p-2 text-sm font-semibold leading-6 text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/projects"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :projects, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-affiliate" /> Projects
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/jobs"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :jobs, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-briefcase" /> Jobs
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/community"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :community, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-world" /> Community
-                </a>
+                </.link>
               </li>
             </ul>
           </li>
@@ -243,38 +241,36 @@
             <div class="text-xs font-semibold leading-6 text-gray-400">Settings</div>
             <ul role="list" class="-mx-2 mt-2 space-y-1">
               <li>
-                <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/settings"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :settings, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-settings" /> General
-                </a>
+                </.link>
               </li>
               <li>
-                <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/members"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :members, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-users" /> Members
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/github-bot"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :github_bot, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-robot" /> GitHub Bot
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/integrations"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :integrations, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-webhook" /> Integrations
-                </a>
+                </.link>
               </li>
             </ul>
           </li>
@@ -282,38 +278,36 @@
             <div class="text-xs font-semibold leading-6 text-gray-400">Resources</div>
             <ul role="list" class="-mx-2 mt-2 space-y-1">
               <li>
-                <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/slash-commands"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :slash_commands, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-terminal" /> Slash Commands
-                </a>
+                </.link>
               </li>
               <li>
-                <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/documentation"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :documentation, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-script" /> Documentation
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/widgets"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :widgets, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-code" /> Widgets
-                </a>
+                </.link>
               </li>
               <li>
-                <a
-                  href="#"
-                  class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                <.link
+                  navigate={~p"/org/#{@org_handle}/sdk"}
+                  class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == :sdk, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                 >
                   <.icon name="tabler-sdk" /> SDK
-                </a>
+                </.link>
               </li>
             </ul>
           </li>

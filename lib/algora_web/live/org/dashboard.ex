@@ -28,7 +28,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def stat_card(assigns) do
     ~H"""
-    <a href={@href}>
+    <.link href={@href}>
       <div class="group/card relative rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 hover:border-white/15 hover:bg-white/[4%] h-full transition-colors duration-75 hover:brightness-125">
         <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
           <h3 class="tracking-tight text-sm font-medium"><%= @title %></h3>
@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <p class="text-xs text-gray-400"><%= @subtext %></p>
         </div>
       </div>
-    </a>
+    </.link>
     """
   end
 
@@ -54,12 +54,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <p class="text-sm text-gray-500 dark:text-gray-400">Most recently posted bounties</p>
         </div>
         <div class="p-6">
-          <a
+          <.link
             class="whitespace-pre text-sm text-gray-400 hover:underline hover:brightness-125"
             href="/org/algora/bounties?status=open"
           >
             View all
-          </a>
+          </.link>
         </div>
       </div>
       <div class="p-6 pt-0">
@@ -122,7 +122,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     aria-hidden="true"
                   >
                   </span>
-                  <a class="group inline-flex" href="#">
+                  <.link class="group inline-flex" rel="noopener" href={activity.url}>
                     <div class="relative flex space-x-3">
                       <div class="flex min-w-0 flex-1 justify-between space-x-4">
                         <div class="flex items-center gap-4">
@@ -144,7 +144,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         </div>
                       </div>
                     </div>
-                  </a>
+                  </.link>
                 </div>
               </li>
             <% end %>
@@ -221,10 +221,32 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp fetch_recent_activities do
     [
-      %{type: :bounty_awarded, user: "urbit-pilled", amount: 50, days_ago: 1},
-      %{type: :pr_submitted, user: "GauravBurande", days_ago: 3},
-      %{type: :bounty_awarded, user: "gilest", amount: 75, days_ago: 6},
-      %{type: :pr_submitted, user: "urbit-pilled", days_ago: 11}
+      %{
+        url: "https://github.com/algora-io/tv/issues/105",
+        type: :bounty_awarded,
+        user: "urbit-pilled",
+        amount: 50,
+        days_ago: 1
+      },
+      %{
+        url: "https://github.com/algora-io/tv/issues/104",
+        type: :pr_submitted,
+        user: "GauravBurande",
+        days_ago: 3
+      },
+      %{
+        url: "https://github.com/algora-io/tv/issues/103",
+        type: :bounty_awarded,
+        user: "gilest",
+        amount: 75,
+        days_ago: 6
+      },
+      %{
+        url: "https://github.com/algora-io/tv/issues/102",
+        type: :pr_submitted,
+        user: "urbit-pilled",
+        days_ago: 11
+      }
     ]
   end
 

@@ -95,8 +95,9 @@ defmodule AlgoraWeb.InstallationsLive do
           </li>
         <% end %>
       </ul>
-      <a
+      <.link
         class="relative block w-full rounded-lg border-2 border-dashed border-gray-600 p-8 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        rel="noopener"
         href={Github.install_url()}
       >
         <svg
@@ -118,7 +119,7 @@ defmodule AlgoraWeb.InstallationsLive do
         <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-200">
           Manage installations
         </h3>
-      </a>
+      </.link>
     </div>
     """
   end

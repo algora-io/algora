@@ -4,13 +4,22 @@ defmodule AlgoraWeb.Org.Nav do
 
   alias AlgoraWeb.Org
 
-  def on_mount(:default, params, _session, socket) do
-    org_handle = params["org_handle"]
+  def on_mount(:default, _params, _session, socket) do
+    current_org = %{
+      handle: "algora",
+      name: "Algora",
+      avatar_url: "https://avatars.githubusercontent.com/u/146413131?s=200&v=4",
+      website_url: "https://algora.io",
+      twitter_url: "https://twitter.com/algoraio",
+      github_url: "https://github.com/algora-io",
+      discord_url: "https://discord.gg/algora",
+      youtube_url: "https://www.youtube.com/@algora-io"
+    }
 
     {:cont,
      socket
-     |> assign(:org_handle, org_handle)
-     |> assign(:nav, nav_items(org_handle))
+     |> assign(:current_org, current_org)
+     |> assign(:nav, nav_items(current_org.handle))
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 

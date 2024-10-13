@@ -2,7 +2,6 @@ defmodule Algora.Stargazer do
   require Logger
   use GenServer
 
-  @url "https://api.github.com/repos/algora-io/tv"
   @poll_interval :timer.minutes(10)
 
   def start_link(cmd) do
@@ -28,7 +27,7 @@ defmodule Algora.Stargazer do
   defp fetch_count() do
     with {:ok, %Finch.Response{status: 200, body: body}} <-
            :get
-           |> Finch.build(@url)
+           |> Finch.build(AlgoraWeb.Constants.get(:github_url))
            |> Finch.request(Algora.Finch),
          {:ok, %{"stargazers_count" => count}} <- Jason.decode(body) do
       count

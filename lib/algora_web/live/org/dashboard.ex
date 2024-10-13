@@ -66,9 +66,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <ul role="list" class="divide-y divide-white/5">
           <%= for bounty <- @bounties do %>
             <li>
-              <a
+              <.link
                 class="group relative flex flex-col items-start gap-x-4 gap-y-2 py-4 sm:flex-row sm:items-center"
-                rel="noopener noreferrer"
+                rel="noopener"
                 href={"https://github.com/algora-io/tv/issues/#{bounty.issue_number}"}
               >
                 <div class="min-w-0 flex-auto">
@@ -95,7 +95,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     $<%= bounty.amount %>
                   </div>
                 </div>
-              </a>
+              </.link>
             </li>
           <% end %>
         </ul>

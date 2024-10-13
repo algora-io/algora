@@ -372,7 +372,7 @@ defmodule AlgoraWeb.CoreComponents do
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40 focus:outline-none focus:opacity-40"
                   aria-label={gettext("close")}
                 >
-                  <.icon name="hero-x-mark-solid" class="w-5 h-5" />
+                  <.icon name="tabler-x" class="w-5 h-5" />
                 </button>
               </div>
               <div id={"#{@id}-content"}>
@@ -452,9 +452,9 @@ defmodule AlgoraWeb.CoreComponents do
       <%= case msg do %>
         <% %{body: body, action: %{ href: href, body: action_body }} -> %>
           <div class="flex gap-1.5 text-[0.8125rem] font-semibold leading-6">
-            <.icon :if={@kind == :info} name="hero-check-circle-solid" class="w-6 h-6" />
-            <.icon :if={@kind == :note} name="hero-information-circle-solid" class="w-6 h-6" />
-            <.icon :if={@kind == :error} name="hero-exclamation-circle-solid" class="w-6 h-6" />
+            <.icon :if={@kind == :info} name="tabler-circle-check-filled" class="w-6 h-6" />
+            <.icon :if={@kind == :note} name="tabler-info-circle-filled" class="w-6 h-6" />
+            <.icon :if={@kind == :error} name="tabler-exclamation-circle-filled" class="w-6 h-6" />
             <div>
               <div><%= body %></div>
               <.link navigate={href} class="underline"><%= action_body %></.link>
@@ -462,9 +462,9 @@ defmodule AlgoraWeb.CoreComponents do
           </div>
         <% body -> %>
           <p class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-            <.icon :if={@kind == :info} name="hero-check-circle-solid" class="w-6 h-6" />
-            <.icon :if={@kind == :note} name="hero-information-circle-solid" class="w-6 h-6" />
-            <.icon :if={@kind == :error} name="hero-exclamation-circle-solid" class="w-6 h-6" />
+            <.icon :if={@kind == :info} name="tabler-circle-check-filled" class="w-6 h-6" />
+            <.icon :if={@kind == :note} name="tabler-info-circle-filled" class="w-6 h-6" />
+            <.icon :if={@kind == :error} name="tabler-exclamation-circle-filled" class="w-6 h-6" />
             <%= body %>
           </p>
       <% end %>
@@ -474,7 +474,7 @@ defmodule AlgoraWeb.CoreComponents do
         class="group absolute top-2 right-1 p-2"
         aria-label={gettext("close")}
       >
-        <.icon name="hero-x-mark-solid" class="w-5 h-5 opacity-40 group-hover:opacity-70" />
+        <.icon name="tabler-x" class="w-5 h-5 opacity-40 group-hover:opacity-70" />
       </button>
     </div>
     """
@@ -503,7 +503,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-disconnected={show("#disconnected")}
       phx-connected={hide("#disconnected")}
     >
-      Attempting to reconnect <.icon name="hero-arrow-path-solid" class="ml-1 w-3 h-3 animate-spin" />
+      Attempting to reconnect <.icon name="tabler-refresh" class="ml-1 w-3 h-3 animate-spin" />
     </.flash>
     """
   end
@@ -755,7 +755,7 @@ defmodule AlgoraWeb.CoreComponents do
   def error(assigns) do
     ~H"""
     <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-red-300">
-      <.icon name="hero-exclamation-circle" class="mt-0.5 w-5 h-5 flex-none" />
+      <.icon name="tabler-exclamation-circle" class="mt-0.5 w-5 h-5 flex-none" />
       <%= render_slot(@inner_block) %>
     </p>
     """
@@ -920,7 +920,7 @@ defmodule AlgoraWeb.CoreComponents do
         navigate={@navigate}
         class="text-sm font-semibold leading-6 text-gray-50 hover:text-gray-200"
       >
-        <.icon name="hero-arrow-left-solid" class="w-3 h-3" />
+        <.icon name="tabler-arrow-left" class="w-3 h-3" />
         <%= render_slot(@inner_block) %>
       </.link>
     </div>
@@ -1010,27 +1010,20 @@ defmodule AlgoraWeb.CoreComponents do
   end
 
   @doc """
-  Renders a [Heroicon](https://heroicons.com).
+  Renders a [Tabler Icon](https://tabler.io/icons).
 
-  Heroicons come in three styles – outline, solid, and mini.
-  By default, the outline style is used, but solid and mini may
-  be applied by using the `-solid` and `-mini` suffix.
-
-  You can customize the size and colors of the icons by setting
-  width, height, and background color classes.
-
-  Icons are extracted from the `deps/heroicons` directory and bundled within
+  Icons are extracted from the `deps/tabler_icons` directory and bundled within
   your compiled app.css by the plugin in your `assets/tailwind.config.js`.
 
   ## Examples
 
-      <.icon name="hero-x-mark-solid" />
-      <.icon name="hero-arrow-path" class="ml-1 w-3 h-3 animate-spin" />
+      <.icon name="tabler-x-mark-solid" />
+      <.icon name="tabler-arrow-path" class="ml-1 w-3 h-3 animate-spin" />
   """
   attr :name, :string, required: true
   attr :class, :string, default: nil
 
-  def icon(%{name: "hero-" <> _} = assigns) do
+  def icon(%{name: "tabler-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
     """
@@ -1075,8 +1068,8 @@ defmodule AlgoraWeb.CoreComponents do
         id="pwa-instructions-mobile"
         class="hidden text-md text-gray-600 mt-2 text-center bg-gray-100 p-2 rounded-md"
       >
-        Tap <.icon name="hero-arrow-up-on-square" class="size-5 mb-1 text-purple-500 inline" /> or
-        <.icon name="hero-ellipsis-vertical" class="size-5 mb-1 text-purple-500 inline" />
+        Tap <.icon name="tabler-upload" class="size-5 mb-1 text-purple-500 inline" /> or
+        <.icon name="tabler-dots-vertical" class="size-5 mb-1 text-purple-500 inline" />
         and select "Add to home screen" to install.
       </div>
     </div>

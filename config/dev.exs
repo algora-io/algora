@@ -2,7 +2,11 @@ import Config
 
 config :algora, :github,
   client_id: System.get_env("GITHUB_CLIENT_ID"),
-  client_secret: System.get_env("GITHUB_CLIENT_SECRET")
+  client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
+  app_handle: System.get_env("GITHUB_APP_HANDLE"),
+  app_id: System.get_env("GITHUB_APP_ID"),
+  webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
+  private_key: System.get_env("GITHUB_PRIVATE_KEY")
 
 # Configure your database
 config :algora, Algora.Repo,

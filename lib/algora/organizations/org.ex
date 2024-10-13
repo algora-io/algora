@@ -1,6 +1,8 @@
 defmodule Algora.Organizations.Org do
   import Ecto.Changeset
 
+  alias Algora.Accounts.User
+
   def changeset(org, params) do
     org
     |> cast(params, [
@@ -21,6 +23,7 @@ defmodule Algora.Organizations.Org do
       :manual_assignment,
       :bounty_mode
     ])
-    |> validate_required([:handle, :name])
+    |> validate_required([:type, :handle, :name])
+    |> User.validate_handle()
   end
 end

@@ -1,5 +1,6 @@
 defmodule Algora.Organizations do
   import Ecto.Query
+  import Ecto.Changeset
 
   alias Algora.Accounts.User
   alias Algora.Organizations.Org
@@ -9,6 +10,7 @@ defmodule Algora.Organizations do
   def create_organization(params) do
     %User{}
     |> Org.changeset(params)
+    |> put_change(:type, :organization)
     |> Repo.insert()
   end
 
@@ -18,20 +20,20 @@ defmodule Algora.Organizations do
     |> Repo.update()
   end
 
-  def create_member(org, user) do
+  def create_member(org, user, role) do
     %Member{}
-    |> Member.changeset(%{org_id: org.id, user_id: user.id})
+    |> Member.changeset(%{role: role, org_id: org.id, user_id: user.id})
     |> Repo.insert()
   end
 
-  def get_org_by(fields), do: Repo.get_by(Org, fields)
-  def get_org_by!(fields), do: Repo.get_by!(Org, fields)
+  def get_org_by(fields), do: Repo.get_by(User, fields)
+  def get_org_by!(fields), do: Repo.get_by!(User, fields)
 
   def get_org_by_handle(handle), do: get_org_by(handle: handle)
   def get_org_by_handle!(handle), do: get_org_by!(handle: handle)
 
-  def get_org(id), do: Repo.get(Org, id)
-  def get_org!(id), do: Repo.get!(Org, id)
+  def get_org(id), do: Repo.get(User, id)
+  def get_org!(id), do: Repo.get!(User, id)
 
   def list_orgs(opts) do
     Repo.all(

@@ -18,15 +18,9 @@ defmodule AlgoraWeb.InstallationsLive do
                 <div class="flex items-center gap-4">
                   <div class="relative h-10 w-10">
                     <img
-                      alt="algora-io"
-                      loading="lazy"
-                      decoding="async"
-                      data-nimg="fill"
+                      alt={installation.provider_login}
                       class="rounded-lg"
-                      sizes="100vw"
-                      srcset="/_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=640&amp;q=75 640w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=750&amp;q=75 750w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=828&amp;q=75 828w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=1080&amp;q=75 1080w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=1200&amp;q=75 1200w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=1920&amp;q=75 1920w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=2048&amp;q=75 2048w, /_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=3840&amp;q=75 3840w"
-                      src="/_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F72413507%3Fv%3D4&amp;w=3840&amp;q=75"
-                      style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                      src={installation.avatar_url}
                     />
                   </div>
                   <div>
@@ -37,7 +31,7 @@ defmodule AlgoraWeb.InstallationsLive do
                       <div class="text-sm text-gray-300">
                         Installed on
                         <span class="font-semibold text-gray-200">
-                          <%= installation.repositories %> repositories
+                          <%= installation.repository_selection %> repositories
                         </span>
                       </div>
                     </div>
@@ -73,17 +67,26 @@ defmodule AlgoraWeb.InstallationsLive do
                       data-headlessui-state=""
                       aria-labelledby="headlessui-listbox-label-:r0: headlessui-listbox-button-:r1:"
                     >
-                      <span class="block truncate dark:text-white">algora</span><span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"><svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                        class="h-5 w-5 text-gray-400 dark:text-gray-300"
-                      ><path
-                        fill-rule="evenodd"
-                        d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
-                        clip-rule="evenodd"
-                      ></path></svg></span>
+                      <span class="block truncate dark:text-white">
+                        <%= (installation.connected_user && installation.connected_user.handle) ||
+                          "None" %>
+                      </span>
+                      <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                          class="h-5 w-5 text-gray-400 dark:text-gray-300"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"
+                            clip-rule="evenodd"
+                          >
+                          </path>
+                        </svg>
+                      </span>
                     </button>
                   </div>
                 </div>

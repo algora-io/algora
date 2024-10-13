@@ -8,14 +8,18 @@ defmodule Algora.Installations.Installation do
     field :provider_login, :string
     field :provider_meta, :map
 
-    belongs_to :user, Algora.Accounts.User
+    field :avatar_url, :string
+    field :repository_selection, :string
+
+    belongs_to :owner, Algora.Accounts.User
+    belongs_to :connected_user, Algora.Accounts.User
 
     timestamps()
   end
 
   def changeset(installation, attrs) do
     installation
-    |> cast(attrs, [:provider, :provider_id, :provider_login, :provider_meta])
-    |> validate_required([:provider, :provider_id, :provider_login, :provider_meta])
+    |> cast(attrs, [])
+    |> validate_required([])
   end
 end

@@ -23,7 +23,11 @@ end
 if config_env() == :prod do
   config :algora, :github,
     client_id: System.fetch_env!("GITHUB_CLIENT_ID"),
-    client_secret: System.fetch_env!("GITHUB_CLIENT_SECRET")
+    client_secret: System.fetch_env!("GITHUB_CLIENT_SECRET"),
+    app_handle: System.fetch_env!("GITHUB_APP_HANDLE"),
+    app_id: System.fetch_env!("GITHUB_APP_ID"),
+    webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
+    private_key: System.fetch_env!("GITHUB_PRIVATE_KEY")
 
   database_url =
     System.get_env("DATABASE_URL") ||

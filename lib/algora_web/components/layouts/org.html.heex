@@ -75,10 +75,71 @@
   </div>
   <!-- Static sidebar for desktop -->
   <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
-    <!-- Sidebar component, swap this element with another sidebar if you like -->
+    <!-- Sidebar component -->
     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950/50 px-6 ring-1 ring-white/5 scrollbar-thin">
       <div class="flex h-16 shrink-0 items-center">
         <.logo class="h-8 w-auto" />
+      </div>
+      <div class="">
+        <div class="flex items-center border-b dark:border-gray-900">
+          <.link navigate={~p"/org/#{@current_org.handle}"}>
+            <div class="flex items-center gap-x-2.5 text-left">
+              <div class="relative flex-shrink-0 overflow-hidden h-12 w-12 rounded-lg">
+                <img src={@current_org.avatar_url} alt={@current_org.name} />
+              </div>
+              <div>
+                <div class="font-display text-base font-semibold dark:text-white">Algora</div>
+                <div class="text-xs font-medium dark:text-gray-300">@algora</div>
+              </div>
+            </div>
+          </.link>
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+          <.link
+            :if={@current_org.twitter_url}
+            href={@current_org.twitter_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-brand-x"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-sky-400"
+            />
+          </.link>
+          <.link
+            :if={@current_org.discord_url}
+            href={@current_org.discord_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-brand-discord"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-purple-400"
+            />
+          </.link>
+          <.link
+            :if={@current_org.youtube_url}
+            href={@current_org.youtube_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-brand-youtube"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-red-400"
+            />
+          </.link>
+          <.link
+            :if={@current_org.website_url}
+            href={@current_org.website_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-world"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-teal-500"
+            />
+          </.link>
+        </div>
       </div>
       <nav class="flex flex-1 flex-col">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">

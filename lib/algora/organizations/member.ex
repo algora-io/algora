@@ -3,7 +3,7 @@ defmodule Algora.Organizations.Member do
   import Ecto.Changeset
 
   schema "members" do
-    field :roles, {:array, :string}, default: []
+    field :role, Ecto.Enum, values: [:admin, :mod, :expert]
 
     belongs_to :org, Algora.Accounts.User
     belongs_to :user, Algora.Accounts.User
@@ -13,7 +13,7 @@ defmodule Algora.Organizations.Member do
 
   def changeset(member, attrs) do
     member
-    |> cast(attrs, [:org_id, :user_id])
-    |> validate_required([:org_id, :user_id])
+    |> cast(attrs, [:role, :org_id, :user_id])
+    |> validate_required([:role, :org_id, :user_id])
   end
 end

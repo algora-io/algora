@@ -3,6 +3,7 @@ defmodule Algora.Accounts.User do
   import Ecto.Changeset
 
   alias Algora.Accounts.{User, Identity}
+  alias Algora.Installations.Installation
 
   schema "users" do
     field :provider, :string
@@ -47,7 +48,8 @@ defmodule Algora.Accounts.User do
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project
     has_many :repositories, Algora.Work.Repository
-    has_many :installations, Algora.Installations.Installation
+    has_many :owned_installations, Installation, foreign_key: :owner_id
+    has_many :connected_installations, Installation, foreign_key: :connected_user_id
 
     timestamps()
   end
@@ -124,7 +126,7 @@ defmodule Algora.Accounts.User do
     |> unique_constraint(:email)
   end
 
-  defp validate_handle(changeset) do
+  def validate_handle(changeset) do
     changeset
     |> validate_format(:handle, ~r/^[a-zA-Z0-9_-]{2,32}$/)
     |> unsafe_validate_unique(:handle, Algora.Repo)

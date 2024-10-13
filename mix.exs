@@ -59,7 +59,8 @@ defmodule Algora.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.3", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+      {:joken, "~> 2.5"}
     ]
   end
 

@@ -137,7 +137,7 @@
               </button>
             </div>
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10">
+            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10 scrollbar-thin">
               <div class="flex h-16 shrink-0 items-center">
                 <.logo class="h-8 w-auto" />
               </div>
@@ -342,7 +342,7 @@
       <!-- Static sidebar for desktop -->
       <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
         <!-- Sidebar component, swap this element with another sidebar if you like -->
-        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-black/10 px-6 ring-1 ring-white/5">
+        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950/50 px-6 ring-1 ring-white/5 scrollbar-thin">
           <div class="flex h-16 shrink-0 items-center">
             <.logo class="h-8 w-auto" />
           </div>
@@ -482,7 +482,7 @@
         <div
           id="navbar"
           phx-hook="NavBar"
-          class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-x-6 border-b border-white/5 bg-gray-950 px-4 shadow-sm sm:px-6 lg:px-8"
+          class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-x-6 border-b border-white/5 px-4 shadow-sm sm:px-6 lg:px-8"
         >
           <a
             class="group outline-none w-fit"
@@ -586,7 +586,11 @@
         </div>
 
         <div class="lg:pr-96">
-          <%= @inner_content %>
+          <div class="fixed left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950" />
+          <div class="fixed left-0 top-0 z-0 h-full w-full bg-purple-900/5" />
+          <div class="relative">
+            <%= @inner_content %>
+          </div>
         </div>
       </div>
     </div>

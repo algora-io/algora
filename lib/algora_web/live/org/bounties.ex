@@ -1,14 +1,16 @@
 defmodule AlgoraWeb.Org.BountiesLive do
   use AlgoraWeb, :live_view
+
   alias Algora.Bounties
-  alias Algora.Work
 
   def mount(_params, _session, socket) do
-    bounties = []
+    bounties = Bounties.list_bounties(%{user_id: socket.assigns.current_org.id, limit: 10})
+    claims = []
 
     {:ok,
      socket
      |> assign(:bounties, bounties)
+     |> assign(:claims, claims)
      |> assign(:open_count, length(bounties))
      |> assign(:completed_count, 0)
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))}
@@ -102,7 +104,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
         <div class="scrollbar-thin w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <tbody class="[&_tr:last-child]:border-0">
-              <%= for bounty <- @bounties do %>
+              <%= for bounty  <- @bounties do %>
                 <tr
                   class="border-b transition-colors hover:bg-gray-100/50 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800 border-white/15 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] dark:hover:bg-white/[2%]"
                   data-state="false"
@@ -121,31 +123,31 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           <.link
                             rel="noopener"
                             class="inline-flex flex-col group/issue"
-                            href={"https://github.com/#{bounty.owner}/#{bounty.repo}/issues/#{bounty.issue_number}"}
+                            href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
                           >
                             <div class="flex items-center gap-4">
                               <div class="truncate">
                                 <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
-                                  <%= bounty.repo %>#<%= bounty.issue_number %>
+                                  <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
                                 </p>
                               </div>
                             </div>
                             <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
-                              <%= bounty.title %>
+                              <%= bounty.task.title %>
                             </p>
                           </.link>
                           <p class="flex items-center gap-1.5 text-xs text-gray-400">
-                            <%= time_ago(bounty.created_at) %>
+                            <%= time_ago(bounty.inserted_at) %>
                           </p>
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                    <%= if length(bounty.claims) > 0 do %>
+                    <%= if length(@claims) > 0 do %>
                       <div class="group flex cursor-pointer flex-col items-center gap-1">
                         <div class="flex cursor-pointer justify-center -space-x-3">
-                          <%= for claim <- bounty.claims do %>
+                          <%= for claim <- @claims do %>
                             <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
                               <img
                                 alt={claim.user.username}
@@ -160,7 +162,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                         <div class="flex items-center gap-0.5">
                           <div class="whitespace-nowrap text-sm font-medium text-gray-300 group-hover:text-gray-100">
-                            <%= length(bounty.claims) %> <%= if length(bounty.claims) == 1,
+                            <%= length(@claims) %> <%= if length(@claims) == 1,
                               do: "claim",
                               else: "claims" %>
                           </div>
@@ -190,7 +192,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     </div>
                   </td>
                 </tr>
-                <%= for claim <- bounty.claims do %>
+                <%= for claim <- @claims do %>
                   <tr
                     class="border-b transition-colors hover:bg-gray-100/50 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800 border-white/15 bg-gray-950/50 dark:hover:bg-gray-950/50"
                     data-state="false"
@@ -215,7 +217,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                               <%= claim.user.username %>
                             </div>
                             <div class="text-xs text-gray-400">
-                              <%= time_ago(claim.created_at) %>
+                              <%= time_ago(claim.inserted_at) %>
                             </div>
                           </div>
                         </div>
@@ -259,14 +261,14 @@ defmodule AlgoraWeb.Org.BountiesLive do
     cond do
       diff < 60 -> "just now"
       diff < 3600 -> "#{div(diff, 60)} minutes ago"
-      diff < 86400 -> "#{div(diff, 3600)} hours ago"
-      diff < 2_592_000 -> "#{div(diff, 86400)} days ago"
+      diff < 86_400 -> "#{div(diff, 3600)} hours ago"
+      diff < 2_592_000 -> "#{div(diff, 86_400)} days ago"
       true -> "#{div(diff, 2_592_000)} months ago"
     end
   end
 
   def handle_event("create_bounty", %{"github_issue_url" => url, "amount" => amount}, socket) do
-    case create_bounty(url, amount) do
+    case Bounties.create_bounty(socket.assigns.current_user, url, amount) do
       {:ok, _bounty} ->
         {:noreply,
          socket
@@ -279,36 +281,5 @@ defmodule AlgoraWeb.Org.BountiesLive do
          |> put_flash(:error, "Error creating bounty")
          |> assign(:new_bounty_form, to_form(changeset))}
     end
-  end
-
-  defp create_bounty(url, amount) do
-    # Fetch GitHub issue details
-    with {:ok, issue_details} <- fetch_github_issue(url),
-         {:ok, task} <- create_task(issue_details),
-         {:ok, bounty} <- create_bounty_record(task, amount) do
-      {:ok, bounty}
-    else
-      error -> error
-    end
-  end
-
-  defp fetch_github_issue(url) do
-    # Implement GitHub API call to fetch issue details
-    # Return {:ok, issue_details} or {:error, reason}
-  end
-
-  defp create_task(issue_details) do
-    Work.create_task(%{
-      title: issue_details.title,
-      description: issue_details.body,
-      due_date: issue_details.due_date
-    })
-  end
-
-  defp create_bounty_record(task, amount) do
-    Bounties.create_bounty(%{
-      amount: Decimal.new(amount),
-      task_id: task.id
-    })
   end
 end

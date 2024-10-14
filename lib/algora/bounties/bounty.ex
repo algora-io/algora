@@ -17,7 +17,9 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:title, :description, :amount])
-    |> validate_required([:title, :description, :amount])
+    |> cast(attrs, [:amount, :currency, :task_id, :user_id])
+    |> validate_required([:amount, :currency, :task_id, :user_id])
+    |> validate_number(:amount, greater_than: 0)
+    |> validate_inclusion(:currency, ["USD"])
   end
 end

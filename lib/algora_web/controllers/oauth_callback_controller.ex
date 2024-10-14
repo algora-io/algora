@@ -2,12 +2,11 @@ defmodule AlgoraWeb.OAuthCallbackController do
   use AlgoraWeb, :controller
   require Logger
 
+  alias Algora.Github
   alias Algora.Accounts
 
   def new(conn, %{"provider" => "github", "code" => code, "state" => state} = params) do
-    client = github_client(conn)
-
-    with {:ok, info} <- client.exchange_access_token(code: code, state: state),
+    with {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
          {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
       conn =
@@ -46,9 +45,5 @@ defmodule AlgoraWeb.OAuthCallbackController do
 
   def sign_out(conn, _) do
     AlgoraWeb.UserAuth.log_out_user(conn)
-  end
-
-  defp github_client(conn) do
-    conn.assigns[:github_client] || Algora.Github
   end
 end

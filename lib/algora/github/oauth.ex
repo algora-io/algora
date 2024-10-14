@@ -1,0 +1,59 @@
+defmodule Algora.Github.OAuth do
+  import Algora.Github.Client, only: [http: 5]
+
+  alias Joken
+  alias Algora.Github
+
+  def exchange_access_token(opts) do
+    code = Keyword.fetch!(opts, :code)
+    state = Keyword.fetch!(opts, :state)
+
+    state
+    |> fetch_exchange_response(code)
+    |> fetch_user_info()
+    |> fetch_emails()
+  end
+
+  defp fetch_exchange_response(state, code) do
+    resp =
+      http(
+        "github.com",
+        "POST",
+        "/login/oauth/access_token",
+        [state: state, code: code, client_secret: Github.secret()],
+        [{"accept", "application/json"}]
+      )
+
+    with {:ok, %{"access_token" => token}} <- resp do
+      {:ok, token}
+    else
+      {:error, _reason} = err -> err
+      %{} = resp -> {:error, {:bad_response, resp}}
+    end
+  end
+
+  defp fetch_user_info({:error, _reason} = error), do: error
+
+  defp fetch_user_info({:ok, token}) do
+    case Github.get_current_user(token) do
+      {:ok, info} -> {:ok, %{info: info, token: token}}
+      {:error, _reason} = err -> err
+    end
+  end
+
+  defp fetch_emails({:error, _} = err), do: err
+
+  defp fetch_emails({:ok, user}) do
+    case Github.get_current_user_emails(user.token) do
+      {:ok, emails} ->
+        {:ok, Map.merge(user, %{primary_email: primary_email(emails), emails: emails})}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  defp primary_email(emails) do
+    Enum.find(emails, fn email -> email["primary"] end)["email"] || Enum.at(emails, 0)
+  end
+end

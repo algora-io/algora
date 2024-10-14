@@ -1,6 +1,5 @@
 defmodule Algora.Organizations do
   import Ecto.Query
-  import Ecto.Changeset
 
   alias Algora.Accounts.User
   alias Algora.Organizations.Org
@@ -8,9 +7,8 @@ defmodule Algora.Organizations do
   alias Algora.Repo
 
   def create_organization(params) do
-    %User{}
+    %User{type: :organization}
     |> Org.changeset(params)
-    |> put_change(:type, :organization)
     |> Repo.insert()
   end
 

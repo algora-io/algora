@@ -141,6 +141,13 @@
           </.link>
         </div>
       </div>
+      <.button
+        phx-click={show_modal("new-bounty-modal")}
+        class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-950 dark:focus-visible:ring-gray-800 bg-purple-600 text-white hover:bg-purple-600/90 h-10 px-4 py-2 w-full"
+      >
+        Share New Bounty
+      </.button>
+
       <nav class="flex flex-1 flex-col">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
           <%= for section <- @nav do %>
@@ -247,3 +254,27 @@
     </div>
   </div>
 </div>
+
+<.modal id="new-bounty-modal">
+  <.header>
+    Create New Bounty
+  </.header>
+  <.simple_form for={@new_bounty_form} phx-submit="create_bounty">
+    <div class="space-y-4">
+      <div>
+        <.label for="github_issue_url">GitHub Issue URL</.label>
+        <.input type="url" field={@new_bounty_form[:github_issue_url]} required />
+      </div>
+      <div>
+        <.label for="amount">Bounty Amount (USD)</.label>
+        <.input type="number" field={@new_bounty_form[:amount]} min="1" step="0.01" required />
+      </div>
+    </div>
+    <:actions>
+      <div class="mt-6 flex justify-end space-x-3">
+        <.button type="button" phx-click="hide_modal">Cancel</.button>
+        <.button type="submit" phx-disable-with="Creating...">Create Bounty</.button>
+      </div>
+    </:actions>
+  </.simple_form>
+</.modal>

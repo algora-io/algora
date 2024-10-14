@@ -2,7 +2,13 @@ defmodule Algora.Work.Repository do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Algora.Work.Repository
+  @derive {Inspect, except: [:provider_meta]}
   schema "repositories" do
+    field :provider, :string
+    field :provider_id, :string
+    field :provider_meta, :map
+
     field :name, :string
     field :url, :string
 
@@ -12,9 +18,15 @@ defmodule Algora.Work.Repository do
     timestamps()
   end
 
-  def changeset(repository, attrs) do
-    repository
-    |> cast(attrs, [:name, :url])
+  def changeset(:github, attrs) do
+    %Repository{provider: "github", provider_id: to_string(attrs["id"]), provider_meta: attrs}
+    |> cast(
+      %{
+        name: attrs["name"],
+        url: attrs["url"]
+      },
+      [:name, :url]
+    )
     |> validate_required([:name, :url])
   end
 end

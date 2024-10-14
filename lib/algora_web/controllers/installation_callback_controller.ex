@@ -87,6 +87,10 @@ defmodule AlgoraWeb.InstallationCallbackController do
 
   defp upsert_org(conn, user, installation, account) do
     attrs = %{
+      provider: "github",
+      provider_id: account["id"],
+      provider_login: account["login"],
+      provider_meta: account,
       handle: account["login"],
       name: account["name"],
       description: account["bio"],

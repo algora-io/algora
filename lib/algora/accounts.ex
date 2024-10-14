@@ -8,7 +8,7 @@ defmodule Algora.Accounts do
   def list_users(opts) do
     Repo.all(
       from u in User,
-        where: u.type == "individual",
+        where: u.type == :individual,
         limit: ^Keyword.fetch!(opts, :limit)
     )
   end

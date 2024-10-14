@@ -33,7 +33,7 @@ defmodule Algora.Repo.Migrations.AddFieldsToUsers do
       add :linkedin_url, :string
     end
 
-    create index(:users, [:provider, :provider_id])
+    create unique_index(:users, [:provider, :provider_id])
     create index(:users, [:featured])
     create index(:users, [:priority])
   end

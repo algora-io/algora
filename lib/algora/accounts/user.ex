@@ -5,6 +5,7 @@ defmodule Algora.Accounts.User do
   alias Algora.Accounts.{User, Identity}
   alias Algora.Installations.Installation
 
+  @derive {Inspect, except: [:provider_meta]}
   schema "users" do
     field :provider, :string
     field :provider_id, :string
@@ -132,4 +133,29 @@ defmodule Algora.Accounts.User do
     |> unsafe_validate_unique(:handle, Algora.Repo)
     |> unique_constraint(:handle)
   end
+
+  def external_user_changeset(:github, attrs) do
+    %User{
+      provider: "github",
+      provider_id: to_string(attrs["id"]),
+      provider_login: attrs["login"],
+      provider_meta: attrs
+    }
+    |> cast(
+      %{
+        name: attrs["name"],
+        bio: attrs["bio"],
+        location: attrs["location"],
+        avatar_url: attrs["avatar_url"],
+        website_url: attrs["blog"],
+        github_url: attrs["html_url"],
+        type: type_from_provider(:github, attrs["type"])
+      },
+      [:name, :bio, :location, :avatar_url, :website_url, :github_url, :type]
+    )
+    |> validate_required([])
+  end
+
+  defp type_from_provider(:github, "Organization"), do: :organization
+  defp type_from_provider(:github, _), do: :individual
 end

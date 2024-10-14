@@ -4,9 +4,6 @@ defmodule Algora.Accounts.Identity do
 
   alias Algora.Accounts.{Identity, User}
 
-  # providers
-  @github "github"
-
   @derive {Inspect, except: [:provider_token, :provider_meta]}
   schema "identities" do
     field :provider, :string
@@ -34,7 +31,7 @@ defmodule Algora.Accounts.Identity do
       "provider_email" => primary_email
     }
 
-    %Identity{provider: @github, provider_meta: %{"user" => info, "emails" => emails}}
+    %Identity{provider: "github", provider_meta: %{"user" => info, "emails" => emails}}
     |> cast(params, [
       :provider_token,
       :provider_email,

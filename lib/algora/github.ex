@@ -1,6 +1,7 @@
 defmodule Algora.Github do
   alias Joken
 
+  @type token :: String.t()
   def install_url() do
     "https://github.com/apps/#{app_handle()}/installations/new"
   end
@@ -76,6 +77,22 @@ defmodule Algora.Github do
       {:error, _reason} = err ->
         err
     end
+  end
+
+  def get_issue(access_token, owner, repo, number) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}")
+  end
+
+  def get_repository(access_token, owner, repo) do
+    fetch(access_token, "/repos/#{owner}/#{repo}")
+  end
+
+  def get_pull_request(access_token, owner, repo, number) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/pulls/#{number}")
+  end
+
+  def get_user(access_token, id) do
+    fetch(access_token, "/user/#{id}")
   end
 
   def get_user_by_username(access_token, username) do

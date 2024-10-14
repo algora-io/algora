@@ -1,45 +1,17 @@
 defmodule AlgoraWeb.Org.BountiesLive do
   use AlgoraWeb, :live_view
+  alias Algora.Bounties
+  alias Algora.Work
 
   def mount(_params, _session, socket) do
-    bounties = [
-      %{
-        id: 1,
-        amount: 200,
-        issue_number: 105,
-        owner: "algora-io",
-        title: "Add livestream clipping feature",
-        repo: "tv",
-        created_at: ~N[2024-03-01 10:00:00],
-        claims: [
-          %{
-            id: "cm1sj9x620004jk032vidw57f",
-            user: %{
-              username: "urbit-pilled",
-              avatar_url: "https://avatars.githubusercontent.com/u/129720764?v=4"
-            },
-            pull_request_url: "https://github.com/algora-io/tv/pull/111",
-            created_at: ~N[2024-03-11 14:00:00]
-          }
-        ]
-      },
-      %{
-        id: 2,
-        amount: 400,
-        issue_number: 73,
-        owner: "algora-io",
-        title: "Implement stream resumption feature for handling disconnections",
-        repo: "tv",
-        created_at: ~N[2024-02-01 09:00:00],
-        claims: []
-      }
-    ]
+    bounties = []
 
     {:ok,
      socket
      |> assign(:bounties, bounties)
      |> assign(:open_count, length(bounties))
-     |> assign(:completed_count, 0)}
+     |> assign(:completed_count, 0)
+     |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))}
   end
 
   def render(assigns) do
@@ -291,5 +263,52 @@ defmodule AlgoraWeb.Org.BountiesLive do
       diff < 2_592_000 -> "#{div(diff, 86400)} days ago"
       true -> "#{div(diff, 2_592_000)} months ago"
     end
+  end
+
+  def handle_event("create_bounty", %{"github_issue_url" => url, "amount" => amount}, socket) do
+    case create_bounty(url, amount) do
+      {:ok, _bounty} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Bounty created successfully")
+         |> push_navigate(to: ~p"/org/#{socket.assigns.current_org.handle}/bounties")}
+
+      {:error, changeset} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Error creating bounty")
+         |> assign(:new_bounty_form, to_form(changeset))}
+    end
+  end
+
+  defp create_bounty(url, amount) do
+    # Fetch GitHub issue details
+    with {:ok, issue_details} <- fetch_github_issue(url),
+         {:ok, task} <- create_task(issue_details),
+         {:ok, bounty} <- create_bounty_record(task, amount) do
+      {:ok, bounty}
+    else
+      error -> error
+    end
+  end
+
+  defp fetch_github_issue(url) do
+    # Implement GitHub API call to fetch issue details
+    # Return {:ok, issue_details} or {:error, reason}
+  end
+
+  defp create_task(issue_details) do
+    Work.create_task(%{
+      title: issue_details.title,
+      description: issue_details.body,
+      due_date: issue_details.due_date
+    })
+  end
+
+  defp create_bounty_record(task, amount) do
+    Bounties.create_bounty(%{
+      amount: Decimal.new(amount),
+      task_id: task.id
+    })
   end
 end

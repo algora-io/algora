@@ -21,29 +21,19 @@ defmodule Algora.Work.Task do
     timestamps()
   end
 
-  def changeset(:github, :issue, attrs) do
-    %Task{provider: "github", provider_id: to_string(attrs["id"]), provider_meta: attrs}
-    |> cast(
-      %{
-        title: attrs["title"],
-        description: attrs["body"],
-        number: attrs["number"]
-      },
-      [:title, :description, :number]
-    )
-    |> validate_required([:title, :description, :number])
-  end
+  def github_changeset(repo, meta) do
+    params = %{
+      provider_id: to_string(meta["id"]),
+      title: meta["title"],
+      description: meta["body"],
+      number: meta["number"],
+      url: meta["html_url"],
+      repository_id: repo.id
+    }
 
-  def changeset(:github, :pull_request, attrs) do
-    %Task{provider: "github", provider_id: to_string(attrs["id"]), provider_meta: attrs}
-    |> cast(
-      %{
-        title: attrs["title"],
-        description: attrs["body"],
-        number: attrs["number"]
-      },
-      [:title, :description, :number]
-    )
-    |> validate_required([:title, :description, :number])
+    %Task{provider: "github", provider_meta: meta}
+    |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id])
+    |> validate_required([:provider_id, :title, :number, :url, :repository_id])
+    |> unique_constraint([:provider, :provider_id])
   end
 end

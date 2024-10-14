@@ -18,15 +18,17 @@ defmodule Algora.Work.Repository do
     timestamps()
   end
 
-  def changeset(:github, attrs) do
-    %Repository{provider: "github", provider_id: to_string(attrs["id"]), provider_meta: attrs}
-    |> cast(
-      %{
-        name: attrs["name"],
-        url: attrs["url"]
-      },
-      [:name, :url]
-    )
-    |> validate_required([:name, :url])
+  def github_changeset(user, meta) do
+    params = %{
+      provider_id: to_string(meta["id"]),
+      name: meta["name"],
+      url: meta["html_url"],
+      user_id: user.id
+    }
+
+    %Repository{provider: "github", provider_meta: meta}
+    |> cast(params, [:provider_id, :name, :url, :user_id])
+    |> validate_required([:provider_id, :name, :url, :user_id])
+    |> unique_constraint([:provider, :provider_id])
   end
 end

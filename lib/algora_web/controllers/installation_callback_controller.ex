@@ -62,12 +62,12 @@ defmodule AlgoraWeb.InstallationCallbackController do
   end
 
   defp do_handle_installation(conn, user, installation_id) do
-    with {:ok, access_token} <- Accounts.get_access_token(user) |> dbg(),
-         {:ok, installation} <- Github.find_installation(access_token, installation_id) |> dbg(),
-         {:ok, github_handle} <- extract_github_handle(installation) |> dbg(),
-         {:ok, account} <- Github.get_user_by_username(access_token, github_handle) |> dbg(),
-         {:ok, org} <- upsert_org(conn, user, installation, account) |> dbg(),
-         {:ok, _} <- upsert_installation(user, org, installation) |> dbg() do
+    with {:ok, access_token} <- Accounts.get_access_token(user),
+         {:ok, installation} <- Github.find_installation(access_token, installation_id),
+         {:ok, github_handle} <- extract_github_handle(installation),
+         {:ok, account} <- Github.get_user_by_username(access_token, github_handle),
+         {:ok, org} <- upsert_org(conn, user, installation, account),
+         {:ok, _} <- upsert_installation(user, org, installation) do
       {:ok, org}
     end
   end

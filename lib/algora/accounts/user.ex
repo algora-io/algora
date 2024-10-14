@@ -134,26 +134,37 @@ defmodule Algora.Accounts.User do
     |> unique_constraint(:handle)
   end
 
-  def external_user_changeset(:github, attrs) do
+  def github_changeset(meta) do
     %User{
       provider: "github",
-      provider_id: to_string(attrs["id"]),
-      provider_login: attrs["login"],
-      provider_meta: attrs
+      provider_meta: meta
     }
     |> cast(
       %{
-        name: attrs["name"],
-        bio: attrs["bio"],
-        location: attrs["location"],
-        avatar_url: attrs["avatar_url"],
-        website_url: attrs["blog"],
-        github_url: attrs["html_url"],
-        type: type_from_provider(:github, attrs["type"])
+        provider_id: to_string(meta["id"]),
+        provider_login: meta["login"],
+        type: type_from_provider(:github, meta["type"]),
+        name: meta["name"],
+        bio: meta["bio"],
+        location: meta["location"],
+        avatar_url: meta["avatar_url"],
+        website_url: meta["blog"],
+        github_url: meta["html_url"]
       },
-      [:name, :bio, :location, :avatar_url, :website_url, :github_url, :type]
+      [
+        :provider_id,
+        :provider_login,
+        :type,
+        :name,
+        :bio,
+        :location,
+        :avatar_url,
+        :website_url,
+        :github_url
+      ]
     )
-    |> validate_required([])
+    |> validate_required([:provider_id, :provider_login, :type])
+    |> unique_constraint([:provider, :provider_id])
   end
 
   defp type_from_provider(:github, "Organization"), do: :organization

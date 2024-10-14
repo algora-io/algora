@@ -24,9 +24,8 @@ defmodule Algora.Github.OAuth do
         [{"accept", "application/json"}]
       )
 
-    with {:ok, %{"access_token" => token}} <- resp do
-      {:ok, token}
-    else
+    case resp do
+      {:ok, %{"access_token" => token}} -> {:ok, token}
       {:error, _reason} = err -> err
       %{} = resp -> {:error, {:bad_response, resp}}
     end

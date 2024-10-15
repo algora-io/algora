@@ -46,7 +46,8 @@ defmodule Algora.Accounts.User do
     field :linkedin_url, :string
 
     has_many :identities, Identity
-    has_many :bounties, Algora.Bounties.Bounty
+    has_many :owned_bounties, Algora.Bounties.Bounty, foreign_key: :owner_id
+    has_many :created_bounties, Algora.Bounties.Bounty, foreign_key: :creator_id
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project

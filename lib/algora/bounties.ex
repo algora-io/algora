@@ -18,7 +18,8 @@ defmodule Algora.Bounties do
         amount: Decimal.new(amount),
         currency: "USD",
         task_id: task.id,
-        user_id: org.id
+        owner_id: org.id,
+        creator_id: user.id
       })
       |> Repo.insert()
     else

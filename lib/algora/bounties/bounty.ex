@@ -9,7 +9,8 @@ defmodule Algora.Bounties.Bounty do
     field :currency, :string
 
     belongs_to :task, Algora.Work.Task
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :owner, Algora.Accounts.User
+    belongs_to :creator, Algora.Accounts.User
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :transactions, Algora.Payments.Transaction
@@ -19,8 +20,8 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :currency, :task_id, :user_id])
-    |> validate_required([:amount, :currency, :task_id, :user_id])
+    |> cast(attrs, [:amount, :currency, :task_id, :owner_id, :creator_id])
+    |> validate_required([:amount, :currency, :task_id, :owner_id, :creator_id])
     |> validate_number(:amount, greater_than: 0)
     |> validate_inclusion(:currency, ["USD"])
   end

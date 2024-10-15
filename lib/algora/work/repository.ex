@@ -3,6 +3,9 @@ defmodule Algora.Work.Repository do
   import Ecto.Changeset
 
   alias Algora.Work.Repository
+
+  @type t() :: %__MODULE__{}
+
   @derive {Inspect, except: [:provider_meta]}
   schema "repositories" do
     field :provider, :string

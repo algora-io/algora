@@ -2,6 +2,8 @@ defmodule Algora.Organizations.Member do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
   schema "members" do
     field :role, Ecto.Enum, values: [:admin, :mod, :expert]
 

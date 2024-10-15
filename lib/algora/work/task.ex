@@ -4,6 +4,8 @@ defmodule Algora.Work.Task do
 
   alias Algora.Work.Task
 
+  @type t() :: %__MODULE__{}
+
   @derive {Inspect, except: [:provider_meta]}
   schema "tasks" do
     field :provider, :string

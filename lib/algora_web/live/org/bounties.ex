@@ -268,12 +268,14 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("create_bounty", %{"github_issue_url" => url, "amount" => amount}, socket) do
-    case Bounties.create_bounty(socket.assigns.current_user, url, amount) do
+    %{current_user: creator, current_org: owner} = socket.assigns
+
+    case Bounties.create_bounty(creator, owner, url, amount) do
       {:ok, _bounty} ->
         {:noreply,
          socket
          |> put_flash(:info, "Bounty created successfully")
-         |> push_navigate(to: ~p"/org/#{socket.assigns.current_org.handle}/bounties")}
+         |> push_navigate(to: ~p"/org/#{owner.handle}/bounties")}
 
       {:error, changeset} ->
         {:noreply,

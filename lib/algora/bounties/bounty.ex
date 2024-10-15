@@ -2,6 +2,8 @@ defmodule Algora.Bounties.Bounty do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
   schema "bounties" do
     field :amount, :decimal
     field :currency, :string

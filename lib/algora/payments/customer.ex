@@ -2,6 +2,9 @@ defmodule Algora.Payments.Customer do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
+  @derive {Inspect, except: [:provider_meta]}
   schema "customers" do
     field :provider, :string
     field :provider_id, :string

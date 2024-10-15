@@ -62,13 +62,17 @@ defmodule Algora.Github do
   def find_installation(token, installation_id, page \\ 1) do
     case list_installations(token, page) do
       {:ok, %{"installations" => installations}} ->
-        case Enum.find(installations, fn i -> i["id"] == installation_id end) do
-          nil -> find_installation(token, installation_id, page + 1)
-          installation -> {:ok, installation}
-        end
+        find_installation_in_list(token, installation_id, installations, page)
 
       {:error, _reason} = error ->
         error
+    end
+  end
+
+  defp find_installation_in_list(token, installation_id, installations, page) do
+    case Enum.find(installations, fn i -> i["id"] == installation_id end) do
+      nil -> find_installation(token, installation_id, page + 1)
+      installation -> {:ok, installation}
     end
   end
 end

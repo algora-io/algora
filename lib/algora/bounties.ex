@@ -49,7 +49,8 @@ defmodule Algora.Bounties do
             number: t.number
           }
         },
-        limit: ^limit
+        limit: ^limit,
+        order_by: [desc: b.inserted_at, desc: b.id]
 
     query
     |> maybe_filter_by_user_id(params[:user_id])

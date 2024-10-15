@@ -2,6 +2,8 @@ defmodule Algora.Jobs.Application do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
   schema "applications" do
     belongs_to :job, Algora.Jobs.Job
     belongs_to :user, Algora.Accounts.User

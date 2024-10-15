@@ -27,7 +27,6 @@ defmodule Algora.Github.OAuth do
     case resp do
       {:ok, %{"access_token" => token}} -> {:ok, token}
       {:error, _reason} = err -> err
-      %{} = resp -> {:error, {:bad_response, resp}}
     end
   end
 

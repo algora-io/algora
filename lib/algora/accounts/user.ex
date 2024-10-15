@@ -5,6 +5,8 @@ defmodule Algora.Accounts.User do
   alias Algora.Accounts.{User, Identity}
   alias Algora.Installations.Installation
 
+  @type t() :: %__MODULE__{}
+
   @derive {Inspect, except: [:provider_meta]}
   schema "users" do
     field :provider, :string
@@ -135,22 +137,21 @@ defmodule Algora.Accounts.User do
   end
 
   def github_changeset(meta) do
-    %User{
-      provider: "github",
-      provider_meta: meta
+    params = %{
+      provider_id: to_string(meta["id"]),
+      provider_login: meta["login"],
+      type: type_from_provider(:github, meta["type"]),
+      name: meta["name"],
+      bio: meta["bio"],
+      location: meta["location"],
+      avatar_url: meta["avatar_url"],
+      website_url: meta["blog"],
+      github_url: meta["html_url"]
     }
+
+    %User{provider: "github", provider_meta: meta}
     |> cast(
-      %{
-        provider_id: to_string(meta["id"]),
-        provider_login: meta["login"],
-        type: type_from_provider(:github, meta["type"]),
-        name: meta["name"],
-        bio: meta["bio"],
-        location: meta["location"],
-        avatar_url: meta["avatar_url"],
-        website_url: meta["blog"],
-        github_url: meta["html_url"]
-      },
+      params,
       [
         :provider_id,
         :provider_login,

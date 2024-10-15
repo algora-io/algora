@@ -2,6 +2,8 @@ defmodule Algora.Bounties.Attempt do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
   schema "attempts" do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :user, Algora.Accounts.User

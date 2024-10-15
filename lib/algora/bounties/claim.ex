@@ -2,6 +2,9 @@ defmodule Algora.Bounties.Claim do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
+  @derive {Inspect, except: [:provider_meta]}
   schema "claims" do
     field :provider, :string
     field :provider_id, :string

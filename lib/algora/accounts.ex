@@ -18,7 +18,7 @@ defmodule Algora.Accounts do
   end
 
   def admin?(%User{} = user) do
-    user.email in Algora.config(:admin_emails)
+    user.email in Algora.config([:admin_emails])
   end
 
   def update_settings(%User{} = user, attrs) do
@@ -102,7 +102,6 @@ defmodule Algora.Accounts do
     Repo.one(query)
   end
 
-  @spec get_access_token(%User{}) :: {:ok, String.t()} | {:error, atom()}
   def get_access_token(%User{} = user) do
     case Repo.one(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github")) do
       %Identity{provider_token: token} -> {:ok, token}

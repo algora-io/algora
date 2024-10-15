@@ -2,6 +2,8 @@ defmodule Algora.Projects.Project do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{}
+
   schema "projects" do
     field :name, :string
 

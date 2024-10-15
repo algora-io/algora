@@ -6,8 +6,8 @@ defmodule Algora.Bounties do
   alias Algora.Accounts
   alias Algora.Work
 
-  def create_bounty(user, url, amount) do
-    with {:ok, token} <- Accounts.get_access_token(user),
+  def create_bounty(creator, owner, url, amount) do
+    with {:ok, token} <- Accounts.get_access_token(creator),
          {:ok, %{"owner" => owner, "repo" => repo, "number" => number}} <- parse_url(url),
          {:ok, task} <-
            Work.fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number}) do
@@ -16,7 +16,7 @@ defmodule Algora.Bounties do
         amount: Decimal.new(amount),
         currency: "USD",
         task_id: task.id,
-        user_id: task.user_id
+        user_id: owner.id
       })
       |> Repo.insert()
     else

@@ -69,9 +69,24 @@ defmodule Algora.Work do
             r.name == ^repo and
             t.number == ^number
 
-    with nil <- Repo.one(query),
-         {:ok, meta} <- Github.get_issue(token, owner, repo, number) do
-      upsert_task(:github, %{token: token, owner: owner, repo: repo, number: number, meta: meta})
+    case Repo.one(query) do
+      nil ->
+        case Github.get_issue(token, owner, repo, number) do
+          {:ok, meta} ->
+            upsert_task(:github, %{
+              token: token,
+              owner: owner,
+              repo: repo,
+              number: number,
+              meta: meta
+            })
+
+          {:error, error} ->
+            {:error, error}
+        end
+
+      task ->
+        {:ok, task}
     end
   end
 
@@ -82,9 +97,15 @@ defmodule Algora.Work do
       from u in User,
         where: u.provider == "github" and u.provider_id == ^id
 
-    with nil <- Repo.one(query),
-         {:ok, meta} <- Github.get_user(token, id) do
-      upsert_user(:github, %{meta: meta})
+    case Repo.one(query) do
+      nil ->
+        case Github.get_user(token, id) do
+          {:ok, meta} -> upsert_user(:github, %{meta: meta})
+          {:error, error} -> {:error, error}
+        end
+
+      user ->
+        {:ok, user}
     end
   end
 
@@ -95,9 +116,15 @@ defmodule Algora.Work do
       from u in User,
         where: u.provider == "github" and u.provider_login == ^login
 
-    with nil <- Repo.one(query),
-         {:ok, meta} <- Github.get_user_by_username(token, login) do
-      upsert_user(:github, %{meta: meta})
+    case Repo.one(query) do
+      nil ->
+        case Github.get_user_by_username(token, login) do
+          {:ok, meta} -> upsert_user(:github, %{meta: meta})
+          {:error, error} -> {:error, error}
+        end
+
+      user ->
+        {:ok, user}
     end
   end
 
@@ -109,9 +136,15 @@ defmodule Algora.Work do
         join: u in assoc(r, :user),
         where: r.provider == "github" and r.name == ^repo and u.provider_login == ^owner
 
-    with nil <- Repo.one(query),
-         {:ok, meta} <- Github.get_repository(token, owner, repo) do
-      upsert_repository(:github, %{token: token, owner: owner, meta: meta})
+    case Repo.one(query) do
+      nil ->
+        case Github.get_repository(token, owner, repo) do
+          {:ok, meta} -> upsert_repository(:github, %{token: token, owner: owner, meta: meta})
+          {:error, error} -> {:error, error}
+        end
+
+      repo ->
+        {:ok, repo}
     end
   end
 end

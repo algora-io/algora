@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.Org.DashboardLive do
   use AlgoraWeb, :live_view
 
+  on_mount AlgoraWeb.Org.BountyHook
+
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,

@@ -3,6 +3,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   alias Algora.Bounties
 
+  on_mount AlgoraWeb.Org.BountyHook
+
   def mount(_params, _session, socket) do
     bounties = Bounties.list_bounties(%{user_id: socket.assigns.current_org.id, limit: 10})
     claims = []
@@ -264,24 +266,6 @@ defmodule AlgoraWeb.Org.BountiesLive do
       diff < 86_400 -> "#{div(diff, 3600)} hours ago"
       diff < 2_592_000 -> "#{div(diff, 86_400)} days ago"
       true -> "#{div(diff, 2_592_000)} months ago"
-    end
-  end
-
-  def handle_event("create_bounty", %{"github_issue_url" => url, "amount" => amount}, socket) do
-    %{current_user: creator, current_org: owner} = socket.assigns
-
-    case Bounties.create_bounty(creator, owner, url, amount) do
-      {:ok, _bounty} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Bounty created successfully")
-         |> push_navigate(to: ~p"/org/#{owner.handle}/bounties")}
-
-      {:error, changeset} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Error creating bounty")
-         |> assign(:new_bounty_form, to_form(changeset))}
     end
   end
 end

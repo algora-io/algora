@@ -5,21 +5,25 @@ defmodule Algora.Bounties do
   alias Algora.Repo
   alias Algora.Accounts
   alias Algora.Work
+  alias Algora.Accounts.User
 
-  @spec create_bounty(user :: User.t(), org :: User.t(), url :: String.t(), amount :: Decimal.t()) ::
+  @spec create_bounty(
+          creator :: User.t(),
+          owner :: User.t(),
+          url :: String.t(),
+          amount :: Decimal.t()
+        ) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  def create_bounty(user, org, url, amount) do
-    with {:ok, token} <- Accounts.get_access_token(user),
-         {:ok, %{"owner" => owner, "repo" => repo, "number" => number}} <- parse_url(url),
-         {:ok, task} <-
-           Work.fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number}) do
+  def create_bounty(creator = %User{}, owner = %User{}, url, amount) do
+    with {:ok, token} <- Accounts.get_access_token(creator),
+         {:ok, task} <- Work.fetch_task(:github, %{token: token, url: url}) do
       %Bounty{}
       |> Bounty.changeset(%{
         amount: Decimal.new(amount),
         currency: "USD",
         task_id: task.id,
-        owner_id: org.id,
-        creator_id: user.id
+        owner_id: owner.id,
+        creator_id: creator.id
       })
       |> Repo.insert()
     else
@@ -63,42 +67,5 @@ defmodule Algora.Bounties do
   defp maybe_filter_by_user_id(query, user_id) do
     from [b, t] in query,
       where: b.user_id == ^user_id
-  end
-
-  defp parse_url(url) do
-    cond do
-      issue_params = parse_url(:github, :issue, url) ->
-        {:ok, issue_params |> Map.put("type", :issue)}
-
-      pr_params = parse_url(:github, :pull_request, url) ->
-        {:ok, pr_params |> Map.put("type", :pull_request)}
-
-      true ->
-        :error
-    end
-  end
-
-  defp parse_url(:github, :issue, url) do
-    regex =
-      ~r|https?://(?:www\.)?github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/issues/(?<number>\d+)|
-
-    parse_with_regex(regex, url)
-  end
-
-  defp parse_url(:github, :pull_request, url) do
-    regex =
-      ~r|https?://(?:www\.)?github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/pull/(?<number>\d+)|
-
-    parse_with_regex(regex, url)
-  end
-
-  defp parse_with_regex(regex, url) do
-    case Regex.named_captures(regex, url) do
-      %{"owner" => owner, "repo" => repo, "number" => number} ->
-        %{"owner" => owner, "repo" => repo, "number" => String.to_integer(number)}
-
-      nil ->
-        nil
-    end
   end
 end

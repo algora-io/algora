@@ -54,6 +54,20 @@ defmodule Algora.Work do
 
   @spec fetch_task(:github, %{
           token: Github.token(),
+          url: String.t()
+        }) :: {:ok, Task.t()} | {:error, atom()}
+  def fetch_task(:github, %{token: token, url: url}) do
+    case parse_url(url) do
+      {:ok, %{owner: owner, repo: repo, number: number}} ->
+        fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number})
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  @spec fetch_task(:github, %{
+          token: Github.token(),
           owner: String.t(),
           repo: String.t(),
           number: integer()
@@ -145,6 +159,43 @@ defmodule Algora.Work do
 
       repo ->
         {:ok, repo}
+    end
+  end
+
+  defp parse_url(url) do
+    cond do
+      issue_params = parse_url(:github, :issue, url) ->
+        {:ok, issue_params |> Map.put("type", :issue)}
+
+      pr_params = parse_url(:github, :pull_request, url) ->
+        {:ok, pr_params |> Map.put("type", :pull_request)}
+
+      true ->
+        :error
+    end
+  end
+
+  defp parse_url(:github, :issue, url) do
+    regex =
+      ~r|https?://(?:www\.)?github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/issues/(?<number>\d+)|
+
+    parse_with_regex(regex, url)
+  end
+
+  defp parse_url(:github, :pull_request, url) do
+    regex =
+      ~r|https?://(?:www\.)?github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/pull/(?<number>\d+)|
+
+    parse_with_regex(regex, url)
+  end
+
+  defp parse_with_regex(regex, url) do
+    case Regex.named_captures(regex, url) do
+      %{"owner" => owner, "repo" => repo, "number" => number} ->
+        %{"owner" => owner, "repo" => repo, "number" => String.to_integer(number)}
+
+      nil ->
+        nil
     end
   end
 end

@@ -43,6 +43,8 @@ defmodule AlgoraWeb.Router do
     live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/auth/login", SignInLive, :index
     end
+
+    live "/onboarding", OnboardingLive
   end
 
   # Other scopes may use custom stacks.

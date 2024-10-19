@@ -1,12 +1,6 @@
 <header class="bg-gray-900 text-white py-4 px-6 md:px-12">
   <nav class="flex justify-between items-center">
-    <div class="text-2xl font-bold">Wefunder</div>
-    <ul class="flex space-x-6">
-      <li><a href="#" class="hover:text-blue-400">Explore</a></li>
-      <li><a href="#" class="hover:text-blue-400">Raise Money</a></li>
-      <li><a href="#" class="hover:text-blue-400">Log in</a></li>
-      <li><a href="#" class="hover:text-blue-400">Sign up</a></li>
-    </ul>
+    <div class="text-2xl font-bold">Algora</div>
   </nav>
 </header>
 
@@ -19,13 +13,63 @@
     <p class="text-gray-300 text-lg mb-8">
       Get equity and front row seats to the startups and small businesses you love—for as little as $100.
     </p>
-    <div class="flex space-x-4">
-      <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300">
-        Join Wefunder
+    <div id="button-container" class="flex space-x-4">
+      <button onclick="showOnboarding('companies')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300">
+        Companies
       </button>
-      <button class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white font-bold py-3 px-6 rounded border-2 border-white transition duration-300">
-        Explore Startups
+      <button onclick="showOnboarding('developers')" class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white font-bold py-3 px-6 rounded border-2 border-white transition duration-300">
+        Developers
       </button>
+    </div>
+    <div id="onboarding-section" class="hidden mt-8">
+      <div id="first-question">
+        <h3 class="text-xl font-bold mb-4">What do you want?</h3>
+        <div class="space-y-4">
+          <div class="flex items-center space-x-2">
+            <input type="checkbox" id="option1" name="onboarding-option" class="custom-checkbox">
+            <label for="option1">Option 1</label>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="checkbox" id="option2" name="onboarding-option" class="custom-checkbox">
+            <label for="option2">Option 2</label>
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="checkbox" id="option3" name="onboarding-option" class="custom-checkbox">
+            <label for="option3">Option 3</label>
+          </div>
+        </div>
+        <button onclick="showTechQuestion()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+          Proceed
+        </button>
+      </div>
+
+      <div id="tech-question" class="hidden">
+        <h3 class="text-xl font-bold mb-4">What technology?</h3>
+        <div class="flex flex-wrap gap-4">
+          <%= for tech <- ["TypeScript", "Scala", "Ruby", "Golang", "Elixir", "PHP", "Rust"] do %>
+            <div class="flex items-center">
+              <input type="checkbox" id={"tech-#{String.downcase(tech)}"} name="tech-option" class="custom-checkbox">
+              <label for={"tech-#{String.downcase(tech)}"} class="ml-2"><%= tech %></label>
+            </div>
+          <% end %>
+        </div>
+        <button onclick="showThirdQuestion()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+          Proceed
+        </button>
+      </div>
+
+      <div id="third-question" class="hidden">
+        <h3 class="text-xl font-bold mb-4">Great! We've found some matches for you.</h3>
+        <p id="match-count" class="text-lg mb-4"></p>
+        <div id="match-list" class="space-y-4 mb-6"></div>
+        
+        <h4 class="text-lg font-semibold mb-2">Enter your email to see all matches:</h4>
+        <input type="email" id="email-input" placeholder="Enter your email" class="w-full px-3 py-2 bg-gray-800 text-white rounded mb-4">
+        
+        <button onclick="finalSubmit()" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+          Submit
+        </button>
+      </div>
     </div>
   </div>
   
@@ -117,3 +161,112 @@
 <aside>
   <!-- Sidebar content will go here -->
 </aside>
+
+<script>
+  function showOnboarding(type) {
+    document.getElementById('button-container').classList.add('hidden');
+    document.getElementById('onboarding-section').classList.remove('hidden');
+    // You can use the 'type' parameter to customize the onboarding for companies or developers
+  }
+
+  function showTechQuestion() {
+    const selectedOptions = Array.from(document.querySelectorAll('input[name="onboarding-option"]:checked'))
+      .map(checkbox => checkbox.id);
+    console.log('Selected options:', selectedOptions);
+    
+    document.getElementById('first-question').classList.add('hidden');
+    document.getElementById('tech-question').classList.remove('hidden');
+  }
+
+  function showThirdQuestion() {
+    const selectedTech = Array.from(document.querySelectorAll('input[name="tech-option"]:checked'))
+      .map(checkbox => checkbox.id.replace('tech-', ''));
+    
+    if (selectedTech.length === 0) {
+      alert("Please select at least one technology.");
+      return;
+    }
+
+    console.log('Selected technologies:', selectedTech);
+    
+    // Generate and display matches
+    const matches = generateFakeMatches(selectedTech);
+    displayMatches(matches);
+    
+    document.getElementById('tech-question').classList.add('hidden');
+    document.getElementById('third-question').classList.remove('hidden');
+  }
+
+  function generateFakeMatches(technologies) {
+    const matchCount = Math.floor(Math.random() * 20) + 5;
+    const matches = [];
+    for (let i = 0; i < 3; i++) {
+      matches.push({
+        name: `Project ${i + 1}`,
+        description: `A ${technologies[i % technologies.length]} project looking for contributors.`
+      });
+    }
+    return { count: matchCount, sampleMatches: matches };
+  }
+
+  function displayMatches(matches) {
+    document.getElementById('match-count').textContent = `We found ${matches.count} potential matches for you!`;
+    
+    const matchList = document.getElementById('match-list');
+    matchList.innerHTML = ''; // Clear existing matches
+    matches.sampleMatches.forEach(match => {
+      const matchElement = document.createElement('div');
+      matchElement.className = 'bg-gray-800 p-4 rounded';
+      matchElement.innerHTML = `
+        <h5 class="font-semibold">${match.name}</h5>
+        <p>${match.description}</p>
+      `;
+      matchList.appendChild(matchElement);
+    });
+  }
+
+  function finalSubmit() {
+    const email = document.getElementById('email-input').value;
+    if (!email) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    const finalData = {
+      selectedOptions: Array.from(document.querySelectorAll('input[name="onboarding-option"]:checked'))
+        .map(checkbox => checkbox.id),
+      selectedTechnologies: Array.from(document.querySelectorAll('input[name="tech-option"]:checked'))
+        .map(checkbox => checkbox.id.replace('tech-', '')),
+      email: email,
+      matchCount: parseInt(document.getElementById('match-count').textContent.match(/\d+/)[0])
+    };
+
+    console.log('Submitting final data:', finalData);
+
+    // Send data to the server (example using fetch API)
+    fetch('/api/onboarding', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(finalData),
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log('Success:', result);
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    });
+
+    // Show loading message
+    document.getElementById('third-question').classList.add('hidden');
+    const loadingMessage = document.createElement('div');
+    loadingMessage.textContent = 'Processing your selections...';
+    loadingMessage.className = 'text-white text-xl mt-8';
+    document.getElementById('onboarding-section').appendChild(loadingMessage);
+  }
+</script>

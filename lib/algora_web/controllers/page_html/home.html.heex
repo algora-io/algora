@@ -1,76 +1,119 @@
-<main class="lg:pr-96">
-  <header class="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-    <h1 class="text-base font-semibold leading-7 text-white">Projects</h1>
-  </header>
-  <!-- Deployment list -->
-  <ul role="list" class="divide-y divide-white/5">
-    <li class="relative flex items-center space-x-4 px-4 py-4 sm:px-6 lg:px-8">
-      <div class="min-w-0 flex-auto">
-        <div class="flex items-center gap-x-3">
-          <div class="flex-none rounded-full bg-gray-100/10 p-1 text-gray-500">
-            <div class="h-2 w-2 rounded-full bg-current"></div>
-          </div>
-          <h2 class="min-w-0 text-sm font-semibold leading-6 text-white">
-            <a href="#" class="flex gap-x-2">
-              <span class="truncate">Planetaria</span>
-              <span class="text-gray-400">/</span>
-              <span class="whitespace-nowrap">ios-app</span>
-              <span class="absolute inset-0"></span>
-            </a>
-          </h2>
-        </div>
-        <div class="mt-3 flex items-center gap-x-2.5 text-xs leading-5 text-gray-400">
-          <p class="truncate">Deploys from GitHub</p>
-          <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-300">
-            <circle cx="1" cy="1" r="1" />
-          </svg>
-          <p class="whitespace-nowrap">Initiated 1m 32s ago</p>
-        </div>
+<header class="bg-gray-900 text-white py-4 px-6 md:px-12">
+  <nav class="flex justify-between items-center">
+    <div class="text-2xl font-bold">Wefunder</div>
+    <ul class="flex space-x-6">
+      <li><a href="#" class="hover:text-blue-400">Explore</a></li>
+      <li><a href="#" class="hover:text-blue-400">Raise Money</a></li>
+      <li><a href="#" class="hover:text-blue-400">Log in</a></li>
+      <li><a href="#" class="hover:text-blue-400">Sign up</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="bg-gray-900 text-white py-16 px-6 md:px-12 flex flex-col md:flex-row justify-between items-start">
+  <div class="md:w-1/2 mb-8 md:mb-0">
+    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
+      Invest in <span class="text-blue-400">founders</span><br>
+      building the <span class="text-red-400">future</span>
+    </h1>
+    <p class="text-gray-300 text-lg mb-8">
+      Get equity and front row seats to the startups and small businesses you love—for as little as $100.
+    </p>
+    <div class="flex space-x-4">
+      <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300">
+        Join Wefunder
+      </button>
+      <button class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white font-bold py-3 px-6 rounded border-2 border-white transition duration-300">
+        Explore Startups
+      </button>
+    </div>
+  </div>
+  
+  <div class="md:w-1/2 flex overflow-hidden relative p-6" style="height: 500px;">
+    <div class="absolute rotate-[9deg] inset-0 bg-gradient-to-b from-transparent from-95% to-gray-900 z-10"></div>
+    <div class="absolute rotate-[9deg] inset-0 bg-gradient-to-t from-transparent from-95% to-gray-900 z-10"></div>
+    <%= for column <- [0, 1] do %>
+      <div class="w-1/2 rotate-[9deg] flex flex-col space-y-6 overflow-hidden px-3">
+        <%= for {company, index} <- Enum.with_index([
+          {"substack", "bg-blue-400", "$7,809,219", "6,688", "al6z", "🇺🇸"},
+          {"Synthesis", "bg-blue-200", "$4,999,989", "1,440", "al6z", "🇬🇧"},
+          {"curlmix", "bg-green-200", "$4,537,310", "6,948", "Backstage Capital", "🇨🇦"},
+          {"MERCURY", "bg-yellow-300", "$4,914,037", "2,453", "al6z", "🇩🇪"},
+          {"TechNova", "bg-purple-300", "$3,250,000", "1,875", "Sequoia", "🇮🇳"},
+          {"GreenLeaf", "bg-green-400", "$5,120,500", "3,210", "Accel", "🇦🇺"},
+          {"DataFlow", "bg-blue-500", "$6,750,000", "4,500", "Andreessen Horowitz", "🇸🇬"},
+          {"RoboTech", "bg-red-300", "$2,980,000", "2,100", "Kleiner Perkins", "🇯🇵"}
+        ]) do %>
+          <%= if rem(index, 2) == column do %>
+            <div class={[
+              "rounded-xl shadow-lg transition duration-300",
+              elem(company, 1),
+              "animate-carousel",
+              if(column == 0, do: "animate-up", else: "animate-down")
+            ]} style="height: 280px;">
+              <div class="p-3 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="text-sm font-bold"><%= elem(company, 0) %></h3>
+                  <div class="flex items-center">
+                    <span class="mr-1 text-lg"><%= elem(company, 5) %></span>
+                    <img src={"https://ui-avatars.com/api/?name=#{elem(company, 0)}&background=fff&color=000&size=24"} alt="Company logo" class="w-6 h-6 rounded">
+                  </div>
+                </div>
+                <div class="mb-2 flex-grow">
+                  <img src={"https://picsum.photos/seed/#{elem(company, 0)}/200/100"} alt="Founder" class="w-full h-24 object-cover rounded">
+                </div>
+                <div class="flex justify-between text-xs mb-1">
+                  <div>
+                    <p class="font-semibold"><%= elem(company, 2) %></p>
+                    <p class="text-gray-300">invested</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-semibold"><%= elem(company, 3) %></p>
+                    <p class="text-gray-300">investors</p>
+                  </div>
+                </div>
+                <div class="bg-white bg-opacity-20 px-2 py-1 rounded">
+                  <p class="text-xs text-white"><%= elem(company, 4) %> co-invested</p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
       </div>
-      <div class="flex-none rounded-full bg-gray-400/10 px-2 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-gray-400/20">
-        Preview
-      </div>
-      <svg
-        class="h-5 w-5 flex-none text-gray-400"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-        aria-hidden="true"
-        data-slot="icon"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-          clip-rule="evenodd"
-        />
-      </svg>
-    </li>
-    <!-- More deployments... -->
-  </ul>
+    <% end %>
+  </div>
+</section>
+
+<style>
+  @keyframes moveUp {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100%); }
+  }
+
+  @keyframes moveDown {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(0); }
+  }
+
+  .animate-carousel {
+    animation-duration: 30s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  .animate-up {
+    animation-name: moveUp;
+  }
+
+  .animate-down {
+    animation-name: moveDown;
+  }
+</style>
+
+<main>
+  <!-- Main content will go here -->
 </main>
-<!-- Activity feed -->
-<aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
-  <header class="flex items-center justify-between border-b border-white/5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-    <h2 class="text-base font-semibold leading-7 text-white">Activity feed</h2>
-    <a href="#" class="text-sm font-semibold leading-6 text-indigo-400">View all</a>
-  </header>
-  <ul role="list" class="divide-y divide-white/5">
-    <li class="px-4 py-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-x-3">
-        <img
-          src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-          alt=""
-          class="h-6 w-6 flex-none rounded-full bg-gray-800"
-        />
-        <h3 class="flex-auto truncate text-sm font-semibold leading-6 text-white">
-          Michael Foster
-        </h3>
-        <time datetime="2023-01-23T11:00" class="flex-none text-xs text-gray-600">1h</time>
-      </div>
-      <p class="mt-3 truncate text-sm text-gray-500">
-        Pushed to <span class="text-gray-400">ios-app</span>
-        (<span class="font-mono text-gray-400">2d89f0c8</span> on <span class="text-gray-400">main</span>)
-      </p>
-    </li>
-    <!-- More items... -->
-  </ul>
+
+<aside>
+  <!-- Sidebar content will go here -->
 </aside>

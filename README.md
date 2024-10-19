@@ -74,8 +74,7 @@ To get a local copy up and running, follow these steps.
 
    ```sql
    CREATE USER algora WITH PASSWORD 'password';
-   CREATE DATABASE console;
-   GRANT ALL PRIVILEGES ON DATABASE console TO algora;
+   ALTER USER algora WITH CREATEDB;
    ```
 
 5. Paste your connection string into your `.env` file

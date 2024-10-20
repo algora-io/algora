@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive
     get "/oauth/callbacks/:provider", OAuthCallbackController, :new
     get "/callbacks/:provider/installation", InstallationCallbackController, :new
     delete "/auth/logout", OAuthCallbackController, :sign_out

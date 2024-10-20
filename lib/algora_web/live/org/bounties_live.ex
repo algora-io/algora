@@ -139,7 +139,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             </p>
                           </.link>
                           <p class="flex items-center gap-1.5 text-xs text-gray-400">
-                            <%= time_ago(bounty.inserted_at) %>
+                            <%= Algora.Util.time_ago(bounty.inserted_at) %>
                           </p>
                         </div>
                       </div>
@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                               <%= claim.user.username %>
                             </div>
                             <div class="text-xs text-gray-400">
-                              <%= time_ago(claim.inserted_at) %>
+                              <%= Algora.Util.time_ago(claim.inserted_at) %>
                             </div>
                           </div>
                         </div>
@@ -254,18 +254,5 @@ defmodule AlgoraWeb.Org.BountiesLive do
       </div>
     </div>
     """
-  end
-
-  defp time_ago(datetime) do
-    now = NaiveDateTime.utc_now()
-    diff = NaiveDateTime.diff(now, datetime, :second)
-
-    cond do
-      diff < 60 -> "just now"
-      diff < 3600 -> "#{div(diff, 60)} minutes ago"
-      diff < 86_400 -> "#{div(diff, 3600)} hours ago"
-      diff < 2_592_000 -> "#{div(diff, 86_400)} days ago"
-      true -> "#{div(diff, 2_592_000)} months ago"
-    end
   end
 end

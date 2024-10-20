@@ -1,6 +1,8 @@
 defmodule Algora.Bounties.Claim do
   use Ecto.Schema
+  import Ecto.Query
   import Ecto.Changeset
+  alias Algora.Bounties.Claim
 
   @type t() :: %__MODULE__{}
 
@@ -37,5 +39,19 @@ defmodule Algora.Bounties.Claim do
     claim
     |> cast(attrs, [:bounty_id, :user_id])
     |> validate_required([:bounty_id, :user_id])
+  end
+
+  def rewarded(query \\ Claim) do
+    from c in query,
+      where: c.status == :approved and not is_nil(c.charged_at)
+  end
+
+  def filter_by_org_id(query, nil), do: query
+
+  def filter_by_org_id(query, org_id) do
+    from c in query,
+      join: b in assoc(c, :bounty),
+      join: u in assoc(b, :owner),
+      where: u.id == ^org_id
   end
 end

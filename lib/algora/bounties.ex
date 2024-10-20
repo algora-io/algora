@@ -2,10 +2,12 @@ defmodule Algora.Bounties do
   import Ecto.Query
 
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
   alias Algora.Repo
   alias Algora.Accounts
   alias Algora.Work
   alias Algora.Accounts.User
+  alias Algora.Organizations.Member
 
   @spec create_bounty(
           creator :: User.t(),
@@ -58,14 +60,60 @@ defmodule Algora.Bounties do
         order_by: [desc: b.inserted_at, desc: b.id]
 
     query
-    |> maybe_filter_by_owner_id(params[:owner_id])
+    |> Bounty.filter_by_org_id(params[:owner_id])
     |> Repo.all()
   end
 
-  defp maybe_filter_by_owner_id(query, nil), do: query
+  def fetch_stats(org_id \\ nil) do
+    open_bounties_query = Bounty.open() |> Bounty.filter_by_org_id(org_id)
+    rewarded_bounties_query = Bounty.completed() |> Bounty.filter_by_org_id(org_id)
+    rewarded_claims_query = Claim.rewarded() |> Claim.filter_by_org_id(org_id)
+    members_query = Member |> Member.filter_by_org_id(org_id)
 
-  defp maybe_filter_by_owner_id(query, owner_id) do
-    from [b, t] in query,
-      where: b.owner_id == ^owner_id
+    open_bounties = Repo.aggregate(open_bounties_query, :count, :id)
+    open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || Decimal.new(0)
+
+    total_awarded = Repo.aggregate(rewarded_bounties_query, :sum, :amount) || Decimal.new(0)
+    completed_bounties = Repo.aggregate(rewarded_bounties_query, :count, :id)
+
+    solvers_count_last_month =
+      Repo.aggregate(
+        rewarded_claims_query
+        |> where([c], c.inserted_at >= fragment("NOW() - INTERVAL '1 month'")),
+        :count,
+        :user_id,
+        distinct: true
+      )
+
+    solvers_count = Repo.aggregate(rewarded_claims_query, :count, :user_id, distinct: true)
+    solvers_diff = solvers_count - solvers_count_last_month
+
+    members_count = Repo.aggregate(members_query, :count, :id)
+
+    %{
+      open_bounties_amount: open_bounties_amount,
+      open_bounties_count: open_bounties,
+      total_awarded: total_awarded,
+      completed_bounties_count: completed_bounties,
+      solvers_count: solvers_count,
+      solvers_diff: solvers_diff,
+      members_count: members_count
+    }
+  end
+
+  def fetch_recent_bounties(org_id \\ nil) do
+    Bounty.open()
+    |> Bounty.filter_by_org_id(org_id)
+    |> Bounty.order_by_most_recent()
+    |> Bounty.limit(4)
+    |> Repo.all()
+    |> Enum.map(fn bounty ->
+      %{
+        title: bounty.title,
+        amount: bounty.amount,
+        issue_number: bounty.issue_number,
+        inserted_at: bounty.inserted_at
+      }
+    end)
   end
 end

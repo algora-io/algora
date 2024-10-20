@@ -1,0 +1,262 @@
+<div>
+  <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
+  <div
+    class="relative z-50 xl:hidden"
+    role="dialog"
+    aria-modal="true"
+    id="mobile-menu"
+    phx-hook="MobileMenu"
+  >
+    <!-- Backdrop -->
+    <div
+      class="fixed inset-0 bg-gray-900/80 transition-opacity ease-linear duration-300 opacity-0"
+      aria-hidden="true"
+      id="menu-backdrop"
+    >
+    </div>
+
+    <div class="fixed inset-0 flex">
+      <!-- Menu -->
+      <div
+        class="relative mr-16 flex w-full max-w-xs flex-1 transform transition ease-in-out duration-300 -translate-x-full"
+        id="menu-container"
+      >
+        <!-- Open button -->
+        <div
+          class="absolute left-full top-0 flex w-16 justify-center pt-5 transition ease-in-out duration-300"
+          id="open-button"
+        >
+          <button type="button" class="-m-2.5 p-2.5" id="open-menu-button">
+            <span class="sr-only">Open sidebar</span>
+            <.icon name="tabler-menu-2" class="h-6 w-6 text-white" />
+          </button>
+        </div>
+        <!-- Close button -->
+        <div
+          class="absolute left-full top-0 flex w-16 justify-center pt-5 opacity-0 transition ease-in-out duration-300"
+          id="close-button"
+        >
+          <button type="button" class="-m-2.5 p-2.5" id="close-menu-button">
+            <span class="sr-only">Close sidebar</span>
+            <.icon name="tabler-x" class="h-6 w-6 text-white" />
+          </button>
+        </div>
+        <!-- Sidebar component -->
+        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10 scrollbar-thin">
+          <div class="flex h-16 shrink-0 items-center">
+            <.logo class="h-8 w-auto" />
+          </div>
+          <nav class="flex flex-1 flex-col">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+              <%= for section <- @nav do %>
+                <li>
+                  <div class="hidden text-xs font-semibold leading-6 text-gray-400">
+                    <%= section.title %>
+                  </div>
+                  <ul role="list" class="-mx-2 mt-2 space-y-1">
+                    <%= for item <- section.items do %>
+                      <li>
+                        <.link
+                          navigate={item.href}
+                          class={
+                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{
+                              if Map.get(item, :tab) && @active_tab == item.tab,
+                                do: "bg-gray-800 text-white",
+                                else: "text-gray-400 hover:text-white hover:bg-gray-800"
+                            }"
+                          }
+                        >
+                          <.icon name={item.icon} /> <%= item.label %>
+                        </.link>
+                      </li>
+                    <% end %>
+                  </ul>
+                </li>
+              <% end %>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Static sidebar for desktop -->
+  <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
+    <!-- Sidebar component -->
+    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950/50 px-6 ring-1 ring-white/5 scrollbar-thin">
+      <div class="flex h-16 shrink-0 items-center">
+        <.logo class="h-8 w-auto" />
+      </div>
+      <div class="">
+        <div class="flex items-center border-b dark:border-gray-900">
+          <.link navigate={~p"/org/#{@current_user.handle}"}>
+            <div class="flex items-center gap-x-2.5 text-left">
+              <div class="relative flex-shrink-0 overflow-hidden h-12 w-12 rounded-lg">
+                <img src={@current_user.avatar_url} alt={@current_user.name} />
+              </div>
+              <div>
+                <div class="font-display text-base font-semibold dark:text-white">Algora</div>
+                <div class="text-xs font-medium dark:text-gray-300">@algora</div>
+              </div>
+            </div>
+          </.link>
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+          <.link
+            :if={@current_user.twitter_url}
+            href={@current_user.twitter_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-brand-x"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-sky-400"
+            />
+          </.link>
+          <.link
+            :if={@current_user.discord_url}
+            href={@current_user.discord_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-brand-discord"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-purple-400"
+            />
+          </.link>
+          <.link
+            :if={@current_user.youtube_url}
+            href={@current_user.youtube_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-brand-youtube"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-red-400"
+            />
+          </.link>
+          <.link
+            :if={@current_user.website_url}
+            href={@current_user.website_url}
+            target="_blank"
+            rel="noopener"
+          >
+            <.icon
+              name="tabler-world"
+              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-teal-500"
+            />
+          </.link>
+        </div>
+      </div>
+
+      <nav class="flex flex-1 flex-col">
+        <ul role="list" class="flex flex-1 flex-col gap-y-7">
+          <%= for section <- @nav do %>
+            <li>
+              <div class="hidden text-xs font-semibold leading-6 text-gray-400">
+                <%= section.title %>
+              </div>
+              <ul role="list" class="-mx-2 mt-2 space-y-1">
+                <%= for item <- section.items do %>
+                  <li>
+                    <.link
+                      navigate={item.href}
+                      class={
+                        "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{
+                          if Map.get(item, :tab) && @active_tab == item.tab,
+                            do: "bg-gray-800 text-white",
+                            else: "text-gray-400 hover:text-white hover:bg-gray-800"
+                        }"
+                      }
+                    >
+                      <.icon name={item.icon} /> <%= item.label %>
+                    </.link>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="xl:pl-72">
+    <div
+      id="navbar"
+      phx-hook="NavBar"
+      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-x-6 border-b border-white/5 px-4 shadow-sm sm:px-6 lg:px-8"
+    >
+      <.link
+        class="group outline-none w-fit"
+        target="_blank"
+        rel="noopener"
+        href={AlgoraWeb.Constants.get(:youtube_url)}
+      >
+        <div class="text-center font-sans justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
+          <div class="justify-center flex w-full items-center gap-x-1">
+            <AlgoraWeb.Components.Icons.youtube class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
+          </div>
+        </div>
+      </.link>
+      <.link
+        class="group outline-none w-fit"
+        rel="noopener"
+        target="_blank"
+        href={AlgoraWeb.Constants.get(:discord_url)}
+      >
+        <div class="text-center font-sans justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
+          <div class="justify-center flex w-full items-center gap-x-1">
+            <AlgoraWeb.Components.Icons.discord class="h-7 w-7" />
+          </div>
+        </div>
+      </.link>
+      <.link
+        :if={Algora.Stargazer.count()}
+        class="group outline-none w-fit"
+        target="_blank"
+        rel="noopener"
+        href={AlgoraWeb.Constants.get(:github_url)}
+      >
+        <div class="text-center font-sans justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap p-2 lg:flex">
+          <div class="justify-center flex w-full items-center gap-x-1">
+            <AlgoraWeb.Components.Icons.github class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
+            <span class="hidden xl:block">Star</span>
+            <span class="font-semibold text-gray-300">
+              <%= Algora.Stargazer.count() %>
+            </span>
+          </div>
+        </div>
+      </.link>
+      <.link
+        class="px-4 py-2 lg:flex hidden whitespace-nowrap"
+        target="_blank"
+        href={AlgoraWeb.Constants.get(:docs_url)}
+      >
+        <span class="relative font-semibold text-sm">Docs</span>
+      </.link>
+      <%= if @current_user do %>
+        <div class="shrink-0">
+          <.simple_dropdown id="navbar-account-dropdown">
+            <:img src={@current_user.avatar_url} alt={@current_user.handle} />
+            <:link href={~p"/auth/logout"} method={:delete}>Sign out</:link>
+          </.simple_dropdown>
+        </div>
+      <% else %>
+        <.link
+          navigate="/auth/login"
+          class="rounded-lg bg-gray-50 hover:bg-gray-200 py-1 px-2 text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80"
+        >
+          <span class="relative font-semibold text-sm">Login</span>
+        </.link>
+      <% end %>
+    </div>
+
+    <div>
+      <div class="fixed left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950" />
+      <div class="fixed left-0 top-0 z-0 h-full w-full bg-purple-900/5" />
+      <div class="relative">
+        <%= @inner_content %>
+      </div>
+    </div>
+  </div>
+</div>

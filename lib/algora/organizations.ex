@@ -36,8 +36,16 @@ defmodule Algora.Organizations do
   def list_orgs(opts) do
     Repo.all(
       from u in User,
-        where: u.type == "organization",
+        where: u.type == :organization,
         limit: ^Keyword.fetch!(opts, :limit)
+    )
+  end
+
+  def get_user_orgs(user = %User{}) do
+    Repo.all(
+      from o in User,
+        join: m in assoc(o, :members),
+        where: m.user_id == ^user.id and m.org_id == o.id
     )
   end
 end

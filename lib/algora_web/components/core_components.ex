@@ -107,7 +107,7 @@ defmodule AlgoraWeb.CoreComponents do
   def dropdown(assigns) do
     ~H"""
     <!-- User account dropdown -->
-    <div class="px-3 w-full relative inline-block text-left">
+    <div class="w-full relative inline-block text-left">
       <div>
         <button
           id={@id}
@@ -153,7 +153,7 @@ defmodule AlgoraWeb.CoreComponents do
       <div
         id={"#{@id}-dropdown"}
         phx-click-away={hide_dropdown("##{@id}-dropdown")}
-        class="hidden z-10 mx-3 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-gray-900 ring-1 ring-gray-900 ring-opacity-5 divide-y divide-gray-700"
+        class="hidden z-10 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-gray-900 ring-1 ring-gray-900 ring-opacity-5 divide-y divide-gray-700"
         role="menu"
         aria-labelledby={@id}
       >

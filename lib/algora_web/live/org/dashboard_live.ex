@@ -93,7 +93,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   </div>
                 </div>
                 <div class="pl-6">
-                  <div class="flex-none whitespace-pre rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-green-400/5 text-green-400 ring-green-400/30">
+                  <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-green-400/5 text-green-400 ring-green-400/30">
                     $<%= bounty.amount %>
                   </div>
                 </div>

@@ -2,8 +2,7 @@ defmodule AlgoraWeb.User.Nav do
   import Phoenix.LiveView
   use Phoenix.Component
 
-  alias AlgoraWeb.Org
-  alias Algora.Organizations
+  alias AlgoraWeb.User
 
   def on_mount(:default, _params, _session, socket) do
     {:cont,
@@ -15,12 +14,8 @@ defmodule AlgoraWeb.User.Nav do
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
-        {Org.DashboardLive, _} -> :dashboard
-        {Org.BountiesLive, _} -> :bounties
-        {Org.ProjectsLive, _} -> :projects
-        {Org.JobsLive, _} -> :jobs
-        {Org.SettingsLive, _} -> :settings
-        {Org.MembersLive, _} -> :members
+        {User.SettingsLive, _} -> :settings
+        {User.InstallationsLive, _} -> :installations
         {_, _} -> nil
       end
 
@@ -32,23 +27,43 @@ defmodule AlgoraWeb.User.Nav do
       %{
         title: "Main Navigation",
         items: [
-          %{href: "/events", icon: "tabler-activity", label: "Activity"},
-          %{href: "/dashboard/orgs", icon: "tabler-rocket", label: "Projects"},
-          %{href: "/bounties/new", icon: "tabler-diamond", label: "Community bounties"},
-          %{href: "https://tv.algora.io", icon: "tabler-device-tv", label: "Media center"}
+          %{href: "/events", tab: :activity, icon: "tabler-activity", label: "Activity"},
+          %{href: "/dashboard/orgs", tab: :projects, icon: "tabler-rocket", label: "Projects"},
+          %{
+            href: "/bounties/new",
+            tab: :bounties,
+            icon: "tabler-diamond",
+            label: "Community bounties"
+          },
+          %{
+            href: "https://tv.algora.io",
+            tab: :media,
+            icon: "tabler-device-tv",
+            label: "Media center"
+          }
         ]
       },
       %{
         title: "User",
         items: [
-          %{href: "/user/installations", icon: "tabler-apps", label: "Installations"},
-          %{href: "/user/payouts", icon: "tabler-currency-dollar", label: "Earnings"}
+          %{
+            href: "/user/installations",
+            tab: :installations,
+            icon: "tabler-apps",
+            label: "Installations"
+          },
+          %{
+            href: "/user/payouts",
+            tab: :earnings,
+            icon: "tabler-currency-dollar",
+            label: "Earnings"
+          }
         ]
       },
       %{
         title: "Resources",
         items: [
-          %{href: "/onboarding", icon: "tabler-rocket", label: "Get started"},
+          %{href: "/onboarding", tab: :onboarding, icon: "tabler-rocket", label: "Get started"},
           %{href: "https://docs.algora.io", icon: "tabler-book", label: "Documentation"},
           %{href: "https://github.com/algora-io/sdk", icon: "tabler-code", label: "Algora SDK"}
         ]
@@ -56,8 +71,8 @@ defmodule AlgoraWeb.User.Nav do
       %{
         title: "Admin",
         items: [
-          %{href: "/admin", icon: "tabler-adjustments", label: "Admin"},
-          %{href: "/user/settings", icon: "tabler-settings", label: "Settings"},
+          %{href: "/admin", tab: :admin, icon: "tabler-adjustments", label: "Admin"},
+          %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"},
           %{href: "/auth/logout", icon: "tabler-logout", label: "Logout"}
         ]
       },

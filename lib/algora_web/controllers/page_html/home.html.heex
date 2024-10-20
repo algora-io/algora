@@ -7,11 +7,11 @@
 <section class="bg-gray-900 text-white py-16 px-6 md:px-12 flex flex-col md:flex-row justify-between items-start">
   <div class="md:w-1/2 mb-8 md:mb-0">
     <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
-      Invest in <span class="text-blue-400">founders</span><br>
-      building the <span class="text-red-400">future</span>
+      Open source <span class="text-green-400">UpWork</span><br>
+      for <span class="text-orange-400">developers</span>
     </h1>
     <p class="text-gray-300 text-lg mb-8">
-      Get equity and front row seats to the startups and small businesses you love—for as little as $100.
+      GitHub bounties, freelancing and full-time jobs.
     </p>
     <div id="button-container" class="flex space-x-4">
       <button onclick="showOnboarding('companies')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300">
@@ -27,15 +27,15 @@
         <div class="space-y-4">
           <div class="flex items-center space-x-2">
             <input type="checkbox" id="option1" name="onboarding-option" class="custom-checkbox">
-            <label for="option1">Option 1</label>
+            <label for="option1">Share open source bounties</label>
           </div>
           <div class="flex items-center space-x-2">
             <input type="checkbox" id="option2" name="onboarding-option" class="custom-checkbox">
-            <label for="option2">Option 2</label>
+            <label for="option2">Share freelancing projects</label>
           </div>
           <div class="flex items-center space-x-2">
             <input type="checkbox" id="option3" name="onboarding-option" class="custom-checkbox">
-            <label for="option3">Option 3</label>
+            <label for="option3">Share full-time jobs</label>
           </div>
         </div>
         <button onclick="showTechQuestion()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
@@ -46,7 +46,7 @@
       <div id="tech-question" class="hidden">
         <h3 class="text-xl font-bold mb-4">What technology?</h3>
         <div class="flex flex-wrap gap-4">
-          <%= for tech <- ["TypeScript", "Scala", "Ruby", "Golang", "Elixir", "PHP", "Rust"] do %>
+          <%= for tech <- ["TypeScript", "Scala", "Java", "C++", "C#", "Kotlin", "Swift", "Ruby", "Golang", "Elixir", "PHP", "Rust"] do %>
             <div class="flex items-center">
               <input type="checkbox" id={"tech-#{String.downcase(tech)}"} name="tech-option" class="custom-checkbox">
               <label for={"tech-#{String.downcase(tech)}"} class="ml-2"><%= tech %></label>
@@ -63,21 +63,22 @@
         <p id="match-count" class="text-lg mb-4"></p>
         <div id="match-list" class="space-y-4 mb-6"></div>
         
-        <h4 class="text-lg font-semibold mb-2">Enter your email to see all matches:</h4>
-        <input type="email" id="email-input" placeholder="Enter your email" class="w-full px-3 py-2 bg-gray-800 text-white rounded mb-4">
-        
-        <button onclick="finalSubmit()" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-          Submit
-        </button>
+        <h4 class="text-lg font-semibold mb-2">Connect with GitHub to see all matches:</h4>
+        <.link href={Algora.Github.authorize_url()} class="mt-2 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center">
+          <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          Connect with GitHub
+        </.link>
       </div>
     </div>
   </div>
   
-  <div class="md:w-1/2 flex overflow-hidden relative p-6" style="height: 500px;">
-    <div class="absolute rotate-[9deg] inset-0 bg-gradient-to-b from-transparent from-95% to-gray-900 z-10"></div>
-    <div class="absolute rotate-[9deg] inset-0 bg-gradient-to-t from-transparent from-95% to-gray-900 z-10"></div>
+  <div class="md:w-1/2 flex overflow-hidden relative p-6 h-[80svh]">
+    <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-b from-transparent from-95% to-gray-900 z-10"></div>
+    <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-t from-transparent from-95% to-gray-900 z-10"></div>
     <%= for column <- [0, 1] do %>
-      <div class="w-1/2 rotate-[9deg] flex flex-col space-y-6 overflow-hidden px-3">
+      <div class="w-1/2 rotate-[5deg] flex flex-col space-y-6 overflow-hidden px-3">
         <%= for {company, index} <- Enum.with_index([
           {"substack", "bg-blue-400", "$7,809,219", "6,688", "al6z", "🇺🇸"},
           {"Synthesis", "bg-blue-200", "$4,999,989", "1,440", "al6z", "🇬🇧"},
@@ -225,19 +226,17 @@
     });
   }
 
-  function finalSubmit() {
-    const email = document.getElementById('email-input').value;
-    if (!email) {
-      alert('Please enter a valid email address.');
-      return;
-    }
+  function authenticateWithGitHub() {
+    // Redirect to the GitHub authentication route
+    window.location.href = '/auth/login';
+  }
 
+  function finalSubmit() {
     const finalData = {
       selectedOptions: Array.from(document.querySelectorAll('input[name="onboarding-option"]:checked'))
         .map(checkbox => checkbox.id),
       selectedTechnologies: Array.from(document.querySelectorAll('input[name="tech-option"]:checked'))
         .map(checkbox => checkbox.id.replace('tech-', '')),
-      email: email,
       matchCount: parseInt(document.getElementById('match-count').textContent.match(/\d+/)[0])
     };
 

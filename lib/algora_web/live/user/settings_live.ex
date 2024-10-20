@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.SettingsLive do
+defmodule AlgoraWeb.User.SettingsLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts

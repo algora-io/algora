@@ -28,8 +28,8 @@ defmodule AlgoraWeb.Router do
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/user/settings", SettingsLive, :edit
-      live "/user/installations", InstallationsLive, :index
+      live "/user/settings", User.SettingsLive, :edit
+      live "/user/installations", User.InstallationsLive, :index
     end
 
     live_session :org,

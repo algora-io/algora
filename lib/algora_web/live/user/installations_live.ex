@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.InstallationsLive do
+defmodule AlgoraWeb.User.InstallationsLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Installations

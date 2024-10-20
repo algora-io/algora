@@ -94,8 +94,12 @@
                 <img src={@current_user.avatar_url} alt={@current_user.name} />
               </div>
               <div>
-                <div class="font-display text-base font-semibold dark:text-white">Algora</div>
-                <div class="text-xs font-medium dark:text-gray-300">@algora</div>
+                <div class="font-display text-base font-semibold dark:text-white">
+                  <%= @current_user.name %>
+                </div>
+                <div class="text-xs font-medium dark:text-gray-300">
+                  @<%= @current_user.handle %>
+                </div>
               </div>
             </div>
           </.link>

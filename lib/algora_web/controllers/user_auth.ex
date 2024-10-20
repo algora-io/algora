@@ -100,7 +100,7 @@ defmodule AlgoraWeb.UserAuth do
 
     conn
     |> renew_session()
-    |> redirect(to: ~p"/auth/login")
+    |> redirect(to: ~p"/")
   end
 
   @doc """

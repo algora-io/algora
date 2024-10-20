@@ -6,18 +6,24 @@
 
 <section class="bg-gray-900 text-white py-16 px-6 md:px-12 flex flex-col md:flex-row justify-between items-start">
   <div class="md:w-1/2 mb-8 md:mb-0">
-    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
-      Open source <span class="text-green-400">UpWork</span><br>
-      for <span class="text-orange-400">developers</span>
+    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4 font-display">
+      Open source <span class="text-green-400">UpWork</span>
+      <br /> for <span class="text-orange-400">developers</span>
     </h1>
     <p class="text-gray-300 text-lg mb-8">
       GitHub bounties, freelancing and full-time jobs.
     </p>
     <div id="button-container" class="flex space-x-4">
-      <button onclick="showOnboarding('companies')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300">
+      <button
+        onclick="showOnboarding('companies')"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300"
+      >
         Companies
       </button>
-      <button onclick="showOnboarding('developers')" class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white font-bold py-3 px-6 rounded border-2 border-white transition duration-300">
+      <button
+        onclick="showOnboarding('developers')"
+        class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white font-bold py-3 px-6 rounded border-2 border-white transition duration-300"
+      >
         Developers
       </button>
     </div>
@@ -26,19 +32,22 @@
         <h3 class="text-xl font-bold mb-4">What do you want?</h3>
         <div class="space-y-4">
           <div class="flex items-center space-x-2">
-            <input type="checkbox" id="option1" name="onboarding-option" class="custom-checkbox">
+            <input type="checkbox" id="option1" name="onboarding-option" class="custom-checkbox" />
             <label for="option1">Share open source bounties</label>
           </div>
           <div class="flex items-center space-x-2">
-            <input type="checkbox" id="option2" name="onboarding-option" class="custom-checkbox">
+            <input type="checkbox" id="option2" name="onboarding-option" class="custom-checkbox" />
             <label for="option2">Share freelancing projects</label>
           </div>
           <div class="flex items-center space-x-2">
-            <input type="checkbox" id="option3" name="onboarding-option" class="custom-checkbox">
+            <input type="checkbox" id="option3" name="onboarding-option" class="custom-checkbox" />
             <label for="option3">Share full-time jobs</label>
           </div>
         </div>
-        <button onclick="showTechQuestion()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+        <button
+          onclick="showTechQuestion()"
+          class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+        >
           Proceed
         </button>
       </div>
@@ -48,12 +57,20 @@
         <div class="flex flex-wrap gap-4">
           <%= for tech <- ["TypeScript", "Scala", "Java", "C++", "C#", "Kotlin", "Swift", "Ruby", "Golang", "Elixir", "PHP", "Rust"] do %>
             <div class="flex items-center">
-              <input type="checkbox" id={"tech-#{String.downcase(tech)}"} name="tech-option" class="custom-checkbox">
+              <input
+                type="checkbox"
+                id={"tech-#{String.downcase(tech)}"}
+                name="tech-option"
+                class="custom-checkbox"
+              />
               <label for={"tech-#{String.downcase(tech)}"} class="ml-2"><%= tech %></label>
             </div>
           <% end %>
         </div>
-        <button onclick="showThirdQuestion()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+        <button
+          onclick="showThirdQuestion()"
+          class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+        >
           Proceed
         </button>
       </div>
@@ -62,21 +79,35 @@
         <h3 class="text-xl font-bold mb-4">Great! We've found some matches for you.</h3>
         <p id="match-count" class="text-lg mb-4"></p>
         <div id="match-list" class="space-y-4 mb-6"></div>
-        
+
         <h4 class="text-lg font-semibold mb-2">Connect with GitHub to see all matches:</h4>
-        <.link href={Algora.Github.authorize_url()} class="mt-2 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center">
-          <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        <.link
+          href={Algora.Github.authorize_url()}
+          class="mt-2 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center"
+        >
+          <svg
+            class="w-5 h-5 mr-2"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+            />
           </svg>
           Connect with GitHub
         </.link>
       </div>
     </div>
   </div>
-  
+
   <div class="md:w-1/2 flex overflow-hidden relative p-6 h-[80svh]">
-    <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-b from-transparent from-95% to-gray-900 z-10"></div>
-    <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-t from-transparent from-95% to-gray-900 z-10"></div>
+    <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-b from-transparent from-95% to-gray-900 z-10">
+    </div>
+    <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-t from-transparent from-95% to-gray-900 z-10">
+    </div>
     <%= for column <- [0, 1] do %>
       <div class="w-1/2 rotate-[5deg] flex flex-col space-y-6 overflow-hidden px-3">
         <%= for {company, index} <- Enum.with_index([
@@ -90,22 +121,33 @@
           {"RoboTech", "bg-red-300", "$2,980,000", "2,100", "Kleiner Perkins", "🇯🇵"}
         ]) do %>
           <%= if rem(index, 2) == column do %>
-            <div class={[
-              "rounded-xl shadow-lg transition duration-300",
-              elem(company, 1),
-              "animate-carousel",
-              if(column == 0, do: "animate-up", else: "animate-down")
-            ]} style="height: 280px;">
+            <div
+              class={[
+                "rounded-xl shadow-lg transition duration-300",
+                elem(company, 1),
+                "animate-carousel",
+                if(column == 0, do: "animate-up", else: "animate-down")
+              ]}
+              style="height: 280px;"
+            >
               <div class="p-3 flex flex-col h-full">
                 <div class="flex justify-between items-start mb-2">
                   <h3 class="text-sm font-bold"><%= elem(company, 0) %></h3>
                   <div class="flex items-center">
                     <span class="mr-1 text-lg"><%= elem(company, 5) %></span>
-                    <img src={"https://ui-avatars.com/api/?name=#{elem(company, 0)}&background=fff&color=000&size=24"} alt="Company logo" class="w-6 h-6 rounded">
+                    <img
+                      src={"https://ui-avatars.com/api/?name=#{elem(company, 0)}&background=fff&color=000&size=24"}
+                      alt="Company logo"
+                      class="w-6 h-6 rounded"
+                    />
                   </div>
                 </div>
                 <div class="mb-2 flex-grow">
-                  <img src={"https://picsum.photos/seed/#{elem(company, 0)}/200/100"} alt="Founder" class="w-full h-24 object-cover rounded">
+                  <img
+                    src={"https://picsum.photos/seed/#{elem(company, 0)}/200/100"}
+                    alt="Founder"
+                    class="w-full h-24 object-cover rounded"
+                  />
                 </div>
                 <div class="flex justify-between text-xs mb-1">
                   <div>

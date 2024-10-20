@@ -4,8 +4,14 @@
 @import "tailwindcss/utilities";
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fadeIn {
@@ -21,17 +27,30 @@
   .rotate-15 {
     transform: rotate(15deg);
   }
-  .top-0 { top: 0px; }
-  .top-100 { top: 100px; }
-  .top-200 { top: 200px; }
-  .top-300 { top: 300px; }
-  .left-0 { left: 0px; }
-  .left-100 { left: 100px; }
+  .top-0 {
+    top: 0px;
+  }
+  .top-100 {
+    top: 100px;
+  }
+  .top-200 {
+    top: 200px;
+  }
+  .top-300 {
+    top: 300px;
+  }
+  .left-0 {
+    left: 0px;
+  }
+  .left-100 {
+    left: 100px;
+  }
 }
 
 @layer utilities {
   .shadow-custom {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 }
 

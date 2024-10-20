@@ -165,10 +165,10 @@ defmodule Algora.Work do
   defp parse_url(url) do
     cond do
       issue_params = parse_url(:github, :issue, url) ->
-        {:ok, issue_params |> Map.put("type", :issue)}
+        {:ok, issue_params |> Map.put(:type, :issue)}
 
       pr_params = parse_url(:github, :pull_request, url) ->
-        {:ok, pr_params |> Map.put("type", :pull_request)}
+        {:ok, pr_params |> Map.put(:type, :pull_request)}
 
       true ->
         :error
@@ -192,7 +192,7 @@ defmodule Algora.Work do
   defp parse_with_regex(regex, url) do
     case Regex.named_captures(regex, url) do
       %{"owner" => owner, "repo" => repo, "number" => number} ->
-        %{"owner" => owner, "repo" => repo, "number" => String.to_integer(number)}
+        %{owner: owner, repo: repo, number: String.to_integer(number)}
 
       nil ->
         nil

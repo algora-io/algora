@@ -10,4 +10,17 @@ defmodule Algora.Util do
     |> Base.url_encode64()
     |> String.replace(["/", "+"], "-")
   end
+
+  def time_ago(datetime) do
+    now = NaiveDateTime.utc_now()
+    diff = NaiveDateTime.diff(now, datetime, :second)
+
+    cond do
+      diff < 60 -> "just now"
+      diff < 3600 -> "#{div(diff, 60)} minutes ago"
+      diff < 86_400 -> "#{div(diff, 3600)} hours ago"
+      diff < 2_592_000 -> "#{div(diff, 86_400)} days ago"
+      true -> "#{div(diff, 2_592_000)} months ago"
+    end
+  end
 end

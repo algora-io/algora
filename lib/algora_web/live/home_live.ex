@@ -214,14 +214,17 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     assign(socket,
-       page_title: "Home",
-       show_onboarding: false,
-       show_tech_question: false,
-       show_third_question: false,
-       matches: %{count: 0, sample_matches: []}
-     )}
+    if socket.assigns.current_user do
+      {:ok, redirect(socket, to: ~p"/dashboard")}
+    else
+      {:ok,
+       socket
+       |> assign(:page_title, "Home")
+       |> assign(:show_onboarding, false)
+       |> assign(:show_tech_question, false)
+       |> assign(:show_third_question, false)
+       |> assign(:matches, %{count: 0, sample_matches: []})}
+    end
   end
 
   @impl true

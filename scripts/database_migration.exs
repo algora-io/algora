@@ -38,6 +38,8 @@ defmodule DatabaseMigration do
     |> rename_column("tech", "tech_stack")
   end
 
+  # defp transform("Org", %{"is_personal" => "t"}), do: nil
+
   defp transform("Org", row) do
     row
     |> Map.put("type", "organization")
@@ -163,6 +165,7 @@ defmodule DatabaseMigration do
     transformed_data =
       data
       |> Enum.map(&transform(table_name, &1))
+      |> Enum.reject(&is_nil/1)
       |> Enum.map(&post_transform(table_name, &1))
 
     if Enum.empty?(transformed_data) do
@@ -191,7 +194,32 @@ defmodule DatabaseMigration do
       |> Map.put(:inserted_at, row["created_at"])
       |> Map.take(Map.keys(default_fields))
 
+    # Ensure handle is unique
+    fields = ensure_unique_handle(fields)
+
     Map.merge(default_fields, fields)
+  end
+
+  defp ensure_unique_handle(fields) do
+    case fields[:handle] do
+      nil ->
+        fields
+
+      handle ->
+        new_handle = get_unique_handle(handle)
+        Map.put(fields, :handle, new_handle)
+    end
+  end
+
+  defp get_unique_handle(handle) do
+    handles = Process.get(:handles, %{})
+    downcased_handle = String.downcase(handle)
+    count = Map.get(handles, downcased_handle, 0)
+
+    new_handle = if count > 0, do: "#{handle}#{count + 1}", else: handle
+    Process.put(:handles, Map.put(handles, downcased_handle, count + 1))
+
+    new_handle
   end
 
   defp rename_column(row, from, to) do
@@ -245,6 +273,6 @@ defmodule DatabaseMigration do
   end
 end
 
-input_file = ".local/algora_db.sql"
-output_file = ".local/algora_db_new.sql"
+input_file = ".local/prod_db.sql"
+output_file = ".local/prod_db_new.sql"
 DatabaseMigration.process_dump(input_file, output_file)

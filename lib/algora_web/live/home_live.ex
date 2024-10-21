@@ -134,8 +134,7 @@ defmodule AlgoraWeb.HomeLive do
               <%= if rem(index, 2) == column do %>
                 <div
                   class={[
-                    "rounded-xl shadow-lg transition duration-300",
-                    elem(company, 1),
+                    "rounded-xl shadow-lg transition duration-300 bg-white/15",
                     "animate-carousel",
                     if(column == 0, do: "animate-up", else: "animate-down")
                   ]}
@@ -143,35 +142,31 @@ defmodule AlgoraWeb.HomeLive do
                 >
                   <div class="p-3 flex flex-col h-full">
                     <div class="flex justify-between items-start mb-2">
-                      <h3 class="text-sm font-bold"><%= elem(company, 0) %></h3>
+                      <h3 class="text-sm font-bold"><%= company.name %></h3>
                       <div class="flex items-center">
-                        <span class="mr-1 text-lg"><%= elem(company, 5) %></span>
-                        <img
-                          src={"https://ui-avatars.com/api/?name=#{elem(company, 0)}&background=fff&color=000&size=24"}
-                          alt="Company logo"
-                          class="w-6 h-6 rounded"
-                        />
+                        <span class="mr-1 text-lg"><%= company.emoji %></span>
+                        <img src={company.avatar_url} alt="Company logo" class="w-6 h-6 rounded" />
                       </div>
                     </div>
                     <div class="mb-2 flex-grow">
                       <img
-                        src={"https://picsum.photos/seed/#{elem(company, 0)}/200/100"}
-                        alt="Founder"
+                        src={company.avatar_url}
+                        alt="Company logo"
                         class="w-full h-24 object-cover rounded"
                       />
                     </div>
                     <div class="flex justify-between text-xs mb-1">
                       <div>
-                        <p class="font-semibold"><%= elem(company, 2) %></p>
+                        <p class="font-semibold"><%= company.amount %></p>
                         <p class="text-gray-300">invested</p>
                       </div>
                       <div class="text-right">
-                        <p class="font-semibold"><%= elem(company, 3) %></p>
-                        <p class="text-gray-300">investors</p>
+                        <p class="font-semibold"><%= company.category %></p>
+                        <p class="text-gray-300">category</p>
                       </div>
                     </div>
                     <div class="bg-white bg-opacity-20 px-2 py-1 rounded">
-                      <p class="text-xs text-white"><%= elem(company, 4) %> co-invested</p>
+                      <p class="text-xs text-white"><%= company.username %></p>
                     </div>
                   </div>
                 </div>
@@ -269,22 +264,100 @@ defmodule AlgoraWeb.HomeLive do
     country_emoji = country_code |> String.upcase() |> Algora.Misc.CountryEmojis.get()
 
     emoji = fn ->
-      if :rand.uniform() < 0.75 do
+      if :rand.uniform() < 0.5 do
         country_emoji
       else
-        Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳", "🇦🇺", "🇸🇬", "🇯🇵"])
+        Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳", "🇸🇬", "🇯🇵", "🇦🇺", "🇿🇦"])
       end
     end
 
     [
-      {"substack", "bg-blue-400/20", "$7,809,219", "6,688", "al6z", emoji.()},
-      {"Synthesis", "bg-blue-200/20", "$4,999,989", "1,440", "al6z", emoji.()},
-      {"curlmix", "bg-green-200/20", "$4,537,310", "6,948", "Backstage Capital", emoji.()},
-      {"MERCURY", "bg-yellow-300/20", "$4,914,037", "2,453", "al6z", emoji.()},
-      {"TechNova", "bg-purple-300/20", "$3,250,000", "1,875", "Sequoia", emoji.()},
-      {"GreenLeaf", "bg-green-400/20", "$5,120,500", "3,210", "Accel", emoji.()},
-      {"DataFlow", "bg-blue-500/20", "$6,750,000", "4,500", "Andreessen Horowitz", emoji.()},
-      {"RoboTech", "bg-red-300/20", "$2,980,000", "2,100", "Kleiner Perkins", emoji.()}
+      %{
+        name: "ZIO",
+        amount: "$66,680",
+        category: "Projects",
+        username: "@ZIO",
+        emoji: emoji.(),
+        avatar_url:
+          "https://console.algora.io/asset/storage/v1/object/public/images/org/ZIO-logo.png"
+      },
+      %{
+        name: "Tailcall Inc.",
+        amount: "$35,545",
+        category: "Projects",
+        username: "@tailcallhq",
+        emoji: emoji.(),
+        avatar_url:
+          "https://console.algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1702212740302"
+      },
+      %{
+        name: "Refact.ai",
+        amount: "$17,000",
+        category: "Projects",
+        username: "@smallcloudai",
+        emoji: emoji.(),
+        avatar_url:
+          "https://console.algora.io/asset/storage/v1/object/public/images/org/refactai.png?t=2023-08-25T14%3A33%3A01.813Z"
+      },
+      %{
+        name: "Capgo",
+        amount: "$13,450",
+        category: "Projects",
+        username: "@Capgo",
+        emoji: emoji.(),
+        avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4"
+      },
+      %{
+        name: "Maybe",
+        amount: "$11,900",
+        category: "Projects",
+        username: "@maybe-finance",
+        emoji: emoji.(),
+        avatar_url:
+          "https://console.algora.io/asset/storage/v1/object/public/images/org/clr89x8os000ejs0f00fmkc76-1704921066094"
+      },
+      %{
+        name: "Remotion",
+        amount: "$11,660",
+        category: "Projects",
+        username: "@remotion",
+        emoji: emoji.(),
+        avatar_url:
+          "https://console.algora.io/asset/storage/v1/object/public/images/org/remotion.png?t=2023-04-02T14%3A56%3A20.474Z"
+      },
+      %{
+        name: "Cal.com, Inc.",
+        amount: "$11,084",
+        category: "Projects",
+        username: "@cal",
+        emoji: emoji.(),
+        avatar_url: "https://avatars.githubusercontent.com/u/79145102?s=200&v=4"
+      },
+      %{
+        name: "Trigger.dev (YC W23)",
+        amount: "$9,920",
+        category: "Projects",
+        username: "@triggerdotdev",
+        emoji: emoji.(),
+        avatar_url: "https://avatars.githubusercontent.com/u/95297378?v=4"
+      },
+      %{
+        name: "Qdrant",
+        amount: "$6,185",
+        category: "Projects",
+        username: "@Qdrant",
+        emoji: emoji.(),
+        avatar_url: "https://avatars.githubusercontent.com/u/73504361?s=200&v=4"
+      },
+      %{
+        name: "Screenpi.pe",
+        amount: "$3,620",
+        category: "Projects",
+        username: "@mediar-ai",
+        emoji: emoji.(),
+        avatar_url:
+          "https://console.algora.io/asset/storage/v1/object/public/images/org/cm03i28i70000ml03oopt7vpi-1724663656705"
+      }
     ]
   end
 end

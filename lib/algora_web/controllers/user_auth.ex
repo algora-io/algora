@@ -168,7 +168,8 @@ defmodule AlgoraWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   def signed_in_path(conn) do
-    case get_session(conn, :last_context, "personal") do
+    case get_session(conn, :last_context) do
+      nil -> ~p"/dashboard"
       "personal" -> ~p"/dashboard"
       org_handle -> ~p"/org/#{org_handle}"
     end

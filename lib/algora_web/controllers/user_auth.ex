@@ -75,11 +75,13 @@ defmodule AlgoraWeb.UserAuth do
     user_return_to = get_session(conn, :user_return_to)
     conn = assign(conn, :current_user, user)
 
-    conn
-    |> renew_session()
-    |> put_session(:user_id, user.id)
-    |> put_session(:live_socket_id, "users_sessions:#{user.id}")
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    conn =
+      renew_session(conn)
+      |> put_session(:user_id, user.id)
+      |> put_session(:last_context, user.last_context)
+      |> put_session(:live_socket_id, "users_sessions:#{user.id}")
+
+    redirect(conn, to: user_return_to || signed_in_path(conn))
   end
 
   defp renew_session(conn) do
@@ -165,5 +167,10 @@ defmodule AlgoraWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  def signed_in_path(_conn), do: "/"
+  def signed_in_path(conn) do
+    case get_session(conn, :last_context, "personal") do
+      "personal" -> ~p"/dashboard"
+      org_handle -> ~p"/org/#{org_handle}"
+    end
+  end
 end

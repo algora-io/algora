@@ -36,6 +36,7 @@ defmodule DatabaseMigration do
     row
     |> Map.put("type", "individual")
     |> rename_column("tech", "tech_stack")
+    |> rename_column("stars_earned", "stargazers_count")
     |> rename_column("image", "avatar_url")
     |> update_url_field("avatar_url")
   end

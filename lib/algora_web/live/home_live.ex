@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
+  alias Algora.Misc.CountryEmojis
   @impl true
   def render(assigns) do
     ~H"""
@@ -128,59 +130,23 @@ defmodule AlgoraWeb.HomeLive do
         </div>
         <div class="absolute rotate-[5deg] inset-0 bg-gradient-to-t from-transparent from-95% to-gray-900 z-10">
         </div>
-        <%= for column <- [0, 1] do %>
-          <div class="w-1/2 rotate-[5deg] flex flex-col space-y-6 overflow-hidden px-3">
-            <%= for {company, index} <- Enum.with_index(@companies) do %>
-              <%= if rem(index, 2) == column do %>
-                <div
-                  class={[
-                    "rounded-xl shadow-lg transition duration-300 bg-white/15",
-                    "animate-carousel",
-                    if(column == 0, do: "animate-up", else: "animate-down")
-                  ]}
-                  style="height: 280px;"
-                >
-                  <div class="p-3 flex flex-col h-full">
-                    <div class="flex justify-between items-start mb-2">
-                      <h3 class="text-sm font-bold"><%= company.name %></h3>
-                      <div class="flex items-center">
-                        <span class="mr-1 text-lg"><%= company.emoji %></span>
-                        <img src={company.avatar_url} alt="Company logo" class="w-6 h-6 rounded" />
-                      </div>
-                    </div>
-                    <div class="mb-2 flex-grow">
-                      <img
-                        src={company.avatar_url}
-                        alt="Company logo"
-                        class="w-full h-24 object-cover rounded"
-                      />
-                    </div>
-                    <div class="flex justify-between text-xs mb-1">
-                      <div>
-                        <p class="font-semibold"><%= company.amount %></p>
-                        <p class="text-gray-300">invested</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="font-semibold"><%= company.category %></p>
-                        <p class="text-gray-300">category</p>
-                      </div>
-                    </div>
-                    <div class="bg-white bg-opacity-20 px-2 py-1 rounded">
-                      <p class="text-xs text-white"><%= company.username %></p>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
-        <% end %>
+        <div class="w-1/2 rotate-[5deg] flex flex-col space-y-6 overflow-hidden px-3">
+          <%= for user <- @users do %>
+            <.entity_card entity={user} animate="up" />
+          <% end %>
+        </div>
+        <div class="w-1/2 rotate-[5deg] flex flex-col space-y-6 overflow-hidden px-3">
+          <%= for org <- @orgs do %>
+            <.entity_card entity={org} animate="down" />
+          <% end %>
+        </div>
       </div>
     </main>
 
     <style>
       @keyframes moveUp {
         0% { transform: translateY(0); }
-        100% { transform: translateY(-100%); }
+         100% { transform: translateY(-100%); }
       }
 
       @keyframes moveDown {
@@ -215,7 +181,8 @@ defmodule AlgoraWeb.HomeLive do
       {:ok,
        socket
        |> assign(:page_title, "Home")
-       |> assign(:companies, generate_fake_companies(country_code))
+       |> assign(:users, get_users(country_code))
+       |> assign(:orgs, get_orgs(country_code))
        |> assign(:show_onboarding, false)
        |> assign(:show_tech_question, false)
        |> assign(:show_third_question, false)
@@ -260,104 +227,79 @@ defmodule AlgoraWeb.HomeLive do
     %{count: match_count, sample_matches: sample_matches}
   end
 
-  defp generate_fake_companies(country_code) do
-    country_emoji = country_code |> String.upcase() |> Algora.Misc.CountryEmojis.get()
-
+  defp get_users(country_code) do
     emoji = fn ->
-      if :rand.uniform() < 0.5 do
-        country_emoji
-      else
-        Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳", "🇸🇬", "🇯🇵", "🇦🇺", "🇿🇦"])
-      end
+      Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳"])
     end
 
-    [
+    users = Accounts.list_users(country: String.upcase(country_code), limit: 5)
+
+    Enum.map(users, fn user ->
       %{
-        name: "ZIO",
-        amount: "$66,680",
-        category: "Projects",
-        username: "@ZIO",
-        emoji: emoji.(),
-        avatar_url:
-          "https://console.algora.io/asset/storage/v1/object/public/images/org/ZIO-logo.png"
-      },
-      %{
-        name: "Tailcall Inc.",
-        amount: "$35,545",
-        category: "Projects",
-        username: "@tailcallhq",
-        emoji: emoji.(),
-        avatar_url:
-          "https://console.algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1702212740302"
-      },
-      %{
-        name: "Refact.ai",
-        amount: "$17,000",
-        category: "Projects",
-        username: "@smallcloudai",
-        emoji: emoji.(),
-        avatar_url:
-          "https://console.algora.io/asset/storage/v1/object/public/images/org/refactai.png?t=2023-08-25T14%3A33%3A01.813Z"
-      },
-      %{
-        name: "Capgo",
-        amount: "$13,450",
-        category: "Projects",
-        username: "@Capgo",
-        emoji: emoji.(),
-        avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4"
-      },
-      %{
-        name: "Maybe",
-        amount: "$11,900",
-        category: "Projects",
-        username: "@maybe-finance",
-        emoji: emoji.(),
-        avatar_url:
-          "https://console.algora.io/asset/storage/v1/object/public/images/org/clr89x8os000ejs0f00fmkc76-1704921066094"
-      },
-      %{
-        name: "Remotion",
-        amount: "$11,660",
-        category: "Projects",
-        username: "@remotion",
-        emoji: emoji.(),
-        avatar_url:
-          "https://console.algora.io/asset/storage/v1/object/public/images/org/remotion.png?t=2023-04-02T14%3A56%3A20.474Z"
-      },
-      %{
-        name: "Cal.com, Inc.",
-        amount: "$11,084",
-        category: "Projects",
-        username: "@cal",
-        emoji: emoji.(),
-        avatar_url: "https://avatars.githubusercontent.com/u/79145102?s=200&v=4"
-      },
-      %{
-        name: "Trigger.dev (YC W23)",
-        amount: "$9,920",
-        category: "Projects",
-        username: "@triggerdotdev",
-        emoji: emoji.(),
-        avatar_url: "https://avatars.githubusercontent.com/u/95297378?v=4"
-      },
-      %{
-        name: "Qdrant",
-        amount: "$6,185",
-        category: "Projects",
-        username: "@Qdrant",
-        emoji: emoji.(),
-        avatar_url: "https://avatars.githubusercontent.com/u/73504361?s=200&v=4"
-      },
-      %{
-        name: "Screenpi.pe",
-        amount: "$3,620",
-        category: "Projects",
-        username: "@mediar-ai",
-        emoji: emoji.(),
-        avatar_url:
-          "https://console.algora.io/asset/storage/v1/object/public/images/org/cm03i28i70000ml03oopt7vpi-1724663656705"
+        name: user.name || user.handle,
+        amount:
+          "$#{:rand.uniform(100_000) |> div(100) |> Kernel./(100) |> Float.round(2) |> Float.to_string()}",
+        category: "User",
+        handle: user.handle,
+        emoji: (user.country && CountryEmojis.get(user.country)) || emoji.(),
+        avatar_url: user.avatar_url
       }
-    ]
+    end)
+  end
+
+  defp get_orgs(country_code) do
+    orgs = Accounts.list_orgs(country: String.upcase(country_code), limit: 5)
+
+    Enum.map(orgs, fn user ->
+      %{
+        name: user.name,
+        amount:
+          "$#{:rand.uniform(100_000) |> div(100) |> Kernel./(100) |> Float.round(2) |> Float.to_string()}",
+        category: "Organization",
+        handle: "@#{user.handle}",
+        emoji: (user.country && CountryEmojis.get(user.country)) || "🇺🇸",
+        avatar_url: user.avatar_url
+      }
+    end)
+  end
+
+  def entity_card(assigns) do
+    ~H"""
+    <div class={[
+      "rounded-xl shadow-lg transition duration-300 bg-white/15",
+      "animate-carousel",
+      "animate-#{@animate}"
+    ]}>
+      <div class="p-3 flex flex-col h-full">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="text-sm font-bold"><%= @entity.name %></h3>
+          <div class="flex items-center">
+            <span class="mr-1 text-lg"><%= @entity.emoji %></span>
+            <img src={@entity.avatar_url} alt={@entity.name} class="w-6 h-6 rounded" />
+          </div>
+        </div>
+        <div class="mb-2 flex-grow">
+          <img
+            src={@entity.avatar_url}
+            alt={@entity.name}
+            class="w-full aspect-square object-cover rounded"
+          />
+        </div>
+        <div class="flex justify-between text-xs mb-1">
+          <div>
+            <p class="font-semibold"><%= @entity.amount %></p>
+            <p class="text-gray-300">invested</p>
+          </div>
+          <div class="text-right">
+            <p class="font-semibold"><%= @entity.category %></p>
+            <p class="text-gray-300">category</p>
+          </div>
+        </div>
+        <div class="bg-white bg-opacity-20 px-2 py-1 rounded">
+          <p class="text-xs text-white"><%= @entity.handle %></p>
+        </div>
+      </div>
+    </div>
+    """
   end
 end

@@ -11,7 +11,7 @@ defmodule Algora.Accounts.User do
     field :provider, :string
     field :provider_id, :string
     field :provider_login, :string
-    field :provider_meta, :map
+    field :provider_meta, :map, default: %{}
 
     field :type, Ecto.Enum, values: [:individual, :organization], default: :individual
     field :email, :string

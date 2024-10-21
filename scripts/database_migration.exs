@@ -41,7 +41,7 @@ defmodule DatabaseMigration do
   defp transform("Org", row) do
     row
     |> Map.put("type", "organization")
-    |> Map.put("provider", (row["github_handle"] && "github") || nil)
+    |> Map.put("provider", row["github_handle"] && "github")
     |> rename_column("github_handle", "provider_login")
     |> rename_column("tech", "tech_stack")
   end

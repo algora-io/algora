@@ -1,6 +1,5 @@
 defmodule Algora.Payments.PaymentMethod do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   schema "payment_methods" do
     field :provider, :string

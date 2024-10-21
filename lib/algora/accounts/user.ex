@@ -1,6 +1,5 @@
 defmodule Algora.Accounts.User do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   alias Algora.Accounts.{User, Identity}
   alias Algora.Installations.Installation
@@ -99,6 +98,7 @@ defmodule Algora.Accounts.User do
         :provider_login,
         :provider_meta
       ])
+      |> generate_id()
       |> validate_required([:email, :name, :handle])
       |> validate_handle()
       |> validate_email()
@@ -114,6 +114,7 @@ defmodule Algora.Accounts.User do
   def org_registration_changeset(org, params) do
     org
     |> cast(params, [:handle, :email, :website_url, :location, :bio])
+    |> generate_id()
     |> validate_required([:handle, :email])
   end
 
@@ -168,6 +169,7 @@ defmodule Algora.Accounts.User do
         :github_url
       ]
     )
+    |> generate_id()
     |> validate_required([:provider_id, :provider_login, :type])
     |> unique_constraint([:provider, :provider_id])
   end

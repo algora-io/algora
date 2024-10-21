@@ -1,6 +1,5 @@
 defmodule Algora.Installations.Installation do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   @type t() :: %__MODULE__{}
 
@@ -20,9 +19,21 @@ defmodule Algora.Installations.Installation do
     timestamps()
   end
 
-  def changeset(installation, attrs) do
+  def changeset(installation, :github, user, org, data) do
+    params = %{
+      owner_id: user.id,
+      connected_user_id: org.id,
+      avatar_url: data["account"]["avatar_url"],
+      repository_selection: data["repository_selection"],
+      provider_id: to_string(data["id"]),
+      provider_login: data["account"]["login"],
+    }
+
     installation
-    |> cast(attrs, [])
-    |> validate_required([])
+    |> cast(params, [:owner_id, :connected_user_id, :avatar_url, :repository_selection, :provider_id, :provider_login])
+    |> validate_required([:owner_id, :connected_user_id, :provider_id, :provider_login])
+    |> generate_id()
+    |> put_change(:provider, "github")
+    |> put_change(:provider_meta, data)
   end
 end

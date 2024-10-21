@@ -55,7 +55,8 @@ defmodule Algora.MixProject do
       {:bandit, "~> 1.2"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
-      {:joken, "~> 2.5"}
+      {:joken, "~> 2.5"},
+      {:nanoid, "~> 2.1.0"}
     ]
   end
 

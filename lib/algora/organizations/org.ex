@@ -1,5 +1,5 @@
 defmodule Algora.Organizations.Org do
-  import Ecto.Changeset
+  use Algora.Model
 
   alias Algora.Accounts.User
 
@@ -23,6 +23,7 @@ defmodule Algora.Organizations.Org do
       :manual_assignment,
       :bounty_mode
     ])
+    |> generate_id()
     |> validate_required([:type, :handle, :name])
     |> User.validate_handle()
   end

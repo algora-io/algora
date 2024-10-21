@@ -1,7 +1,5 @@
 defmodule Algora.Bounties.Bounty do
-  use Ecto.Schema
-  import Ecto.Changeset
-  import Ecto.Query
+  use Algora.Model
   alias Algora.Bounties.Bounty
 
   @type t() :: %__MODULE__{}
@@ -23,6 +21,7 @@ defmodule Algora.Bounties.Bounty do
   def changeset(bounty, attrs) do
     bounty
     |> cast(attrs, [:amount, :currency, :task_id, :owner_id, :creator_id])
+    |> generate_id()
     |> validate_required([:amount, :currency, :task_id, :owner_id, :creator_id])
     |> validate_number(:amount, greater_than: 0)
     |> validate_inclusion(:currency, ["USD"])

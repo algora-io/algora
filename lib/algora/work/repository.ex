@@ -1,6 +1,5 @@
 defmodule Algora.Work.Repository do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   alias Algora.Work.Repository
 
@@ -31,6 +30,7 @@ defmodule Algora.Work.Repository do
 
     %Repository{provider: "github", provider_meta: meta}
     |> cast(params, [:provider_id, :name, :url, :user_id])
+    |> generate_id()
     |> validate_required([:provider_id, :name, :url, :user_id])
     |> unique_constraint([:provider, :provider_id])
   end

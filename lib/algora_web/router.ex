@@ -23,12 +23,6 @@ defmodule AlgoraWeb.Router do
     get "/", RootController, :index
     get "/set_context/:context", ContextController, :set
 
-    live_session :root,
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      live "/us", HomeLive, :index
-      live "/gr", HomeLive, :index
-    end
-
     get "/oauth/callbacks/:provider", OAuthCallbackController, :new
     get "/callbacks/:provider/installation", InstallationCallbackController, :new
     get "/auth/logout", OAuthCallbackController, :sign_out
@@ -56,6 +50,11 @@ defmodule AlgoraWeb.Router do
     end
 
     live "/onboarding", OnboardingLive
+
+    live_session :root,
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+      live "/:country_code", HomeLive, :index
+    end
   end
 
   # Other scopes may use custom stacks.

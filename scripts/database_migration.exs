@@ -32,6 +32,22 @@ defmodule DatabaseMigration do
     "Org" => User
   }
 
+  defp transform("User", row) do
+    row
+    |> Map.put("type", "individual")
+    |> rename_column("tech", "tech_stack")
+  end
+
+  defp transform("Org", row) do
+    row
+    |> Map.put("type", "organization")
+    |> Map.put("provider", (row["github_handle"] && "github") || nil)
+    |> rename_column("github_handle", "provider_login")
+    |> rename_column("tech", "tech_stack")
+  end
+
+  defp transform(_, row), do: row
+
   def process_dump(input_file, output_file) do
     File.stream!(input_file)
     |> Stream.chunk_while(
@@ -177,22 +193,6 @@ defmodule DatabaseMigration do
 
     Map.merge(default_fields, fields)
   end
-
-  defp transform("User", row) do
-    row
-    |> Map.put("type", "individual")
-    |> rename_column("tech", "tech_stack")
-  end
-
-  defp transform("Org", row) do
-    row
-    |> Map.put("type", "organization")
-    |> Map.put("provider", (row["github_handle"] && "github") || nil)
-    |> rename_column("github_handle", "provider_login")
-    |> rename_column("tech", "tech_stack")
-  end
-
-  defp transform(_, row), do: row
 
   defp rename_column(row, from, to) do
     row

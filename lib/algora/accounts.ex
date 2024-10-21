@@ -8,8 +8,18 @@ defmodule Algora.Accounts do
   def list_users(opts) do
     Repo.all(
       from u in User,
-        where: u.type == :individual,
-        limit: ^Keyword.fetch!(opts, :limit)
+        where: u.type == :individual and u.country == ^Keyword.fetch!(opts, :country),
+        limit: ^Keyword.fetch!(opts, :limit),
+        order_by: [desc: u.stargazers_count]
+    )
+  end
+
+  def list_orgs(opts) do
+    Repo.all(
+      from u in User,
+        where: u.type == :organization and u.seeded == false and is_nil(u.provider_login),
+        limit: ^Keyword.fetch!(opts, :limit),
+        order_by: [desc: u.stargazers_count]
     )
   end
 

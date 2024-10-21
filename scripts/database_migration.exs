@@ -227,6 +227,7 @@ defmodule DatabaseMigration do
   end
 
   defp serialize_value(value) when is_map(value), do: Jason.encode!(value)
+  defp serialize_value(value) when is_nil(value), do: "\\N"
   defp serialize_value(value), do: to_string(value)
 
   def extract_default_fields(schema) do

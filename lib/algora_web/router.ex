@@ -18,11 +18,15 @@ defmodule AlgoraWeb.Router do
   end
 
   scope "/", AlgoraWeb do
-    pipe_through :browser
+    pipe_through [:browser]
+
+    get "/", RootController, :index
+    get "/set_context/:context", ContextController, :set
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      live "/", HomeLive, :index
+      live "/us", HomeLive, :index
+      live "/gr", HomeLive, :index
     end
 
     get "/oauth/callbacks/:provider", OAuthCallbackController, :new

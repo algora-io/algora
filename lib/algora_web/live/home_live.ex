@@ -130,16 +130,7 @@ defmodule AlgoraWeb.HomeLive do
         </div>
         <%= for column <- [0, 1] do %>
           <div class="w-1/2 rotate-[5deg] flex flex-col space-y-6 overflow-hidden px-3">
-            <%= for {company, index} <- Enum.with_index([
-          {"substack", "bg-blue-400", "$7,809,219", "6,688", "al6z", "🇺🇸"},
-          {"Synthesis", "bg-blue-200", "$4,999,989", "1,440", "al6z", "🇬🇧"},
-          {"curlmix", "bg-green-200", "$4,537,310", "6,948", "Backstage Capital", "🇨🇦"},
-          {"MERCURY", "bg-yellow-300", "$4,914,037", "2,453", "al6z", "🇩🇪"},
-          {"TechNova", "bg-purple-300", "$3,250,000", "1,875", "Sequoia", "🇮🇳"},
-          {"GreenLeaf", "bg-green-400", "$5,120,500", "3,210", "Accel", "🇦🇺"},
-          {"DataFlow", "bg-blue-500", "$6,750,000", "4,500", "Andreessen Horowitz", "🇸🇬"},
-          {"RoboTech", "bg-red-300", "$2,980,000", "2,100", "Kleiner Perkins", "🇯🇵"}
-        ]) do %>
+            <%= for {company, index} <- Enum.with_index(@companies) do %>
               <%= if rem(index, 2) == column do %>
                 <div
                   class={[
@@ -221,14 +212,15 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
-    Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
-
     if socket.assigns.current_user do
       {:ok, redirect(socket, to: ~p"/dashboard")}
     else
+      Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
+
       {:ok,
        socket
        |> assign(:page_title, "Home")
+       |> assign(:companies, generate_fake_companies(country_code))
        |> assign(:show_onboarding, false)
        |> assign(:show_tech_question, false)
        |> assign(:show_third_question, false)
@@ -251,7 +243,10 @@ defmodule AlgoraWeb.HomeLive do
     matches = generate_fake_matches(selected_tech)
 
     {:noreply,
-     assign(socket, show_third_question: true, selected_tech: selected_tech, matches: matches)}
+     socket
+     |> assign(:show_third_question, true)
+     |> assign(:selected_tech, selected_tech)
+     |> assign(:matches, matches)}
   end
 
   defp generate_fake_matches(technologies) do
@@ -268,5 +263,28 @@ defmodule AlgoraWeb.HomeLive do
       end)
 
     %{count: match_count, sample_matches: sample_matches}
+  end
+
+  defp generate_fake_companies(country_code) do
+    country_emoji = country_code |> String.upcase() |> Algora.Misc.CountryEmojis.get()
+
+    emoji = fn ->
+      if :rand.uniform() < 0.75 do
+        country_emoji
+      else
+        Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳", "🇦🇺", "🇸🇬", "🇯🇵"])
+      end
+    end
+
+    [
+      {"substack", "bg-blue-400/20", "$7,809,219", "6,688", "al6z", emoji.()},
+      {"Synthesis", "bg-blue-200/20", "$4,999,989", "1,440", "al6z", emoji.()},
+      {"curlmix", "bg-green-200/20", "$4,537,310", "6,948", "Backstage Capital", emoji.()},
+      {"MERCURY", "bg-yellow-300/20", "$4,914,037", "2,453", "al6z", emoji.()},
+      {"TechNova", "bg-purple-300/20", "$3,250,000", "1,875", "Sequoia", emoji.()},
+      {"GreenLeaf", "bg-green-400/20", "$5,120,500", "3,210", "Accel", emoji.()},
+      {"DataFlow", "bg-blue-500/20", "$6,750,000", "4,500", "Andreessen Horowitz", emoji.()},
+      {"RoboTech", "bg-red-300/20", "$2,980,000", "2,100", "Kleiner Perkins", emoji.()}
+    ]
   end
 end

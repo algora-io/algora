@@ -49,8 +49,6 @@ defmodule AlgoraWeb.Router do
       live "/auth/login", SignInLive, :index
     end
 
-    live "/onboarding", OnboardingLive
-
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

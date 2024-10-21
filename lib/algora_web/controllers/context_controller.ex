@@ -1,12 +1,13 @@
 defmodule AlgoraWeb.ContextController do
   use AlgoraWeb, :controller
+  alias Algora.Accounts
+  alias AlgoraWeb.UserAuth
 
   def set(conn, %{"context" => context}) do
     conn = conn |> put_session(:last_context, context)
 
-    case context do
-      "personal" -> redirect(conn, to: "/dashboard")
-      org_handle -> redirect(conn, to: "/org/#{org_handle}")
-    end
+    conn = put_session(conn, :last_context, context)
+
+    redirect(conn, to: UserAuth.signed_in_path(conn))
   end
 end

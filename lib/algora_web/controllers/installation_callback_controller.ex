@@ -48,6 +48,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
         conn
         |> put_flash(:info, "Organization created successfully: #{org.handle}")
 
+        # TODO: Redirect to the org dashboard and set the session context
         redirect_url = determine_redirect_url(conn, org, user)
         redirect(conn, to: redirect_url)
 

@@ -18,6 +18,7 @@ defmodule Algora.Accounts.User do
     field :email, :string
     field :name, :string
     field :handle, :string
+    field :last_context, :string
     field :bio, :string
     field :avatar_url, :string
     field :location, :string
@@ -118,7 +119,7 @@ defmodule Algora.Accounts.User do
 
   def settings_changeset(%User{} = user, params) do
     user
-    |> cast(params, [:handle, :name])
+    |> cast(params, [:handle, :name, :last_context])
     |> validate_required([:handle, :name])
     |> validate_handle()
   end

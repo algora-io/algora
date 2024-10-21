@@ -23,4 +23,8 @@ defmodule Algora.Util do
       true -> "#{div(diff, 2_592_000)} months ago"
     end
   end
+
+  # TODO: Implement this for all countries
+  def locale_from_country_code("gr"), do: "el"
+  def locale_from_country_code(country_code), do: country_code
 end

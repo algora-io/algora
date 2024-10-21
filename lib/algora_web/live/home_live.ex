@@ -13,11 +13,12 @@ defmodule AlgoraWeb.HomeLive do
     <main class="bg-gray-900 text-white py-16 px-6 md:px-12 flex flex-col md:flex-row justify-between items-start">
       <div class="md:w-1/2 mb-8 md:mb-0">
         <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4 font-display">
-          Open source <span class="text-green-400">UpWork</span>
-          <br /> for <span class="text-orange-400">developers</span>
+          <%= gettext("Open source") %> <span class="text-green-400"><%= gettext("UpWork") %></span>
+          <br /> <%= gettext("for") %>
+          <span class="text-orange-400"><%= gettext("developers") %></span>
         </h1>
         <p class="text-gray-300 text-lg mb-8">
-          GitHub bounties, freelancing and full-time jobs.
+          <%= gettext("GitHub bounties, freelancing and full-time jobs.") %>
         </p>
         <div id="button-container" class={if @show_onboarding, do: "hidden", else: "flex space-x-4"}>
           <button
@@ -25,22 +26,22 @@ defmodule AlgoraWeb.HomeLive do
             phx-value-type="companies"
             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300"
           >
-            Companies
+            <%= gettext("Companies") %>
           </button>
           <button
             phx-click="show_onboarding"
             phx-value-type="developers"
             class="bg-transparent hover:bg-white hover:bg-opacity-10 text-white font-bold py-3 px-6 rounded border-2 border-white transition duration-300"
           >
-            Developers
+            <%= gettext("Developers") %>
           </button>
         </div>
         <div id="onboarding-section" class={if @show_onboarding, do: "", else: "hidden"}>
           <div id="first-question" class={if @show_tech_question, do: "hidden", else: ""}>
-            <h3 class="text-xl font-bold mb-4">What do you want?</h3>
+            <h3 class="text-xl font-bold mb-4"><%= gettext("What do you want?") %></h3>
             <form phx-submit="show_tech_question">
               <div class="space-y-4">
-                <%= for {option, label} <- [{"option1", "Share open source bounties"}, {"option2", "Share freelancing projects"}, {"option3", "Share full-time jobs"}] do %>
+                <%= for {option, label} <- [{"option1", gettext("Share open source bounties")}, {"option2", gettext("Share freelancing projects")}, {"option3", gettext("Share full-time jobs")}] do %>
                   <div class="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -57,7 +58,7 @@ defmodule AlgoraWeb.HomeLive do
                 type="submit"
                 class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
-                Proceed
+                <%= gettext("Proceed") %>
               </button>
             </form>
           </div>
@@ -66,7 +67,7 @@ defmodule AlgoraWeb.HomeLive do
             id="tech-question"
             class={if @show_tech_question && !@show_third_question, do: "", else: "hidden"}
           >
-            <h3 class="text-xl font-bold mb-4">What technology?</h3>
+            <h3 class="text-xl font-bold mb-4"><%= gettext("What technology?") %></h3>
             <form phx-submit="show_third_question">
               <div class="flex flex-wrap gap-4">
                 <%= for tech <- ["TypeScript", "Scala", "Java", "C++", "C#", "Kotlin", "Swift", "Ruby", "Golang", "Elixir", "PHP", "Rust"] do %>
@@ -86,15 +87,17 @@ defmodule AlgoraWeb.HomeLive do
                 type="submit"
                 class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
-                Proceed
+                <%= gettext("Proceed") %>
               </button>
             </form>
           </div>
 
           <div id="third-question" class={if @show_third_question, do: "", else: "hidden"}>
-            <h3 class="text-xl font-bold mb-4">Great! We've found some matches for you.</h3>
+            <h3 class="text-xl font-bold mb-4">
+              <%= gettext("Great! We've found some matches for you.") %>
+            </h3>
             <p id="match-count" class="text-lg mb-4">
-              We found <%= @matches.count %> potential matches for you!
+              <%= gettext("We found %{count} potential matches for you!", count: @matches.count) %>
             </p>
             <div id="match-list" class="space-y-4 mb-6">
               <%= for match <- @matches.sample_matches do %>
@@ -105,12 +108,16 @@ defmodule AlgoraWeb.HomeLive do
               <% end %>
             </div>
 
-            <h4 class="text-lg font-semibold mb-2">Connect with GitHub to see all matches:</h4>
+            <h4 class="text-lg font-semibold mb-2">
+              <%= gettext("Connect with GitHub to see all matches:") %>
+            </h4>
             <.link
               href={Algora.Github.authorize_url()}
               class="mt-2 bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex items-center justify-center"
             >
-              <AlgoraWeb.Components.Icons.github class="w-5 h-5 mr-2" /> Connect with GitHub
+              <AlgoraWeb.Components.Icons.github class="w-5 h-5 mr-2" /> <%= gettext(
+                "Connect with GitHub"
+              ) %>
             </.link>
           </div>
         </div>
@@ -213,7 +220,9 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(%{"country_code" => country_code}, _session, socket) do
+    Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
+
     if socket.assigns.current_user do
       {:ok, redirect(socket, to: ~p"/dashboard")}
     else
@@ -253,8 +262,8 @@ defmodule AlgoraWeb.HomeLive do
       |> Enum.with_index(1)
       |> Enum.map(fn {tech, i} ->
         %{
-          name: "Project #{i}",
-          description: "A #{tech} project looking for contributors."
+          name: gettext("Project %{i}", i: i),
+          description: gettext("A %{tech} project looking for contributors.", tech: tech)
         }
       end)
 

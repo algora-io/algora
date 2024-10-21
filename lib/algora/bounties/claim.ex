@@ -1,7 +1,5 @@
 defmodule Algora.Bounties.Claim do
-  use Ecto.Schema
-  import Ecto.Query
-  import Ecto.Changeset
+  use Algora.Model
   alias Algora.Bounties.Claim
 
   @type t() :: %__MODULE__{}

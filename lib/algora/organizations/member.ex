@@ -1,9 +1,5 @@
 defmodule Algora.Organizations.Member do
-  use Ecto.Schema
-  import Ecto.Query
-  import Ecto.Changeset
-
-  alias Algora.Organizations.Member
+  use Algora.Model
 
   @type t() :: %__MODULE__{}
 
@@ -20,6 +16,7 @@ defmodule Algora.Organizations.Member do
     member
     |> cast(attrs, [:role, :org_id, :user_id])
     |> validate_required([:role, :org_id, :user_id])
+    |> generate_id()
   end
 
   def filter_by_org_id(query, nil), do: query

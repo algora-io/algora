@@ -1,6 +1,5 @@
 defmodule Algora.Payments.Account do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   @type t() :: %__MODULE__{}
 

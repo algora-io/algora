@@ -1,6 +1,5 @@
 defmodule Algora.Accounts.Identity do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   alias Algora.Accounts.{Identity, User}
 
@@ -41,6 +40,7 @@ defmodule Algora.Accounts.Identity do
       :provider_name,
       :provider_id
     ])
+    |> generate_id()
     |> validate_required([:provider_token, :provider_email, :provider_name, :provider_id])
     |> validate_length(:provider_meta, max: 10_000)
   end

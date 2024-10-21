@@ -1,6 +1,5 @@
 defmodule Algora.Work.Task do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Algora.Model
 
   alias Algora.Work.Task
 
@@ -35,6 +34,7 @@ defmodule Algora.Work.Task do
 
     %Task{provider: "github", provider_meta: meta}
     |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id])
+    |> generate_id()
     |> validate_required([:provider_id, :title, :number, :url, :repository_id])
     |> unique_constraint([:provider, :provider_id])
   end

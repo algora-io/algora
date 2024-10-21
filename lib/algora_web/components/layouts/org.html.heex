@@ -87,7 +87,7 @@
             <:title><%= @current_org.name %></:title>
             <:subtitle>@<%= @current_org.handle %></:subtitle>
 
-            <:link navigate={~p"/"}>
+            <:link href={~p"/set_context/personal"}>
               <div class="flex items-center">
                 <img
                   src={@current_user.avatar_url}
@@ -107,7 +107,7 @@
                   Algora.Organizations.get_user_orgs(@current_user)
                   |> Enum.reject(&(&1.id == @current_org.id))
               }
-              navigate={~p"/org/#{org.handle}"}
+              href={~p"/set_context/#{org.handle}"}
             >
               <div class="flex items-center">
                 <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />

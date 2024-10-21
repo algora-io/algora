@@ -95,7 +95,7 @@
 
             <:link
               :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
-              navigate={~p"/org/#{org.handle}"}
+              href={~p"/set_context/#{org.handle}"}
             >
               <div class="flex items-center">
                 <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />

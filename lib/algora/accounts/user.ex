@@ -21,6 +21,7 @@ defmodule Algora.Accounts.User do
     field :bio, :string
     field :avatar_url, :string
     field :location, :string
+    field :country, :string
     field :stargazers_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []

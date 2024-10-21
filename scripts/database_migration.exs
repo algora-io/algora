@@ -20,9 +20,17 @@ defmodule DatabaseMigration do
   - Run the script using: elixir scripts/database_migration.exs
   """
 
-  @allowed_tables [
-    "User"
-  ]
+  alias Algora.Accounts.User
+
+  @table_mappings %{
+    "User" => "users",
+    "Org" => "users"
+  }
+
+  @schema_mappings %{
+    "User" => User,
+    "Org" => User
+  }
 
   def process_dump(input_file, output_file) do
     File.stream!(input_file)
@@ -69,7 +77,7 @@ defmodule DatabaseMigration do
     if String.starts_with?(copy_statement, "COPY ") do
       table_name = extract_table_name(copy_statement)
 
-      if table_name in @allowed_tables do
+      if table_name in Map.keys(@table_mappings) do
         columns = extract_columns(copy_statement)
         data = parse_data_lines(data_lines, columns)
 
@@ -104,42 +112,93 @@ defmodule DatabaseMigration do
     |> Enum.take_while(&(String.trim(&1) != "\\."))
     |> Enum.map(fn line ->
       values = String.split(String.trim(line), "\t")
-      Enum.zip(columns, values) |> Enum.into(%{})
+
+      Enum.zip(columns, values)
+      |> Enum.map(fn {column, value} -> {column, deserialize_value(value)} end)
+      |> Enum.into(%{})
     end)
+  end
+
+  defp deserialize_value(value) do
+    cond do
+      String.starts_with?(value, "{") && String.ends_with?(value, "}") ->
+        value
+        |> String.slice(1..-2)
+        |> String.split(",")
+        |> Enum.map(&String.trim/1)
+
+      String.starts_with?(value, "[") && String.ends_with?(value, "]") ->
+        value
+        |> Jason.decode!()
+
+      true ->
+        value
+    end
   end
 
   defp transform_copy_section(nil), do: nil
 
   defp transform_copy_section(%{table: table_name, data: data}) do
-    table_name = String.replace(table_name, ~r/^public\./, "")
-    pluralized_table_name = pluralize_table_name(table_name)
-    transformed_data = Enum.map(data, &transform(table_name, &1))
+    transformed_table_name =
+      table_name
+      |> String.replace(~r/^public\./, "")
+      |> transform_table_name()
+
+    transformed_data =
+      data
+      |> Enum.map(&transform(table_name, &1))
+      |> Enum.map(&post_transform(table_name, &1))
 
     if Enum.empty?(transformed_data) do
       nil
     else
       transformed_columns = Map.keys(hd(transformed_data))
-      %{table: pluralized_table_name, columns: transformed_columns, data: transformed_data}
+      %{table: transformed_table_name, columns: transformed_columns, data: transformed_data}
     end
   end
 
-  defp pluralize_table_name(table_name) do
-    case table_name do
-      "User" -> "users"
-      _ -> table_name
-    end
+  defp transform_table_name(table_name), do: @table_mappings[table_name]
+
+  defp post_transform(table_name, row) do
+    schema = @schema_mappings[table_name]
+
+    default_fields =
+      schema.__struct__()
+      |> Map.from_struct()
+      |> Map.take(schema.__schema__(:fields))
+
+    fields =
+      row
+      |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
+      |> Enum.reject(fn {_, v} -> v == "\\N" end)
+      |> Map.new()
+      |> Map.put(:inserted_at, row["created_at"])
+      |> Map.take(Map.keys(default_fields))
+
+    Map.merge(default_fields, fields)
   end
 
   defp transform("User", row) do
-    allowed_columns = ["id", "inserted_at", "updated_at", "handle", "email"]
-
     row
-    |> Map.put("inserted_at", Map.get(row, "created_at"))
     |> Map.put("type", "individual")
-    |> Map.filter(fn {key, _} -> key in allowed_columns end)
+    |> rename_column("tech", "tech_stack")
+  end
+
+  defp transform("Org", row) do
+    row
+    |> Map.put("type", "organization")
+    |> Map.put("provider", (row["github_handle"] && "github") || nil)
+    |> rename_column("github_handle", "provider_login")
+    |> rename_column("tech", "tech_stack")
   end
 
   defp transform(_, row), do: row
+
+  defp rename_column(row, from, to) do
+    row
+    |> Map.put(to, Map.get(row, from))
+    |> Map.delete(from)
+  end
 
   defp load_copy_section(nil), do: []
 
@@ -149,16 +208,42 @@ defmodule DatabaseMigration do
     data_lines =
       Enum.map(data, fn row ->
         columns
-        |> Enum.map(fn col -> Map.get(row, col, "") end)
+        |> Enum.map(fn col -> serialize_value(Map.get(row, col, "")) end)
         |> Enum.join("\t")
-        # Add newline after each row
         |> Kernel.<>("\n")
       end)
 
     [copy_statement | data_lines] ++ ["\\.\n\n"]
   end
+
+  defp serialize_value(value) when is_list(value) do
+    cond do
+      Enum.all?(value, &is_binary/1) ->
+        "{#{Enum.join(value, ",")}}"
+
+      true ->
+        Jason.encode!(value)
+    end
+  end
+
+  defp serialize_value(value) when is_map(value), do: Jason.encode!(value)
+  defp serialize_value(value), do: to_string(value)
+
+  def extract_default_fields(schema) do
+    schema.__schema__(:fields)
+    |> Enum.filter(fn field ->
+      case schema.__schema__(:field, field) do
+        {:default, _} -> true
+        _ -> false
+      end
+    end)
+    |> Enum.map(fn field ->
+      {field, schema.__schema__(:field, field) |> elem(1)}
+    end)
+    |> Enum.into(%{})
+  end
 end
 
-input_file = "algora_db.sql"
-output_file = "algora_db_new.sql"
+input_file = ".local/algora_db.sql"
+output_file = ".local/algora_db_new.sql"
 DatabaseMigration.process_dump(input_file, output_file)

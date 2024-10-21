@@ -36,6 +36,8 @@ defmodule DatabaseMigration do
     row
     |> Map.put("type", "individual")
     |> rename_column("tech", "tech_stack")
+    |> rename_column("image", "avatar_url")
+    |> update_url_field("avatar_url")
   end
 
   # defp transform("Org", %{"is_personal" => "t"}), do: nil
@@ -46,6 +48,7 @@ defmodule DatabaseMigration do
     |> Map.put("provider", row["github_handle"] && "github")
     |> rename_column("github_handle", "provider_login")
     |> rename_column("tech", "tech_stack")
+    |> update_url_field("avatar_url")
   end
 
   defp transform(_, row), do: row
@@ -270,6 +273,16 @@ defmodule DatabaseMigration do
       {field, schema.__schema__(:field, field) |> elem(1)}
     end)
     |> Enum.into(%{})
+  end
+
+  defp update_url_field(fields, field) do
+    case Map.get(fields, field) do
+      "/" <> rest ->
+        Map.put(fields, field, "https://console.algora.io/" <> rest)
+
+      _ ->
+        fields
+    end
   end
 end
 

@@ -6,12 +6,12 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.{User, Identity}
 
   def list_users(opts) do
-    Repo.all(
-      from u in User,
-        where: u.type == :individual and u.country == ^Keyword.fetch!(opts, :country),
-        limit: ^Keyword.fetch!(opts, :limit),
-        order_by: [desc: u.stargazers_count]
-    )
+    User
+    |> where(type: :individual)
+    |> filter_by_country(opts[:country])
+    |> limit(^Keyword.fetch!(opts, :limit))
+    |> order_by(desc: :stargazers_count)
+    |> Repo.all()
   end
 
   def list_orgs(opts) do
@@ -131,4 +131,7 @@ defmodule Algora.Accounts do
 
     {:ok, Repo.preload(user, :identities, force: true)}
   end
+
+  defp filter_by_country(query, nil), do: query
+  defp filter_by_country(query, country), do: where(query, [u], u.country == ^country)
 end

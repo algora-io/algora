@@ -109,7 +109,7 @@ defmodule Algora.Work do
   def fetch_user(:github, %{token: token, id: id}) do
     query =
       from u in User,
-        where: u.provider == "github" and u.provider_id == ^id
+        where: u.provider == "github" and u.provider_id == ^to_string(id)
 
     case Repo.one(query) do
       nil ->

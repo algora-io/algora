@@ -106,7 +106,7 @@ GitHub is used for authenticating users.
 [Create a GitHub OAuth app](https://github.com/settings/applications/new) and set
 
 - Homepage URL: http://localhost:4000
-- Authorization callback URL: http://localhost:4000/oauth/callbacks/github
+- Authorization callback URL: http://localhost:4000/callbacks/github/oauth
 
 Once you have obtained your client ID and secret, add them to your `.env` file.
 

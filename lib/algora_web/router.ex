@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Router do
     get "/", RootController, :index
     get "/set_context/:context", ContextController, :set
 
-    get "/oauth/callbacks/:provider", OAuthCallbackController, :new
+    get "/callbacks/:provider/oauth", OAuthCallbackController, :new
     get "/callbacks/:provider/installation", InstallationCallbackController, :new
     get "/auth/logout", OAuthCallbackController, :sign_out
     delete "/auth/logout", OAuthCallbackController, :sign_out

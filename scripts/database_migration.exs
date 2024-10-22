@@ -21,18 +21,70 @@ defmodule DatabaseMigration do
   """
 
   alias Algora.Accounts.User
+  alias Algora.Work.Task
 
   @table_mappings %{
     "User" => "users",
-    "Org" => "users"
+    "Org" => "users",
+    "Task" => "tasks",
+    "GithubIssue" => nil,
+    "GithubPullRequest" => nil
   }
 
   @schema_mappings %{
     "User" => User,
-    "Org" => User
+    "Org" => User,
+    "Task" => Task,
+    "GithubIssue" => nil,
+    "GithubPullRequest" => nil
   }
 
-  defp transform("User", row) do
+  @relevant_tables Map.keys(@table_mappings)
+
+  defp transform("Task", row, db) do
+    github_issues = Map.get(db, "GithubIssue", [])
+    github_issue = Enum.find(github_issues, &(&1["id"] == row["issue_id"]))
+
+    github_pull_requests = Map.get(db, "GithubPullRequest", [])
+    github_pull_request = Enum.find(github_pull_requests, &(&1["id"] == row["pull_request_id"]))
+
+    row =
+      cond do
+        github_issue ->
+          row
+          |> Map.put("type", "issue")
+          |> Map.put("title", github_issue["title"])
+          |> Map.put("description", github_issue["body"])
+          |> Map.put("inserted_at", github_issue["created_at"])
+          |> Map.put("updated_at", github_issue["updated_at"])
+          |> Map.put("url", github_issue["html_url"])
+          |> Map.put("provider", "github")
+          |> Map.put("provider_id", github_issue["id"])
+          |> Map.put("provider_meta", deserialize_value(github_issue))
+
+        github_pull_request ->
+          row
+          |> Map.put("type", "pull_request")
+          |> Map.put("title", github_pull_request["title"])
+          |> Map.put("description", github_pull_request["body"])
+          |> Map.put("inserted_at", github_pull_request["created_at"])
+          |> Map.put("updated_at", github_pull_request["updated_at"])
+          |> Map.put("url", github_pull_request["html_url"])
+          |> Map.put("provider", "github")
+          |> Map.put("provider_id", github_pull_request["id"])
+          |> Map.put("provider_meta", deserialize_value(github_pull_request))
+
+        true ->
+          row
+          # TODO: maybe discard altogther?
+          |> Map.put("inserted_at", "1970-01-01 00:00:00")
+          |> Map.put("updated_at", "1970-01-01 00:00:00")
+      end
+
+    row
+  end
+
+  defp transform("User", row, _db) do
     row
     |> Map.put("type", "individual")
     |> rename_column("tech", "tech_stack")
@@ -41,9 +93,7 @@ defmodule DatabaseMigration do
     |> update_url_field("avatar_url")
   end
 
-  # defp transform("Org", %{"is_personal" => "t"}), do: nil
-
-  defp transform("Org", row) do
+  defp transform("Org", row, _db) do
     row
     |> Map.put("type", "organization")
     |> Map.put("provider", row["github_handle"] && "github")
@@ -52,9 +102,11 @@ defmodule DatabaseMigration do
     |> update_url_field("avatar_url")
   end
 
-  defp transform(_, row), do: row
+  defp transform(_, _row, _db), do: nil
 
   def process_dump(input_file, output_file) do
+    db = collect_data(input_file)
+
     File.stream!(input_file)
     |> Stream.chunk_while(
       [],
@@ -62,115 +114,88 @@ defmodule DatabaseMigration do
       &after_fun/1
     )
     |> Stream.filter(&(length(&1) > 0))
-    |> Stream.map(&process_chunk/1)
+    |> Stream.map(&process_chunk(&1, db))
     |> Stream.into(File.stream!(output_file))
     |> Stream.run()
   end
 
-  defp chunk_fun(line, []) do
-    if String.starts_with?(line, "COPY ") do
-      {:cont, [line]}
-    else
-      {:cont, [], []}
-    end
-  end
+  defp collect_data(input_file) do
+    File.stream!(input_file)
+    |> Stream.chunk_while(
+      nil,
+      &collect_chunk_fun/2,
+      &collect_after_fun/1
+    )
+    |> Enum.reduce(%{}, fn
+      {table, data}, acc when table in @relevant_tables ->
+        parsed_data = parse_copy_data(data)
+        Map.put(acc, table, parsed_data)
 
-  defp chunk_fun(line, acc) do
-    trimmed_line = String.trim(line)
-
-    if trimmed_line == "\\." do
-      {:cont, Enum.reverse([trimmed_line | acc]), []}
-    else
-      {:cont, [line | acc]}
-    end
-  end
-
-  defp after_fun([]), do: {:cont, []}
-  defp after_fun(acc), do: {:cont, Enum.reverse(acc), []}
-
-  defp process_chunk(chunk) do
-    chunk
-    |> extract_copy_section()
-    |> transform_copy_section()
-    |> load_copy_section()
-  end
-
-  defp extract_copy_section([copy_statement | data_lines]) do
-    if String.starts_with?(copy_statement, "COPY ") do
-      table_name = extract_table_name(copy_statement)
-
-      if table_name in Map.keys(@table_mappings) do
-        columns = extract_columns(copy_statement)
-        data = parse_data_lines(data_lines, columns)
-
-        %{
-          table: table_name,
-          columns: columns,
-          data: data
-        }
-      else
-        nil
-      end
-    else
-      nil
-    end
-  end
-
-  defp extract_table_name(copy_statement) do
-    ~r/COPY\s+(\w+\.)?\"?(\w+)\"?/
-    |> Regex.run(copy_statement)
-    |> List.last()
-  end
-
-  defp extract_columns(copy_statement) do
-    ~r/\((.*?)\)/
-    |> Regex.run(copy_statement)
-    |> List.last()
-    |> String.split(", ")
-  end
-
-  defp parse_data_lines(data_lines, columns) do
-    data_lines
-    |> Enum.take_while(&(String.trim(&1) != "\\."))
-    |> Enum.map(fn line ->
-      values = String.split(String.trim(line), "\t")
-
-      Enum.zip(columns, values)
-      |> Enum.map(fn {column, value} -> {column, deserialize_value(value)} end)
-      |> Enum.into(%{})
+      _, acc ->
+        acc
     end)
   end
 
-  defp deserialize_value(value) do
-    cond do
-      String.starts_with?(value, "{") && String.ends_with?(value, "}") ->
-        value
-        |> String.slice(1..-2)
-        |> String.split(",")
-        |> Enum.map(&String.trim/1)
+  defp parse_copy_data([header | data]) do
+    columns =
+      header
+      |> String.split("(")
+      |> List.last()
+      |> String.trim_trailing(") FROM stdin;\n")
+      |> String.split(", ")
 
-      String.starts_with?(value, "[") && String.ends_with?(value, "]") ->
-        value
-        |> Jason.decode!()
+    Enum.map(data, fn line ->
+      values = String.trim(line) |> String.split("\t")
+      Enum.zip(columns, values) |> Map.new()
+    end)
+  end
 
-      true ->
-        value
+  defp collect_chunk_fun(line, nil) do
+    case Regex.run(~r/COPY public\.\"(\w+)\"/, line) do
+      [_, table_name] -> {:cont, {table_name, [line]}}
+      _ -> {:cont, nil}
     end
   end
 
-  defp transform_copy_section(nil), do: nil
+  defp collect_chunk_fun(line, {table, acc}) do
+    if String.trim(line) == "\\." do
+      {:cont, {table, Enum.reverse(acc)}, nil}
+    else
+      {:cont, {table, [line | acc]}}
+    end
+  end
 
-  defp transform_copy_section(%{table: table_name, data: data}) do
-    transformed_table_name =
-      table_name
-      |> String.replace(~r/^public\./, "")
-      |> transform_table_name()
+  defp collect_after_fun(nil), do: {:cont, nil}
+  defp collect_after_fun({table, acc}), do: {:cont, {table, Enum.reverse(acc)}, nil}
 
+  defp process_chunk(chunk, db) do
+    case extract_copy_section(chunk) do
+      %{table: table} = section when table in @relevant_tables ->
+        transform_section(section, db)
+
+      _ ->
+        nil
+    end
+    |> load_copy_section()
+  end
+
+  defp transform_section(%{table: table, columns: _columns, data: data}, db) do
     transformed_data =
       data
-      |> Enum.map(&transform(table_name, &1))
+      |> Enum.map(fn row ->
+        try do
+          transform(table, row, db)
+        rescue
+          e ->
+            IO.puts("Error transforming row in table #{table}: #{inspect(row)}")
+            IO.puts("Error: #{inspect(e)}")
+            nil
+        end
+      end)
       |> Enum.reject(&is_nil/1)
-      |> Enum.map(&post_transform(table_name, &1))
+      |> Enum.map(&post_transform(table, &1))
+
+    transformed_table_name = transform_table_name(table)
 
     if Enum.empty?(transformed_data) do
       nil
@@ -192,16 +217,29 @@ defmodule DatabaseMigration do
 
     fields =
       row
-      |> Enum.map(fn {k, v} -> {String.to_atom(k), v} end)
       |> Enum.reject(fn {_, v} -> v == "\\N" end)
+      |> Map.new(fn {k, v} -> {k, v} end)
+      |> conditionally_rename_created_at()
+      |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
+      |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
       |> Map.new()
-      |> Map.put(:inserted_at, row["created_at"])
-      |> Map.take(Map.keys(default_fields))
 
     # Ensure handle is unique
     fields = ensure_unique_handle(fields)
 
     Map.merge(default_fields, fields)
+  end
+
+  defp conditionally_rename_created_at(fields) do
+    case {Map.get(fields, "inserted_at"), Map.get(fields, "created_at")} do
+      {nil, created_at} when not is_nil(created_at) ->
+        fields
+        |> Map.put("inserted_at", created_at)
+        |> Map.delete("created_at")
+
+      _ ->
+        fields
+    end
   end
 
   defp ensure_unique_handle(fields) do
@@ -227,8 +265,10 @@ defmodule DatabaseMigration do
   end
 
   defp rename_column(row, from, to) do
+    value = Map.get(row, from)
+
     row
-    |> Map.put(to, Map.get(row, from))
+    |> Map.put(to, value)
     |> Map.delete(from)
   end
 
@@ -248,33 +288,59 @@ defmodule DatabaseMigration do
     [copy_statement | data_lines] ++ ["\\.\n\n"]
   end
 
-  defp serialize_value(value) when is_list(value) do
-    cond do
-      Enum.all?(value, &is_binary/1) ->
-        "{#{Enum.join(value, ",")}}"
-
-      true ->
-        Jason.encode!(value)
+  defp serialize_value(value) when is_map(value) or is_list(value) do
+    try do
+      json = Jason.encode!(value, escape: :json)
+      # Handle empty arrays specifically
+      if json == "[]" do
+        "{}"
+      else
+        # Escape backslashes and double quotes for PostgreSQL COPY
+        String.replace(json, ["\\", "\""], fn
+          "\\" -> "\\\\"
+          "\"" -> "\\\""
+        end)
+      end
+    rescue
+      _ ->
+        # Fallback to a safe string representation
+        inspect(value, limit: :infinity, printable_limit: :infinity)
+        |> String.replace(["\\", "\n", "\r", "\t"], fn
+          "\\" -> "\\\\"
+          "\n" -> "\\n"
+          "\r" -> "\\r"
+          "\t" -> "\\t"
+        end)
+        |> String.replace("\"", "\\\"")
     end
   end
 
-  defp serialize_value(value) when is_map(value), do: Jason.encode!(value)
   defp serialize_value(value) when is_nil(value), do: "\\N"
+
+  defp serialize_value(value) when is_binary(value) do
+    String.replace(value, ["\\", "\n", "\r", "\t"], fn
+      "\\" -> "\\\\"
+      "\n" -> "\\n"
+      "\r" -> "\\r"
+      "\t" -> "\\t"
+    end)
+  end
+
   defp serialize_value(value), do: to_string(value)
 
-  def extract_default_fields(schema) do
-    schema.__schema__(:fields)
-    |> Enum.filter(fn field ->
-      case schema.__schema__(:field, field) do
-        {:default, _} -> true
-        _ -> false
-      end
-    end)
-    |> Enum.map(fn field ->
-      {field, schema.__schema__(:field, field) |> elem(1)}
-    end)
-    |> Enum.into(%{})
-  end
+  # defp extract_default_fields(schema) do
+  #   schema.__schema__(:fields)
+  #   |> Enum.filter(fn field ->
+  #     case schema.__schema__(:field, field) do
+  #       {:default, _} -> true
+  #       _ -> false
+  #     end
+  #   end)
+  #   |> Enum.map(fn field ->
+  #     {field, schema.__schema__(:field, field) |> elem(1)}
+  #   end)
+  #   |> Enum.into(%{})
+  # end
 
   defp update_url_field(fields, field) do
     case Map.get(fields, field) do
@@ -285,6 +351,82 @@ defmodule DatabaseMigration do
         fields
     end
   end
+
+  defp chunk_fun(line, acc) do
+    if String.starts_with?(line, "COPY ") or String.trim(line) == "\\." do
+      {:cont, Enum.reverse(acc), [line]}
+    else
+      {:cont, [line | acc]}
+    end
+  end
+
+  defp after_fun(acc), do: {:cont, Enum.reverse(acc), []}
+
+  defp extract_copy_section([header | data]) do
+    case Regex.run(~r/COPY (?:public\.)?\"?(\w+)\"?\s*\((.*?)\)\s*FROM stdin;/, header) do
+      [_, table, column_string] ->
+        columns = column_string |> String.split(", ") |> Enum.map(&String.trim/1)
+
+        parsed_data =
+          data
+          |> Enum.take_while(&(&1 != "\\.\n"))
+          |> Enum.map(&parse_data_row(&1, columns))
+
+        %{table: table, columns: columns, data: parsed_data}
+
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_data_row(row, columns) do
+    row
+    |> String.trim()
+    |> String.split("\t")
+    |> Enum.zip(columns)
+    |> Map.new(fn {value, column} -> {column, value} end)
+
+    # |> Map.new(fn {value, column} -> {column, deserialize_value(value)} end)
+  end
+
+  defp deserialize_value("\\N"), do: nil
+  defp deserialize_value("t"), do: true
+  defp deserialize_value("f"), do: false
+  defp deserialize_value("{}"), do: []
+
+  defp deserialize_value(value) when is_map(value) do
+    value
+    |> Enum.map(fn {k, v} -> {k, deserialize_value(v)} end)
+    |> Map.new()
+  end
+
+  defp deserialize_value(value) when is_list(value) do
+    Enum.map(value, &deserialize_value/1)
+  end
+
+  defp deserialize_value(value) when is_binary(value) do
+    cond do
+      String.starts_with?(value, "{") and String.ends_with?(value, "}") ->
+        value
+        |> String.slice(1..-2)
+        |> String.split(",", trim: true)
+        |> Enum.map(&deserialize_value/1)
+
+      true ->
+        case Integer.parse(value) do
+          {int, ""} ->
+            int
+
+          _ ->
+            case Float.parse(value) do
+              {float, ""} -> float
+              _ -> value
+            end
+        end
+    end
+  end
+
+  defp deserialize_value(value), do: value
 end
 
 input_file = ".local/prod_db.sql"

@@ -24,6 +24,11 @@ defmodule Algora.Util do
     end
   end
 
+
+  def format_money_truncated(amount, currency) do
+    Money.new(amount, currency) |> Money.to_string!(symbol: true, truncate: true)
+  end
+
   # TODO: Implement this for all countries
   def locale_from_country_code("gr"), do: "el"
   def locale_from_country_code(country_code), do: country_code

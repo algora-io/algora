@@ -115,7 +115,7 @@ defmodule DatabaseMigration do
       if reward do
         row
         |> Map.put("amount", Decimal.div(Decimal.new(reward["amount"]), 100))
-        |> Map.put("currency", transform_currency(reward["currency"]))
+        |> Map.put("currency", reward["currency"])
         |> Map.put("task_id", row["task_id"])
         |> Map.put("owner_id", row["org_id"])
         |> Map.put("creator_id", row["poster_id"])
@@ -127,10 +127,6 @@ defmodule DatabaseMigration do
 
     row |> dbg()
   end
-
-  defp transform_currency("USD"), do: "USD"
-  # Default to USD for any other currency
-  defp transform_currency(_), do: "USD"
 
   defp transform(_, _row, _db), do: nil
 

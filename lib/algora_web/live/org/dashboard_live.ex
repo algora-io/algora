@@ -2,16 +2,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
-
+  alias Algora.Util
+  alias Algora.Money
   on_mount AlgoraWeb.Org.BountyHook
 
   def mount(_params, _session, socket) do
+    org_id = socket.assigns.current_org.id
+    stats = Bounties.fetch_stats(org_id)
+    recent_bounties = Bounties.list_bounties(owner_id: org_id, limit: 10)
+    recent_activities = fetch_recent_activities()
+
     {:ok,
-     assign(socket,
-       stats: Bounties.fetch_stats(),
-       recent_bounties: Bounties.list_bounties(limit: 10),
-       recent_activities: fetch_recent_activities()
-     )}
+     socket
+     |> assign(:stats, stats)
+     |> assign(:recent_bounties, recent_bounties)
+     |> assign(:recent_activities, recent_activities)}
   end
 
   def render(assigns) do
@@ -20,14 +25,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <.stat_card
           title="Open Bounties"
-          value={"$#{@stats.open_bounties_amount}"}
+          value={Money.format!(@stats.open_bounties_amount, @stats.currency)}
           subtext={"#{@stats.open_bounties_count} bounties"}
           href={"/org/#{@current_org.handle}/bounties?status=open"}
           icon="tabler-diamond"
         />
         <.stat_card
           title="Total Awarded"
-          value={"$#{@stats.total_awarded}"}
+          value={Money.format!(@stats.total_awarded, @stats.currency)}
           subtext={"#{@stats.completed_bounties_count} bounties / tips"}
           href={"/org/#{@current_org.handle}/bounties?status=completed"}
           icon="tabler-gift"
@@ -121,7 +126,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </div>
                 <div class="pl-6">
                   <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-green-400/5 text-green-400 ring-green-400/30">
-                    $<%= bounty.amount %>
+                    <%= Money.format!(bounty.amount, bounty.currency) %>
                   </div>
                 </div>
               </.link>
@@ -184,9 +189,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
     """
   end
 
-  defp activity_text(%{type: :bounty_awarded, user: user, amount: amount}) do
+  defp activity_text(%{type: :bounty_awarded, user: user, amount: amount, currency: currency}) do
     Phoenix.HTML.raw(
-      "<strong class='font-bold'>Algora</strong> awarded <strong class='font-bold'>#{user}</strong> a <strong class='font-bold'>$#{amount}</strong> bounty"
+      "<strong class='font-bold'>Algora</strong> awarded <strong class='font-bold'>#{user}</strong> a <strong class='font-bold'>#{Money.format!(amount, currency)}</strong> bounty"
     )
   end
 
@@ -203,6 +208,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         type: :bounty_awarded,
         user: "urbit-pilled",
         amount: 50,
+        currency: "USD",
         days_ago: 1
       },
       %{
@@ -216,6 +222,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         type: :bounty_awarded,
         user: "gilest",
         amount: 75,
+        currency: "USD",
         days_ago: 6
       },
       %{

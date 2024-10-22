@@ -34,7 +34,10 @@ defmodule Algora.Bounties do
   end
 
   @spec list_bounties(
-          params :: %{optional(:owner_id) => integer(), optional(:limit) => non_neg_integer()}
+          params :: %{
+            optional(:owner_id) => integer(),
+            optional(:limit) => non_neg_integer()
+          }
         ) :: [map()]
   def list_bounties(params) do
     limit = params[:limit] || 10
@@ -91,6 +94,7 @@ defmodule Algora.Bounties do
     members_count = Repo.aggregate(members_query, :count, :id)
 
     %{
+      currency: "USD",
       open_bounties_amount: open_bounties_amount,
       open_bounties_count: open_bounties,
       total_awarded: total_awarded,

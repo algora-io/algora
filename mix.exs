@@ -56,7 +56,9 @@ defmodule Algora.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:joken, "~> 2.5"},
-      {:nanoid, "~> 2.1.0"}
+      {:nanoid, "~> 2.1.0"},
+      {:ex_cldr, "~> 2.0"},
+      {:ex_money, "~> 5.12"}
     ]
   end
 

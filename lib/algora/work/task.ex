@@ -37,6 +37,8 @@ defmodule Algora.Work.Task do
     |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id])
     |> generate_id()
     |> validate_required([:provider_id, :title, :number, :url, :repository_id])
-    |> unique_constraint([:provider, :provider_id])
+
+    # TODO: Reenable this after migration is complete.
+    # |> unique_constraint([:provider, :provider_id])
   end
 end

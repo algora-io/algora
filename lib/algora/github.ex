@@ -21,7 +21,7 @@ defmodule Algora.Github do
       URI.encode_query(
         client_id: client_id(),
         state: Algora.Util.random_string(),
-        redirect_uri: "#{AlgoraWeb.Endpoint.url()}/oauth/callbacks/github?#{redirect_query}"
+        redirect_uri: "#{AlgoraWeb.Endpoint.url()}/callbacks/github/oauth?#{redirect_query}"
       )
 
     "https://github.com/login/oauth/authorize?#{query}"

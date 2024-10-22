@@ -27,6 +27,7 @@ defmodule DatabaseMigration do
   @table_mappings %{
     "User" => "users",
     "Org" => "users",
+    "GithubUser" => "users",
     "Task" => "tasks",
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
@@ -37,6 +38,7 @@ defmodule DatabaseMigration do
   @schema_mappings %{
     "User" => User,
     "Org" => User,
+    "GithubUser" => User,
     "Task" => Task,
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
@@ -47,11 +49,11 @@ defmodule DatabaseMigration do
   @relevant_tables Map.keys(@table_mappings)
 
   defp transform("Task", row, db) do
-    github_issues = Map.get(db, "GithubIssue", [])
-    github_issue = Enum.find(github_issues, &(&1["id"] == row["issue_id"]))
+    github_issue =
+      db |> Map.get("GithubIssue", []) |> Enum.find(&(&1["id"] == row["issue_id"]))
 
-    github_pull_requests = Map.get(db, "GithubPullRequest", [])
-    github_pull_request = Enum.find(github_pull_requests, &(&1["id"] == row["pull_request_id"]))
+    github_pull_request =
+      db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["pull_request_id"]))
 
     row =
       cond do
@@ -89,7 +91,21 @@ defmodule DatabaseMigration do
     row
   end
 
-  defp transform("User", row, _db) do
+  defp transform("User", row, db) do
+    github_user =
+      db |> Map.get("GithubUser", []) |> Enum.find(&(&1["user_id"] == row["id"]))
+
+    row =
+      if github_user do
+        row
+        |> Map.put("provider", "github")
+        |> Map.put("provider_id", github_user["id"])
+        |> Map.put("provider_login", github_user["login"])
+        |> Map.put("provider_meta", deserialize_value(github_user))
+      else
+        row
+      end
+
     row
     |> Map.put("type", "individual")
     |> rename_column("tech", "tech_stack")
@@ -107,9 +123,19 @@ defmodule DatabaseMigration do
     |> update_url_field("avatar_url")
   end
 
+  defp transform("GithubUser", %{user_id: nil} = row, _db) do
+    row
+    |> Map.put("type", "individual")
+    |> Map.put("provider", "github")
+    |> Map.put("provider_id", row["id"])
+    |> Map.put("provider_meta", deserialize_value(row))
+  end
+
+  defp transform("GithubUser", _row, _db), do: nil
+
   defp transform("Bounty", row, db) do
-    rewards = Map.get(db, "Reward", [])
-    reward = Enum.find(rewards, &(&1["bounty_id"] == row["id"]))
+    reward =
+      db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
 
     row =
       if reward do

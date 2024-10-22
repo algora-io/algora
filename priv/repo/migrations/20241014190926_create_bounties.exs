@@ -7,7 +7,7 @@ defmodule Algora.Repo.Migrations.CreateBounties do
       add :currency, :string, null: false
       add :task_id, references(:tasks, on_delete: :restrict), null: false
       add :owner_id, references(:users, on_delete: :restrict), null: false
-      add :creator_id, references(:users, on_delete: :restrict), null: false
+      add :creator_id, references(:users, on_delete: :restrict)
 
       timestamps()
     end

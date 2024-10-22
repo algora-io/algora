@@ -22,13 +22,16 @@ defmodule DatabaseMigration do
 
   alias Algora.Accounts.User
   alias Algora.Work.Task
+  alias Algora.Bounties.Bounty
 
   @table_mappings %{
     "User" => "users",
     "Org" => "users",
     "Task" => "tasks",
     "GithubIssue" => nil,
-    "GithubPullRequest" => nil
+    "GithubPullRequest" => nil,
+    "Bounty" => "bounties",
+    "Reward" => nil
   }
 
   @schema_mappings %{
@@ -36,7 +39,9 @@ defmodule DatabaseMigration do
     "Org" => User,
     "Task" => Task,
     "GithubIssue" => nil,
-    "GithubPullRequest" => nil
+    "GithubPullRequest" => nil,
+    "Bounty" => Bounty,
+    "Reward" => nil
   }
 
   @relevant_tables Map.keys(@table_mappings)
@@ -101,6 +106,31 @@ defmodule DatabaseMigration do
     |> rename_column("tech", "tech_stack")
     |> update_url_field("avatar_url")
   end
+
+  defp transform("Bounty", row, db) do
+    rewards = Map.get(db, "Reward", [])
+    reward = Enum.find(rewards, &(&1["bounty_id"] == row["id"]))
+
+    row =
+      if reward do
+        row
+        |> Map.put("amount", Decimal.div(Decimal.new(reward["amount"]), 100))
+        |> Map.put("currency", transform_currency(reward["currency"]))
+        |> Map.put("task_id", row["task_id"])
+        |> Map.put("owner_id", row["org_id"])
+        |> Map.put("creator_id", row["poster_id"])
+        |> Map.put("inserted_at", row["created_at"])
+        |> Map.put("updated_at", row["updated_at"])
+      else
+        nil
+      end
+
+    row |> dbg()
+  end
+
+  defp transform_currency("USD"), do: "USD"
+  # Default to USD for any other currency
+  defp transform_currency(_), do: "USD"
 
   defp transform(_, _row, _db), do: nil
 
@@ -288,6 +318,8 @@ defmodule DatabaseMigration do
     [copy_statement | data_lines] ++ ["\\.\n\n"]
   end
 
+  defp serialize_value(%Decimal{} = value), do: Decimal.to_string(value)
+
   defp serialize_value(value) when is_map(value) or is_list(value) do
     try do
       json = Jason.encode!(value, escape: :json)
@@ -318,6 +350,14 @@ defmodule DatabaseMigration do
   defp serialize_value(value) when is_nil(value), do: "\\N"
 
   defp serialize_value(value) when is_binary(value) do
+    # Remove any surrounding quotes for numeric values
+    value =
+      if String.starts_with?(value, "\"") and String.ends_with?(value, "\"") do
+        String.slice(value, 1..-2)
+      else
+        value
+      end
+
     String.replace(value, ["\\", "\n", "\r", "\t"], fn
       "\\" -> "\\\\"
       "\n" -> "\\n"

@@ -7,6 +7,7 @@ defmodule Algora.Repo.Migrations.CreateTasks do
       add :provider_id, :string
       add :provider_meta, :map
 
+      add :type, :string
       add :title, :string
       add :description, :text
       add :number, :integer
@@ -18,6 +19,8 @@ defmodule Algora.Repo.Migrations.CreateTasks do
     end
 
     create index(:tasks, [:repository_id])
-    create unique_index(:tasks, [:provider, :provider_id])
+
+    # TODO: Reenable this after migration is complete.
+    # create unique_index(:tasks, [:provider, :provider_id])
   end
 end

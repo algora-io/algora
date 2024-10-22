@@ -11,6 +11,7 @@ defmodule Algora.Work.Task do
     field :provider_id, :string
     field :provider_meta, :map
 
+    field :type, Ecto.Enum, values: [:issue, :pull_request]
     field :title, :string
     field :description, :string
     field :number, :integer

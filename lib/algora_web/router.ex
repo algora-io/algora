@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Router do
 
     live_session :org,
       layout: {AlgoraWeb.Layouts, :org},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.Org.Nav] do
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
       live "/org/:org_handle", Org.DashboardLive, :index
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
       live "/org/:org_handle/projects", Org.ProjectsLive, :index

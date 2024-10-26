@@ -64,9 +64,9 @@ defmodule Algora.Accounts.User do
   @doc """
   A user changeset for github registration.
   """
-  def github_registration_changeset(info, primary_email, emails, token) do
+  def github_registration_changeset(nil, info, primary_email, emails, token) do
     identity_changeset =
-      Identity.github_registration_changeset(info, primary_email, emails, token)
+      Identity.github_registration_changeset(nil, info, primary_email, emails, token)
 
     if identity_changeset.valid? do
       params = %{
@@ -109,6 +109,52 @@ defmodule Algora.Accounts.User do
       |> change()
       |> Map.put(:valid?, false)
       |> put_assoc(:identities, [identity_changeset])
+    end
+  end
+
+  def github_registration_changeset(user = %User{}, info, primary_email, emails, token) do
+    identity_changeset =
+      Identity.github_registration_changeset(user, info, primary_email, emails, token)
+
+    if identity_changeset.valid? do
+      params = %{
+        "handle" => info["login"],
+        "email" => primary_email,
+        "name" => get_change(identity_changeset, :provider_name),
+        "bio" => info["bio"],
+        "location" => info["location"],
+        "avatar_url" => info["avatar_url"],
+        "website_url" => info["blog"],
+        "github_url" => info["html_url"],
+        "provider" => "github",
+        "provider_id" => to_string(info["id"]),
+        "provider_login" => info["login"],
+        "provider_meta" => info
+      }
+
+      user
+      |> cast(params, [
+        :handle,
+        :email,
+        :name,
+        :bio,
+        :location,
+        :avatar_url,
+        :website_url,
+        :github_url,
+        :provider,
+        :provider_id,
+        :provider_login,
+        :provider_meta
+      ])
+      |> generate_id()
+      |> validate_required([:email, :name, :handle])
+      |> validate_handle()
+      |> validate_email()
+    else
+      user
+      |> change()
+      |> Map.put(:valid?, false)
     end
   end
 

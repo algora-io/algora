@@ -23,7 +23,7 @@ defmodule Algora.Accounts.Identity do
   @doc """
   A user changeset for github registration.
   """
-  def github_registration_changeset(info, primary_email, emails, token) do
+  def github_registration_changeset(nil, info, primary_email, emails, token) do
     params = %{
       "provider_token" => token,
       "provider_id" => to_string(info["id"]),
@@ -33,6 +33,32 @@ defmodule Algora.Accounts.Identity do
     }
 
     %Identity{provider: "github", provider_meta: %{"user" => info, "emails" => emails}}
+    |> cast(params, [
+      :provider_token,
+      :provider_email,
+      :provider_login,
+      :provider_name,
+      :provider_id
+    ])
+    |> generate_id()
+    |> validate_required([:provider_token, :provider_email, :provider_name, :provider_id])
+    |> validate_length(:provider_meta, max: 10_000)
+  end
+
+  def github_registration_changeset(user, info, primary_email, emails, token) do
+    params = %{
+      "provider_token" => token,
+      "provider_id" => to_string(info["id"]),
+      "provider_login" => info["login"],
+      "provider_name" => info["name"] || info["login"],
+      "provider_email" => primary_email
+    }
+
+    %Identity{
+      provider: "github",
+      provider_meta: %{"user" => info, "emails" => emails},
+      user_id: user.id
+    }
     |> cast(params, [
       :provider_token,
       :provider_email,

@@ -14,6 +14,27 @@ defmodule Algora.Accounts do
     |> Repo.all()
   end
 
+  def list_matching_devs(country_code) do
+    emoji = fn ->
+      Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳"])
+    end
+
+    users = list_users(country: String.upcase(country_code), limit: 8)
+
+    Enum.map(users, fn user ->
+      %{
+        name: user.name || user.handle,
+        handle: user.handle,
+        flag: (user.country && Algora.Misc.CountryEmojis.get(user.country)) || emoji.(),
+        skills: user.tech_stack |> Enum.take(6),
+        earned: :rand.uniform(50),
+        bounties: :rand.uniform(40),
+        projects: :rand.uniform(10),
+        avatar_url: user.avatar_url
+      }
+    end)
+  end
+
   def list_orgs(opts) do
     Repo.all(
       from u in User,

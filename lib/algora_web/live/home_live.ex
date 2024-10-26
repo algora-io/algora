@@ -181,7 +181,7 @@ defmodule AlgoraWeb.HomeLive do
       {:ok,
        socket
        |> assign(:page_title, "Home")
-       |> assign(:users, get_users(country_code))
+       |> assign(:users, Accounts.list_matching_devs(country_code))
        |> assign(:orgs, get_orgs(country_code))
        |> assign(:show_onboarding, false)
        |> assign(:show_tech_question, false)
@@ -225,26 +225,6 @@ defmodule AlgoraWeb.HomeLive do
       end)
 
     %{count: match_count, sample_matches: sample_matches}
-  end
-
-  defp get_users(country_code) do
-    emoji = fn ->
-      Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳"])
-    end
-
-    users = Accounts.list_users(country: String.upcase(country_code), limit: 5)
-
-    Enum.map(users, fn user ->
-      %{
-        name: user.name || user.handle,
-        amount:
-          "$#{:rand.uniform(100_000) |> div(100) |> Kernel./(100) |> Float.round(2) |> Float.to_string()}",
-        category: "User",
-        handle: user.handle,
-        emoji: (user.country && CountryEmojis.get(user.country)) || emoji.(),
-        avatar_url: user.avatar_url
-      }
-    end)
   end
 
   defp get_orgs(country_code) do

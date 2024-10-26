@@ -44,7 +44,10 @@ defmodule AlgoraWeb.User.DashboardLive do
 
       <div class="grid grid-cols-4 gap-6">
         <%= for match <- @matches do %>
-          <div class="bg-gray-800 rounded-lg p-4">
+          <div class="bg-gray-800 rounded-lg p-4 flex flex-col h-full relative">
+            <div class="absolute top-2 right-2 text-xl">
+              <%= match.flag %>
+            </div>
             <div class="flex items-center mb-4">
               <img
                 src={match.avatar_url}
@@ -53,11 +56,11 @@ defmodule AlgoraWeb.User.DashboardLive do
               />
               <div>
                 <div class="font-semibold"><%= match.name %></div>
-                <div class="text-xl"><%= match.flag %></div>
+                <div class="text-sm text-gray-400">@<%= match.handle %></div>
               </div>
             </div>
             <div class="text-sm mb-2"><%= Enum.join(match.skills, ", ") %></div>
-            <div class="text-sm mb-4">
+            <div class="text-sm mb-4 mt-auto">
               $<%= match.earned %>k earned (<%= match.bounties %> bounties, <%= match.projects %> projects)
             </div>
             <button class="w-full border border-dashed border-white text-sm py-2 rounded hover:bg-gray-700 transition-colors">
@@ -76,7 +79,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         get_started_cards: get_started_cards(),
         tech_stack: ["Elixir", "TypeScript"],
         locations: ["United Kingdom", "Remote"],
-        matches: get_matches()
+        matches: Algora.Accounts.list_matching_devs("GB")
       )
 
     {:ok, socket}
@@ -115,47 +118,6 @@ defmodule AlgoraWeb.User.DashboardLive do
           "You can use your job board and ATS privately as well as publish jobs on Algora."
         ],
         active: false
-      }
-    ]
-  end
-
-  defp get_matches do
-    [
-      %{
-        name: "John Doe",
-        flag: "🇬🇧",
-        skills: ["Elixir", "TypeScript"],
-        earned: 15,
-        bounties: 15,
-        projects: 2,
-        avatar_url: get_avatar_url("John Doe")
-      },
-      %{
-        name: "Alice Smith",
-        flag: "🇺🇸",
-        skills: ["Python", "React", "AWS"],
-        earned: 32,
-        bounties: 28,
-        projects: 5,
-        avatar_url: get_avatar_url("Alice Smith")
-      },
-      %{
-        name: "Carlos Rodriguez",
-        flag: "🇪🇸",
-        skills: ["Ruby", "Vue.js", "Docker"],
-        earned: 21,
-        bounties: 19,
-        projects: 3,
-        avatar_url: get_avatar_url("Carlos Rodriguez")
-      },
-      %{
-        name: "Yuki Tanaka",
-        flag: "🇯🇵",
-        skills: ["Java", "Spring", "Kubernetes"],
-        earned: 40,
-        bounties: 35,
-        projects: 6,
-        avatar_url: get_avatar_url("Yuki Tanaka")
       }
     ]
   end

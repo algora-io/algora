@@ -253,44 +253,80 @@ const Hooks = {
   MobileMenu: {
     mounted() {
       this.menuOpen = false;
+      this.expanded = true;
       this.backdrop = this.el.querySelector("#menu-backdrop");
       this.menuContainer = this.el.querySelector("#menu-container");
       this.closeButton = this.el.querySelector("#close-button");
       this.closeMenuButton = this.el.querySelector("#close-menu-button");
       this.openButton = this.el.querySelector("#open-button");
       this.openMenuButton = this.el.querySelector("#open-menu-button");
+      this.desktopSidebar = document.getElementById("desktop-sidebar");
+      this.sidebarToggle = this.desktopSidebar.querySelector("#sidebar-toggle");
+      this.logo = this.desktopSidebar.querySelector(".logo");
+      this.expandableElements =
+        this.desktopSidebar.querySelectorAll("[data-expandable]");
 
-      this.closeMenuButton.addEventListener("click", () => this.toggleMenu());
-      this.openMenuButton.addEventListener("click", () => this.toggleMenu());
+      this.closeMenuButton.addEventListener("click", () =>
+        this.toggleMobileMenu()
+      );
+      this.openMenuButton.addEventListener("click", () =>
+        this.toggleMobileMenu()
+      );
+      this.sidebarToggle.addEventListener("click", () =>
+        this.toggleDesktopSidebar()
+      );
+
+      this.handleResize = this.handleResize.bind(this);
+      window.addEventListener("resize", this.handleResize);
+      this.handleResize();
     },
 
-    toggleMenu() {
+    destroyed() {
+      window.removeEventListener("resize", this.handleResize);
+    },
+
+    toggleMobileMenu() {
       this.menuOpen = !this.menuOpen;
 
       if (this.menuOpen) {
         this.backdrop.classList.remove("opacity-0");
         this.backdrop.classList.add("opacity-100");
-
         this.menuContainer.classList.remove("-translate-x-full");
         this.menuContainer.classList.add("translate-x-0");
-
         this.closeButton.classList.remove("opacity-0");
         this.closeButton.classList.add("opacity-100");
-
         this.openButton.classList.remove("opacity-100");
         this.openButton.classList.add("opacity-0");
       } else {
         this.backdrop.classList.remove("opacity-100");
         this.backdrop.classList.add("opacity-0");
-
         this.menuContainer.classList.remove("translate-x-0");
         this.menuContainer.classList.add("-translate-x-full");
-
         this.closeButton.classList.remove("opacity-100");
         this.closeButton.classList.add("opacity-0");
-
         this.openButton.classList.remove("opacity-0");
         this.openButton.classList.add("opacity-100");
+      }
+    },
+
+    toggleDesktopSidebar() {
+      this.expanded = !this.expanded;
+      this.desktopSidebar.classList.toggle("xl:w-72", this.expanded);
+      this.desktopSidebar.classList.toggle("xl:w-20", !this.expanded);
+      this.logo.classList.toggle("hidden", !this.expanded);
+
+      this.expandableElements.forEach((el) => {
+        el.classList.toggle("hidden", !this.expanded);
+      });
+
+      this.handleResize();
+    },
+
+    handleResize() {
+      const navbar = document.getElementById("navbar");
+      if (navbar) {
+        navbar.style.left = this.expanded ? "18rem" : "5rem";
+        navbar.style.width = `calc(100% - ${this.expanded ? "18rem" : "5rem"})`;
       }
     },
   },

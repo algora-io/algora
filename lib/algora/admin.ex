@@ -30,7 +30,8 @@ defmodule Algora.Admin do
 
     Repo.all(query)
     |> Task.async_stream(fn %{repository_url: url} -> process_repo(url) end,
-      max_concurrency: @max_concurrency
+      max_concurrency: @max_concurrency,
+      timeout: :infinity
     )
     |> Stream.run()
   end
@@ -46,7 +47,7 @@ defmodule Algora.Admin do
   end
 
   defp fetch_or_load_repo_data(url) do
-    hash = :crypto.hash(:md5, url) |> Base.encode16(case: :lower)
+    hash = :crypto.hash(:sha256, url) |> Base.encode16(case: :lower)
     cache_path = ".local/github/#{hash}.json"
 
     if File.exists?(cache_path) do

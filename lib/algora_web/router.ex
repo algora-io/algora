@@ -53,6 +53,8 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index
     end
+
+    live "/projects/new", ProjectWizardLive
   end
 
   # Other scopes may use custom stacks.

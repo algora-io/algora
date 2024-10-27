@@ -79,7 +79,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         get_started_cards: get_started_cards(),
         tech_stack: ["Elixir", "TypeScript"],
         locations: ["United Kingdom", "Remote"],
-        matches: Algora.Accounts.list_matching_devs("GB")
+        matches: Algora.Accounts.list_matching_devs(limit: 8, country: "GB")
       )
 
     {:ok, socket}

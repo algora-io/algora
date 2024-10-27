@@ -49,6 +49,8 @@ defmodule AlgoraWeb.Router do
       live "/auth/login", SignInLive, :index
     end
 
+    live "/orgs/new", Org.CreateLive
+
     live "/projects/new", Project.CreateLive
     live "/projects", Project.IndexLive
     live "/projects/:id", Project.ViewLive

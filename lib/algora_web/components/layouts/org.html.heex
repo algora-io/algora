@@ -118,6 +118,14 @@
                   </div>
                 </div>
               </:link>
+              <:link href={~p"/orgs/new"}>
+                <div class="flex items-center">
+                  <.icon name="tabler-plus" class="w-8 h-8 rounded-full mr-3" />
+                  <div>
+                    <div class="font-semibold">New organization</div>
+                  </div>
+                </div>
+              </:link>
             </.dropdown>
           <% else %>
             <.dropdown id="dashboard-dropdown">

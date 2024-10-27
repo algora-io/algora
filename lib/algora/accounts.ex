@@ -37,9 +37,9 @@ defmodule Algora.Accounts do
   def list_orgs(opts) do
     query =
       from u in User,
-        where: u.type == :organization and u.seeded == false and is_nil(u.provider_login),
+        where: u.type == :organization and u.seeded == false and not(is_nil(u.provider_login)),
         limit: ^Keyword.get(opts, :limit, 100),
-        order_by: [desc: u.stargazers_count]
+        order_by: [desc: u.priority, desc: u.stargazers_count]
 
     query
     |> Repo.all()
@@ -49,6 +49,7 @@ defmodule Algora.Accounts do
         handle: user.handle,
         flag: get_flag(user),
         amount: :rand.uniform(100_000),
+        tech_stack: user.tech_stack |> Enum.take(6),
         avatar_url: user.avatar_url
       }
     end)

@@ -2,23 +2,8 @@
 // https://tailwindcss.com/docs/configuration
 
 const plugin = require("tailwindcss/plugin");
-const colors = require("tailwindcss/colors");
 const path = require("path");
 const fs = require("fs");
-
-const gray = {
-  50: "#f8f9fc",
-  100: "#f1f2f9",
-  200: "#e1e2ef",
-  300: "#cbcee1",
-  400: "#9497b8",
-  500: "#65688b",
-  600: "#484b6a",
-  700: "#343756",
-  800: "#1d1e3a",
-  900: "#100f29",
-  950: "#050217",
-};
 
 module.exports = {
   content: [
@@ -29,24 +14,21 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        gray,
-        green: colors.emerald,
-        purple: colors.indigo,
-        yellow: colors.amber,
-      },
+      colors: require("./tailwind.colors.json"),
       animation: {
-        fadeIn: 'fadeIn 0.5s ease-out forwards',
+        fadeIn: "fadeIn 0.5s ease-out forwards",
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        }
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
     },
   },
   plugins: [
+    require("@tailwindcss/typography"),
+    require("tailwindcss-animate"),
     require("@tailwindcss/forms"),
     // Allows prefixing tailwind classes with LiveView classes to add rules
     // only when LiveView classes are applied, for example:

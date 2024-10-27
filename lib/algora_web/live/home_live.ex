@@ -182,7 +182,7 @@ defmodule AlgoraWeb.HomeLive do
        socket
        |> assign(:page_title, "Home")
        |> assign(:users, Accounts.list_matching_devs(limit: 8, country: country_code))
-       |> assign(:orgs, get_orgs(country_code))
+       |> assign(:orgs, Accounts.list_orgs(country: country_code, limit: 5))
        |> assign(:show_onboarding, false)
        |> assign(:show_tech_question, false)
        |> assign(:show_third_question, false)
@@ -227,22 +227,6 @@ defmodule AlgoraWeb.HomeLive do
     %{count: match_count, sample_matches: sample_matches}
   end
 
-  defp get_orgs(country_code) do
-    orgs = Accounts.list_orgs(country: String.upcase(country_code), limit: 5)
-
-    Enum.map(orgs, fn user ->
-      %{
-        name: user.name,
-        amount:
-          "$#{:rand.uniform(100_000) |> div(100) |> Kernel./(100) |> Float.round(2) |> Float.to_string()}",
-        category: "Organization",
-        handle: "@#{user.handle}",
-        emoji: (user.country && CountryEmojis.get(user.country)) || "🇺🇸",
-        avatar_url: user.avatar_url
-      }
-    end)
-  end
-
   def entity_card(assigns) do
     ~H"""
     <div class={[
@@ -254,7 +238,7 @@ defmodule AlgoraWeb.HomeLive do
         <div class="flex justify-between items-start mb-2">
           <h3 class="text-sm font-bold"><%= @entity.name %></h3>
           <div class="flex items-center">
-            <span class="mr-1 text-lg"><%= @entity.emoji %></span>
+            <span class="mr-1 text-lg"><%= @entity.flag %></span>
             <img src={@entity.avatar_url} alt={@entity.name} class="w-6 h-6 rounded" />
           </div>
         </div>
@@ -268,11 +252,11 @@ defmodule AlgoraWeb.HomeLive do
         <div class="flex justify-between text-xs mb-1">
           <div>
             <p class="font-semibold"><%= @entity.amount %></p>
-            <p class="text-gray-300">invested</p>
+            <p class="text-gray-300">amount</p>
           </div>
           <div class="text-right">
-            <p class="font-semibold"><%= @entity.category %></p>
-            <p class="text-gray-300">category</p>
+            <p class="font-semibold">placeholder</p>
+            <p class="text-gray-300">placeholder</p>
           </div>
         </div>
         <div class="bg-white bg-opacity-20 px-2 py-1 rounded">

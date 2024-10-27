@@ -61,7 +61,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             </div>
             <div class="text-sm mb-2"><%= Enum.join(match.skills, ", ") %></div>
             <div class="text-sm mb-4 mt-auto">
-              $<%= match.earned %>k earned (<%= match.bounties %> bounties, <%= match.projects %> projects)
+              $<%= match.amount %> earned (<%= match.bounties %> bounties, <%= match.projects %> projects)
             </div>
             <button class="w-full border border-dashed border-white text-sm py-2 rounded hover:bg-gray-700 transition-colors">
               Collaborate

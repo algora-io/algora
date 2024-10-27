@@ -260,7 +260,7 @@ defmodule Algora.Misc.CountryEmojis do
     "ZW" => "🇿🇼",
   }
 
-  def get(country_code) do
-    Map.get(@country_emojis, country_code)
+  def get(country_code, default) do
+    Map.get(@country_emojis, country_code, default)
   end
 end

@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
-  alias Algora.Util
   alias Algora.Money
   on_mount AlgoraWeb.Org.BountyHook
 

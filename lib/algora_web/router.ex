@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
       live "/org/:org_handle", Org.DashboardLive, :index
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
-      live "/org/:org_handle/projects", Org.ProjectsLive, :index
+      live "/org/:org_handle/projects", Project.IndexLive, :index
       live "/org/:org_handle/jobs", Org.JobsLive, :index
     end
 
@@ -49,12 +49,14 @@ defmodule AlgoraWeb.Router do
       live "/auth/login", SignInLive, :index
     end
 
+    live "/projects/new", Project.CreateLive
+    live "/projects", Project.IndexLive
+    live "/projects/:id", Project.ViewLive
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index
     end
-
-    live "/projects/new", ProjectWizardLive
   end
 
   # Other scopes may use custom stacks.

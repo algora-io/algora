@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.ProjectWizardLive do
+defmodule AlgoraWeb.Project.CreateLive do
   use AlgoraWeb, :live_view
   alias Algora.Accounts
   alias Algora.Money

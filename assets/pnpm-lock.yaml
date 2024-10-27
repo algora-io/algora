@@ -1,0 +1,51 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  framer-motion:
+    specifier: ^11.11.10
+    version: 11.11.10
+
+devDependencies:
+  '@types/phoenix':
+    specifier: ^1.6.4
+    version: 1.6.4
+  '@types/phoenix_live_view':
+    specifier: ^0.18.4
+    version: 0.18.4
+
+packages:
+
+  /@types/phoenix@1.6.4:
+    resolution: {integrity: sha512-B34A7uot1Cv0XtaHRYDATltAdKx0BvVKNgYNqE4WjtPUa4VQJM7kxeXcVKaH+KS+kCmZ+6w+QaUdcljiheiBJA==}
+    dev: true
+
+  /@types/phoenix_live_view@0.18.4:
+    resolution: {integrity: sha512-9mq6zRZfCtY8f4Kiu9ca0YodlNoL5kPfz6AO8AMIylftoT59re5+l5BxPISt/NJXyj1S/gRJmwpHgyVsyEk8cg==}
+    dependencies:
+      '@types/phoenix': 1.6.4
+    dev: true
+
+  /framer-motion@11.11.10:
+    resolution: {integrity: sha512-061Bt1jL/vIm+diYIiA4dP/Yld7vD47ROextS7ESBW5hr4wQFhxB5D5T5zAc3c/5me3cOa+iO5LqhA38WDln/A==}
+    peerDependencies:
+      '@emotion/is-prop-valid': '*'
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+    dependencies:
+      tslib: 2.8.0
+    dev: false
+
+  /tslib@2.8.0:
+    resolution: {integrity: sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA==}
+    dev: false

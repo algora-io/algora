@@ -3,31 +3,31 @@ defmodule AlgoraWeb.ProjectWizardLive do
   alias Algora.Accounts
 
   def mount(_params, session, socket) do
-    matching_devs = get_initial_matching_devs()
+    project = %{
+      country: "US",
+      skills: ["Elixir"],
+      title: "",
+      scope: %{size: nil, duration: nil, experience: nil},
+      budget: %{type: :hourly, from: nil, to: nil},
+      description: ""
+    }
 
     {:ok,
-     assign(socket,
-       step: 1,
-       total_steps: 5,
-       project: %{
-         skills: [],
-         title: "",
-         scope: %{size: nil, duration: nil, experience: nil},
-         budget: %{type: :hourly, from: nil, to: nil},
-         description: ""
-       },
-       current_user: %{email: session["user_email"]},
-       matching_devs: matching_devs
-     )}
+     socket
+     |> assign(step: 1)
+     |> assign(total_steps: 5)
+     |> assign(project: project)
+     |> assign(current_user: %{email: session["user_email"]})
+     |> assign(matching_devs: get_matching_devs(project))}
   end
 
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-gray-950 text-white sm:flex">
       <div class="flex-grow p-8 max-w-3xl mx-auto">
-        <div class="flex items-center gap-4 text-lg mb-6">
+        <div class="flex items-center gap-4 text-lg mb-6 font-display">
           <span class="text-gray-300"><%= @step %> / 5</span>
-          <h1 class="text-lg font-bold">Create Your Project</h1>
+          <h1 class="text-lg text-gray-200 font-semibold uppercase">Create Your Project</h1>
         </div>
         <div class="mb-8">
           <%= render_step(assigns) %>
@@ -61,7 +61,7 @@ defmodule AlgoraWeb.ProjectWizardLive do
         </div>
       </div>
       <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-gray-950 to-gray-900 px-8 py-4 overflow-y-auto">
-        <h2 class="text-xl font-semibold mb-4">Matching Developers</h2>
+        <h2 class="text-lg text-gray-200 font-semibold uppercase mb-4">Matching Developers</h2>
         <%= if @matching_devs == [] do %>
           <p class="text-gray-400">Add skills to see matching developers</p>
         <% else %>
@@ -331,18 +331,7 @@ defmodule AlgoraWeb.ProjectWizardLive do
   defp next_step_label(3), do: "Budget"
   defp next_step_label(4), do: "Description"
 
-  defp get_initial_matching_devs do
-    # For initial display, we'll show a mix of developers without filtering by skills
-    Accounts.list_matching_devs(limit: 5, country: "US")
-  end
-
   defp get_matching_devs(project) do
-    if length(project.skills) > 0 do
-      # Filter developers based on project skills
-      Accounts.list_matching_devs(limit: 5, country: "US", skills: project.skills)
-    else
-      # If no skills are selected, show the initial list
-      get_initial_matching_devs()
-    end
+    Accounts.list_matching_devs(limit: 5, country: project.country, skills: project.skills)
   end
 end

@@ -23,6 +23,7 @@ defmodule DatabaseMigration do
   alias Algora.Accounts.User
   alias Algora.Work.Task
   alias Algora.Bounties.Bounty
+  alias Algora.Payments.Transaction
 
   @table_mappings %{
     "User" => "users",
@@ -32,7 +33,9 @@ defmodule DatabaseMigration do
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
     "Bounty" => "bounties",
-    "Reward" => nil
+    "Reward" => nil,
+    "BountyTransfer" => "transactions",
+    "Claim" => nil
   }
 
   @schema_mappings %{
@@ -43,7 +46,9 @@ defmodule DatabaseMigration do
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
     "Bounty" => Bounty,
-    "Reward" => nil
+    "Reward" => nil,
+    "BountyTransfer" => Transaction,
+    "Claim" => nil
   }
 
   @relevant_tables Map.keys(@table_mappings)
@@ -138,20 +143,55 @@ defmodule DatabaseMigration do
       db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
 
     row =
+      row
+      |> Map.put("task_id", row["task_id"])
+      |> Map.put("owner_id", row["org_id"])
+      |> Map.put("creator_id", row["poster_id"])
+      |> Map.put("inserted_at", row["created_at"])
+      |> Map.put("updated_at", row["updated_at"])
+
+    row =
       if reward do
         row
         |> Map.put("amount", Decimal.div(Decimal.new(reward["amount"]), 100))
         |> Map.put("currency", reward["currency"])
-        |> Map.put("task_id", row["task_id"])
-        |> Map.put("owner_id", row["org_id"])
-        |> Map.put("creator_id", row["poster_id"])
+      else
+        # TODO: make the fields nullable instead
+        row
+        |> Map.put("amount", 0)
+        |> Map.put("currency", "USD")
+      end
+
+    row
+  end
+
+  defp transform("BountyTransfer", row, db) do
+    claim =
+      db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
+
+    github_user =
+      db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
+
+    user =
+      db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+
+    row =
+      if claim && user do
+        row
+        |> Map.put("type", "transfer")
+        |> Map.put("provider", "stripe")
+        |> Map.put("provider_id", row["transfer_id"])
+        |> Map.put("amount", Decimal.div(Decimal.new(row["amount"]), 100))
+        |> Map.put("currency", row["currency"])
+        |> Map.put("bounty_id", claim["bounty_id"])
+        |> Map.put("receiver_id", user["id"])
         |> Map.put("inserted_at", row["created_at"])
         |> Map.put("updated_at", row["updated_at"])
       else
         nil
       end
 
-    row |> dbg()
+    row
   end
 
   defp transform(_, _row, _db), do: nil

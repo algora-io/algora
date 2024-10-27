@@ -33,6 +33,8 @@ defmodule Algora.Accounts.User do
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
 
+    field :need_avatar, :boolean, default: false
+
     field :bounty_mode, Ecto.Enum,
       values: [:community, :experts_only, :public],
       default: :community
@@ -168,7 +170,7 @@ defmodule Algora.Accounts.User do
 
   def settings_changeset(%User{} = user, params) do
     user
-    |> cast(params, [:handle, :name, :last_context])
+    |> cast(params, [:handle, :name, :last_context, :need_avatar])
     |> validate_required([:handle, :name])
     |> validate_handle()
   end

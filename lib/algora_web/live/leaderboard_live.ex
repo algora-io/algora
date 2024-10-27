@@ -5,6 +5,7 @@ defmodule AlgoraWeb.LeaderboardLive do
   alias Algora.Repo
   alias Algora.Money
   import Ecto.Query
+  import Ecto.Changeset
   import AlgoraWeb.Component.Card
   import AlgoraWeb.Component.DataTable
   import AlgoraWeb.Component.Avatar
@@ -13,6 +14,15 @@ defmodule AlgoraWeb.LeaderboardLive do
   def mount(_params, _session, socket) do
     top_earners = get_top_earners()
     {:ok, assign(socket, :top_earners, top_earners)}
+  end
+
+  def handle_event("toggle-need-avatar", %{"user-id" => user_id}, socket) do
+    {:ok, _user} =
+      Accounts.get_user!(user_id) |> change() |> put_change(:need_avatar, true) |> Repo.update()
+
+    # Refresh the data
+    top_earners = get_top_earners()
+    {:noreply, assign(socket, :top_earners, top_earners)}
   end
 
   def render(assigns) do
@@ -43,6 +53,13 @@ defmodule AlgoraWeb.LeaderboardLive do
             <.data_table id={"leaderboard-#{country}"} rows={users}>
               <:col :let={user} label="User">
                 <div class="flex items-center gap-4">
+                  <input
+                    type="checkbox"
+                    class="w-6 h-6 rounded border-gray-300"
+                    checked={user.need_avatar}
+                    phx-click="toggle-need-avatar"
+                    phx-value-user-id={user.id}
+                  />
                   <.avatar class="h-24 w-24">
                     <.avatar_image src={user.avatar_url} alt={user.name} />
                     <.avatar_fallback class="text-lg">
@@ -80,13 +97,14 @@ defmodule AlgoraWeb.LeaderboardLive do
       from u in Accounts.User,
         join: t in Transaction,
         on: t.receiver_id == u.id and not is_nil(t.succeeded_at),
-        group_by: [u.id, u.name, u.provider_login, u.avatar_url, u.country],
+        group_by: [u.id, u.name, u.provider_login, u.avatar_url, u.country, u.need_avatar],
         select: %{
           id: u.id,
           name: coalesce(u.name, u.handle),
           provider_login: u.provider_login,
           avatar_url: u.avatar_url,
           country: u.country,
+          need_avatar: u.need_avatar,
           total_earned: sum(t.amount),
           transaction_count: count(t.id)
         }
@@ -102,6 +120,7 @@ defmodule AlgoraWeb.LeaderboardLive do
           u1.provider_login,
           u1.avatar_url,
           u1.country,
+          u1.need_avatar,
           u1.total_earned,
           u1.transaction_count
         ],

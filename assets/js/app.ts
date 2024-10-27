@@ -2,9 +2,6 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket, type ViewHook } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
-import { VidstackPlayer, VidstackPlayerLayout } from "vidstack/global/player";
-import { isHLSProvider } from "vidstack";
-import HLS from "@algora/hls.js";
 
 // TODO: add eslint & biome
 // TODO: enable strict mode
@@ -372,6 +369,33 @@ const Hooks = {
         trigger.removeEventListener("mouseenter", this.handleMouseEnter);
         trigger.removeEventListener("mouseleave", this.handleMouseLeave);
         trigger.removeEventListener("mousemove", this.handleMouseMove);
+      });
+    },
+  },
+  DeriveHandle: {
+    mounted() {
+      const handleInput = document.querySelector("[data-handle-target]");
+      let shouldDerive = true;
+
+      // Listen for manual edits to the handle field
+      handleInput?.addEventListener("input", () => {
+        shouldDerive = false;
+      });
+
+      // Listen for changes to the name field
+      this.el.addEventListener("input", (e) => {
+        if (!shouldDerive) return;
+
+        const handle = e.target.value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+
+        if (handleInput) {
+          (handleInput as HTMLInputElement).value = handle;
+          // Trigger the blur event to update the server state
+          handleInput.dispatchEvent(new Event("blur"));
+        }
       });
     },
   },

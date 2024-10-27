@@ -58,7 +58,8 @@ defmodule Algora.MixProject do
       {:joken, "~> 2.5"},
       {:nanoid, "~> 2.1.0"},
       {:ex_cldr, "~> 2.0"},
-      {:ex_money, "~> 5.12"}
+      {:ex_money, "~> 5.12"},
+      {:salad_ui, "~> 0.11.0", only: [:dev]}
     ]
   end
 

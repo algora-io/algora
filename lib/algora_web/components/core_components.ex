@@ -60,7 +60,7 @@ defmodule AlgoraWeb.CoreComponents do
     <.link
       navigate="/"
       aria-label="Algora TV"
-      class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
+      class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
     >
       <AlgoraWeb.Components.Icons.algora class={["text-white", @class || "w-20 h-auto"]} />
     </.link>
@@ -112,7 +112,7 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full bg-gray-800 rounded-md px-3.5 py-2 text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-400"
+          class="group w-full bg-gray-800 rounded-md px-3.5 py-2 text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
           data-active-class="bg-gray-800"
@@ -162,7 +162,7 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-400"
+              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
               {link}
             >
               <%= render_slot(link) %>
@@ -212,7 +212,7 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full bg-gray-800 rounded-full text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-purple-400"
+          class="group w-full bg-gray-800 rounded-full text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
           data-active-class="bg-gray-800"
@@ -235,7 +235,7 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-purple-400"
+              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-indigo-400"
               {link}
             >
               <%= render_slot(link) %>
@@ -434,8 +434,8 @@ defmodule AlgoraWeb.CoreComponents do
       role="alert"
       class={[
         "fixed hidden top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 shadow-md shadow-gray-50/5 ring-1",
-        @kind == :info && "bg-green-900 text-green-100 ring-green-900 fill-green-900",
-        @kind == :note && "bg-purple-900 text-purple-100 ring-purple-900 fill-purple-900",
+        @kind == :info && "bg-emerald-900 text-emerald-100 ring-emerald-900 fill-emerald-900",
+        @kind == :note && "bg-indigo-900 text-indigo-100 ring-indigo-900 fill-indigo-900",
         @kind == :error && "bg-red-900 p-3 text-red-50 shadow-md ring-red-900 fill-red-50"
       ]}
       {@rest}
@@ -1059,8 +1059,8 @@ defmodule AlgoraWeb.CoreComponents do
         id="pwa-instructions-mobile"
         class="hidden text-md text-gray-600 mt-2 text-center bg-gray-100 p-2 rounded-md"
       >
-        Tap <.icon name="tabler-upload" class="size-5 mb-1 text-purple-500 inline" /> or
-        <.icon name="tabler-dots-vertical" class="size-5 mb-1 text-purple-500 inline" />
+        Tap <.icon name="tabler-upload" class="size-5 mb-1 text-indigo-500 inline" /> or
+        <.icon name="tabler-dots-vertical" class="size-5 mb-1 text-indigo-500 inline" />
         and select "Add to home screen" to install.
       </div>
     </div>

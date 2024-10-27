@@ -28,7 +28,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
             <p class="text-sm dark:text-gray-300">
               Create new bounties using the
               <code class="text-base font-semibold text-cyan-300">
-                <span>/bounty</span> <span class="text-green-300">$AMOUNT</span>
+                <span>/bounty</span> <span class="text-emerald-300">$AMOUNT</span>
               </code>
               command on Github.
             </p>
@@ -48,12 +48,12 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   type="button"
                   role="tab"
                   aria-selected="true"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
                   data-state="active"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
-                    <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-purple-200">
+                    <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-indigo-200">
                       <%= @open_count %>
                     </span>
                   </div>
@@ -62,12 +62,12 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   type="button"
                   role="tab"
                   aria-selected="false"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-purple-600/50"
+                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-indigo-600/50"
                   data-state="inactive"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
-                    <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-gray-400 group-hover:text-purple-200">
+                    <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-gray-400 group-hover:text-indigo-200">
                       <%= @completed_count %>
                     </span>
                   </div>
@@ -117,7 +117,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         <div class="relative h-full pl-2">
                           <div class="flex items-start justify-between">
                             <div class="font-mono text-2xl cursor-pointer">
-                              <div class="font-extrabold text-green-300 hover:text-green-200">
+                              <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
                                 $<%= bounty.amount %>
                               </div>
                             </div>
@@ -237,7 +237,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             View
                           </.link>
                           <.link
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-600/90 h-10 px-4 py-2"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-600/90 h-10 px-4 py-2"
                             navigate={~p"/org/#{@current_org.handle}/checkout?claims=#{claim.id}"}
                           >
                             Reward

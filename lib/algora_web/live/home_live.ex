@@ -15,7 +15,7 @@ defmodule AlgoraWeb.HomeLive do
     <main class="bg-gray-900 text-white py-16 px-6 md:px-12 flex flex-col md:flex-row justify-between items-start">
       <div class="md:w-1/2 mb-8 md:mb-0">
         <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4 font-display">
-          <%= gettext("Open source") %> <span class="text-green-400"><%= gettext("UpWork") %></span>
+          <%= gettext("Open source") %> <span class="text-emerald-400"><%= gettext("UpWork") %></span>
           <br /> <%= gettext("for") %>
           <span class="text-orange-400"><%= gettext("developers") %></span>
         </h1>
@@ -26,7 +26,7 @@ defmodule AlgoraWeb.HomeLive do
           <button
             phx-click="show_onboarding"
             phx-value-type="companies"
-            class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded transition duration-300"
+            class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded transition duration-300"
           >
             <%= gettext("Companies") %>
           </button>
@@ -58,7 +58,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <button
                 type="submit"
-                class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+                class="mt-6 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
                 <%= gettext("Proceed") %>
               </button>
@@ -87,7 +87,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <button
                 type="submit"
-                class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+                class="mt-6 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
                 <%= gettext("Proceed") %>
               </button>

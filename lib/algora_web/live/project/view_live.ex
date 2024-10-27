@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Project.ViewLive do
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-purple-400 font-medium text-xl">
+                <div class="text-indigo-400 font-medium text-xl">
                   <%= case @project.budget.type do %>
                     <% :hourly -> %>
                       $<%= @project.budget.from %>-<%= @project.budget.to %>/hour
@@ -114,7 +114,7 @@ defmodule AlgoraWeb.Project.ViewLive do
             <%!-- Sidebar --%>
             <div class="space-y-8">
               <%!-- Apply Button --%>
-              <button class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition">
+              <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition">
                 Apply Now
               </button>
 

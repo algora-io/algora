@@ -96,7 +96,7 @@ defmodule AlgoraWeb.User.InstallationsLive do
         <% end %>
       </ul>
       <.link
-        class="relative block w-full rounded-lg border-2 border-dashed border-gray-600 p-8 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        class="relative block w-full rounded-lg border-2 border-dashed border-gray-600 p-8 text-center hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         rel="noopener"
         href={Github.install_url()}
       >

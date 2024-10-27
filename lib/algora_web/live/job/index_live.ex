@@ -78,7 +78,7 @@ defmodule AlgoraWeb.Job.IndexLive do
               <div class="flex justify-between items-start mb-4">
                 <div>
                   <h2 class="text-xl font-semibold text-white mb-2">
-                    <.link navigate={~p"/jobs/#{job.id}"} class="hover:text-purple-400 transition">
+                    <.link navigate={~p"/jobs/#{job.id}"} class="hover:text-indigo-400 transition">
                       <%= job.title %>
                     </.link>
                   </h2>
@@ -94,7 +94,7 @@ defmodule AlgoraWeb.Job.IndexLive do
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="text-purple-400 font-medium">
+                  <div class="text-indigo-400 font-medium">
                     <%= case job.budget.type do %>
                       <% :hourly -> %>
                         $<%= job.budget.from %>-<%= job.budget.to %>/hour
@@ -144,7 +144,7 @@ defmodule AlgoraWeb.Job.IndexLive do
                         >
                           <div class="absolute inset-x-10 z-30 w-[20%] -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px">
                           </div>
-                          <div class="absolute w-[40%] z-30 -bottom-px bg-gradient-to-r from-transparent via-green-500 to-transparent h-px">
+                          <div class="absolute w-[40%] z-30 -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px">
                           </div>
                           <div class="font-bold text-white relative z-30 text-base">
                             <%= applicant.name %>

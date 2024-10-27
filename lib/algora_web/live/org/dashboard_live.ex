@@ -104,7 +104,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">
-                    <div class="flex-none rounded-full p-1 bg-green-400/10 text-green-400">
+                    <div class="flex-none rounded-full p-1 bg-emerald-400/10 text-emerald-400">
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
@@ -124,7 +124,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   </div>
                 </div>
                 <div class="pl-6">
-                  <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-green-400/5 text-green-400 ring-green-400/30">
+                  <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-emerald-400/5 text-emerald-400 ring-emerald-400/30">
                     <%= Money.format!(bounty.amount, bounty.currency) %>
                   </div>
                 </div>

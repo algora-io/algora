@@ -14,11 +14,13 @@ defmodule Algora.Payments.Transaction do
     field :currency, :string
     field :type, Ecto.Enum, values: [:charge, :transfer]
 
-    belongs_to :account, Algora.Payments.Account
-    belongs_to :customer, Algora.Payments.Customer
+    # TODO:
+    # belongs_to :account, Algora.Payments.Account
+    # belongs_to :customer, Algora.Payments.Customer
+    belongs_to :receiver, Algora.Accounts.User
     belongs_to :bounty, Algora.Bounties.Bounty
-    belongs_to :claim, Algora.Bounties.Claim
-    belongs_to :project, Algora.Projects.Project
+    # belongs_to :claim, Algora.Bounties.Claim
+    # belongs_to :project, Algora.Projects.Project
 
     timestamps()
   end

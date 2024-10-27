@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Table do
+defmodule AlgoraWeb.Component.DataTable do
   @moduledoc """
   Implement of table components from https://ui.shadcn.com/docs/components/table
   """
@@ -9,7 +9,7 @@ defmodule AlgoraWeb.Component.Table do
 
   ## Examples:
 
-    <.table>
+    <.data_table>
        <.table_caption>A list of your recent invoices.</.table_caption>
        <.table_header>
          <.table_row>
@@ -42,19 +42,48 @@ defmodule AlgoraWeb.Component.Table do
            </.table_cell>
          </.table_row>
        </.table_body>
-      </.table>
+      </.data_table>
   """
   attr :class, :string, default: nil
   attr :rest, :global
   slot :inner_block, required: true
 
-  def table(assigns) do
+  # Add these new attributes
+  attr :rows, :list, default: []
+  attr :id, :string
+
+  slot :col, required: true do
+    attr :label, :string
+    attr :align, :string
+  end
+
+  def data_table(assigns) do
     ~H"""
-    <table class={classes(["w-full caption-bottom text-sm", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
-    </table>
+    <div class="relative w-full overflow-auto">
+      <table class={classes(["w-full caption-bottom text-sm", @class])} {@rest}>
+        <thead>
+          <tr>
+            <th :for={col <- @col} class={get_alignment_class(col)}>
+              <%= col.label %>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr :for={row <- @rows}>
+            <td :for={col <- @col} class={get_alignment_class(col)}>
+              <%= render_slot(col, row) %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     """
   end
+
+  # Add this helper function
+  defp get_alignment_class(%{align: "right"}), do: "p-4 text-right"
+  defp get_alignment_class(%{align: "center"}), do: "p-4 text-center"
+  defp get_alignment_class(_), do: "p-4 text-left"
 
   attr :class, :string, default: nil
   attr :rest, :global

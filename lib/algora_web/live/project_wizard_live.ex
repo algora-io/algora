@@ -61,30 +61,38 @@ defmodule AlgoraWeb.ProjectWizardLive do
           <% end %>
         </div>
       </div>
-      <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-gray-950 to-gray-900 px-8 py-4 overflow-y-auto">
-        <h2 class="text-lg text-gray-200 font-semibold uppercase mb-4">Matching Developers</h2>
+      <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
+        <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
+          Matching Developers
+        </h2>
         <%= if @matching_devs == [] do %>
           <p class="text-gray-400">Add skills to see matching developers</p>
         <% else %>
           <%= for dev <- @matching_devs do %>
-            <div class="mb-4 bg-white/[7.5%] p-3 rounded">
-              <div class="flex items-center mb-2">
+            <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
+              <div class="flex mb-2 gap-3">
                 <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
                 <div>
-                  <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                  <div class="text-sm text-gray-400">@<%= dev.handle %></div>
-                  <div class="text-sm">
-                    <div class="mb-1 -ml-1">
-                      <div class="flex flex-wrap gap-1 mt-1">
-                        <%= for skill <- dev.skills do %>
-                          <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
-                            <%= skill %>
-                          </span>
-                        <% end %>
+                  <div class="flex justify-between">
+                    <div>
+                      <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                      <div class="text-sm text-gray-400">@<%= dev.handle %></div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                      <div class="text-gray-300">Earned</div>
+                      <div class="text-white font-semibold">
+                        <%= Money.format!(dev.amount, "USD") %>
                       </div>
                     </div>
-                    <div>
-                      Earned: <%= Money.format!(dev.amount, "USD") %> | Bounties: <%= dev.bounties %> | Projects: <%= dev.projects %>
+                  </div>
+
+                  <div class="pt-3 text-sm">
+                    <div class="-ml-1 text-sm flex flex-wrap gap-1">
+                      <%= for skill <- dev.skills do %>
+                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
+                          <%= skill %>
+                        </span>
+                      <% end %>
                     </div>
                   </div>
                 </div>
@@ -108,18 +116,18 @@ defmodule AlgoraWeb.ProjectWizardLive do
         <input
           type="text"
           placeholder="Desired areas of expertise"
-          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
       </div>
 
       <div class="flex flex-wrap gap-3">
         <%= for skill <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
-          <div class="bg-blue-900 text-blue-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
+          <div class="bg-purple-900 text-purple-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
             <%= skill %>
             <button
               phx-click="remove_skill"
               phx-value-skill={skill}
-              class="ml-2 text-blue-300 hover:text-blue-100"
+              class="ml-2 text-purple-300 hover:text-purple-100"
             >
               ×
             </button>
@@ -281,12 +289,6 @@ defmodule AlgoraWeb.ProjectWizardLive do
     """
   end
 
-  def handle_event("update_project", %{"field" => field, "value" => value} = params, socket) do
-    updated_project = update_project_field(socket.assigns.project, field, value, params)
-    matching_devs = get_matching_devs(updated_project)
-    {:noreply, assign(socket, project: updated_project, matching_devs: matching_devs)}
-  end
-
   defp update_project_field(project, "skills", _value, %{"skill" => skill}) do
     skills =
       if skill in project.skills,
@@ -333,6 +335,12 @@ defmodule AlgoraWeb.ProjectWizardLive do
     updated_skills = List.delete(socket.assigns.project.skills, skill)
     updated_project = Map.put(socket.assigns.project, :skills, updated_skills)
     {:noreply, assign(socket, project: updated_project)}
+  end
+
+  def handle_event("update_project", %{"field" => field, "value" => value} = params, socket) do
+    updated_project = update_project_field(socket.assigns.project, field, value, params)
+    matching_devs = get_matching_devs(updated_project)
+    {:noreply, assign(socket, project: updated_project, matching_devs: matching_devs)}
   end
 
   defp next_step_label(1), do: "Project Name"

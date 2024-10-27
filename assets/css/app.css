@@ -108,7 +108,7 @@
   border-radius: 4px;
 }
 .alert-info {
-  @apply text-blue-300 bg-blue-950/50 border-blue-500;
+  @apply text-purple-300 bg-purple-950/50 border-purple-500;
 }
 .alert-warning {
   @apply text-yellow-300 bg-yellow-950/50 border-yellow-500;

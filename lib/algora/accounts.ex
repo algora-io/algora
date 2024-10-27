@@ -14,14 +14,24 @@ defmodule Algora.Accounts do
     |> Repo.all()
   end
 
-  def list_matching_devs(country_code) do
+  @spec list_matching_devs(
+          params :: %{
+            optional(:country) => String.t(),
+            optional(:limit) => non_neg_integer(),
+            optional(:skills) => [String.t()]
+          }
+        ) :: [map()]
+  def list_matching_devs(opts) do
+    dbg(opts)
+
     emoji = fn ->
       Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳"])
     end
 
-    users = list_users(country: String.upcase(country_code), limit: 8)
+    users = list_users(opts)
 
-    Enum.map(users, fn user ->
+    users
+    |> Enum.map(fn user ->
       %{
         name: user.name || user.handle,
         handle: user.handle,
@@ -33,6 +43,7 @@ defmodule Algora.Accounts do
         avatar_url: user.avatar_url
       }
     end)
+    |> filter_by_skills(opts[:skills])
   end
 
   def list_orgs(opts) do
@@ -179,5 +190,15 @@ defmodule Algora.Accounts do
   end
 
   defp filter_by_country(query, nil), do: query
-  defp filter_by_country(query, country), do: where(query, [u], u.country == ^country)
+
+  defp filter_by_country(query, country),
+    do: where(query, [u], u.country == ^String.upcase(country))
+
+  defp filter_by_skills(devs, nil), do: devs
+
+  defp filter_by_skills(devs, skills) do
+    Enum.filter(devs, fn dev ->
+      Enum.any?(dev.skills, &(&1 in skills))
+    end)
+  end
 end

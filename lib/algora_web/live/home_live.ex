@@ -181,7 +181,7 @@ defmodule AlgoraWeb.HomeLive do
       {:ok,
        socket
        |> assign(:page_title, "Home")
-       |> assign(:users, Accounts.list_matching_devs(country_code))
+       |> assign(:users, Accounts.list_matching_devs(limit: 8, country: country_code))
        |> assign(:orgs, get_orgs(country_code))
        |> assign(:show_onboarding, false)
        |> assign(:show_tech_question, false)

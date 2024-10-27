@@ -59,6 +59,8 @@ defmodule AlgoraWeb.Router do
     live "/jobs", Job.IndexLive
     live "/jobs/:id", Job.ViewLive
 
+    live "/leaderboard", LeaderboardLive
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

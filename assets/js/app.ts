@@ -309,6 +309,72 @@ const Hooks = {
       });
     },
   },
+  AnimatedTooltip: {
+    mounted() {
+      const springConfig = { stiffness: 100, damping: 5 };
+      let hoveredTooltip: HTMLElement | null = null;
+      let currentX = 0;
+
+      const handleMouseEnter = (event: MouseEvent) => {
+        const target = event.currentTarget as HTMLElement;
+        const tooltip = target.querySelector("[data-tooltip]") as HTMLElement;
+        if (tooltip) {
+          hoveredTooltip = tooltip;
+          tooltip.classList.remove("hidden");
+          tooltip.style.opacity = "1";
+          tooltip.style.transform = "translateY(0) scale(1)";
+        }
+      };
+
+      const handleMouseLeave = (event: MouseEvent) => {
+        const target = event.currentTarget as HTMLElement;
+        const tooltip = target.querySelector("[data-tooltip]") as HTMLElement;
+        if (tooltip) {
+          tooltip.classList.add("hidden");
+          tooltip.style.opacity = "0";
+          tooltip.style.transform = "translateY(20px) scale(0.6)";
+          hoveredTooltip = null;
+        }
+      };
+
+      const handleMouseMove = (event: MouseEvent) => {
+        if (!hoveredTooltip) return;
+
+        const target = event.currentTarget as HTMLElement;
+        const halfWidth = target.offsetWidth / 2;
+        currentX = event.offsetX - halfWidth;
+
+        // Calculate rotation and translation based on mouse position
+        const rotateRange = [-45, 45];
+        const translateRange = [-50, 50];
+        const progress = (currentX + 100) / 200; // Normalize to 0-1
+
+        const rotation =
+          rotateRange[0] + (rotateRange[1] - rotateRange[0]) * progress;
+        const translation =
+          translateRange[0] +
+          (translateRange[1] - translateRange[0]) * progress;
+
+        hoveredTooltip.style.transform = `translateX(${translation}px) rotate(${rotation}deg)`;
+      };
+
+      // Set up event listeners for all tooltip items
+      this.el.querySelectorAll("[data-tooltip-trigger]").forEach((trigger) => {
+        trigger.addEventListener("mouseenter", handleMouseEnter);
+        trigger.addEventListener("mouseleave", handleMouseLeave);
+        trigger.addEventListener("mousemove", handleMouseMove);
+      });
+    },
+
+    destroyed() {
+      // Clean up event listeners if needed
+      this.el.querySelectorAll("[data-tooltip-trigger]").forEach((trigger) => {
+        trigger.removeEventListener("mouseenter", this.handleMouseEnter);
+        trigger.removeEventListener("mouseleave", this.handleMouseLeave);
+        trigger.removeEventListener("mousemove", this.handleMouseMove);
+      });
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

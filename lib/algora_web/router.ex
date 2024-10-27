@@ -53,6 +53,10 @@ defmodule AlgoraWeb.Router do
     live "/projects", Project.IndexLive
     live "/projects/:id", Project.ViewLive
 
+    live "/jobs/new", Job.CreateLive
+    live "/jobs", Job.IndexLive
+    live "/jobs/:id", Job.ViewLive
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

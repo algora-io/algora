@@ -3,7 +3,6 @@ defmodule AlgoraWeb.Project.IndexLive do
   alias Algora.Money
 
   def mount(_params, _session, socket) do
-    # Mock data following the project structure from ProjectWizardLive
     projects = [
       %{
         id: 1,
@@ -36,6 +35,33 @@ defmodule AlgoraWeb.Project.IndexLive do
         }
       }
     ]
+
+    projects =
+      projects
+      |> Enum.map(fn project ->
+        Map.put(project, :applicants, [
+          %{
+            name: "Alice Johnson",
+            designation: "Senior Developer",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice"
+          },
+          %{
+            name: "Bob Smith",
+            designation: "Full Stack Engineer",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"
+          },
+          %{
+            name: "Charlie Davis",
+            designation: "Senior Developer",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Charlie"
+          },
+          %{
+            name: "Dave Johnson",
+            designation: "Full Stack Engineer",
+            image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Dave"
+          }
+        ])
+      end)
 
     {:ok, assign(socket, projects: projects)}
   end
@@ -111,18 +137,45 @@ defmodule AlgoraWeb.Project.IndexLive do
                   </div>
                 </div>
 
-                <div class="flex items-center gap-3 text-sm">
-                  <div class="flex items-center gap-2 text-gray-400">
-                    <.icon name="tabler-chart-bar" class="w-4 h-4" />
-                    <%= String.capitalize(project.scope.experience) %>
+                <div class="flex items-center gap-6">
+                  <div id={"applicants-#{project.id}"} phx-hook="AnimatedTooltip" class="flex">
+                    <%= for applicant <- project.applicants do %>
+                      <div class="-mr-4 relative group" data-tooltip-trigger>
+                        <div
+                          data-tooltip
+                          class="hidden absolute -top-16 -left-1/2 translate-x-1/2 text-xs flex-col items-center justify-center rounded-md bg-black z-50 shadow-xl px-4 py-2 whitespace-nowrap"
+                        >
+                          <div class="absolute inset-x-10 z-30 w-[20%] -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px">
+                          </div>
+                          <div class="absolute w-[40%] z-30 -bottom-px bg-gradient-to-r from-transparent via-green-500 to-transparent h-px">
+                          </div>
+                          <div class="font-bold text-white relative z-30 text-base">
+                            <%= applicant.name %>
+                          </div>
+                          <div class="text-white text-xs"><%= applicant.designation %></div>
+                        </div>
+                        <img
+                          src={applicant.image}
+                          alt={applicant.name}
+                          class="object-cover !m-0 !p-0 object-top rounded-full h-10 w-10 border-2 group-hover:scale-105 group-hover:z-30 border-white relative transition duration-500 bg-gray-900"
+                        />
+                      </div>
+                    <% end %>
                   </div>
-                  <div class="flex items-center gap-2 text-gray-400">
-                    <.icon name="tabler-clock" class="w-4 h-4" />
-                    <%= String.capitalize(project.scope.duration) %> term
-                  </div>
-                  <div class="flex items-center gap-2 text-gray-400">
-                    <.icon name="tabler-layout-grid" class="w-4 h-4" />
-                    <%= String.capitalize(project.scope.size) %> size
+
+                  <div class="flex items-center gap-3 text-sm">
+                    <div class="flex items-center gap-2 text-gray-400">
+                      <.icon name="tabler-chart-bar" class="w-4 h-4" />
+                      <%= String.capitalize(project.scope.experience) %>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-400">
+                      <.icon name="tabler-clock" class="w-4 h-4" />
+                      <%= String.capitalize(project.scope.duration) %> term
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-400">
+                      <.icon name="tabler-layout-grid" class="w-4 h-4" />
+                      <%= String.capitalize(project.scope.size) %> size
+                    </div>
                   </div>
                 </div>
               </div>

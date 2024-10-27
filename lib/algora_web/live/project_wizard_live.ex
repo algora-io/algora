@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.ProjectWizardLive do
   use AlgoraWeb, :live_view
   alias Algora.Accounts
+  alias Algora.Money
 
   def mount(_params, session, socket) do
     project = %{
@@ -66,18 +67,26 @@ defmodule AlgoraWeb.ProjectWizardLive do
           <p class="text-gray-400">Add skills to see matching developers</p>
         <% else %>
           <%= for dev <- @matching_devs do %>
-            <div class="mb-4 bg-gray-800 p-3 rounded">
+            <div class="mb-4 bg-white/[7.5%] p-3 rounded">
               <div class="flex items-center mb-2">
-                <img src={dev.avatar_url} alt={dev.name} class="w-10 h-10 rounded-full mr-3" />
+                <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
                 <div>
-                  <div class="font-semibold"><%= dev.name %></div>
-                  <div class="text-sm text-gray-400">@<%= dev.handle %> <%= dev.flag %></div>
-                </div>
-              </div>
-              <div class="text-sm">
-                <div class="mb-1">Skills: <%= Enum.join(dev.skills, ", ") %></div>
-                <div>
-                  Earned: $<%= dev.amount %> | Bounties: <%= dev.bounties %> | Projects: <%= dev.projects %>
+                  <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                  <div class="text-sm text-gray-400">@<%= dev.handle %></div>
+                  <div class="text-sm">
+                    <div class="mb-1 -ml-1">
+                      <div class="flex flex-wrap gap-1 mt-1">
+                        <%= for skill <- dev.skills do %>
+                          <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
+                            <%= skill %>
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+                    <div>
+                      Earned: <%= Money.format!(dev.amount, "USD") %> | Bounties: <%= dev.bounties %> | Projects: <%= dev.projects %>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

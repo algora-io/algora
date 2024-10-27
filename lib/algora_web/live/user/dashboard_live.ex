@@ -121,8 +121,4 @@ defmodule AlgoraWeb.User.DashboardLive do
       }
     ]
   end
-
-  defp get_avatar_url(name) do
-    "https://ui-avatars.com/api/?name=#{URI.encode_www_form(name)}&background=random&color=fff&size=128"
-  end
 end

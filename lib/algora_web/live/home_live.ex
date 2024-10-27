@@ -2,7 +2,7 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
-  alias Algora.Misc.CountryEmojis
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -26,7 +26,7 @@ defmodule AlgoraWeb.HomeLive do
           <button
             phx-click="show_onboarding"
             phx-value-type="companies"
-            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded transition duration-300"
+            class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded transition duration-300"
           >
             <%= gettext("Companies") %>
           </button>
@@ -58,7 +58,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <button
                 type="submit"
-                class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+                class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
                 <%= gettext("Proceed") %>
               </button>
@@ -87,7 +87,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <button
                 type="submit"
-                class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+                class="mt-6 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
                 <%= gettext("Proceed") %>
               </button>

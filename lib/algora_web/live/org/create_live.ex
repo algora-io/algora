@@ -18,7 +18,7 @@ defmodule AlgoraWeb.Org.CreateLive do
      |> assign(total_steps: 1)
      |> assign(org: org)
      |> assign(current_user: %{email: session["user_email"]})
-     |> assign(matching_devs: get_matching_devs(org))}
+     |> assign(matching_orgs: get_matching_orgs(org))}
   end
 
   def render(assigns) do
@@ -58,32 +58,32 @@ defmodule AlgoraWeb.Org.CreateLive do
       </div>
       <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
         <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
-          Matching Developers
+          You're in good company
         </h2>
-        <%= if @matching_devs == [] do %>
-          <p class="text-gray-400">Add skills to see matching developers</p>
+        <%= if @matching_orgs == [] do %>
+          <p class="text-gray-400">Add skills to see similar organizations</p>
         <% else %>
-          <%= for dev <- @matching_devs do %>
+          <%= for org <- @matching_orgs do %>
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
               <div class="flex mb-2 gap-3">
-                <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
-                <div>
+                <img src={org.avatar_url} alt={org.name} class="w-24 h-24 rounded-full mr-3" />
+                <div class="flex-grow">
                   <div class="flex justify-between">
                     <div>
-                      <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                      <div class="text-sm text-gray-400">@<%= dev.handle %></div>
+                      <div class="font-semibold"><%= org.name %> <%= org.flag %></div>
+                      <div class="text-sm text-gray-400">@<%= org.handle %></div>
                     </div>
                     <div class="flex flex-col items-end">
-                      <div class="text-gray-300">Earned</div>
+                      <div class="text-gray-300">Awarded</div>
                       <div class="text-white font-semibold">
-                        <%= Money.format!(dev.amount, "USD") %>
+                        <%= Money.format!(org.amount, "USD") %>
                       </div>
                     </div>
                   </div>
 
                   <div class="pt-3 text-sm">
                     <div class="-ml-1 text-sm flex flex-wrap gap-1">
-                      <%= for skill <- dev.skills do %>
+                      <%= for skill <- org.tech_stack do %>
                         <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
                           <%= skill %>
                         </span>
@@ -340,8 +340,8 @@ defmodule AlgoraWeb.Org.CreateLive do
 
   def handle_event("update_job", %{"field" => field, "value" => value} = params, socket) do
     updated_job = update_job_field(socket.assigns.job, field, value, params)
-    matching_devs = get_matching_devs(updated_job)
-    {:noreply, assign(socket, job: updated_job, matching_devs: matching_devs)}
+    matching_orgs = get_matching_orgs(updated_job)
+    {:noreply, assign(socket, job: updated_job, matching_orgs: matching_orgs)}
   end
 
   def handle_event("derive_handle", %{"value" => name}, socket) do
@@ -364,7 +364,7 @@ defmodule AlgoraWeb.Org.CreateLive do
   defp next_step_label(3), do: "Budget"
   defp next_step_label(4), do: "Description"
 
-  defp get_matching_devs(job) do
-    Accounts.list_matching_devs(limit: 5, country: job.country, skills: job.skills)
+  defp get_matching_orgs(org) do
+    Accounts.list_orgs(limit: 5)
   end
 end

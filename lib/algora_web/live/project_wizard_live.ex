@@ -77,7 +77,7 @@ defmodule AlgoraWeb.ProjectWizardLive do
               <div class="text-sm">
                 <div class="mb-1">Skills: <%= Enum.join(dev.skills, ", ") %></div>
                 <div>
-                  Earned: $<%= dev.earned %> | Bounties: <%= dev.bounties %> | Projects: <%= dev.projects %>
+                  Earned: $<%= dev.amount %> | Bounties: <%= dev.bounties %> | Projects: <%= dev.projects %>
                 </div>
               </div>
             </div>

@@ -5,15 +5,6 @@ defmodule Algora.Accounts do
   alias Algora.Repo
   alias Algora.Accounts.{User, Identity}
 
-  def list_users(opts) do
-    User
-    |> where(type: :individual)
-    |> filter_by_country(opts[:country])
-    |> limit(^Keyword.fetch!(opts, :limit))
-    |> order_by(desc: :stargazers_count)
-    |> Repo.all()
-  end
-
   @spec list_matching_devs(
           params :: %{
             optional(:country) => String.t(),
@@ -22,37 +13,45 @@ defmodule Algora.Accounts do
           }
         ) :: [map()]
   def list_matching_devs(opts) do
-    dbg(opts)
-
-    emoji = fn ->
-      Enum.random(["🇺🇸", "🇬🇧", "🇨🇦", "🇩🇪", "🇮🇳"])
-    end
-
-    users = list_users(opts)
-
-    users
+    User
+    |> where(type: :individual)
+    |> filter_by_country(opts[:country])
+    |> filter_by_skills(opts[:skills])
+    |> limit(^Keyword.get(opts, :limit, 100))
+    |> order_by(desc: :stargazers_count)
+    |> Repo.all()
     |> Enum.map(fn user ->
       %{
         name: user.name || user.handle,
         handle: user.handle,
-        flag: (user.country && Algora.Misc.CountryEmojis.get(user.country)) || emoji.(),
+        flag: get_flag(user),
         skills: user.tech_stack |> Enum.take(6),
-        earned: :rand.uniform(50),
+        amount: :rand.uniform(20_000),
         bounties: :rand.uniform(40),
         projects: :rand.uniform(10),
         avatar_url: user.avatar_url
       }
     end)
-    |> filter_by_skills(opts[:skills])
   end
 
   def list_orgs(opts) do
-    Repo.all(
+    query =
       from u in User,
         where: u.type == :organization and u.seeded == false and is_nil(u.provider_login),
-        limit: ^Keyword.fetch!(opts, :limit),
+        limit: ^Keyword.get(opts, :limit, 100),
         order_by: [desc: u.stargazers_count]
-    )
+
+    query
+    |> Repo.all()
+    |> Enum.map(fn user ->
+      %{
+        name: user.name || user.handle,
+        handle: user.handle,
+        flag: get_flag(user),
+        amount: :rand.uniform(100_000),
+        avatar_url: user.avatar_url
+      }
+    end)
   end
 
   def get_users_map(user_ids) when is_list(user_ids) do
@@ -194,11 +193,12 @@ defmodule Algora.Accounts do
   defp filter_by_country(query, country),
     do: where(query, [u], u.country == ^String.upcase(country))
 
-  defp filter_by_skills(devs, nil), do: devs
+  defp filter_by_skills(query, nil), do: query
 
-  defp filter_by_skills(devs, skills) do
-    Enum.filter(devs, fn dev ->
-      Enum.any?(dev.skills, &(&1 in skills))
-    end)
+  defp filter_by_skills(query, skills) when is_list(skills) and length(skills) > 0 do
+    query
+    |> where([u], fragment("? && ?", u.tech_stack, ^skills))
   end
+
+  defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
 end

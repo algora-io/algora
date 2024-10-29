@@ -53,6 +53,7 @@ defmodule Algora.Bounties do
     query =
       from b in sq,
         join: t in assoc(b, :task),
+        join: o in assoc(b, :owner),
         left_join: r in assoc(t, :repository),
         left_join: u in assoc(r, :user),
         select: %{
@@ -60,6 +61,12 @@ defmodule Algora.Bounties do
           inserted_at: b.inserted_at,
           amount: b.amount,
           currency: b.currency,
+          tech_stack: o.tech_stack,
+          owner: %{
+            name: coalesce(o.name, o.handle),
+            handle: o.handle,
+            avatar_url: o.avatar_url
+          },
           task: %{
             title: t.title,
             owner: u.provider_login,

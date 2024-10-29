@@ -77,13 +77,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def dashboard_onboarding(assigns) do
     ~H"""
     <div class="text-white p-4 pt-6 sm:p-6 md:p-8">
-      <h1 class="text-4xl font-semibold text-white mb-8">Get started</h1>
+      <h1 class="text-2xl font-semibold text-white mb-8">Get started</h1>
 
-      <div class="grid grid-cols-3 gap-6 mb-12">
+      <div class="grid grid-cols-3 gap-8 mb-12">
         <%= for card <- @get_started_cards do %>
           <div class="group flex h-full w-full max-w-md items-center justify-center">
-            <div class="relative z-10 flex h-full w-full cursor-pointer items-center overflow-hidden ring-1 group-hover:ring-2 rounded-md shadow-[0px_3.26536px_2.21381px_0px_rgba(30,_27,_75,_0.08),_0px_7.84712px_5.32008px_0px_rgba(30,_27,_75,_0.11),_0px_14.77543px_10.01724px_0px_rgba(30,_27,_75,_0.14),_0px_26.35684px_17.86905px_0px_rgba(30,_27,_75,_0.16),_0px_49.29758px_33.42209px_0px_rgba(30,_27,_75,_0.19),_0px_15px_15px_0px_rgba(30,_27,_75,_0.27)] ring-purple-400/20 p-[1.5px]">
-              <div class="absolute inset-0 h-full w-full opacity-50 group-hover:opacity-100 transition-opacity animate-rotate rounded-full bg-[conic-gradient(#5D59EB_20deg,#8b5cf6_120deg)]">
+            <div class="relative z-10 flex h-full w-full cursor-pointer items-center overflow-hidden ring-1 group-hover:ring-2 rounded-md ring-purple-400/20 p-[1.5px]">
+              <div class="absolute inset-0 h-full w-full opacity-100 group-hover:opacity-100 transition-opacity animate-rotate rounded-full bg-[conic-gradient(#5D59EB_20deg,#8b5cf6_120deg)]">
               </div>
               <a
                 rel="noopener"
@@ -95,9 +95,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <div class="flex items-center gap-3 mb-4">
                     <.icon
                       name={card.icon}
-                      class="h-8 w-8 text-gray-400 group-hover:text-white transition-colors"
+                      class="h-8 w-8 text-indigo-400 group-hover:text-white transition-colors"
                     />
-                    <h2 class="text-xl font-semibold text-gray-100 group-hover:text-white transition-colors">
+                    <h2 class="text-xl font-display font-semibold text-indigo-300 group-hover:text-white transition-colors">
                       <%= card.title %>
                     </h2>
                   </div>

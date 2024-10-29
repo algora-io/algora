@@ -31,18 +31,20 @@ defmodule Algora.Accounts do
     |> limit(^Keyword.get(opts, :limit, 100))
     |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.receiver_id)
     |> order_by([u, ta], desc: coalesce(ta.sum, 0), desc: u.stargazers_count)
+    |> select([u, ta], {u, ta.sum})
     |> Repo.all()
-    |> Enum.map(fn user ->
-      %{
-        name: user.name || user.handle,
-        handle: user.handle,
-        flag: get_flag(user),
-        skills: user.tech_stack |> Enum.take(6),
-        amount: :rand.uniform(20_000),
-        bounties: :rand.uniform(40),
-        projects: :rand.uniform(10),
-        avatar_url: user.avatar_url
-      }
+    |> Enum.map(fn
+      {user, sum} ->
+        %{
+          name: user.name || user.handle,
+          handle: user.handle,
+          flag: get_flag(user),
+          skills: user.tech_stack |> Enum.take(6),
+          amount: sum || 0,
+          bounties: :rand.uniform(40),
+          projects: :rand.uniform(10),
+          avatar_url: user.avatar_url
+        }
     end)
   end
 

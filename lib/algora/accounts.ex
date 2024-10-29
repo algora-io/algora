@@ -13,12 +13,22 @@ defmodule Algora.Accounts do
           }
         ) :: [map()]
   def list_matching_devs(opts) do
+    transfer_amounts_query =
+      from t in Algora.Payments.Transaction,
+        where: t.type == :transfer,
+        group_by: t.receiver_id,
+        select: %{
+          receiver_id: t.receiver_id,
+          sum: sum(t.amount)
+        }
+
     User
     |> where(type: :individual)
     |> filter_by_country(opts[:country])
     |> filter_by_skills(opts[:skills])
     |> limit(^Keyword.get(opts, :limit, 100))
-    |> order_by(desc: :stargazers_count)
+    |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.receiver_id)
+    |> order_by([u, ta], desc: coalesce(ta.sum, 0), desc: u.stargazers_count)
     |> Repo.all()
     |> Enum.map(fn user ->
       %{
@@ -37,7 +47,7 @@ defmodule Algora.Accounts do
   def list_orgs(opts) do
     query =
       from u in User,
-        where: u.type == :organization and u.seeded == false and not(is_nil(u.provider_login)),
+        where: u.type == :organization and u.seeded == false and not is_nil(u.provider_login),
         limit: ^Keyword.get(opts, :limit, 100),
         order_by: [desc: u.priority, desc: u.stargazers_count]
 

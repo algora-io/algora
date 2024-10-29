@@ -13,12 +13,27 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:ok,
      socket
+     |> assign(:onboarding_completed?, false)
      |> assign(:stats, stats)
      |> assign(:recent_bounties, recent_bounties)
-     |> assign(:recent_activities, recent_activities)}
+     |> assign(:recent_activities, recent_activities)
+     |> assign(:get_started_cards, get_started_cards())
+     |> assign(:tech_stack, ["Elixir", "TypeScript"])
+     |> assign(:locations, ["United States", "Remote"])
+     |> assign(:matches, Algora.Accounts.list_matching_devs(limit: 8, country: "US"))}
   end
 
   def render(assigns) do
+    ~H"""
+    <%= if @onboarding_completed? do %>
+      <.dashboard_onboarded {assigns} />
+    <% else %>
+      <.dashboard_onboarding {assigns} />
+    <% end %>
+    """
+  end
+
+  def dashboard_onboarded(assigns) do
     ~H"""
     <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8">
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -57,6 +72,100 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </div>
     </div>
     """
+  end
+
+  def dashboard_onboarding(assigns) do
+    ~H"""
+    <div class="text-white p-6">
+      <h1 class="text-4xl font-handwriting mb-8">Get started</h1>
+
+      <div class="grid grid-cols-4 gap-6 mb-12">
+        <%= for card <- @get_started_cards do %>
+          <div class="rounded-lg p-6 relative bg-white/10 cursor-pointer group">
+            <h2 class="text-xl font-semibold mb-4"><%= card.title %></h2>
+            <%= for paragraph <- card.paragraphs do %>
+              <p class="text-sm mb-2 text-gray-300"><%= paragraph %></p>
+            <% end %>
+            <div class="absolute bottom-4 right-6 text-3xl group-hover:translate-x-2 transition-transform">
+              &rarr;
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <h2 class="text-3xl font-handwriting mb-6">Your matches</h2>
+
+      <div class="flex gap-6 mb-8">
+        <div class="flex items-center">
+          <span class="mr-2">Tech stack:</span>
+          <%= for tech <- @tech_stack do %>
+            <span class="bg-gray-700 text-sm rounded-full px-3 py-1 mr-2"><%= tech %></span>
+          <% end %>
+        </div>
+
+        <div class="flex items-center">
+          <span class="mr-2">Location:</span>
+          <%= for location <- @locations do %>
+            <span class="bg-gray-700 text-sm rounded-full px-3 py-1 mr-2"><%= location %></span>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-4 gap-6">
+        <%= for match <- @matches do %>
+          <div class="bg-gray-800 rounded-lg p-4 flex flex-col h-full relative">
+            <div class="absolute top-2 right-2 text-xl">
+              <%= match.flag %>
+            </div>
+            <div class="flex items-center mb-4">
+              <img
+                src={match.avatar_url}
+                alt={match.name}
+                class="w-12 h-12 rounded-full mr-3 object-cover"
+              />
+              <div>
+                <div class="font-semibold"><%= match.name %></div>
+                <div class="text-sm text-gray-400">@<%= match.handle %></div>
+              </div>
+            </div>
+            <div class="text-sm mb-2"><%= Enum.join(match.skills, ", ") %></div>
+            <div class="text-sm mb-4 mt-auto">
+              $<%= match.amount %> earned (<%= match.bounties %> bounties, <%= match.projects %> projects)
+            </div>
+            <button class="w-full border border-dashed border-white text-sm py-2 rounded hover:bg-gray-700 transition-colors">
+              Collaborate
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  defp get_started_cards do
+    [
+      %{
+        title: "Create bounties",
+        paragraphs: [
+          "Install Algora in your GitHub repo(s), use the Algora commands in issues and pull requests, and reward bounties without leaving GitHub.",
+          "You can share your bounty board with anyone and toggle bounties between private & public."
+        ]
+      },
+      %{
+        title: "Create projects",
+        paragraphs: [
+          "Get matched with top developers, manage contract work and make payments globally.",
+          "You can share projects with anyone and pay on hourly, fixed, milestone or bounty basis."
+        ]
+      },
+      %{
+        title: "Create jobs",
+        paragraphs: [
+          "Find new teammates, manage applicants and simplify contract-to-hire.",
+          "You can use your job board and ATS privately as well as publish jobs on Algora."
+        ]
+      }
+    ]
   end
 
   def stat_card(assigns) do

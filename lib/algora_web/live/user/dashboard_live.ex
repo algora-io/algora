@@ -8,13 +8,8 @@ defmodule AlgoraWeb.User.DashboardLive do
       socket
       |> assign(:tech_stack, ["Elixir", "TypeScript"])
       |> assign(:bounties, Bounties.list_bounties(status: :open, limit: 10))
-      |> assign(:steps, [
-        %{status: :completed, name: "Create Stripe account"},
-        %{status: :completed, name: "Earn first bounty"},
-        %{status: :upcoming, name: "Earn through referral"},
-        %{status: :upcoming, name: "Earn $10K"},
-        %{status: :upcoming, name: "Earn $50K"}
-      ])
+      |> assign(:achievements, fetch_achievements())
+      |> assign(:events, fetch_events())
 
     {:ok, socket}
   end
@@ -265,57 +260,13 @@ defmodule AlgoraWeb.User.DashboardLive do
       </header>
       <nav class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8" aria-label="Progress">
         <ol role="list" class="space-y-6">
-          <%= for step <- @steps do %>
+          <%= for achievement <- @achievements do %>
             <li>
-              <%= case step.status do %>
+              <%= case achievement.status do %>
                 <% :completed -> %>
-                  <a href="#" class="group">
-                    <span class="flex items-start">
-                      <span class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
-                        <svg
-                          class="h-full w-full text-emerald-400 group-hover:text-emerald-300"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                          data-slot="icon"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </span>
-                      <span class="ml-3 text-sm font-medium text-emerald-400 group-hover:text-gray-300">
-                        <%= step.name %>
-                      </span>
-                    </span>
-                  </a>
-                <% :current -> %>
-                  <a href="#" class="flex items-start" aria-current="step">
-                    <span
-                      class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center"
-                      aria-hidden="true"
-                    >
-                      <span class="absolute h-4 w-4 rounded-full bg-indigo-200"></span>
-                      <span class="relative block h-2 w-2 rounded-full bg-indigo-600"></span>
-                    </span>
-                    <span class="ml-3 text-sm font-medium text-indigo-600"><%= step.name %></span>
-                  </a>
+                  <%= achievement(%{achievement: achievement}) %>
                 <% :upcoming -> %>
-                  <a href="#" class="group">
-                    <div class="flex items-start">
-                      <div
-                        class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center"
-                        aria-hidden="true"
-                      >
-                        <div class="h-2 w-2 rounded-full bg-gray-600 group-hover:bg-gray-500"></div>
-                      </div>
-                      <p class="ml-3 text-sm font-medium text-gray-400 group-hover:text-gray-300">
-                        <%= step.name %>
-                      </p>
-                    </div>
-                  </a>
+                  <%= achievement(%{achievement: achievement}) %>
               <% end %>
             </li>
           <% end %>
@@ -327,227 +278,244 @@ defmodule AlgoraWeb.User.DashboardLive do
         <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
       </header>
       <ul class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <li class="relative pb-8">
-          <div>
-            <div class="relative -ml-[2.75rem]">
-              <span
-                class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
-                aria-hidden="true"
-              >
-              </span>
-              <a class="group inline-flex ml-[2.75rem]" href="/org/grit">
-                <div class="relative flex space-x-3">
-                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                    <div class="flex items-center gap-4">
-                      <div class="relative flex -space-x-1">
-                        <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
-                          <img
-                            alt="Grit"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            src="https://avatars.githubusercontent.com/u/62914393?s=200&amp;v=4"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
-                        </div>
-                      </div>
-                      <div class="z-10 flex gap-2">
-                        <span class="font-emoji text-sm sm:text-xl">💎</span>
-                        <div class="space-y-0.5">
-                          <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
-                            <strong class="font-bold">Grit</strong>
-                            shared <strong class="font-bold">2</strong>
-                            bounties rewarding <strong class="font-bold">$300</strong>
-                          </p>
-                          <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                            <time datetime="2024-10-28T20:02:22.464Z">1 day ago</time>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
+        <%= for event <- @events do %>
+          <li class="relative pb-8">
+            <div>
+              <div class="relative -ml-[2.75rem]">
+                <span
+                  class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
+                  aria-hidden="true"
+                >
+                </span>
+                <.event event={event} />
+              </div>
             </div>
-          </div>
-        </li>
-        <li class="relative pb-8">
-          <div>
-            <div class="relative -ml-[2.75rem]">
-              <span
-                class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
-                aria-hidden="true"
-              >
-              </span>
-              <a class="group inline-flex ml-[2.75rem]" href="/org/Permitio">
-                <div class="relative flex space-x-3">
-                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                    <div class="flex items-center gap-4">
-                      <div class="relative flex -space-x-1">
-                        <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
-                          <img
-                            alt="Permit.io"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            src="https://console.algora.io/asset/storage/v1/object/public/images/org/cm17ongdt0001l603xo4kyvra-1726653932317"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
-                        </div>
-                      </div>
-                      <div class="z-10 flex gap-2">
-                        <span class="font-emoji text-sm sm:text-xl">💎</span>
-                        <div class="space-y-0.5">
-                          <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
-                            <strong class="font-bold">Permit.io</strong>
-                            shared <strong class="font-bold">9</strong>
-                            bounties rewarding <strong class="font-bold">$1,850</strong>
-                          </p>
-                          <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                            <time datetime="2024-10-28T15:55:29.178Z">1 day ago</time>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </li>
-        <li class="relative pb-8">
-          <div>
-            <div class="relative -ml-[2.75rem]">
-              <span
-                class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
-                aria-hidden="true"
-              >
-              </span>
-              <a class="group inline-flex" href="https://github.com/algora-io/tv/issues/105">
-                <div class="relative flex space-x-3">
-                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                    <div class="flex items-center gap-4">
-                      <div class="relative flex -space-x-1">
-                        <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
-                        </div>
-                        <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
-                          <img
-                            alt="urbit-pilled"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            src="https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
-                        </div>
-                      </div>
-                      <div class="z-10 flex gap-2">
-                        <span class="font-emoji text-sm sm:text-xl">💰</span>
-                        <div class="space-y-0.5">
-                          <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
-                            <strong class="font-bold">Algora</strong>
-                            awarded <strong class="font-bold">urbit-pilled</strong>
-                            a <strong class="font-bold">$200</strong>
-                            bounty
-                          </p>
-                          <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                            <time datetime="2024-10-28T14:23:26.505Z">1 day ago</time>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </li>
-        <li class="relative pb-8">
-          <div>
-            <div class="relative -ml-[2.75rem]">
-              <span
-                class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
-                aria-hidden="true"
-              >
-              </span>
-              <a class="group inline-flex ml-[2.75rem]" href="https://tv.algora.io/cmgriffing">
-                <div class="relative flex space-x-3">
-                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                    <div class="flex items-center gap-4">
-                      <div class="relative flex -space-x-1">
-                        <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
-                          <img
-                            alt="Chris Griffing"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            src="https://avatars.githubusercontent.com/u/1195435?v=4"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
-                        </div>
-                      </div>
-                      <div class="z-10 flex gap-2">
-                        <span class="font-emoji text-sm sm:text-xl">🔴</span>
-                        <div class="space-y-0.5">
-                          <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
-                            <strong class="font-bold">Chris Griffing</strong> started streaming
-                          </p>
-                          <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                            <time datetime="2024-10-27T21:38:00.560Z">2 days ago</time>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </li>
-        <li class="relative pb-8">
-          <div>
-            <div class="relative -ml-[2.75rem]">
-              <span
-                class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
-                aria-hidden="true"
-              >
-              </span>
-              <a class="group inline-flex ml-[2.75rem]" href="https://tv.algora.io/danielroe">
-                <div class="relative flex space-x-3">
-                  <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                    <div class="flex items-center gap-4">
-                      <div class="relative flex -space-x-1">
-                        <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
-                          <img
-                            alt="Daniel Roe"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            src="https://avatars.githubusercontent.com/u/28706372?v=4"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
-                        </div>
-                      </div>
-                      <div class="z-10 flex gap-2">
-                        <span class="font-emoji text-sm sm:text-xl">🔴</span>
-                        <div class="space-y-0.5">
-                          <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
-                            <strong class="font-bold">Daniel Roe</strong> started streaming
-                          </p>
-                          <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                            <time datetime="2024-10-24T10:32:01.550Z">5 days ago</time>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </li>
+          </li>
+        <% end %>
       </ul>
     </aside>
+    """
+  end
+
+  defp format_time_ago(datetime) do
+    diff = DateTime.diff(DateTime.utc_now(), datetime, :day)
+
+    case diff do
+      0 -> "today"
+      1 -> "1 day ago"
+      n -> "#{n} days ago"
+    end
+  end
+
+  defp fetch_events() do
+    [
+      %{
+        type: :bounty_shared,
+        org: %{
+          name: "Grit",
+          handle: "grit",
+          avatar_url: "https://avatars.githubusercontent.com/u/62914393?s=200&v=4"
+        },
+        count: 2,
+        amount: 300,
+        inserted_at: ~U[2024-10-28 20:02:22.464Z]
+      },
+      %{
+        type: :bounty_shared,
+        org: %{
+          name: "Permit.io",
+          handle: "Permitio",
+          avatar_url:
+            "https://console.algora.io/asset/storage/v1/object/public/images/org/cm17ongdt0001l603xo4kyvra-1726653932317"
+        },
+        count: 9,
+        amount: 1850,
+        inserted_at: ~U[2024-10-28 15:55:29.178Z]
+      },
+      %{
+        type: :bounty_awarded,
+        org: %{name: "Algora"},
+        user: %{
+          name: "urbit-pilled",
+          avatar_url:
+            "https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
+        },
+        amount: 200,
+        url: "https://github.com/algora-io/tv/issues/105",
+        inserted_at: ~U[2024-10-28 14:23:26.505Z]
+      },
+      %{
+        type: :stream_started,
+        user: %{
+          name: "Chris Griffing",
+          avatar_url: "https://avatars.githubusercontent.com/u/1195435?v=4"
+        },
+        url: "https://tv.algora.io/cmgriffing",
+        inserted_at: ~U[2024-10-27 21:38:00.560Z]
+      },
+      %{
+        type: :stream_started,
+        user: %{
+          name: "Daniel Roe",
+          avatar_url: "https://avatars.githubusercontent.com/u/28706372?v=4"
+        },
+        url: "https://tv.algora.io/danielroe",
+        inserted_at: ~U[2024-10-24 10:32:01.550Z]
+      }
+    ]
+  end
+
+  defp fetch_achievements() do
+    [
+      %{status: :completed, name: "Personalize Algora"},
+      %{status: :upcoming, name: "Create Stripe account"},
+      %{status: :upcoming, name: "Earn first bounty"},
+      %{status: :upcoming, name: "Earn through referral"},
+      %{status: :upcoming, name: "Earn $10K"},
+      %{status: :upcoming, name: "Earn $50K"}
+    ]
+  end
+
+  def achievement(%{achievement: %{status: :completed}} = assigns) do
+    ~H"""
+    <a href="#" class="group">
+      <span class="flex items-start">
+        <span class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
+          <svg
+            class="h-full w-full text-emerald-400 group-hover:text-emerald-300"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+            data-slot="icon"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </span>
+        <span class="ml-3 text-sm font-medium text-emerald-400 group-hover:text-gray-300">
+          <%= @achievement.name %>
+        </span>
+      </span>
+    </a>
+    """
+  end
+
+  def achievement(%{achievement: %{status: :upcoming}} = assigns) do
+    ~H"""
+    <a href="#" class="group">
+      <div class="flex items-start">
+        <div
+          class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center"
+          aria-hidden="true"
+        >
+          <div class="h-2 w-2 rounded-full bg-gray-600 group-hover:bg-gray-500"></div>
+        </div>
+        <p class="ml-3 text-sm font-medium text-gray-400 group-hover:text-gray-300">
+          <%= @achievement.name %>
+        </p>
+      </div>
+    </a>
+    """
+  end
+
+  def event(%{event: %{type: :bounty_shared}} = assigns) do
+    ~H"""
+    <a class="group inline-flex ml-[2.75rem]" href={~p"/org/#{@event.org.handle}"}>
+      <div class="relative flex space-x-3">
+        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+          <div class="flex items-center gap-4">
+            <div class="relative flex -space-x-1">
+              <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
+                <img alt={@event.org.name} src={@event.org.avatar_url} />
+              </div>
+            </div>
+            <div class="z-10 flex gap-2">
+              <span class="font-emoji text-sm sm:text-xl">💎</span>
+              <div class="space-y-0.5">
+                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
+                  <strong class="font-bold"><%= @event.org.name %></strong>
+                  shared <strong class="font-bold"><%= @event.count %></strong>
+                  bounties rewarding <strong class="font-bold">$<%= @event.amount %></strong>
+                </p>
+                <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                  <time datetime={@event.inserted_at}>
+                    <%= format_time_ago(@event.inserted_at) %>
+                  </time>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+    """
+  end
+
+  def event(%{event: %{type: :bounty_awarded}} = assigns) do
+    ~H"""
+    <a class="group inline-flex ml-[2.75rem]" href={@event.url}>
+      <div class="relative flex space-x-3">
+        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+          <div class="flex items-center gap-4">
+            <div class="relative flex -space-x-1">
+              <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
+                <img alt={@event.user.name} src={@event.user.avatar_url} />
+              </div>
+            </div>
+            <div class="z-10 flex gap-2">
+              <span class="font-emoji text-sm sm:text-xl">💰</span>
+              <div class="space-y-0.5">
+                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
+                  <strong class="font-bold"><%= @event.org.name %></strong>
+                  awarded <strong class="font-bold"><%= @event.user.name %></strong>
+                  a <strong class="font-bold">$<%= @event.amount %></strong>
+                  bounty
+                </p>
+                <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                  <time datetime={@event.inserted_at}>
+                    <%= format_time_ago(@event.inserted_at) %>
+                  </time>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+    """
+  end
+
+  def event(%{event: %{type: :stream_started}} = assigns) do
+    ~H"""
+    <a class="group inline-flex ml-[2.75rem]" href={@event.url}>
+      <div class="relative flex space-x-3">
+        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+          <div class="flex items-center gap-4">
+            <div class="relative flex -space-x-1">
+              <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
+                <img alt={@event.user.name} src={@event.user.avatar_url} />
+              </div>
+            </div>
+            <div class="z-10 flex gap-2">
+              <span class="font-emoji text-sm sm:text-xl">🔴</span>
+              <div class="space-y-0.5">
+                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
+                  <strong class="font-bold"><%= @event.user.name %></strong> started streaming
+                </p>
+                <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
+                  <time datetime={@event.inserted_at}>
+                    <%= format_time_ago(@event.inserted_at) %>
+                  </time>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
     """
   end
 end

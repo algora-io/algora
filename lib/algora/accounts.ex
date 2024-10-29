@@ -208,11 +208,17 @@ defmodule Algora.Accounts do
   defp filter_by_country(query, country),
     do: where(query, [u], u.country == ^String.upcase(country))
 
+  defp filter_by_skills(query, []), do: query
   defp filter_by_skills(query, nil), do: query
 
   defp filter_by_skills(query, skills) when is_list(skills) and length(skills) > 0 do
+    lowercase_skills = Enum.map(skills, &String.downcase/1)
+
     query
-    |> where([u], fragment("? && ?", u.tech_stack, ^skills))
+    |> where(
+      [u],
+      fragment("ARRAY(SELECT LOWER(unnest(?))) && ?", u.tech_stack, ^lowercase_skills)
+    )
   end
 
   defp filter_by_ids(query, nil), do: query

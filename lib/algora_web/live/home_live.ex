@@ -16,7 +16,33 @@ defmodule AlgoraWeb.HomeLive do
         ]
       )
 
-    featured_orgs = Accounts.list_orgs(limit: 5)
+    featured_orgs = [
+      %{
+        name: "ZIO",
+        avatar_url: "https://zio.dev/img/navbar_brand.png",
+        url: "https://zio.dev"
+      },
+      # %{
+      #   name: "Tailcall",
+      #   avatar_url: "https://tailcall.run/icons/companies/taicall.svg",
+      #   url: "https://tailcall.run"
+      # },
+      %{
+        name: "Cal.com",
+        avatar_url: "https://cal.com/logo-white.svg",
+        url: "https://cal.com"
+      },
+      %{
+        name: "Qdrant",
+        avatar_url: "https://qdrant.tech/img/logo.png",
+        url: "https://qdrant.tech"
+      }
+      # %{
+      #   name: "Maybe",
+      #   avatar_url: "https://maybe.co/assets/logo-1c6733d1.svg",
+      #   url: "https://maybe.co"
+      # }
+    ]
 
     socket =
       socket

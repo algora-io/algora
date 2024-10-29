@@ -62,6 +62,7 @@ defmodule AlgoraWeb.Router do
     live "/leaderboard", LeaderboardLive
 
     live "/onboarding/org", Onboarding.OrgLive
+    live "/onboarding/dev", Onboarding.OrgLive
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do

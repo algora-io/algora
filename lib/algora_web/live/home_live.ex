@@ -202,18 +202,18 @@ defmodule AlgoraWeb.HomeLive do
                   </p>
 
                   <div class="mt-10 flex items-center gap-x-6">
-                    <a
-                      href="#"
+                    <.link
+                      navigate={~p"/onboarding/org"}
                       class="rounded-md bg-indigo-600 px-12 py-5 text-xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                     >
                       Companies
-                    </a>
-                    <a
-                      href="#"
+                    </.link>
+                    <.link
+                      navigate={~p"/onboarding/dev"}
                       class="rounded-md bg-white px-12 py-5 text-xl font-semibold text-indigo-600 shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-gray-50"
                     >
                       Developers
-                    </a>
+                    </.link>
                   </div>
                   <!-- Stats Section -->
                   <dl class="mt-16 grid grid-cols-2 gap-8 lg:grid-cols-4">

@@ -221,7 +221,7 @@
   }
 
   * {
-    @apply border-border !important;
+    @apply border-border;
   }
 }
 
@@ -286,7 +286,7 @@ body {
   }
 
   * {
-    @apply border-border !important;
+    @apply border-border;
   }
 }
 

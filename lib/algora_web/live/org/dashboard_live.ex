@@ -76,68 +76,93 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def dashboard_onboarding(assigns) do
     ~H"""
-    <div class="text-white p-6">
-      <h1 class="text-4xl font-handwriting mb-8">Get started</h1>
+    <div class="text-white p-4 pt-6 sm:p-6 md:p-8">
+      <h1 class="text-4xl font-semibold text-white mb-8">Get started</h1>
 
-      <div class="grid grid-cols-4 gap-6 mb-12">
+      <div class="grid grid-cols-3 gap-6 mb-12">
         <%= for card <- @get_started_cards do %>
-          <div class="rounded-lg p-6 relative bg-white/10 cursor-pointer group">
-            <h2 class="text-xl font-semibold mb-4"><%= card.title %></h2>
-            <%= for paragraph <- card.paragraphs do %>
-              <p class="text-sm mb-2 text-gray-300"><%= paragraph %></p>
-            <% end %>
-            <div class="absolute bottom-4 right-6 text-3xl group-hover:translate-x-2 transition-transform">
-              &rarr;
-            </div>
-          </div>
-        <% end %>
-      </div>
-
-      <h2 class="text-3xl font-handwriting mb-6">Your matches</h2>
-
-      <div class="flex gap-6 mb-8">
-        <div class="flex items-center">
-          <span class="mr-2">Tech stack:</span>
-          <%= for tech <- @tech_stack do %>
-            <span class="bg-gray-700 text-sm rounded-full px-3 py-1 mr-2"><%= tech %></span>
-          <% end %>
-        </div>
-
-        <div class="flex items-center">
-          <span class="mr-2">Location:</span>
-          <%= for location <- @locations do %>
-            <span class="bg-gray-700 text-sm rounded-full px-3 py-1 mr-2"><%= location %></span>
-          <% end %>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-4 gap-6">
-        <%= for match <- @matches do %>
-          <div class="bg-gray-800 rounded-lg p-4 flex flex-col h-full relative">
-            <div class="absolute top-2 right-2 text-xl">
-              <%= match.flag %>
-            </div>
-            <div class="flex items-center mb-4">
-              <img
-                src={match.avatar_url}
-                alt={match.name}
-                class="w-12 h-12 rounded-full mr-3 object-cover"
-              />
-              <div>
-                <div class="font-semibold"><%= match.name %></div>
-                <div class="text-sm text-gray-400">@<%= match.handle %></div>
+          <div class="group flex h-full w-full max-w-md items-center justify-center">
+            <div class="relative z-10 flex h-full w-full cursor-pointer items-center overflow-hidden ring-1 group-hover:ring-2 rounded-md shadow-[0px_3.26536px_2.21381px_0px_rgba(30,_27,_75,_0.08),_0px_7.84712px_5.32008px_0px_rgba(30,_27,_75,_0.11),_0px_14.77543px_10.01724px_0px_rgba(30,_27,_75,_0.14),_0px_26.35684px_17.86905px_0px_rgba(30,_27,_75,_0.16),_0px_49.29758px_33.42209px_0px_rgba(30,_27,_75,_0.19),_0px_15px_15px_0px_rgba(30,_27,_75,_0.27)] ring-purple-400/20 p-[1.5px]">
+              <div class="absolute inset-0 h-full w-full opacity-50 group-hover:opacity-100 transition-opacity animate-rotate rounded-full bg-[conic-gradient(#5D59EB_20deg,#8b5cf6_120deg)]">
               </div>
+              <a
+                rel="noopener"
+                target="_blank"
+                class="relative flex h-full w-full overflow-hidden rounded-md bg-gray-900"
+                href="https://algora.io/challenges/golem"
+              >
+                <div class="rounded-lg p-6 relative cursor-pointer group">
+                  <div class="flex items-center gap-3 mb-4">
+                    <.icon
+                      name={card.icon}
+                      class="h-8 w-8 text-gray-400 group-hover:text-white transition-colors"
+                    />
+                    <h2 class="text-xl font-semibold text-gray-100 group-hover:text-white transition-colors">
+                      <%= card.title %>
+                    </h2>
+                  </div>
+                  <%= for paragraph <- card.paragraphs do %>
+                    <p class="text-base mb-2 text-gray-300 font-medium group-hover:text-gray-100 transition-colors">
+                      <%= paragraph %>
+                    </p>
+                  <% end %>
+                  <div class="absolute bottom-4 right-6 text-3xl group-hover:translate-x-2 transition-transform">
+                    &rarr;
+                  </div>
+                </div>
+              </a>
             </div>
-            <div class="text-sm mb-2"><%= Enum.join(match.skills, ", ") %></div>
-            <div class="text-sm mb-4 mt-auto">
-              $<%= match.amount %> earned (<%= match.bounties %> bounties, <%= match.projects %> projects)
-            </div>
-            <button class="w-full border border-dashed border-white text-sm py-2 rounded hover:bg-gray-700 transition-colors">
-              Collaborate
-            </button>
           </div>
         <% end %>
       </div>
+
+      <%= if @onboarding_completed? do %>
+        <h2 class="text-3xl font-handwriting mb-6">Your matches</h2>
+
+        <div class="flex gap-6 mb-8">
+          <div class="flex items-center">
+            <span class="mr-2">Tech stack:</span>
+            <%= for tech <- @tech_stack do %>
+              <span class="bg-gray-700 text-sm rounded-full px-3 py-1 mr-2"><%= tech %></span>
+            <% end %>
+          </div>
+
+          <div class="flex items-center">
+            <span class="mr-2">Location:</span>
+            <%= for location <- @locations do %>
+              <span class="bg-gray-700 text-sm rounded-full px-3 py-1 mr-2"><%= location %></span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-6">
+          <%= for match <- @matches do %>
+            <div class="bg-gray-800 rounded-lg p-4 flex flex-col h-full relative">
+              <div class="absolute top-2 right-2 text-xl">
+                <%= match.flag %>
+              </div>
+              <div class="flex items-center mb-4">
+                <img
+                  src={match.avatar_url}
+                  alt={match.name}
+                  class="w-12 h-12 rounded-full mr-3 object-cover"
+                />
+                <div>
+                  <div class="font-semibold"><%= match.name %></div>
+                  <div class="text-sm text-gray-400">@<%= match.handle %></div>
+                </div>
+              </div>
+              <div class="text-sm mb-2"><%= Enum.join(match.skills, ", ") %></div>
+              <div class="text-sm mb-4 mt-auto">
+                $<%= match.amount %> earned (<%= match.bounties %> bounties, <%= match.projects %> projects)
+              </div>
+              <button class="w-full border border-dashed border-white text-sm py-2 rounded hover:bg-gray-700 transition-colors">
+                Collaborate
+              </button>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
     """
   end
@@ -146,6 +171,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     [
       %{
         title: "Create bounties",
+        icon: "tabler-diamond",
         paragraphs: [
           "Install Algora in your GitHub repo(s), use the Algora commands in issues and pull requests, and reward bounties without leaving GitHub.",
           "You can share your bounty board with anyone and toggle bounties between private & public."
@@ -153,6 +179,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       },
       %{
         title: "Create projects",
+        icon: "tabler-rocket",
         paragraphs: [
           "Get matched with top developers, manage contract work and make payments globally.",
           "You can share projects with anyone and pay on hourly, fixed, milestone or bounty basis."
@@ -160,6 +187,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       },
       %{
         title: "Create jobs",
+        icon: "tabler-briefcase",
         paragraphs: [
           "Find new teammates, manage applicants and simplify contract-to-hire.",
           "You can use your job board and ATS privately as well as publish jobs on Algora."

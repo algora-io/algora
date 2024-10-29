@@ -62,7 +62,7 @@ defmodule AlgoraWeb.CoreComponents do
       aria-label="Algora TV"
       class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
     >
-      <AlgoraWeb.Components.Icons.algora class={["text-white", @class || "w-20 h-auto"]} />
+      <AlgoraWeb.Components.Icons.algora class={["fill-current", @class || "w-20 h-auto"]} />
     </.link>
     """
   end

@@ -9,7 +9,8 @@ defmodule Algora.Accounts do
           params :: %{
             optional(:country) => String.t(),
             optional(:limit) => non_neg_integer(),
-            optional(:skills) => [String.t()]
+            optional(:skills) => [String.t()],
+            optional(:ids) => [String.t()]
           }
         ) :: [map()]
   def list_matching_devs(opts) do
@@ -26,6 +27,7 @@ defmodule Algora.Accounts do
     |> where(type: :individual)
     |> filter_by_country(opts[:country])
     |> filter_by_skills(opts[:skills])
+    |> filter_by_ids(opts[:ids])
     |> limit(^Keyword.get(opts, :limit, 100))
     |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.receiver_id)
     |> order_by([u, ta], desc: coalesce(ta.sum, 0), desc: u.stargazers_count)
@@ -209,6 +211,12 @@ defmodule Algora.Accounts do
   defp filter_by_skills(query, skills) when is_list(skills) and length(skills) > 0 do
     query
     |> where([u], fragment("? && ?", u.tech_stack, ^skills))
+  end
+
+  defp filter_by_ids(query, nil), do: query
+
+  defp filter_by_ids(query, ids) when is_list(ids) and length(ids) > 0 do
+    query |> where([u], u.id in ^ids)
   end
 
   defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")

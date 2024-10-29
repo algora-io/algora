@@ -71,7 +71,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
               <div class="flex mb-2 gap-3">
                 <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
-                <div>
+                <div class="flex-grow">
                   <div class="flex justify-between">
                     <div>
                       <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
@@ -201,6 +201,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             placeholder="company.com"
             class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
+          <p class="mt-2 text-sm text-gray-400">
+            We will automatically add your teammates to your organization if they sign up with a verified email address from this domain
+          </p>
         </div>
       </div>
     </div>

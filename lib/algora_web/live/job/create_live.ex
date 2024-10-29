@@ -72,7 +72,7 @@ defmodule AlgoraWeb.Job.CreateLive do
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
               <div class="flex mb-2 gap-3">
                 <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
-                <div>
+                <div class="flex-grow">
                   <div class="flex justify-between">
                     <div>
                       <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>

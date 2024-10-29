@@ -1,7 +1,7 @@
 defmodule Algora.Bounties.Bounty do
   use Algora.Model
   alias Algora.Bounties.Bounty
-
+  alias Algora.Payments.Transaction
   @type t() :: %__MODULE__{}
 
   schema "bounties" do
@@ -29,20 +29,47 @@ defmodule Algora.Bounties.Bounty do
 
   def open(query \\ Bounty) do
     from b in query,
-      left_join: c in assoc(b, :claims),
-      where: is_nil(c.id) or c.status != :approved
+      as: :bounties,
+      where:
+        not exists(
+          from(
+            t in Transaction,
+            where:
+              parent_as(:bounties).id == t.bounty_id and
+                not is_nil(t.succeeded_at) and
+                t.type == :transfer
+          )
+        )
   end
 
   def completed(query \\ Bounty) do
     from b in query,
-      join: c in assoc(b, :claims),
-      where: c.status == :approved
+      as: :bounties,
+      where:
+        exists(
+          from(
+            t in Transaction,
+            where:
+              parent_as(:bounties).id == t.bounty_id and
+                not is_nil(t.succeeded_at) and
+                t.type == :transfer
+          )
+        )
   end
 
   def rewarded(query \\ Bounty) do
     from b in query,
-      join: c in assoc(b, :claims),
-      where: not is_nil(c.charged_at)
+      as: :bounties,
+      where:
+        exists(
+          from(
+            t in Transaction,
+            where:
+              parent_as(:bounties).id == t.bounty_id and
+                not is_nil(t.succeeded_at) and
+                t.type == :transfer
+          )
+        )
   end
 
   def order_by_most_recent(query \\ Bounty) do

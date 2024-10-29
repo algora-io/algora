@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.Onboarding.DevLive do
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Bounties
   alias Algora.Money
 
   def mount(_params, _session, socket) do
@@ -10,12 +10,14 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       intentions: []
     }
 
+    bounties = Bounties.list_bounties(status: :open, limit: 5)
+
     {:ok,
      socket
      |> assign(:step, 1)
      |> assign(:total_steps, 2)
      |> assign(:context, context)
-     |> assign(:matching_devs, get_matching_devs(context))}
+     |> assign(:bounties, bounties)}
   end
 
   def render(assigns) do
@@ -59,38 +61,27 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       </div>
       <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
         <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
-          Matching Developers
+          Open Bounties
         </h2>
-        <%= if @matching_devs == [] do %>
-          <p class="text-gray-400">Add skills to see matching developers</p>
+        <%= if @bounties == [] do %>
+          <p class="text-gray-400">No open bounties available</p>
         <% else %>
-          <%= for dev <- @matching_devs do %>
+          <%= for bounty <- @bounties do %>
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
-              <div class="flex mb-2 gap-3">
-                <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
-                <div class="flex-grow">
-                  <div class="flex justify-between">
-                    <div>
-                      <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                      <div class="text-sm text-gray-400">@<%= dev.handle %></div>
-                    </div>
-                    <div class="flex flex-col items-end">
-                      <div class="text-gray-300">Earned</div>
-                      <div class="text-white font-semibold">
-                        <%= Money.format!(dev.amount, "USD") %>
-                      </div>
-                    </div>
+              <div class="flex flex-col">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="font-mono text-2xl font-extrabold text-emerald-300">
+                    <%= Money.format!(bounty.amount, bounty.currency) %>
                   </div>
-
-                  <div class="pt-3 text-sm">
-                    <div class="-ml-1 text-sm flex flex-wrap gap-1">
-                      <%= for skill <- dev.skills do %>
-                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
-                          <%= skill %>
-                        </span>
-                      <% end %>
-                    </div>
-                  </div>
+                </div>
+                <div class="text-sm text-gray-300 mb-1">
+                  <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
+                </div>
+                <div class="text-white font-medium">
+                  <%= bounty.task.title %>
+                </div>
+                <div class="text-xs text-gray-400 mt-2">
+                  <%= Algora.Util.time_ago(bounty.inserted_at) %>
                 </div>
               </div>
             </div>
@@ -180,7 +171,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           rel="noopener"
           class="mt-8 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400"
         >
-        <AlgoraWeb.Components.Icons.github class="w-5 h-5 mr-2" />  Sign in with GitHub
+          <AlgoraWeb.Components.Icons.github class="w-5 h-5 mr-2" /> Sign in with GitHub
         </.link>
       </div>
     </div>
@@ -196,7 +187,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     %{context | skills: skills}
   end
 
-  defp update_context_field(context, "email" = field, value, _params) do
+  defp update_context_field(context, "email" = _field, value, _params) do
     domain = value |> String.split("@") |> List.last()
 
     context
@@ -235,8 +226,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   def handle_event("update_context", %{"field" => field, "value" => value} = params, socket) do
     updated_context = update_context_field(socket.assigns.context, field, value, params)
-    matching_devs = get_matching_devs(updated_context)
-    {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
+    {:noreply, assign(socket, context: updated_context)}
   end
 
   def handle_event("toggle_intention", %{"intention" => intention}, socket) do
@@ -255,16 +245,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       when byte_size(skill) > 0 do
     updated_skills = [String.trim(skill) | socket.assigns.context.skills] |> Enum.uniq()
     updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
-    matching_devs = get_matching_devs(updated_context)
-
-    {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
+    {:noreply, assign(socket, context: updated_context)}
   end
 
   def handle_event("handle_skill_input", _params, socket) do
     {:noreply, socket}
-  end
-
-  defp get_matching_devs(context) do
-    Accounts.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
   end
 end

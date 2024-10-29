@@ -18,27 +18,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <main class="lg:pr-96">
       <div class="p-4 pt-6 sm:p-6 md:p-8">
-        <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 -ml-4 lg:-ml-8 md:pl-4">
-          <div class="border-white/5 px-4 sm:px-6 lg:px-8">
-            <p class="text-sm/6 font-medium text-gray-400">Earnings</p>
-            <p class="mt-2 flex items-baseline gap-x-2">
-              <span class="text-4xl font-semibold tracking-tight text-white">$22,100</span>
-            </p>
-          </div>
-          <div class="border-white/5 px-4 sm:border-l sm:px-6 lg:px-8">
-            <p class="text-sm/6 font-medium text-gray-400">Projects</p>
-            <p class="mt-2 flex items-baseline gap-x-2">
-              <span class="text-4xl font-semibold tracking-tight text-white">18</span>
-            </p>
-          </div>
-          <div class="border-white/5 px-4 sm:px-6 lg:border-l lg:px-8">
-            <p class="text-sm/6 font-medium text-gray-400">Bounties</p>
-            <p class="mt-2 flex items-baseline gap-x-2">
-              <span class="text-4xl font-semibold tracking-tight text-white">56</span>
-            </p>
-          </div>
-        </div>
-        <div class="pt-12">
+        <div>
           <header class="flex items-center justify-between md:pl-4">
             <h2 class="font-display text-2xl/7 font-semibold text-white">Bounties for you</h2>
             <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
@@ -253,12 +233,12 @@ defmodule AlgoraWeb.User.DashboardLive do
       </div>
     </main>
     <!-- Activity feed -->
-    <aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5">
-      <header class="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+    <aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5 p-4 pt-6 sm:p-6 md:p-8">
+      <header class="flex items-center justify-between">
         <h2 class="font-display text-xl/7 font-semibold text-white">Achievements</h2>
         <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
       </header>
-      <nav class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8" aria-label="Progress">
+      <nav class="pt-4">
         <ol role="list" class="space-y-6">
           <%= for achievement <- @achievements do %>
             <li>
@@ -273,17 +253,17 @@ defmodule AlgoraWeb.User.DashboardLive do
         </ol>
       </nav>
 
-      <header class="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+      <header class="flex items-center justify-between pt-12">
         <h2 class="font-display text-xl/7 font-semibold text-white">Activity feed</h2>
         <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
       </header>
-      <ul class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <ul class="pt-4">
         <%= for event <- @events do %>
           <li class="relative pb-8">
             <div>
-              <div class="relative -ml-[2.75rem]">
+              <div class="relative">
                 <span
-                  class="absolute -bottom-6 left-6 h-5 w-0.5 ml-[2.75rem] bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
+                  class="absolute -bottom-6 left-4 h-5 w-0.5 bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
                   aria-hidden="true"
                 >
                 </span>
@@ -319,18 +299,6 @@ defmodule AlgoraWeb.User.DashboardLive do
         count: 2,
         amount: 300,
         inserted_at: ~U[2024-10-28 20:02:22.464Z]
-      },
-      %{
-        type: :bounty_shared,
-        org: %{
-          name: "Permit.io",
-          handle: "Permitio",
-          avatar_url:
-            "https://console.algora.io/asset/storage/v1/object/public/images/org/cm17ongdt0001l603xo4kyvra-1726653932317"
-        },
-        count: 9,
-        amount: 1850,
-        inserted_at: ~U[2024-10-28 15:55:29.178Z]
       },
       %{
         type: :bounty_awarded,
@@ -423,19 +391,19 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def event(%{event: %{type: :bounty_shared}} = assigns) do
     ~H"""
-    <a class="group inline-flex ml-[2.75rem]" href={~p"/org/#{@event.org.handle}"}>
+    <a class="group inline-flex" href={~p"/org/#{@event.org.handle}"}>
       <div class="relative flex space-x-3">
         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
           <div class="flex items-center gap-4">
             <div class="relative flex -space-x-1">
-              <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
+              <div class="relative flex-shrink-0 overflow-hidden flex h-8 w-8 items-center justify-center rounded-xl">
                 <img alt={@event.org.name} src={@event.org.avatar_url} />
               </div>
             </div>
             <div class="z-10 flex gap-2">
-              <span class="font-emoji text-sm sm:text-xl">💎</span>
+              <span class="font-emoji text-sm sm:text-base">💎</span>
               <div class="space-y-0.5">
-                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
+                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-sm">
                   <strong class="font-bold"><%= @event.org.name %></strong>
                   shared <strong class="font-bold"><%= @event.count %></strong>
                   bounties rewarding <strong class="font-bold">$<%= @event.amount %></strong>
@@ -456,19 +424,19 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def event(%{event: %{type: :bounty_awarded}} = assigns) do
     ~H"""
-    <a class="group inline-flex ml-[2.75rem]" href={@event.url}>
+    <a class="group inline-flex" href={@event.url}>
       <div class="relative flex space-x-3">
         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
           <div class="flex items-center gap-4">
             <div class="relative flex -space-x-1">
-              <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
+              <div class="relative flex-shrink-0 overflow-hidden flex h-8 w-8 items-center justify-center rounded-xl">
                 <img alt={@event.user.name} src={@event.user.avatar_url} />
               </div>
             </div>
             <div class="z-10 flex gap-2">
-              <span class="font-emoji text-sm sm:text-xl">💰</span>
+              <span class="font-emoji text-sm sm:text-base">💰</span>
               <div class="space-y-0.5">
-                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
+                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-sm">
                   <strong class="font-bold"><%= @event.org.name %></strong>
                   awarded <strong class="font-bold"><%= @event.user.name %></strong>
                   a <strong class="font-bold">$<%= @event.amount %></strong>
@@ -490,19 +458,19 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def event(%{event: %{type: :stream_started}} = assigns) do
     ~H"""
-    <a class="group inline-flex ml-[2.75rem]" href={@event.url}>
+    <a class="group inline-flex" href={@event.url}>
       <div class="relative flex space-x-3">
         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
           <div class="flex items-center gap-4">
             <div class="relative flex -space-x-1">
-              <div class="relative flex-shrink-0 overflow-hidden flex h-12 w-12 items-center justify-center rounded-xl">
+              <div class="relative flex-shrink-0 overflow-hidden flex h-8 w-8 items-center justify-center rounded-xl">
                 <img alt={@event.user.name} src={@event.user.avatar_url} />
               </div>
             </div>
             <div class="z-10 flex gap-2">
-              <span class="font-emoji text-sm sm:text-xl">🔴</span>
+              <span class="font-emoji text-sm sm:text-base">🔴</span>
               <div class="space-y-0.5">
-                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-base">
+                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-sm">
                   <strong class="font-bold"><%= @event.user.name %></strong> started streaming
                 </p>
                 <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">

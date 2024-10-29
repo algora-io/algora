@@ -4,10 +4,15 @@ defmodule AlgoraWeb.User.DashboardLive do
   alias Algora.Money
 
   def mount(_params, _session, socket) do
+    tech_stack = ["Rust", "Elixir"]
+
     socket =
       socket
-      |> assign(:tech_stack, ["Elixir", "TypeScript"])
-      |> assign(:bounties, Bounties.list_bounties(status: :open, limit: 10))
+      |> assign(:tech_stack, tech_stack)
+      |> assign(
+        :bounties,
+        Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 10)
+      )
       |> assign(:achievements, fetch_achievements())
       |> assign(:events, fetch_events())
 
@@ -17,7 +22,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   def render(assigns) do
     ~H"""
     <main class="lg:pr-96">
-      <div class="p-4 pt-6 sm:p-6 md:p-8">
+      <div class="p-4 pt-6 sm:p-6 md:p-8 md:-ml-4">
         <div>
           <header class="flex items-center justify-between md:pl-4">
             <h2 class="font-display text-2xl/7 font-semibold text-white">Bounties for you</h2>
@@ -34,53 +39,30 @@ defmodule AlgoraWeb.User.DashboardLive do
             style="animation-duration: 0s;"
           >
             <div class="w-full" style="opacity: 1;">
-              <div class="grid gap-x-6 gap-y-2 py-2 md:pl-4">
-                <div class="space-y-1">
-                  <div class="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    Tech stack
-                  </div>
-                  <div
-                    class="flex-col text-gray-950 dark:text-gray-50 flex w-full rounded-lg border border-gray-300 bg-gray-50 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 peer-[.error]:border-red-500 peer-[.error]:bg-red-50 peer-[.error]:text-red-900 peer-[.error]:placeholder-red-700 peer-[.error]:focus:border-red-500 peer-[.error]:focus:ring-red-500 dark:border-white/10 dark:bg-gray-950/50 dark:placeholder-gray-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 peer-[.error]:dark:border-red-500 peer-[.error]:dark:bg-red-700/10 peer-[.error]:dark:text-red-500 peer-[.error]:dark:placeholder-red-500 peer-focus peer relative overflow-visible"
-                    cmdk-root=""
-                  >
-                    <label
-                      cmdk-label=""
-                      for=":rb:"
-                      id=":ra:"
-                      style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; border-width: 0px;"
-                    >
-                    </label>
-                    <div class="group rounded-md border border-gray-200 px-3 py-2 text-sm ring-offset-white focus-within:ring-2 focus-within:ring-gray-400 focus-within:ring-offset-2 dark:border-gray-800 dark:ring-offset-gray-950 dark:focus-within:ring-gray-800">
-                      <div class="flex flex-wrap gap-2">
-                        <div class="relative h-5 flex-shrink-0">
-                          <div class="pointer-events-none absolute flex min-w-max flex-wrap gap-1">
-                            <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 dark:border-gray-300 dark:focus:ring-gray-300 border-transparent bg-gray-100 text-gray-900 hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80 flex-shrink-0 opacity-20">
-                              typescript<button class="ml-1 rounded-full outline-none ring-offset-white focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:ring-offset-gray-950 dark:focus:ring-gray-800"></button>
-                            </div>
-                            <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2 dark:border-gray-300 dark:focus:ring-gray-300 border-transparent bg-gray-100 text-gray-900 hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80 flex-shrink-0 opacity-20">
-                              nextjs<button class="ml-1 rounded-full outline-none ring-offset-white focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:ring-offset-gray-950 dark:focus:ring-gray-800"></button>
-                            </div>
-                          </div>
-                        </div>
-                        <input
-                          class="bg-transparent outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400 absolute inset-0"
-                          cmdk-input=""
-                          autocomplete="off"
-                          autocorrect="off"
-                          spellcheck="false"
-                          aria-autocomplete="list"
-                          role="combobox"
-                          aria-expanded="true"
-                          aria-controls=":r9:"
-                          aria-labelledby=":ra:"
-                          id=":rb:"
-                          type="text"
-                          value=""
-                        />
-                      </div>
+              <div class="md:pl-4">
+                <div class="mt-4">
+                  <input
+                    type="text"
+                    placeholder="Elixir, Phoenix, PostgreSQL, etc."
+                    phx-keydown="handle_tech_input"
+                    phx-debounce="200"
+                    class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div class="flex flex-wrap gap-3 mt-4">
+                  <%= for tech <- @tech_stack do %>
+                    <div class="bg-indigo-900 text-indigo-200 rounded-lg px-2.5 py-1.5 text-sm font-semibold flex items-center">
+                      <%= tech %>
+                      <button
+                        phx-click="remove_tech"
+                        phx-value-tech={tech}
+                        class="ml-2 text-indigo-300 hover:text-indigo-100"
+                      >
+                        ×
+                      </button>
                     </div>
-                    <div class="relative"></div>
-                  </div>
+                  <% end %>
                 </div>
               </div>
               <div class="scrollbar-thin w-full overflow-auto">
@@ -485,5 +467,28 @@ defmodule AlgoraWeb.User.DashboardLive do
       </div>
     </a>
     """
+  end
+
+  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
+      when byte_size(tech) > 0 do
+    tech_stack = [String.trim(tech) | socket.assigns.tech_stack] |> Enum.uniq()
+
+    {:noreply,
+     socket
+     |> assign(:tech_stack, tech_stack)
+     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
+  end
+
+  def handle_event("handle_tech_input", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("remove_tech", %{"tech" => tech}, socket) do
+    tech_stack = List.delete(socket.assigns.tech_stack, tech)
+
+    {:noreply,
+     socket
+     |> assign(:tech_stack, tech_stack)
+     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
   end
 end

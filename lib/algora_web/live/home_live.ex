@@ -1,18 +1,29 @@
 defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
-  import AlgoraWeb.Component.Card
   alias Algora.Accounts
 
   @impl true
   def mount(_params, _session, socket) do
-    # Get featured developer and organizations
-    featured_dev = Accounts.list_matching_devs(limit: 1) |> List.first()
-    orgs = Accounts.list_orgs(limit: 6)
+    featured_devs =
+      Accounts.list_matching_devs(
+        ids: [
+          "clkml8zpq0000l00fjudr9dwl",
+          "clh9dhdz30002le0fjxwhjxnx",
+          "clgxc4nos0000jt0fygp77a9x",
+          "clg4rtl2n0002jv0fg30lto6l",
+          "clsdprvym000al70f76whovr4"
+        ]
+      )
 
     socket =
       socket
-      |> assign(:featured_dev, featured_dev)
-      |> assign(:orgs, orgs)
+      |> assign(:featured_devs, featured_devs)
+      |> assign(:stats, [
+        %{label: "Active Projects", value: "500+"},
+        %{label: "Total Developers", value: "2,000+"},
+        %{label: "Companies", value: "100+"},
+        %{label: "Paid Out", value: "$1M+"}
+      ])
 
     {:ok, socket}
   end
@@ -20,79 +31,292 @@ defmodule AlgoraWeb.HomeLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <!-- Left Column -->
-          <div class="space-y-8">
-            <h1 class="text-5xl font-bold tracking-tight text-gray-900">
-              Hire the <span class="underline decoration-blue-500">Top 3%</span>
-              of<br /> Freelance Talent<span class="text-2xl align-super">®</span>
-            </h1>
-
-            <p class="text-xl text-gray-600 leading-relaxed">
-              Algora is an exclusive network of the top freelance software developers, designers, marketing experts, finance experts, product managers, and project managers in the world. Top companies hire Algora freelancers for their most important projects.
-            </p>
-
-            <div>
-              <.button class="px-8 py-4 text-lg bg-emerald-500 hover:bg-emerald-600 text-white rounded-md">
-                Hire Top Talent
-              </.button>
+    <div class="bg-white">
+      <header class="absolute inset-x-0 top-0 z-50">
+        <nav
+          class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+          aria-label="Global"
+        >
+          <div class="flex lg:flex-1">
+            <.logo class="text-black h-8 w-auto" />
+          </div>
+          <div class="flex lg:hidden">
+            <button
+              type="button"
+              class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            >
+              <span class="sr-only">Open main menu</span>
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                aria-hidden="true"
+                data-slot="icon"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="hidden lg:flex lg:gap-x-12">
+            <a href="#" class="text-sm/6 font-semibold text-gray-900">Product</a>
+            <a href="#" class="text-sm/6 font-semibold text-gray-900">Features</a>
+            <a href="#" class="text-sm/6 font-semibold text-gray-900">Marketplace</a>
+            <a href="#" class="text-sm/6 font-semibold text-gray-900">Company</a>
+          </div>
+          <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+            <a href="#" class="text-sm/6 font-semibold text-gray-900">
+              Log in <span aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </nav>
+        <!-- Mobile menu, show/hide based on menu open state. -->
+        <div class="lg:hidden" role="dialog" aria-modal="true">
+          <!-- Background backdrop, show/hide based on slide-over state. -->
+          <div class="fixed inset-0 z-50"></div>
+          <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+            <div class="flex items-center justify-between">
+              <a href="#" class="-m-1.5 p-1.5">
+                <span class="sr-only">Your Company</span>
+                <img
+                  class="h-8 w-auto"
+                  src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
+                  alt=""
+                />
+              </a>
+              <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700">
+                <span class="sr-only">Close menu</span>
+                <svg
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  data-slot="icon"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="mt-6 flow-root">
+              <div class="-my-6 divide-y divide-gray-500/10">
+                <div class="space-y-2 py-6">
+                  <a
+                    href="#"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Product
+                  </a>
+                  <a
+                    href="#"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Features
+                  </a>
+                  <a
+                    href="#"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Marketplace
+                  </a>
+                  <a
+                    href="#"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Company
+                  </a>
+                </div>
+                <div class="py-6">
+                  <a
+                    href="#"
+                    class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                  >
+                    Log in
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-          <!-- Right Column -->
-          <div class="relative">
-            <div class="relative">
-              <img
-                src={@featured_dev.avatar_url}
-                alt="Professional"
-                class="w-full max-w-lg mx-auto rounded-lg object-cover aspect-[4/3]"
+        </div>
+      </header>
+      <main>
+        <div class="relative isolate">
+          <svg
+            class="absolute inset-x-0 top-0 -z-10 h-[64rem] w-full stroke-gray-200 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
+            aria-hidden="true"
+          >
+            <defs>
+              <pattern
+                id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
+                width="200"
+                height="200"
+                x="50%"
+                y="-1"
+                patternUnits="userSpaceOnUse"
+              >
+                <path d="M.5 200V.5H200" fill="none" />
+              </pattern>
+            </defs>
+            <svg x="50%" y="-1" class="overflow-visible fill-gray-50">
+              <path
+                d="M-200 0h201v201h-201Z M600 0h201v201h-201Z M-400 600h201v201h-201Z M200 800h201v201h-201Z"
+                stroke-width="0"
               />
+            </svg>
+            <rect
+              width="100%"
+              height="100%"
+              stroke-width="0"
+              fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
+            />
+          </svg>
+          <div
+            class="absolute left-1/2 right-0 top-0 -z-10 -ml-24 transform overflow-hidden blur-3xl lg:ml-24 xl:ml-48"
+            aria-hidden="true"
+          >
+            <div
+              class="aspect-[801/1036] w-[50.0625rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30"
+              style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.7%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)"
+            >
             </div>
-            <!-- Floating Card -->
-            <.card class="absolute -right-8 -bottom-8 w-72 bg-white shadow-xl z-20">
-              <.card_content class="space-y-4">
-                <div class="flex items-start gap-4">
-                  <div class="flex-1">
-                    <h3 class="font-semibold text-gray-900"><%= @featured_dev.name %></h3>
-                    <div class="flex items-center gap-2 text-sm text-emerald-600">
-                      <.icon name="tabler-check-circle" class="w-4 h-4" />
-                      <span>Verified Expert</span>
-                    </div>
-                    <div class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                      <.icon name="tabler-briefcase" class="w-4 h-4" />
-                      <span><%= @featured_dev.projects %> Projects</span>
-                    </div>
-                  </div>
-                </div>
+          </div>
+          <div class="overflow-hidden">
+            <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-16">
+              <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
+                <div class="lg:-mt-12 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
+                  <h1 class="text-pretty text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
+                    Open Source UpWork <br /> for Developers
+                  </h1>
+                  <p class="mt-8 text-pretty text-lg font-medium text-gray-500 sm:max-w-md sm:text-xl/8 lg:max-w-none">
+                    GitHub bounties, freelancing and full-time jobs.
+                  </p>
 
-                <div>
-                  <p class="text-xs text-gray-500 uppercase">PREVIOUSLY AT</p>
-                  <div class="mt-2">
-                    <img
-                      :if={org = List.first(@orgs)}
-                      src={org.avatar_url}
-                      alt={org.name}
-                      class="h-8"
-                    />
+                  <div class="mt-10 flex items-center gap-x-6">
+                    <a
+                      href="#"
+                      class="rounded-md bg-indigo-600 px-12 py-5 text-xl font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      Companies
+                    </a>
+                    <a
+                      href="#"
+                      class="rounded-md bg-white px-12 py-5 text-xl font-semibold text-indigo-600 shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-gray-50"
+                    >
+                      Developers
+                    </a>
+                  </div>
+                  <!-- Stats Section -->
+                  <dl class="mt-16 grid grid-cols-2 gap-8 lg:grid-cols-4">
+                    <%= for stat <- @stats do %>
+                      <div class="flex flex-col gap-y-2">
+                        <dt class="text-sm leading-6 text-gray-600"><%= stat.label %></dt>
+                        <dd class="text-3xl font-semibold tracking-tight text-gray-900">
+                          <%= stat.value %>
+                        </dd>
+                      </div>
+                    <% end %>
+                  </dl>
+                  <!-- Logos Section -->
+                  <div class="mt-16">
+                    <h2 class="text-sm font-semibold leading-8 text-gray-900">
+                      Trusted by the world's most innovative teams
+                    </h2>
+                    <div class="mt-6 grid grid-cols-5 gap-x-8 gap-y-4">
+                      <img
+                        class="max-h-8 w-full object-contain"
+                        src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
+                        alt="Transistor"
+                      />
+                      <img
+                        class="max-h-8 w-full object-contain"
+                        src="https://tailwindui.com/img/logos/158x48/reform-logo-gray-900.svg"
+                        alt="Reform"
+                      />
+                      <img
+                        class="max-h-8 w-full object-contain"
+                        src="https://tailwindui.com/img/logos/158x48/tuple-logo-gray-900.svg"
+                        alt="Tuple"
+                      />
+                      <img
+                        class="max-h-8 w-full object-contain"
+                        src="https://tailwindui.com/img/logos/158x48/savvycal-logo-gray-900.svg"
+                        alt="SavvyCal"
+                      />
+                      <img
+                        class="max-h-8 w-full object-contain"
+                        src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
+                        alt="Statamic"
+                      />
+                    </div>
                   </div>
                 </div>
-              </.card_content>
-            </.card>
+                <!-- Featured Devs Section -->
+                <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
+                  <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                    <div class="relative">
+                      <img
+                        src={List.first(@featured_devs).avatar_url}
+                        alt={List.first(@featured_devs).name}
+                        class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
+                      />
+                      <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
+                    <%= if length(@featured_devs) >= 3 do %>
+                      <div class="relative">
+                        <img
+                          src={Enum.at(@featured_devs, 1).avatar_url}
+                          alt={Enum.at(@featured_devs, 1).name}
+                          class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
+                        />
+                        <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
+                        </div>
+                      </div>
+                      <div class="relative">
+                        <img
+                          src={Enum.at(@featured_devs, 2).avatar_url}
+                          alt={Enum.at(@featured_devs, 2).name}
+                          class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
+                        />
+                        <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
+                    <div class="relative">
+                      <img
+                        src={Enum.at(@featured_devs, 3).avatar_url}
+                        alt={Enum.at(@featured_devs, 3).name}
+                        class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
+                      />
+                      <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <img
+                        src={Enum.at(@featured_devs, 4).avatar_url}
+                        alt={Enum.at(@featured_devs, 4).name}
+                        class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
+                      />
+                      <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Logos Section -->
-        <div class="mt-24">
-          <p class="text-center text-gray-600 text-sm font-medium mb-8">
-            TRUSTED BY LEADING BRANDS AND STARTUPS
-          </p>
-          <div class="grid grid-cols-3 md:grid-cols-6 gap-8 items-center justify-items-center opacity-75">
-            <%= for org <- @orgs do %>
-              <img src={org.avatar_url} alt={org.name} class="h-8 w-8 object-contain" />
-            <% end %>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
     """
   end

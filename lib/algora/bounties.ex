@@ -37,7 +37,8 @@ defmodule Algora.Bounties do
           params :: %{
             optional(:owner_id) => integer(),
             optional(:limit) => non_neg_integer(),
-            optional(:status) => :open | :completed
+            optional(:status) => :open | :completed,
+            optional(:tech_stack) => [String.t()]
           }
         ) :: [map()]
   def list_bounties(params) do
@@ -80,6 +81,7 @@ defmodule Algora.Bounties do
 
     query
     |> Bounty.filter_by_org_id(params[:owner_id])
+    |> Bounty.filter_by_tech_stack(params[:tech_stack])
     |> Repo.all()
   end
 

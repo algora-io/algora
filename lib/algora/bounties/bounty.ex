@@ -87,4 +87,15 @@ defmodule Algora.Bounties.Bounty do
       join: u in assoc(b, :owner),
       where: u.id == ^org_id
   end
+
+  def filter_by_tech_stack(query, []), do: query
+  def filter_by_tech_stack(query, nil), do: query
+
+  def filter_by_tech_stack(query, tech_stack) do
+    lowercase_tech_stack = Enum.map(tech_stack, &String.downcase/1)
+
+    from b in query,
+      join: o in assoc(b, :owner),
+      where: fragment("ARRAY(SELECT LOWER(unnest(?))) && ?", o.tech_stack, ^lowercase_tech_stack)
+  end
 end

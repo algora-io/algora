@@ -6,7 +6,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
   on_mount AlgoraWeb.Org.BountyHook
 
   def mount(_params, _session, socket) do
-    bounties = Bounties.list_bounties(%{owner_id: socket.assigns.current_org.id, limit: 10})
+    bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10)
     claims = []
 
     {:ok,

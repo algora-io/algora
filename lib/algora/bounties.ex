@@ -36,17 +36,25 @@ defmodule Algora.Bounties do
   @spec list_bounties(
           params :: %{
             optional(:owner_id) => integer(),
-            optional(:limit) => non_neg_integer()
+            optional(:limit) => non_neg_integer(),
+            optional(:status) => :open | :completed
           }
         ) :: [map()]
   def list_bounties(params) do
     limit = params[:limit] || 10
 
+    sq =
+      case params[:status] do
+        :open -> Bounty.open()
+        :completed -> Bounty.completed()
+        _ -> Bounty.open()
+      end
+
     query =
-      from b in Bounty,
+      from b in sq,
         join: t in assoc(b, :task),
-        join: r in assoc(t, :repository),
-        join: u in assoc(r, :user),
+        left_join: r in assoc(t, :repository),
+        left_join: u in assoc(r, :user),
         select: %{
           id: b.id,
           inserted_at: b.inserted_at,

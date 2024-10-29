@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.Accounts
+  alias Algora.Money
 
   @impl true
   def mount(_params, _session, socket) do
@@ -15,9 +16,12 @@ defmodule AlgoraWeb.HomeLive do
         ]
       )
 
+    featured_orgs = Accounts.list_orgs(limit: 5)
+
     socket =
       socket
       |> assign(:featured_devs, featured_devs)
+      |> assign(:featured_orgs, featured_orgs)
       |> assign(:stats, [
         %{label: "Active Projects", value: "500+"},
         %{label: "Total Developers", value: "2,000+"},
@@ -228,88 +232,32 @@ defmodule AlgoraWeb.HomeLive do
                       Trusted by the world's most innovative teams
                     </h2>
                     <div class="mt-6 grid grid-cols-5 gap-x-8 gap-y-4">
-                      <img
-                        class="max-h-8 w-full object-contain"
-                        src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg"
-                        alt="Transistor"
-                      />
-                      <img
-                        class="max-h-8 w-full object-contain"
-                        src="https://tailwindui.com/img/logos/158x48/reform-logo-gray-900.svg"
-                        alt="Reform"
-                      />
-                      <img
-                        class="max-h-8 w-full object-contain"
-                        src="https://tailwindui.com/img/logos/158x48/tuple-logo-gray-900.svg"
-                        alt="Tuple"
-                      />
-                      <img
-                        class="max-h-8 w-full object-contain"
-                        src="https://tailwindui.com/img/logos/158x48/savvycal-logo-gray-900.svg"
-                        alt="SavvyCal"
-                      />
-                      <img
-                        class="max-h-8 w-full object-contain"
-                        src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg"
-                        alt="Statamic"
-                      />
+                      <%= for org <- @featured_orgs do %>
+                        <img
+                          class="max-h-8 w-full object-contain"
+                          src={org.avatar_url}
+                          alt={org.name}
+                        />
+                      <% end %>
                     </div>
                   </div>
                 </div>
                 <!-- Featured Devs Section -->
                 <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
                   <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                    <div class="relative">
-                      <img
-                        src={List.first(@featured_devs).avatar_url}
-                        alt={List.first(@featured_devs).name}
-                        class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
-                      />
-                      <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                      </div>
-                    </div>
+                    <.dev_card dev={List.first(@featured_devs)} />
                   </div>
                   <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
                     <%= if length(@featured_devs) >= 3 do %>
-                      <div class="relative">
-                        <img
-                          src={Enum.at(@featured_devs, 1).avatar_url}
-                          alt={Enum.at(@featured_devs, 1).name}
-                          class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
-                        />
-                        <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                        </div>
-                      </div>
-                      <div class="relative">
-                        <img
-                          src={Enum.at(@featured_devs, 2).avatar_url}
-                          alt={Enum.at(@featured_devs, 2).name}
-                          class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
-                        />
-                        <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                        </div>
-                      </div>
+                      <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
+                        <.dev_card dev={dev} />
+                      <% end %>
                     <% end %>
                   </div>
                   <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
-                    <div class="relative">
-                      <img
-                        src={Enum.at(@featured_devs, 3).avatar_url}
-                        alt={Enum.at(@featured_devs, 3).name}
-                        class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
-                      />
-                      <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                      </div>
-                    </div>
-                    <div class="relative">
-                      <img
-                        src={Enum.at(@featured_devs, 4).avatar_url}
-                        alt={Enum.at(@featured_devs, 4).name}
-                        class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg"
-                      />
-                      <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-gray-900/10">
-                      </div>
-                    </div>
+                    <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
+                      <.dev_card dev={dev} />
+                    <% end %>
                   </div>
                 </div>
               </div>
@@ -317,6 +265,37 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </div>
       </main>
+    </div>
+    """
+  end
+
+  def dev_card(assigns) do
+    ~H"""
+    <div class="relative">
+      <img
+        src={@dev.avatar_url}
+        alt={@dev.name}
+        class="aspect-square w-full rounded-xl rounded-b-none bg-gray-900/5 object-cover shadow-lg ring-1 ring-inset ring-gray-900/10"
+      />
+      <div class="font-display mt-0.5 p-3 bg-white/50 rounded-xl rounded-t-none text-sm ring-1 ring-inset ring-gray-900/10">
+        <div class="font-semibold text-gray-900"><%= @dev.name %> <%= @dev.flag %></div>
+        <div class="mt-1 text-sm">
+          <div class="p-px -ml-1 text-sm flex flex-wrap gap-1 h-6 overflow-hidden">
+            <%= for skill <- @dev.skills do %>
+              <span class="text-gray-900 rounded-xl px-2 py-0.5 text-xs ring-1 ring-gray-900/20">
+                <%= skill %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+        <div class="mt-1 text-gray-900 text-xs">
+          <span class="font-medium">Total Earned:</span>
+          <span class="font-bold text-sm">
+            <%= @dev.amount
+            |> Money.format!("USD", fractional_digits: 0) %>
+          </span>
+        </div>
+      </div>
     </div>
     """
   end

@@ -69,8 +69,9 @@ defmodule Algora.Bounties do
           },
           task: %{
             title: t.title,
-            owner: u.provider_login,
-            repo: r.name,
+            # HACK: remove these once we have a way to get the owner and repo from the task
+            owner: coalesce(u.provider_login, o.handle),
+            repo: coalesce(r.name, o.handle),
             number: t.number
           }
         },

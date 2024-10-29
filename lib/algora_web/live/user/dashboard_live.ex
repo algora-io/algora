@@ -15,15 +15,6 @@ defmodule AlgoraWeb.User.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="p-4 pt-6 sm:p-6 md:p-8">
-      <section class="pl-4 hidden">
-        <div class="flex items-end justify-between">
-          <h2 class="font-display text-2xl font-bold dark:text-white">Jump back in</h2>
-          <button type="button" class="text-sm font-medium text-gray-400 hover:underline">
-            Show all
-          </button>
-        </div>
-        <div class="mt-4 grid gap-6 md:grid-cols-3"></div>
-      </section>
       <div dir="ltr" data-orientation="horizontal">
         <div class="flex flex-wrap items-end justify-between gap-3 md:pl-4">
           <h2 class="font-display text-2xl font-bold dark:text-white">Bounties for you</h2>

@@ -181,18 +181,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
       <div class="space-y-6">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Domain</label>
-          <input
-            type="text"
-            phx-blur="update_context"
-            phx-value-field="domain"
-            value={@context.domain}
-            placeholder="company.com"
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">Work Email</label>
           <input
             type="email"
@@ -200,6 +188,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             phx-value-field="email"
             value={@context.email}
             placeholder="you@company.com"
+            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Company Domain</label>
+          <input
+            type="text"
+            phx-blur="update_context"
+            phx-value-field="domain"
+            value={@context.domain}
+            placeholder="company.com"
             class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -241,6 +240,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         else: [skill | context.skills]
 
     %{context | skills: skills}
+  end
+
+  defp update_context_field(context, "email" = field, value, _params) do
+    domain = value |> String.split("@") |> List.last()
+
+    context
+    |> Map.put(:email, value)
+    |> Map.put(:domain, domain)
   end
 
   defp update_context_field(context, field, value, _params) do

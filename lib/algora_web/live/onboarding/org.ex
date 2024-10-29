@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-indigo-950 to-black text-white sm:flex">
+    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white sm:flex">
       <div class="flex-grow px-8 py-16 bg-gray-950/25">
         <div class="max-w-3xl mx-auto">
           <div class="flex items-center gap-4 text-lg mb-6 font-display">

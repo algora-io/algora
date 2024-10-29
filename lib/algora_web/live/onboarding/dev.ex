@@ -22,44 +22,46 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-950 text-white sm:flex">
-      <div class="flex-grow p-8 max-w-3xl mx-auto">
-        <div class="flex items-center gap-4 text-lg mb-6 font-display">
-          <span class="text-gray-300"><%= @step %> / <%= @total_steps %></span>
-          <h1 class="text-lg text-gray-200 font-semibold uppercase">Get started</h1>
-        </div>
-        <div class="mb-8">
-          <%= render_step(assigns) %>
-        </div>
-        <div class="flex justify-between">
-          <%= if @step > 1 do %>
-            <button
-              phx-click="prev_step"
-              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Previous
-            </button>
-          <% else %>
-            <div></div>
-          <% end %>
-          <%= if @step < @total_steps do %>
-            <button
-              phx-click="next_step"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Next
-            </button>
-          <% else %>
-            <button
-              phx-click="submit"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Sign up
-            </button>
-          <% end %>
+    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white sm:flex relative">
+      <div class="flex-grow px-8 py-16 bg-gray-950/25">
+        <div class="max-w-3xl mx-auto">
+          <div class="flex items-center gap-4 text-lg mb-6 font-display">
+            <span class="text-gray-300"><%= @step %> / <%= @total_steps %></span>
+            <h1 class="text-lg text-gray-200 font-semibold uppercase">Get started</h1>
+          </div>
+          <div class="mb-8">
+            <%= render_step(assigns) %>
+          </div>
+          <div class="flex justify-between">
+            <%= if @step > 1 do %>
+              <button
+                phx-click="prev_step"
+                class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Previous
+              </button>
+            <% else %>
+              <div></div>
+            <% end %>
+            <%= if @step < @total_steps do %>
+              <button
+                phx-click="next_step"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Next
+              </button>
+            <% else %>
+              <button
+                phx-click="submit"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Sign up
+              </button>
+            <% end %>
+          </div>
         </div>
       </div>
-      <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
+      <div class="sm:w-1/3 border-l-2 border-gray-700 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
         <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
           Open Bounties
         </h2>

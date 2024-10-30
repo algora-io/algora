@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Pagination do
+defmodule AlgoraWeb.Components.Pagination do
   @moduledoc false
   use AlgoraWeb.Component
 
@@ -235,7 +235,8 @@ defmodule AlgoraWeb.Component.Pagination do
 
   @variants %{
     variant: %{
-      "outline" => "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+      "outline" =>
+        "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
       "ghost" => "hover:bg-accent hover:text-accent-foreground"
     },
     size: %{

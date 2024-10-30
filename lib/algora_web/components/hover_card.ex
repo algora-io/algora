@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.HoverCard do
+defmodule AlgoraWeb.Components.HoverCard do
   @moduledoc """
   Implement hover card component
 

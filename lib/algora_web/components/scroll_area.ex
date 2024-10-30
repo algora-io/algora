@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.ScrollArea do
+defmodule AlgoraWeb.Components.ScrollArea do
   @moduledoc false
   use AlgoraWeb.Component
 

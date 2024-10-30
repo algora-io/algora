@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.ToggleGroup do
+defmodule AlgoraWeb.Components.ToggleGroup do
   @moduledoc false
   use AlgoraWeb.Component
 
@@ -23,13 +23,15 @@ defmodule AlgoraWeb.Component.ToggleGroup do
   attr :name, :string, default: nil
   attr :multiple, :any, values: [true, false, "true", "false"], default: false
 
-  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :"default-value", :any, values: [true, false, "true", "false"]
 
   attr :value, :string,
     default: nil,
-    doc: "The value of the toggle group. It's a single value for single type and a list of values for multiple type."
+    doc:
+      "The value of the toggle group. It's a single value for single type and a list of values for multiple type."
 
   attr :disabled, :boolean, default: false
   attr :class, :string, default: nil
@@ -42,7 +44,9 @@ defmodule AlgoraWeb.Component.ToggleGroup do
     assigns = prepare_assign(assigns)
 
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", assigns.multiple) end)
+      assign_new(assigns, :checked, fn ->
+        Phoenix.HTML.Form.normalize_value("checkbox", assigns.multiple)
+      end)
 
     ensure_valid_value_type!(assigns)
 
@@ -59,7 +63,8 @@ defmodule AlgoraWeb.Component.ToggleGroup do
         raise ArgumentError, "The value of the toggle group must be a list for multiple type."
 
       not multiple and not (is_nil(value) or is_binary(value)) ->
-        raise ArgumentError, "The value of the toggle group must be a single value for single type."
+        raise ArgumentError,
+              "The value of the toggle group must be a single value for single type."
 
       true ->
         nil
@@ -139,7 +144,8 @@ defmodule AlgoraWeb.Component.ToggleGroup do
   @variants %{
     variant: %{
       "default" => "bg-transparent",
-      "outline" => "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground"
+      "outline" =>
+        "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground"
     },
     size: %{
       "default" => "h-10 px-3",

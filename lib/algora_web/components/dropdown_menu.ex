@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.DropdownMenu do
+defmodule AlgoraWeb.Components.DropdownMenu do
   @moduledoc false
   use AlgoraWeb.Component
 

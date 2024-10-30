@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Accordion do
+defmodule AlgoraWeb.Components.Accordion do
   @moduledoc """
   Accordion component for displaying collapsible content.
 
@@ -37,7 +37,6 @@ defmodule AlgoraWeb.Component.Accordion do
   slot :inner_block, required: true
 
   def accordion(assigns) do
-
     ~H"""
     <div class={classes(["", @class])}>
       <%= render_slot(@inner_block) %>

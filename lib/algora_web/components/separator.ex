@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Separator do
+defmodule AlgoraWeb.Components.Separator do
   @moduledoc false
   use AlgoraWeb.Component
 

@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Menu do
+defmodule AlgoraWeb.Components.Menu do
   @moduledoc """
   Implement menu components
   """

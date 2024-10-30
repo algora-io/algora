@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Progress do
+defmodule AlgoraWeb.Components.Progress do
   @moduledoc false
   use AlgoraWeb.Component
 

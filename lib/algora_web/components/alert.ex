@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Alert do
+defmodule AlgoraWeb.Components.Alert do
   @moduledoc false
   use AlgoraWeb.Component
 
@@ -86,7 +86,8 @@ defmodule AlgoraWeb.Component.Alert do
   @variants %{
     variant: %{
       "default" => "bg-background text-foreground",
-      "destructive" => "border-destructive/50 text-destructive dark:border-destructive [&>span]:text-destructive"
+      "destructive" =>
+        "border-destructive/50 text-destructive dark:border-destructive [&>span]:text-destructive"
     }
   }
 

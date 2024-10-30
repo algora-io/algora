@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Popover do
+defmodule AlgoraWeb.Components.Popover do
   @moduledoc """
   Implement Popover component
 
@@ -43,8 +43,11 @@ defmodule AlgoraWeb.Component.Popover do
   Render popover trigger
   """
   attr :class, :string, default: nil
-  attr :target, :string, required: true,
-       doc: "The id of target element to show popover"
+
+  attr :target, :string,
+    required: true,
+    doc: "The id of target element to show popover"
+
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -78,8 +81,13 @@ defmodule AlgoraWeb.Component.Popover do
   def popover_content(assigns) do
     assigns =
       assign(assigns, :variant_class, side_variant(assigns.side, assigns.align))
-   |> assign_new(:state, fn -> if assigns[:open] in ["true", true] do "open" else "closed" end  end)
-
+      |> assign_new(:state, fn ->
+        if assigns[:open] in ["true", true] do
+          "open"
+        else
+          "closed"
+        end
+      end)
 
     ~H"""
     <div
@@ -108,5 +116,4 @@ defmodule AlgoraWeb.Component.Popover do
   defp hide() do
     JS.set_attribute({"data-state", "closed"})
   end
-
 end

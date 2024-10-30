@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Label do
+defmodule AlgoraWeb.Components.Label do
   @moduledoc false
   use AlgoraWeb.Component
 

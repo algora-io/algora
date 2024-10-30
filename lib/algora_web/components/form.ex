@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Form do
+defmodule AlgoraWeb.Components.Form do
   @moduledoc false
   use AlgoraWeb.Component
 

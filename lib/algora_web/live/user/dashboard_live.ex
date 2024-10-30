@@ -42,10 +42,12 @@ defmodule AlgoraWeb.User.DashboardLive do
               <div>
                 <div class="mt-4">
                   <input
+                    id="tech-input"
                     type="text"
                     placeholder="Elixir, Phoenix, PostgreSQL, etc."
                     phx-keydown="handle_tech_input"
                     phx-debounce="200"
+                    phx-hook="ClearInput"
                     class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -473,7 +475,8 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply,
      socket
      |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
+     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))
+     |> push_event("clear-input", %{selector: "[phx-keydown='handle_tech_input']"})}
   end
 
   def handle_event("handle_tech_input", _params, socket) do

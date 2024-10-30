@@ -399,6 +399,13 @@ const Hooks = {
       });
     },
   },
+  ClearInput: {
+    mounted() {
+      this.handleEvent("clear-input", ({ selector }) => {
+        document.querySelector(selector).value = "";
+      });
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

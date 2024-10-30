@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.DataTable do
+defmodule AlgoraWeb.Components.DataTable do
   @moduledoc """
   Implement of table components from https://ui.shadcn.com/docs/components/table
   """

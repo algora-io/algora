@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Dialog do
+defmodule AlgoraWeb.Components.Dialog do
   @moduledoc """
   Implement of Dialog components from https://ui.shadcn.com/docs/components/dialog
   """

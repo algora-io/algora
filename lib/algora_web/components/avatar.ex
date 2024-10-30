@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Avatar do
+defmodule AlgoraWeb.Components.Avatar do
   @moduledoc false
   use AlgoraWeb.Component
 

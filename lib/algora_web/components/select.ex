@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Select do
+defmodule AlgoraWeb.Components.Select do
   @moduledoc """
   Implement of select components from https://ui.shadcn.com/docs/components/select
 
@@ -36,7 +36,8 @@ defmodule AlgoraWeb.Component.Select do
   attr :value, :any, default: nil, doc: "The value of the select"
   attr :"default-value", :any, default: nil, doc: "The default value of the select"
 
-  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :label, :string,
     default: nil,

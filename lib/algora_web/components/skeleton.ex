@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Skeleton do
+defmodule AlgoraWeb.Components.Skeleton do
   @moduledoc false
   use AlgoraWeb.Component
 

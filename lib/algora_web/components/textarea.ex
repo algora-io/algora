@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Textarea do
+defmodule AlgoraWeb.Components.Textarea do
   @moduledoc false
   use AlgoraWeb.Component
 

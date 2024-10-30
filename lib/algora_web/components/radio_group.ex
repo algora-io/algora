@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.RadioGroup do
+defmodule AlgoraWeb.Components.RadioGroup do
   @moduledoc false
   use AlgoraWeb.Component
 
@@ -26,7 +26,10 @@ defmodule AlgoraWeb.Component.RadioGroup do
   attr :name, :string, default: nil
   attr :value, :any, default: nil
   attr :"default-value", :any
-  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :field, Phoenix.HTML.FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
   attr :class, :string, default: nil
   slot :inner_block, required: true
 

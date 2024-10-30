@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Breadcrumb do
+defmodule AlgoraWeb.Components.Breadcrumb do
   @moduledoc false
   use AlgoraWeb.Component
 

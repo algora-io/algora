@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Slider do
+defmodule AlgoraWeb.Components.Slider do
   @moduledoc false
   use AlgoraWeb.Component
 
@@ -16,7 +16,9 @@ defmodule AlgoraWeb.Component.Slider do
   attr :name, :string, default: nil
   attr :value, :integer, default: 0, doc: ""
   attr :"default-value", :integer
-  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
+
+  attr :field, Phoenix.HTML.FormField,
+    doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :min, :integer, default: 0
   attr :max, :integer, default: 100

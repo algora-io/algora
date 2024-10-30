@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Tooltip do
+defmodule AlgoraWeb.Components.Tooltip do
   @moduledoc false
   use AlgoraWeb.Component
 

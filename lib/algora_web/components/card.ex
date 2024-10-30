@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Component.Card do
+defmodule AlgoraWeb.Components.Card do
   @moduledoc """
   Implement of card components from https://ui.shadcn.com/docs/components/card
   """

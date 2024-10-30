@@ -119,6 +119,12 @@ module.exports = {
         ".phx-change-loading &",
       ])
     ),
+    plugin(({ addVariant }) =>
+      addVariant("phx-keydown-loading", [
+        ".phx-keydown-loading&",
+        ".phx-keydown-loading &",
+      ])
+    ),
     // Embeds Tabler Icons (https://tabler.io/icons) into your app.css bundle
     // See your `CoreComponents.icon/1` for more information.
     //

@@ -80,7 +80,7 @@
     </div>
   </div>
   <!-- Static sidebar for desktop -->
-  <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
+  <%!-- <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
     <!-- Sidebar component -->
     <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-950/50 px-6 ring-1 ring-white/5 scrollbar-thin">
       <div class="flex h-16 shrink-0 items-center">
@@ -185,9 +185,65 @@
         </ul>
       </nav>
     </div>
+  </div> --%>
+  <!-- Static sidebar for desktop -->
+  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
+    <div class="flex h-16 shrink-0 items-center justify-center">
+      <.logo class="h-8 w-auto text-white" />
+    </div>
+    <nav class="mt-8">
+      <ul role="list" class="flex flex-col items-center space-y-1">
+        <li>
+          <!-- Current: "bg-gray-800 text-white", Default: "text-gray-400 hover:text-white hover:bg-gray-800" -->
+          <a
+            href="#"
+            class="group flex gap-x-3 rounded-md bg-gray-800 p-3 text-sm/6 font-semibold text-white"
+          >
+            <.icon name="tabler-home" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#"
+            class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <.icon name="tabler-diamond" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Bounties</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#"
+            class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <.icon name="tabler-rocket" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Projects</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#"
+            class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <.icon name="tabler-briefcase" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Jobs</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#"
+            class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
+          >
+            <.icon name="tabler-settings" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Settings</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
   </div>
 
-  <div class="xl:pl-72">
+  <div class="xl:pl-16">
     <div
       id="navbar"
       phx-hook="NavBar"

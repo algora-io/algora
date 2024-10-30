@@ -22,9 +22,9 @@ defmodule AlgoraWeb.User.DashboardLive do
   def render(assigns) do
     ~H"""
     <main class="lg:pr-96">
-      <div class="p-4 pt-6 sm:p-6 md:p-8 md:-ml-4">
+      <div class="p-4 pt-6 sm:p-6 md:p-8">
         <div class="max-w-4xl mx-auto">
-          <header class="flex items-center justify-between md:pl-4">
+          <header class="flex items-center justify-between">
             <h2 class="font-display text-2xl/7 font-semibold text-white">Bounties for you</h2>
             <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
           </header>
@@ -38,8 +38,8 @@ defmodule AlgoraWeb.User.DashboardLive do
             class="mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:ring-offset-indigo-600 dark:focus-visible:ring-gray-800"
             style="animation-duration: 0s;"
           >
-            <div class="w-full" style="opacity: 1;">
-              <div class="md:pl-4">
+            <div class="w-full">
+              <div>
                 <div class="mt-4">
                   <input
                     type="text"
@@ -77,14 +77,11 @@ defmodule AlgoraWeb.User.DashboardLive do
                   </thead>
                   <tbody class="[&amp;_tr:last-child]:border-0">
                     <%= for bounty <- @bounties do %>
-                      <tr
-                        class="border-b transition-colors data-[state=selected]:bg-gray-100 dark:hover:bg-gray-800/50 dark:data-[state=selected]:bg-gray-800 hover:bg-white/[3%]"
-                        style="opacity: 1;"
-                      >
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 w-full py-6">
+                      <tr class="border-b transition-colors data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800">
+                        <td class="p-4 pl-0 align-middle [&amp;:has([role=checkbox])]:pr-0 w-full py-6">
                           <div class="relative flex w-full max-w-[calc(100vw-44px)] items-center gap-4">
                             <a href={~p"/org/#{bounty.owner.handle}"}>
-                              <span class="relative shrink-0 overflow-hidden flex h-14 w-14 items-center justify-center rounded-xl brightness-90 transition-all group-hover:brightness-100">
+                              <span class="relative shrink-0 overflow-hidden flex h-14 w-14 items-center justify-center rounded-xl">
                                 <img
                                   class="aspect-square h-full w-full"
                                   alt={bounty.owner.name}

@@ -16,6 +16,6 @@ defmodule Algora.Repo.Migrations.CreateRepositories do
     create index(:repositories, [:user_id])
 
     # TODO: Reenable this after migration is complete.
-    # create unique_index(:tasks, [:provider, :provider_id])
+    create unique_index(:repositories, [:provider, :provider_id])
   end
 end

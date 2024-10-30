@@ -109,7 +109,9 @@ defmodule Algora.Work do
   def fetch_user(:github, %{token: token, id: id}) do
     query =
       from u in User,
-        where: u.provider == "github" and u.provider_id == ^to_string(id)
+        where: u.provider == "github" and u.provider_id == ^to_string(id),
+        # TODO: handle multiple users with the same provider_id
+        limit: 1
 
     case Repo.one(query) do
       nil ->
@@ -128,7 +130,9 @@ defmodule Algora.Work do
   def fetch_user(:github, %{token: token, login: login}) do
     query =
       from u in User,
-        where: u.provider == "github" and u.provider_login == ^login
+        where: u.provider == "github" and u.provider_login == ^login,
+        # TODO: handle multiple users with the same provider_login
+        limit: 1
 
     case Repo.one(query) do
       nil ->

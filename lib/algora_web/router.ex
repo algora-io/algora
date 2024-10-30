@@ -63,11 +63,15 @@ defmodule AlgoraWeb.Router do
 
     live "/onboarding/org", Onboarding.OrgLive
     live "/onboarding/dev", Onboarding.DevLive
+    live "/companies", CompaniesLive, :index
+    live "/developers", DevelopersLive, :index
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index
     end
+
+    live "/open-source", OpenSourceLive, :index
   end
 
   # Other scopes may use custom stacks.

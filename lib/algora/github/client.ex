@@ -51,7 +51,12 @@ defmodule Algora.Github.Client do
     File.write!(cache_path, Jason.encode!(data))
   end
 
-  def fetch(access_token, path, method \\ "GET") do
+  def fetch(access_token, url, method \\ "GET")
+
+  def fetch(access_token, "https://api.github.com" <> path, method),
+    do: fetch(access_token, path, method)
+
+  def fetch(access_token, path, method) do
     http("api.github.com", method, path, [], [
       {"accept", "application/vnd.github.v3+json"},
       {"Authorization", "Bearer #{access_token}"}

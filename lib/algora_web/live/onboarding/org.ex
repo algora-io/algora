@@ -155,18 +155,19 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             {"jobs", "Share full-time jobs"},
             {"projects", "Share freelancing projects"},
           ] do %>
-            <div class="relative flex items-start">
-              <div class="flex h-6 items-center">
+            <div class="relative flex items-center">
+              <div class="flex items-center">
                 <input
+                  id={"intention-#{intention}"}
                   type="checkbox"
                   phx-click="toggle_intention"
                   phx-value-intention={intention}
                   checked={intention in @context.intentions}
-                  class="h-4 w-4 rounded border-gray-700 bg-gray-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
+                  class="h-8 w-8 rounded border-gray-700 bg-gray-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
                 />
               </div>
-              <div class="ml-3 text-sm leading-6">
-                <label class="text-gray-300"><%= label %></label>
+              <div class="ml-3 text-base leading-6">
+                <label for={"intention-#{intention}"} class="text-gray-300"><%= label %></label>
               </div>
             </div>
           <% end %>

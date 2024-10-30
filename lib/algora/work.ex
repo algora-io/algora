@@ -1,4 +1,5 @@
 defmodule Algora.Work do
+  require Logger
   import Ecto.Query
 
   alias Algora.Work.Task
@@ -31,6 +32,8 @@ defmodule Algora.Work do
         repo: repo,
         meta: meta
       }) do
+    Logger.info("Upserting task #{owner}/#{repo}/#{meta["number"]}")
+
     with {:ok, repo} <- fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
       Task.github_changeset(repo, meta)
       |> Repo.insert(@upsert_options)
@@ -40,16 +43,29 @@ defmodule Algora.Work do
   @spec upsert_repository(:github, %{token: Github.token(), owner: String.t(), meta: map()}) ::
           {:ok, Repository.t()} | {:error, atom()}
   def upsert_repository(:github, %{token: token, owner: owner, meta: meta}) do
-    with {:ok, user} <- fetch_user(:github, %{token: token, login: owner}) do
-      Repository.github_changeset(user, meta)
-      |> Repo.insert(@upsert_options)
+    Logger.info("Upserting repository #{owner}/#{meta["name"]}")
+
+    with {:ok, user} <- fetch_user(:github, %{token: token, id: meta["owner"]["id"]}),
+         {:ok, repo} <- Repository.github_changeset(user, meta) |> Repo.insert(@upsert_options) do
+      {:ok, repo}
+    else
+      {:error, error} ->
+        Logger.error("Failed to upsert repository #{owner}/#{meta["name"]}: #{inspect(error)}")
+        {:error, error}
     end
   end
 
   @spec upsert_user(:github, %{meta: map()}) :: {:ok, User.t()} | {:error, atom()}
   def upsert_user(:github, %{meta: meta}) do
-    User.github_changeset(meta)
-    |> Repo.insert(@upsert_options)
+    Logger.info("Upserting user #{meta["login"]}")
+
+    with {:ok, user} <- User.github_changeset(meta) |> Repo.insert(@upsert_options) do
+      {:ok, user}
+    else
+      error ->
+        Logger.error("Failed to upsert user #{meta["login"]}: #{inspect(error)}")
+        {:error, error}
+    end
   end
 
   @spec fetch_task(:github, %{
@@ -57,6 +73,8 @@ defmodule Algora.Work do
           url: String.t()
         }) :: {:ok, Task.t()} | {:error, atom()}
   def fetch_task(:github, %{token: token, url: url}) do
+    Logger.info("Fetching task #{url}")
+
     case parse_url(url) do
       {:ok, %{owner: owner, repo: repo, number: number}} ->
         fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number})
@@ -73,6 +91,8 @@ defmodule Algora.Work do
           number: integer()
         }) :: {:ok, Task.t()} | {:error, atom()}
   def fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number}) do
+    Logger.info("Fetching task #{owner}/#{repo}/#{number}")
+
     query =
       from t in Task,
         join: r in assoc(t, :repository),
@@ -107,6 +127,8 @@ defmodule Algora.Work do
   @spec fetch_user(:github, %{token: Github.token(), id: String.t()}) ::
           {:ok, User.t()} | {:error, atom()}
   def fetch_user(:github, %{token: token, id: id}) do
+    Logger.info("Fetching user #{id}")
+
     query =
       from u in User,
         where: u.provider == "github" and u.provider_id == ^to_string(id),
@@ -128,6 +150,8 @@ defmodule Algora.Work do
   @spec fetch_user(:github, %{token: Github.token(), login: String.t()}) ::
           {:ok, User.t()} | {:error, atom()}
   def fetch_user(:github, %{token: token, login: login}) do
+    Logger.info("Fetching user #{login}")
+
     query =
       from u in User,
         where: u.provider == "github" and u.provider_login == ^login,
@@ -149,6 +173,8 @@ defmodule Algora.Work do
   @spec fetch_repository(:github, %{token: Github.token(), owner: String.t(), repo: String.t()}) ::
           {:ok, Repository.t()} | {:error, atom()}
   def fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
+    Logger.info("Fetching repository #{owner}/#{repo}")
+
     query =
       from r in Repository,
         join: u in assoc(r, :user),
@@ -159,6 +185,31 @@ defmodule Algora.Work do
         case Github.get_repository(token, owner, repo) do
           {:ok, meta} -> upsert_repository(:github, %{token: token, owner: owner, meta: meta})
           {:error, error} -> {:error, error}
+        end
+
+      repo ->
+        {:ok, repo}
+    end
+  end
+
+  @spec fetch_repository(:github, %{token: Github.token(), id: String.t()}) ::
+          {:ok, Repository.t()} | {:error, atom()}
+  def fetch_repository(:github, %{token: token, id: id}) do
+    Logger.info("Fetching repository #{id}")
+
+    query =
+      from r in Repository,
+        join: u in assoc(r, :user),
+        where: r.provider == "github" and r.provider_id == ^to_string(id)
+
+    case Repo.one(query) do
+      nil ->
+        case Github.get_repository(token, id) do
+          {:ok, meta} ->
+            upsert_repository(:github, %{token: token, owner: meta["owner"]["login"], meta: meta})
+
+          {:error, error} ->
+            {:error, error}
         end
 
       repo ->

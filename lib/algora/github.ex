@@ -39,6 +39,10 @@ defmodule Algora.Github do
     fetch(access_token, "/repos/#{owner}/#{repo}")
   end
 
+  def get_repository(access_token, id) do
+    fetch(access_token, "/repositories/#{id}")
+  end
+
   def get_pull_request(access_token, owner, repo, number) do
     fetch(access_token, "/repos/#{owner}/#{repo}/pulls/#{number}")
   end

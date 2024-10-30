@@ -1,10 +1,11 @@
 defmodule Algora.Admin do
+  require Logger
+
   import Ecto.Query
 
   alias Algora.Repo
   alias Algora.Work
-
-  @max_concurrency 1
+  alias Algora.Github
 
   def token!(), do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 
@@ -18,24 +19,10 @@ defmodule Algora.Admin do
 
     {success, failure} =
       Repo.all(query)
-      |> Stream.map(&repo_params/1)
-      |> Task.async_stream(
-        fn
-          {:ok, %{owner: owner, repo: repo}} ->
-            case Work.fetch_repository(:github, %{token: token!(), owner: owner, repo: repo}) do
-              {:ok, _} -> {:success}
-              {:error, _} -> {:failure}
-            end
-
-          {:error, _} = _error ->
-            {:failure}
-        end,
-        max_concurrency: @max_concurrency,
-        timeout: :infinity
-      )
+      |> Task.async_stream(&backfill_repo/1, max_concurrency: 1, timeout: :infinity)
       |> Enum.reduce({0, 0}, fn
-        {:ok, {:success}}, {s, f} -> {s + 1, f}
-        {:ok, {:failure}}, {s, f} -> {s, f + 1}
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
         {:exit, _}, {s, f} -> {s, f + 1}
       end)
 
@@ -43,12 +30,24 @@ defmodule Algora.Admin do
     :ok
   end
 
-  def repo_params(url) do
+  def backfill_repo(url) do
     with %URI{host: "api.github.com", path: "/repos/" <> path} <- URI.parse(url),
-         [owner, repo] <- String.split(path, "/", trim: true) do
-      {:ok, %{owner: owner, repo: repo}}
-    else
-      _ -> {:error, :invalid_github_url}
+         [owner, repo] <- String.split(path, "/", trim: true),
+         {:ok, repo} <- Github.get_repository(token!(), owner, repo),
+         {:ok, repo} <- Work.fetch_repository(:github, %{token: token!(), id: repo["id"]}),
+         :ok <- update_tasks(url, repo.id) do
+      {:ok, repo}
     end
+  end
+
+  defp update_tasks(url, repo_id) do
+    Logger.info("Updating tasks for #{url} to #{repo_id}")
+
+    from(t in Algora.Work.Task,
+      where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)
+    )
+    |> Repo.update_all(set: [repository_id: repo_id])
+
+    :ok
   end
 end

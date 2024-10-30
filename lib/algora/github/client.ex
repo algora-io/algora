@@ -6,11 +6,9 @@ defmodule Algora.Github.Client do
   @type token :: String.t()
 
   def http(host, method, path, query, headers, body \\ "") do
+    cache_path = ".local/github/#{path}.json"
     query_string = URI.encode_query([{:client_id, Github.client_id()} | query])
     url = "https://#{host}#{path}?#{query_string}"
-
-    cache_key = :crypto.hash(:sha256, url) |> Base.encode16(case: :lower)
-    cache_path = ".local/github/#{cache_key}.json"
 
     case read_from_cache(cache_path) do
       {:ok, cached_data} ->
@@ -64,11 +62,11 @@ defmodule Algora.Github.Client do
   end
 
   def get_installation_token(installation_id) do
-    with {:ok, jwt, _claims} <- Crypto.generate_jwt() do
-      http("api.github.com", "POST", "/app/installations/#{installation_id}/access_tokens", [], [
-        {"accept", "application/vnd.github.v3+json"},
-        {"Authorization", "Bearer #{jwt}"}
-      ])
+    path = "/app/installations/#{installation_id}/access_tokens"
+
+    case Crypto.generate_jwt() do
+      {:ok, jwt, _claims} -> fetch(jwt, path, "POST")
+      error -> error
     end
   end
 end

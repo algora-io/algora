@@ -298,11 +298,24 @@
         <span class="relative font-semibold text-sm">Docs</span>
       </.link>
       <%= if @current_user do %>
-        <div class="shrink-0">
-          <.simple_dropdown id="navbar-account-dropdown">
+        <div>
+          <.dropdown2 id="dashboard-dropdown">
             <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-            <:link href={~p"/auth/logout"} method={:delete}>Sign out</:link>
-          </.simple_dropdown>
+            <:title><%= @current_user.name %></:title>
+
+            <:link
+              :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
+              href={~p"/set_context/#{org.handle}"}
+            >
+              <div class="flex items-center">
+                <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
+                <div>
+                  <div class="font-semibold"><%= org.name %></div>
+                  <div class="text-sm text-gray-500">@<%= org.handle %></div>
+                </div>
+              </div>
+            </:link>
+          </.dropdown2>
         </div>
       <% else %>
         <.link

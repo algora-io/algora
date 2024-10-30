@@ -147,20 +147,107 @@ defmodule AlgoraWeb.CoreComponents do
                 <span class="text-gray-400 text-sm truncate"><%= render_slot(@subtitle) %></span>
               </span>
             </span>
-            <svg
-              class="flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-400"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
+            <.icon
+              name="tabler-selector"
+              class="ml-2 flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-400"
+            />
+          </span>
+        </button>
+      </div>
+      <div
+        id={"#{@id}-dropdown"}
+        phx-click-away={hide_dropdown("##{@id}-dropdown")}
+        class="hidden z-10 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-gray-900 ring-1 ring-gray-900 ring-opacity-5 divide-y divide-gray-700"
+        role="menu"
+        aria-labelledby={@id}
+      >
+        <div class="py-1" role="none">
+          <%= for link <- @link do %>
+            <.link
+              tabindex="-1"
+              role="menuitem"
+              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
+              {link}
             >
-              <path
-                fill-rule="evenodd"
-                d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              >
-              </path>
-            </svg>
+              <%= render_slot(link) %>
+            </.link>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
+  Returns a button triggered dropdown with aria keyboard and focus supporrt.
+
+  Accepts the follow slots:
+
+    * `:id` - The id to uniquely identify this dropdown
+    * `:img` - The optional img to show beside the button title
+    * `:title` - The button title
+    * `:subtitle` - The button subtitle
+
+  ## Examples
+
+      <.dropdown id={@id}>
+        <:img src={@current_user.avatar_url} alt={@current_user.handle}/>
+        <:title><%= @current_user.name %></:title>
+        <:subtitle>@<%= @current_user.handle %></:subtitle>
+
+        <:link navigate={~p"/"}>Dashboard</:link>
+        <:link navigate={~p"/user/settings"}Settings</:link>
+      </.dropdown>
+  """
+  attr :id, :string, required: true
+
+  slot :img do
+    attr :src, :string
+    attr :alt, :string
+  end
+
+  slot :title
+  slot :subtitle
+
+  slot :link do
+    attr :navigate, :string
+    attr :href, :string
+    attr :method, :any
+  end
+
+  def dropdown2(assigns) do
+    ~H"""
+    <!-- User account dropdown -->
+    <div class="w-full relative inline-block text-left">
+      <div>
+        <button
+          id={@id}
+          type="button"
+          class="group w-full rounded-md px-3.5 py-2 text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
+          phx-click={show_dropdown("##{@id}-dropdown")}
+          phx-hook="Menu"
+          data-active-class="bg-gray-800"
+          aria-haspopup="true"
+        >
+          <span class="flex w-full justify-between items-center">
+            <span class="flex min-w-0 items-center justify-between space-x-3">
+              <%= for img <- @img do %>
+                <img
+                  class="w-10 h-10 bg-gray-600 rounded-full flex-shrink-0"
+                  {assigns_to_attributes(img)}
+                />
+              <% end %>
+              <span class="flex-1 flex flex-col min-w-0">
+                <span class="text-gray-50 text-sm font-medium truncate">
+                  <%= render_slot(@title) %>
+                </span>
+                <span class="text-gray-400 text-sm truncate"><%= render_slot(@subtitle) %></span>
+              </span>
+            </span>
+            <.icon
+              name="tabler-selector"
+              class="ml-2 flex-shrink-0 h-5 w-5 text-gray-500 group-hover:text-gray-400"
+            />
           </span>
         </button>
       </div>

@@ -2,24 +2,13 @@ defmodule Algora.Admin do
   import Ecto.Query
 
   alias Algora.Repo
-  alias Algora.Accounts.Identity
   alias Algora.Work
   alias Algora.Github
   alias Algora.Work.Repository
 
-  @max_concurrency 20
+  @max_concurrency 1
 
-  def token!() do
-    with identity when not is_nil(identity) <-
-           Identity
-           |> where([i], i.provider == "github")
-           |> limit(1)
-           |> Repo.one() do
-      identity.provider_token
-    else
-      _ -> nil
-    end
-  end
+  def token!(), do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 
   def backfill_repos!() do
     query =
@@ -48,6 +37,8 @@ defmodule Algora.Admin do
   end
 
   defp insert_or_update_repo(repo_data) do
+    IO.puts("Inserting or updating repo #{repo_data["name"]}")
+
     with {:ok, user} <-
            Work.fetch_user(:github, %{token: token!(), id: repo_data["owner"]["id"]}),
          repo <- Repo.get_by(Repository, provider_id: to_string(repo_data["id"])) do

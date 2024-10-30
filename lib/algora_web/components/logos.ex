@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Components.Icons do
+defmodule AlgoraWeb.Components.Logos do
   use Phoenix.Component
 
   def algora(assigns) do

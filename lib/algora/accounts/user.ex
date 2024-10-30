@@ -64,6 +64,14 @@ defmodule Algora.Accounts.User do
     timestamps()
   end
 
+  def org_registration_changeset(params) do
+    %User{}
+    |> cast(params, [:email])
+    |> generate_id()
+    |> validate_required([:email])
+    |> validate_email()
+  end
+
   @doc """
   A user changeset for github registration.
   """

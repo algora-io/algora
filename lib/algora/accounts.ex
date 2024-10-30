@@ -48,6 +48,18 @@ defmodule Algora.Accounts do
     end)
   end
 
+  def list_featured_devs() do
+    list_matching_devs(
+      ids: [
+        "clkml8zpq0000l00fjudr9dwl",
+        "clh9dhdz30002le0fjxwhjxnx",
+        "clgxc4nos0000jt0fygp77a9x",
+        "clg4rtl2n0002jv0fg30lto6l",
+        "clsdprvym000al70f76whovr4"
+      ]
+    )
+  end
+
   def list_orgs(opts) do
     query =
       from u in User,

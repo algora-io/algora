@@ -48,18 +48,21 @@ defmodule AlgoraWeb.User.DashboardLive do
                     phx-keydown="handle_tech_input"
                     phx-debounce="200"
                     phx-hook="ClearInput"
-                    class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 phx-keydown-loading:opacity-50 phx-keydown-loading:cursor-wait"
                   />
                 </div>
 
                 <div class="flex flex-wrap gap-3 mt-4">
                   <%= for tech <- @tech_stack do %>
-                    <div class="bg-indigo-900 text-indigo-200 rounded-lg px-2.5 py-1.5 text-sm font-semibold flex items-center">
+                    <div class={[
+                      "bg-indigo-900 text-indigo-200 rounded-lg px-2.5 py-1.5 text-sm font-semibold flex items-center",
+                      "has-[.phx-click-loading]:opacity-50 has-[.phx-click-loading]:animate-pulse has-[.phx-click-loading]:cursor-wait"
+                    ]}>
                       <%= tech %>
                       <button
                         phx-click="remove_tech"
                         phx-value-tech={tech}
-                        class="ml-2 text-indigo-300 hover:text-indigo-100"
+                        class="ml-2 text-indigo-300 hover:text-indigo-100 phx-click-loading:pointer-events-none"
                       >
                         ×
                       </button>

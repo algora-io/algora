@@ -32,8 +32,6 @@ defmodule Algora.Work.Repository do
     |> cast(params, [:provider_id, :name, :url, :user_id])
     |> generate_id()
     |> validate_required([:provider_id, :name, :url, :user_id])
-
-    # TODO: Reenable this after migration is complete.
-    # |> unique_constraint([:provider, :provider_id])
+    |> unique_constraint([:provider, :provider_id])
   end
 end

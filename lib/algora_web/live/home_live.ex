@@ -227,23 +227,25 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <!-- Featured Devs Section -->
-                <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
-                  <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                    <.dev_card dev={List.first(@featured_devs)} />
-                  </div>
-                  <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
-                    <%= if length(@featured_devs) >= 3 do %>
-                      <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
+                <%= if length(@featured_devs) > 0 do %>
+                  <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
+                    <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                      <.dev_card dev={List.first(@featured_devs)} />
+                    </div>
+                    <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
+                      <%= if length(@featured_devs) >= 3 do %>
+                        <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
+                          <.dev_card dev={dev} />
+                        <% end %>
+                      <% end %>
+                    </div>
+                    <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
+                      <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
                         <.dev_card dev={dev} />
                       <% end %>
-                    <% end %>
+                    </div>
                   </div>
-                  <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
-                    <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
-                      <.dev_card dev={dev} />
-                    <% end %>
-                  </div>
-                </div>
+                <% end %>
               </div>
             </div>
           </div>

@@ -68,7 +68,7 @@ defmodule AlgoraWeb.HomeLive do
           aria-label="Global"
         >
           <div class="flex lg:flex-1">
-            <.logo class="text-white h-8 w-auto" />
+            <.wordmark class="text-white h-8 w-auto" />
           </div>
           <div class="flex lg:hidden">
             <button

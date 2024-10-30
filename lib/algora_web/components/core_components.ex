@@ -67,6 +67,20 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  attr :class, :string, default: nil
+
+  def wordmark(assigns) do
+    ~H"""
+    <.link
+      navigate="/"
+      aria-label="Algora TV"
+      class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+    >
+      <AlgoraWeb.Components.Wordmarks.algora class={["fill-current", @class || "w-20 h-auto"]} />
+    </.link>
+    """
+  end
+
   @doc """
   Returns a button triggered dropdown with aria keyboard and focus supporrt.
 

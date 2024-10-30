@@ -5,57 +5,11 @@ defmodule AlgoraWeb.HomeLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    featured_devs =
-      Accounts.list_matching_devs(
-        ids: [
-          "clkml8zpq0000l00fjudr9dwl",
-          "clh9dhdz30002le0fjxwhjxnx",
-          "clgxc4nos0000jt0fygp77a9x",
-          "clg4rtl2n0002jv0fg30lto6l",
-          "clsdprvym000al70f76whovr4"
-        ]
-      )
-
-    featured_orgs = [
-      %{
-        name: "ZIO",
-        avatar_url: "https://zio.dev/img/navbar_brand.png",
-        url: "https://zio.dev"
-      },
-      # %{
-      #   name: "Tailcall",
-      #   avatar_url: "https://tailcall.run/icons/companies/taicall.svg",
-      #   url: "https://tailcall.run"
-      # },
-      %{
-        name: "Cal.com",
-        avatar_url: "https://cal.com/logo-white.svg",
-        url: "https://cal.com"
-      },
-      %{
-        name: "Qdrant",
-        avatar_url: "https://qdrant.tech/img/logo.png",
-        url: "https://qdrant.tech"
-      }
-      # %{
-      #   name: "Maybe",
-      #   avatar_url: "https://maybe.co/assets/logo-1c6733d1.svg",
-      #   url: "https://maybe.co"
-      # }
-    ]
-
-    socket =
-      socket
-      |> assign(:featured_devs, featured_devs)
-      |> assign(:featured_orgs, featured_orgs)
-      |> assign(:stats, [
-        %{label: "Active Projects", value: "500+"},
-        %{label: "Total Developers", value: "2,000+"},
-        %{label: "Companies", value: "100+"},
-        %{label: "Paid Out", value: "$1M+"}
-      ])
-
-    {:ok, socket}
+    {:ok,
+     socket
+     |> assign(:featured_devs, Accounts.list_featured_devs())
+     |> assign(:featured_orgs, list_featured_orgs())
+     |> assign(:stats, fetch_stats())}
   end
 
   @impl true
@@ -100,9 +54,12 @@ defmodule AlgoraWeb.HomeLive do
             <a href="#" class="text-sm/6 font-semibold text-gray-300 hover:text-white">Company</a>
           </div>
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a href="#" class="text-sm/6 font-semibold text-gray-300 hover:text-white">
+            <.link
+              navigate={~p"/auth/login"}
+              class="text-sm/6 font-semibold text-gray-300 hover:text-white"
+            >
               Log in <span aria-hidden="true">&rarr;</span>
-            </a>
+            </.link>
           </div>
         </nav>
         <!-- Mobile menu, show/hide based on menu open state. -->
@@ -221,7 +178,7 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-16">
               <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div class="lg:-mt-12 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
-                  <h1 class="text-pretty text-5xl font-semibold tracking-tight text-white sm:text-7xl">
+                  <h1 class="text-pretty text-5xl font-semibold tracking-tight text-white sm:text-7xl font-display">
                     Open Source UpWork <br /> for Developers
                   </h1>
                   <p class="mt-8 text-pretty text-lg font-medium text-gray-300 sm:max-w-md sm:text-xl/8 lg:max-w-none">
@@ -247,7 +204,7 @@ defmodule AlgoraWeb.HomeLive do
                     <%= for stat <- @stats do %>
                       <div class="flex flex-col gap-y-2">
                         <dt class="text-sm leading-6 text-gray-400"><%= stat.label %></dt>
-                        <dd class="text-3xl font-semibold tracking-tight text-white">
+                        <dd class="text-3xl font-semibold tracking-tight text-white font-display">
                           <%= stat.value %>
                         </dd>
                       </div>
@@ -324,5 +281,44 @@ defmodule AlgoraWeb.HomeLive do
       </div>
     </div>
     """
+  end
+
+  def fetch_stats() do
+    [
+      %{label: "Paid Out", value: "$283,868"},
+      %{label: "Completed Bounties", value: "2,240"},
+      %{label: "Contributors", value: "509"},
+      %{label: "Countries", value: "67"}
+    ]
+  end
+
+  def list_featured_orgs() do
+    [
+      %{
+        name: "ZIO",
+        avatar_url: "https://zio.dev/img/navbar_brand.png",
+        url: "https://zio.dev"
+      },
+      # %{
+      #   name: "Tailcall",
+      #   avatar_url: "https://tailcall.run/icons/companies/taicall.svg",
+      #   url: "https://tailcall.run"
+      # },
+      %{
+        name: "Cal.com",
+        avatar_url: "https://cal.com/logo-white.svg",
+        url: "https://cal.com"
+      },
+      %{
+        name: "Qdrant",
+        avatar_url: "https://qdrant.tech/img/logo.png",
+        url: "https://qdrant.tech"
+      }
+      # %{
+      #   name: "Maybe",
+      #   avatar_url: "https://maybe.co/assets/logo-1c6733d1.svg",
+      #   url: "https://maybe.co"
+      # }
+    ]
   end
 end

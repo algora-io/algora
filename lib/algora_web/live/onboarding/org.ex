@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Onboarding.OrgLive do
+  require Logger
   use AlgoraWeb, :live_view
   alias Algora.Accounts
   alias Algora.Money
@@ -18,7 +19,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      |> assign(:step, 1)
      |> assign(:total_steps, 3)
      |> assign(:context, context)
-     |> assign(:matching_devs, get_matching_devs(context))}
+     |> assign(:matching_devs, get_matching_devs(context))
+     |> assign(:code_valid, nil)}
   end
 
   def render(assigns) do
@@ -219,7 +221,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         Verify your email
       </h2>
       <p class="text-gray-400">
-        We've sent a 6-digit code to <%= @context.email %>
+        We've sent a code to <%= @context.email %>
       </p>
 
       <div>
@@ -229,11 +231,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           phx-blur="update_context"
           phx-value-field="verification_code"
           value={@context.verification_code}
-          maxlength="6"
-          placeholder="Enter 6-digit code"
+          placeholder="Enter verification code"
           class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 tracking-widest text-center text-2xl"
         />
       </div>
+
+      <%= if @code_valid == false do %>
+        <p class="text-red-400">Please enter a valid verification code</p>
+      <% end %>
     </div>
     """
   end
@@ -282,6 +287,37 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     updated_skills = List.delete(socket.assigns.context.skills, skill)
     updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
     {:noreply, assign(socket, context: updated_context)}
+  end
+
+  def handle_event("update_context", %{"field" => "email", "value" => email} = params, socket) do
+    verification_token = AlgoraWeb.UserAuth.generate_login_code(email)
+
+    # TODO: Send email
+    IO.puts("========================")
+    IO.puts(AlgoraWeb.UserAuth.login_email(email, verification_token))
+    IO.puts("========================")
+
+    updated_context = update_context_field(socket.assigns.context, "email", email, params)
+    matching_devs = get_matching_devs(updated_context)
+    {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
+  end
+
+  def handle_event(
+        "update_context",
+        %{"field" => "verification_code", "value" => token} = _params,
+        socket
+      ) do
+    email = socket.assigns.context.email
+
+    with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(token) do
+      {:noreply, socket |> redirect(to: AlgoraWeb.UserAuth.login_path(email, token))}
+    else
+      {:ok, _different_email} ->
+        {:noreply, assign(socket, code_valid: false)}
+
+      {:error, _reason} ->
+        {:noreply, assign(socket, code_valid: false)}
+    end
   end
 
   def handle_event("update_context", %{"field" => field, "value" => value} = params, socket) do

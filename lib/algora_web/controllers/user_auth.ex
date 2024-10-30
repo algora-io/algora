@@ -174,4 +174,48 @@ defmodule AlgoraWeb.UserAuth do
       org_handle -> ~p"/org/#{org_handle}"
     end
   end
+
+  defp login_code_ttl, do: 3600
+  defp login_code_salt, do: "algora-login-code"
+
+  def generate_login_code(email) do
+    Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), email, max_age: login_code_ttl())
+  end
+
+  def verify_login_code(code) do
+    Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl())
+  end
+
+  def login_path(email, token),
+    do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
+
+  def login_email(email, token) do
+    name = email |> String.split("@") |> List.first() |> String.capitalize()
+
+    """
+    From: "Algora <info@algora.io>"
+    To: "#{email}",
+    Subject: "Algora sign-in verification code"
+
+    Hi #{name},
+
+    We have received a login attempt and generated the following verification code:
+
+    #{token}
+
+    To complete the sign-in process, please enter the code above on the page you entered your email address.
+
+    Or copy and paste this URL into your browser:
+
+    http://localhost:4000#{login_path(email, token)}
+
+    If you didn't request this link, you can safely ignore this email.
+
+    --------------------------------------------------------------------------------
+
+    For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
+
+    © 2023 Algora PBC.
+    """
+  end
 end

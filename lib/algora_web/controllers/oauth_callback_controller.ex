@@ -43,7 +43,44 @@ defmodule AlgoraWeb.OAuthCallbackController do
     redirect(conn, to: "/")
   end
 
+  def new(conn, %{"provider" => "email", "email" => email, "token" => token} = params) do
+    with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(token),
+         {:ok, user} <- get_or_register_user(email) do
+      conn =
+        if params["return_to"] do
+          conn |> put_session(:user_return_to, params["return_to"])
+        else
+          conn
+        end
+
+      conn
+      |> put_flash(:info, "Welcome, #{user.handle}!")
+      |> AlgoraWeb.UserAuth.log_in_user(user)
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        Logger.debug("failed GitHub insert #{inspect(changeset.errors)}")
+
+        conn
+        |> put_flash(:error, "Something went wrong. Please try again.")
+        |> redirect(to: "/")
+
+      {:error, reason} ->
+        Logger.debug("failed GitHub exchange #{inspect(reason)}")
+
+        conn
+        |> put_flash(:error, "Something went wrong. Please try again.")
+        |> redirect(to: "/")
+    end
+  end
+
   def sign_out(conn, _) do
     AlgoraWeb.UserAuth.log_out_user(conn)
+  end
+
+  defp get_or_register_user(email) do
+    case Accounts.get_user_by_email(email) do
+      nil -> Accounts.register_org(%{email: email})
+      user -> {:ok, user}
+    end
   end
 end

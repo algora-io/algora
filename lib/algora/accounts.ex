@@ -154,6 +154,10 @@ defmodule Algora.Accounts do
     end
   end
 
+  def register_org(params) do
+    User.org_registration_changeset(params) |> Repo.insert()
+  end
+
   def create_user(info, primary_email, emails, token) do
     User.github_registration_changeset(nil, info, primary_email, emails, token)
     |> Repo.insert()

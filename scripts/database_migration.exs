@@ -51,6 +51,8 @@ defmodule DatabaseMigration do
     "Claim" => nil
   }
 
+  @backfilled_tables ["repositories", "transactions", "bounties", "tasks", "users"]
+
   @relevant_tables Map.keys(@table_mappings)
 
   defp transform("Task", row, db) do
@@ -529,8 +531,50 @@ defmodule DatabaseMigration do
   end
 
   defp deserialize_value(value), do: value
+
+  defp clear_tables!() do
+    commands =
+      [
+        "BEGIN TRANSACTION;",
+        "SET CONSTRAINTS ALL DEFERRED;",
+        Enum.map(@backfilled_tables, &"TRUNCATE TABLE #{&1} CASCADE;"),
+        "SET CONSTRAINTS ALL IMMEDIATE;",
+        "COMMIT;"
+      ]
+      |> List.flatten()
+      |> Enum.join("\n")
+
+    case psql(["-c", commands]) do
+      {:ok, _} -> :ok
+      {:error, code} -> raise "Failed to clear tables with exit code: #{code}"
+    end
+  end
+
+  defp psql(commands) do
+    case System.cmd("psql", [System.fetch_env!("DATABASE_URL") | commands]) do
+      {res, 0} -> {:ok, res}
+      {_, code} -> {:error, code}
+    end
+  end
+
+  def run!() do
+    input_file = ".local/prod_db.sql"
+    output_file = ".local/prod_db_new.sql"
+
+    IO.puts("Processing dump...")
+    #  :ok = process_dump(input_file, output_file)
+
+    IO.puts("Clearing tables...")
+    :ok = clear_tables!()
+
+    IO.puts("Importing new data...")
+    {:ok, _} = psql(["-f", output_file])
+
+    IO.puts("Backfilling repositories...")
+    :ok = Algora.Admin.backfill_repos!()
+
+    IO.puts("Migration completed successfully")
+  end
 end
 
-input_file = ".local/prod_db.sql"
-output_file = ".local/prod_db_new.sql"
-DatabaseMigration.process_dump(input_file, output_file)
+DatabaseMigration.run!()

@@ -23,7 +23,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <main class="lg:pr-96">
       <div class="p-4 pt-6 sm:p-6 md:p-8 md:-ml-4">
-        <div>
+        <div class="max-w-4xl mx-auto">
           <header class="flex items-center justify-between md:pl-4">
             <h2 class="font-display text-2xl/7 font-semibold text-white">Bounties for you</h2>
             <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>

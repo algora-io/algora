@@ -4,9 +4,10 @@ defmodule Algora.Admin do
   alias Algora.Repo
   alias Algora.Accounts.Identity
   alias Algora.Work
+  alias Algora.Github
   alias Algora.Work.Repository
 
-  @max_concurrency 1
+  @max_concurrency 20
 
   def token!() do
     with identity when not is_nil(identity) <-
@@ -37,7 +38,7 @@ defmodule Algora.Admin do
   end
 
   defp process_repo(url) do
-    with {:ok, repo_data} <- fetch_or_load_repo_data(url),
+    with {:ok, repo_data} <- Github.get(token!(), url),
          {:ok, repo} <- insert_or_update_repo(repo_data),
          :ok <- update_tasks(url, repo.id) do
       {:ok, repo}
@@ -46,39 +47,7 @@ defmodule Algora.Admin do
     end
   end
 
-  defp fetch_or_load_repo_data(url) do
-    hash = :crypto.hash(:sha256, url) |> Base.encode16(case: :lower)
-    cache_path = ".local/github/#{hash}.json"
-
-    if File.exists?(cache_path) do
-      File.read!(cache_path) |> Jason.decode()
-    else
-      res =
-        Finch.build(:get, url, [
-          {"Authorization", "Bearer #{token!()}"},
-          {"accept", "application/vnd.github.v3+json"},
-          {"Content-Type", "application/json"}
-        ])
-        |> Finch.request(Algora.Finch)
-
-      with {:ok, %Finch.Response{status: 200, body: body}} <- res,
-           {:ok, repo_data} <- Jason.decode(body) do
-        File.mkdir_p!(Path.dirname(cache_path))
-        File.write!(cache_path, Jason.encode!(repo_data))
-        {:ok, repo_data}
-      else
-        {:ok, %Finch.Response{status: status}} ->
-          {:error, "GitHub API returned status #{status}"}
-
-        error ->
-          {:error, "Failed to fetch repository data: #{inspect(error)}"}
-      end
-    end
-  end
-
   defp insert_or_update_repo(repo_data) do
-    dbg(repo_data["html_url"])
-
     with {:ok, user} <-
            Work.fetch_user(:github, %{token: token!(), id: repo_data["owner"]["id"]}),
          repo <- Repo.get_by(Repository, provider_id: to_string(repo_data["id"])) do

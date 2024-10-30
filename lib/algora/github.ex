@@ -27,6 +27,10 @@ defmodule Algora.Github do
     "https://github.com/login/oauth/authorize?#{query}"
   end
 
+  def get(access_token, url) do
+    fetch(access_token, url)
+  end
+
   def get_issue(access_token, owner, repo, number) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}")
   end

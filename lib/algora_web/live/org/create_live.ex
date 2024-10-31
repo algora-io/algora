@@ -56,7 +56,7 @@ defmodule AlgoraWeb.Org.CreateLive do
           <% end %>
         </div>
       </div>
-      <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
+      <div class="font-display sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto sm:max-h-screen">
         <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
           You're in good company
         </h2>

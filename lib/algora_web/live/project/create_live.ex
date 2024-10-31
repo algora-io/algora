@@ -117,7 +117,7 @@ defmodule AlgoraWeb.Project.CreateLive do
         <input
           type="text"
           placeholder="Desired areas of expertise"
-          class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
@@ -167,7 +167,7 @@ defmodule AlgoraWeb.Project.CreateLive do
             phx-blur="update_project"
             value={@project.title}
             placeholder="Enter project name"
-            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -272,7 +272,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 value={@project.budget.hours_per_week}
                 phx-blur="update_project"
                 phx-value-field="budget.hours_per_week"
-                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div>
@@ -283,7 +283,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 value={@project.budget.hourly_rate}
                 phx-blur="update_project"
                 phx-value-field="budget.hourly_rate"
-                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -297,7 +297,7 @@ defmodule AlgoraWeb.Project.CreateLive do
               placeholder="$5,000"
               phx-blur="update_project"
               phx-value-field="budget.fixed_price"
-              class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         <% end %>

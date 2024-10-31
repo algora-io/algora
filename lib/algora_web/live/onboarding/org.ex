@@ -163,11 +163,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   phx-click="toggle_intention"
                   phx-value-intention={intention}
                   checked={intention in @context.intentions}
-                  class="h-8 w-8 rounded border-gray-700 bg-gray-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
+                  class="h-8 w-8 rounded border-gray-700 bg-gray-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900 cursor-pointer"
                 />
               </div>
               <div class="ml-3 text-base leading-6">
-                <label for={"intention-#{intention}"} class="text-gray-300"><%= label %></label>
+                <label for={"intention-#{intention}"} class="text-gray-300 cursor-pointer">
+                  <%= label %>
+                </label>
               </div>
             </div>
           <% end %>

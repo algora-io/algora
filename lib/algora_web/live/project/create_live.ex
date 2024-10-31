@@ -113,7 +113,7 @@ defmodule AlgoraWeb.Project.CreateLive do
     ~H"""
     <div class="space-y-8">
       <h2 class="text-4xl font-semibold text-white">
-        Which specific skills do you need your Elixir developer to have?
+        What is your tech stack?
       </h2>
 
       <div>
@@ -138,21 +138,6 @@ defmodule AlgoraWeb.Project.CreateLive do
           </div>
         <% end %>
       </div>
-
-      <div>
-        <h3 class="text-lg font-medium text-gray-400 mb-3">Popular skills for Software Developers</h3>
-        <div class="flex flex-wrap gap-3">
-          <%= for skill <- ["JavaScript", "CSS", "PHP", "React", "HTML", "Node.js", "iOS", "MySQL", "Python", "HTML5"] do %>
-            <button
-              phx-click="add_skill"
-              phx-value-skill={skill}
-              class="bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm font-semibold flex items-center"
-            >
-              + <%= skill %>
-            </button>
-          <% end %>
-        </div>
-      </div>
     </div>
     """
   end
@@ -163,7 +148,7 @@ defmodule AlgoraWeb.Project.CreateLive do
       <h2 class="text-2xl font-semibold mb-4">Project Details</h2>
       <div class="space-y-8">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Project Name</label>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
           <input
             type="text"
             phx-value-field="title"
@@ -175,7 +160,7 @@ defmodule AlgoraWeb.Project.CreateLive do
         </div>
 
         <fieldset class="mb-8">
-          <legend class="text-sm font-medium text-gray-300 mb-2">Project Discovery</legend>
+          <legend class="text-sm font-medium text-gray-300 mb-2">Discovery</legend>
           <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
             <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :public, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
               <input

@@ -24,8 +24,8 @@ defmodule AlgoraWeb.Project.CreateLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white sm:flex">
-      <div class="flex-grow px-8 py-16 bg-gray-950/25">
+    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white flex flex-col sm:flex-row">
+      <div class="flex-grow px-4 sm:px-8 py-8 sm:py-16 bg-gray-950/25">
         <div class="max-w-3xl mx-auto">
           <div class="flex items-center gap-4 text-lg mb-6 font-display">
             <span class="text-gray-300"><%= @step %> / <%= @total_steps %></span>
@@ -63,7 +63,8 @@ defmodule AlgoraWeb.Project.CreateLive do
           </div>
         </div>
       </div>
-      <div class="sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
+
+      <div class="font-display w-full sm:w-1/3 border-t-2 sm:border-t-0 sm:border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-4 sm:px-8 py-4 overflow-y-auto sm:max-h-screen">
         <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
           Matching Developers
         </h2>
@@ -73,27 +74,31 @@ defmodule AlgoraWeb.Project.CreateLive do
           <%= for dev <- @matching_devs do %>
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
               <div class="flex mb-2 gap-3">
-                <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
-                <div class="flex-grow">
+                <img
+                  src={dev.avatar_url}
+                  alt={dev.name}
+                  class="w-16 h-16 sm:w-24 sm:h-24 rounded-full mr-3"
+                />
+                <div class="flex-grow min-w-0">
                   <div class="flex justify-between">
-                    <div>
-                      <div class="font-semibold text-lg font-display">
+                    <div class="min-w-0">
+                      <div class="font-semibold text-base sm:text-lg font-display truncate">
                         <%= dev.name %> <%= dev.flag %>
                       </div>
-                      <div class="text-sm text-gray-400">@<%= dev.handle %></div>
+                      <div class="text-sm text-gray-400 truncate">@<%= dev.handle %></div>
                     </div>
-                    <div class="flex flex-col items-end">
-                      <div class="text-gray-300">Earned</div>
-                      <div class="text-white font-semibold text-lg font-display">
+                    <div class="flex flex-col items-end ml-2">
+                      <div class="text-gray-300 text-sm">Earned</div>
+                      <div class="text-white font-semibold text-base sm:text-lg font-display">
                         <%= Money.format!(dev.amount, "USD") %>
                       </div>
                     </div>
                   </div>
 
-                  <div class="pt-3 text-sm">
-                    <div class="-ml-1 p-[2px] overflow-hidden h-7 text-sm flex flex-wrap gap-2">
+                  <div class="-m-1 pt-2 sm:pt-3 text-sm">
+                    <div class="p-1 overflow-x-auto flex gap-2 scrollbar-thin pb-4">
                       <%= for skill <- dev.skills do %>
-                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-2 ring-white/20">
+                        <span class="text-white rounded-xl px-2 py-0.5 text-xs sm:text-sm ring-1 ring-white/40 whitespace-nowrap">
                           <%= skill %>
                         </span>
                       <% end %>
@@ -154,7 +159,7 @@ defmodule AlgoraWeb.Project.CreateLive do
             phx-value-field="title"
             phx-blur="update_project"
             value={@project.title}
-            placeholder="Enter project name"
+            placeholder="Looking for an Elixir developer to build and maintain a livestreaming app"
             class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>

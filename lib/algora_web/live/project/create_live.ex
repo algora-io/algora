@@ -261,39 +261,28 @@ defmodule AlgoraWeb.Project.CreateLive do
         </fieldset>
 
         <%= if @project.budget.type == :hourly do %>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">
-              Expected Hours per Week
-            </label>
-            <input
-              type="number"
-              name="budget[hours_per_week]"
-              value={@project.budget.hours_per_week}
-              phx-blur="update_project"
-              phx-value-field="budget.hours_per_week"
-              class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div class="flex gap-4">
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-300 mb-2">From (hourly rate)</label>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">
+                Expected Hours per Week
+              </label>
               <input
                 type="number"
-                name="budget[from]"
-                value={@project.budget.from}
+                name="budget[hours_per_week]"
+                value={@project.budget.hours_per_week}
                 phx-blur="update_project"
-                phx-value-field="budget.from"
+                phx-value-field="budget.hours_per_week"
                 class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-300 mb-2">To (hourly rate)</label>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Hourly Rate</label>
               <input
                 type="number"
-                name="budget[to]"
-                value={@project.budget.to}
+                name="budget[hourly_rate]"
+                value={@project.budget.hourly_rate}
                 phx-blur="update_project"
-                phx-value-field="budget.to"
+                phx-value-field="budget.hourly_rate"
                 class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -353,7 +342,7 @@ defmodule AlgoraWeb.Project.CreateLive do
     new_budget =
       case value do
         "fixed" -> %{type: :fixed, fixed_price: nil}
-        "hourly" -> %{type: :hourly, from: nil, to: nil, hours_per_week: nil}
+        "hourly" -> %{type: :hourly, hourly_rate: nil, hours_per_week: nil}
       end
 
     %{project | budget: new_budget}

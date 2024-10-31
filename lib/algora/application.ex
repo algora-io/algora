@@ -15,12 +15,15 @@ defmodule Algora.Application do
       # Start the Finch HTTP client for sending emails
       {Finch, name: Algora.Finch},
       Algora.Stargazer,
-      if(tunnel = Application.get_env(:algora, :cloudflare_tunnel)) do
-        {Algora.Tunnel, tunnel}
-      end,
       # Start to serve requests, typically the last entry
       AlgoraWeb.Endpoint
     ]
+
+    children =
+      case Application.get_env(:algora, :cloudflare_tunnel) do
+        nil -> children
+        tunnel -> children ++ [{Algora.Tunnel, tunnel}]
+      end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

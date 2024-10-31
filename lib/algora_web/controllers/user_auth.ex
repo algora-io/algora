@@ -207,7 +207,7 @@ defmodule AlgoraWeb.UserAuth do
 
     Or copy and paste this URL into your browser:
 
-    http://localhost:4000#{login_path(email, token)}
+    #{AlgoraWeb.Endpoint.url()}/#{login_path(email, token)}
 
     If you didn't request this link, you can safely ignore this email.
 

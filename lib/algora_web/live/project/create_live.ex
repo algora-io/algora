@@ -15,7 +15,7 @@ defmodule AlgoraWeb.Project.CreateLive do
 
     {:ok,
      socket
-     |> assign(step: 3)
+     |> assign(step: 1)
      |> assign(total_steps: 4)
      |> assign(project: project)
      |> assign(current_user: %{email: session["user_email"]})
@@ -77,21 +77,23 @@ defmodule AlgoraWeb.Project.CreateLive do
                 <div class="flex-grow">
                   <div class="flex justify-between">
                     <div>
-                      <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                      <div class="font-semibold text-lg font-display">
+                        <%= dev.name %> <%= dev.flag %>
+                      </div>
                       <div class="text-sm text-gray-400">@<%= dev.handle %></div>
                     </div>
                     <div class="flex flex-col items-end">
                       <div class="text-gray-300">Earned</div>
-                      <div class="text-white font-semibold">
+                      <div class="text-white font-semibold text-lg font-display">
                         <%= Money.format!(dev.amount, "USD") %>
                       </div>
                     </div>
                   </div>
 
                   <div class="pt-3 text-sm">
-                    <div class="-ml-1 text-sm flex flex-wrap gap-1">
+                    <div class="-ml-1 p-[2px] overflow-hidden h-7 text-sm flex flex-wrap gap-2">
                       <%= for skill <- dev.skills do %>
-                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
+                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-2 ring-white/20">
                           <%= skill %>
                         </span>
                       <% end %>
@@ -283,7 +285,18 @@ defmodule AlgoraWeb.Project.CreateLive do
                 <span class="flex flex-col">
                   <span class="flex items-center gap-2">
                     <span class="block text-sm font-medium text-gray-200">Outcome-Based</span>
-                    <span class="text-xs font-medium text-indigo-400">15% platform fee</span>
+                    <%= if @project.visibility == :public do %>
+                      <span class="text-xs font-display font-medium text-indigo-400">
+                        15% platform fee
+                      </span>
+                    <% else %>
+                      <span class="text-xs font-display font-medium text-indigo-400">
+                        5% platform fee
+                      </span>
+                      <span class="text-xs font-display font-medium text-emerald-400">
+                        First $5k free
+                      </span>
+                    <% end %>
                   </span>
                   <span class="mt-1 flex items-center text-sm text-gray-400">
                     Pay for milestones & bounties
@@ -305,11 +318,6 @@ defmodule AlgoraWeb.Project.CreateLive do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span
-                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.budget.type == :fixed, do: 'border border-indigo-600', else: 'border-2 border-transparent'}"}
-                aria-hidden="true"
-              >
-              </span>
             </label>
 
             <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.budget.type == :hourly, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
@@ -326,7 +334,18 @@ defmodule AlgoraWeb.Project.CreateLive do
                 <span class="flex flex-col">
                   <span class="flex items-center gap-2">
                     <span class="block text-sm font-medium text-gray-200">Time-Based</span>
-                    <span class="text-xs font-medium text-indigo-400">5% platform fee</span>
+                    <%= if @project.visibility == :public do %>
+                      <span class="text-xs font-display font-medium text-indigo-400">
+                        5% platform fee
+                      </span>
+                    <% else %>
+                      <span class="text-xs font-display font-medium text-indigo-400">
+                        5% platform fee
+                      </span>
+                      <span class="text-xs font-display font-medium text-emerald-400">
+                        First $5k free
+                      </span>
+                    <% end %>
                   </span>
                   <span class="mt-1 flex items-center text-sm text-gray-400">Pay an hourly rate</span>
                   <span class="mt-6 text-sm font-medium text-gray-300">
@@ -346,11 +365,6 @@ defmodule AlgoraWeb.Project.CreateLive do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span
-                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.budget.type == :hourly, do: 'border border-indigo-600', else: 'border-2 border-transparent'}"}
-                aria-hidden="true"
-              >
-              </span>
             </label>
           </div>
         </fieldset>

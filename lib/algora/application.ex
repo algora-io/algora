@@ -14,9 +14,10 @@ defmodule Algora.Application do
       {Phoenix.PubSub, name: Algora.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Algora.Finch},
-      # Start a worker by calling: Algora.Worker.start_link(arg)
-      # {Algora.Worker, arg},
       Algora.Stargazer,
+      if(tunnel = Application.get_env(:algora, :cloudflare_tunnel)) do
+        {Algora.Tunnel, tunnel}
+      end,
       # Start to serve requests, typically the last entry
       AlgoraWeb.Endpoint
     ]

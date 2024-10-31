@@ -91,3 +91,5 @@ config :swoosh, :api_client, false
 
 # Path to install SaladUI components
 config :salad_ui, components_path: Path.join(File.cwd!(), "lib/algora_web/components")
+
+config :algora, :cloudflare_tunnel, System.get_env("CLOUDFLARE_TUNNEL")

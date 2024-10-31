@@ -85,11 +85,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <div class="relative z-10 flex h-full w-full cursor-pointer items-center overflow-hidden ring-1 group-hover:ring-2 rounded-md ring-purple-400/20 p-[1.5px]">
               <div class="absolute inset-0 h-full w-full opacity-100 group-hover:opacity-100 transition-opacity animate-rotate rounded-full bg-[conic-gradient(#5D59EB_20deg,#8b5cf6_120deg)]">
               </div>
-              <a
-                rel="noopener"
-                target="_blank"
+              <.link
                 class="relative flex h-full w-full overflow-hidden rounded-md bg-gray-900"
-                href="https://algora.io/challenges/golem"
+                navigate={card.href}
               >
                 <div class="rounded-lg p-6 relative cursor-pointer group">
                   <div class="flex items-center gap-3 mb-4">
@@ -110,7 +108,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     &rarr;
                   </div>
                 </div>
-              </a>
+              </.link>
             </div>
           </div>
         <% end %>
@@ -171,6 +169,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     [
       %{
         title: "Create bounties",
+        href: ~p"/bounties/new",
         icon: "tabler-diamond",
         paragraphs: [
           "Install Algora in your GitHub repo(s), use the Algora commands in issues and pull requests, and reward bounties without leaving GitHub.",
@@ -179,6 +178,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       },
       %{
         title: "Create projects",
+        href: ~p"/projects/new",
         icon: "tabler-rocket",
         paragraphs: [
           "Get matched with top developers, manage contract work and make payments globally.",
@@ -187,6 +187,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       },
       %{
         title: "Create jobs",
+        href: ~p"/jobs/new",
         icon: "tabler-briefcase",
         paragraphs: [
           "Find new teammates, manage applicants and simplify contract-to-hire.",

@@ -9,13 +9,14 @@ defmodule AlgoraWeb.Project.CreateLive do
       skills: ["Elixir"],
       title: "",
       budget: %{type: :fixed, fixed_price: nil},
-      description: ""
+      description: "",
+      visibility: :public
     }
 
     {:ok,
      socket
-     |> assign(step: 2)
-     |> assign(total_steps: 3)
+     |> assign(step: 3)
+     |> assign(total_steps: 4)
      |> assign(project: project)
      |> assign(current_user: %{email: session["user_email"]})
      |> assign(matching_devs: get_matching_devs(project))}
@@ -54,7 +55,7 @@ defmodule AlgoraWeb.Project.CreateLive do
             <% else %>
               <button
                 phx-click="submit"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
               >
                 Submit Project
               </button>
@@ -171,6 +172,100 @@ defmodule AlgoraWeb.Project.CreateLive do
           />
         </div>
 
+        <fieldset class="mb-8">
+          <legend class="text-sm font-medium text-gray-300 mb-2">Project Discovery</legend>
+          <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :public, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
+              <input
+                type="radio"
+                name="visibility"
+                value="public"
+                checked={@project.visibility == :public}
+                class="sr-only"
+                phx-click="update_project"
+                phx-value-field="visibility"
+              />
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-200">Algora Network</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-400">
+                    Open to our vetted developer network
+                  </span>
+                  <span class="mt-6 text-sm font-medium text-gray-300">
+                    Best for finding new talent quickly
+                  </span>
+                </span>
+              </span>
+              <svg
+                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :public, do: 'invisible'}"}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span
+                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :public, do: 'border border-indigo-600', else: 'border-2 border-transparent'}"}
+                aria-hidden="true"
+              >
+              </span>
+            </label>
+
+            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :private, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
+              <input
+                type="radio"
+                name="visibility"
+                value="private"
+                checked={@project.visibility == :private}
+                class="sr-only"
+                phx-click="update_project"
+                phx-value-field="visibility"
+              />
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-200">Bring Your Own</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-400">
+                    Invite specific developers
+                  </span>
+                  <span class="mt-6 text-sm font-medium text-gray-300">
+                    Best for working with known teams
+                  </span>
+                </span>
+              </span>
+              <svg
+                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :private, do: 'invisible'}"}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span
+                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :private, do: 'border border-indigo-600', else: 'border-2 border-transparent'}"}
+                aria-hidden="true"
+              >
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    """
+  end
+
+  def render_step(%{step: 3} = assigns) do
+    ~H"""
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Collaboration Details</h2>
+      <div class="space-y-8">
         <fieldset>
           <legend class="text-sm font-medium text-gray-300 mb-2">Collaboration Type</legend>
           <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
@@ -261,13 +356,12 @@ defmodule AlgoraWeb.Project.CreateLive do
         </fieldset>
 
         <%= if @project.budget.type == :hourly do %>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-2">
                 Expected Hours per Week
               </label>
               <input
-                type="number"
                 name="budget[hours_per_week]"
                 value={@project.budget.hours_per_week}
                 phx-blur="update_project"
@@ -278,7 +372,6 @@ defmodule AlgoraWeb.Project.CreateLive do
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-2">Hourly Rate</label>
               <input
-                type="number"
                 name="budget[hourly_rate]"
                 value={@project.budget.hourly_rate}
                 phx-blur="update_project"
@@ -291,13 +384,12 @@ defmodule AlgoraWeb.Project.CreateLive do
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-2">Project Budget</label>
             <input
-              type="number"
               name="budget[fixed_price]"
               value={@project.budget.fixed_price}
               placeholder="$5,000"
               phx-blur="update_project"
               phx-value-field="budget.fixed_price"
-              class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="text-base font-semibold font-display w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-emerald-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
         <% end %>
@@ -306,7 +398,7 @@ defmodule AlgoraWeb.Project.CreateLive do
     """
   end
 
-  def render_step(%{step: 3} = assigns) do
+  def render_step(%{step: 4} = assigns) do
     ~H"""
     <div>
       <h2 class="text-2xl font-semibold mb-4">Describe your project</h2>
@@ -316,7 +408,7 @@ defmodule AlgoraWeb.Project.CreateLive do
           rows="6"
           phx-blur="update_project"
           phx-value-field="description"
-          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+          class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Provide a detailed description of your project..."
         ><%= @project.description %></textarea>
       </div>
@@ -351,6 +443,10 @@ defmodule AlgoraWeb.Project.CreateLive do
   defp update_project_field(project, "budget." <> budget_field, value, _params) do
     budget = Map.put(project.budget, String.to_atom(budget_field), value)
     %{project | budget: budget}
+  end
+
+  defp update_project_field(project, "visibility", value, _params) do
+    %{project | visibility: String.to_atom(value)}
   end
 
   defp update_project_field(project, field, value, _params) do
@@ -389,8 +485,9 @@ defmodule AlgoraWeb.Project.CreateLive do
   end
 
   defp next_step_label(1), do: "Project Details"
-  defp next_step_label(2), do: "Description"
-  defp next_step_label(3), do: "Review"
+  defp next_step_label(2), do: "Collaboration"
+  defp next_step_label(3), do: "Description"
+  defp next_step_label(4), do: "Review"
 
   defp get_matching_devs(project) do
     Accounts.list_matching_devs(limit: 5, country: project.country, skills: project.skills)

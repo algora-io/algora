@@ -14,6 +14,66 @@ defmodule AlgoraWeb.DevLive do
       hourly_rate: Decimal.new("50")
     }
 
+    nav_items = [
+      %{
+        icon: "tabler-home",
+        label: "Dashboard",
+        href: "#",
+        active: false
+      },
+      %{
+        icon: "tabler-shopping-cart",
+        label: "Orders",
+        href: "#",
+        active: true
+      },
+      %{
+        icon: "tabler-package",
+        label: "Products",
+        href: "#",
+        active: false
+      },
+      %{
+        icon: "tabler-users",
+        label: "Customers",
+        href: "#",
+        active: false
+      },
+      %{
+        icon: "tabler-chart-line",
+        label: "Analytics",
+        href: "#",
+        active: false
+      }
+    ]
+
+    footer_nav_items = [
+      %{
+        icon: "tabler-settings",
+        label: "Settings",
+        href: "#"
+      }
+    ]
+
+    user_menu_items = [
+      %{label: "My Account", href: "#", divider: true},
+      %{label: "Settings", href: "#"},
+      %{label: "Support", href: "#", divider: true},
+      %{label: "Logout", href: "#"}
+    ]
+
+    filter_menu_items = [
+      %{label: "Fulfilled", href: "#"},
+      %{label: "Declined", href: "#"},
+      %{label: "Refunded", href: "#"}
+    ]
+
+    time_periods = [
+      %{label: "Week", value: "week"},
+      %{label: "Month", value: "month"},
+      %{label: "Year", value: "year"}
+    ]
+
     matching_devs =
       Accounts.list_matching_devs(
         limit: 5,
@@ -25,6 +85,12 @@ defmodule AlgoraWeb.DevLive do
      assign(socket,
        page_title: "Project",
        project: project,
+       nav_items: nav_items,
+       footer_nav_items: footer_nav_items,
+       user_menu_items: user_menu_items,
+       filter_menu_items: filter_menu_items,
+       time_periods: time_periods,
+       active_period: "week",
        matching_devs: matching_devs,
        bounties: Bounties.list_bounties(%{limit: 8})
      )}
@@ -42,122 +108,40 @@ defmodule AlgoraWeb.DevLive do
           >
             <img src={@current_org.avatar_url} alt={@current_org.name} class="w-8 h-8 rounded-full" />
           </a>
-          <div class="relative inline-block group/tooltip" data-phx-id="m3-phx-GAPTpMFHc9kS4XZh">
-            <tooltip_trigger>
-              <a
-                href="#"
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                data-phx-id="m4-phx-GAPTpMFHc9kS4XZh"
-              >
-                <.icon name="tabler-home" class="h-5 w-5" />
-                <span class="sr-only"> Dashboard </span>
-              </a>
-            </tooltip_trigger>
-            <div
-              data-side="right"
-              class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95"
-              data-phx-id="m5-phx-GAPTpMFHc9kS4XZh"
-            >
-              Dashboard
+          <%= for item <- @nav_items do %>
+            <div class="relative inline-block group/tooltip">
+              <tooltip_trigger>
+                <a
+                  href={item.href}
+                  class={"flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:text-foreground md:h-8 md:w-8 #{if item.active, do: "bg-accent text-accent-foreground", else: "text-muted-foreground"}"}
+                >
+                  <.icon name={item.icon} class="h-5 w-5" />
+                  <span class="sr-only"><%= item.label %></span>
+                </a>
+              </tooltip_trigger>
+              <div class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95">
+                <%= item.label %>
+              </div>
             </div>
-          </div>
-          <div class="relative inline-block group/tooltip" data-phx-id="m6-phx-GAPTpMFHc9kS4XZh">
-            <tooltip_trigger>
-              <a
-                href="#"
-                class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                data-phx-id="m7-phx-GAPTpMFHc9kS4XZh"
-              >
-                <.icon name="tabler-shopping-cart" class="h-5 w-5" />
-                <span class="sr-only"> Orders </span>
-              </a>
-            </tooltip_trigger>
-            <div
-              data-side="right"
-              class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95"
-              data-phx-id="m8-phx-GAPTpMFHc9kS4XZh"
-            >
-              Orders
-            </div>
-          </div>
-          <div class="relative inline-block group/tooltip" data-phx-id="m9-phx-GAPTpMFHc9kS4XZh">
-            <tooltip_trigger>
-              <a
-                href="#"
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                data-phx-id="m10-phx-GAPTpMFHc9kS4XZh"
-              >
-                <.icon name="tabler-package" class="h-5 w-5" />
-                <span class="sr-only"> Products </span>
-              </a>
-            </tooltip_trigger>
-            <div
-              data-side="right"
-              class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95"
-              data-phx-id="m11-phx-GAPTpMFHc9kS4XZh"
-            >
-              Products
-            </div>
-          </div>
-          <div class="relative inline-block group/tooltip" data-phx-id="m12-phx-GAPTpMFHc9kS4XZh">
-            <tooltip_trigger>
-              <a
-                href="#"
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                data-phx-id="m13-phx-GAPTpMFHc9kS4XZh"
-              >
-                <.icon name="tabler-users" class="h-5 w-5" />
-                <span class="sr-only"> Customers </span>
-              </a>
-            </tooltip_trigger>
-            <div
-              data-side="right"
-              class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95"
-              data-phx-id="m14-phx-GAPTpMFHc9kS4XZh"
-            >
-              Customers
-            </div>
-          </div>
-          <div class="relative inline-block group/tooltip" data-phx-id="m15-phx-GAPTpMFHc9kS4XZh">
-            <tooltip_trigger>
-              <a
-                href="#"
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                data-phx-id="m16-phx-GAPTpMFHc9kS4XZh"
-              >
-                <.icon name="tabler-chart-line" class="h-5 w-5" />
-                <span class="sr-only"> Analytics </span>
-              </a>
-            </tooltip_trigger>
-            <div
-              data-side="right"
-              class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95"
-              data-phx-id="m17-phx-GAPTpMFHc9kS4XZh"
-            >
-              Analytics
-            </div>
-          </div>
+          <% end %>
         </nav>
         <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-          <div class="relative inline-block group/tooltip" data-phx-id="m18-phx-GAPTpMFHc9kS4XZh">
-            <tooltip_trigger>
-              <a
-                href="#"
-                class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                data-phx-id="m19-phx-GAPTpMFHc9kS4XZh"
-              >
-                <.icon name="tabler-settings" class="h-5 w-5" />
-                <span class="sr-only"> Settings </span>
-              </a>
-            </tooltip_trigger>
-            <div
-              data-side="right"
-              class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95"
-              data-phx-id="m20-phx-GAPTpMFHc9kS4XZh"
-            >
-              Settings
+          <%= for item <- @footer_nav_items do %>
+            <div class="relative inline-block group/tooltip">
+              <tooltip_trigger>
+                <a
+                  href={item.href}
+                  class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                >
+                  <.icon name={item.icon} class="h-5 w-5" />
+                  <span class="sr-only"><%= item.label %></span>
+                </a>
+              </tooltip_trigger>
+              <div class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95">
+                <%= item.label %>
+              </div>
             </div>
-          </div>
+          <% end %>
         </nav>
       </aside>
       <div class="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
@@ -506,30 +490,14 @@ defmodule AlgoraWeb.DevLive do
                     data-phx-id="m52-phx-GAPTpMFHc9kS4XZh"
                   >
                   </div>
-                  <div
-                    class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    data-phx-id="m53-phx-GAPTpMFHc9kS4XZh"
-                  >
-                    Settings
-                  </div>
-                  <div
-                    class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    data-phx-id="m54-phx-GAPTpMFHc9kS4XZh"
-                  >
-                    Support
-                  </div>
-                  <div
-                    role="separator"
-                    class="-mx-1 my-1 bg-muted h-px"
-                    data-phx-id="m55-phx-GAPTpMFHc9kS4XZh"
-                  >
-                  </div>
-                  <div
-                    class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                    data-phx-id="m56-phx-GAPTpMFHc9kS4XZh"
-                  >
-                    Logout
-                  </div>
+                  <%= for item <- @user_menu_items do %>
+                    <%= if item[:divider] do %>
+                      <div role="separator" class="-mx-1 my-1 bg-muted h-px"></div>
+                    <% end %>
+                    <div class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none">
+                      <%= item.label %>
+                    </div>
+                  <% end %>
                 </div>
               </div>
             </div>
@@ -623,31 +591,17 @@ defmodule AlgoraWeb.DevLive do
                   class="inline-flex p-1 rounded-md bg-muted text-muted-foreground items-center justify-center h-10"
                   data-phx-id="m78-phx-GAPTpMFHc9kS4XZh"
                 >
-                  <button
-                    class="inline-flex px-3 py-1.5 rounded-sm ring-offset-background transition-all whitespace-nowrap items-center justify-center font-medium text-sm disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tabs-trigger"
-                    data-target="week"
-                    phx-click="[[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-state=active]&quot;}],[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;active&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-target=week]&quot;}],[&quot;hide&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content:not([value=week])&quot;}],[&quot;show&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content[value=week]&quot;}]]"
-                    data-phx-id="m79-phx-GAPTpMFHc9kS4XZh"
-                    data-state="active"
-                  >
-                    Week
-                  </button>
-                  <button
-                    class="inline-flex px-3 py-1.5 rounded-sm ring-offset-background transition-all whitespace-nowrap items-center justify-center font-medium text-sm disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tabs-trigger"
-                    data-target="month"
-                    phx-click="[[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-state=active]&quot;}],[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;active&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-target=month]&quot;}],[&quot;hide&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content:not([value=month])&quot;}],[&quot;show&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content[value=month]&quot;}]]"
-                    data-phx-id="m80-phx-GAPTpMFHc9kS4XZh"
-                  >
-                    Month
-                  </button>
-                  <button
-                    class="inline-flex px-3 py-1.5 rounded-sm ring-offset-background transition-all whitespace-nowrap items-center justify-center font-medium text-sm disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tabs-trigger"
-                    data-target="year"
-                    phx-click="[[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-state=active]&quot;}],[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;active&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-target=year]&quot;}],[&quot;hide&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content:not([value=year])&quot;}],[&quot;show&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content[value=year]&quot;}]]"
-                    data-phx-id="m81-phx-GAPTpMFHc9kS4XZh"
-                  >
-                    Year
-                  </button>
+                  <%= for period <- @time_periods do %>
+                    <button
+                      class="inline-flex px-3 py-1.5 rounded-sm ring-offset-background transition-all whitespace-nowrap items-center justify-center font-medium text-sm disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tabs-trigger"
+                      data-target={period.value}
+                      data-state={if @active_period == period.value, do: "active", else: ""}
+                      phx-click="select_period"
+                      phx-value-period={period.value}
+                    >
+                      <%= period.label %>
+                    </button>
+                  <% end %>
                 </div>
                 <div class="ml-auto flex items-center gap-2">
                   <div class="relative inline-block group" data-phx-id="m82-phx-GAPTpMFHc9kS4XZh">
@@ -675,24 +629,11 @@ defmodule AlgoraWeb.DevLive do
                           class="min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md top-0 left-full"
                           data-phx-id="m86-phx-GAPTpMFHc9kS4XZh"
                         >
-                          <div
-                            class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                            data-phx-id="m89-phx-GAPTpMFHc9kS4XZh"
-                          >
-                            Fulfilled
-                          </div>
-                          <div
-                            class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                            data-phx-id="m90-phx-GAPTpMFHc9kS4XZh"
-                          >
-                            Declined
-                          </div>
-                          <div
-                            class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none"
-                            data-phx-id="m91-phx-GAPTpMFHc9kS4XZh"
-                          >
-                            Refunded
-                          </div>
+                          <%= for item <- @filter_menu_items do %>
+                            <div class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none">
+                              <%= item.label %>
+                            </div>
+                          <% end %>
                         </div>
                       </div>
                     </div>
@@ -843,5 +784,9 @@ defmodule AlgoraWeb.DevLive do
       </div>
     </div>
     """
+  end
+
+  def handle_event("select_period", %{"period" => period}, socket) do
+    {:noreply, assign(socket, active_period: period)}
   end
 end

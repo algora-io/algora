@@ -6,13 +6,26 @@ defmodule AlgoraWeb.DevLive do
   alias Algora.Bounties
 
   def mount(_params, _session, socket) do
-    project = %{title: "Build Real-time Chat Application"}
+    project = %{
+      title: "Build Real-time Chat Application",
+      description: "Build a real-time chat application using Phoenix and LiveView.",
+      tech_stack: ["Elixir", "Phoenix", "PostgreSQL", "TailwindCSS"],
+      country: "US",
+      hourly_rate: Decimal.new("50")
+    }
+
+    matching_devs =
+      Accounts.list_matching_devs(
+        limit: 5,
+        country: project.country,
+        skills: project.tech_stack
+      )
 
     {:ok,
      assign(socket,
        page_title: "Project",
        project: project,
-       matching_devs: get_matching_devs(),
+       matching_devs: matching_devs,
        bounties: Bounties.list_bounties(%{limit: 8})
      )}
   end
@@ -636,22 +649,15 @@ defmodule AlgoraWeb.DevLive do
                   <div class="flex justify-between items-start gap-8">
                     <div class="flex-1">
                       <h3 class="tracking-tight font-semibold leading-none text-2xl mb-4">
-                        Build Real-time Chat Application
+                        <%= @project.title %>
                       </h3>
 
                       <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                          Elixir
-                        </span>
-                        <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                          Phoenix
-                        </span>
-                        <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                          Phoenix LiveView
-                        </span>
-                        <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                          PostgreSQL
-                        </span>
+                        <%= for tech <- @project.tech_stack do %>
+                          <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+                            <%= tech %>
+                          </span>
+                        <% end %>
                       </div>
 
                       <div class="flex items-center gap-4 text-muted-foreground text-sm">
@@ -659,13 +665,13 @@ defmodule AlgoraWeb.DevLive do
                           <.icon name="tabler-clock" class="w-4 h-4" /> Posted March 15, 2024
                         </div>
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-world" class="w-4 h-4" /> US
+                          <.icon name="tabler-world" class="w-4 h-4" /> <%= @project.country %>
                         </div>
                       </div>
                     </div>
                     <div class="text-right">
                       <div class="text-primary font-semibold font-display text-3xl">
-                        $50-75/hour
+                        <%= Money.format!(@project.hourly_rate, "USD") %>/hour
                       </div>
                       <div class="text-sm text-muted-foreground">
                         Hourly Rate
@@ -969,13 +975,5 @@ defmodule AlgoraWeb.DevLive do
       </div>
     </div>
     """
-  end
-
-  defp get_matching_devs do
-    Accounts.list_matching_devs(
-      limit: 5,
-      country: "US",
-      skills: ["Elixir", "Phoenix", "LiveView"]
-    )
   end
 end

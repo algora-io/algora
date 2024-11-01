@@ -73,6 +73,7 @@ defmodule AlgoraWeb.Router do
     live "/jobs/:id", Job.ViewLive
 
     live "/leaderboard", LeaderboardLive
+    live "/dev", DevLive
 
     live "/onboarding/org", Onboarding.OrgLive
     live "/onboarding/dev", Onboarding.DevLive

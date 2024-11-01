@@ -80,7 +80,7 @@
       <div class="flex h-16 shrink-0 items-center">
         <.wordmark class="h-8 w-auto" />
       </div>
-      <div class="">
+      <%!-- <div class="">
         <div class="flex items-center border-b dark:border-gray-900">
           <%= if @current_user do %>
             <.dropdown id="dashboard-dropdown">
@@ -181,13 +181,13 @@
             />
           </.link>
         </div>
-      </div>
-      <.button
+      </div> --%>
+      <%!-- <.button
         phx-click={show_modal("new-bounty-modal")}
         class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-950 dark:focus-visible:ring-gray-800 bg-indigo-600 text-white hover:bg-indigo-600/90 h-10 px-4 py-2 w-full"
       >
         Share New Bounty
-      </.button>
+      </.button> --%>
 
       <nav class="flex flex-1 flex-col">
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
@@ -196,12 +196,12 @@
               <div class="text-xs font-semibold leading-6 text-gray-400">
                 <%= section.title %>
               </div>
-              <ul role="list" class="-mx-2 mt-2 space-y-1">
+              <ul role="list" class="-mx-4 mt-2 space-y-1">
                 <%= for item <- section.items do %>
                   <li>
                     <.link
                       navigate={item.href}
-                      class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
+                      class={"group flex gap-x-3 rounded-md py-2 px-4 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                     >
                       <.icon name={item.icon} /> <%= item.label %>
                     </.link>
@@ -210,6 +210,42 @@
               </ul>
             </li>
           <% end %>
+          <li>
+            <div class="text-xs font-semibold leading-6 text-gray-400">
+              Direct messages
+            </div>
+            <ul role="list" class="mt-2 space-y-2">
+              <%= for user <- @online_users do %>
+                <li>
+                  <.link
+                    class="flex cursor-pointer items-center gap-2"
+                    navigate={"/#{user.handle}"}
+                  >
+                    <div class="relative inline-block">
+                      <div class="relative flex-shrink-0 overflow-hidden h-8 w-8 rounded-full">
+                        <img
+                          alt={user.handle}
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="fill"
+                          src={user.avatar_url}
+                          style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                        />
+                      </div>
+                      <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                      </span>
+                    </div>
+                    <div class="truncate">
+                      <div class="truncate text-sm font-medium text-gray-200">
+                        <%= user.handle %>
+                      </div>
+                      <div class="truncate text-sm text-gray-500">online</div>
+                    </div>
+                  </.link>
+                </li>
+              <% end %>
+            </ul>
+          </li>
         </ul>
       </nav>
     </div>

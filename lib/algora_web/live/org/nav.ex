@@ -2,31 +2,35 @@ defmodule AlgoraWeb.Org.Nav do
   import Phoenix.LiveView
   use Phoenix.Component
 
-  alias AlgoraWeb.Org
   alias Algora.Organizations
 
   def on_mount(:default, %{"org_handle" => org_handle}, _session, socket) do
     current_org = Organizations.get_org_by(handle: org_handle)
+    online_users = Organizations.get_online_users(current_org.id)
 
     {:cont,
      socket
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
      |> assign(:nav, nav_items(current_org.handle))
+     |> assign(:online_users, online_users)
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
-        {Org.DashboardLive, _} -> :dashboard
-        {Org.BountiesLive, _} -> :bounties
-        {Org.ProjectsLive, _} -> :projects
-        {Org.JobsLive, _} -> :jobs
-        {Org.SettingsLive, _} -> :settings
-        {Org.MembersLive, _} -> :members
+        {AlgoraWeb.Org.DashboardLive, _} -> :dashboard
+        {AlgoraWeb.Org.BountiesLive, _} -> :bounties
+        {AlgoraWeb.Org.ProjectsLive, _} -> :projects
+        {AlgoraWeb.Project.ViewLive, _} -> :projects
+        {AlgoraWeb.Org.JobsLive, _} -> :jobs
+        {AlgoraWeb.Org.SettingsLive, _} -> :settings
+        {AlgoraWeb.Org.MembersLive, _} -> :members
         {_, _} -> nil
       end
+
+    dbg(socket.view)
 
     {:cont, socket |> assign(:active_tab, active_tab)}
   end
@@ -55,60 +59,13 @@ defmodule AlgoraWeb.Org.Nav do
             tab: :community,
             icon: "tabler-world",
             label: "Community"
-          }
-        ]
-      },
-      %{
-        title: "Settings",
-        items: [
+          },
           %{
             href: "/org/#{org_handle}/settings",
             tab: :settings,
             icon: "tabler-settings",
-            label: "General"
-          },
-          %{
-            href: "/org/#{org_handle}/members",
-            tab: :members,
-            icon: "tabler-users",
-            label: "Members"
-          },
-          %{
-            href: "/org/#{org_handle}/github-bot",
-            tab: :github_bot,
-            icon: "tabler-robot",
-            label: "GitHub Bot"
-          },
-          %{
-            href: "/org/#{org_handle}/integrations",
-            tab: :integrations,
-            icon: "tabler-webhook",
-            label: "Integrations"
+            label: "Settings"
           }
-        ]
-      },
-      %{
-        title: "Resources",
-        items: [
-          %{
-            href: "/org/#{org_handle}/slash-commands",
-            tab: :slash_commands,
-            icon: "tabler-terminal",
-            label: "Slash Commands"
-          },
-          %{
-            href: "/org/#{org_handle}/documentation",
-            tab: :documentation,
-            icon: "tabler-script",
-            label: "Documentation"
-          },
-          %{
-            href: "/org/#{org_handle}/widgets",
-            tab: :widgets,
-            icon: "tabler-code",
-            label: "Widgets"
-          },
-          %{href: "/org/#{org_handle}/sdk", tab: :sdk, icon: "tabler-sdk", label: "SDK"}
         ]
       }
     ]

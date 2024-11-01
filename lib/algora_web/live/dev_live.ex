@@ -728,6 +728,28 @@ defmodule AlgoraWeb.DevLive do
             </div>
           </div>
           <div class="lg:col-span-1">
+            <div class="rounded-xl bg-card text-card-foreground shadow border mb-4">
+              <div class="p-6">
+                <div class="flex flex-col items-center text-center space-y-3">
+                  <div class="rounded-full bg-primary/10 p-3">
+                    <.icon name="tabler-users-plus" class="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 class="font-semibold text-lg">Invite Developers</h3>
+                  <p class="text-sm text-muted-foreground">
+                    Share this project with developers in your network or invite them directly.
+                  </p>
+                  <div class="flex gap-2">
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                      Invite Developers
+                    </button>
+                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                      Share Link
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="rounded-xl bg-card text-card-foreground shadow border">
               <div class="p-6">
                 <h2 class="tracking-tight font-semibold leading-none text-lg mb-4">

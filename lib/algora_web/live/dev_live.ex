@@ -6,9 +6,12 @@ defmodule AlgoraWeb.DevLive do
   alias Algora.Bounties
 
   def mount(_params, _session, socket) do
+    project = %{title: "Build Real-time Chat Application"}
+
     {:ok,
      assign(socket,
-       page_title: "Bounties",
+       page_title: "Project",
+       project: project,
        matching_devs: get_matching_devs(),
        bounties: Bounties.list_bounties(%{limit: 8})
      )}
@@ -24,25 +27,7 @@ defmodule AlgoraWeb.DevLive do
             class="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
             data-phx-id="m2-phx-GAPTpMFHc9kS4XZh"
           >
-            <svg
-              class="h-4 w-4 transition-all group-hover:scale-110"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="m7.5 4.27 9 5.15"></path>
-              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z">
-              </path>
-              <path d="m3.3 7 8.7 5 8.7-5"></path>
-              <path d="M12 22V12"></path>
-            </svg>
-            <span class="sr-only"> Acme Inc </span>
+            <img src={@current_org.avatar_url} alt={@current_org.name} class="w-8 h-8 rounded-full" />
           </a>
           <div class="relative inline-block group/tooltip" data-phx-id="m3-phx-GAPTpMFHc9kS4XZh">
             <tooltip_trigger>
@@ -482,7 +467,7 @@ defmodule AlgoraWeb.DevLive do
                   data-phx-id="m36-phx-GAPTpMFHc9kS4XZh"
                 >
                 </a>
-                <a href="#" data-phx-id="m37-phx-GAPTpMFHc9kS4XZh"> Dashboard </a>
+                <a href="#" data-phx-id="m37-phx-GAPTpMFHc9kS4XZh"><%= @current_org.name %></a>
               </li>
               <li
                 role="presentation"
@@ -509,7 +494,7 @@ defmodule AlgoraWeb.DevLive do
                   data-phx-id="m40-phx-GAPTpMFHc9kS4XZh"
                 >
                 </a>
-                <a href="#" data-phx-id="m41-phx-GAPTpMFHc9kS4XZh"> Orders </a>
+                <a href="#" data-phx-id="m41-phx-GAPTpMFHc9kS4XZh"> Projects </a>
               </li>
               <li
                 role="presentation"
@@ -537,7 +522,7 @@ defmodule AlgoraWeb.DevLive do
                   class="text-foreground font-normal"
                   data-phx-id="m44-phx-GAPTpMFHc9kS4XZh"
                 >
-                  Recent Orders
+                  <%= @project.title %>
                 </span>
               </li>
             </ol>
@@ -577,13 +562,17 @@ defmodule AlgoraWeb.DevLive do
                 class="inline-flex rounded-full border-input bg-background transition-colors whitespace-nowrap items-center justify-center overflow-hidden font-medium shadow-sm text-sm w-9 h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground border"
                 data-phx-id="m48-phx-GAPTpMFHc9kS4XZh"
               >
-                <img
-                  src="/images/avatar02-e904d5847af14af9cad1ad5c92151406.png?vsn=d"
-                  width="36"
-                  height="36"
-                  alt="Avatar"
-                  class="overflow-hidden rounded-full"
-                />
+                <%= if @current_user do %>
+                  <img
+                    src={@current_user.avatar_url}
+                    width="36"
+                    height="36"
+                    alt="Avatar"
+                    class="overflow-hidden rounded-full"
+                  />
+                <% else %>
+                  <.icon name="tabler-user" class="w-6 h-6" />
+                <% end %>
               </button>
             </div>
             <div

@@ -48,4 +48,14 @@ defmodule Algora.Organizations do
         where: m.user_id == ^user.id and m.org_id == o.id
     )
   end
+
+  ## TODO: Implement online users
+  def get_online_users(_org_id) do
+    Repo.all(
+      from u in User,
+        where: u.type == :individual and not is_nil(u.handle) and not is_nil(u.provider_login),
+        order_by: [desc: u.updated_at],
+        limit: 10
+    )
+  end
 end

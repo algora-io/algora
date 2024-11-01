@@ -49,13 +49,13 @@ defmodule Algora.Organizations do
     )
   end
 
-  ## TODO: Implement online users
+  # TODO: Implement online users
   def get_online_users(_org_id) do
-    Repo.all(
-      from u in User,
-        where: u.type == :individual and not is_nil(u.handle) and not is_nil(u.provider_login),
-        order_by: [desc: u.updated_at],
-        limit: 10
+    from(u in User,
+      where: u.type == :individual and not is_nil(u.handle) and not is_nil(u.provider_login),
+      order_by: fragment("RANDOM()"),
+      limit: 10
     )
+    |> Repo.all()
   end
 end

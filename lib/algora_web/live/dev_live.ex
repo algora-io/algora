@@ -19,29 +19,23 @@ defmodule AlgoraWeb.DevLive do
         icon: "tabler-home",
         label: "Dashboard",
         href: "#",
-        active: false
-      },
-      %{
-        icon: "tabler-shopping-cart",
-        label: "Orders",
-        href: "#",
         active: true
       },
       %{
-        icon: "tabler-package",
-        label: "Products",
+        icon: "tabler-diamond",
+        label: "Bountes",
+        href: "#",
+        active: false
+      },
+      %{
+        icon: "tabler-file",
+        label: "Documents",
         href: "#",
         active: false
       },
       %{
         icon: "tabler-users",
-        label: "Customers",
-        href: "#",
-        active: false
-      },
-      %{
-        icon: "tabler-chart-line",
-        label: "Analytics",
+        label: "Team",
         href: "#",
         active: false
       }

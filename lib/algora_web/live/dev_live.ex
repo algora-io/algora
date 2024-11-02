@@ -427,19 +427,10 @@ defmodule AlgoraWeb.DevLive do
               </li>
             </ol>
           </nav>
-          <div class="relative ml-auto flex-1 md:grow-0">
-            <.icon
-              name="tabler-search"
-              class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-            />
-            <input
-              class="flex pl-8 px-3 py-2 rounded-lg ring-offset-background border-input bg-background text-sm w-full h-10 lg:w-[336px] md:w-[200px] placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 file:border-0 file:bg-transparent file:font-medium file:text-sm border"
-              type="text"
-              placeholder="Search..."
-              data-phx-id="m45-phx-GAPTpMFHc9kS4XZh"
-            />
-          </div>
-          <div class="relative inline-block group" data-phx-id="m46-phx-GAPTpMFHc9kS4XZh">
+          <div
+            class="ml-auto md:grow-0 relative inline-block group"
+            data-phx-id="m46-phx-GAPTpMFHc9kS4XZh"
+          >
             <div
               class="dropdown-menu-trigger peer"
               data-state="closed"

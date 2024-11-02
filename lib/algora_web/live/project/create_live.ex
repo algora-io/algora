@@ -55,7 +55,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 phx-click="submit"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
               >
-                Submit Project
+                Initialize Project
               </button>
             <% end %>
           </div>
@@ -177,12 +177,15 @@ defmodule AlgoraWeb.Project.CreateLive do
               />
               <span class="flex flex-1">
                 <span class="flex flex-col">
-                  <span class="block text-sm font-medium text-gray-200">Algora Network</span>
+                  <span class="flex items-center gap-2">
+                    <span class="block text-sm font-medium text-gray-200">Algora Network</span>
+                    <span class="text-xs text-indigo-400 font-medium">15% platform fee</span>
+                  </span>
                   <span class="mt-1 flex items-center text-sm text-gray-400">
                     Open to our vetted developer network
                   </span>
                   <span class="mt-6 text-sm font-medium text-gray-300">
-                    Best for finding new talent quickly
+                    Best for working with new talent quickly
                   </span>
                 </span>
               </span>
@@ -217,7 +220,10 @@ defmodule AlgoraWeb.Project.CreateLive do
               />
               <span class="flex flex-1">
                 <span class="flex flex-col">
-                  <span class="block text-sm font-medium text-gray-200">Bring Your Own</span>
+                  <span class="flex items-center gap-2">
+                    <span class="block text-sm font-medium text-gray-200">Bring Your Own</span>
+                    <span class="text-xs text-indigo-400 font-medium">5% platform fee</span>
+                  </span>
                   <span class="mt-1 flex items-center text-sm text-gray-400">
                     Invite specific developers
                   </span>

@@ -179,7 +179,7 @@ defmodule AlgoraWeb.HomeLive do
               <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div class="lg:-mt-12 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
                   <h1 class="text-pretty text-5xl font-semibold tracking-tight text-white sm:text-7xl font-display">
-                    Open Source UpWork <br /> for Developers
+                    The open source UpWork alternative.
                   </h1>
                   <p class="mt-8 text-pretty text-lg font-medium text-gray-300 sm:max-w-md sm:text-xl/8 lg:max-w-none">
                     GitHub bounties, freelancing and full-time jobs.

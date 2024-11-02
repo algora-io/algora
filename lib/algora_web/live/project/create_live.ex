@@ -8,15 +8,13 @@ defmodule AlgoraWeb.Project.CreateLive do
       country: "US",
       skills: ["Elixir"],
       title: "",
-      budget: %{type: :fixed, fixed_price: nil},
-      description: "",
       visibility: :public
     }
 
     {:ok,
      socket
      |> assign(step: 1)
-     |> assign(total_steps: 4)
+     |> assign(total_steps: 2)
      |> assign(project: project)
      |> assign(current_user: %{email: session["user_email"]})
      |> assign(matching_devs: get_matching_devs(project))}
@@ -248,173 +246,6 @@ defmodule AlgoraWeb.Project.CreateLive do
             </label>
           </div>
         </fieldset>
-      </div>
-    </div>
-    """
-  end
-
-  def render_step(%{step: 3} = assigns) do
-    ~H"""
-    <div>
-      <h2 class="text-2xl font-semibold mb-4">Collaboration Details</h2>
-      <div class="space-y-8">
-        <fieldset>
-          <legend class="text-sm font-medium text-gray-300 mb-2">Collaboration Type</legend>
-          <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.budget.type == :fixed, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
-              <input
-                type="radio"
-                name="budget[type]"
-                value="fixed"
-                checked={@project.budget.type == :fixed}
-                class="sr-only"
-                phx-click="update_project"
-                phx-value-field="budget.type"
-              />
-              <span class="flex flex-1">
-                <span class="flex flex-col">
-                  <span class="flex items-center gap-2">
-                    <span class="block text-sm font-medium text-gray-200">Outcome-Based</span>
-                    <%= if @project.visibility == :public do %>
-                      <span class="text-xs font-display font-medium text-indigo-400">
-                        15% platform fee
-                      </span>
-                    <% else %>
-                      <span class="text-xs font-display font-medium text-indigo-400">
-                        5% platform fee
-                      </span>
-                      <span class="text-xs font-display font-medium text-emerald-400">
-                        First $5k free
-                      </span>
-                    <% end %>
-                  </span>
-                  <span class="mt-1 flex items-center text-sm text-gray-400">
-                    Pay for milestones & bounties
-                  </span>
-                  <span class="mt-6 text-sm font-medium text-gray-300">
-                    Best for specific deliverables and features
-                  </span>
-                </span>
-              </span>
-              <svg
-                class={"h-5 w-5 text-indigo-600 #{if @project.budget.type != :fixed, do: 'invisible'}"}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </label>
-
-            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.budget.type == :hourly, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
-              <input
-                type="radio"
-                name="budget[type]"
-                value="hourly"
-                checked={@project.budget.type == :hourly}
-                class="sr-only"
-                phx-click="update_project"
-                phx-value-field="budget.type"
-              />
-              <span class="flex flex-1">
-                <span class="flex flex-col">
-                  <span class="flex items-center gap-2">
-                    <span class="block text-sm font-medium text-gray-200">Time-Based</span>
-                    <%= if @project.visibility == :public do %>
-                      <span class="text-xs font-display font-medium text-indigo-400">
-                        5% platform fee
-                      </span>
-                    <% else %>
-                      <span class="text-xs font-display font-medium text-indigo-400">
-                        5% platform fee
-                      </span>
-                      <span class="text-xs font-display font-medium text-emerald-400">
-                        First $5k free
-                      </span>
-                    <% end %>
-                  </span>
-                  <span class="mt-1 flex items-center text-sm text-gray-400">Pay an hourly rate</span>
-                  <span class="mt-6 text-sm font-medium text-gray-300">
-                    Best for ongoing collab and complex projects
-                  </span>
-                </span>
-              </span>
-              <svg
-                class={"h-5 w-5 text-indigo-600 #{if @project.budget.type != :hourly, do: 'invisible'}"}
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-            </label>
-          </div>
-        </fieldset>
-
-        <%= if @project.budget.type == :hourly do %>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">
-                Expected Hours per Week
-              </label>
-              <input
-                name="budget[hours_per_week]"
-                value={@project.budget.hours_per_week}
-                phx-blur="update_project"
-                phx-value-field="budget.hours_per_week"
-                class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-300 mb-2">Hourly Rate</label>
-              <input
-                name="budget[hourly_rate]"
-                value={@project.budget.hourly_rate}
-                phx-blur="update_project"
-                phx-value-field="budget.hourly_rate"
-                class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
-        <% else %>
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Project Budget</label>
-            <input
-              name="budget[fixed_price]"
-              value={@project.budget.fixed_price}
-              placeholder="$5,000"
-              phx-blur="update_project"
-              phx-value-field="budget.fixed_price"
-              class="text-base font-semibold font-display w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-emerald-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-        <% end %>
-      </div>
-    </div>
-    """
-  end
-
-  def render_step(%{step: 4} = assigns) do
-    ~H"""
-    <div>
-      <h2 class="text-2xl font-semibold mb-4">Describe your project</h2>
-      <div>
-        <textarea
-          name="description"
-          rows="6"
-          phx-blur="update_project"
-          phx-value-field="description"
-          class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="Provide a detailed description of your project..."
-        ><%= @project.description %></textarea>
       </div>
     </div>
     """

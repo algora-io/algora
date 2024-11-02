@@ -12,25 +12,16 @@ defmodule Algora.Bounties do
   @spec create_bounty(
           creator :: User.t(),
           owner :: User.t(),
-          url :: String.t(),
-          amount :: Decimal.t()
+          params :: map()
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  def create_bounty(creator = %User{}, owner = %User{}, url, amount) do
-    with {:ok, token} <- Accounts.get_access_token(creator),
-         {:ok, task} <- Work.fetch_task(:github, %{token: token, url: url}) do
-      %Bounty{}
-      |> Bounty.changeset(%{
-        amount: Decimal.new(amount),
-        currency: "USD",
-        task_id: task.id,
-        owner_id: owner.id,
-        creator_id: creator.id
-      })
-      |> Repo.insert()
-    else
-      error -> error
-    end
+  def create_bounty(creator, owner, params) do
+    %Bounty{
+      creator_id: creator.id,
+      owner_id: owner.id
+    }
+    |> Bounty.create_changeset(params)
+    |> Repo.insert()
   end
 
   @spec list_bounties(

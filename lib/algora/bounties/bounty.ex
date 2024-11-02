@@ -7,6 +7,7 @@ defmodule Algora.Bounties.Bounty do
   schema "bounties" do
     field :amount, :decimal
     field :currency, :string
+    field :payment_type, Ecto.Enum, values: [:fixed, :hourly]
 
     belongs_to :task, Algora.Work.Task
     belongs_to :owner, Algora.Accounts.User
@@ -97,5 +98,13 @@ defmodule Algora.Bounties.Bounty do
     from b in query,
       join: o in assoc(b, :owner),
       where: fragment("ARRAY(SELECT LOWER(unnest(?))) && ?", o.tech_stack, ^lowercase_tech_stack)
+  end
+
+  def create_changeset(bounty, attrs) do
+    bounty
+    |> cast(attrs, [:amount, :currency, :payment_type])
+    |> cast_assoc(:task)
+    |> validate_required([:amount, :currency])
+    |> validate_number(:amount, greater_than: 0)
   end
 end

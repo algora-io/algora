@@ -203,7 +203,7 @@ defmodule AlgoraWeb.PricingLive do
           phx-value-plan={@plan.name}
           class={[
             "relative w-full cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border h-[42px] px-4 py-2",
-            @plan.popular && "bg-primary text-primary-foreground hover:bg-primary/90",
+            @plan.popular && "mt-8 bg-primary text-primary-foreground hover:bg-primary/90",
             !@plan.popular &&
               "bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
           ]}
@@ -581,7 +581,7 @@ defmodule AlgoraWeb.PricingLive do
       },
       %Plan{
         name: "Enterprise",
-        description: "For organizations that need custom solutions and dedicated support",
+        description: "For large organizations",
         price: nil,
         cta_text: "Contact Sales",
         popular: false,

@@ -3,13 +3,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   alias Algora.Bounties
   alias Algora.Money
-  on_mount AlgoraWeb.Org.BountyHook
+  alias Algora.Bounties.Bounty
+  alias AlgoraWeb.Org.Forms.BountyForm
 
   def mount(_params, _session, socket) do
     org_id = socket.assigns.current_org.id
     stats = Bounties.fetch_stats(org_id)
     recent_bounties = Bounties.list_bounties(owner_id: org_id, limit: 10)
     recent_activities = fetch_recent_activities()
+
+    changeset =
+      %BountyForm{}
+      |> BountyForm.changeset(%{
+        payment_type: "fixed",
+        currency: "USD"
+      })
 
     {:ok,
      socket
@@ -20,7 +28,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
      |> assign(:get_started_cards, get_started_cards())
      |> assign(:tech_stack, ["Elixir", "TypeScript"])
      |> assign(:locations, ["United States", "Remote"])
-     |> assign(:matches, Algora.Accounts.list_matching_devs(limit: 8, country: "US"))}
+     |> assign(:matches, Algora.Accounts.list_matching_devs(limit: 8, country: "US"))
+     |> assign_form(changeset)}
   end
 
   def render(assigns) do
@@ -37,38 +46,163 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8">
       <div class="p-6 relative rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 h-full">
-        <h2 class="text-lg font-semibold mb-4">Create New Bounty</h2>
-        <.form for={@new_bounty_form} phx-submit="create_bounty" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
+        <.simple_form for={@form} phx-change="validate" phx-submit="create_bounty" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <.label for="github_issue_url">GitHub Issue URL</.label>
+              <.label for="title" class="text-sm font-medium mb-2">
+                Title
+              </.label>
               <.input
-                type="url"
-                field={@new_bounty_form[:github_issue_url]}
-                placeholder="https://github.com/owner/repo/issues/123"
+                type="text"
+                field={@form[:title]}
+                placeholder="Brief description of the task"
                 required
-                class="w-full"
+                class="w-full bg-gray-900/50 border-white/10 rounded-lg"
               />
             </div>
             <div>
-              <.label for="amount">Bounty Amount (USD)</.label>
-              <.input
-                type="number"
-                field={@new_bounty_form[:amount]}
-                min="1"
-                step="0.01"
-                placeholder="100"
-                required
-                class="w-full"
-              />
+              <.label for="task_url" class="text-sm font-medium mb-2">
+                Ticket
+                <span class="font-normal text-gray-300 text-xs">
+                  (GitHub, Linear, Figma, Jira, Google Docs...)
+                </span>
+              </.label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <.icon name={get_url_icon(@form[:task_url].value)} class="w-5 h-5 text-gray-400" />
+                </div>
+                <.input
+                  type="url"
+                  field={@form[:task_url]}
+                  placeholder="https://github.com/owner/repo/issues/123"
+                  required
+                  class="w-full pl-10 bg-gray-900/50 border-white/10 rounded-lg"
+                />
+              </div>
             </div>
           </div>
+
+          <fieldset class="mb-8">
+            <legend class="text-sm font-medium text-gray-300 mb-2">Payment Type</legend>
+            <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:payment_type].value == "fixed", do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-white/[2.5%]'}"}>
+                <input
+                  type="radio"
+                  name="bounty_form[payment_type]"
+                  value="fixed"
+                  checked={@form[:payment_type].value == "fixed"}
+                  class="sr-only"
+                />
+                <span class="flex flex-1 flex-col">
+                  <span class="flex items-center mb-1">
+                    <span class="block text-sm font-medium text-gray-200">Fixed Amount</span>
+                    <svg
+                      class={"ml-2 h-5 w-5 text-indigo-600 #{if @form[:payment_type].value != "fixed", do: 'invisible'}"}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                  <span class="mt-1 text-sm text-gray-400">
+                    Pay upon full completion or reward milestones
+                  </span>
+
+                  <div class={"mt-3 transition-opacity duration-200 #{if @form[:payment_type].value != "fixed", do: 'opacity-0 h-0 overflow-hidden', else: 'opacity-100'}"}>
+                    <div class="relative">
+                      <.input
+                        field={@form[:amount]}
+                        min="1"
+                        step="0.01"
+                        placeholder="$1,000"
+                        required={@form[:payment_type].value == "fixed"}
+                        class="w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
+                      />
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span class="text-gray-400 text-sm">USD</span>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              </label>
+
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:payment_type].value == "hourly", do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-white/[2.5%]'}"}>
+                <input
+                  type="radio"
+                  name="bounty_form[payment_type]"
+                  value="hourly"
+                  checked={@form[:payment_type].value == "hourly"}
+                  class="sr-only"
+                />
+                <span class="flex flex-1 flex-col">
+                  <span class="flex items-center mb-1">
+                    <span class="block text-sm font-medium text-gray-200">Hourly Rate</span>
+                    <svg
+                      class={"ml-2 h-5 w-5 text-indigo-600 #{if @form[:payment_type].value != "hourly", do: 'invisible'}"}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                  <span class="mt-1 text-sm text-gray-400">
+                    Pay as you go based on hours worked
+                  </span>
+
+                  <div class={"mt-3 transition-opacity duration-200 #{if @form[:payment_type].value != "hourly", do: 'opacity-0 h-0 overflow-hidden', else: 'opacity-100'}"}>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div class="relative">
+                        <.input
+                          field={@form[:amount]}
+                          min="1"
+                          step="0.01"
+                          placeholder="$75"
+                          required={@form[:payment_type].value == "hourly"}
+                          class="w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
+                        />
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <span class="text-gray-400 text-sm">USD/h</span>
+                        </div>
+                      </div>
+                      <div class="relative">
+                        <.input
+                          field={@form[:expected_hours]}
+                          min="1"
+                          step="1"
+                          placeholder="10"
+                          required={@form[:payment_type].value == "hourly"}
+                          class="w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
+                        />
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <span class="text-gray-400 text-sm">hours per week</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
           <div class="flex justify-end">
-            <.button type="submit" phx-disable-with="Creating...">
+            <.button
+              type="submit"
+              phx-disable-with="Creating..."
+              class="bg-white text-gray-900 hover:bg-gray-100"
+            >
               <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Create Bounty
             </.button>
           </div>
-        </.form>
+        </.simple_form>
       </div>
 
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -404,5 +538,79 @@ defmodule AlgoraWeb.Org.DashboardLive do
         days_ago: 11
       }
     ]
+  end
+
+  def handle_event("validate", %{"bounty_form" => params}, socket) do
+    changeset =
+      %BountyForm{}
+      |> BountyForm.changeset(params)
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
+  def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
+    %{current_user: creator, current_org: owner} = socket.assigns
+
+    changeset =
+      %BountyForm{}
+      |> BountyForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    if changeset.valid? do
+      form_data = Ecto.Changeset.apply_changes(changeset)
+
+      # Calculate total amount for hourly payments
+      amount =
+        if form_data.payment_type == "hourly" do
+          Decimal.mult(form_data.amount, Decimal.new(form_data.expected_hours))
+        else
+          form_data.amount
+        end
+
+      # Create params map in the format expected by Bounty.create_changeset
+      bounty_params = %{
+        "task" => %{
+          "url" => form_data.task_url,
+          "title" => form_data.title
+        },
+        "amount" => amount,
+        "status" => "open"
+      }
+
+      case Bounties.create_bounty(creator, owner, bounty_params) do
+        {:ok, _bounty} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Bounty created successfully")
+           |> push_navigate(to: "/org/#{owner.handle}/bounties")}
+
+        {:error, _changeset} ->
+          {:noreply,
+           socket
+           |> put_flash(:error, "Error creating bounty")}
+      end
+    else
+      {:noreply,
+       socket
+       |> assign_form(changeset)
+       |> put_flash(:error, "Please fix the errors in the form")}
+    end
+  end
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
+  end
+
+  defp get_url_icon(nil), do: "tabler-link"
+
+  defp get_url_icon(url) when is_binary(url) do
+    cond do
+      String.contains?(url, "github.com") -> "tabler-brand-github"
+      String.contains?(url, "figma.com") -> "tabler-brand-figma"
+      String.contains?(url, "docs.google.com") -> "tabler-brand-google"
+      # String.contains?(url, "linear.app") -> "tabler-brand-linear"
+      # String.contains?(url, "atlassian.net") -> "tabler-brand-jira"
+      true -> "tabler-link"
+    end
   end
 end

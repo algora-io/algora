@@ -453,28 +453,28 @@ defmodule AlgoraWeb.PricingLive do
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-4">
               <h4 class="font-medium text-card-foreground">Traditional Hiring</h4>
-              <div class="space-y-2">
+              <div>
                 <div class="flex justify-between">
                   <span class="text-muted-foreground">Base Monthly Cost</span>
                   <span class="font-mono">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_cost)) %>
                   </span>
                 </div>
-                <div class="flex justify-between text-sm">
+                <div class="pt-2 flex justify-between text-sm">
                   <span class="text-muted-foreground">Overhead (35%)</span>
                   <span class="font-mono text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead)) %>
                   </span>
                 </div>
-                <div class="flex justify-between font-medium border-t pt-2">
+                <div class="pt-2 mt-9 flex justify-between text-sm border-t">
                   <span class="text-muted-foreground">Total Monthly Cost</span>
-                  <span class="font-mono">
+                  <span class="font-mono text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total)) %>
                   </span>
                 </div>
-                <div class="flex justify-between text-sm">
+                <div class="pt-2 flex justify-between font-medium">
                   <span class="text-muted-foreground">Total Yearly Cost</span>
-                  <span class="font-mono text-muted-foreground">
+                  <span class="font-mono">
                     $<%= Number.Delimit.number_to_delimited(
                       trunc(@roi_estimate.traditional_total * 12)
                     ) %>
@@ -506,15 +506,15 @@ defmodule AlgoraWeb.PricingLive do
                     $<%= Number.Delimit.number_to_delimited(@roi_estimate.monthly_subscription) %>
                   </span>
                 </div>
-                <div class="flex justify-between font-medium border-t pt-2">
+                <div class="flex justify-between text-sm border-t pt-2">
                   <span class="text-muted-foreground">Total Monthly Cost</span>
-                  <span class="font-mono">
+                  <span class="font-mono text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total)) %>
                   </span>
                 </div>
-                <div class="flex justify-between text-sm">
+                <div class="flex justify-between font-medium">
                   <span class="text-muted-foreground">Total Yearly Cost</span>
-                  <span class="font-mono text-muted-foreground">
+                  <span class="font-mono">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total * 12)) %>
                   </span>
                 </div>

@@ -221,7 +221,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
               </div>
             <% else %>
-              <div class="flex items-end">
+              <div class="mt-4 flex items-end">
                 <p class="mt-2 pb-1 font-display text-4xl">Custom</p>
               </div>
             <% end %>
@@ -439,12 +439,6 @@ defmodule AlgoraWeb.PricingLive do
               class="w-full rounded-md border border-input bg-background px-3 py-2"
             />
           </div>
-        </div>
-
-        <div class="text-sm text-muted-foreground mt-2">
-          <p>
-            Update any two fields of Hourly Rate, Hours per Week, or Annual TC - the third will automatically calculate.
-          </p>
         </div>
       </form>
 

@@ -46,7 +46,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8">
       <div class="p-6 relative rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 h-full">
-        <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
+          <.button
+            type="submit"
+            phx-disable-with="Creating..."
+            class="bg-white text-gray-900 hover:bg-gray-100"
+          >
+            <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Create Bounty
+          </.button>
+        </div>
         <.simple_form for={@form} phx-change="validate" phx-submit="create_bounty" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -121,7 +130,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         step="0.01"
                         placeholder="$1,000"
                         required={@form[:payment_type].value == "fixed"}
-                        class="w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
+                        class="font-display w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm text-green-300 font-medium"
                       />
                       <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                         <span class="text-gray-400 text-sm">USD</span>
@@ -167,7 +176,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                           step="0.01"
                           placeholder="$75"
                           required={@form[:payment_type].value == "hourly"}
-                          class="w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
+                          class="font-display w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm text-green-300 font-medium"
                         />
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                           <span class="text-gray-400 text-sm">USD/h</span>
@@ -180,7 +189,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                           step="1"
                           placeholder="10"
                           required={@form[:payment_type].value == "hourly"}
-                          class="w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
+                          class="font-display w-full py-1.5 bg-gray-900/50 border-white/10 rounded-lg text-sm"
                         />
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                           <span class="text-gray-400 text-sm">hours per week</span>
@@ -192,16 +201,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </label>
             </div>
           </fieldset>
-
-          <div class="flex justify-end">
-            <.button
-              type="submit"
-              phx-disable-with="Creating..."
-              class="bg-white text-gray-900 hover:bg-gray-100"
-            >
-              <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Create Bounty
-            </.button>
-          </div>
         </.simple_form>
       </div>
 

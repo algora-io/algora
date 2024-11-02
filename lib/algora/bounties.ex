@@ -4,8 +4,6 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Repo
-  alias Algora.Accounts
-  alias Algora.Work
   alias Algora.Accounts.User
   alias Algora.Organizations.Member
 

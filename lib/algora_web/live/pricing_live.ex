@@ -34,7 +34,11 @@ defmodule AlgoraWeb.PricingLive do
       :annual_tc,
       :platform_fee,
       :traditional_cost,
+      :traditional_overhead,
+      :traditional_total,
       :algora_cost,
+      :algora_fee,
+      :algora_total,
       :savings
     ]
   end
@@ -136,16 +140,21 @@ defmodule AlgoraWeb.PricingLive do
     hours_per_week = String.to_integer(params["hours_per_week"])
     annual_tc = hourly_rate * hours_per_week * 52
 
-    # Traditional hiring costs (recruitment fees, overhead, etc.)
-    # 30% overhead
-    traditional_cost = developers * hourly_rate * hours_per_week * 4.3 * 1.3
+    # Base monthly cost (same for both traditional and Algora)
+    monthly_base_cost = developers * hourly_rate * hours_per_week * 4.3
 
-    # Algora cost with platform fee
-    # 10% for larger teams
-    platform_fee = if developers >= 5, do: 0.10, else: 0.15
-    algora_cost = developers * hourly_rate * hours_per_week * 4.3 * (1 + platform_fee)
+    # Traditional hiring costs (30% overhead)
+    traditional_cost = monthly_base_cost
+    traditional_overhead = traditional_cost * 0.3
+    traditional_total = traditional_cost + traditional_overhead
 
-    yearly_savings = (traditional_cost - algora_cost) * 12
+    # Algora cost with platform fee (15%)
+    platform_fee = 0.15
+    algora_cost = monthly_base_cost
+    algora_fee = algora_cost * platform_fee
+    algora_total = algora_cost + algora_fee
+
+    yearly_savings = (traditional_total - algora_total) * 12
 
     %ROIEstimate{
       developers: developers,
@@ -154,7 +163,11 @@ defmodule AlgoraWeb.PricingLive do
       annual_tc: annual_tc,
       platform_fee: platform_fee,
       traditional_cost: traditional_cost,
+      traditional_overhead: traditional_overhead,
+      traditional_total: traditional_total,
       algora_cost: algora_cost,
+      algora_fee: algora_fee,
+      algora_total: algora_total,
       savings: yearly_savings
     }
   end
@@ -439,24 +452,28 @@ defmodule AlgoraWeb.PricingLive do
               <h4 class="font-medium text-card-foreground">Traditional Hiring</h4>
               <div class="space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-muted-foreground">Monthly Cost</span>
+                  <span class="text-muted-foreground">Base Monthly Cost</span>
                   <span class="font-mono">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_cost)) %>
                   </span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-muted-foreground">Yearly Cost</span>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Overhead (30%)</span>
+                  <span class="font-mono text-muted-foreground">
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead)) %>
+                  </span>
+                </div>
+                <div class="flex justify-between font-medium border-t pt-2">
+                  <span class="text-muted-foreground">Total Monthly Cost</span>
                   <span class="font-mono">
-                    $<%= Number.Delimit.number_to_delimited(
-                      trunc(@roi_estimate.traditional_cost * 12)
-                    ) %>
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total)) %>
                   </span>
                 </div>
                 <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Including 30% overhead</span>
+                  <span class="text-muted-foreground">Total Yearly Cost</span>
                   <span class="font-mono text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(
-                      trunc(@roi_estimate.traditional_cost * 12 * 0.3)
+                      trunc(@roi_estimate.traditional_total * 12)
                     ) %>
                   </span>
                 </div>
@@ -467,21 +484,29 @@ defmodule AlgoraWeb.PricingLive do
               <h4 class="font-medium text-card-foreground">With Algora</h4>
               <div class="space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-muted-foreground">Monthly Cost</span>
+                  <span class="text-muted-foreground">Base Monthly Cost</span>
                   <span class="font-mono">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_cost)) %>
                   </span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-muted-foreground">Platform Fee</span>
-                  <span class="font-mono"><%= @roi_estimate.platform_fee * 100 %>%</span>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">
+                    Platform Fee (<%= @roi_estimate.platform_fee * 100 %>%)
+                  </span>
+                  <span class="font-mono text-muted-foreground">
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_fee)) %>
+                  </span>
+                </div>
+                <div class="flex justify-between font-medium border-t pt-2">
+                  <span class="text-muted-foreground">Total Monthly Cost</span>
+                  <span class="font-mono">
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total)) %>
+                  </span>
                 </div>
                 <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Platform Fee Amount</span>
+                  <span class="text-muted-foreground">Total Yearly Cost</span>
                   <span class="font-mono text-muted-foreground">
-                    $<%= Number.Delimit.number_to_delimited(
-                      trunc(@roi_estimate.algora_cost * @roi_estimate.platform_fee)
-                    ) %>
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total * 12)) %>
                   </span>
                 </div>
               </div>

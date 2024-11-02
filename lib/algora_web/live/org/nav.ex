@@ -60,7 +60,7 @@ defmodule AlgoraWeb.Org.Nav do
             label: "Team"
           },
           %{
-            href: "/org/#{org_handle}/community",
+            href: "/org/#{org_handle}/analytics",
             tab: :analytics,
             icon: "tabler-chart-bar",
             label: "Analytics"

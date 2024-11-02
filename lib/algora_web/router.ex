@@ -56,6 +56,7 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/projects", Project.IndexLive, :index
       # live "/org/:org_handle/projects/:id", Project.ViewLive
       live "/org/:org_handle/jobs", Org.JobsLive, :index
+      live "/org/:org_handle/analytics", Org.AnalyticsLive, :index
     end
 
     live_session :org2,

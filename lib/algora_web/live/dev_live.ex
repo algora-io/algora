@@ -7,11 +7,10 @@ defmodule AlgoraWeb.DevLive do
 
   def mount(_params, _session, socket) do
     project = %{
-      title: "Build Real-time Chat Application",
+      title: "Looking for an Elixir developer to build a real-time chat application",
       description: "Build a real-time chat application using Phoenix and LiveView.",
       tech_stack: ["Elixir", "Phoenix", "PostgreSQL", "TailwindCSS"],
-      country: "US",
-      hourly_rate: Decimal.new("50")
+      country: "US"
     }
 
     nav_items = [
@@ -68,12 +67,14 @@ defmodule AlgoraWeb.DevLive do
       %{label: "Year", value: "year"}
     ]
 
-    matching_devs =
-      Accounts.list_matching_devs(
-        limit: 5,
-        country: project.country,
-        skills: project.tech_stack
-      )
+    # matching_devs =
+    #   Accounts.list_matching_devs(
+    #     limit: 5,
+    #     country: project.country,
+    #     skills: project.tech_stack
+    #   )
+
+    # bounties = Bounties.list_bounties(%{limit: 8})
 
     {:ok,
      assign(socket,
@@ -85,8 +86,8 @@ defmodule AlgoraWeb.DevLive do
        filter_menu_items: filter_menu_items,
        time_periods: time_periods,
        active_period: "week",
-       matching_devs: matching_devs,
-       bounties: Bounties.list_bounties(%{limit: 8})
+       matching_devs: [],
+       bounties: []
      )}
   end
 
@@ -450,12 +451,12 @@ defmodule AlgoraWeb.DevLive do
                 class="inline-flex rounded-full border-input bg-background transition-colors whitespace-nowrap items-center justify-center overflow-hidden font-medium shadow-sm text-sm w-9 h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground border"
                 data-phx-id="m48-phx-GAPTpMFHc9kS4XZh"
               >
-                <%= if @current_user do %>
+                <%= if @current_user && @current_user.avatar_url do %>
                   <img
                     src={@current_user.avatar_url}
                     width="36"
                     height="36"
-                    alt="Avatar"
+                    alt={@current_user.name}
                     class="overflow-hidden rounded-full"
                   />
                 <% else %>
@@ -497,15 +498,15 @@ defmodule AlgoraWeb.DevLive do
             </div>
           </div>
         </header>
-        <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-          <div class="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+        <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 lg:grid-cols-3 xl:grid-cols-3">
+          <div class="grid auto-rows-max items-start gap-4 lg:col-span-2">
             <div class="grid gap-4 sm:grid-cols-2">
               <div
                 class="rounded-xl bg-card text-card-foreground shadow sm:col-span-2 border"
                 data-phx-id="m57-phx-GAPTpMFHc9kS4XZh"
               >
                 <div class="flex p-6 pb-3 flex-col space-y-1.5">
-                  <div class="flex justify-between items-start gap-8">
+                  <div class="flex justify-between items-start gap-4">
                     <div class="flex-1">
                       <h3 class="tracking-tight font-semibold leading-none text-2xl mb-4">
                         <%= @project.title %>
@@ -528,14 +529,16 @@ defmodule AlgoraWeb.DevLive do
                         </div>
                       </div>
                     </div>
-                    <div class="text-right">
-                      <div class="text-primary font-semibold font-display text-3xl">
-                        <%= Money.format!(@project.hourly_rate, "USD") %>/hour
+                    <%= if @project[:hourly_rate] do %>
+                      <div class="text-right">
+                        <div class="text-primary font-semibold font-display text-3xl">
+                          <%= Money.format!(@project.hourly_rate, "USD") %>/hour
+                        </div>
+                        <div class="text-sm text-muted-foreground">
+                          Hourly Rate
+                        </div>
                       </div>
-                      <div class="text-sm text-muted-foreground">
-                        Hourly Rate
-                      </div>
-                    </div>
+                    <% end %>
                   </div>
                 </div>
               </div>
@@ -549,7 +552,7 @@ defmodule AlgoraWeb.DevLive do
                     <h3 class="font-medium">Project Description</h3>
                   </div>
                   <p class="text-sm text-muted-foreground">
-                    Add details about requirements, timeline, and expectations.
+                    Add details on requirements, timeline, and expectations.
                   </p>
                   <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
                     Add Description
@@ -580,7 +583,7 @@ defmodule AlgoraWeb.DevLive do
               phx-mounted="[[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-state=active]&quot;}],[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;active&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-target=week]&quot;}],[&quot;hide&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content:not([value=week])&quot;}],[&quot;show&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content[value=week]&quot;}]]"
               data-phx-id="m77-phx-GAPTpMFHc9kS4XZh"
             >
-              <div class="flex items-center">
+              <%!-- <div class="mb-2 flex items-center">
                 <div
                   class="inline-flex p-1 rounded-md bg-muted text-muted-foreground items-center justify-center h-10"
                   data-phx-id="m78-phx-GAPTpMFHc9kS4XZh"
@@ -640,9 +643,9 @@ defmodule AlgoraWeb.DevLive do
                     <span class="sr-only sm:not-sr-only"> Export </span>
                   </button>
                 </div>
-              </div>
+              </div> --%>
               <div
-                class="mt-2 ring-offset-background focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 tabs-content"
+                class="ring-offset-background focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 tabs-content"
                 value="week"
                 data-phx-id="m93-phx-GAPTpMFHc9kS4XZh"
               >
@@ -689,36 +692,55 @@ defmodule AlgoraWeb.DevLive do
                         </tr>
                       </thead>
                       <tbody class="[&_tr:last-child]:border-0">
-                        <%= for bounty <- @bounties do %>
-                          <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
-                            <td class="p-4 align-middle">
-                              <div class="font-medium"><%= bounty.task.title %></div>
-                              <div class="hidden text-sm text-muted-foreground md:inline">
-                                <%= bounty.task.owner %>/<%= bounty.task.repo %> #<%= bounty.task.number %>
+                        <%= if @bounties == [] do %>
+                          <tr>
+                            <td colspan="5" class="p-8">
+                              <div class="flex flex-col items-center text-center space-y-3">
+                                <div class="rounded-full bg-primary/10 p-3">
+                                  <.icon name="tabler-plus" class="w-6 h-6 text-primary" />
+                                </div>
+                                <h3 class="font-semibold text-lg">No Bounties Yet</h3>
+                                <p class="text-sm text-muted-foreground max-w-sm">
+                                  Create your first bounty to start attracting developers to your project.
+                                </p>
+                                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                                  <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Add Bounty
+                                </button>
                               </div>
-                            </td>
-                            <td class="hidden p-4 align-middle sm:table-cell">
-                              <div class="flex items-center gap-2">
-                                <img src={bounty.owner.avatar_url} class="h-6 w-6 rounded-full" />
-                                <%= bounty.owner.name %>
-                              </div>
-                            </td>
-                            <td class="hidden p-4 align-middle sm:table-cell">
-                              <div class="flex flex-wrap gap-1">
-                                <%= for tech <- bounty.tech_stack || [] do %>
-                                  <div class="inline-flex px-2.5 py-0.5 rounded-full border-transparent bg-secondary text-secondary-foreground text-xs">
-                                    <%= tech %>
-                                  </div>
-                                <% end %>
-                              </div>
-                            </td>
-                            <td class="hidden p-4 align-middle md:table-cell">
-                              <%= Calendar.strftime(bounty.inserted_at, "%Y-%m-%d") %>
-                            </td>
-                            <td class="p-4 text-right align-middle">
-                              <%= Money.format!(bounty.amount, bounty.currency) %>
                             </td>
                           </tr>
+                        <% else %>
+                          <%= for bounty <- @bounties do %>
+                            <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
+                              <td class="p-4 align-middle">
+                                <div class="font-medium"><%= bounty.task.title %></div>
+                                <div class="hidden text-sm text-muted-foreground md:inline">
+                                  <%= bounty.task.owner %>/<%= bounty.task.repo %> #<%= bounty.task.number %>
+                                </div>
+                              </td>
+                              <td class="hidden p-4 align-middle sm:table-cell">
+                                <div class="flex items-center gap-2">
+                                  <img src={bounty.owner.avatar_url} class="h-6 w-6 rounded-full" />
+                                  <%= bounty.owner.name %>
+                                </div>
+                              </td>
+                              <td class="hidden p-4 align-middle sm:table-cell">
+                                <div class="flex flex-wrap gap-1">
+                                  <%= for tech <- bounty.tech_stack || [] do %>
+                                    <div class="inline-flex px-2.5 py-0.5 rounded-full border-transparent bg-secondary text-secondary-foreground text-xs">
+                                      <%= tech %>
+                                    </div>
+                                  <% end %>
+                                </div>
+                              </td>
+                              <td class="hidden p-4 align-middle md:table-cell">
+                                <%= Calendar.strftime(bounty.inserted_at, "%Y-%m-%d") %>
+                              </td>
+                              <td class="p-4 text-right align-middle">
+                                <%= Money.format!(bounty.amount, bounty.currency) %>
+                              </td>
+                            </tr>
+                          <% end %>
                         <% end %>
                       </tbody>
                     </table>
@@ -750,15 +772,13 @@ defmodule AlgoraWeb.DevLive do
               </div>
             </div>
 
-            <div class="rounded-xl bg-card text-card-foreground shadow border">
-              <div class="p-6">
-                <h2 class="tracking-tight font-semibold leading-none text-lg mb-4">
-                  Matching Developers
-                </h2>
+            <%= if @matching_devs != [] do %>
+              <div class="rounded-xl bg-card text-card-foreground shadow border">
+                <div class="p-6">
+                  <h2 class="tracking-tight font-semibold leading-none text-lg mb-4">
+                    Matching Developers
+                  </h2>
 
-                <%= if @matching_devs == [] do %>
-                  <p class="text-muted-foreground">No matching developers found</p>
-                <% else %>
                   <div class="space-y-4">
                     <%= for dev <- @matching_devs do %>
                       <div class="flex items-center gap-4 p-4 rounded-lg bg-accent/50">
@@ -792,9 +812,9 @@ defmodule AlgoraWeb.DevLive do
                       </div>
                     <% end %>
                   </div>
-                <% end %>
+                </div>
               </div>
-            </div>
+            <% end %>
           </div>
         </main>
       </div>

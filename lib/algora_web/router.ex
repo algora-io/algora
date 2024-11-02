@@ -84,6 +84,8 @@ defmodule AlgoraWeb.Router do
     live "/companies", CompaniesLive, :index
     live "/developers", DevelopersLive, :index
 
+    live "/pricing", PricingLive
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

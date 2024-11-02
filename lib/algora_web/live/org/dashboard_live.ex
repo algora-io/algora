@@ -13,7 +13,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:ok,
      socket
-     |> assign(:onboarding_completed?, false)
+     |> assign(:onboarding_completed?, true)
      |> assign(:stats, stats)
      |> assign(:recent_bounties, recent_bounties)
      |> assign(:recent_activities, recent_activities)
@@ -36,6 +36,41 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def dashboard_onboarded(assigns) do
     ~H"""
     <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8">
+      <div class="p-6 relative rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 h-full">
+        <h2 class="text-lg font-semibold mb-4">Create New Bounty</h2>
+        <.form for={@new_bounty_form} phx-submit="create_bounty" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <.label for="github_issue_url">GitHub Issue URL</.label>
+              <.input
+                type="url"
+                field={@new_bounty_form[:github_issue_url]}
+                placeholder="https://github.com/owner/repo/issues/123"
+                required
+                class="w-full"
+              />
+            </div>
+            <div>
+              <.label for="amount">Bounty Amount (USD)</.label>
+              <.input
+                type="number"
+                field={@new_bounty_form[:amount]}
+                min="1"
+                step="0.01"
+                placeholder="100"
+                required
+                class="w-full"
+              />
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <.button type="submit" phx-disable-with="Creating...">
+              <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Create Bounty
+            </.button>
+          </div>
+        </.form>
+      </div>
+
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <.stat_card
           title="Open Bounties"

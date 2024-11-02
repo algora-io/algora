@@ -31,6 +31,7 @@ defmodule AlgoraWeb.PricingLive do
       :developers,
       :hourly_rate,
       :hours_per_week,
+      :annual_tc,
       :platform_fee,
       :traditional_cost,
       :algora_cost,
@@ -74,14 +75,66 @@ defmodule AlgoraWeb.PricingLive do
   end
 
   def handle_event("calculate_roi", %{"roi" => params}, socket) do
+    params = calculate_missing_rate_field(params)
     estimate = calculate_roi_estimate(params)
     {:noreply, assign(socket, roi_estimate: estimate)}
+  end
+
+  defp calculate_missing_rate_field(params) do
+    hours_per_week = params["hours_per_week"] |> to_string() |> String.trim()
+    hourly_rate = params["hourly_rate"] |> to_string() |> String.trim()
+    annual_tc = params["annual_tc"] |> to_string() |> String.trim()
+
+    # Convert empty strings to nil for clearer logic
+    hours_per_week = if hours_per_week == "", do: nil, else: String.to_integer(hours_per_week)
+    hourly_rate = if hourly_rate == "", do: nil, else: String.to_integer(hourly_rate)
+    annual_tc = if annual_tc == "", do: nil, else: String.to_integer(annual_tc)
+
+    cond do
+      # Case 1: Annual TC and Hours/Week provided - calculate Hourly Rate
+      is_nil(hourly_rate) && not is_nil(hours_per_week) && not is_nil(annual_tc) ->
+        calculated_rate = div(annual_tc, hours_per_week * 52)
+
+        %{
+          "developers" => params["developers"],
+          "hourly_rate" => to_string(calculated_rate),
+          "hours_per_week" => to_string(hours_per_week),
+          "annual_tc" => to_string(annual_tc)
+        }
+
+      # Case 2: Annual TC and Hourly Rate provided - calculate Hours/Week
+      is_nil(hours_per_week) && not is_nil(hourly_rate) && not is_nil(annual_tc) ->
+        calculated_hours = div(annual_tc, hourly_rate * 52)
+
+        %{
+          "developers" => params["developers"],
+          "hourly_rate" => to_string(hourly_rate),
+          "hours_per_week" => to_string(calculated_hours),
+          "annual_tc" => to_string(annual_tc)
+        }
+
+      # Case 3: Hours/Week and Hourly Rate provided - calculate Annual TC
+      is_nil(annual_tc) && not is_nil(hourly_rate) && not is_nil(hours_per_week) ->
+        calculated_tc = hourly_rate * hours_per_week * 52
+
+        %{
+          "developers" => params["developers"],
+          "hourly_rate" => to_string(hourly_rate),
+          "hours_per_week" => to_string(hours_per_week),
+          "annual_tc" => to_string(calculated_tc)
+        }
+
+      # Default case: return original params if we don't have enough information
+      true ->
+        params
+    end
   end
 
   defp calculate_roi_estimate(params) do
     developers = String.to_integer(params["developers"])
     hourly_rate = String.to_integer(params["hourly_rate"])
     hours_per_week = String.to_integer(params["hours_per_week"])
+    annual_tc = hourly_rate * hours_per_week * 52
 
     # Traditional hiring costs (recruitment fees, overhead, etc.)
     # 30% overhead
@@ -98,6 +151,7 @@ defmodule AlgoraWeb.PricingLive do
       developers: developers,
       hourly_rate: hourly_rate,
       hours_per_week: hours_per_week,
+      annual_tc: annual_tc,
       platform_fee: platform_fee,
       traditional_cost: traditional_cost,
       algora_cost: algora_cost,
@@ -312,33 +366,69 @@ defmodule AlgoraWeb.PricingLive do
             <input
               type="number"
               name="roi[developers]"
-              value="3"
+              value={@roi_estimate.developers}
               min="1"
               class="w-full rounded-md border border-input bg-background px-3 py-2"
             />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-muted-foreground">Average Hourly Rate ($)</label>
+            <label class="text-sm font-medium text-muted-foreground">
+              Average Hourly Rate ($)
+              <.icon
+                name="tabler-info-circle"
+                class="inline-block w-4 h-4 ml-1 text-muted-foreground"
+              />
+            </label>
             <input
               type="number"
               name="roi[hourly_rate]"
-              value="75"
+              value={@roi_estimate.hourly_rate}
               min="1"
               class="w-full rounded-md border border-input bg-background px-3 py-2"
             />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium text-muted-foreground">Hours per Week</label>
+            <label class="text-sm font-medium text-muted-foreground">
+              Hours per Week
+              <.icon
+                name="tabler-info-circle"
+                class="inline-block w-4 h-4 ml-1 text-muted-foreground"
+              />
+            </label>
             <input
               type="number"
               name="roi[hours_per_week]"
-              value="40"
+              value={@roi_estimate.hours_per_week}
+              min="1"
+              max="168"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-muted-foreground">
+              Annual Total Compensation ($)
+              <.icon
+                name="tabler-info-circle"
+                class="inline-block w-4 h-4 ml-1 text-muted-foreground"
+              />
+            </label>
+            <input
+              type="number"
+              name="roi[annual_tc]"
+              value={@roi_estimate.annual_tc}
               min="1"
               class="w-full rounded-md border border-input bg-background px-3 py-2"
             />
           </div>
+        </div>
+
+        <div class="text-sm text-muted-foreground mt-2">
+          <p>
+            Update any two fields of Hourly Rate, Hours per Week, or Annual TC - the third will automatically calculate.
+          </p>
         </div>
       </form>
 
@@ -362,6 +452,14 @@ defmodule AlgoraWeb.PricingLive do
                     ) %>
                   </span>
                 </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Including 30% overhead</span>
+                  <span class="font-mono text-muted-foreground">
+                    $<%= Number.Delimit.number_to_delimited(
+                      trunc(@roi_estimate.traditional_cost * 12 * 0.3)
+                    ) %>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -377,6 +475,14 @@ defmodule AlgoraWeb.PricingLive do
                 <div class="flex justify-between">
                   <span class="text-muted-foreground">Platform Fee</span>
                   <span class="font-mono"><%= @roi_estimate.platform_fee * 100 %>%</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Platform Fee Amount</span>
+                  <span class="font-mono text-muted-foreground">
+                    $<%= Number.Delimit.number_to_delimited(
+                      trunc(@roi_estimate.algora_cost * @roi_estimate.platform_fee)
+                    ) %>
+                  </span>
                 </div>
               </div>
             </div>
@@ -460,29 +566,6 @@ defmodule AlgoraWeb.PricingLive do
           %Feature{name: "Custom job board"},
           %Feature{name: "ATS integration"}
         ]
-      }
-    ]
-  end
-
-  defp get_compute_addons do
-    [
-      %ComputeOption{
-        name: "Micro",
-        cpu: "2 vCPU",
-        memory: "1 GB",
-        price: 5
-      },
-      %ComputeOption{
-        name: "Small",
-        cpu: "4 vCPU",
-        memory: "2 GB",
-        price: 10
-      },
-      %ComputeOption{
-        name: "Medium",
-        cpu: "8 vCPU",
-        memory: "4 GB",
-        price: 20
       }
     ]
   end

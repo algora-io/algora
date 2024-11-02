@@ -40,25 +40,30 @@ defmodule AlgoraWeb.Org.Nav do
       %{
         title: "Overview",
         items: [
-          %{href: "/org/#{org_handle}", tab: :dashboard, icon: "tabler-home", label: "Dashboard"},
+          %{
+            href: "/org/#{org_handle}",
+            tab: :dashboard,
+            icon: "tabler-flower",
+            label: "Dashboard"
+          },
           %{
             href: "/org/#{org_handle}/bounties",
             tab: :bounties,
             icon: "tabler-diamond",
             label: "Bounties"
           },
-          %{
-            href: "/org/#{org_handle}/projects",
-            tab: :projects,
-            icon: "tabler-folder",
-            label: "Projects"
-          },
           %{href: "/org/#{org_handle}/jobs", tab: :jobs, icon: "tabler-briefcase", label: "Jobs"},
           %{
+            href: "/org/#{org_handle}/team",
+            tab: :team,
+            icon: "tabler-users",
+            label: "Team"
+          },
+          %{
             href: "/org/#{org_handle}/community",
-            tab: :community,
-            icon: "tabler-world",
-            label: "Community"
+            tab: :analytics,
+            icon: "tabler-chart-bar",
+            label: "Analytics"
           },
           %{
             href: "/org/#{org_handle}/settings",

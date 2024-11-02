@@ -1121,6 +1121,12 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  def icon(%{name: "algora-logo"} = assigns) do
+    ~H"""
+    <AlgoraWeb.Components.Logos.algora class={@class} />
+    """
+  end
+
   def pwa_install_prompt(assigns) do
     ~H"""
     <div

@@ -38,6 +38,7 @@ defmodule AlgoraWeb.PricingLive do
       :traditional_total,
       :algora_cost,
       :algora_fee,
+      :monthly_subscription,
       :algora_total,
       :savings
     ]
@@ -143,16 +144,17 @@ defmodule AlgoraWeb.PricingLive do
     # Base monthly cost (same for both traditional and Algora)
     monthly_base_cost = developers * hourly_rate * hours_per_week * 4.3
 
-    # Traditional hiring costs (30% overhead)
+    # Traditional hiring costs (35% overhead - industry average per SBA)
     traditional_cost = monthly_base_cost
-    traditional_overhead = traditional_cost * 0.3
+    traditional_overhead = traditional_cost * 0.35
     traditional_total = traditional_cost + traditional_overhead
 
-    # Algora cost with platform fee (15%)
+    # Algora costs
     platform_fee = 0.15
+    monthly_subscription = 599
     algora_cost = monthly_base_cost
     algora_fee = algora_cost * platform_fee
-    algora_total = algora_cost + algora_fee
+    algora_total = algora_cost + algora_fee + monthly_subscription
 
     yearly_savings = (traditional_total - algora_total) * 12
 
@@ -167,6 +169,7 @@ defmodule AlgoraWeb.PricingLive do
       traditional_total: traditional_total,
       algora_cost: algora_cost,
       algora_fee: algora_fee,
+      monthly_subscription: monthly_subscription,
       algora_total: algora_total,
       savings: yearly_savings
     }
@@ -458,7 +461,7 @@ defmodule AlgoraWeb.PricingLive do
                   </span>
                 </div>
                 <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Overhead (30%)</span>
+                  <span class="text-muted-foreground">Overhead (35%)</span>
                   <span class="font-mono text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead)) %>
                   </span>
@@ -491,10 +494,16 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-muted-foreground">
-                    Platform Fee (<%= @roi_estimate.platform_fee * 100 %>%)
+                    Platform Fee (<%= trunc(@roi_estimate.platform_fee * 100) %>%)
                   </span>
                   <span class="font-mono text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_fee)) %>
+                  </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Monthly Subscription</span>
+                  <span class="font-mono text-muted-foreground">
+                    $<%= Number.Delimit.number_to_delimited(@roi_estimate.monthly_subscription) %>
                   </span>
                 </div>
                 <div class="flex justify-between font-medium border-t pt-2">
@@ -521,7 +530,7 @@ defmodule AlgoraWeb.PricingLive do
               </span>
             </div>
             <p class="mt-2 text-sm text-muted-foreground">
-              Savings include reduced recruitment costs, overhead, and administrative expenses.
+              Savings include reduced recruitment costs, social security taxes, and administrative expenses.
             </p>
           </div>
         </div>

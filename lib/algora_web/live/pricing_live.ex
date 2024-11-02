@@ -26,7 +26,26 @@ defmodule AlgoraWeb.PricingLive do
     defstruct [:id, :question, :answer]
   end
 
+  defmodule ROIEstimate do
+    defstruct [
+      :developers,
+      :hourly_rate,
+      :hours_per_week,
+      :platform_fee,
+      :traditional_cost,
+      :algora_cost,
+      :savings
+    ]
+  end
+
   def mount(_params, _session, socket) do
+    initial_estimate =
+      calculate_roi_estimate(%{
+        "developers" => "3",
+        "hourly_rate" => "75",
+        "hours_per_week" => "40"
+      })
+
     socket =
       assign(socket,
         page_title: "Pricing",
@@ -34,7 +53,8 @@ defmodule AlgoraWeb.PricingLive do
         faq_items: get_faq_items(),
         testimonials: get_testimonials(),
         page_scroll: 0,
-        active_faq: nil
+        active_faq: nil,
+        roi_estimate: initial_estimate
       )
 
     {:ok, socket}
@@ -51,6 +71,38 @@ defmodule AlgoraWeb.PricingLive do
 
   def handle_event("select_compute", %{"option" => option}, socket) do
     {:noreply, assign(socket, selected_compute_option: option)}
+  end
+
+  def handle_event("calculate_roi", %{"roi" => params}, socket) do
+    estimate = calculate_roi_estimate(params)
+    {:noreply, assign(socket, roi_estimate: estimate)}
+  end
+
+  defp calculate_roi_estimate(params) do
+    developers = String.to_integer(params["developers"])
+    hourly_rate = String.to_integer(params["hourly_rate"])
+    hours_per_week = String.to_integer(params["hours_per_week"])
+
+    # Traditional hiring costs (recruitment fees, overhead, etc.)
+    # 30% overhead
+    traditional_cost = developers * hourly_rate * hours_per_week * 4.3 * 1.3
+
+    # Algora cost with platform fee
+    # 10% for larger teams
+    platform_fee = if developers >= 5, do: 0.10, else: 0.15
+    algora_cost = developers * hourly_rate * hours_per_week * 4.3 * (1 + platform_fee)
+
+    yearly_savings = (traditional_cost - algora_cost) * 12
+
+    %ROIEstimate{
+      developers: developers,
+      hourly_rate: hourly_rate,
+      hours_per_week: hours_per_week,
+      platform_fee: platform_fee,
+      traditional_cost: traditional_cost,
+      algora_cost: algora_cost,
+      savings: yearly_savings
+    }
   end
 
   # Component: Pricing Card
@@ -247,6 +299,106 @@ defmodule AlgoraWeb.PricingLive do
     """
   end
 
+  # New ROI Calculator Component
+  def roi_calculator(assigns) do
+    ~H"""
+    <div class="max-w-2xl mx-auto bg-card rounded-xl p-6 border mt-16">
+      <h3 class="text-2xl font-bold text-card-foreground mb-6">Calculate Your Savings</h3>
+
+      <form phx-change="calculate_roi" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-muted-foreground">Number of Developers</label>
+            <input
+              type="number"
+              name="roi[developers]"
+              value="3"
+              min="1"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-muted-foreground">Average Hourly Rate ($)</label>
+            <input
+              type="number"
+              name="roi[hourly_rate]"
+              value="75"
+              min="1"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-muted-foreground">Hours per Week</label>
+            <input
+              type="number"
+              name="roi[hours_per_week]"
+              value="40"
+              min="1"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+            />
+          </div>
+        </div>
+      </form>
+
+      <%= if @roi_estimate do %>
+        <div class="mt-8 border-t pt-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+              <h4 class="font-medium text-card-foreground">Traditional Hiring</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Monthly Cost</span>
+                  <span class="font-mono">
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_cost)) %>
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Yearly Cost</span>
+                  <span class="font-mono">
+                    $<%= Number.Delimit.number_to_delimited(
+                      trunc(@roi_estimate.traditional_cost * 12)
+                    ) %>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <h4 class="font-medium text-card-foreground">With Algora</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Monthly Cost</span>
+                  <span class="font-mono">
+                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_cost)) %>
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Platform Fee</span>
+                  <span class="font-mono"><%= @roi_estimate.platform_fee * 100 %>%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-6 border-t">
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-medium text-card-foreground">Estimated Yearly Savings</span>
+              <span class="text-2xl font-bold text-primary font-mono">
+                $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.savings)) %>
+              </span>
+            </div>
+            <p class="mt-2 text-sm text-muted-foreground">
+              Savings include reduced recruitment costs, overhead, and administrative expenses.
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
   # Data functions
   defp get_plans do
     [
@@ -423,6 +575,8 @@ defmodule AlgoraWeb.PricingLive do
               <.pricing_card plan={plan} />
             <% end %>
           </div>
+
+          <.roi_calculator roi_estimate={@roi_estimate} />
         </div>
 
         <div class="py-24 sm:py-32">

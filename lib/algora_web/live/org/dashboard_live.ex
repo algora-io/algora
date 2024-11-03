@@ -369,7 +369,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         phx-click="close_drawer"
       >
         <div
-          class={"fixed inset-x-0 bottom-0 z-50 h-[72vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
+          class={"fixed inset-x-0 bottom-0 z-50 h-[80vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
           phx-click-away="close_drawer"
         >
           <%= if @selected_dev do %>
@@ -406,7 +406,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     <!-- Stats Grid -->
                     <div>
                       <h5 class="text-sm font-medium mb-3 opacity-0">Stats</h5>
-                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <div class="p-4 rounded-lg bg-card border border-border">
                           <div class="flex items-center gap-2 mb-2">
                             <div class="text-2xl font-bold font-display">
@@ -435,20 +435,19 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     </div>
                     <!-- Message -->
                     <div class="p-px">
-                      <h5 class="text-sm font-medium mb-2">Note</h5>
                       <div class="rounded-lg bg-card border border-border">
                         <div class="px-4 py-2 border-b border-border">
                           <div class="flex items-center gap-2 text-sm text-muted-foreground">
                             <.icon name="tabler-message" class="w-4 h-4" />
                             <span>
-                              @<%= @selected_dev.handle %> wrote to you <%= Algora.Util.time_ago(
+                              <%= @selected_dev.handle %> wrote to you <%= Algora.Util.time_ago(
                                 DateTime.utc_now()
                                 |> DateTime.add(-3, :day)
                               ) %>
                             </span>
                           </div>
                         </div>
-                        <div class="px-4 leading-5 text-base whitespace-pre-line min-h-[9rem]">
+                        <div class="px-4 leading-5 text-base whitespace-pre-line min-h-[12rem]">
                           <%= @selected_dev.message %>
                         </div>
                       </div>
@@ -457,7 +456,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <!-- Right Column -->
                   <div>
                     <h5 class="text-sm font-medium mb-3">Past Reviews</h5>
-                    <div class="space-y-3">
+                    <div class="space-y-6">
                       <%= for review <- [
                         %{stars: 5, comment: "Exceptional problem-solving skills and great communication throughout the project.", company: "TechCorp Inc."},
                         %{stars: 4, comment: "Delivered high-quality work ahead of schedule. Would definitely work with again.", company: "StartupXYZ"},

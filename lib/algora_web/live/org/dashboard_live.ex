@@ -410,7 +410,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="p-4 rounded-lg bg-card border border-border">
                           <div class="flex items-center gap-2 mb-2">
-                            <.icon name="tabler-cash-register" class="w-8 h-8 text-muted-foreground" />
                             <div class="text-2xl font-bold font-display">
                               <%= Money.format!(@selected_dev.amount, "USD") %>
                             </div>
@@ -419,7 +418,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         </div>
                         <div class="p-4 rounded-lg bg-card border border-border">
                           <div class="flex items-center gap-2 mb-2">
-                            <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
                             <div class="text-2xl font-bold font-display">
                               <%= @selected_dev.bounties %>
                             </div>
@@ -428,7 +426,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         </div>
                         <div class="p-4 rounded-lg bg-card border border-border">
                           <div class="flex items-center gap-2 mb-2">
-                            <.icon name="tabler-rocket" class="w-8 h-8 text-muted-foreground" />
                             <div class="text-2xl font-bold font-display">
                               <%= @selected_dev.projects %>
                             </div>

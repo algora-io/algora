@@ -42,7 +42,7 @@
           </button>
         </div>
         <!-- Sidebar component -->
-        <div class="flex grow flex-col gap-y-5 overflow-y-auto px-6 ring-1 ring-white/5 scrollbar-thin border-r-2 border-gray-700/50 bg-gradient-to-b from-white/[5%] to-white/[2.5%]">
+        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-background px-6 ring-1 ring-border/10 scrollbar-thin">
           <div class="flex h-16 shrink-0 items-center">
             <.wordmark class="h-8 w-auto" />
           </div>
@@ -187,7 +187,7 @@
     </div>
   </div> --%>
   <!-- Static sidebar for desktop -->
-  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-gray-900 lg:pb-4">
+  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
     <div class="flex h-16 shrink-0 items-center justify-center">
       <.logo class="h-8 w-auto text-white" />
     </div>
@@ -327,12 +327,8 @@
       <% end %>
     </div>
 
-    <div>
-      <div class="fixed inset-0 z-0 h-full w-full bg-gradient-to-br from-gray-950 to-black" />
-      <div class="fixed inset-0 z-0 h-full w-full bg-indigo-950/25" />
-      <div class="relative">
-        <%= @inner_content %>
-      </div>
+    <div class="relative">
+      <%= @inner_content %>
     </div>
   </div>
 </div>

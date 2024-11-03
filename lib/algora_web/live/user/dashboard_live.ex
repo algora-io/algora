@@ -21,156 +21,112 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def render(assigns) do
     ~H"""
-    <main class="lg:pr-96">
+    <div class="flex-1 lg:pr-96">
       <div class="p-4 pt-6 sm:p-6 md:p-8">
-        <div class="max-w-4xl mx-auto">
-          <header class="flex items-center justify-between">
-            <h2 class="font-display text-2xl/7 font-semibold text-white">Bounties for you</h2>
-            <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
-          </header>
-          <div
-            data-state="active"
-            data-orientation="horizontal"
-            role="tabpanel"
-            aria-labelledby="radix-:r0:-trigger-bounties"
-            id="radix-:r0:-content-bounties"
-            tabindex="0"
-            class="mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:ring-offset-indigo-600 dark:focus-visible:ring-gray-800"
-            style="animation-duration: 0s;"
-          >
-            <div class="w-full">
-              <div>
-                <div class="mt-4">
-                  <input
-                    id="tech-input"
-                    type="text"
-                    placeholder="Elixir, Phoenix, PostgreSQL, etc."
-                    phx-keydown="handle_tech_input"
-                    phx-debounce="200"
-                    phx-hook="ClearInput"
-                    class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 phx-keydown-loading:opacity-50 phx-keydown-loading:cursor-wait"
-                  />
-                </div>
-
-                <div class="flex flex-wrap gap-3 mt-4">
-                  <%= for tech <- @tech_stack do %>
-                    <div class={[
-                      "bg-indigo-900 text-indigo-200 rounded-lg px-2.5 py-1.5 text-sm font-semibold flex items-center",
-                      "has-[.phx-click-loading]:opacity-50 has-[.phx-click-loading]:animate-pulse has-[.phx-click-loading]:cursor-wait"
-                    ]}>
-                      <%= tech %>
-                      <button
-                        phx-click="remove_tech"
-                        phx-value-tech={tech}
-                        class="ml-2 text-indigo-300 hover:text-indigo-100 phx-click-loading:pointer-events-none"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  <% end %>
-                </div>
+        <div class="space-y-8">
+          <!-- Bounties Section -->
+          <div class="group/card relative h-full rounded-lg border bg-card text-card-foreground">
+            <div class="flex justify-between p-6 pb-4">
+              <div class="flex flex-col space-y-1.5">
+                <h2 class="text-2xl font-semibold leading-none tracking-tight">Bounties for you</h2>
+                <p class="text-sm text-muted-foreground">Based on your tech stack</p>
               </div>
-              <div class="scrollbar-thin w-full overflow-auto">
+              <div>
+                <.link
+                  class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
+                  href="#"
+                >
+                  View all
+                </.link>
+              </div>
+            </div>
+            <!-- Tech Stack Input -->
+            <div class="px-6">
+              <div class="mt-4">
+                <.input
+                  id="tech-input"
+                  name="tech-input"
+                  value=""
+                  type="text"
+                  placeholder="Elixir, Phoenix, PostgreSQL, etc."
+                  phx-keydown="handle_tech_input"
+                  phx-debounce="200"
+                  phx-hook="ClearInput"
+                  class="w-full bg-background border-input"
+                />
+              </div>
+
+              <div class="flex flex-wrap gap-3 mt-4">
+                <%= for tech <- @tech_stack do %>
+                  <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
+                    <%= tech %>
+                    <button
+                      phx-click="remove_tech"
+                      phx-value-tech={tech}
+                      class="ml-2 text-success hover:text-success/80"
+                    >
+                      ×
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <!-- Bounties Table -->
+            <div class="p-6">
+              <div class="relative w-full overflow-auto">
                 <table class="w-full caption-bottom text-sm">
-                  <thead class="[&amp;_tr]:border-b hidden">
-                    <tr class="border-b transition-colors data-[state=selected]:bg-gray-100 dark:hover:bg-gray-800/50 dark:data-[state=selected]:bg-gray-800 hover:bg-transparent">
-                      <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 dark:text-gray-400 [&amp;:has([role=checkbox])]:pr-0">
-                      </th>
-                      <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 dark:text-gray-400 [&amp;:has([role=checkbox])]:pr-0 pl-[1rem] md:pl-[5.5rem]">
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="[&amp;_tr:last-child]:border-0">
+                  <tbody>
                     <%= for bounty <- @bounties do %>
-                      <tr class="border-b transition-colors data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800">
-                        <td class="p-4 pl-0 align-middle [&amp;:has([role=checkbox])]:pr-0 w-full py-6">
-                          <div class="relative flex w-full max-w-[calc(100vw-44px)] items-center gap-4">
-                            <a href={~p"/org/#{bounty.owner.handle}"}>
-                              <span class="relative shrink-0 overflow-hidden flex h-14 w-14 items-center justify-center rounded-xl">
+                      <tr class="border-b transition-colors hover:bg-muted/50">
+                        <td class="p-4 align-middle">
+                          <div class="flex items-center gap-4">
+                            <.link href={~p"/org/#{bounty.owner.handle}"}>
+                              <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
                                 <img
                                   class="aspect-square h-full w-full"
                                   alt={bounty.owner.name}
                                   src={bounty.owner.avatar_url}
                                 />
                               </span>
-                            </a>
-                            <div class="w-full truncate">
-                              <div class="flex items-center gap-1 whitespace-nowrap pt-px font-mono text-sm leading-none text-white/70 transition-colors md:text-base">
-                                <a
-                                  class="font-bold hover:text-white/80 hover:underline"
+                            </.link>
+
+                            <div class="flex flex-col gap-1">
+                              <div class="flex items-center gap-1 text-sm text-muted-foreground">
+                                <.link
                                   href={~p"/org/#{bounty.owner.handle}"}
+                                  class="font-semibold hover:underline"
                                 >
                                   <%= bounty.owner.name %>
-                                </a>
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  class="h-3 w-3 text-white/50 transition-colors"
-                                  aria-hidden="true"
+                                </.link>
+                                <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                                <.link
+                                  href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                                  class="hover:underline"
                                 >
-                                  <path d="M9 6l6 6l-6 6"></path>
-                                </svg>
-                                <a
-                                  class="group font-medium hover:text-white/80 hover:underline"
-                                  rel="noopener"
-                                  href="https://github.com/SigNoz/signoz/issues/6028"
-                                >
-                                  <span class="hidden md:inline"><%= bounty.task.owner %>/</span><%= bounty.task.repo %><span class="hidden text-white/40 group-hover:text-white/60 md:inline">#<%= bounty.task.number %></span>
-                                </a>
+                                  <%= bounty.task.repo %>#<%= bounty.task.number %>
+                                </.link>
                               </div>
-                              <a
-                                rel="noopener"
-                                class="group mt-1.5 flex max-w-[16rem] items-center gap-2 truncate whitespace-nowrap text-sm text-white/90 transition-colors hover:text-white md:-mt-0.5 md:max-w-2xl md:truncate md:text-base"
-                                href="https://github.com/SigNoz/signoz/issues/6028"
+
+                              <.link
+                                href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                                class="group flex items-center gap-2"
                               >
-                                <div>
-                                  <div class="font-display text-base font-semibold text-emerald-300/90 transition-colors group-hover:text-emerald-300 md:text-xl">
-                                    <%= Money.format!(bounty.amount, bounty.currency) %>
-                                  </div>
+                                <div class="font-display text-xl font-semibold text-success">
+                                  <%= Money.format!(bounty.amount, bounty.currency) %>
                                 </div>
-                                <div class="truncate group-hover:underline">
+                                <div class="text-foreground group-hover:underline">
                                   <%= bounty.task.title %>
                                 </div>
-                              </a>
-                              <ul class="mt-2 flex flex-wrap items-center gap-1.5 md:mt-0.5">
+                              </.link>
+
+                              <div class="flex flex-wrap gap-2">
                                 <%= for tag <- bounty.tech_stack do %>
-                                  <li class="flex text-sm leading-none tracking-wide transition-colors text-indigo-300/90 group-hover:text-indigo-300">
+                                  <span class="text-sm text-muted-foreground">
                                     #<%= tag %>
-                                  </li>
-                                <% end %>
-                              </ul>
-                            </div>
-                          </div>
-                        </td>
-                        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-                          <div class="flex flex-row-reverse justify-center">
-                            <%= if false do %>
-                              <.link rel="noopener" href={bounty.url}>
-                                <span class="relative shrink-0 overflow-hidden -ml-2 flex h-10 w-10 items-center justify-center rounded-full ring-4 ring-gray-800">
-                                  <span class="flex h-full w-full items-center justify-center dark:bg-gray-800 rounded-full bg-gray-800">
-                                    +3
                                   </span>
-                                </span>
-                              </.link>
-                            <% end %>
-                            <%= for attempter <- [] do %>
-                              <.link rel="noopener" href={attempter.url}>
-                                <span class="relative shrink-0 overflow-hidden -ml-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 ring-4 ring-gray-800">
-                                  <img
-                                    class="aspect-square h-full w-full"
-                                    alt={attempter.name}
-                                    src={attempter.avatar_url}
-                                  />
-                                </span>
-                              </.link>
-                            <% end %>
+                                <% end %>
+                              </div>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -180,48 +136,22 @@ defmodule AlgoraWeb.User.DashboardLive do
               </div>
             </div>
           </div>
-          <div
-            data-state="inactive"
-            data-orientation="horizontal"
-            role="tabpanel"
-            aria-labelledby="radix-:r0:-trigger-orgs"
-            hidden=""
-            id="radix-:r0:-content-orgs"
-            tabindex="0"
-            class="mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:ring-offset-indigo-600 dark:focus-visible:ring-gray-800"
-          >
-          </div>
-          <div
-            data-state="inactive"
-            data-orientation="horizontal"
-            role="tabpanel"
-            aria-labelledby="radix-:r0:-trigger-rewarded"
-            hidden=""
-            id="radix-:r0:-content-rewarded"
-            tabindex="0"
-            class="mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:ring-offset-indigo-600 dark:focus-visible:ring-gray-800"
-          >
-          </div>
-          <div
-            data-state="inactive"
-            data-orientation="horizontal"
-            role="tabpanel"
-            aria-labelledby="radix-:r0:-trigger-community"
-            hidden=""
-            id="radix-:r0:-content-community"
-            tabindex="0"
-            class="mt-2 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 dark:ring-offset-indigo-600 dark:focus-visible:ring-gray-800"
-          >
-          </div>
         </div>
       </div>
-    </main>
-    <!-- Activity feed -->
-    <aside class="bg-black/10 lg:fixed lg:bottom-0 lg:right-0 lg:top-16 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-white/5 p-4 pt-6 sm:p-6 md:p-8">
-      <header class="flex items-center justify-between">
-        <h2 class="font-display text-xl/7 font-semibold text-white">Achievements</h2>
-        <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
-      </header>
+    </div>
+    <!-- Activity Feed Sidebar -->
+    <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-muted/10 p-4 pt-6 lg:block sm:p-6 md:p-8">
+      <!-- Achievements Section -->
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
+        <.link
+          class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
+          href="#"
+        >
+          View all
+        </.link>
+      </div>
+
       <nav class="pt-4">
         <ol role="list" class="space-y-6">
           <%= for achievement <- @achievements do %>
@@ -236,24 +166,22 @@ defmodule AlgoraWeb.User.DashboardLive do
           <% end %>
         </ol>
       </nav>
+      <!-- Activity Feed Section -->
+      <div class="flex items-center justify-between pt-12">
+        <h2 class="text-xl font-semibold leading-none tracking-tight">Activity feed</h2>
+        <.link
+          class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
+          href="#"
+        >
+          View all
+        </.link>
+      </div>
 
-      <header class="flex items-center justify-between pt-12">
-        <h2 class="font-display text-xl/7 font-semibold text-white">Activity feed</h2>
-        <a href="#" class="text-sm/6 font-semibold text-indigo-400">View all</a>
-      </header>
       <ul class="pt-4">
         <%= for event <- @events do %>
           <li class="relative pb-8">
-            <div>
-              <div class="relative">
-                <span
-                  class="absolute -bottom-6 left-4 h-5 w-0.5 bg-gray-200 transition-opacity dark:bg-gray-600 opacity-100"
-                  aria-hidden="true"
-                >
-                </span>
-                <.event event={event} />
-              </div>
-            </div>
+            <span class="absolute left-4 -bottom-6 h-5 w-0.5 bg-border"></span>
+            <.event event={event} />
           </li>
         <% end %>
       </ul>
@@ -330,46 +258,27 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def achievement(%{achievement: %{status: :completed}} = assigns) do
     ~H"""
-    <a href="#" class="group">
-      <span class="flex items-start">
-        <span class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center">
-          <svg
-            class="h-full w-full text-emerald-400 group-hover:text-emerald-300"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-            data-slot="icon"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </span>
-        <span class="ml-3 text-sm font-medium text-emerald-400 group-hover:text-gray-300">
-          <%= @achievement.name %>
-        </span>
+    <.link href="#" class="group flex items-center gap-3">
+      <div class="flex h-5 w-5 items-center justify-center text-success">
+        <.icon name="tabler-circle-check-filled" class="h-5 w-5" />
+      </div>
+      <span class="text-sm font-medium text-success group-hover:text-muted">
+        <%= @achievement.name %>
       </span>
-    </a>
+    </.link>
     """
   end
 
   def achievement(%{achievement: %{status: :upcoming}} = assigns) do
     ~H"""
-    <a href="#" class="group">
-      <div class="flex items-start">
-        <div
-          class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center"
-          aria-hidden="true"
-        >
-          <div class="h-2 w-2 rounded-full bg-gray-600 group-hover:bg-gray-500"></div>
-        </div>
-        <p class="ml-3 text-sm font-medium text-gray-400 group-hover:text-gray-300">
-          <%= @achievement.name %>
-        </p>
+    <.link href="#" class="group flex items-center gap-3">
+      <div class="flex h-5 w-5 items-center justify-center">
+        <div class="h-2 w-2 rounded-full bg-muted-foreground group-hover:bg-muted"></div>
       </div>
-    </a>
+      <span class="text-sm font-medium text-muted-foreground group-hover:text-muted">
+        <%= @achievement.name %>
+      </span>
+    </.link>
     """
   end
 

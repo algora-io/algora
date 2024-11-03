@@ -2,6 +2,7 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.Accounts
   alias Algora.Money
+  import AlgoraWeb.Components.Globe
 
   @impl true
   def mount(_params, _session, socket) do
@@ -116,6 +117,9 @@ defmodule AlgoraWeb.HomeLive do
 
       <main>
         <div class="relative isolate">
+          <div class="absolute max-w-lg w-full top-6 right-[20vw]">
+            <.globe />
+          </div>
           <!-- Background pattern -->
           <div
             class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"

@@ -186,11 +186,11 @@ body {
     --accent-foreground: 255 0% 10%;
     --destructive: 0 50% 30%;
     --destructive-foreground: 255 0% 90%;
-    --success: 158 64% 52%;
+    --success: 161 93.5% 30.4%;
     --success-foreground: 0 0% 100%;
     --border: 255 20% 50%;
     --input: 255 20% 18%;
-    --ring: 255 57.5% 47.1%;
+    --ring: 161 93.5% 30.4%;
     --radius: 0.5rem;
   }
   .dark {
@@ -210,11 +210,11 @@ body {
     --accent-foreground: 255 0% 90%;
     --destructive: 0 50% 30%;
     --destructive-foreground: 255 0% 90%;
-    --success: 158 64% 52%;
+    --success: 161 93.5% 30.4%;
     --success-foreground: 0 0% 100%;
     --border: 255 20% 18%;
     --input: 255 20% 18%;
-    --ring: 255 57.5% 47.1%;
+    --ring: 161 93.5% 30.4%;
     --radius: 0.5rem;
   }
 

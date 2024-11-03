@@ -437,7 +437,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     <!-- Message -->
                     <div class="p-px">
                       <h5 class="text-sm font-medium mb-2">Message</h5>
-                      <div class="rounded-lg bg-card px-4 text-sm ring-1 ring-ring min-h-[12rem] whitespace-pre-line">
+                      <div class="rounded-lg bg-card px-4 text-base border border-border min-h-[12rem] whitespace-pre-line">
                         <%= @selected_dev.message %>
                       </div>
                     </div>
@@ -470,8 +470,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </div>
               <!-- Drawer Footer -->
               <div class="mt-auto">
-                <div class="flex gap-6">
-                  <.button phx-click="close_drawer" variant="outline" class="flex-1" size="lg">
+                <div class="grid grid-cols-2 gap-6">
+                  <.button phx-click="close_drawer" variant="hover:destructive" size="lg">
                     Decline
                   </.button>
                   <.button

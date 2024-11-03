@@ -460,7 +460,7 @@ defmodule AlgoraWeb.PricingLive do
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead)) %>
                   </span>
                 </div>
-                <div class="pt-2 mt-10 flex justify-between border-t">
+                <div class="pt-2 mt-[4.5rem] flex justify-between border-t">
                   <span class="text-muted-foreground font-medium">Total Monthly Cost</span>
                   <span class="font-display text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total)) %>
@@ -492,6 +492,14 @@ defmodule AlgoraWeb.PricingLive do
                   </span>
                   <span class="font-display text-muted-foreground">
                     $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_fee)) %>
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">
+                    Placement Fee (0%)
+                  </span>
+                  <span class="font-display text-muted-foreground">
+                    $0.00
                   </span>
                 </div>
                 <div class="flex justify-between">
@@ -555,7 +563,7 @@ defmodule AlgoraWeb.PricingLive do
       },
       %Plan{
         name: "Startup",
-        description: "For growing companies with larger development needs",
+        description: "For growing companies",
         price: 599,
         cta_text: "Upgrade now",
         popular: true,

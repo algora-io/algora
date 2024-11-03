@@ -369,8 +369,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         phx-click="close_drawer"
       >
         <div
-          class={"fixed inset-x-0 bottom-0 z-50 h-[80vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
-          phx-click-away="close_drawer"
+          class={"fixed inset-x-0 bottom-0 z-50 h-[80vh] rounded-t-xl bg-background border transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
+          onclick="event.stopPropagation()"
         >
           <%= if @selected_dev do %>
             <div class="flex flex-col relative h-full p-6">

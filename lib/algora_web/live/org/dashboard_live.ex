@@ -365,8 +365,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.bounties_card current_org={@current_org} bounties={@recent_bounties} />
       </div>
 
-      <div class={"fixed inset-0 bg-black/50 z-50 transition-opacity #{if @show_dev_drawer, do: "opacity-100", else: "opacity-0 pointer-events-none"}"}>
-        <div class={"fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}>
+      <div
+        class={"fixed inset-0 bg-black/50 z-50 transition-opacity #{if @show_dev_drawer, do: "opacity-100", else: "opacity-0 pointer-events-none"}"}
+        phx-click="close_drawer"
+      >
+        <div
+          class={"fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
+          phx-click-away="close_drawer"
+        >
           <%= if @selected_dev do %>
             <div class="flex flex-col relative h-full p-6">
               <!-- Drawer Header -->

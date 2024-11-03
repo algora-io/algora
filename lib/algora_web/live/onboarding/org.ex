@@ -25,84 +25,77 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white sm:flex">
-      <div class="flex-grow px-8 py-16 bg-gray-950/25">
-        <div class="max-w-3xl mx-auto">
-          <div class="flex items-center gap-4 text-lg mb-6 font-display">
-            <span class="text-gray-300"><%= @step %> / <%= @total_steps %></span>
-            <h1 class="text-lg text-gray-200 font-semibold uppercase">Get started</h1>
-          </div>
-          <div class="mb-8">
-            <%= render_step(assigns) %>
-          </div>
-          <div class="flex justify-between">
-            <%= if @step > 1 do %>
-              <button
-                phx-click="prev_step"
-                class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Previous
-              </button>
-            <% else %>
-              <div></div>
-            <% end %>
-            <%= if @step < @total_steps do %>
-              <button
-                phx-click="next_step"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Next
-              </button>
-            <% else %>
-              <button
-                phx-click="submit"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Sign up
-              </button>
-            <% end %>
+    <div class="min-h-screen bg-gradient-to-br from-muted/10 to-muted/20">
+      <div class="flex-1 flex">
+        <div class="flex-grow px-8 py-16">
+          <div class="max-w-3xl mx-auto">
+            <div class="flex items-center gap-4 text-lg mb-6">
+              <span class="text-muted-foreground"><%= @step %> / <%= @total_steps %></span>
+              <h1 class="text-lg font-semibold uppercase">Get started</h1>
+            </div>
+            <div class="mb-8">
+              <%= render_step(assigns) %>
+            </div>
+            <div class="flex justify-between">
+              <%= if @step > 1 do %>
+                <.button phx-click="prev_step" class="bg-secondary hover:bg-secondary/80">
+                  Previous
+                </.button>
+              <% else %>
+                <div></div>
+              <% end %>
+              <%= if @step < @total_steps do %>
+                <.button phx-click="next_step" class="bg-primary hover:bg-primary/80">
+                  Next
+                </.button>
+              <% else %>
+                <.button phx-click="submit" class="bg-success hover:bg-success/80">
+                  Sign up
+                </.button>
+              <% end %>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="sm:w-1/3 border-l-2 border-gray-700 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
-        <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
-          Matching Developers
-        </h2>
-        <%= if @matching_devs == [] do %>
-          <p class="text-gray-400">Add skills to see matching developers</p>
-        <% else %>
-          <%= for dev <- @matching_devs do %>
-            <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
-              <div class="flex mb-2 gap-3">
-                <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
-                <div class="flex-grow">
-                  <div class="flex justify-between">
-                    <div>
-                      <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                      <div class="text-sm text-gray-400">@<%= dev.handle %></div>
-                    </div>
-                    <div class="flex flex-col items-end">
-                      <div class="text-gray-300">Earned</div>
-                      <div class="text-white font-semibold">
-                        <%= Money.format!(dev.amount, "USD") %>
+        <div class="w-1/3 border-l border-border bg-background px-8 py-4 overflow-y-auto">
+          <h2 class="text-lg font-semibold uppercase mb-4">
+            Matching Developers
+          </h2>
+          <%= if @matching_devs == [] do %>
+            <p class="text-muted-foreground">Add skills to see matching developers</p>
+          <% else %>
+            <%= for dev <- @matching_devs do %>
+              <div class="mb-4 bg-card p-4 rounded-lg border border-border">
+                <div class="flex mb-2 gap-3">
+                  <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
+                  <div class="flex-grow">
+                    <div class="flex justify-between">
+                      <div>
+                        <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                        <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
+                      </div>
+                      <div class="flex flex-col items-end">
+                        <div class="text-muted-foreground">Earned</div>
+                        <div class="font-semibold text-success font-display">
+                          <%= Money.format!(dev.amount, "USD") %>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div class="pt-3 text-sm">
-                    <div class="-ml-1 text-sm flex flex-wrap gap-1">
-                      <%= for skill <- dev.skills do %>
-                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
-                          <%= skill %>
-                        </span>
-                      <% end %>
+                    <div class="pt-3 text-sm">
+                      <div class="-ml-1 text-sm flex flex-wrap gap-1">
+                        <%= for skill <- dev.skills do %>
+                          <span class="rounded-xl px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
+                            <%= skill %>
+                          </span>
+                        <% end %>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            <% end %>
           <% end %>
-        <% end %>
+        </div>
       </div>
     </div>
     """
@@ -112,29 +105,31 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="text-4xl font-semibold text-white mb-2">
+        <h2 class="text-4xl font-semibold mb-2">
           What is your tech stack?
         </h2>
-        <p class="text-gray-400">Select the technologies you work with</p>
+        <p class="text-muted-foreground">Select the technologies you work with</p>
 
         <div class="mt-4">
-          <input
+          <.input
             type="text"
+            name="skill_input"
+            value=""
             placeholder="Elixir, Phoenix, PostgreSQL, etc."
             phx-keydown="handle_skill_input"
             phx-debounce="200"
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full bg-background border-input"
           />
         </div>
 
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for skill <- @context.skills do %>
-            <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
+            <div class="bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-semibold flex items-center">
               <%= skill %>
               <button
                 phx-click="remove_skill"
                 phx-value-skill={skill}
-                class="ml-2 text-indigo-300 hover:text-indigo-100"
+                class="ml-2 text-primary hover:text-primary/80"
               >
                 ×
               </button>
@@ -163,7 +158,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   phx-click="toggle_intention"
                   phx-value-intention={intention}
                   checked={intention in @context.intentions}
-                  class="h-8 w-8 rounded border-gray-700 bg-gray-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900 cursor-pointer"
+                  class="h-8 w-8 rounded border-gray-700 bg-gray-800 text-primary focus:ring-primary focus:ring-offset-gray-900 cursor-pointer"
                 />
               </div>
               <div class="ml-3 text-base leading-6">

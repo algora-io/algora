@@ -8,7 +8,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   Icons are provided by [heroicons](https://heroicons.com). See `icon/1` for usage.
   """
-  use Phoenix.Component
+  use AlgoraWeb.Component
   use AlgoraWeb, :verified_routes
 
   alias Phoenix.LiveView.JS
@@ -647,25 +647,68 @@ defmodule AlgoraWeb.CoreComponents do
   """
   attr :type, :string, default: nil
   attr :class, :string, default: nil
+
+  attr :variant, :string,
+    values: ~w(default secondary destructive outline ghost link),
+    default: "default",
+    doc: "the button variant style"
+
+  attr :size, :string, values: ~w(default sm lg icon), default: "default"
   attr :rest, :global, include: ~w(disabled form name value)
 
   slot :inner_block, required: true
 
-  def button(assigns) do
+  def(button(assigns)) do
+    assigns = assign(assigns, :variant_class, variant(assigns))
+
     ~H"""
     <button
       type={@type}
-      class={[
-        "phx-submit-loading:opacity-75 disabled:opacity-75 rounded-lg bg-primary hover:bg-primary/90 py-1.5 px-3",
-        "text-sm font-semibold leading-6 text-primary-foreground active:text-primary-foreground/80",
-        "relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-primary/50 hover:bg-primary/30 text-foreground border-primary/80 hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600",
-        @class
-      ]}
+      class={
+        classes([
+          "phx-submit-loading:opacity-75 disabled:opacity-75 text-sm",
+          "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50",
+          @variant_class,
+          @class
+        ])
+      }
       {@rest}
     >
       <%= render_slot(@inner_block) %>
     </button>
     """
+  end
+
+  @variants %{
+    variant: %{
+      "default" =>
+        "bg-primary/50 hover:bg-primary/30 text-foreground border-primary/80 hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600 shadow border",
+      "destructive" =>
+        "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+      "outline" =>
+        "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+      "secondary" => "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+      "ghost" => "hover:bg-accent hover:text-accent-foreground",
+      "link" => "text-primary underline-offset-4 hover:underline"
+    },
+    size: %{
+      "default" => "h-9 px-4 py-2 text-sm",
+      "sm" => "h-8 rounded-md px-3 text-xs",
+      "lg" => "h-10 rounded-md px-8",
+      "icon" => "h-9 w-9"
+    }
+  }
+
+  @default_variants %{
+    variant: "default",
+    size: "default"
+  }
+
+  defp variant(props) do
+    variants = Map.take(props, ~w(variant size)a)
+    variants = Map.merge(@default_variants, variants)
+
+    Enum.map_join(variants, " ", fn {key, value} -> @variants[key][value] end)
   end
 
   @doc """

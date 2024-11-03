@@ -3,11 +3,6 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-::selection {
-  background: #4338ca;
-  color: #fff;
-}
-
 .font-display {
   font-family: "Space Grotesk", sans-serif;
   font-optical-sizing: auto;
@@ -168,6 +163,10 @@ body {
   @apply bg-background text-foreground;
 }
 
+::selection {
+  @apply bg-primary text-primary-foreground;
+}
+
 @layer base {
   :root {
     --background: 255 0% 95%;
@@ -210,7 +209,7 @@ body {
     --accent-foreground: 255 0% 90%;
     --destructive: 0 50% 30%;
     --destructive-foreground: 255 0% 90%;
-    --success: 161 93.5% 30.4%;
+    --success: 158 64% 52%;
     --success-foreground: 0 0% 100%;
     --border: 255 20% 18%;
     --input: 255 20% 18%;

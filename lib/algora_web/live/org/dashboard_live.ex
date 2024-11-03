@@ -28,11 +28,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <div class="p-6 relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
         <div class="flex justify-between">
           <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
-          <.button
-            type="submit"
-            phx-disable-with="Creating..."
-            class="relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-primary/50 hover:bg-primary/30 text-foreground border-primary/80 hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600 text-xs px-2.5 py-2 h-[32px]"
-          >
+          <.button type="submit" phx-disable-with="Creating..." class="text-xs h-[32px]">
             Create bounty
           </.button>
         </div>

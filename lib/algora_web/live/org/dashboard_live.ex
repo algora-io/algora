@@ -26,7 +26,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8">
       <div class="p-6 relative rounded-xl border bg-card text-card-foreground md:gap-8 h-full">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between">
           <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
           <.button
             type="submit"

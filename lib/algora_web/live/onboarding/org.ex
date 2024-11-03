@@ -132,12 +132,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for skill <- @context.skills do %>
-            <div class="bg-primary/10 text-primary rounded-full px-4 py-2 text-sm font-semibold flex items-center">
+            <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
               <%= skill %>
               <button
                 phx-click="remove_skill"
                 phx-value-skill={skill}
-                class="ml-2 text-primary hover:text-primary/80"
+                class="ml-2 text-success hover:text-success/80"
               >
                 ×
               </button>

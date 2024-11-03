@@ -25,7 +25,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8 max-w-5xl mx-auto">
-      <div class="p-6 relative rounded-xl border bg-card text-card-foreground md:gap-8 h-full">
+      <div class="p-6 relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
         <div class="flex justify-between">
           <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
           <.button
@@ -284,7 +284,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def bounties_card(assigns) do
     ~H"""
-    <div class="group/card relative h-full rounded-xl border bg-card text-card-foreground md:gap-8 overflow-hidden lg:col-span-4">
+    <div class="group/card relative h-full rounded-lg border bg-card text-card-foreground md:gap-8 overflow-hidden lg:col-span-4">
       <div class="flex justify-between">
         <div class="flex flex-col space-y-1.5 p-6">
           <h3 class="text-2xl font-semibold leading-none tracking-tight">Bounties</h3>
@@ -330,7 +330,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   </div>
                 </div>
                 <div class="pl-6">
-                  <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-success/5 text-success ring-success/30">
+                  <div class="flex-none rounded-lg px-3 py-1 font-display tabular-nums text-lg font-extrabold ring-1 ring-inset bg-success/5 text-success ring-success/30">
                     <%= Money.format!(bounty.amount, bounty.currency) %>
                   </div>
                 </div>

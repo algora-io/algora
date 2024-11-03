@@ -5,7 +5,8 @@ const plugin = require("tailwindcss/plugin");
 const { fontFamily } = require("tailwindcss/defaultTheme");
 const path = require("path");
 const fs = require("fs");
-const colors = require("./tailwind.colors.json");
+// const colors = require("./tailwind.colors.json");
+const colors = require("tailwindcss/colors");
 
 module.exports = {
   content: [
@@ -24,7 +25,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        ...colors,
+        gray: colors.zinc,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -41,6 +42,10 @@ module.exports = {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",

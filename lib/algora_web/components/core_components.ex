@@ -126,10 +126,10 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full bg-gray-800 rounded-md px-3.5 py-2 text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
+          class="group w-full rounded-md px-3.5 py-2 text-sm text-left font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
-          data-active-class="bg-gray-800"
+          data-active-class="bg-accent"
           aria-haspopup="true"
         >
           <span class="flex w-full justify-between items-center">
@@ -157,7 +157,7 @@ defmodule AlgoraWeb.CoreComponents do
       <div
         id={"#{@id}-dropdown"}
         phx-click-away={hide_dropdown("##{@id}-dropdown")}
-        class="hidden z-10 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-gray-900 ring-1 ring-gray-900 ring-opacity-5 divide-y divide-gray-700"
+        class="hidden z-10 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-popover ring-1 ring-border divide-y divide-border"
         role="menu"
         aria-labelledby={@id}
       >
@@ -166,7 +166,7 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
+              class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
               {link}
             >
               <%= render_slot(link) %>
@@ -223,10 +223,10 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full rounded-md px-3.5 py-2 text-sm text-left font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
+          class="group w-full rounded-md px-3.5 py-2 text-sm text-left font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
-          data-active-class="bg-gray-800"
+          data-active-class="bg-accent"
           aria-haspopup="true"
         >
           <span class="flex w-full justify-between items-center">
@@ -254,7 +254,7 @@ defmodule AlgoraWeb.CoreComponents do
       <div
         id={"#{@id}-dropdown"}
         phx-click-away={hide_dropdown("##{@id}-dropdown")}
-        class="hidden z-10 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-gray-900 ring-1 ring-gray-900 ring-opacity-5 divide-y divide-gray-700"
+        class="hidden z-10 origin-top absolute right-0 left-0 mt-1 rounded-md shadow-lg bg-popover ring-1 ring-border divide-y divide-border"
         role="menu"
         aria-labelledby={@id}
       >
@@ -263,7 +263,7 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-400"
+              class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
               {link}
             >
               <%= render_slot(link) %>
@@ -436,7 +436,7 @@ defmodule AlgoraWeb.CoreComponents do
     >
       <div
         id={"#{@id}-bg"}
-        class="fixed inset-0 bg-gray-950/90 transition-opacity"
+        class="fixed inset-0 bg-background/80 transition-opacity"
         aria-hidden="true"
       />
       <div
@@ -455,7 +455,7 @@ defmodule AlgoraWeb.CoreComponents do
               phx-window-keydown={hide_modal(@on_cancel, @id)}
               phx-key="escape"
               phx-click-away={hide_modal(@on_cancel, @id)}
-              class="hidden relative rounded-2xl bg-gray-900 py-6 px-10 shadow-lg shadow-gray-200/10 ring-1 ring-gray-200/10 transition"
+              class="hidden relative rounded-2xl bg-background py-6 px-10 shadow-lg shadow-background/10 ring-1 ring-border transition"
             >
               <div class="absolute top-6 right-5">
                 <button
@@ -469,13 +469,13 @@ defmodule AlgoraWeb.CoreComponents do
               </div>
               <div id={"#{@id}-content"}>
                 <header :if={@title != []}>
-                  <h1 id={"#{@id}-title"} class="text-lg font-semibold leading-8 text-gray-100">
+                  <h1 id={"#{@id}-title"} class="text-lg font-semibold leading-8 text-foreground">
                     <%= render_slot(@title) %>
                   </h1>
                   <p
                     :if={@subtitle != []}
                     id={"#{@id}-description"}
-                    class="mt-2 text-sm leading-6 text-gray-300"
+                    class="mt-2 text-sm leading-6 text-muted-foreground"
                   >
                     <%= render_slot(@subtitle) %>
                   </p>
@@ -494,7 +494,7 @@ defmodule AlgoraWeb.CoreComponents do
                   <.link
                     :for={cancel <- @cancel}
                     phx-click={hide_modal(@on_cancel, @id)}
-                    class="text-sm font-semibold leading-6 text-gray-50 hover:text-gray-200"
+                    class="text-sm font-semibold leading-6 text-foreground hover:text-foreground/80"
                   >
                     <%= render_slot(cancel) %>
                   </.link>
@@ -534,10 +534,11 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed hidden top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 shadow-md shadow-gray-50/5 ring-1",
-        @kind == :info && "bg-emerald-900 text-emerald-100 ring-emerald-900 fill-emerald-900",
-        @kind == :note && "bg-indigo-900 text-indigo-100 ring-indigo-900 fill-indigo-900",
-        @kind == :error && "bg-red-900 p-3 text-red-50 shadow-md ring-red-900 fill-red-50"
+        "fixed hidden top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 shadow-md ring-1",
+        @kind == :info && "bg-success text-success-foreground ring-success fill-success-foreground",
+        @kind == :note && "bg-info text-info-foreground ring-info fill-info-foreground",
+        @kind == :error &&
+          "bg-destructive text-destructive-foreground ring-destructive fill-destructive-foreground"
       ]}
       {@rest}
     >
@@ -655,8 +656,8 @@ defmodule AlgoraWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 disabled:opacity-75 rounded-lg bg-gray-50 hover:bg-gray-200 py-2 px-3",
-        "text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80",
+        "phx-submit-loading:opacity-75 disabled:opacity-75 rounded-lg bg-primary hover:bg-primary/90 py-2 px-3",
+        "text-sm font-semibold leading-6 text-primary-foreground active:text-primary-foreground/80",
         @class
       ]}
       {@rest}
@@ -724,7 +725,7 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           value="true"
           checked={@checked}
-          class="rounded border-gray-600 text-gray-50 focus:ring-gray-50"
+          class="rounded border-input text-primary focus:ring-ring"
           {@rest}
         />
         <%= @label %>
@@ -747,7 +748,7 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           checked={@checked}
-          class="rounded-full border-gray-600 text-gray-500 focus:ring-gray-50 sr-only peer"
+          class="rounded-full border-input text-primary focus:ring-ring sr-only peer"
           {@rest}
         />
         <%= @label %>
@@ -765,7 +766,7 @@ defmodule AlgoraWeb.CoreComponents do
       <select
         id={@id}
         name={@name}
-        class="mt-1 block w-full py-2 px-3 border border-gray-600 bg-gray-950 rounded-md shadow-sm focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm"
+        class="mt-1 block w-full py-2 px-3 border border-input bg-background rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-ring sm:text-sm"
         multiple={@multiple}
         {@rest}
       >
@@ -785,11 +786,11 @@ defmodule AlgoraWeb.CoreComponents do
         id={@id || @name}
         name={@name}
         class={[
-          "bg-gray-950 mt-2 block min-h-[6rem] w-full rounded-lg border-gray-600 py-[7px] px-[11px]",
-          "text-gray-50 focus:border-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-100/5 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-gray-600 phx-no-feedback:focus:border-gray-500 phx-no-feedback:focus:ring-gray-100/5",
-          "border-gray-600 focus:border-gray-500 focus:ring-gray-100/5",
-          @errors != [] && "border-red-500 focus:border-red-500 focus:ring-red-500/10",
+          "bg-background mt-2 block min-h-[6rem] w-full rounded-lg border-input py-[7px] px-[11px]",
+          "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
+          "phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5",
+          "border-input focus:border-ring focus:ring-ring/5",
+          @errors != [] && "border-destructive focus:border-destructive focus:ring-destructive/10",
           @class
         ]}
         {@rest}
@@ -809,12 +810,12 @@ defmodule AlgoraWeb.CoreComponents do
         id={@id || @name}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "bg-gray-950 block w-full rounded-lg border-gray-600 py-[7px] px-[11px]",
-          "text-gray-50 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-gray-600 phx-no-feedback:focus:border-gray-500 phx-no-feedback:focus:ring-gray-100/5",
-          "border-gray-600 focus:border-gray-500 focus:ring-gray-100/5",
+          "bg-background block w-full rounded-lg border-input py-[7px] px-[11px]",
+          "text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
+          "phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5",
+          "border-input focus:border-ring focus:ring-ring/5",
           @errors != [] &&
-            "border-red-500 focus:border-red-500 focus:ring-red-500/10 placeholder-red-300",
+            "border-destructive focus:border-destructive focus:ring-destructive/10 placeholder-destructive-foreground/50",
           @class
         ]}
         {@rest}
@@ -833,7 +834,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class={["block text-sm font-semibold leading-6 text-gray-100", @class]}>
+    <label for={@for} class={["block text-sm font-semibold leading-6 text-foreground", @class]}>
       <%= render_slot(@inner_block) %>
     </label>
     """
@@ -846,7 +847,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-red-300">
+    <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-destructive">
       <.icon name="tabler-exclamation-circle" class="mt-0.5 w-5 h-5 flex-none" />
       <%= render_slot(@inner_block) %>
     </p>
@@ -867,10 +868,10 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]} {@rest}>
       <div>
-        <h1 class="text-lg font-semibold leading-8 text-gray-100 focus:outline-none">
+        <h1 class="text-lg font-semibold leading-8 text-foreground focus:outline-none">
           <%= render_slot(@inner_block) %>
         </h1>
-        <p :if={@subtitle != []} class="text-sm leading-6 text-gray-300">
+        <p :if={@subtitle != []} class="text-sm leading-6 text-muted-foreground">
           <%= render_slot(@subtitle) %>
         </p>
       </div>
@@ -915,12 +916,12 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <div class="overflow-y-auto px-4 sm:overflow-visible sm:px-0">
       <table class={["w-[40rem] sm:w-full", @class]}>
-        <thead class="text-left text-[0.8125rem] leading-6 text-gray-100">
+        <thead class="text-left text-[0.8125rem] leading-6 text-foreground">
           <tr>
             <th
               :for={{col, i} <- Enum.with_index(@col)}
               class={[
-                "p-0 pb-4 pr-4 font-medium text-sm text-gray-300",
+                "p-0 pb-4 pr-4 font-medium text-sm text-muted-foreground",
                 i == 0 && "pl-4",
                 col[:align] == "right" && "text-right"
               ]}
@@ -933,13 +934,9 @@ defmodule AlgoraWeb.CoreComponents do
         <tbody
           id={@id}
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
-          class="relative divide-y divide-gray-800 border-t border-gray-700 text-sm leading-6 text-gray-200"
+          class="relative divide-y divide-border border-t border-border text-sm leading-6 text-foreground"
         >
-          <tr
-            :for={row <- @rows}
-            id={@row_id && @row_id.(row)}
-            class="group bg-white/[2.5%] hover:bg-white/[5%]"
-          >
+          <tr :for={row <- @rows} id={@row_id && @row_id.(row)} class="group hover:bg-muted/50">
             <td
               :for={{col, i} <- Enum.with_index(@col)}
               phx-click={@row_click && @row_click.(row)}
@@ -985,10 +982,12 @@ defmodule AlgoraWeb.CoreComponents do
   def list(assigns) do
     ~H"""
     <div class="mt-14">
-      <dl class="-my-4 divide-y divide-gray-800">
+      <dl class="-my-4 divide-y divide-border">
         <div :for={item <- @item} class="flex gap-4 py-4 sm:gap-8">
-          <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-gray-50"><%= item.title %></dt>
-          <dd class="text-sm leading-6 text-gray-200"><%= render_slot(item) %></dd>
+          <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-foreground">
+            <%= item.title %>
+          </dt>
+          <dd class="text-sm leading-6 text-muted-foreground"><%= render_slot(item) %></dd>
         </div>
       </dl>
     </div>
@@ -1010,7 +1009,7 @@ defmodule AlgoraWeb.CoreComponents do
     <div class="mt-16">
       <.link
         navigate={@navigate}
-        class="text-sm font-semibold leading-6 text-gray-50 hover:text-gray-200"
+        class="text-sm font-semibold leading-6 text-foreground hover:text-foreground/80"
       >
         <.icon name="tabler-arrow-left" class="w-3 h-3" />
         <%= render_slot(@inner_block) %>
@@ -1132,20 +1131,23 @@ defmodule AlgoraWeb.CoreComponents do
     <div
       id="pwa-install-prompt"
       phx-hook="PWAInstallPrompt"
-      class="hidden fixed bottom-5 left-1/2 transform -translate-x-1/2 w-[90%] md:max-w-[300px] bg-white rounded-lg shadow-lg p-4 text-center z-50"
+      class="hidden fixed bottom-5 left-1/2 transform -translate-x-1/2 w-[90%] md:max-w-[300px] bg-background rounded-lg shadow-lg p-4 text-center z-50"
     >
       <div class="mb-3">
-        <img class="w-16 h-16 bg-gray-200 rounded-lg mx-auto mb-2" src="/images/logo-192px.png" />
-        <h1 class="text-lg text-gray-800 font-semibold">Algora Console</h1>
-        <p class="text-sm text-gray-600 font-semibold">Never miss a bounty again!</p>
+        <img class="w-16 h-16 bg-muted rounded-lg mx-auto mb-2" src="/images/logo-192px.png" />
+        <h1 class="text-lg text-foreground font-semibold">Algora Console</h1>
+        <p class="text-sm text-muted-foreground font-semibold">Never miss a bounty again!</p>
       </div>
       <button
         id="pwa-install-button"
-        class="hidden bg-indigo-600 text-white py-2 px-4 rounded-md text-sm font-semibold"
+        class="hidden bg-primary text-primary-foreground py-2 px-4 rounded-md text-sm font-semibold"
       >
         Install
       </button>
-      <button id="pwa-close-button" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+      <button
+        id="pwa-close-button"
+        class="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+      >
         <svg
           class="w-5 h-5"
           fill="none"
@@ -1164,10 +1166,10 @@ defmodule AlgoraWeb.CoreComponents do
       </button>
       <div
         id="pwa-instructions-mobile"
-        class="hidden text-md text-gray-600 mt-2 text-center bg-gray-100 p-2 rounded-md"
+        class="hidden text-md text-muted-foreground mt-2 text-center bg-muted p-2 rounded-md"
       >
-        Tap <.icon name="tabler-upload" class="size-5 mb-1 text-indigo-500 inline" /> or
-        <.icon name="tabler-dots-vertical" class="size-5 mb-1 text-indigo-500 inline" />
+        Tap <.icon name="tabler-upload" class="size-5 mb-1 text-primary inline" /> or
+        <.icon name="tabler-dots-vertical" class="size-5 mb-1 text-primary inline" />
         and select "Add to home screen" to install.
       </div>
     </div>

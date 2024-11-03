@@ -9,7 +9,7 @@
   >
     <!-- Backdrop -->
     <div
-      class="fixed inset-0 bg-gray-900/80 transition-opacity ease-linear duration-300 opacity-0"
+      class="fixed inset-0 bg-background/80 transition-opacity ease-linear duration-300 opacity-0"
       aria-hidden="true"
       id="menu-backdrop"
     >
@@ -42,7 +42,7 @@
           </button>
         </div>
         <!-- Sidebar component -->
-        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 ring-1 ring-white/10 scrollbar-thin">
+        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-background px-6 ring-1 ring-border/10 scrollbar-thin">
           <div class="flex h-16 shrink-0 items-center">
             <.wordmark class="h-8 w-auto" />
           </div>
@@ -58,7 +58,7 @@
                       <li>
                         <.link
                           navigate={item.href}
-                          class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
+                          class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-accent text-accent-foreground", else: "text-muted-foreground hover:text-foreground hover:bg-accent"}"}
                         >
                           <.icon name={item.icon} /> <%= item.label %>
                         </.link>
@@ -76,7 +76,7 @@
   <!-- Static sidebar for desktop -->
   <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
     <!-- Sidebar component -->
-    <div class="flex grow flex-col gap-y-5 overflow-y-auto px-6 ring-1 ring-white/5 scrollbar-thin border-r-2 border-gray-700/50 bg-gradient-to-b from-white/[5%] to-white/[2.5%]">
+    <div class="flex grow flex-col gap-y-5 overflow-y-auto px-6 ring-1 ring-border/5 scrollbar-thin border-r-2 border-border/50 bg-background">
       <div class="flex h-16 shrink-0 items-center">
         <.wordmark class="h-8 w-auto" />
       </div>
@@ -144,7 +144,7 @@
           >
             <.icon
               name="tabler-brand-x"
-              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-sky-400"
+              class="h-5 w-5 text-muted-foreground transition-colors duration-150 hover:text-primary"
             />
           </.link>
           <.link
@@ -155,7 +155,7 @@
           >
             <.icon
               name="tabler-brand-discord"
-              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-indigo-400"
+              class="h-5 w-5 text-muted-foreground transition-colors duration-150 hover:text-primary"
             />
           </.link>
           <.link
@@ -166,7 +166,7 @@
           >
             <.icon
               name="tabler-brand-youtube"
-              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-red-400"
+              class="h-5 w-5 text-muted-foreground transition-colors duration-150 hover:text-primary"
             />
           </.link>
           <.link
@@ -177,7 +177,7 @@
           >
             <.icon
               name="tabler-world"
-              class="h-5 w-5 text-gray-400 transition-colors duration-150 hover:text-teal-500"
+              class="h-5 w-5 text-muted-foreground transition-colors duration-150 hover:text-primary"
             />
           </.link>
         </div>
@@ -193,7 +193,7 @@
         <ul role="list" class="flex flex-1 flex-col gap-y-7">
           <%= for section <- @nav do %>
             <li>
-              <div class="text-xs font-semibold leading-6 text-gray-400">
+              <div class="text-xs font-semibold leading-6 text-muted-foreground">
                 <%= section.title %>
               </div>
               <ul role="list" class="-mx-4 mt-2 space-y-1">
@@ -201,7 +201,7 @@
                   <li>
                     <.link
                       navigate={item.href}
-                      class={"group flex gap-x-3 rounded-md py-2 px-4 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
+                      class={"group flex gap-x-3 rounded-md py-2 px-4 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-accent text-accent-foreground", else: "text-muted-foreground hover:text-foreground hover:bg-accent"}"}
                     >
                       <.icon name={item.icon} class="w-6 h-6" /> <%= item.label %>
                     </.link>
@@ -255,7 +255,7 @@
     <div
       id="navbar"
       phx-hook="NavBar"
-      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-x-6 border-b border-white/5 px-4 shadow-sm sm:px-6 lg:px-8"
+      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-x-6 border-b border-border/5 px-4 shadow-sm sm:px-6 lg:px-8"
     >
       <.link
         class="group outline-none w-fit"
@@ -315,7 +315,7 @@
       <% else %>
         <.link
           navigate="/auth/login"
-          class="rounded-lg bg-gray-50 hover:bg-gray-200 py-1 px-2 text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80"
+          class="rounded-lg bg-accent hover:bg-accent/80 py-1 px-2 text-sm font-semibold leading-6 text-accent-foreground"
         >
           <span class="relative font-semibold text-sm">Login</span>
         </.link>
@@ -323,8 +323,7 @@
     </div>
 
     <div>
-      <div class="fixed inset-0 z-0 h-full w-full bg-gradient-to-br from-gray-950 to-black" />
-      <div class="fixed inset-0 z-0 h-full w-full bg-indigo-950/25" />
+      <div class="fixed inset-0 z-0 h-full w-full" />
       <div class="relative">
         <%= @inner_content %>
       </div>

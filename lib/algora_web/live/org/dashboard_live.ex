@@ -31,12 +31,20 @@ defmodule AlgoraWeb.Org.DashboardLive do
     <div class="flex-1 p-4 pt-6 sm:p-6 md:p-8 max-w-5xl mx-auto">
       <div class="p-6 relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
         <div class="flex justify-between">
-          <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
+          <div>
+            <h2 class="inline text-2xl font-semibold">Create New Bounty</h2>
+            <span class="text-sm text-muted-foreground">(looking for ideas?)</span>
+          </div>
           <.button type="submit" phx-disable-with="Creating..." size="sm">
             Create bounty
           </.button>
         </div>
-        <.simple_form for={@form} phx-change="validate" phx-submit="create_bounty" class="space-y-6">
+        <.simple_form
+          for={@form}
+          phx-change="validate"
+          phx-submit="create_bounty"
+          class="mt-6 space-y-6"
+        >
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <.label for="title" class="text-sm font-medium mb-2">

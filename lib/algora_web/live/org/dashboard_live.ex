@@ -21,12 +21,15 @@ defmodule AlgoraWeb.Org.DashboardLive do
      socket
      |> assign(:recent_bounties, recent_bounties)
      |> assign(:matching_devs, matching_devs)
+     #  |> assign(:selected_dev, nil)
+     |> assign(:selected_dev, matching_devs |> hd())
+     |> assign(:show_dev_drawer, true)
      |> assign_form(changeset)}
   end
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 space-y-4 p-4 pt-6 sm:p-6 md:p-8 max-w-5xl mx-auto">
+    <div class="flex-1 p-4 pt-6 sm:p-6 md:p-8 max-w-5xl mx-auto">
       <div class="p-6 relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
         <div class="flex justify-between">
           <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
@@ -310,23 +313,45 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         <img class="aspect-square h-full w-full" alt={dev.name} src={dev.avatar_url} />
                       </span>
                       <div class="flex flex-col">
-                        <span class="font-medium"><%= dev.name %></span>
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium"><%= dev.name %></span>
+                          <%= if dev.flag do %>
+                            <span><%= dev.flag %></span>
+                          <% end %>
+                        </div>
                         <span class="text-sm text-muted-foreground">@<%= dev.handle %></span>
                       </div>
                     </div>
                   </td>
                   <td class="p-4 align-middle">
-                    <div class="flex flex-wrap gap-1">
-                      <%= for skill <- dev.skills do %>
-                        <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                          <%= skill %>
-                        </span>
-                      <% end %>
+                    <div class="space-y-2">
+                      <div class="-ml-2.5 flex flex-wrap gap-1">
+                        <%= for skill <- Enum.take(dev.skills, 3) do %>
+                          <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+                            <%= skill %>
+                          </span>
+                        <% end %>
+                        <%= if length(dev.skills) > 3 do %>
+                          <span class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs text-muted-foreground">
+                            +<%= length(dev.skills) - 3 %> more
+                          </span>
+                        <% end %>
+                      </div>
+                      <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div class="flex items-center gap-1">
+                          <.icon name="tabler-diamond" class="w-4 h-4" />
+                          <span><%= dev.bounties %> bounties</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                          <.icon name="tabler-cash" class="w-4 h-4" />
+                          <span><%= Money.format!(dev.amount, "USD") %></span>
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td class="p-4 align-middle text-right">
                     <.button phx-click="view_dev" phx-value-id={dev.id} size="sm" variant="default">
-                      View
+                      View Profile
                     </.button>
                   </td>
                 </tr>
@@ -336,7 +361,129 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
       </div>
 
-      <.bounties_card current_org={@current_org} bounties={@recent_bounties} />
+      <div class="mt-8">
+        <.bounties_card current_org={@current_org} bounties={@recent_bounties} />
+      </div>
+
+      <div class={"fixed inset-0 bg-black/50 z-50 transition-opacity #{if @show_dev_drawer, do: "opacity-100", else: "opacity-0 pointer-events-none"}"}>
+        <div class={"fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}>
+          <%= if @selected_dev do %>
+            <div class="flex flex-col relative h-full p-6">
+              <!-- Drawer Header -->
+              <div class="flex justify-between items-start">
+                <div class="flex items-start gap-4">
+                  <img src={@selected_dev.avatar_url} alt="" class="w-20 h-20 rounded-full" />
+                  <div>
+                    <h4 class="text-xl font-semibold">
+                      <%= @selected_dev.name %> <%= @selected_dev.flag %>
+                    </h4>
+                    <div class="text-sm text-muted-foreground">
+                      @<%= @selected_dev.handle %>
+                    </div>
+                    <div class="-ml-1 mt-2 flex flex-wrap gap-2">
+                      <%= for skill <- @selected_dev.skills do %>
+                        <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                          <%= skill %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                <button phx-click="close_drawer" class="text-muted-foreground hover:text-foreground">
+                  <.icon name="tabler-x" class="w-5 h-5" />
+                </button>
+              </div>
+              <!-- Drawer Content -->
+              <div class="overflow-y-auto">
+                <div class="grid grid-cols-2 gap-6">
+                  <!-- Left Column -->
+                  <div class="mt-8 space-y-6">
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div class="p-4 rounded-lg bg-card border border-border">
+                        <div class="flex items-center gap-2 mb-2">
+                          <.icon name="tabler-cash-register" class="w-8 h-8 text-muted-foreground" />
+                          <div class="text-2xl font-bold font-display">
+                            <%= Money.format!(@selected_dev.amount, "USD") %>
+                          </div>
+                        </div>
+                        <div class="text-sm text-muted-foreground">Total Earnings</div>
+                      </div>
+                      <div class="p-4 rounded-lg bg-card border border-border">
+                        <div class="flex items-center gap-2 mb-2">
+                          <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+                          <div class="text-2xl font-bold font-display">
+                            <%= @selected_dev.bounties %>
+                          </div>
+                        </div>
+                        <div class="text-sm text-muted-foreground">Bounties Solved</div>
+                      </div>
+                      <div class="p-4 rounded-lg bg-card border border-border">
+                        <div class="flex items-center gap-2 mb-2">
+                          <.icon name="tabler-rocket" class="w-8 h-8 text-muted-foreground" />
+                          <div class="text-2xl font-bold font-display">
+                            <%= @selected_dev.projects %>
+                          </div>
+                        </div>
+                        <div class="text-sm text-muted-foreground">Projects Contributed</div>
+                      </div>
+                    </div>
+                    <!-- Message -->
+                    <div class="space-y-4 p-1 relative">
+                      <div>
+                        <h5 class="text-sm font-medium mb-2">Message</h5>
+                        <div class="rounded-lg bg-card p-4 text-sm ring-1 ring-ring min-h-[12rem]">
+                          <%= @selected_dev.message %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Right Column -->
+                  <div>
+                    <h5 class="text-sm font-medium mb-3">Past Reviews</h5>
+                    <div class="space-y-3">
+                      <%= for review <- [
+                        %{stars: 5, comment: "Exceptional problem-solving skills and great communication throughout the project.", company: "TechCorp Inc."},
+                        %{stars: 4, comment: "Delivered high-quality work ahead of schedule. Would definitely work with again.", company: "StartupXYZ"},
+                        %{stars: 5, comment: "Outstanding technical expertise and professional attitude.", company: "DevLabs"}
+                      ] do %>
+                        <div class="rounded-lg bg-card p-4 text-sm border border-border">
+                          <div class="flex items-center gap-1 mb-2">
+                            <%= for i <- 1..5 do %>
+                              <.icon
+                                name="tabler-star-filled"
+                                class={"w-4 h-4 #{if i <= review.stars, do: "text-warning", else: "text-muted-foreground/25"}"}
+                              />
+                            <% end %>
+                          </div>
+                          <p class="text-sm mb-2"><%= review.comment %></p>
+                          <p class="text-xs text-muted-foreground">— <%= review.company %></p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Drawer Footer -->
+              <div class="mt-auto">
+                <div class="flex gap-6">
+                  <.button phx-click="close_drawer" variant="outline" class="flex-1" size="lg">
+                    Decline
+                  </.button>
+                  <.button
+                    phx-click="accept_dev"
+                    phx-value-id={@selected_dev.id}
+                    class="flex-1"
+                    size="lg"
+                  >
+                    Accept
+                  </.button>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
     """
   end
@@ -460,10 +607,28 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
+    dev = Accounts.get_user!(dev_id)
+
+    {:noreply,
+     socket
+     |> assign(:selected_dev, dev)
+     |> assign(:show_dev_drawer, true)}
+  end
+
+  def handle_event("close_drawer", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_dev_drawer, false)
+     |> assign(:selected_dev, nil)}
+  end
+
+  def handle_event("accept_dev", %{"id" => dev_id}, socket) do
     # Add logic to accept developer
     {:noreply,
      socket
      |> put_flash(:info, "Developer accepted successfully")
+     |> assign(:show_dev_drawer, false)
+     |> assign(:selected_dev, nil)
      |> assign(:matching_devs, Enum.reject(socket.assigns.matching_devs, &(&1.id == dev_id)))}
   end
 

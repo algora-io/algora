@@ -44,7 +44,8 @@ defmodule Algora.Accounts do
           amount: sum || 0,
           bounties: :rand.uniform(40),
           projects: :rand.uniform(10),
-          avatar_url: user.avatar_url
+          avatar_url: user.avatar_url,
+          message: "Hello, I'm interested in freelancing with you!"
         }
     end)
   end
@@ -126,9 +127,47 @@ defmodule Algora.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user!(id) do
+    if user = get_user(id) do
+      user
+    else
+      raise Ecto.NoResultsError, query: "User with id #{id} not found"
+    end
+  end
 
-  def get_user(id), do: Repo.get(User, id)
+  def get_user(id) do
+    transfer_amounts_query =
+      from t in Algora.Payments.Transaction,
+        where: t.type == :transfer,
+        group_by: t.receiver_id,
+        select: %{
+          receiver_id: t.receiver_id,
+          sum: sum(t.amount)
+        }
+
+    case User
+         |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.receiver_id)
+         |> where([u], u.id == ^id)
+         |> select([u, ta], {u, ta.sum})
+         |> Repo.one() do
+      nil ->
+        nil
+
+      {user, sum} ->
+        %{
+          id: user.id,
+          name: user.name || user.handle,
+          handle: user.handle,
+          flag: get_flag(user),
+          skills: user.tech_stack |> Enum.take(6),
+          amount: sum || 0,
+          bounties: :rand.uniform(40),
+          projects: :rand.uniform(10),
+          avatar_url: user.avatar_url,
+          message: "Hello, I'm interested in freelancing with you!"
+        }
+    end
+  end
 
   def get_user_by(fields), do: Repo.get_by(User, fields)
 

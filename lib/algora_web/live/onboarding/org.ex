@@ -201,7 +201,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               value={@context.email}
               placeholder="you@company.com"
               class="w-full bg-background border-input pl-10"
-              autocomplete="off"
               data-domain-target
               phx-hook="DeriveDomain"
             />

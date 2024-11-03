@@ -291,7 +291,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <div class="relative w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <thead class="[&_tr]:border-b">
-              <tr class="border-b transition-colors hover:bg-muted/50">
+              <tr class="border-b transition-colors hover:bg-background/50">
                 <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                   Developer
                 </th>
@@ -305,7 +305,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </thead>
             <tbody class="[&_tr:last-child]:border-0">
               <%= for dev <- @matching_devs do %>
-                <tr class="border-b transition-colors hover:bg-muted/50">
+                <tr class="border-b transition-colors hover:bg-background/50">
                   <td class="p-4 align-middle">
                     <div class="flex items-center gap-3">
                       <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">

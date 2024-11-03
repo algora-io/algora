@@ -366,7 +366,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </div>
 
       <div
-        class={"fixed inset-0 bg-black/50 z-50 transition-opacity #{if @show_dev_drawer, do: "opacity-100", else: "opacity-0 pointer-events-none"}"}
+        class={"fixed inset-0 bg-black/90 z-50 transition-all duration-300 #{if @show_dev_drawer, do: "opacity-100", else: "opacity-0 pointer-events-none"}"}
         phx-click="close_drawer"
       >
         <div
@@ -625,8 +625,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def handle_event("close_drawer", _, socket) do
     {:noreply,
      socket
-     |> assign(:show_dev_drawer, false)
-     |> assign(:selected_dev, nil)}
+     |> assign(:show_dev_drawer, false)}
   end
 
   def handle_event("accept_dev", %{"id" => dev_id}, socket) do

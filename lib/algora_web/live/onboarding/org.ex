@@ -17,7 +17,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:ok,
      socket
      |> assign(:step, 1)
-     |> assign(:total_steps, 3)
+     |> assign(:total_steps, 2)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
      |> assign(:code_valid, nil)}
@@ -29,34 +29,42 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <div class="flex-1 flex">
         <div class="flex-grow px-8 py-16">
           <div class="max-w-3xl mx-auto">
-            <div class="flex items-center gap-4 text-lg mb-6">
+            <div class={["flex items-center gap-4 text-lg mb-6", @step > @total_steps && "opacity-0"]}>
               <span class="text-muted-foreground"><%= @step %> / <%= @total_steps %></span>
               <h1 class="text-lg font-semibold uppercase">Get started</h1>
             </div>
-            <div class="mb-8">
+
+            <div class="mb-4">
               <%= render_step(assigns) %>
             </div>
+
             <div class="flex justify-between">
-              <%= if @step > 1 do %>
-                <.button phx-click="prev_step" class="bg-secondary hover:bg-secondary/80">
-                  Previous
-                </.button>
-              <% else %>
-                <div></div>
-              <% end %>
-              <%= if @step < @total_steps do %>
-                <.button phx-click="next_step" class="bg-primary hover:bg-primary/80">
-                  Next
-                </.button>
-              <% else %>
-                <.button phx-click="submit" class="bg-success hover:bg-success/80">
-                  Sign up
-                </.button>
+              <%= case @step do %>
+                <% 1 -> %>
+                  <.button phx-click="next_step" class="ml-auto bg-primary hover:bg-primary/80">
+                    Next
+                  </.button>
+                <% 2 -> %>
+                  <.button
+                    phx-click="prev_step"
+                    class="bg-secondary hover:bg-secondary/80 border-transparent"
+                  >
+                    Previous
+                  </.button>
+                  <.button phx-click="next_step">
+                    Sign up
+                  </.button>
+                <% 3 -> %>
+                  <.button phx-click="next_step" class="ml-auto">
+                    Submit
+                  </.button>
+                <% _ -> %>
+                  <div></div>
               <% end %>
             </div>
           </div>
         </div>
-        <div class="w-1/3 border-l border-border bg-background px-8 py-4 overflow-y-auto">
+        <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto">
           <h2 class="text-lg font-semibold uppercase mb-4">
             Matching Developers
           </h2>
@@ -64,7 +72,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <p class="text-muted-foreground">Add skills to see matching developers</p>
           <% else %>
             <%= for dev <- @matching_devs do %>
-              <div class="mb-4 bg-card p-4 rounded-lg border border-border">
+              <div class="mb-6 bg-card p-4 rounded-lg border border-border">
                 <div class="flex mb-2 gap-3">
                   <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
                   <div class="flex-grow">
@@ -82,9 +90,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     </div>
 
                     <div class="pt-3 text-sm">
-                      <div class="-ml-1 text-sm flex flex-wrap gap-1">
+                      <div class="-ml-1 text-sm flex flex-wrap gap-3">
                         <%= for skill <- dev.skills do %>
-                          <span class="rounded-xl px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
+                          <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
                             <%= skill %>
                           </span>
                         <% end %>
@@ -103,7 +111,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render_step(%{step: 1} = assigns) do
     ~H"""
-    <div class="space-y-8">
+    <div class="space-y-4">
       <div>
         <h2 class="text-4xl font-semibold mb-2">
           What is your tech stack?
@@ -138,7 +146,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </div>
 
-      <div class="mt-8">
+      <div>
         <h2 class="text-4xl font-semibold text-white mb-2">
           What are you looking to do?
         </h2>
@@ -146,9 +154,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         <div class="mt-4 grid grid-cols-1 gap-4">
           <%= for {intention, label} <- [
-            {"bounties", "Share open source bounties"},
-            {"jobs", "Share full-time jobs"},
-            {"projects", "Share freelancing projects"},
+            {"bounties", "Use bounties with my own developers"},
+            {"projects", "Share bounties with Algora developers"},
+            {"jobs", "Hire full-time engineers"},
           ] do %>
             <div class="relative flex items-center">
               <div class="flex items-center">
@@ -158,7 +166,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   phx-click="toggle_intention"
                   phx-value-intention={intention}
                   checked={intention in @context.intentions}
-                  class="h-8 w-8 rounded border-gray-700 bg-gray-800 text-primary focus:ring-primary focus:ring-offset-gray-900 cursor-pointer"
+                  class="h-8 w-8 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background cursor-pointer"
                 />
               </div>
               <div class="ml-3 text-base leading-6">
@@ -176,35 +184,58 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render_step(%{step: 2} = assigns) do
     ~H"""
-    <div class="space-y-8">
-      <h2 class="text-4xl font-semibold text-white">
-        Tell us about your company
+    <div class="space-y-4">
+      <h2 class="text-4xl font-semibold mb-2">
+        Join Algora with your team
       </h2>
 
       <div class="space-y-6">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Work Email</label>
-          <input
-            type="email"
-            phx-blur="update_context"
-            phx-value-field="email"
-            value={@context.email}
-            placeholder="you@company.com"
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          <label class="block text-sm font-medium mb-2">Work Email</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <.icon name="tabler-mail" class="w-5 h-5 text-muted-foreground" />
+            </div>
+            <.input
+              type="email"
+              name="email"
+              phx-blur="update_context"
+              phx-value-field="email"
+              value={@context.email}
+              placeholder="you@company.com"
+              class="w-full bg-background border-input pl-10"
+              autocomplete="off"
+              data-domain-target
+              phx-hook="DeriveDomain"
+            />
+          </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Company Domain</label>
-          <input
-            type="text"
-            phx-blur="update_context"
-            phx-value-field="domain"
-            value={@context.domain}
-            placeholder="company.com"
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <p class="mt-2 text-sm text-gray-400">
-            We will automatically add your teammates to your organization if they sign up with a verified email address from this domain
+          <label class="block text-sm font-medium">Company Domain</label>
+          <p class="mt-1 text-sm text-muted-foreground">
+            We will add your teammates to your organization if they sign up with a verified email address from this domain
+          </p>
+          <div class="mt-2 relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <.icon name="tabler-at" class="w-5 h-5 text-muted-foreground" />
+            </div>
+
+            <.input
+              type="text"
+              name="domain"
+              phx-change="update_context"
+              phx-value-field="domain"
+              value={@context.domain}
+              placeholder="company.com"
+              class="w-full bg-background border-input pl-10"
+              data-domain-source
+            />
+          </div>
+
+          <p class="mt-4 text-sm text-muted-foreground/75">
+            By continuing, you agree to Algora's
+            <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
+            and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
           </p>
         </div>
       </div>
@@ -215,28 +246,31 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def render_step(%{step: 3} = assigns) do
     ~H"""
     <div class="space-y-8">
-      <h2 class="text-4xl font-semibold text-white">
-        Verify your email
-      </h2>
-      <p class="text-gray-400">
-        We've sent a code to <%= @context.email %>
-      </p>
-
       <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">Verification Code</label>
-        <input
-          type="text"
-          phx-blur="update_context"
-          phx-value-field="verification_code"
-          value={@context.verification_code}
-          placeholder="Enter verification code"
-          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 tracking-widest text-center text-2xl"
-        />
-      </div>
+        <h2 class="text-4xl font-semibold mb-2">
+          Verify your email
+        </h2>
+        <p class="text-muted-foreground">
+          We've sent a code to <%= @context.email %>
+        </p>
 
-      <%= if @code_valid == false do %>
-        <p class="text-red-400">Please enter a valid verification code</p>
-      <% end %>
+        <div class="mt-6">
+          <label class="block text-sm font-medium mb-2">Verification Code</label>
+          <.input
+            type="text"
+            name="verification_code"
+            phx-blur="update_context"
+            phx-value-field="verification_code"
+            value={@context.verification_code}
+            placeholder="Enter verification code"
+            class="w-full bg-background border-input text-center text-2xl tracking-widest"
+          />
+        </div>
+
+        <%= if @code_valid == false do %>
+          <p class="text-destructive">Please enter a valid verification code</p>
+        <% end %>
+      </div>
     </div>
     """
   end

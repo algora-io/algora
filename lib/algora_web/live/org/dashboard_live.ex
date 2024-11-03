@@ -4,10 +4,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Bounties
   alias Algora.Money
   alias AlgoraWeb.Org.Forms.BountyForm
+  alias Algora.Accounts
 
   def mount(_params, _session, socket) do
-    org_id = socket.assigns.current_org.id
     recent_bounties = Bounties.list_bounties(limit: 10)
+    matching_devs = Accounts.list_matching_devs(org_id: socket.assigns.current_org.id, limit: 5)
 
     changeset =
       %BountyForm{}
@@ -19,6 +20,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     {:ok,
      socket
      |> assign(:recent_bounties, recent_bounties)
+     |> assign(:matching_devs, matching_devs)
      |> assign_form(changeset)}
   end
 
@@ -28,7 +30,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <div class="p-6 relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
         <div class="flex justify-between">
           <h2 class="text-2xl font-semibold mb-6">Create New Bounty</h2>
-          <.button type="submit" phx-disable-with="Creating..." class="text-xs h-[32px]">
+          <.button type="submit" phx-disable-with="Creating..." size="sm">
             Create bounty
           </.button>
         </div>
@@ -273,6 +275,67 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </fieldset>
         </.simple_form>
       </div>
+
+      <div class="mt-8 p-6 relative rounded-lg border bg-card text-card-foreground">
+        <div class="flex justify-between mb-6">
+          <div class="flex flex-col space-y-1.5">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight">Applicants</h2>
+            <p class="text-sm text-muted-foreground">
+              Developers interested in freelancing with you
+            </p>
+          </div>
+        </div>
+
+        <div class="relative w-full overflow-auto">
+          <table class="w-full caption-bottom text-sm">
+            <thead class="[&_tr]:border-b">
+              <tr class="border-b transition-colors hover:bg-muted/50">
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Developer
+                </th>
+                <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  Skills
+                </th>
+                <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="[&_tr:last-child]:border-0">
+              <%= for dev <- @matching_devs do %>
+                <tr class="border-b transition-colors hover:bg-muted/50">
+                  <td class="p-4 align-middle">
+                    <div class="flex items-center gap-3">
+                      <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                        <img class="aspect-square h-full w-full" alt={dev.name} src={dev.avatar_url} />
+                      </span>
+                      <div class="flex flex-col">
+                        <span class="font-medium"><%= dev.name %></span>
+                        <span class="text-sm text-muted-foreground">@<%= dev.handle %></span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="p-4 align-middle">
+                    <div class="flex flex-wrap gap-1">
+                      <%= for skill <- dev.skills do %>
+                        <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+                          <%= skill %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </td>
+                  <td class="p-4 align-middle text-right">
+                    <.button phx-click="view_dev" phx-value-id={dev.id} size="sm" variant="default">
+                      View
+                    </.button>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <.bounties_card current_org={@current_org} bounties={@recent_bounties} />
     </div>
     """
@@ -394,6 +457,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign_form(changeset)
        |> put_flash(:error, "Please fix the errors in the form")}
     end
+  end
+
+  def handle_event("view_dev", %{"id" => dev_id}, socket) do
+    # Add logic to accept developer
+    {:noreply,
+     socket
+     |> put_flash(:info, "Developer accepted successfully")
+     |> assign(:matching_devs, Enum.reject(socket.assigns.matching_devs, &(&1.id == dev_id)))}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

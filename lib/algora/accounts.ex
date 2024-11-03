@@ -36,6 +36,7 @@ defmodule Algora.Accounts do
     |> Enum.map(fn
       {user, sum} ->
         %{
+          id: user.id,
           name: user.name || user.handle,
           handle: user.handle,
           flag: get_flag(user),

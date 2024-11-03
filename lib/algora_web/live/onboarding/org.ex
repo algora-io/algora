@@ -16,7 +16,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     {:ok,
      socket
-     |> assign(:step, 1)
+     |> assign(:step, 2)
      |> assign(:total_steps, 2)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
@@ -41,17 +41,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <div class="flex justify-between">
               <%= case @step do %>
                 <% 1 -> %>
-                  <.button phx-click="next_step" class="ml-auto bg-primary hover:bg-primary/80">
+                  <.button phx-click="next_step" class="ml-auto">
                     Next
                   </.button>
                 <% 2 -> %>
-                  <.button
-                    phx-click="prev_step"
-                    class="bg-secondary hover:bg-secondary/80 border-transparent"
-                  >
+                  <.button phx-click="prev_step" variant="secondary">
                     Previous
                   </.button>
-                  <.button phx-click="next_step">
+                  <.button phx-click="next_step" variant="default">
                     Sign up
                   </.button>
                 <% 3 -> %>

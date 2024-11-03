@@ -21,9 +21,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
      socket
      |> assign(:recent_bounties, recent_bounties)
      |> assign(:matching_devs, matching_devs)
-     #  |> assign(:selected_dev, nil)
-     |> assign(:selected_dev, matching_devs |> hd())
-     |> assign(:show_dev_drawer, true)
+     |> assign(:selected_dev, nil)
+     |> assign(:show_dev_drawer, false)
      |> assign_form(changeset)}
   end
 
@@ -370,7 +369,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         phx-click="close_drawer"
       >
         <div
-          class={"fixed inset-x-0 bottom-0 z-50 h-[75vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
+          class={"fixed inset-x-0 bottom-0 z-50 h-[72vh] rounded-t-xl bg-background border-t transform transition-transform duration-300 ease-in-out #{if @show_dev_drawer, do: "translate-y-0", else: "translate-y-full"}"}
           phx-click-away="close_drawer"
         >
           <%= if @selected_dev do %>
@@ -436,9 +435,22 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     </div>
                     <!-- Message -->
                     <div class="p-px">
-                      <h5 class="text-sm font-medium mb-2">Message</h5>
-                      <div class="rounded-lg bg-card px-4 text-base border border-border min-h-[12rem] whitespace-pre-line">
-                        <%= @selected_dev.message %>
+                      <h5 class="text-sm font-medium mb-2">Note</h5>
+                      <div class="rounded-lg bg-card border border-border">
+                        <div class="px-4 py-2 border-b border-border">
+                          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <.icon name="tabler-message" class="w-4 h-4" />
+                            <span>
+                              @<%= @selected_dev.handle %> wrote to you <%= Algora.Util.time_ago(
+                                DateTime.utc_now()
+                                |> DateTime.add(-3, :day)
+                              ) %>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="px-4 leading-5 text-base whitespace-pre-line min-h-[9rem]">
+                          <%= @selected_dev.message %>
+                        </div>
                       </div>
                     </div>
                   </div>

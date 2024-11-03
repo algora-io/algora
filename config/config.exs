@@ -77,7 +77,23 @@ config :ex_cldr,
   default_backend: Algora.Cldr
 
 # SaladUI use tails to properly merge Tailwind CSS classes
-config :tails, colors_file: Path.join(File.cwd!(), "assets/tailwind.colors.json")
+config :tails,
+  color_classes: [
+    "primary",
+    "secondary",
+    "destructive",
+    "success",
+    "muted",
+    "accent",
+    "popover",
+    "card",
+    "border",
+    "input",
+    "ring",
+    "background",
+    "foreground",
+    "gray"
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -10,16 +10,31 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
     field :expected_hours, :integer
     field :payment_type, :string
     field :currency, :string
+    field :sharing_type, :string
+    field :share_emails, :string
+    field :share_url, :string
   end
 
   def changeset(form, attrs \\ %{}) do
     form
-    |> cast(attrs, [:title, :task_url, :amount, :expected_hours, :payment_type, :currency])
+    |> cast(attrs, [
+      :title,
+      :task_url,
+      :amount,
+      :expected_hours,
+      :payment_type,
+      :currency,
+      :sharing_type,
+      :share_emails,
+      :share_url
+    ])
     |> validate_required([:title, :task_url, :amount, :payment_type, :currency])
     |> validate_number(:amount, greater_than: 0)
     |> validate_expected_hours()
     |> validate_inclusion(:payment_type, ["fixed", "hourly"])
     |> validate_inclusion(:currency, ["USD"])
+    |> validate_inclusion(:sharing_type, ["private", "platform"])
+    |> put_default_sharing_type()
     |> validate_task_url()
   end
 
@@ -38,6 +53,14 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
       changeset
       |> validate_required([:expected_hours])
       |> validate_number(:expected_hours, greater_than: 0)
+    else
+      changeset
+    end
+  end
+
+  defp put_default_sharing_type(changeset) do
+    if get_field(changeset, :sharing_type) == nil do
+      put_change(changeset, :sharing_type, "platform")
     else
       changeset
     end

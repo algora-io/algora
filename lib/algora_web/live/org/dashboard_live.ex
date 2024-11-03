@@ -184,6 +184,97 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </label>
             </div>
           </fieldset>
+
+          <fieldset class="mb-8">
+            <legend class="text-sm font-medium text-foreground mb-2">Share Bounty With</legend>
+            <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "private", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+                <input
+                  type="radio"
+                  name="bounty_form[sharing_type]"
+                  value="private"
+                  checked={@form[:sharing_type].value == "private"}
+                  class="sr-only"
+                />
+                <span class="flex flex-1 flex-col">
+                  <span class="flex items-center mb-1">
+                    <span class="block text-sm font-medium text-foreground">Private Share</span>
+                    <svg
+                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "private", do: 'invisible'}"}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                  <span class="mt-1 text-sm text-muted-foreground">
+                    Share with specific people via email or link
+                  </span>
+
+                  <div class={"mt-3 space-y-3 transition-opacity duration-200 #{if @form[:sharing_type].value != "private", do: 'opacity-0 h-0 overflow-hidden', else: 'opacity-100'}"}>
+                    <div class="relative">
+                      <.input
+                        type="text"
+                        field={@form[:share_emails]}
+                        placeholder="email1@example.com, email2@example.com"
+                        class="w-full bg-background border-input rounded-lg"
+                      />
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <.icon name="tabler-mail" class="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div class="relative">
+                      <.input
+                        type="text"
+                        field={@form[:share_url]}
+                        value="https://algora.io/bounties/share/abc123"
+                        readonly
+                        class="w-full bg-background/50 border-input rounded-lg cursor-pointer"
+                      />
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                        <button type="button" class="text-muted-foreground hover:text-foreground">
+                          <.icon name="tabler-copy" class="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              </label>
+
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "platform", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+                <input
+                  type="radio"
+                  name="bounty_form[sharing_type]"
+                  value="platform"
+                  checked={@form[:sharing_type].value == "platform"}
+                  class="sr-only"
+                />
+                <span class="flex flex-1 flex-col">
+                  <span class="flex items-center mb-1">
+                    <span class="block text-sm font-medium text-foreground">Platform</span>
+                    <svg
+                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "platform", do: 'invisible'}"}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                  <span class="mt-1 text-sm text-muted-foreground">
+                    Share with all platform users
+                  </span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
         </.simple_form>
       </div>
       <.bounties_card current_org={@current_org} bounties={@recent_bounties} />

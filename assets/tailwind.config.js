@@ -5,8 +5,7 @@ const plugin = require("tailwindcss/plugin");
 const { fontFamily } = require("tailwindcss/defaultTheme");
 const path = require("path");
 const fs = require("fs");
-// const colors = require("./tailwind.colors.json");
-const colors = require("tailwindcss/colors");
+const colors = require("./tailwind.colors.json");
 
 module.exports = {
   content: [
@@ -25,7 +24,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        gray: colors.zinc,
+        ...colors,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

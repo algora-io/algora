@@ -82,7 +82,7 @@
       </div>
 
       <nav class="flex flex-1 flex-col">
-        <ul role="list" class="flex flex-1 flex-col gap-y-7">
+        <ul role="list" class="flex flex-1 flex-col">
           <%= for section <- @nav do %>
             <li>
               <ul role="list" class="space-y-1">
@@ -100,13 +100,15 @@
               </ul>
             </li>
           <% end %>
+
+          <.separator class="my-4" />
           <!-- Online users section -->
           <li>
-            <ul role="list" class="space-y-4">
+            <ul role="list" class="space-y-1">
               <%= for user <- @online_users do %>
                 <li>
                   <.link
-                    class="flex justify-center"
+                    class="flex justify-center p-2"
                     navigate={"/#{user.handle}"}
                     title={user.handle}
                   >

@@ -637,6 +637,8 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  defdelegate separator(assigns), to: AlgoraWeb.Components.Separator
+
   @doc """
   Renders a button.
 

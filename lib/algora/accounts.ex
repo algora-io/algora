@@ -45,7 +45,11 @@ defmodule Algora.Accounts do
           bounties: :rand.uniform(40),
           projects: :rand.uniform(10),
           avatar_url: user.avatar_url,
-          message: "Hello, I'm interested in freelancing with you!"
+          message: """
+          Hey 👋
+
+          I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
+          """
         }
     end)
   end
@@ -164,7 +168,11 @@ defmodule Algora.Accounts do
           bounties: :rand.uniform(40),
           projects: :rand.uniform(10),
           avatar_url: user.avatar_url,
-          message: "Hello, I'm interested in freelancing with you!"
+          message: """
+          Hey 👋
+
+          I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
+          """
         }
     end
   end

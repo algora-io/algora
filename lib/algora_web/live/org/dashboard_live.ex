@@ -397,44 +397,45 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <div class="overflow-y-auto">
                 <div class="grid grid-cols-2 gap-6">
                   <!-- Left Column -->
-                  <div class="mt-8 space-y-6">
+                  <div class="space-y-6">
                     <!-- Stats Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div class="p-4 rounded-lg bg-card border border-border">
-                        <div class="flex items-center gap-2 mb-2">
-                          <.icon name="tabler-cash-register" class="w-8 h-8 text-muted-foreground" />
-                          <div class="text-2xl font-bold font-display">
-                            <%= Money.format!(@selected_dev.amount, "USD") %>
+                    <div>
+                      <h5 class="text-sm font-medium mb-3 opacity-0">Stats</h5>
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="p-4 rounded-lg bg-card border border-border">
+                          <div class="flex items-center gap-2 mb-2">
+                            <.icon name="tabler-cash-register" class="w-8 h-8 text-muted-foreground" />
+                            <div class="text-2xl font-bold font-display">
+                              <%= Money.format!(@selected_dev.amount, "USD") %>
+                            </div>
                           </div>
+                          <div class="text-sm text-muted-foreground">Total Earnings</div>
                         </div>
-                        <div class="text-sm text-muted-foreground">Total Earnings</div>
-                      </div>
-                      <div class="p-4 rounded-lg bg-card border border-border">
-                        <div class="flex items-center gap-2 mb-2">
-                          <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
-                          <div class="text-2xl font-bold font-display">
-                            <%= @selected_dev.bounties %>
+                        <div class="p-4 rounded-lg bg-card border border-border">
+                          <div class="flex items-center gap-2 mb-2">
+                            <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+                            <div class="text-2xl font-bold font-display">
+                              <%= @selected_dev.bounties %>
+                            </div>
                           </div>
+                          <div class="text-sm text-muted-foreground">Bounties Solved</div>
                         </div>
-                        <div class="text-sm text-muted-foreground">Bounties Solved</div>
-                      </div>
-                      <div class="p-4 rounded-lg bg-card border border-border">
-                        <div class="flex items-center gap-2 mb-2">
-                          <.icon name="tabler-rocket" class="w-8 h-8 text-muted-foreground" />
-                          <div class="text-2xl font-bold font-display">
-                            <%= @selected_dev.projects %>
+                        <div class="p-4 rounded-lg bg-card border border-border">
+                          <div class="flex items-center gap-2 mb-2">
+                            <.icon name="tabler-rocket" class="w-8 h-8 text-muted-foreground" />
+                            <div class="text-2xl font-bold font-display">
+                              <%= @selected_dev.projects %>
+                            </div>
                           </div>
+                          <div class="text-sm text-muted-foreground">Projects Contributed</div>
                         </div>
-                        <div class="text-sm text-muted-foreground">Projects Contributed</div>
                       </div>
                     </div>
                     <!-- Message -->
-                    <div class="space-y-4 p-1 relative">
-                      <div>
-                        <h5 class="text-sm font-medium mb-2">Message</h5>
-                        <div class="rounded-lg bg-card p-4 text-sm ring-1 ring-ring min-h-[12rem]">
-                          <%= @selected_dev.message %>
-                        </div>
+                    <div class="p-px">
+                      <h5 class="text-sm font-medium mb-2">Message</h5>
+                      <div class="rounded-lg bg-card px-4 text-sm ring-1 ring-ring min-h-[12rem] whitespace-pre-line">
+                        <%= @selected_dev.message %>
                       </div>
                     </div>
                   </div>

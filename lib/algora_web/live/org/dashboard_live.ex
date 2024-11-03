@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <.button
             type="submit"
             phx-disable-with="Creating..."
-            class="relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-primary-400 dark:bg-primary-500 hover:bg-primary/80 dark:hover:bg-primary/50 text-foreground border-primary-500/75 dark:border-primary/30 hover:border-primary-600 dark:hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-400/80 dark:data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600 text-xs px-2.5 py-2 h-[32px]"
+            class="relative justify-center cursor-pointer inline-flex items-center space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border bg-primary/50 hover:bg-primary/30 text-foreground border-primary/80 hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600 text-xs px-2.5 py-2 h-[32px]"
           >
             Create bounty
           </.button>

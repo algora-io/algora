@@ -406,6 +406,31 @@ const Hooks = {
       });
     },
   },
+  DeriveDomain: {
+    mounted() {
+      const domainInput = document.querySelector("[data-domain-source]");
+      let shouldDerive = true;
+
+      // Listen for manual edits to the domain field
+      domainInput?.addEventListener("input", () => {
+        shouldDerive = false;
+      });
+
+      // Listen for changes to the email field
+      this.el.addEventListener("input", (e) => {
+        if (!shouldDerive) return;
+
+        const email = (e.target as HTMLInputElement).value;
+        const domain = email.split("@")[1] || "";
+
+        if (domainInput) {
+          (domainInput as HTMLInputElement).value = domain;
+          // Trigger the change event to update the server state
+          domainInput.dispatchEvent(new Event("change"));
+        }
+      });
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

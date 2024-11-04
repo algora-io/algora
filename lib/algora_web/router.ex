@@ -53,7 +53,8 @@ defmodule AlgoraWeb.Router do
     live_session :org,
       layout: {AlgoraWeb.Layouts, :org},
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
-      live "/org/:org_handle", Org.DashboardLive, :index
+      live "/org/:org_handle", Org.HomeLive, :index
+      live "/org/:org_handle/dashboard", Org.DashboardLive, :index
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
       live "/org/:org_handle/projects", Project.IndexLive, :index
       # live "/org/:org_handle/projects/:id", Project.ViewLive

@@ -202,7 +202,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       %{
         amount: Decimal.new(75),
         currency: "USD",
-        task: %{title: "Senior Elixir Engineer for livestreaming platform"},
+        task: %{title: "Full-stack Elixir engineer for livestreaming platform"},
         owner: %{
           handle: "algora",
           name: "Algora",
@@ -215,7 +215,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       %{
         amount: Decimal.new(150),
         currency: "USD",
-        task: %{title: "Rust Backend Engineer (Contract)"},
+        task: %{title: "Rust backend engineer (contract)"},
         owner: %{
           handle: "golemcloud",
           name: "Golem Cloud",

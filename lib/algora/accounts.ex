@@ -45,6 +45,7 @@ defmodule Algora.Accounts do
           bounties: :rand.uniform(40),
           projects: :rand.uniform(10),
           avatar_url: user.avatar_url,
+          bio: user.bio,
           message: """
           Hey 👋
 
@@ -168,6 +169,7 @@ defmodule Algora.Accounts do
           bounties: :rand.uniform(40),
           projects: :rand.uniform(10),
           avatar_url: user.avatar_url,
+          bio: user.bio,
           message: """
           Hey 👋
 

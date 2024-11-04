@@ -527,7 +527,7 @@ defmodule AlgoraWeb.PricingLive do
           <div class="mt-6 pt-6 border-t">
             <div class="flex justify-between items-center">
               <span class="text-lg font-medium text-card-foreground">Estimated Yearly Savings</span>
-              <span class="text-2xl font-bold text-primary font-display">
+              <span class="text-2xl font-bold text-success font-display">
                 $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.savings)) %>
               </span>
             </div>

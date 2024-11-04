@@ -6,9 +6,7 @@ defmodule AlgoraWeb.LeaderboardLive do
   alias Algora.Money
   import Ecto.Query
   import Ecto.Changeset
-  import AlgoraWeb.Components.Card
-  import AlgoraWeb.Components.DataTable
-  import AlgoraWeb.Components.Avatar
+
   alias Algora.Misc.CountryEmojis
 
   def mount(_params, _session, socket) do

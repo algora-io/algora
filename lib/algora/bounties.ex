@@ -108,7 +108,9 @@ defmodule Algora.Bounties do
       completed_bounties_count: completed_bounties,
       solvers_count: solvers_count,
       solvers_diff: solvers_diff,
-      members_count: members_count
+      members_count: members_count,
+      # TODO
+      reviews_count: 4
     }
   end
 

@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Org.AnalyticsLive do
   use AlgoraWeb, :live_view
 
+  import AlgoraWeb.Components.StatCard
   alias Algora.Bounties
   alias Algora.Money
 
@@ -55,23 +56,6 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
         <.activity_card activities={@recent_activities} />
       </div>
     </div>
-    """
-  end
-
-  def stat_card(assigns) do
-    ~H"""
-    <.link href={@href}>
-      <div class="group/card relative rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 hover:border-white/15 hover:bg-white/[4%] h-full transition-colors duration-75 hover:brightness-125">
-        <div class="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
-          <h3 class="tracking-tight text-sm font-medium"><%= @title %></h3>
-          <.icon name={@icon} class="h-6 w-6 text-gray-400" />
-        </div>
-        <div class="p-6 pt-0">
-          <div class="text-2xl font-bold"><%= @value %></div>
-          <p class="text-xs text-gray-400"><%= @subtext %></p>
-        </div>
-      </div>
-    </.link>
     """
   end
 

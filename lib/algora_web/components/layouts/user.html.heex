@@ -73,6 +73,36 @@
                   </ul>
                 </li>
               <% end %>
+
+              <.separator class="my-4" />
+
+              <li>
+                <ul role="list" class="space-y-1">
+                  <%= for org <- @online_orgs do %>
+                    <li>
+                      <.link
+                        class="flex justify-center p-2"
+                        navigate={"/#{org.handle}"}
+                        title={org.handle}
+                      >
+                        <div class="relative inline-block">
+                          <div class="relative flex-shrink-0 overflow-hidden h-8 w-8 rounded-full">
+                            <img
+                              alt={org.handle}
+                              loading="lazy"
+                              decoding="async"
+                              src={org.avatar_url}
+                              class="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                          </span>
+                        </div>
+                      </.link>
+                    </li>
+                  <% end %>
+                </ul>
+              </li>
             </ul>
           </nav>
         </div>
@@ -187,7 +217,7 @@
     </div>
   </div> --%>
   <!-- Static sidebar for desktop -->
-  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
+  <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4 scrollbar-thin">
     <div class="flex h-16 shrink-0 items-center justify-center">
       <.logo class="h-8 w-auto text-white" />
     </div>
@@ -239,6 +269,30 @@
             <span class="sr-only">Settings</span>
           </a>
         </li>
+      </ul>
+
+      <.separator class="my-4 w-2/3 mx-auto" />
+
+      <ul role="list" class="space-y-1">
+        <%= for org <- @online_orgs do %>
+          <li>
+            <.link class="flex justify-center p-2" navigate={"/#{org.handle}"} title={org.handle}>
+              <div class="relative inline-block">
+                <div class="relative flex-shrink-0 overflow-hidden h-8 w-8 rounded-full">
+                  <img
+                    alt={org.handle}
+                    loading="lazy"
+                    decoding="async"
+                    src={org.avatar_url}
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+                <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                </span>
+              </div>
+            </.link>
+          </li>
+        <% end %>
       </ul>
     </nav>
   </div>

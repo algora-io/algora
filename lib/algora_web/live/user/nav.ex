@@ -2,12 +2,14 @@ defmodule AlgoraWeb.User.Nav do
   import Phoenix.LiveView
   use Phoenix.Component
 
+  alias Algora.Accounts
   alias AlgoraWeb.User
 
   def on_mount(:default, _params, _session, socket) do
     {:cont,
      socket
      |> assign(:nav, nav_items())
+     |> assign(:online_orgs, Accounts.list_orgs(limit: 10))
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 

@@ -9,7 +9,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     socket =
       socket
       |> assign(:tech_stack, tech_stack)
-      |> assign(:view_mode, "compact")
+      |> assign(:view_mode, "default")
       |> assign(
         :bounties,
         Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         </div>
       </div>
     </div>
-    <!-- Activity Feed Sidebar -->
+    <!-- Sidebar -->
     <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8">
       <!-- Achievements Section -->
       <div class="flex items-center justify-between">
@@ -98,7 +98,6 @@ defmodule AlgoraWeb.User.DashboardLive do
           View all
         </.link>
       </div>
-
       <nav class="pt-4">
         <ol role="list" class="space-y-6">
           <%= for achievement <- @achievements do %>
@@ -108,25 +107,6 @@ defmodule AlgoraWeb.User.DashboardLive do
           <% end %>
         </ol>
       </nav>
-      <!-- Activity Feed Section -->
-      <div class="flex items-center justify-between pt-12">
-        <h2 class="text-xl font-semibold leading-none tracking-tight">Activity feed</h2>
-        <.link
-          class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
-          href="#"
-        >
-          View all
-        </.link>
-      </div>
-
-      <ul class="pt-4">
-        <%= for event <- @events do %>
-          <li class="relative pb-8">
-            <span class="absolute left-4 -bottom-6 h-5 w-0.5 bg-border"></span>
-            <.event event={event} />
-          </li>
-        <% end %>
-      </ul>
     </aside>
     """
   end

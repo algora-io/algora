@@ -9,9 +9,10 @@ defmodule AlgoraWeb.User.DashboardLive do
     socket =
       socket
       |> assign(:tech_stack, tech_stack)
+      |> assign(:view_mode, "compact")
       |> assign(
         :bounties,
-        Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 10)
+        Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
       )
       |> assign(:achievements, fetch_achievements())
       |> assign(:events, fetch_events())
@@ -29,17 +30,19 @@ defmodule AlgoraWeb.User.DashboardLive do
             <h2 class="text-2xl font-semibold leading-none tracking-tight">Bounties for you</h2>
             <p class="text-sm text-muted-foreground">Based on your tech stack</p>
           </div>
-          <div>
-            <.link
-              class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
-              href="#"
-            >
-              View all
-            </.link>
-          </div>
+          <.toggle_group :let={builder} type="single" value={@view_mode}>
+            <.toggle_group_item builder={builder} value="default" class="gap-2" phx-click="view_mode">
+              <.icon name="tabler-layout-list" class="h-4 w-4" />
+              <span class="sr-only">Default view</span>
+            </.toggle_group_item>
+            <.toggle_group_item builder={builder} value="compact" class="gap-2" phx-click="view_mode">
+              <.icon name="tabler-baseline-density-medium" class="h-4 w-4" />
+              <span class="sr-only">Compact view</span>
+            </.toggle_group_item>
+          </.toggle_group>
         </div>
         <!-- Tech Stack Input -->
-        <div class="px-6">
+        <div class="px-6 pt-3">
           <.input
             id="tech-input"
             name="tech-input"
@@ -66,65 +69,16 @@ defmodule AlgoraWeb.User.DashboardLive do
             <% end %>
           </div>
         </div>
-        <!-- Bounties Table -->
-        <div class="px-6 -ml-4">
+        <div class="px-6 pt-3 -ml-4">
           <div class="relative w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for bounty <- @bounties do %>
-                  <tr class="border-b transition-colors hover:bg-muted/10">
-                    <td class="p-4 align-middle">
-                      <div class="flex items-center gap-4">
-                        <.link href={~p"/org/#{bounty.owner.handle}"}>
-                          <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                            <img
-                              class="aspect-square h-full w-full"
-                              alt={bounty.owner.name}
-                              src={bounty.owner.avatar_url}
-                            />
-                          </span>
-                        </.link>
-
-                        <div class="flex flex-col gap-1">
-                          <div class="flex items-center gap-1 text-sm text-muted-foreground">
-                            <.link
-                              href={~p"/org/#{bounty.owner.handle}"}
-                              class="font-semibold hover:underline"
-                            >
-                              <%= bounty.owner.name %>
-                            </.link>
-                            <.icon name="tabler-chevron-right" class="h-4 w-4" />
-                            <.link
-                              href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
-                              class="hover:underline"
-                            >
-                              <%= bounty.task.repo %>#<%= bounty.task.number %>
-                            </.link>
-                          </div>
-
-                          <.link
-                            href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
-                            class="group flex items-center gap-2"
-                          >
-                            <div class="font-display text-xl font-semibold text-success">
-                              <%= Money.format!(bounty.amount, bounty.currency) %>
-                            </div>
-                            <div class="text-foreground group-hover:underline line-clamp-1">
-                              <%= bounty.task.title %>
-                            </div>
-                          </.link>
-
-                          <div class="flex flex-wrap gap-2">
-                            <%= for tag <- bounty.tech_stack do %>
-                              <span class="text-sm text-muted-foreground">
-                                #<%= tag %>
-                              </span>
-                            <% end %>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
+                  <%= if @view_mode == "compact" do %>
+                    <.compact_view bounty={bounty} />
+                  <% else %>
+                    <.default_view bounty={bounty} />
+                  <% end %>
                 <% end %>
               </tbody>
             </table>
@@ -404,5 +358,99 @@ defmodule AlgoraWeb.User.DashboardLive do
      socket
      |> assign(:tech_stack, tech_stack)
      |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
+  end
+
+  def handle_event("view_mode", %{"value" => mode}, socket) do
+    dbg(mode)
+    {:noreply, assign(socket, :view_mode, mode)}
+  end
+
+  def compact_view(assigns) do
+    ~H"""
+    <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+      <td class="p-4 py-0 align-middle">
+        <div class="flex items-center gap-4">
+          <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+            <%= Money.format!(@bounty.amount, @bounty.currency) %>
+          </div>
+
+          <.link
+            href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
+            class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+          >
+            <%= @bounty.task.title %>
+          </.link>
+
+          <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+            <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+              <%= @bounty.owner.name %>
+            </.link>
+            <.icon name="tabler-chevron-right" class="h-4 w-4" />
+            <.link
+              href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
+              class="hover:underline"
+            >
+              <%= @bounty.task.repo %>#<%= @bounty.task.number %>
+            </.link>
+          </div>
+        </div>
+      </td>
+    </tr>
+    """
+  end
+
+  def default_view(assigns) do
+    ~H"""
+    <tr class="border-b transition-colors hover:bg-muted/10">
+      <td class="p-4 align-middle">
+        <div class="flex items-center gap-4">
+          <.link href={~p"/org/#{@bounty.owner.handle}"}>
+            <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+              <img
+                class="aspect-square h-full w-full"
+                alt={@bounty.owner.name}
+                src={@bounty.owner.avatar_url}
+              />
+            </span>
+          </.link>
+
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-1 text-sm text-muted-foreground">
+              <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+                <%= @bounty.owner.name %>
+              </.link>
+              <.icon name="tabler-chevron-right" class="h-4 w-4" />
+              <.link
+                href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
+                class="hover:underline"
+              >
+                <%= @bounty.task.repo %>#<%= @bounty.task.number %>
+              </.link>
+            </div>
+
+            <.link
+              href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
+              class="group flex items-center gap-2"
+            >
+              <div class="font-display text-xl font-semibold text-success">
+                <%= Money.format!(@bounty.amount, @bounty.currency) %>
+              </div>
+              <div class="text-foreground group-hover:underline line-clamp-1">
+                <%= @bounty.task.title %>
+              </div>
+            </.link>
+
+            <div class="flex flex-wrap gap-2">
+              <%= for tag <- @bounty.tech_stack do %>
+                <span class="text-sm text-muted-foreground">
+                  #<%= tag %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    """
   end
 end

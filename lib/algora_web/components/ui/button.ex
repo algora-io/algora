@@ -30,7 +30,7 @@ defmodule AlgoraWeb.Components.UI.Button do
       type={@type}
       class={
         classes([
-          "phx-submit-loading:opacity-75 disabled:opacity-75 text-sm",
+          "phx-submit-loading:opacity-75 disabled:opacity-75",
           "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50",
           @variant_class,
           @class

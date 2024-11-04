@@ -46,6 +46,8 @@ defmodule AlgoraWeb.Router do
       live "/dashboard", User.DashboardLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index
+
+      live "/@/:handle", User.ProfileLive, :index
     end
 
     live_session :org,

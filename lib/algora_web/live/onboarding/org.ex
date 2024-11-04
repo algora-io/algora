@@ -16,7 +16,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     {:ok,
      socket
-     |> assign(:step, 2)
+     |> assign(:step, 1)
      |> assign(:total_steps, 2)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
@@ -25,7 +25,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-br from-muted/10 to-muted/20">
+    <div class="min-h-screen bg-card">
       <div class="flex-1 flex">
         <div class="flex-grow px-8 py-16">
           <div class="max-w-3xl mx-auto">

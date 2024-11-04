@@ -14,6 +14,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(
         :bounties,
         Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
+        |> intersperse_hourly_bounties()
       )
       |> assign(:achievements, fetch_achievements())
 
@@ -196,6 +197,68 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply, assign(socket, :view_mode, mode)}
   end
 
+  defp intersperse_hourly_bounties(bounties) do
+    hourly_bounties = [
+      %{
+        amount: Decimal.new(75),
+        currency: "USD",
+        task: %{title: "Senior Elixir Engineer for livestreaming platform"},
+        owner: %{
+          handle: "algora",
+          name: "Algora",
+          avatar_url:
+            "https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
+        },
+        tech_stack: ["elixir", "phoenix", "membrane"],
+        hourly: true
+      },
+      %{
+        amount: Decimal.new(150),
+        currency: "USD",
+        task: %{title: "Rust Backend Engineer (Contract)"},
+        owner: %{
+          handle: "golemcloud",
+          name: "Golem Cloud",
+          avatar_url:
+            "https://console.algora.io/_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F133607167%3Fs%3D200%26v%3D4&w=1920&q=75"
+        },
+        tech_stack: ["rust", "wasm"],
+        hourly: true
+      }
+    ]
+
+    bounties
+    |> Enum.zip(Stream.cycle(hourly_bounties))
+    |> Enum.flat_map(fn {bounty, hourly} -> [bounty, hourly] end)
+  end
+
+  def compact_view(%{bounty: %{hourly: true}} = assigns) do
+    ~H"""
+    <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+      <td class="p-4 py-0 align-middle">
+        <div class="flex items-center gap-4">
+          <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+            <%= Money.format!(@bounty.amount, @bounty.currency) %>/hr
+          </div>
+
+          <.link
+            navigate={~p"/org/#{@bounty.owner.handle}"}
+            class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+          >
+            <%= @bounty.task.title %>
+          </.link>
+
+          <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+            <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+              <%= @bounty.owner.name %>
+            </.link>
+          </div>
+        </div>
+      </td>
+    </tr>
+    """
+  end
+
   def compact_view(assigns) do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10 h-10">
@@ -220,6 +283,54 @@ defmodule AlgoraWeb.User.DashboardLive do
             <.link href={Bounty.url(@bounty)} class="hover:underline">
               <%= Bounty.path(@bounty) %>
             </.link>
+          </div>
+        </div>
+      </td>
+    </tr>
+    """
+  end
+
+  def default_view(%{bounty: %{hourly: true}} = assigns) do
+    ~H"""
+    <tr class="border-b transition-colors hover:bg-muted/10">
+      <td class="p-4 align-middle">
+        <div class="flex items-center gap-4">
+          <.link href={~p"/org/#{@bounty.owner.handle}"}>
+            <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+              <img
+                class="aspect-square h-full w-full"
+                alt={@bounty.owner.name}
+                src={@bounty.owner.avatar_url}
+              />
+            </span>
+          </.link>
+
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-1 text-sm text-muted-foreground">
+              <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+                <%= @bounty.owner.name %>
+              </.link>
+            </div>
+
+            <div class="group flex items-center gap-2">
+              <div class="font-display text-xl font-semibold text-success">
+                <%= Money.format!(@bounty.amount, @bounty.currency) %>/hr
+              </div>
+              <.link
+                navigate={~p"/org/#{@bounty.owner.handle}"}
+                class="text-foreground group-hover:underline line-clamp-1"
+              >
+                <%= @bounty.task.title %>
+              </.link>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <%= for tag <- @bounty.tech_stack do %>
+                <span class="text-sm text-muted-foreground">
+                  #<%= tag %>
+                </span>
+              <% end %>
+            </div>
           </div>
         </div>
       </td>

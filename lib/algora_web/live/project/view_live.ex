@@ -3,9 +3,6 @@ defmodule AlgoraWeb.Project.ViewLive do
   alias Algora.Money
   alias Algora.Accounts
 
-  import AlgoraWeb.Components.Tabs
-  import AlgoraWeb.Components.Card
-
   def mount(%{"id" => id}, _session, socket) do
     # Mock data for a single project
     project = %{

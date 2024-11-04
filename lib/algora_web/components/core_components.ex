@@ -637,10 +637,6 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
-  defdelegate separator(assigns), to: AlgoraWeb.Components.Separator
-
-  defdelegate button(assigns), to: AlgoraWeb.Components.Button
-
   @doc """
   Renders an input with label and error messages.
 
@@ -1149,4 +1145,19 @@ defmodule AlgoraWeb.CoreComponents do
     </div>
     """
   end
+
+  defdelegate avatar_fallback(assigns), to: AlgoraWeb.Components.UI.Avatar
+  defdelegate avatar_image(assigns), to: AlgoraWeb.Components.UI.Avatar
+  defdelegate avatar(assigns), to: AlgoraWeb.Components.UI.Avatar
+  defdelegate button(assigns), to: AlgoraWeb.Components.UI.Button
+  defdelegate card_content(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate card_header(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate card_title(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate card(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate data_table(assigns), to: AlgoraWeb.Components.UI.DataTable
+  defdelegate separator(assigns), to: AlgoraWeb.Components.UI.Separator
+  defdelegate tabs_content(assigns), to: AlgoraWeb.Components.UI.Tabs
+  defdelegate tabs_list(assigns), to: AlgoraWeb.Components.UI.Tabs
+  defdelegate tabs_trigger(assigns), to: AlgoraWeb.Components.UI.Tabs
+  defdelegate tabs(assigns), to: AlgoraWeb.Components.UI.Tabs
 end

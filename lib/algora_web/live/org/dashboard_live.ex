@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           phx-submit="create_bounty"
           class="mt-6 space-y-6"
         >
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
             <div>
               <.label for="title" class="text-sm font-medium mb-2">
                 Title

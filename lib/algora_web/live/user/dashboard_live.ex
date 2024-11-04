@@ -107,6 +107,48 @@ defmodule AlgoraWeb.User.DashboardLive do
           <% end %>
         </ol>
       </nav>
+      <div class="pt-8">
+        <form
+          class="relative mb-4 p-5 rounded-lg overflow-hidden border border-border"
+          style="background: linear-gradient(92.79deg, #000000 -246.32%, #000231 -20.84%, #150E46 103.47%); z-index: 1;"
+        >
+          <img
+            src="https://github.githubassets.com/assets/universe24-banner-graphic-16-2ccd0a285a4e.jpg"
+            alt=""
+            width="355"
+            height="205"
+            class="absolute bottom-0 right-0 w-full h-full pointer-events-none object-cover -z-10"
+          />
+
+          <div class="absolute p-2 top-1 right-1.5">
+            <button class="text-white" aria-label="Close" type="submit">
+              <.icon name="tabler-x" class="h-4 w-4" />
+            </button>
+          </div>
+
+          <img
+            src="https://github.githubassets.com/assets/logo-dark-2c4fc4ef1104.svg"
+            alt="Universe24"
+            width="195"
+            height="21"
+            class="max-w-[85%] h-auto block"
+          />
+
+          <p class="mb-0 pr-2 text-sm mt-[22px] tracking-[-0.01em] text-white">
+            <strong>Get 30+ hours of free content</strong>
+            <span class="text-[#e6e7ec]">
+              when you watch all the virtual sessions you may have missed at GitHub Universe.
+            </span>
+          </p>
+
+          <a
+            href="https://githubuniverse.com/?utm_source=github&amp;utm_medium=banner&amp;utm_campaign=24banner16li"
+            class="mt-[26px] min-h-[36px] rounded-lg font-semibold text-black bg-white hover:bg-gray-50 border border-gray-500 w-full inline-flex items-center justify-center tracking-[-0.02em]"
+          >
+            <span>Watch now</span>
+          </a>
+        </form>
+      </div>
     </aside>
     """
   end

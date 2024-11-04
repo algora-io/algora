@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.User.DashboardLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
   alias Algora.Money
 
   def mount(_params, _session, socket) do
@@ -205,7 +206,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
 
           <.link
-            href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
+            href={Bounty.url(@bounty)}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
             <%= @bounty.task.title %>
@@ -216,11 +217,8 @@ defmodule AlgoraWeb.User.DashboardLive do
               <%= @bounty.owner.name %>
             </.link>
             <.icon name="tabler-chevron-right" class="h-4 w-4" />
-            <.link
-              href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
-              class="hover:underline"
-            >
-              <%= @bounty.task.repo %>#<%= @bounty.task.number %>
+            <.link href={Bounty.url(@bounty)} class="hover:underline">
+              <%= Bounty.path(@bounty) %>
             </.link>
           </div>
         </div>
@@ -250,18 +248,12 @@ defmodule AlgoraWeb.User.DashboardLive do
                 <%= @bounty.owner.name %>
               </.link>
               <.icon name="tabler-chevron-right" class="h-4 w-4" />
-              <.link
-                href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
-                class="hover:underline"
-              >
-                <%= @bounty.task.repo %>#<%= @bounty.task.number %>
+              <.link href={Bounty.url(@bounty)} class="hover:underline">
+                <%= Bounty.path(@bounty) %>
               </.link>
             </div>
 
-            <.link
-              href={"https://github.com/#{@bounty.task.owner}/#{@bounty.task.repo}/issues/#{@bounty.task.number}"}
-              class="group flex items-center gap-2"
-            >
+            <.link href={Bounty.url(@bounty)} class="group flex items-center gap-2">
               <div class="font-display text-xl font-semibold text-success">
                 <%= Money.format!(@bounty.amount, @bounty.currency) %>
               </div>

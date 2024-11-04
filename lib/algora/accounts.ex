@@ -131,15 +131,15 @@ defmodule Algora.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id) do
-    if user = get_user(id) do
-      user
-    else
-      raise Ecto.NoResultsError, query: "User with id #{id} not found"
-    end
-  end
+  def get_user!(id), do: Repo.get!(User, id)
 
-  def get_user(id) do
+  def get_user(id), do: Repo.get(User, id)
+
+  def get_user_by(fields), do: Repo.get_by(User, fields)
+
+  def get_user_by!(fields), do: Repo.get_by!(User, fields)
+
+  def get_user_with_stats(id) do
     transfer_amounts_query =
       from t in Algora.Payments.Transaction,
         where: t.type == :transfer,
@@ -176,10 +176,6 @@ defmodule Algora.Accounts do
         }
     end
   end
-
-  def get_user_by(fields), do: Repo.get_by(User, fields)
-
-  def get_user_by!(fields), do: Repo.get_by!(User, fields)
 
   ## User registration
 

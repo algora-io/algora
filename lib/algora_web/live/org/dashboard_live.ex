@@ -630,7 +630,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
-    dev = Accounts.get_user!(dev_id)
+    dev = Accounts.get_user_with_stats(dev_id)
 
     {:noreply,
      socket

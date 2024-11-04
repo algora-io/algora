@@ -122,7 +122,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
           <!-- Background pattern -->
           <div
-            class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+            class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
             aria-hidden="true"
           >
             <div
@@ -155,7 +155,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
 
           <div
-            class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+            class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
             aria-hidden="true"
           >
             <div

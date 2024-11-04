@@ -190,16 +190,42 @@
         <span class="relative font-semibold text-sm">Docs</span>
       </.link>
       <%= if @current_user do %>
-        <div class="shrink-0">
-          <.simple_dropdown id="navbar-account-dropdown">
-            <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-            <:link href={~p"/auth/logout"} method={:delete}>Sign out</:link>
-          </.simple_dropdown>
+        <div>
+          <.dropdown2 id="dashboard-dropdown">
+            <:img src={@current_org.avatar_url} alt={@current_org.handle} />
+            <:title><%= @current_org.name %></:title>
+
+            <:link href={~p"/set_context/personal"}>
+              <div class="flex items-center">
+                <img
+                  src={@current_user.avatar_url}
+                  alt={@current_user.name}
+                  class="w-8 h-8 rounded-full mr-3"
+                />
+                <div>
+                  <div class="font-semibold"><%= @current_user.name %></div>
+                  <div class="text-sm text-gray-500">@<%= @current_user.handle %></div>
+                </div>
+              </div>
+            </:link>
+            <:link
+              :for={org <- Algora.Organizations.get_user_orgs(@current_org)}
+              href={~p"/set_context/#{org.handle}"}
+            >
+              <div class="flex items-center">
+                <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
+                <div>
+                  <div class="font-semibold"><%= org.name %></div>
+                  <div class="text-sm text-gray-500">@<%= org.handle %></div>
+                </div>
+              </div>
+            </:link>
+          </.dropdown2>
         </div>
       <% else %>
         <.link
           navigate="/auth/login"
-          class="rounded-lg bg-accent hover:bg-accent/80 py-1 px-2 text-sm font-semibold leading-6 text-accent-foreground"
+          class="rounded-lg bg-gray-50 hover:bg-gray-200 py-1 px-2 text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80"
         >
           <span class="relative font-semibold text-sm">Login</span>
         </.link>

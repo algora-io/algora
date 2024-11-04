@@ -25,8 +25,21 @@ defmodule Algora.Bounties.Bounty do
     |> generate_id()
     |> validate_required([:amount, :currency, :task_id, :owner_id, :creator_id])
     |> validate_number(:amount, greater_than: 0)
-    |> validate_inclusion(:currency, ["USD"])
+    |> validate_currency()
   end
+
+  def validate_currency(changeset) do
+    changeset |> validate_inclusion(:currency, ["USD"])
+  end
+
+  def url(bounty),
+    do: "https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"
+
+  def path(bounty),
+    do: "#{bounty.task.repo}##{bounty.task.number}"
+
+  def full_path(bounty),
+    do: "#{bounty.task.owner}/#{bounty.task.repo}##{bounty.task.number}"
 
   def open(query \\ Bounty) do
     from b in query,

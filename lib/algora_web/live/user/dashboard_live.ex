@@ -15,7 +15,6 @@ defmodule AlgoraWeb.User.DashboardLive do
         Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
       )
       |> assign(:achievements, fetch_achievements())
-      |> assign(:events, fetch_events())
 
     {:ok, socket}
   end
@@ -116,62 +115,6 @@ defmodule AlgoraWeb.User.DashboardLive do
     """
   end
 
-  defp format_time_ago(datetime) do
-    diff = DateTime.diff(DateTime.utc_now(), datetime, :day)
-
-    case diff do
-      0 -> "today"
-      1 -> "1 day ago"
-      n -> "#{n} days ago"
-    end
-  end
-
-  defp fetch_events() do
-    [
-      %{
-        type: :bounty_shared,
-        org: %{
-          name: "Grit",
-          handle: "grit",
-          avatar_url: "https://avatars.githubusercontent.com/u/62914393?s=200&v=4"
-        },
-        count: 2,
-        amount: 300,
-        inserted_at: ~U[2024-10-28 20:02:22.464Z]
-      },
-      %{
-        type: :bounty_awarded,
-        org: %{name: "Algora"},
-        user: %{
-          name: "urbit-pilled",
-          avatar_url:
-            "https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
-        },
-        amount: 200,
-        url: "https://github.com/algora-io/tv/issues/105",
-        inserted_at: ~U[2024-10-28 14:23:26.505Z]
-      },
-      %{
-        type: :stream_started,
-        user: %{
-          name: "Chris Griffing",
-          avatar_url: "https://avatars.githubusercontent.com/u/1195435?v=4"
-        },
-        url: "https://tv.algora.io/cmgriffing",
-        inserted_at: ~U[2024-10-27 21:38:00.560Z]
-      },
-      %{
-        type: :stream_started,
-        user: %{
-          name: "Daniel Roe",
-          avatar_url: "https://avatars.githubusercontent.com/u/28706372?v=4"
-        },
-        url: "https://tv.algora.io/danielroe",
-        inserted_at: ~U[2024-10-24 10:32:01.550Z]
-      }
-    ]
-  end
-
   defp fetch_achievements() do
     [
       %{status: :completed, name: "Personalize Algora"},
@@ -220,104 +163,6 @@ defmodule AlgoraWeb.User.DashboardLive do
         <%= @achievement.name %>
       </span>
     </.link>
-    """
-  end
-
-  def event(%{event: %{type: :bounty_shared}} = assigns) do
-    ~H"""
-    <a class="group inline-flex" href={~p"/org/#{@event.org.handle}"}>
-      <div class="relative flex space-x-3">
-        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-          <div class="flex items-center gap-4">
-            <div class="relative flex -space-x-1">
-              <div class="relative flex-shrink-0 overflow-hidden flex h-8 w-8 items-center justify-center rounded-xl">
-                <img alt={@event.org.name} src={@event.org.avatar_url} />
-              </div>
-            </div>
-            <div class="z-10 flex gap-2">
-              <span class="font-emoji text-sm sm:text-base">💎</span>
-              <div class="space-y-0.5">
-                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-sm">
-                  <strong class="font-bold"><%= @event.org.name %></strong>
-                  shared <strong class="font-bold"><%= @event.count %></strong>
-                  bounties rewarding <strong class="font-bold">$<%= @event.amount %></strong>
-                </p>
-                <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                  <time datetime={@event.inserted_at}>
-                    <%= format_time_ago(@event.inserted_at) %>
-                  </time>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </a>
-    """
-  end
-
-  def event(%{event: %{type: :bounty_awarded}} = assigns) do
-    ~H"""
-    <a class="group inline-flex" href={@event.url}>
-      <div class="relative flex space-x-3">
-        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-          <div class="flex items-center gap-4">
-            <div class="relative flex -space-x-1">
-              <div class="relative flex-shrink-0 overflow-hidden flex h-8 w-8 items-center justify-center rounded-xl">
-                <img alt={@event.user.name} src={@event.user.avatar_url} />
-              </div>
-            </div>
-            <div class="z-10 flex gap-2">
-              <span class="font-emoji text-sm sm:text-base">💰</span>
-              <div class="space-y-0.5">
-                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-sm">
-                  <strong class="font-bold"><%= @event.org.name %></strong>
-                  awarded <strong class="font-bold"><%= @event.user.name %></strong>
-                  a <strong class="font-bold">$<%= @event.amount %></strong>
-                  bounty
-                </p>
-                <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                  <time datetime={@event.inserted_at}>
-                    <%= format_time_ago(@event.inserted_at) %>
-                  </time>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </a>
-    """
-  end
-
-  def event(%{event: %{type: :stream_started}} = assigns) do
-    ~H"""
-    <a class="group inline-flex" href={@event.url}>
-      <div class="relative flex space-x-3">
-        <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-          <div class="flex items-center gap-4">
-            <div class="relative flex -space-x-1">
-              <div class="relative flex-shrink-0 overflow-hidden flex h-8 w-8 items-center justify-center rounded-xl">
-                <img alt={@event.user.name} src={@event.user.avatar_url} />
-              </div>
-            </div>
-            <div class="z-10 flex gap-2">
-              <span class="font-emoji text-sm sm:text-base">🔴</span>
-              <div class="space-y-0.5">
-                <p class="text-xs text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white sm:text-sm">
-                  <strong class="font-bold"><%= @event.user.name %></strong> started streaming
-                </p>
-                <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 sm:text-sm">
-                  <time datetime={@event.inserted_at}>
-                    <%= format_time_ago(@event.inserted_at) %>
-                  </time>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </a>
     """
   end
 

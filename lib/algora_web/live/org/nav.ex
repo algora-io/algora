@@ -2,11 +2,11 @@ defmodule AlgoraWeb.Org.Nav do
   import Phoenix.LiveView
   use Phoenix.Component
 
-  alias Algora.Organizations
+  alias Algora.{Accounts, Organizations}
 
   def on_mount(:default, %{"org_handle" => org_handle}, _session, socket) do
     current_org = Organizations.get_org_by(handle: org_handle)
-    online_users = Organizations.get_online_users(current_org.id)
+    online_users = Accounts.list_matching_devs(limit: 10)
 
     {:cont,
      socket

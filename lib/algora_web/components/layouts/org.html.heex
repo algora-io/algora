@@ -74,15 +74,14 @@
     </div>
   </div>
   <!-- Static sidebar for desktop -->
-  <div class="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-16 xl:flex-col scrollbar-thin">
+  <div>
     <!-- Sidebar component -->
-    <div class="flex grow flex-col gap-y-5 overflow-y-auto px-2 ring-1 ring-border/5 scrollbar-thin border-r-2 border-border/50 bg-popover">
+    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4 scrollbar-thin">
       <div class="flex h-16 shrink-0 items-center justify-center">
-        <.icon name="algora-logo" class="h-8 w-8" />
+        <.logo class="h-8 w-auto text-white" />
       </div>
-
-      <nav class="flex flex-1 flex-col">
-        <ul role="list" class="flex flex-1 flex-col">
+      <nav class="mt-4">
+        <ul role="list" class="flex flex-col items-center space-y-1">
           <%= for section <- @nav do %>
             <li>
               <ul role="list" class="space-y-1">
@@ -90,46 +89,45 @@
                   <li>
                     <.link
                       navigate={item.href}
-                      class={"group flex justify-center rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-accent text-accent-foreground", else: "text-muted-foreground hover:text-foreground hover:bg-accent"}"}
+                      class={"group flex justify-center rounded-md p-3 text-sm/6 font-semibold #{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
                       title={item.label}
                     >
-                      <.icon name={item.icon} class="w-6 h-6" />
+                      <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                      <span class="sr-only"><%= item.label %></span>
                     </.link>
                   </li>
                 <% end %>
               </ul>
             </li>
           <% end %>
+        </ul>
 
-          <.separator class="my-4" />
-          <!-- Online users section -->
-          <li>
-            <ul role="list" class="space-y-1">
-              <%= for user <- @online_users do %>
-                <li>
-                  <.link
-                    class="flex justify-center p-2"
-                    navigate={"/#{user.handle}"}
-                    title={user.handle}
-                  >
-                    <div class="relative inline-block">
-                      <div class="relative flex-shrink-0 overflow-hidden h-8 w-8 rounded-full">
-                        <img
-                          alt={user.handle}
-                          loading="lazy"
-                          decoding="async"
-                          src={user.avatar_url}
-                          class="h-full w-full object-cover"
-                        />
-                      </div>
-                      <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
-                      </span>
-                    </div>
-                  </.link>
-                </li>
-              <% end %>
-            </ul>
-          </li>
+        <.separator class="my-4 w-2/3 mx-auto" />
+        <!-- Online users section -->
+        <ul role="list" class="space-y-1">
+          <%= for user <- @online_users do %>
+            <li>
+              <.link
+                class="flex justify-center p-2"
+                navigate={"/#{user.handle}"}
+                title={user.handle}
+              >
+                <div class="relative inline-block">
+                  <div class="relative flex-shrink-0 overflow-hidden h-8 w-8 rounded-full">
+                    <img
+                      alt={user.handle}
+                      loading="lazy"
+                      decoding="async"
+                      src={user.avatar_url}
+                      class="h-full w-full object-cover"
+                    />
+                  </div>
+                  <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                  </span>
+                </div>
+              </.link>
+            </li>
+          <% end %>
         </ul>
       </nav>
     </div>

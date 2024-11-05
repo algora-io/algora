@@ -2,7 +2,6 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.Accounts
   alias Algora.Money
-  import AlgoraWeb.Components.Globe
 
   @impl true
   def mount(_params, _session, socket) do
@@ -35,16 +34,13 @@ defmodule AlgoraWeb.HomeLive do
           <!-- Desktop nav -->
           <div class="hidden lg:flex lg:gap-x-12">
             <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Product
+              Companies
             </a>
             <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Features
+              Developers
             </a>
             <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Marketplace
-            </a>
-            <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Company
+              Open source
             </a>
           </div>
 
@@ -117,9 +113,6 @@ defmodule AlgoraWeb.HomeLive do
 
       <main>
         <div class="relative isolate">
-          <div class="absolute max-w-lg w-full top-6 right-[20vw]">
-            <.globe />
-          </div>
           <!-- Background pattern -->
           <div
             class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
@@ -132,7 +125,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
 
-          <div class="absolute inset-x-0 -z-10 h-[64rem] w-full stroke-border [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]">
+          <div class="absolute inset-x-0 -z-10 h-screen w-full stroke-border [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]">
             <defs>
               <pattern
                 id="grid-pattern"
@@ -165,7 +158,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-16">
+          <div class="mx-auto max-w-7xl px-6 pb-24 pt-36 sm:pt-60 lg:px-8 lg:pt-16">
             <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="lg:-mt-12 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
                 <h1 class="text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl font-display">
@@ -234,6 +227,30 @@ defmodule AlgoraWeb.HomeLive do
               <% end %>
             </div>
           </div>
+          <!-- New Footer -->
+          <footer class="border-t">
+            <div class="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
+              <div class="flex justify-center space-x-6 md:order-2">
+                <a href="#" class="text-muted-foreground hover:text-foreground">
+                  <span class="sr-only">Twitter</span>
+                  <.icon name="tabler-brand-twitter" class="h-6 w-6" />
+                </a>
+                <a href="#" class="text-muted-foreground hover:text-foreground">
+                  <span class="sr-only">GitHub</span>
+                  <.icon name="tabler-brand-github" class="h-6 w-6" />
+                </a>
+                <a href="#" class="text-muted-foreground hover:text-foreground">
+                  <span class="sr-only">Discord</span>
+                  <.icon name="tabler-brand-discord" class="h-6 w-6" />
+                </a>
+              </div>
+              <div class="mt-8 md:order-1 md:mt-0">
+                <p class="text-center text-xs leading-5 text-muted-foreground">
+                  &copy; <%= DateTime.utc_now().year %> Algora. All rights reserved.
+                </p>
+              </div>
+            </div>
+          </footer>
         </div>
       </main>
     </div>

@@ -10,22 +10,13 @@ defmodule AlgoraWeb.WebhooksController do
     try do
       with {:ok, %Webhook{delivery: _delivery, event: event, installation_id: _installation_id}} <-
              Webhook.new(conn) do
-        case event do
-          "issues" ->
-            handle_issue_event(params)
+        event_action =
+          case params["action"] do
+            nil -> event
+            action -> "#{event}.#{action}"
+          end
 
-          "issue_comment" ->
-            handle_comment_event(params)
-
-          "pull_request" ->
-            handle_pull_request_event(params)
-
-          "ping" ->
-            Logger.info("GitHub sent the ping event")
-
-          _ ->
-            Logger.info("Unhandled event: #{event}")
-        end
+        handle_event(event_action, params)
 
         conn
         |> put_status(:accepted)
@@ -61,44 +52,46 @@ defmodule AlgoraWeb.WebhooksController do
     end
   end
 
-  defp handle_issue_event(params) do
-    case params["action"] do
-      "opened" ->
-        process_commands(params["issue"]["body"])
-        Logger.info("An issue was opened with this title: #{params["issue"]["title"]}")
-
-      "edited" ->
-        process_commands(params["issue"]["body"])
-        Logger.info("An issue was edited")
-
-      "closed" ->
-        Logger.info("An issue was closed by #{params["issue"]["user"]["login"]}")
-
-      _ ->
-        Logger.info("Unhandled action for the issue event: #{params["action"]}")
-    end
+  defp handle_event("issues.opened", params) do
+    process_commands(params["issue"]["body"])
+    Logger.info("An issue was opened with this title: #{params["issue"]["title"]}")
   end
 
-  defp handle_comment_event(params) do
-    case params["action"] do
-      action when action in ["created", "edited"] ->
-        process_commands(params["comment"]["body"])
-        Logger.info("Comment #{action} by #{params["comment"]["user"]["login"]}")
-
-      _ ->
-        Logger.info("Unhandled comment action: #{params["action"]}")
-    end
+  defp handle_event("issues.edited", params) do
+    process_commands(params["issue"]["body"])
+    Logger.info("An issue was edited")
   end
 
-  defp handle_pull_request_event(params) do
-    case params["action"] do
-      action when action in ["opened", "edited"] ->
-        process_commands(params["pull_request"]["body"])
-        Logger.info("Pull request #{action} by #{params["pull_request"]["user"]["login"]}")
+  defp handle_event("issues.closed", params) do
+    Logger.info("An issue was closed by #{params["issue"]["user"]["login"]}")
+  end
 
-      _ ->
-        Logger.info("Unhandled pull request action: #{params["action"]}")
-    end
+  defp handle_event("issue_comment.created", params) do
+    process_commands(params["comment"]["body"])
+    Logger.info("Comment created by #{params["comment"]["user"]["login"]}")
+  end
+
+  defp handle_event("issue_comment.edited", params) do
+    process_commands(params["comment"]["body"])
+    Logger.info("Comment edited by #{params["comment"]["user"]["login"]}")
+  end
+
+  defp handle_event("pull_request.opened", params) do
+    process_commands(params["pull_request"]["body"])
+    Logger.info("Pull request opened by #{params["pull_request"]["user"]["login"]}")
+  end
+
+  defp handle_event("pull_request.edited", params) do
+    process_commands(params["pull_request"]["body"])
+    Logger.info("Pull request edited by #{params["pull_request"]["user"]["login"]}")
+  end
+
+  defp handle_event("ping", _params) do
+    Logger.info("GitHub sent the ping event")
+  end
+
+  defp handle_event(event_action, _params) do
+    Logger.info("Unhandled event action: #{event_action}")
   end
 
   defp process_commands(body) when is_binary(body) do

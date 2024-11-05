@@ -14,8 +14,7 @@ defmodule AlgoraWeb.Router do
   end
 
   pipeline :api do
-    plug AlgoraWeb.Plugs.SaveRawPayload
-    # plug :accepts, ["json"]
+    plug :accepts, ["json"]
   end
 
   scope "/callbacks", AlgoraWeb do

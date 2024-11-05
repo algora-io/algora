@@ -17,17 +17,10 @@ defmodule AlgoraWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/callbacks", AlgoraWeb do
+  scope "/webhooks", AlgoraWeb do
     pipe_through :api
 
-    post "/:provider/webhook", WebhookCallbackController, :new
-  end
-
-  scope "/callbacks", AlgoraWeb do
-    pipe_through :browser
-
-    get "/:provider/oauth", OAuthCallbackController, :new
-    get "/:provider/installation", InstallationCallbackController, :new
+    post "/:provider", WebhooksController, :new
   end
 
   scope "/", AlgoraWeb do
@@ -36,6 +29,8 @@ defmodule AlgoraWeb.Router do
     get "/", RootController, :index
     get "/set_context/:context", ContextController, :set
 
+    get "/callbacks/:provider/oauth", OAuthCallbackController, :new
+    get "/callbacks/:provider/installation", InstallationCallbackController, :new
     get "/auth/logout", OAuthCallbackController, :sign_out
     delete "/auth/logout", OAuthCallbackController, :sign_out
 

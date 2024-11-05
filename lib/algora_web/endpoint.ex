@@ -41,19 +41,33 @@ defmodule AlgoraWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
-  defmodule CacheBodyReader do
-    def read_body(conn, opts) do
-      {:ok, body, conn} = Plug.Conn.read_body(conn, opts)
-      conn = update_in(conn.assigns[:raw_body], &[body | &1 || []])
-      {:ok, body, conn}
+  plug :parse_body
+
+  opts = [
+    parsers: [:urlencoded, :multipart, :json],
+    pass: ["*/*"],
+    json_decoder: Phoenix.json_library()
+  ]
+
+  defmodule BodyReader do
+    def cache_raw_body(conn, opts) do
+      with {:ok, body, conn} <- Plug.Conn.read_body(conn, opts) do
+        conn = update_in(conn.assigns[:raw_body], &[body | &1 || []])
+
+        {:ok, body, conn}
+      end
     end
   end
 
-  plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
-    body_reader: {CacheBodyReader, :read_body, []},
-    json_decoder: Phoenix.json_library()
+  @parser_without_cache Plug.Parsers.init(opts)
+  @parser_with_cache Plug.Parsers.init([body_reader: {BodyReader, :cache_raw_body, []}] ++ opts)
+
+  # All endpoints that start with "webhooks" have their body cached.
+  defp parse_body(%{path_info: ["webhooks" | _]} = conn, _),
+    do: Plug.Parsers.call(conn, @parser_with_cache)
+
+  defp parse_body(conn, _),
+    do: Plug.Parsers.call(conn, @parser_without_cache)
 
   plug Plug.MethodOverride
   plug Plug.Head

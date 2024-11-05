@@ -2,7 +2,6 @@ defmodule Algora.Github do
   import Algora.Github.Client, only: [fetch: 2, fetch: 3]
   alias Algora.Github.Crypto
 
-
   @type token :: String.t()
 
   def client_id, do: Algora.config([:github, :client_id])
@@ -10,7 +9,7 @@ defmodule Algora.Github do
   def app_handle, do: Algora.config([:github, :app_handle])
   def app_id, do: Algora.config([:github, :app_id])
   def webhook_secret, do: Algora.config([:github, :webhook_secret])
-  def private_key, do: Algora.config([:github, :private_key])
+  def private_key, do: Algora.config([:github, :private_key]) |> String.replace("\\n", "\n")
 
   def install_url() do
     "https://github.com/apps/#{app_handle()}/installations/new"

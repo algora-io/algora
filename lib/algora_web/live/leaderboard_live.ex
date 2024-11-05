@@ -28,7 +28,7 @@ defmodule AlgoraWeb.LeaderboardLive do
     <div class="container mx-auto px-4 py-8">
       <.header class="mb-8 text-3xl">
         Global Leaderboard
-        <:subtitle class="text-xl">Top earners by country</:subtitle>
+        <:subtitle>Top earners by country</:subtitle>
       </.header>
 
       <div class="grid gap-8">

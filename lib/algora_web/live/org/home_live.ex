@@ -165,7 +165,7 @@ defmodule AlgoraWeb.Org.HomeLive do
               <div class="flex-shrink-0 w-8 text-center font-mono text-muted-foreground">
                 #<%= idx + 1 %>
               </div>
-              <.link href={~p"/u/#{earner.handle}"} class="flex items-center gap-3 flex-1">
+              <.link href={~p"/@/#{earner.handle}"} class="flex items-center gap-3 flex-1">
                 <.avatar class="h-8 w-8">
                   <.avatar_image src={earner.avatar_url} alt={earner.name} />
                 </.avatar>

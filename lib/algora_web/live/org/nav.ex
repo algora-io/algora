@@ -30,8 +30,6 @@ defmodule AlgoraWeb.Org.Nav do
         {_, _} -> nil
       end
 
-    dbg(socket.view)
-
     {:cont, socket |> assign(:active_tab, active_tab)}
   end
 

@@ -351,10 +351,12 @@ defmodule AlgoraWeb.PricingLive do
               <span class="text-foreground font-medium"><%= item.question %></span>
               <.icon
                 name="tabler-chevron-down"
-                class={[
-                  "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                  @active_faq == item.id && "transform rotate-180"
-                ]}
+                class={
+                  classes([
+                    "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                    @active_faq == item.id && "transform rotate-180"
+                  ])
+                }
               />
             </button>
             <%= if @active_faq == item.id do %>
@@ -746,10 +748,12 @@ defmodule AlgoraWeb.PricingLive do
                   <span class="text-foreground font-medium"><%= item.question %></span>
                   <.icon
                     name="tabler-chevron-down"
-                    class={[
-                      "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                      @active_faq == item.id && "transform rotate-180"
-                    ]}
+                    class={
+                      classes([
+                        "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                        @active_faq == item.id && "transform rotate-180"
+                      ])
+                    }
                   />
                 </button>
                 <%= if @active_faq == item.id do %>

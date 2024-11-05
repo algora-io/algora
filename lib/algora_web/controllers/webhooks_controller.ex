@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.WebhookCallbackController do
+defmodule AlgoraWeb.WebhooksController do
   use AlgoraWeb, :controller
   require Logger
   alias Algora.Github.Webhook

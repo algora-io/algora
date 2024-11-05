@@ -1,13 +1,11 @@
 defmodule Algora.Github.Client do
   alias Joken
-  alias Algora.Github
 
   @type token :: String.t()
 
   def http(host, method, path, query, headers, body \\ "") do
     cache_path = ".local/github/#{path}.json"
-    query_string = URI.encode_query([{:client_id, Github.client_id()} | query])
-    url = "https://#{host}#{path}?#{query_string}"
+    url = "https://#{host}#{path}?#{URI.encode_query(query)}"
 
     case read_from_cache(cache_path) do
       {:ok, cached_data} ->

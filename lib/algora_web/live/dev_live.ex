@@ -1,9 +1,7 @@
 defmodule AlgoraWeb.DevLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts
   alias Algora.Money
-  alias Algora.Bounties
 
   def mount(_params, _session, socket) do
     project = %{

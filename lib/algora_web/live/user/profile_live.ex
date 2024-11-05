@@ -167,24 +167,6 @@ defmodule AlgoraWeb.User.ProfileLive do
     """
   end
 
-  defp fetch_completed_bounties do
-    [
-      %{
-        org: %{
-          name: "Algora",
-          handle: "algora",
-          avatar_url: "https://avatars.githubusercontent.com/u/1234567?v=4"
-        },
-        title: "Implement user profile page",
-        repo: "algora",
-        number: 123,
-        url: "https://github.com/algora/issues/123",
-        amount: Decimal.new(1000)
-      }
-      # Add more bounties as needed
-    ]
-  end
-
   defp fetch_reviews do
     [
       %{

@@ -54,6 +54,8 @@ defmodule AlgoraWeb do
       use Phoenix.LiveView,
         layout: {AlgoraWeb.Layouts, :app}
 
+      import Tails, only: [classes: 1]
+
       unquote(html_helpers())
     end
   end

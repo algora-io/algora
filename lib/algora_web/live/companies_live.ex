@@ -1,7 +1,6 @@
 defmodule AlgoraWeb.CompaniesLive do
   use AlgoraWeb, :live_view
   alias Algora.Accounts
-  alias Algora.Money
 
   @impl true
   def mount(_params, _session, socket) do
@@ -23,7 +22,8 @@ defmodule AlgoraWeb.CompaniesLive do
 
   @impl true
   def handle_event("toggle-faq", %{"id" => id}, socket) do
-    {:noreply, assign(socket, expanded_faq: if(socket.assigns.expanded_faq == id, do: nil, else: id))}
+    {:noreply,
+     assign(socket, expanded_faq: if(socket.assigns.expanded_faq == id, do: nil, else: id))}
   end
 
   @impl true
@@ -32,7 +32,10 @@ defmodule AlgoraWeb.CompaniesLive do
     <div class="bg-gradient-to-tl from-indigo-950 to-black">
       <!-- Header with Mobile Menu -->
       <header class="absolute inset-x-0 top-0 z-50">
-        <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
+        <nav
+          class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+          aria-label="Global"
+        >
           <div class="flex lg:flex-1">
             <.wordmark class="text-white h-8 w-auto" />
           </div>
@@ -47,10 +50,18 @@ defmodule AlgoraWeb.CompaniesLive do
             </button>
           </div>
           <div class="hidden lg:flex lg:gap-x-12">
-            <a href="#features" class="text-sm/6 font-semibold text-gray-300 hover:text-white">Features</a>
-            <a href="#how-it-works" class="text-sm/6 font-semibold text-gray-300 hover:text-white">How it Works</a>
-            <a href="#pricing" class="text-sm/6 font-semibold text-gray-300 hover:text-white">Pricing</a>
-            <a href="#testimonials" class="text-sm/6 font-semibold text-gray-300 hover:text-white">Testimonials</a>
+            <a href="#features" class="text-sm/6 font-semibold text-gray-300 hover:text-white">
+              Features
+            </a>
+            <a href="#how-it-works" class="text-sm/6 font-semibold text-gray-300 hover:text-white">
+              How it Works
+            </a>
+            <a href="#pricing" class="text-sm/6 font-semibold text-gray-300 hover:text-white">
+              Pricing
+            </a>
+            <a href="#testimonials" class="text-sm/6 font-semibold text-gray-300 hover:text-white">
+              Testimonials
+            </a>
           </div>
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
             <.link
@@ -61,7 +72,6 @@ defmodule AlgoraWeb.CompaniesLive do
             </.link>
           </div>
         </nav>
-
         <!-- Mobile menu -->
         <div :if={@mobile_menu_open} class="lg:hidden" role="dialog" aria-modal="true">
           <div class="fixed inset-0 z-50"></div>
@@ -143,7 +153,6 @@ defmodule AlgoraWeb.CompaniesLive do
                 </a>
               </div>
             </div>
-
             <!-- Stats Section -->
             <dl class="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-8 text-center lg:grid-cols-4">
               <%= for stat <- @stats do %>
@@ -157,21 +166,39 @@ defmodule AlgoraWeb.CompaniesLive do
             </dl>
           </div>
         </div>
-
         <!-- Integration Logos -->
         <div class="mx-auto max-w-7xl px-6 sm:px-8 pb-24">
           <h2 class="text-center text-lg font-semibold leading-8 text-white mb-8">
             Seamlessly Integrates With Your Tools
           </h2>
           <div class="mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
-            <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200" src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub">
-            <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200" src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Slack_icon_2019.svg" alt="Slack">
-            <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200" src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe">
-            <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200" src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Linear_logo_%282021%29.svg" alt="Linear">
-            <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+            <img
+              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
+              alt="GitHub"
+            />
+            <img
+              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Slack_icon_2019.svg"
+              alt="Slack"
+            />
+            <img
+              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
+              alt="Stripe"
+            />
+            <img
+              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Linear_logo_%282021%29.svg"
+              alt="Linear"
+            />
+            <img
+              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
+              alt="Telegram"
+            />
           </div>
         </div>
-
         <!-- Features Section -->
         <div id="features" class="py-24 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -201,7 +228,6 @@ defmodule AlgoraWeb.CompaniesLive do
             </div>
           </div>
         </div>
-
         <!-- How it Works Section -->
         <div id="how-it-works" class="py-24 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -233,7 +259,6 @@ defmodule AlgoraWeb.CompaniesLive do
             </div>
           </div>
         </div>
-
         <!-- Pricing Section -->
         <div id="pricing" class="py-24 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -260,9 +285,13 @@ defmodule AlgoraWeb.CompaniesLive do
                     </div>
                     <p class="mt-6 text-base leading-7 text-gray-300"><%= plan.description %></p>
                     <p class="mt-8 flex items-baseline gap-x-1">
-                      <span class="text-4xl font-bold tracking-tight text-white"><%= plan.price %></span>
+                      <span class="text-4xl font-bold tracking-tight text-white">
+                        <%= plan.price %>
+                      </span>
                       <%= if plan.period do %>
-                        <span class="text-sm font-semibold leading-6 text-gray-300">/<%= plan.period %></span>
+                        <span class="text-sm font-semibold leading-6 text-gray-300">
+                          /<%= plan.period %>
+                        </span>
                       <% end %>
                     </p>
                     <ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-gray-300">
@@ -285,7 +314,6 @@ defmodule AlgoraWeb.CompaniesLive do
             </div>
           </div>
         </div>
-
         <!-- Testimonials Section -->
         <div id="testimonials" class="py-24 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -310,11 +338,14 @@ defmodule AlgoraWeb.CompaniesLive do
                               frameborder="0"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowfullscreen
-                            ></iframe>
+                            >
+                            </iframe>
                           </div>
                         </div>
                         <div class="text-center lg:text-left mt-8">
-                          <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white"><%= testimonial.name %></h3>
+                          <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white">
+                            <%= testimonial.name %>
+                          </h3>
                           <p class="text-lg leading-6 text-gray-400 mt-2"><%= testimonial.role %></p>
                           <p class="text-md leading-6 text-indigo-400"><%= testimonial.company %></p>
                         </div>
@@ -326,18 +357,26 @@ defmodule AlgoraWeb.CompaniesLive do
                       </div>
                       <div class="lg:col-span-1">
                         <div class="rounded-2xl bg-white/5 p-8 ring-1 ring-white/10">
-                          <h4 class="text-lg font-semibold leading-6 text-indigo-400 mb-6">Their Journey with Algora</h4>
+                          <h4 class="text-lg font-semibold leading-6 text-indigo-400 mb-6">
+                            Their Journey with Algora
+                          </h4>
                           <div class="text-gray-300 text-lg leading-relaxed mb-8">
                             <%= for paragraph <- testimonial.description do %>
                               <p class="mb-4"><%= paragraph %></p>
                             <% end %>
                           </div>
-                          <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">Impact Summary</h4>
+                          <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">
+                            Impact Summary
+                          </h4>
                           <dl class="grid grid-cols-2 gap-6">
                             <%= for {label, value} <- testimonial.results do %>
                               <div>
-                                <dt class="text-sm font-medium leading-6 text-gray-300"><%= label %></dt>
-                                <dd class="mt-1 text-2xl font-semibold tracking-tight text-white"><%= value %></dd>
+                                <dt class="text-sm font-medium leading-6 text-gray-300">
+                                  <%= label %>
+                                </dt>
+                                <dd class="mt-1 text-2xl font-semibold tracking-tight text-white">
+                                  <%= value %>
+                                </dd>
                               </div>
                             <% end %>
                           </dl>
@@ -346,11 +385,17 @@ defmodule AlgoraWeb.CompaniesLive do
                     <% else %>
                       <div class="lg:col-span-1">
                         <div class="flex flex-col items-center lg:items-start gap-y-8">
-                          <img class="h-32 w-32 rounded-full" src={testimonial.avatar} alt="">
+                          <img class="h-32 w-32 rounded-full" src={testimonial.avatar} alt="" />
                           <div class="text-center lg:text-left">
-                            <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white"><%= testimonial.name %></h3>
-                            <p class="text-lg leading-6 text-gray-400 mt-2"><%= testimonial.role %></p>
-                            <p class="text-md leading-6 text-indigo-400"><%= testimonial.company %></p>
+                            <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white">
+                              <%= testimonial.name %>
+                            </h3>
+                            <p class="text-lg leading-6 text-gray-400 mt-2">
+                              <%= testimonial.role %>
+                            </p>
+                            <p class="text-md leading-6 text-indigo-400">
+                              <%= testimonial.company %>
+                            </p>
                           </div>
                         </div>
                         <figure class="mt-12">
@@ -361,18 +406,26 @@ defmodule AlgoraWeb.CompaniesLive do
                       </div>
                       <div class="lg:col-span-1">
                         <div class="rounded-2xl bg-white/5 p-8 ring-1 ring-white/10">
-                          <h4 class="text-lg font-semibold leading-6 text-indigo-400 mb-6">Their Journey with Algora</h4>
+                          <h4 class="text-lg font-semibold leading-6 text-indigo-400 mb-6">
+                            Their Journey with Algora
+                          </h4>
                           <div class="text-gray-300 text-lg leading-relaxed mb-8">
                             <%= for paragraph <- testimonial.description do %>
                               <p class="mb-4"><%= paragraph %></p>
                             <% end %>
                           </div>
-                          <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">Impact Summary</h4>
+                          <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">
+                            Impact Summary
+                          </h4>
                           <dl class="grid grid-cols-2 gap-6">
                             <%= for {label, value} <- testimonial.results do %>
                               <div>
-                                <dt class="text-sm font-medium leading-6 text-gray-300"><%= label %></dt>
-                                <dd class="mt-1 text-2xl font-semibold tracking-tight text-white"><%= value %></dd>
+                                <dt class="text-sm font-medium leading-6 text-gray-300">
+                                  <%= label %>
+                                </dt>
+                                <dd class="mt-1 text-2xl font-semibold tracking-tight text-white">
+                                  <%= value %>
+                                </dd>
                               </div>
                             <% end %>
                           </dl>
@@ -385,7 +438,6 @@ defmodule AlgoraWeb.CompaniesLive do
             </div>
           </div>
         </div>
-
         <!-- FAQ Section -->
         <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
           <div class="mx-auto max-w-4xl divide-y divide-white/10">
@@ -408,7 +460,6 @@ defmodule AlgoraWeb.CompaniesLive do
             </dl>
           </div>
         </div>
-
         <!-- Case Studies -->
         <div class="py-24 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -424,9 +475,15 @@ defmodule AlgoraWeb.CompaniesLive do
             <div class="mx-auto mt-16 grid max-w-2xl auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               <%= for case_study <- case_studies() do %>
                 <article class="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl bg-gray-900 px-8 pb-8 pt-80 sm:pt-48 lg:pt-80">
-                  <img src={case_study.image} alt="" class="absolute inset-0 -z-10 h-full w-full object-cover">
-                  <div class="absolute inset-0 -z-10 bg-gradient-to-t from-gray-900 via-gray-900/40"></div>
-                  <div class="absolute inset-0 -z-10 rounded-2xl ring-1 ring-inset ring-gray-900/10"></div>
+                  <img
+                    src={case_study.image}
+                    alt=""
+                    class="absolute inset-0 -z-10 h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 -z-10 bg-gradient-to-t from-gray-900 via-gray-900/40">
+                  </div>
+                  <div class="absolute inset-0 -z-10 rounded-2xl ring-1 ring-inset ring-gray-900/10">
+                  </div>
 
                   <div class="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm leading-6 text-gray-300">
                     <time datetime={case_study.date} class="mr-8"><%= case_study.date %></time>
@@ -435,7 +492,11 @@ defmodule AlgoraWeb.CompaniesLive do
                         <circle cx="1" cy="1" r="1" />
                       </svg>
                       <div class="flex gap-x-2.5">
-                        <img src={case_study.author_image} alt="" class="h-6 w-6 flex-none rounded-full bg-white/10">
+                        <img
+                          src={case_study.author_image}
+                          alt=""
+                          class="h-6 w-6 flex-none rounded-full bg-white/10"
+                        />
                         <%= case_study.author %>
                       </div>
                     </div>
@@ -461,22 +522,26 @@ defmodule AlgoraWeb.CompaniesLive do
       %{
         name: "Global Talent Pool",
         icon: "tabler-world",
-        description: "Access top developers from around the world, pre-vetted and ready to contribute to your projects."
+        description:
+          "Access top developers from around the world, pre-vetted and ready to contribute to your projects."
       },
       %{
         name: "Seamless Integration",
         icon: "tabler-puzzle",
-        description: "Our platform integrates with your existing tools and workflows, making team expansion effortless."
+        description:
+          "Our platform integrates with your existing tools and workflows, making team expansion effortless."
       },
       %{
         name: "Quality Assurance",
         icon: "tabler-shield-check",
-        description: "Every developer is thoroughly vetted through technical assessments and real-world projects."
+        description:
+          "Every developer is thoroughly vetted through technical assessments and real-world projects."
       },
       %{
         name: "Flexible Engagement",
         icon: "tabler-clock",
-        description: "Work with developers on your terms - full-time, part-time, or project-based."
+        description:
+          "Work with developers on your terms - full-time, part-time, or project-based."
       },
       %{
         name: "Cost Effective",
@@ -499,11 +564,13 @@ defmodule AlgoraWeb.CompaniesLive do
       },
       %{
         name: "Get Matched",
-        description: "Our AI matches you with the best developers for your project based on skills and experience."
+        description:
+          "Our AI matches you with the best developers for your project based on skills and experience."
       },
       %{
         name: "Start Working",
-        description: "Begin collaboration immediately with our integrated project management tools."
+        description:
+          "Begin collaboration immediately with our integrated project management tools."
       }
     ]
   end
@@ -561,7 +628,8 @@ defmodule AlgoraWeb.CompaniesLive do
         role: "CEO & Co-founder",
         company: "TechCorp",
         avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-        quote: "Algora has transformed how we build our engineering team. The quality of developers and the speed at which we were able to scale our team exceeded our expectations.",
+        quote:
+          "Algora has transformed how we build our engineering team. The quality of developers and the speed at which we were able to scale our team exceeded our expectations.",
         description: [
           "TechCorp came to Algora looking to scale their engineering team rapidly without compromising on quality.",
           "Within weeks, they were able to onboard senior developers who had significant open source contributions in their tech stack.",
@@ -579,7 +647,8 @@ defmodule AlgoraWeb.CompaniesLive do
         role: "CTO",
         company: "StartupX",
         avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-        quote: "The developers we've hired through Algora have been exceptional. They don't just write code - they contribute meaningful solutions and have become integral parts of our team.",
+        quote:
+          "The developers we've hired through Algora have been exceptional. They don't just write code - they contribute meaningful solutions and have become integral parts of our team.",
         description: [
           "StartupX needed to build a team of specialized developers for their AI-powered platform.",
           "Through Algora, they found developers who not only had the technical skills but also brought valuable experience from similar projects.",
@@ -597,7 +666,8 @@ defmodule AlgoraWeb.CompaniesLive do
         role: "VP Engineering",
         company: "ScaleUp Inc",
         avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-        quote: "What impressed me most was how quickly the developers were able to adapt to our codebase and start making meaningful contributions. The quality of talent on Algora is outstanding.",
+        quote:
+          "What impressed me most was how quickly the developers were able to adapt to our codebase and start making meaningful contributions. The quality of talent on Algora is outstanding.",
         description: [
           "ScaleUp Inc was struggling to find developers who could handle their complex microservices architecture.",
           "Algora matched them with developers who had extensive experience with distributed systems and cloud infrastructure.",
@@ -615,7 +685,8 @@ defmodule AlgoraWeb.CompaniesLive do
         role: "Head of Engineering",
         company: "InnovateAI",
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-        quote: "Finding ML engineers with open source experience was a challenge until we discovered Algora. The platform's matching algorithm helped us build a world-class AI team in record time.",
+        quote:
+          "Finding ML engineers with open source experience was a challenge until we discovered Algora. The platform's matching algorithm helped us build a world-class AI team in record time.",
         description: [
           "InnovateAI needed specialized machine learning engineers with experience in production systems.",
           "Through Algora's network, they connected with developers who had contributed to major ML frameworks.",
@@ -632,7 +703,8 @@ defmodule AlgoraWeb.CompaniesLive do
         name: "Alex Rivera",
         role: "Engineering Director",
         company: "CloudScale Systems",
-        quote: "Algora didn't just help us hire developers - they helped us build a culture of open source contribution that has transformed our entire engineering organization.",
+        quote:
+          "Algora didn't just help us hire developers - they helped us build a culture of open source contribution that has transformed our entire engineering organization.",
         description: [
           "CloudScale Systems needed to rapidly scale their infrastructure team while maintaining their high standards for code quality.",
           "Through Algora, they found developers with significant contributions to major cloud infrastructure projects.",
@@ -652,27 +724,33 @@ defmodule AlgoraWeb.CompaniesLive do
     [
       %{
         question: "How does your developer vetting process work?",
-        answer: "Our vetting process is comprehensive and includes multiple stages: technical skills assessment, code quality review, communication evaluation, and background verification. We accept only the top 1% of applicants to ensure the highest quality talent for your team."
+        answer:
+          "Our vetting process is comprehensive and includes multiple stages: technical skills assessment, code quality review, communication evaluation, and background verification. We accept only the top 1% of applicants to ensure the highest quality talent for your team."
       },
       %{
         question: "What if I'm not satisfied with a developer's performance?",
-        answer: "We offer a 100% satisfaction guarantee. If you're not completely satisfied with a developer's performance, we'll work with you to find a replacement at no additional cost. Our priority is ensuring a perfect fit for your team."
+        answer:
+          "We offer a 100% satisfaction guarantee. If you're not completely satisfied with a developer's performance, we'll work with you to find a replacement at no additional cost. Our priority is ensuring a perfect fit for your team."
       },
       %{
         question: "How quickly can I add developers to my team?",
-        answer: "Most companies are able to start working with their new developers within 1-2 weeks. For specialized roles or specific technology requirements, it might take up to 3 weeks to ensure the perfect match."
+        answer:
+          "Most companies are able to start working with their new developers within 1-2 weeks. For specialized roles or specific technology requirements, it might take up to 3 weeks to ensure the perfect match."
       },
       %{
         question: "What types of developers are available on your platform?",
-        answer: "We have developers across all major technologies and specializations including: Frontend (React, Vue, Angular), Backend (Node.js, Python, Ruby, Elixir), Mobile (iOS, Android, React Native), DevOps, Data Science, and more."
+        answer:
+          "We have developers across all major technologies and specializations including: Frontend (React, Vue, Angular), Backend (Node.js, Python, Ruby, Elixir), Mobile (iOS, Android, React Native), DevOps, Data Science, and more."
       },
       %{
         question: "How do you handle intellectual property and NDAs?",
-        answer: "We take intellectual property very seriously. All developers sign comprehensive NDAs and IP assignment agreements. We can also work with your legal team to implement any additional agreements specific to your company's needs."
+        answer:
+          "We take intellectual property very seriously. All developers sign comprehensive NDAs and IP assignment agreements. We can also work with your legal team to implement any additional agreements specific to your company's needs."
       },
       %{
         question: "What are your pricing models?",
-        answer: "We offer flexible pricing models to suit different needs: hourly rates for project-based work, monthly retainers for ongoing engagements, and custom enterprise packages for larger teams. Contact us for detailed pricing based on your specific requirements."
+        answer:
+          "We offer flexible pricing models to suit different needs: hourly rates for project-based work, monthly retainers for ongoing engagements, and custom enterprise packages for larger teams. Contact us for detailed pricing based on your specific requirements."
       }
     ]
   end
@@ -682,11 +760,13 @@ defmodule AlgoraWeb.CompaniesLive do
       %{
         title: "How StartupX Scaled Their Engineering Team",
         href: "#",
-        description: "StartupX needed to double their engineering team in 3 months. See how they did it with Algora.",
+        description:
+          "StartupX needed to double their engineering team in 3 months. See how they did it with Algora.",
         date: "Mar 16, 2024",
         author: "Tom Cook",
         author_image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-        image: "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80"
+        image:
+          "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80"
       },
       %{
         title: "TechCorp's Journey to Remote-First Development",
@@ -695,16 +775,19 @@ defmodule AlgoraWeb.CompaniesLive do
         date: "Mar 10, 2024",
         author: "Sarah Chen",
         author_image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-        image: "https://images.unsplash.com/photo-1547586696-ea22b4d4235d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3270&q=80"
+        image:
+          "https://images.unsplash.com/photo-1547586696-ea22b4d4235d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3270&q=80"
       },
       %{
         title: "DevCo's Open Source Success Story",
         href: "#",
-        description: "How DevCo leveraged open source talent to accelerate their product development.",
+        description:
+          "How DevCo leveraged open source talent to accelerate their product development.",
         date: "Mar 5, 2024",
         author: "Emily Thompson",
         author_image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-        image: "https://images.unsplash.com/photo-1492724441997-5dc865305da7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3270&q=80"
+        image:
+          "https://images.unsplash.com/photo-1492724441997-5dc865305da7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3270&q=80"
       }
     ]
   end

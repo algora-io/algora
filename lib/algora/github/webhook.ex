@@ -17,8 +17,6 @@ defmodule Algora.Github.Webhook do
   def new(conn) do
     secret = Algora.Github.webhook_secret()
 
-    dbg(conn)
-
     with {:ok, headers} <- parse_headers(conn),
          {:ok, payload} <- Jason.encode(conn.params),
          {:ok, _} <- verify_signature(headers.signature_256, payload, secret) do

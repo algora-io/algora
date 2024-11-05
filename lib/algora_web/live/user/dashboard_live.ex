@@ -193,7 +193,6 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   def handle_event("view_mode", %{"value" => mode}, socket) do
-    dbg(mode)
     {:noreply, assign(socket, :view_mode, mode)}
   end
 

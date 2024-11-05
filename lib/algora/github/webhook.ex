@@ -18,8 +18,7 @@ defmodule Algora.Github.Webhook do
     secret = Algora.Github.webhook_secret()
 
     with {:ok, headers} <- parse_headers(conn),
-         {:ok, payload} <- Jason.encode(conn.params),
-         {:ok, _} <- verify_signature(headers.signature_256, payload, secret) do
+         {:ok, _} <- verify_signature(headers.signature_256, conn.assigns[:raw_body], secret) do
       {:ok, headers}
     end
   end
@@ -48,12 +47,6 @@ defmodule Algora.Github.Webhook do
     end
   end
 
-  def generate_signature(payload, secret) do
-    :hmac
-    |> :crypto.mac(:sha256, secret, payload)
-    |> Base.encode16(case: :lower)
-  end
-
   def verify_signature(signature, payload, secret) do
     sig = generate_signature(payload, secret)
 
@@ -61,6 +54,12 @@ defmodule Algora.Github.Webhook do
       true -> {:ok, nil}
       false -> {:error, :signature_mismatch}
     end
+  end
+
+  defp generate_signature(payload, secret) do
+    :hmac
+    |> :crypto.mac(:sha256, secret, payload)
+    |> Base.encode16(case: :lower)
   end
 
   defp get_header(conn, header) do

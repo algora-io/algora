@@ -2,6 +2,7 @@ defmodule AlgoraWeb.WebhooksController do
   use AlgoraWeb, :controller
   require Logger
   alias Algora.Github.Webhook
+  alias Algora.Github
 
   # TODO: persist & alert about failed deliveries
   # TODO: auto-retry failed deliveries with exponential backoff
@@ -52,7 +53,11 @@ defmodule AlgoraWeb.WebhooksController do
     Logger.info("Bounty command without amount")
   end
 
-  defp execute_command({"bounty", args}, _author, _params) do
+  defp execute_command({"bounty", args}, author, params) do
+    permissions = get_permissions(author, params)
+
+    dbg(permissions)
+
     case Regex.run(~r/\$(\d+)/, args) do
       [_, amount] -> Logger.info("Bounty command with amount: $#{amount}")
       nil -> Logger.info("Invalid bounty amount format")
@@ -104,6 +109,23 @@ defmodule AlgoraWeb.WebhooksController do
   defp execute_command({command, _}, _author, _params),
     do: Logger.info("Unhandled command: #{command}")
 
+  # TODO: cache installation tokens
+  defp get_permissions(author, %{"repository" => repository, "installation" => installation}) do
+    case Github.get_installation_token(installation["id"]) do
+      {:ok, access_token} ->
+        Github.get_repository_permissions(
+          access_token,
+          repository["owner"]["login"],
+          repository["name"],
+          author
+        )
+
+      error ->
+        Logger.error("Failed to get installation token: #{inspect(error)}")
+        nil
+    end
+  end
+
   defp process_commands(body, author, params) when is_binary(body) do
     body
     |> extract_commands()
@@ -121,17 +143,13 @@ defmodule AlgoraWeb.WebhooksController do
     end)
   end
 
-  defp get_author("issues", params), do: params["issue"]["user"]["login"]
-  defp get_author("issue_comment", params), do: params["comment"]["user"]["login"]
-  defp get_author("pull_request", params), do: params["pull_request"]["user"]["login"]
+  defp get_author("issues", params), do: params["issue"]["user"]
+  defp get_author("issue_comment", params), do: params["comment"]["user"]
+  defp get_author("pull_request", params), do: params["pull_request"]["user"]
   defp get_author(_event, _params), do: nil
 
   defp get_body("issues", params), do: params["issue"]["body"]
   defp get_body("issue_comment", params), do: params["comment"]["body"]
   defp get_body("pull_request", params), do: params["pull_request"]["body"]
   defp get_body(_event, _params), do: nil
-
-  defp get_repo_owner(params) do
-    params["repository"]["owner"]["login"]
-  end
 end

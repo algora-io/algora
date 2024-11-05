@@ -1,7 +1,6 @@
 defmodule Algora.Github.Client do
   alias Joken
   alias Algora.Github
-  alias Algora.Github.Crypto
 
   @type token :: String.t()
 
@@ -59,14 +58,5 @@ defmodule Algora.Github.Client do
       {"accept", "application/vnd.github.v3+json"},
       {"Authorization", "Bearer #{access_token}"}
     ])
-  end
-
-  def get_installation_token(installation_id) do
-    path = "/app/installations/#{installation_id}/access_tokens"
-
-    case Crypto.generate_jwt() do
-      {:ok, jwt, _claims} -> fetch(jwt, path, "POST")
-      error -> error
-    end
   end
 end

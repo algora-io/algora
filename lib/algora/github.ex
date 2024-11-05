@@ -1,5 +1,7 @@
 defmodule Algora.Github do
-  import Algora.Github.Client, only: [fetch: 2]
+  import Algora.Github.Client, only: [fetch: 2, fetch: 3]
+  alias Algora.Github.Crypto
+
 
   @type token :: String.t()
 
@@ -63,6 +65,10 @@ defmodule Algora.Github do
     fetch(access_token, "/users/#{username}")
   end
 
+  def get_repository_permissions(access_token, owner, repo, username) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/collaborators/#{username}/permission")
+  end
+
   def list_installations(token, page \\ 1) do
     fetch(token, "/user/installations?page=#{page}")
   end
@@ -81,6 +87,15 @@ defmodule Algora.Github do
     case Enum.find(installations, fn i -> i["id"] == installation_id end) do
       nil -> find_installation(token, installation_id, page + 1)
       installation -> {:ok, installation}
+    end
+  end
+
+  def get_installation_token(installation_id) do
+    path = "/app/installations/#{installation_id}/access_tokens"
+
+    case Crypto.generate_jwt() do
+      {:ok, jwt, _claims} -> fetch(jwt, path, "POST")
+      error -> error
     end
   end
 end

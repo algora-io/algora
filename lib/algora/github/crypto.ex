@@ -19,9 +19,6 @@ defmodule Algora.Github.Crypto do
 
     signer = Joken.Signer.create("RS256", %{"pem" => Github.private_key()})
 
-    case Joken.generate_and_sign(%{}, payload, signer) do
-      {:ok, token, claims} -> {:ok, token, claims}
-      {:error, reason} -> {:error, reason}
-    end
+    Joken.generate_and_sign(%{}, payload, signer)
   end
 end

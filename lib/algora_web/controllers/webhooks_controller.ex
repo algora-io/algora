@@ -10,13 +10,9 @@ defmodule AlgoraWeb.WebhooksController do
     try do
       with {:ok, %Webhook{delivery: _delivery, event: event, installation_id: _installation_id}} <-
              Webhook.new(conn) do
-        event_action =
-          case params["action"] do
-            nil -> event
-            action -> "#{event}.#{action}"
-          end
-
-        handle_event(event_action, params)
+        author = get_author(event, params)
+        body = get_body(event, params)
+        process_commands(body, author, params)
 
         conn
         |> put_status(:accepted)
@@ -52,99 +48,39 @@ defmodule AlgoraWeb.WebhooksController do
     end
   end
 
-  defp handle_event("issues.opened", params) do
-    process_commands(params["issue"]["body"])
-    Logger.info("An issue was opened with this title: #{params["issue"]["title"]}")
+  defp execute_command({"bounty", nil}, _author, _params) do
+    Logger.info("Bounty command without amount")
   end
 
-  defp handle_event("issues.edited", params) do
-    process_commands(params["issue"]["body"])
-    Logger.info("An issue was edited")
-  end
-
-  defp handle_event("issues.closed", params) do
-    Logger.info("An issue was closed by #{params["issue"]["user"]["login"]}")
-  end
-
-  defp handle_event("issue_comment.created", params) do
-    process_commands(params["comment"]["body"])
-    Logger.info("Comment created by #{params["comment"]["user"]["login"]}")
-  end
-
-  defp handle_event("issue_comment.edited", params) do
-    process_commands(params["comment"]["body"])
-    Logger.info("Comment edited by #{params["comment"]["user"]["login"]}")
-  end
-
-  defp handle_event("pull_request.opened", params) do
-    process_commands(params["pull_request"]["body"])
-    Logger.info("Pull request opened by #{params["pull_request"]["user"]["login"]}")
-  end
-
-  defp handle_event("pull_request.edited", params) do
-    process_commands(params["pull_request"]["body"])
-    Logger.info("Pull request edited by #{params["pull_request"]["user"]["login"]}")
-  end
-
-  defp handle_event("ping", _params) do
-    Logger.info("GitHub sent the ping event")
-  end
-
-  defp handle_event(event_action, _params) do
-    Logger.info("Unhandled event action: #{event_action}")
-  end
-
-  defp process_commands(body) when is_binary(body) do
-    commands = extract_commands(body)
-    Enum.each(commands, &execute_command/1)
-  end
-
-  defp process_commands(_), do: nil
-
-  defp extract_commands(body) do
-    ~r{^/(\w+)(?:\s+(.+))?}m
-    |> Regex.scan(body, capture: :all_but_first)
-    |> Enum.map(fn
-      [command] -> {command, nil}
-      [command, args] -> {command, String.trim(args)}
-    end)
-  end
-
-  defp execute_command({"bounty", args}) do
-    case args do
-      nil ->
-        Logger.info("Bounty command without amount")
-
-      args ->
-        case Regex.run(~r/\$(\d+)/, args) do
-          [_, amount] -> Logger.info("Bounty command with amount: $#{amount}")
-          nil -> Logger.info("Invalid bounty amount format")
-        end
+  defp execute_command({"bounty", args}, _author, _params) do
+    case Regex.run(~r/\$(\d+)/, args) do
+      [_, amount] -> Logger.info("Bounty command with amount: $#{amount}")
+      nil -> Logger.info("Invalid bounty amount format")
     end
   end
 
-  defp execute_command({"tip", args}) when not is_nil(args) do
+  defp execute_command({"tip", args}, _author, _params) when not is_nil(args) do
     amount = Regex.run(~r/\$(\d+)/, args)
-    user = Regex.run(~r/@(\w+)/, args)
+    receiver = Regex.run(~r/@(\w+)/, args)
 
-    case {amount, user} do
-      {[_, amount], [_, user]} -> Logger.info("Tip $#{amount} to @#{user}")
-      {[_, amount], nil} -> Logger.info("Tip $#{amount} to unspecified user")
-      {nil, [_, user]} -> Logger.info("Tip (no amount) to @#{user}")
+    case {amount, receiver} do
+      {[_, amount], [_, receiver]} -> Logger.info("Tip $#{amount} to @#{receiver}")
+      {[_, amount], nil} -> Logger.info("Tip $#{amount} to unspecified receiver")
+      {nil, [_, receiver]} -> Logger.info("Tip (no amount) to @#{receiver}")
       _ -> Logger.info("Invalid tip format")
     end
   end
 
-  defp execute_command({"approve", _}), do: Logger.info("Approve command")
+  defp execute_command({"approve", _}, _author, _params), do: Logger.info("Approve command")
 
-  defp execute_command({"split", args}) when not is_nil(args) do
+  defp execute_command({"split", args}, _author, _params) when not is_nil(args) do
     case Regex.run(~r/@(\w+)\s+%(\d+)/, args) do
-      [_, user, percentage] -> Logger.info("Split #{percentage}% with @#{user}")
+      [_, author, percentage] -> Logger.info("Split #{percentage}% with @#{author}")
       nil -> Logger.info("Invalid split format")
     end
   end
 
-  defp execute_command({"claim", args}) when not is_nil(args) do
+  defp execute_command({"claim", args}, _author, _params) when not is_nil(args) do
     cond do
       String.starts_with?(args, "http") ->
         case Regex.run(~r{github\.com/([^/]+)/([^/]+)/(?:issues|pulls)/(\d+)}, args) do
@@ -165,5 +101,37 @@ defmodule AlgoraWeb.WebhooksController do
     end
   end
 
-  defp execute_command({command, _}), do: Logger.info("Unhandled command: #{command}")
+  defp execute_command({command, _}, _author, _params),
+    do: Logger.info("Unhandled command: #{command}")
+
+  defp process_commands(body, author, params) when is_binary(body) do
+    body
+    |> extract_commands()
+    |> Enum.each(&execute_command(&1, author, params))
+  end
+
+  defp process_commands(_body, _author, _params), do: nil
+
+  defp extract_commands(body) do
+    ~r{^/(\w+)(?:\s+(.+))?}m
+    |> Regex.scan(body, capture: :all_but_first)
+    |> Enum.map(fn
+      [command] -> {command, nil}
+      [command, args] -> {command, String.trim(args)}
+    end)
+  end
+
+  defp get_author("issues", params), do: params["issue"]["user"]["login"]
+  defp get_author("issue_comment", params), do: params["comment"]["user"]["login"]
+  defp get_author("pull_request", params), do: params["pull_request"]["user"]["login"]
+  defp get_author(_event, _params), do: nil
+
+  defp get_body("issues", params), do: params["issue"]["body"]
+  defp get_body("issue_comment", params), do: params["comment"]["body"]
+  defp get_body("pull_request", params), do: params["pull_request"]["body"]
+  defp get_body(_event, _params), do: nil
+
+  defp get_repo_owner(params) do
+    params["repository"]["owner"]["login"]
+  end
 end

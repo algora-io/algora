@@ -49,18 +49,30 @@ defmodule AlgoraWeb.WebhooksController do
     end
   end
 
+  # TODO: cache installation tokens
+  defp get_permissions(author, %{"repository" => repository, "installation" => installation}) do
+    with {:ok, %{"token" => access_token}} <- Github.get_installation_token(installation["id"]),
+         {:ok, %{"permission" => permission}} <-
+           Github.get_repository_permissions(
+             access_token,
+             repository["owner"]["login"],
+             repository["name"],
+             author["login"]
+           ) do
+      {:ok, permission}
+    end
+  end
+
   defp execute_command({"bounty", nil}, _author, _params) do
     Logger.info("Bounty command without amount")
   end
 
   defp execute_command({"bounty", args}, author, params) do
-    permissions = get_permissions(author, params)
-
-    dbg(permissions)
-
-    case Regex.run(~r/\$(\d+)/, args) do
-      [_, amount] -> Logger.info("Bounty command with amount: $#{amount}")
-      nil -> Logger.info("Invalid bounty amount format")
+    with {:ok, "admin"} <- get_permissions(author, params),
+         [_, amount] <- Regex.run(~r/\$(\d+)/, args) do
+      Logger.info("Bounty command with amount: $#{amount}")
+    else
+      _ -> Logger.info("Invalid bounty amount format")
     end
   end
 
@@ -108,23 +120,6 @@ defmodule AlgoraWeb.WebhooksController do
 
   defp execute_command({command, _}, _author, _params),
     do: Logger.info("Unhandled command: #{command}")
-
-  # TODO: cache installation tokens
-  defp get_permissions(author, %{"repository" => repository, "installation" => installation}) do
-    case Github.get_installation_token(installation["id"]) do
-      {:ok, access_token} ->
-        Github.get_repository_permissions(
-          access_token,
-          repository["owner"]["login"],
-          repository["name"],
-          author
-        )
-
-      error ->
-        Logger.error("Failed to get installation token: #{inspect(error)}")
-        nil
-    end
-  end
 
   defp process_commands(body, author, params) when is_binary(body) do
     body

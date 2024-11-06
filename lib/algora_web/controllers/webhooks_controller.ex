@@ -15,37 +15,25 @@ defmodule AlgoraWeb.WebhooksController do
         body = get_body(event, params)
         process_commands(body, author, params)
 
-        conn
-        |> put_status(:accepted)
-        |> json(%{status: "ok"})
+        conn |> put_status(:accepted) |> json(%{status: "ok"})
       else
         {:error, %Jason.EncodeError{}} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{error: "Invalid payload"})
+          conn |> put_status(:bad_request) |> json(%{error: "Invalid payload"})
 
         {:error, :missing_header} ->
-          conn
-          |> put_status(:bad_request)
-          |> json(%{error: "Missing header"})
+          conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
 
         {:error, :signature_mismatch} ->
-          conn
-          |> put_status(:unauthorized)
-          |> json(%{error: "Signature mismatch"})
+          conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
 
         {:error, reason} ->
-          conn
-          |> put_status(:internal_server_error)
-          |> json(%{error: reason})
+          conn |> put_status(:internal_server_error) |> json(%{error: reason})
       end
     rescue
       e ->
         Logger.error("Unexpected error: #{inspect(e)}")
 
-        conn
-        |> put_status(:internal_server_error)
-        |> json(%{error: "Internal server error"})
+        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
     end
   end
 
@@ -70,27 +58,47 @@ defmodule AlgoraWeb.WebhooksController do
   defp execute_command({"bounty", args}, author, params) do
     with {:ok, "admin"} <- get_permissions(author, params) do
       case extract_amount(args) do
-        nil -> {:ok, :open_to_bids}
-        amount -> {:ok, amount}
+        nil ->
+          {:ok, :open_to_bids}
+
+        amount ->
+          # Get repository and issue details from params
+          repo = params["repository"]
+          issue = params["issue"]
+
+          # Construct the bounty message
+          message = """
+          ## 💎 $#{amount} bounty [• #{repo["owner"]["login"]}](https://console.algora.io/org/#{repo["owner"]["login"]})
+          ### Steps to solve:
+          1. **Start working**: Comment `/attempt ##{issue["number"]}` with your implementation plan
+          2. **Submit work**: Create a pull request including `/claim ##{issue["number"]}` in the PR body to claim the bounty
+          3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+
+          Thank you for contributing to #{repo["full_name"]}!
+
+          **[Add a bounty](https://console.algora.io/org/#{repo["owner"]["login"]}/bounties/community?fund=#{repo["full_name"]}%23#{issue["number"]})** • **[Share on socials](https://twitter.com/intent/tweet?text=%24#{amount}+bounty%21+%F0%9F%92%8E+#{issue["html_url"]}&related=algoraio)**
+
+          Attempt | Started (GMT+0) | Solution
+          --------|----------------|----------
+          """
+
+          # Post comment to the issue
+          with {:ok, %{"token" => token}} <-
+                 Github.get_installation_token(params["installation"]["id"]) do
+            Github.create_issue_comment(
+              token,
+              repo["owner"]["login"],
+              repo["name"],
+              issue["number"],
+              message
+            )
+          end
+
+          {:ok, amount}
       end
     else
       {:ok, _permission} -> {:error, :unauthorized}
       {:error, error} -> {:error, error}
-    end
-  end
-
-  # Helper function to extract amount from various formats
-  defp extract_amount(nil), do: nil
-
-  defp extract_amount(args) do
-    # Remove commas before parsing and handle optional $ and decimal places
-    case Regex.run(~r/(\d+(?:,\d{3})*(?:\.\d+)?)\$?/, args) do
-      [_, amount] ->
-        {amount, _} = amount |> String.replace(",", "") |> Float.parse()
-        trunc(amount)
-
-      nil ->
-        nil
     end
   end
 
@@ -140,7 +148,7 @@ defmodule AlgoraWeb.WebhooksController do
     do: Logger.info("Unhandled command: #{command}")
 
   def process_commands(body, author, params) when is_binary(body) do
-    body |> extract_commands() |> Enum.map(&execute_command(&1, author, params))
+    body |> extract_commands() |> Enum.map(&execute_command(&1, author, params)) |> dbg()
   end
 
   def process_commands(_body, _author, _params), do: nil
@@ -152,6 +160,21 @@ defmodule AlgoraWeb.WebhooksController do
       [command] -> {command, nil}
       [command, args] -> {command, String.trim(args)}
     end)
+  end
+
+  # Helper function to extract amount from various formats
+  defp extract_amount(nil), do: nil
+
+  defp extract_amount(args) do
+    # Remove commas before parsing and handle optional $ and decimal places
+    case Regex.run(~r/(\d+(?:,\d{3})*(?:\.\d+)?)\$?/, args) do
+      [_, amount] ->
+        {amount, _} = amount |> String.replace(",", "") |> Float.parse()
+        trunc(amount)
+
+      nil ->
+        nil
+    end
   end
 
   defp get_author("issues", params), do: params["issue"]["user"]

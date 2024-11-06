@@ -44,12 +44,36 @@ defmodule AlgoraWeb.WebhooksControllerTest do
       assert [ok: 100] = process_bounty_command("/bounty 100")
     end
 
-    test "handles bounty command with non-numeric amount" do
-      assert [error: :invalid_format] = process_bounty_command("/bounty $abc")
+    test "handles bounty command with decimal amount" do
+      assert [ok: 100] = process_bounty_command("/bounty 100.50")
     end
 
-    test "handles bounty command with decimal amount" do
-      assert [error: :invalid_format] = process_bounty_command("/bounty $100.50")
+    test "handles bounty command with partial decimal amount" do
+      assert [ok: 100] = process_bounty_command("/bounty 100.5")
+    end
+
+    test "handles bounty command with decimal amount and $ prefix" do
+      assert [ok: 100] = process_bounty_command("/bounty $100.50")
+    end
+
+    test "handles bounty command with partial decimal amount and $ prefix" do
+      assert [ok: 100] = process_bounty_command("/bounty $100.5")
+    end
+
+    test "handles bounty command with decimal amount and $ suffix" do
+      assert [ok: 100] = process_bounty_command("/bounty 100.50$")
+    end
+
+    test "handles bounty command with partial decimal amount and $ suffix" do
+      assert [ok: 100] = process_bounty_command("/bounty 100.5$")
+    end
+
+    test "handles bounty command with comma separator" do
+      assert [ok: 1000] = process_bounty_command("/bounty 1,000")
+    end
+
+    test "handles bounty command with comma separator and decimal amount" do
+      assert [ok: 1000] = process_bounty_command("/bounty 1,000.50")
     end
   end
 

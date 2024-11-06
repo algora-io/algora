@@ -67,17 +67,30 @@ defmodule AlgoraWeb.WebhooksController do
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
-  defp execute_command({"bounty", nil}, _author, _params), do: {:ok, :open_to_bids}
-
   defp execute_command({"bounty", args}, author, params) do
-    with {:ok, "admin"} <- get_permissions(author, params) |> dbg() do
-      case Regex.run(~r/\$(\d+)/, args) do
-        [_, amount] -> {:ok, String.to_integer(amount)}
-        _ -> {:ok, :open_to_bids}
+    with {:ok, "admin"} <- get_permissions(author, params) do
+      case extract_amount(args) do
+        nil -> {:ok, :open_to_bids}
+        amount -> {:ok, amount}
       end
     else
       {:ok, _permission} -> {:error, :unauthorized}
       {:error, error} -> {:error, error}
+    end
+  end
+
+  # Helper function to extract amount from various formats
+  defp extract_amount(nil), do: nil
+
+  defp extract_amount(args) do
+    # Remove commas before parsing and handle optional $ and decimal places
+    case Regex.run(~r/(\d+(?:,\d{3})*(?:\.\d+)?)\$?/, args) do
+      [_, amount] ->
+        {amount, _} = amount |> String.replace(",", "") |> Float.parse()
+        trunc(amount)
+
+      nil ->
+        nil
     end
   end
 

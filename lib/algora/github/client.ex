@@ -6,10 +6,9 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  def http(host, method, path, _query, headers, body \\ "") do
+  def http(host, method, path, headers, body \\ "") do
     cache_path = ".local/github/#{path}.json"
     url = "https://#{host}#{path}"
-    dbg(url)
 
     case read_from_cache(cache_path) do
       {:ok, cached_data} ->
@@ -50,16 +49,19 @@ defmodule Algora.Github.Client do
     File.write!(cache_path, Jason.encode!(data))
   end
 
-  def fetch(access_token, url, method \\ "GET")
+  def fetch(access_token, url, method \\ "GET", body \\ "")
 
-  def fetch(access_token, "https://api.github.com" <> path, method),
-    do: fetch(access_token, path, method)
+  def fetch(access_token, "https://api.github.com" <> path, method, body),
+    do: fetch(access_token, path, method, body)
 
-  def fetch(access_token, path, method) do
-    http("api.github.com", method, path, [], [
-      {"accept", "application/vnd.github.v3+json"},
-      {"Authorization", "Bearer #{access_token}"}
-    ])
+  def fetch(access_token, path, method, body) do
+    http(
+      "api.github.com",
+      method,
+      path,
+      [{"accept", "application/vnd.github.v3+json"}, {"Authorization", "Bearer #{access_token}"}],
+      body
+    )
   end
 
   @impl true

@@ -1,7 +1,4 @@
 defmodule Algora.Github.OAuth do
-  import Algora.Github.Client, only: [http: 5]
-
-  alias Joken
   alias Algora.Github
 
   def exchange_access_token(opts) do
@@ -15,18 +12,20 @@ defmodule Algora.Github.OAuth do
   end
 
   defp fetch_exchange_response(state, code) do
-    resp =
-      http(
-        "github.com",
-        "POST",
-        "/login/oauth/access_token",
-        [state: state, code: code, client_secret: Github.secret()],
-        [{"accept", "application/json"}]
-      )
+    query = [
+      state: state,
+      code: code,
+      client_id: Github.client_id(),
+      client_secret: Github.secret()
+    ]
 
-    case resp do
-      {:ok, %{"access_token" => token}} -> {:ok, token}
-      {:error, _reason} = err -> err
+    url = "https://github.com/login/oauth/access_token?#{URI.encode_query(query)}"
+    headers = [{"Content-Type", "application/json"}, {"accept", "application/json"}]
+    request = Finch.build("POST", url, headers)
+
+    with {:ok, %Finch.Response{body: body}} <- Finch.request(request, Algora.Finch),
+         {:ok, %{"access_token" => token}} <- Jason.decode(body) do
+      {:ok, token}
     end
   end
 

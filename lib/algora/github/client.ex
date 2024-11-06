@@ -3,9 +3,10 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  def http(host, method, path, query, headers, body \\ "") do
+  def http(host, method, path, _query, headers, body \\ "") do
     cache_path = ".local/github/#{path}.json"
-    url = "https://#{host}#{path}?#{URI.encode_query(query)}"
+    url = "https://#{host}#{path}"
+    dbg(url)
 
     case read_from_cache(cache_path) do
       {:ok, cached_data} ->
@@ -15,7 +16,7 @@ defmodule Algora.Github.Client do
         headers = [{"Content-Type", "application/json"} | headers]
         request = Finch.build(method, url, headers, body)
 
-        case Finch.request(request, Algora.Finch) do
+        case Finch.request(request, finch_client()) do
           {:ok, %Finch.Response{status: 200, body: body}} ->
             decoded_body = Jason.decode!(body)
             write_to_cache(cache_path, decoded_body)
@@ -56,5 +57,9 @@ defmodule Algora.Github.Client do
       {"accept", "application/vnd.github.v3+json"},
       {"Authorization", "Bearer #{access_token}"}
     ])
+  end
+
+  defp finch_client do
+    Application.get_env(:algora, :finch_adapter, Finch)
   end
 end

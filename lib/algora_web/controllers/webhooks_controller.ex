@@ -60,19 +60,24 @@ defmodule AlgoraWeb.WebhooksController do
              author["login"]
            ) do
       {:ok, permission}
+    else
+      error -> error
     end
   end
 
-  defp execute_command({"bounty", nil}, _author, _params) do
-    Logger.info("Bounty command without amount")
-  end
+  defp get_permissions(_author, _params), do: {:error, :invalid_params}
+
+  defp execute_command({"bounty", nil}, _author, _params), do: {:ok, :open_to_bids}
 
   defp execute_command({"bounty", args}, author, params) do
-    with {:ok, "admin"} <- get_permissions(author, params),
-         [_, amount] <- Regex.run(~r/\$(\d+)/, args) do
-      Logger.info("Bounty command with amount: $#{amount}")
+    with {:ok, "admin"} <- get_permissions(author, params) do
+      case Regex.run(~r/\$(\d+)/, args) do
+        [_, amount] -> {:ok, String.to_integer(amount)}
+        _ -> {:ok, :open_to_bids}
+      end
     else
-      _ -> Logger.info("Invalid bounty amount format")
+      {:ok, _permission} -> {:error, :unauthorized}
+      {:error, error} -> {:error, error}
     end
   end
 
@@ -121,16 +126,16 @@ defmodule AlgoraWeb.WebhooksController do
   defp execute_command({command, _}, _author, _params),
     do: Logger.info("Unhandled command: #{command}")
 
-  defp process_commands(body, author, params) when is_binary(body) do
+  def process_commands(body, author, params) when is_binary(body) do
     body
     |> extract_commands()
-    |> Enum.each(&execute_command(&1, author, params))
+    |> Enum.map(&execute_command(&1, author, params))
   end
 
-  defp process_commands(_body, _author, _params), do: nil
+  def process_commands(_body, _author, _params), do: nil
 
-  defp extract_commands(body) do
-    ~r{^/(\w+)(?:\s+(.+))?}m
+  def extract_commands(body, regex \\ ~r{\B/(\w+)(?:\s+([^/\n]+))?}) do
+    regex
     |> Regex.scan(body, capture: :all_but_first)
     |> Enum.map(fn
       [command] -> {command, nil}

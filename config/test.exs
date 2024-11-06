@@ -28,3 +28,13 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :algora, :github,
+  client_id: System.get_env("GITHUB_CLIENT_ID"),
+  client_secret: System.get_env("GITHUB_CLIENT_SECRET"),
+  app_handle: System.get_env("GITHUB_APP_HANDLE"),
+  app_id: System.get_env("GITHUB_APP_ID"),
+  webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
+  private_key: System.get_env("GITHUB_PRIVATE_KEY")
+
+config :algora, :finch_adapter, Finch.Mock

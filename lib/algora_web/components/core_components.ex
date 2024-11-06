@@ -1162,4 +1162,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate tabs(assigns), to: AlgoraWeb.Components.UI.Tabs
   defdelegate toggle_group(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
   defdelegate toggle_group_item(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
+  defdelegate tooltip(assigns), to: AlgoraWeb.Components.UI.Tooltip
+  defdelegate tooltip_trigger(assigns), to: AlgoraWeb.Components.UI.Tooltip
+  defdelegate tooltip_content(assigns), to: AlgoraWeb.Components.UI.Tooltip
 end

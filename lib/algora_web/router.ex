@@ -84,6 +84,8 @@ defmodule AlgoraWeb.Router do
 
     live "/pricing", PricingLive
 
+    live "/trotw", TROTWLive
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

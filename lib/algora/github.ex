@@ -1,6 +1,5 @@
 defmodule Algora.Github do
-  import Algora.Github.Client, only: [fetch: 2, fetch: 3]
-  alias Algora.Github.Crypto
+  @behaviour Algora.Github.Behaviour
 
   @type token :: String.t()
 
@@ -28,73 +27,53 @@ defmodule Algora.Github do
     "https://github.com/login/oauth/authorize?#{query}"
   end
 
-  def get(access_token, url) do
-    fetch(access_token, url)
-  end
+  defp client, do: Application.get_env(:algora, :github_client, Algora.Github.Client)
 
-  def get_issue(access_token, owner, repo, number) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}")
-  end
+  @impl true
+  def get_repository(token, owner, repo),
+    do: client().get_repository(token, owner, repo)
 
-  def get_repository(access_token, owner, repo) do
-    fetch(access_token, "/repos/#{owner}/#{repo}")
-  end
+  @impl true
+  def get_repository(token, id),
+    do: client().get_repository(token, id)
 
-  def get_repository(access_token, id) do
-    fetch(access_token, "/repositories/#{id}")
-  end
+  @impl true
+  def get_issue(token, owner, repo, number),
+    do: client().get_issue(token, owner, repo, number)
 
-  def get_pull_request(access_token, owner, repo, number) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/pulls/#{number}")
-  end
+  @impl true
+  def get_pull_request(token, owner, repo, number),
+    do: client().get_pull_request(token, owner, repo, number)
 
-  def get_current_user(access_token) do
-    fetch(access_token, "/user")
-  end
+  @impl true
+  def get_current_user(token),
+    do: client().get_current_user(token)
 
-  def get_current_user_emails(access_token) do
-    fetch(access_token, "/user/emails")
-  end
+  @impl true
+  def get_current_user_emails(token),
+    do: client().get_current_user_emails(token)
 
-  def get_user(access_token, id) do
-    fetch(access_token, "/user/#{id}")
-  end
+  @impl true
+  def get_user(token, id),
+    do: client().get_user(token, id)
 
-  def get_user_by_username(access_token, username) do
-    fetch(access_token, "/users/#{username}")
-  end
+  @impl true
+  def get_user_by_username(token, username),
+    do: client().get_user_by_username(token, username)
 
-  def get_repository_permissions(access_token, owner, repo, username) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/collaborators/#{username}/permission")
-  end
+  @impl true
+  def get_repository_permissions(token, owner, repo, username),
+    do: client().get_repository_permissions(token, owner, repo, username)
 
-  def list_installations(token, page \\ 1) do
-    fetch(token, "/user/installations?page=#{page}")
-  end
+  @impl true
+  def list_installations(token, page \\ 1),
+    do: client().list_installations(token, page)
 
-  def find_installation(token, installation_id, page \\ 1) do
-    case list_installations(token, page) do
-      {:ok, %{"installations" => installations}} ->
-        find_installation_in_list(token, installation_id, installations, page)
+  @impl true
+  def find_installation(token, installation_id, page \\ 1),
+    do: client().find_installation(token, installation_id, page)
 
-      {:error, _reason} = error ->
-        error
-    end
-  end
-
-  defp find_installation_in_list(token, installation_id, installations, page) do
-    case Enum.find(installations, fn i -> i["id"] == installation_id end) do
-      nil -> find_installation(token, installation_id, page + 1)
-      installation -> {:ok, installation}
-    end
-  end
-
-  def get_installation_token(installation_id) do
-    path = "/app/installations/#{installation_id}/access_tokens"
-
-    case Crypto.generate_jwt() do
-      {:ok, jwt, _claims} -> fetch(jwt, path, "POST")
-      error -> error
-    end
-  end
+  @impl true
+  def get_installation_token(installation_id),
+    do: client().get_installation_token(installation_id)
 end

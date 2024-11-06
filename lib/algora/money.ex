@@ -11,4 +11,11 @@ defmodule Algora.Money do
     {:ok, res} = format(amount, currency, opts)
     res
   end
+
+  def split(_money, 0), do: []
+
+  def split(money, parts) do
+    {dividend, _remainder} = Money.split(money, parts)
+    [dividend | split(Money.sub!(money, dividend), parts - 1)]
+  end
 end

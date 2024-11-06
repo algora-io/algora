@@ -141,4 +141,9 @@ defmodule Algora.Github.Client do
       error -> error
     end
   end
+
+  @impl true
+  def create_issue_comment(access_token, owner, repo, number, body) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/comments", "POST", body)
+  end
 end

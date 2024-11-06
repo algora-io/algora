@@ -14,4 +14,6 @@ defmodule Algora.Github.Behaviour do
   @callback list_installations(token(), integer()) :: response
   @callback find_installation(token(), integer(), integer()) :: response
   @callback get_installation_token(integer()) :: response
+  @callback create_issue_comment(token(), String.t(), String.t(), integer(), String.t()) ::
+              response
 end

@@ -76,4 +76,8 @@ defmodule Algora.Github do
   @impl true
   def get_installation_token(installation_id),
     do: client().get_installation_token(installation_id)
+
+  @impl true
+  def create_issue_comment(token, owner, repo, number, body),
+    do: client().create_issue_comment(token, owner, repo, number, body)
 end

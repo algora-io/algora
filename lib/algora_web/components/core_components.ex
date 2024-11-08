@@ -1146,23 +1146,62 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  defdelegate accordion_item(assigns), to: AlgoraWeb.Components.UI.Accordion
+  defdelegate accordion_trigger(assigns), to: AlgoraWeb.Components.UI.Accordion
+  defdelegate accordion(assigns), to: AlgoraWeb.Components.UI.Accordion
   defdelegate avatar_fallback(assigns), to: AlgoraWeb.Components.UI.Avatar
   defdelegate avatar_image(assigns), to: AlgoraWeb.Components.UI.Avatar
   defdelegate avatar(assigns), to: AlgoraWeb.Components.UI.Avatar
+  defdelegate badge(assigns), to: AlgoraWeb.Components.UI.Badge
   defdelegate button(assigns), to: AlgoraWeb.Components.UI.Button
   defdelegate card_content(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate card_header(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate card_title(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate card(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate checkbox(assigns), to: AlgoraWeb.Components.UI.Checkbox
   defdelegate data_table(assigns), to: AlgoraWeb.Components.UI.DataTable
+  defdelegate form_control(assigns), to: AlgoraWeb.Components.UI.Form
+  defdelegate form_description(assigns), to: AlgoraWeb.Components.UI.Form
+  defdelegate form_item(assigns), to: AlgoraWeb.Components.UI.Form
+  defdelegate form_label(assigns), to: AlgoraWeb.Components.UI.Form
+  defdelegate hover_card_content(assigns), to: AlgoraWeb.Components.UI.HoverCard
+  defdelegate hover_card_trigger(assigns), to: AlgoraWeb.Components.UI.HoverCard
+  defdelegate hover_card(assigns), to: AlgoraWeb.Components.UI.HoverCard
+  defdelegate menu_group(assigns), to: AlgoraWeb.Components.UI.Menu
+  defdelegate menu_item(assigns), to: AlgoraWeb.Components.UI.Menu
+  defdelegate menu_label(assigns), to: AlgoraWeb.Components.UI.Menu
+  defdelegate menu_separator(assigns), to: AlgoraWeb.Components.UI.Menu
+  defdelegate menu_shortcut(assigns), to: AlgoraWeb.Components.UI.Menu
+  defdelegate menu(assigns), to: AlgoraWeb.Components.UI.Menu
+  defdelegate popover_content(assigns), to: AlgoraWeb.Components.UI.Popover
+  defdelegate popover_trigger(assigns), to: AlgoraWeb.Components.UI.Popover
+  defdelegate popover(assigns), to: AlgoraWeb.Components.UI.Popover
+  defdelegate radio_group_item(assigns), to: AlgoraWeb.Components.UI.RadioGroup
+  defdelegate radio_group(assigns), to: AlgoraWeb.Components.UI.RadioGroup
+  defdelegate scroll_area(assigns), to: AlgoraWeb.Components.UI.ScrollArea
+  defdelegate select_content(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select_group(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select_item(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select_label(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select_separator(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select_trigger(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select(assigns), to: AlgoraWeb.Components.UI.Select
   defdelegate separator(assigns), to: AlgoraWeb.Components.UI.Separator
+  defdelegate sheet_content(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate sheet_description(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate sheet_footer(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate sheet_header(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate sheet_title(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate sheet(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate switch(assigns), to: AlgoraWeb.Components.UI.Switch
   defdelegate tabs_content(assigns), to: AlgoraWeb.Components.UI.Tabs
   defdelegate tabs_list(assigns), to: AlgoraWeb.Components.UI.Tabs
   defdelegate tabs_trigger(assigns), to: AlgoraWeb.Components.UI.Tabs
   defdelegate tabs(assigns), to: AlgoraWeb.Components.UI.Tabs
-  defdelegate toggle_group(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
   defdelegate toggle_group_item(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
-  defdelegate tooltip(assigns), to: AlgoraWeb.Components.UI.Tooltip
-  defdelegate tooltip_trigger(assigns), to: AlgoraWeb.Components.UI.Tooltip
+  defdelegate toggle_group(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
+  defdelegate toggle(assigns), to: AlgoraWeb.Components.UI.Toggle
   defdelegate tooltip_content(assigns), to: AlgoraWeb.Components.UI.Tooltip
+  defdelegate tooltip_trigger(assigns), to: AlgoraWeb.Components.UI.Tooltip
+  defdelegate tooltip(assigns), to: AlgoraWeb.Components.UI.Tooltip
 end

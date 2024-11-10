@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.Org.JobLive do
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
+  alias Algora.Bounties
   alias Algora.Money
 
   def mount(_params, _session, socket) do
@@ -84,27 +86,28 @@ defmodule AlgoraWeb.Org.JobLive do
       %{label: "Year", value: "year"}
     ]
 
-    # matching_devs =
-    #   Accounts.list_matching_devs(
-    #     limit: 5,
-    #     country: job.country,
-    #     skills: job.tech_stack
-    #   )
+    matching_devs =
+      Accounts.list_matching_devs(
+        limit: 5,
+        country: job.country,
+        skills: job.tech_stack
+      )
 
-    # bounties = Bounties.list_bounties(%{limit: 8})
+    bounties = Bounties.list_bounties(%{limit: 8})
 
     {:ok,
      assign(socket,
        page_title: "Job",
        job: job,
+       show_full_description: false,
        nav_items: nav_items,
        footer_nav_items: footer_nav_items,
        user_menu_items: user_menu_items,
        filter_menu_items: filter_menu_items,
        time_periods: time_periods,
        active_period: "week",
-       matching_devs: [],
-       bounties: []
+       matching_devs: matching_devs,
+       bounties: bounties
      )}
   end
 
@@ -153,6 +156,24 @@ defmodule AlgoraWeb.Org.JobLive do
                         </div>
                       </div>
                     <% end %>
+                  </div>
+                </div>
+                <div class="border-t p-6">
+                  <div class="prose prose-invert max-w-none">
+                    <div class="whitespace-pre-line text-foreground-muted -my-12">
+                      <%= if @show_full_description do %>
+                        <%= @job.description %>
+                      <% else %>
+                        <%= String.split(@job.description, "\n") |> Enum.take(3) |> Enum.join("\n") %>...
+                      <% end %>
+
+                      <button
+                        phx-click="toggle_description"
+                        class="mt-2 text-primary hover:text-primary/80 text-sm font-medium"
+                      >
+                        <%= if @show_full_description, do: "Show less", else: "See more" %>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -280,12 +301,12 @@ defmodule AlgoraWeb.Org.JobLive do
                                   <.icon name="tabler-plus" class="w-6 h-6 text-primary" />
                                 </div>
                                 <h3 class="font-semibold text-lg">No Bounties Yet</h3>
-                                <p class="text-sm text-muted-foreground max-w-sm">
+                                <p class="text-sm text-muted-foreground text-balance">
                                   Create your first bounty to start attracting developers to your job.
                                 </p>
-                                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                                <.button>
                                   <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Add Bounty
-                                </button>
+                                </.button>
                               </div>
                             </td>
                           </tr>
@@ -341,12 +362,12 @@ defmodule AlgoraWeb.Org.JobLive do
                     Share this job with developers in your network or invite them directly.
                   </p>
                   <div class="flex gap-2">
-                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                    <.button>
                       Invite Developers
-                    </button>
-                    <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                    </.button>
+                    <.button variant="outline">
                       Share Link
-                    </button>
+                    </.button>
                   </div>
                 </div>
               </div>
@@ -404,5 +425,9 @@ defmodule AlgoraWeb.Org.JobLive do
 
   def handle_event("select_period", %{"period" => period}, socket) do
     {:noreply, assign(socket, active_period: period)}
+  end
+
+  def handle_event("toggle_description", _, socket) do
+    {:noreply, assign(socket, show_full_description: !socket.assigns.show_full_description)}
   end
 end

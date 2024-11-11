@@ -27,8 +27,16 @@ defmodule AlgoraWeb.Components.UI.ScrollArea do
 
   def scroll_area(assigns) do
     ~H"""
-    <div class={classes(["relative overflow-hidden", @class])} {@rest}>
-      <div class="salad-scroll-area rounded-[inherit] h-full w-full overflow-y-auto overflow-x-hidden">
+    <div class={classes(["relative overflow-hidden"])}>
+      <div
+        class={
+          classes([
+            "salad-scroll-area rounded-[inherit] h-full w-full overflow-y-auto overflow-x-hidden scrollbar-thin",
+            @class
+          ])
+        }
+        {@rest}
+      >
         <div class="-mr-3" style="min-width: 100%;">
           <%= render_slot(@inner_block) %>
         </div>

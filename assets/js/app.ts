@@ -306,6 +306,18 @@ const Hooks = {
       });
     },
   },
+  ScrollToBottom: {
+    mounted() {
+      this.el.classList.add("js-scroll");
+      this.el.scrollTop = this.el.scrollHeight;
+      this.handleEvent("scroll-to-bottom", () => {
+        this.el.scrollTop = this.el.scrollHeight;
+      });
+    },
+    updated() {
+      this.el.scrollTop = this.el.scrollHeight;
+    },
+  },
   AnimatedTooltip: {
     mounted() {
       const springConfig = { stiffness: 100, damping: 5 };

@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
   alias Algora.Money
 
   def mount(_params, _session, socket) do
@@ -160,7 +161,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
                 <div class="border-t p-6">
                   <div class="prose prose-invert max-w-none">
-                    <div class="whitespace-pre-line text-foreground-muted -my-12">
+                    <div class="text-foreground-muted">
                       <%= if @show_full_description do %>
                         <%= @job.description %>
                       <% else %>
@@ -184,67 +185,6 @@ defmodule AlgoraWeb.Org.JobLive do
               phx-mounted="[[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-state=active]&quot;}],[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;active&quot;],&quot;to&quot;:&quot;#tabs .tabs-trigger[data-target=week]&quot;}],[&quot;hide&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content:not([value=week])&quot;}],[&quot;show&quot;,{&quot;to&quot;:&quot;#tabs .tabs-content[value=week]&quot;}]]"
               data-phx-id="m77-phx-GAPTpMFHc9kS4XZh"
             >
-              <%!-- <div class="mb-2 flex items-center">
-                <div
-                  class="inline-flex p-1 rounded-md bg-muted text-muted-foreground items-center justify-center h-10"
-                  data-phx-id="m78-phx-GAPTpMFHc9kS4XZh"
-                >
-                  <%= for period <- @time_periods do %>
-                    <button
-                      class="inline-flex px-3 py-1.5 rounded-sm ring-offset-background transition-all whitespace-nowrap items-center justify-center font-medium text-sm disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground tabs-trigger"
-                      data-target={period.value}
-                      data-state={if @active_period == period.value, do: "active", else: ""}
-                      phx-click="select_period"
-                      phx-value-period={period.value}
-                    >
-                      <%= period.label %>
-                    </button>
-                  <% end %>
-                </div>
-                <div class="ml-auto flex items-center gap-2">
-                  <div class="relative inline-block group" data-phx-id="m82-phx-GAPTpMFHc9kS4XZh">
-                    <div
-                      class="dropdown-menu-trigger peer"
-                      data-state="closed"
-                      phx-click="[[&quot;toggle_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;open&quot;,&quot;closed&quot;]}]]"
-                      phx-click-away="[[&quot;set_attr&quot;,{&quot;attr&quot;:[&quot;data-state&quot;,&quot;closed&quot;]}]]"
-                      data-phx-id="m83-phx-GAPTpMFHc9kS4XZh"
-                    >
-                      <button
-                        class="inline-flex px-3 rounded-md border-input bg-background transition-colors whitespace-nowrap items-center justify-center font-medium shadow-sm gap-1 text-sm h-7 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground border"
-                        data-phx-id="m84-phx-GAPTpMFHc9kS4XZh"
-                      >
-                        <.icon name="tabler-filter" class="h-3.5 w-3.5" />
-                        <span class="sr-only sm:not-sr-only"> Filter </span>
-                      </button>
-                    </div>
-                    <div
-                      class="z-50 animate-in peer-data-[state=closed]:fade-out-0 peer-data-[state=open]:fade-in-0 peer-data-[state=closed]:zoom-out-95 peer-data-[state=open]:zoom-in-95 peer-data-[side=bottom]:slide-in-from-top-2 peer-data-[side=left]:slide-in-from-right-2 peer-data-[side=right]:slide-in-from-left-2 peer-data-[side=top]:slide-in-from-bottom-2 absolute peer-data-[state=closed]:hidden top-full mt-2 right-0"
-                      data-phx-id="m85-phx-GAPTpMFHc9kS4XZh"
-                    >
-                      <div class="">
-                        <div
-                          class="min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md top-0 left-full"
-                          data-phx-id="m86-phx-GAPTpMFHc9kS4XZh"
-                        >
-                          <%= for item <- @filter_menu_items do %>
-                            <div class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none">
-                              <%= item.label %>
-                            </div>
-                          <% end %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    class="inline-flex px-3 rounded-md border-input bg-background transition-colors whitespace-nowrap items-center justify-center font-medium shadow-sm gap-1 text-sm h-7 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground border"
-                    data-phx-id="m92-phx-GAPTpMFHc9kS4XZh"
-                  >
-                    <.icon name="tabler-file-export" class="h-3.5 w-3.5" />
-                    <span class="sr-only sm:not-sr-only"> Export </span>
-                  </button>
-                </div>
-              </div> --%>
               <div
                 class="ring-offset-background focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 tabs-content"
                 value="week"
@@ -273,22 +213,10 @@ defmodule AlgoraWeb.Org.JobLive do
                       class="text-sm w-full caption-bottom"
                       data-phx-id="m99-phx-GAPTpMFHc9kS4XZh"
                     >
-                      <thead class="[&_tr]:border-b">
+                      <thead class="[&_tr]:border-b sr-only">
                         <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
                           <th class="px-4 text-muted-foreground text-left align-middle font-medium h-12">
                             Task
-                          </th>
-                          <th class="hidden px-4 text-muted-foreground text-left align-middle font-medium h-12 sm:table-cell">
-                            Owner
-                          </th>
-                          <th class="hidden px-4 text-muted-foreground text-left align-middle font-medium h-12 sm:table-cell">
-                            Tech Stack
-                          </th>
-                          <th class="hidden px-4 text-muted-foreground text-left align-middle font-medium h-12 md:table-cell">
-                            Posted
-                          </th>
-                          <th class="px-4 text-muted-foreground text-right align-middle font-medium h-12">
-                            Bounty
                           </th>
                         </tr>
                       </thead>
@@ -312,33 +240,33 @@ defmodule AlgoraWeb.Org.JobLive do
                           </tr>
                         <% else %>
                           <%= for bounty <- @bounties do %>
-                            <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
-                              <td class="p-4 align-middle">
-                                <div class="font-medium"><%= bounty.task.title %></div>
-                                <div class="hidden text-sm text-muted-foreground md:inline">
-                                  <%= bounty.task.owner %>/<%= bounty.task.repo %> #<%= bounty.task.number %>
+                            <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+                              <td class="p-4 py-0 align-middle">
+                                <div class="flex items-center gap-4">
+                                  <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+                                    <%= Money.format!(bounty.amount, bounty.currency) %>
+                                  </div>
+
+                                  <.link
+                                    href={Bounty.url(bounty)}
+                                    class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+                                  >
+                                    <%= bounty.task.title %>
+                                  </.link>
+
+                                  <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+                                    <.link
+                                      href={~p"/org/#{bounty.owner.handle}"}
+                                      class="font-semibold hover:underline"
+                                    >
+                                      <%= bounty.owner.name %>
+                                    </.link>
+                                    <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                                    <.link href={Bounty.url(bounty)} class="hover:underline">
+                                      <%= Bounty.path(bounty) %>
+                                    </.link>
+                                  </div>
                                 </div>
-                              </td>
-                              <td class="hidden p-4 align-middle sm:table-cell">
-                                <div class="flex items-center gap-2">
-                                  <img src={bounty.owner.avatar_url} class="h-6 w-6 rounded-full" />
-                                  <%= bounty.owner.name %>
-                                </div>
-                              </td>
-                              <td class="hidden p-4 align-middle sm:table-cell">
-                                <div class="flex flex-wrap gap-1">
-                                  <%= for tech <- bounty.tech_stack || [] do %>
-                                    <div class="inline-flex px-2.5 py-0.5 rounded-full border-transparent bg-secondary text-secondary-foreground text-xs">
-                                      <%= tech %>
-                                    </div>
-                                  <% end %>
-                                </div>
-                              </td>
-                              <td class="hidden p-4 align-middle md:table-cell">
-                                <%= Calendar.strftime(bounty.inserted_at, "%Y-%m-%d") %>
-                              </td>
-                              <td class="p-4 text-right align-middle">
-                                <%= Money.format!(bounty.amount, bounty.currency) %>
                               </td>
                             </tr>
                           <% end %>

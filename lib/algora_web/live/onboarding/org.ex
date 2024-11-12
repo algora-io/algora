@@ -19,7 +19,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:ok,
      socket
      |> assign(:step, 1)
-     |> assign(:total_steps, 4)
+     |> assign(:total_steps, 2)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
      |> assign(:code_valid, nil)}
@@ -31,8 +31,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <div class="flex-1 flex">
         <div class="flex-grow px-8 py-16">
           <div class="max-w-3xl mx-auto">
-            <div class={["flex items-center gap-4 text-lg mb-6", @step > @total_steps && "opacity-0"]}>
-              <span class="text-muted-foreground"><%= @step %> / <%= @total_steps %></span>
+            <div class="flex items-center gap-4 text-lg mb-6">
+              <span class="text-muted-foreground">
+                <%= min(@step, @total_steps) %> / <%= @total_steps %>
+              </span>
               <h1 class="text-lg font-semibold uppercase">Get started</h1>
             </div>
 
@@ -58,14 +60,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     Previous
                   </.button>
                   <.button phx-click="next_step" variant="default">
-                    Next
+                    Sign up
                   </.button>
                 <% 4 -> %>
                   <.button phx-click="prev_step" variant="secondary">
                     Previous
                   </.button>
                   <.button phx-click="next_step" variant="default">
-                    Sign up
+                    Submit
                   </.button>
                 <% _ -> %>
                   <div></div>
@@ -120,7 +122,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render_step(%{step: 1} = assigns) do
     ~H"""
-    <div class="space-y-4">
+    <div>
       <div>
         <h2 class="text-4xl font-semibold mb-2">
           What is your tech stack?
@@ -154,36 +156,49 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <% end %>
         </div>
       </div>
-
-      <div class="hidden">
-        <h2 class="text-4xl font-semibold text-white mb-2">
-          Which of the following describe you?
-        </h2>
-        <p class="text-gray-400">Select all that apply</p>
-
-        <div class="mt-4 grid grid-cols-1 gap-4">
-          <%= for {intention, label} <- [
-            {"bounties", "Use bounties with my own developers"},
-            {"projects", "I'm looking to collaborate flexibly with developers"},
-            {"jobs", "I'm currently hiring full-time engineers"},
-          ] do %>
-            <div class="relative flex items-center">
-              <div class="flex items-center">
-                <input
-                  id={"intention-#{intention}"}
-                  type="checkbox"
-                  phx-click="toggle_intention"
-                  phx-value-intention={intention}
-                  checked={intention in @context.intentions}
-                  class="h-8 w-8 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background cursor-pointer"
-                />
-              </div>
-              <div class="ml-3 text-base leading-6">
-                <label for={"intention-#{intention}"} class="text-gray-300 cursor-pointer">
-                  <%= label %>
-                </label>
-              </div>
-            </div>
+      <div class="mt-4">
+        <label class="block text-4xl font-semibold mb-2">Are you hiring full-time?</label>
+        <div class="space-y-3">
+          <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
+            <label class="flex items-center space-x-3">
+              <input
+                type="radio"
+                name="hiring_status"
+                value={value}
+                checked={@context.hiring_status == value}
+                phx-click="update_context"
+                phx-value-field="hiring_status"
+                phx-value-value={value}
+                class="h-5 w-5 rounded-full border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+              />
+              <span class="text-base"><%= label %></span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+      <div class="mt-8">
+        <label class="block text-4xl font-semibold mb-4">
+          Which of the following best describes you?
+        </label>
+        <div class="space-y-3">
+          <%= for {type, label} <- [
+                {"opensource", "Open source company"},
+                {"closedsource", "Closed source company"},
+                {"agency", "Agency / consultancy / studio"},
+                {"nonprofit", "Non-profit / FOSS"}
+              ] do %>
+            <label class="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                name="company_type"
+                value={type}
+                checked={type in (@context.company_types || [])}
+                phx-click="toggle_company_type"
+                phx-value-type={type}
+                class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+              />
+              <span class="text-base"><%= label %></span>
+            </label>
           <% end %>
         </div>
       </div>
@@ -192,64 +207,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def render_step(%{step: 2} = assigns) do
-    ~H"""
-    <div class="space-y-8">
-      <div>
-        <div class="space-y-6">
-          <div>
-            <label class="block text-4xl font-semibold mb-4">
-              Which of the following best describes you?
-            </label>
-            <div class="space-y-3">
-              <%= for {type, label} <- [
-                {"opensource", "Open source company"},
-                {"closedsource", "Closed source company"},
-                {"agency", "Agency / consultancy / studio"},
-                {"nonprofit", "Non-profit / FOSS"}
-              ] do %>
-                <label class="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    name="company_type"
-                    value={type}
-                    checked={type in (@context.company_types || [])}
-                    phx-click="toggle_company_type"
-                    phx-value-type={type}
-                    class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
-                  />
-                  <span class="text-base"><%= label %></span>
-                </label>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="mt-8">
-            <label class="block text-4xl font-semibold mb-2">Are you hiring full-time?</label>
-            <div class="space-y-3">
-              <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
-                <label class="flex items-center space-x-3">
-                  <input
-                    type="radio"
-                    name="hiring_status"
-                    value={value}
-                    checked={@context.hiring_status == value}
-                    phx-click="update_context"
-                    phx-value-field="hiring_status"
-                    phx-value-value={value}
-                    class="h-5 w-5 rounded-full border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
-                  />
-                  <span class="text-base"><%= label %></span>
-                </label>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  def render_step(%{step: 3} = assigns) do
     ~H"""
     <div class="space-y-4">
       <h2 class="text-4xl font-semibold mb-2">
@@ -309,7 +266,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  def render_step(%{step: 4} = assigns) do
+  def render_step(%{step: 3} = assigns) do
     ~H"""
     <div class="space-y-8">
       <div>

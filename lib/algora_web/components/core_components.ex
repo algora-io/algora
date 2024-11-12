@@ -200,6 +200,7 @@ defmodule AlgoraWeb.CoreComponents do
       </.dropdown>
   """
   attr :id, :string, required: true
+  attr :class, :string, default: nil
 
   slot :img do
     attr :src, :string
@@ -218,7 +219,7 @@ defmodule AlgoraWeb.CoreComponents do
   def dropdown2(assigns) do
     ~H"""
     <!-- User account dropdown -->
-    <div class="w-full relative inline-block text-left">
+    <div class={classes(["w-full relative text-left", @class])}>
       <div>
         <button
           id={@id}
@@ -272,6 +273,28 @@ defmodule AlgoraWeb.CoreComponents do
         </div>
       </div>
     </div>
+    """
+  end
+
+  def context_selector(assigns) do
+    ~H"""
+    <.dropdown2 id="dashboard-dropdown">
+      <:img src={@current_user.avatar_url} alt={@current_user.handle} />
+      <:title><%= @current_user.name %></:title>
+
+      <:link
+        :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
+        href={~p"/set_context/#{org.handle}"}
+      >
+        <div class="flex items-center">
+          <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
+          <div class="truncate">
+            <div class="truncate font-semibold"><%= org.name %></div>
+            <div class="truncate text-sm text-gray-500">@<%= org.handle %></div>
+          </div>
+        </div>
+      </:link>
+    </.dropdown2>
     """
   end
 

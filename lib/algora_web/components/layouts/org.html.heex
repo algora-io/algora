@@ -194,7 +194,7 @@
             <:title><%= @current_org.name %></:title>
 
             <:link href={~p"/set_context/personal"}>
-              <div class="flex items-center">
+              <div class="flex items-center whitespace-nowrap">
                 <img
                   src={@current_user.avatar_url}
                   alt={@current_user.name}
@@ -207,15 +207,23 @@
               </div>
             </:link>
             <:link
-              :for={org <- Algora.Organizations.get_user_orgs(@current_org)}
+              :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
               href={~p"/set_context/#{org.handle}"}
             >
-              <div class="flex items-center">
+              <div class="flex items-center whitespace-nowrap">
                 <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
                 <div>
                   <div class="font-semibold"><%= org.name %></div>
                   <div class="text-sm text-gray-500">@<%= org.handle %></div>
                 </div>
+              </div>
+            </:link>
+            <:link href={~p"/auth/logout"} method="delete">
+              <div class="flex items-center whitespace-nowrap">
+                <div class="h-8 w-8 flex items-center justify-center mr-3">
+                  <.icon name="tabler-logout" class="h-5 w-5" />
+                </div>
+                <div class="font-semibold">Logout</div>
               </div>
             </:link>
           </.dropdown2>

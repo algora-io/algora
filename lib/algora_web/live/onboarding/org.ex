@@ -75,45 +75,167 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             </div>
           </div>
         </div>
-        <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto">
-          <h2 class="text-lg font-semibold uppercase mb-4">
-            Matching Developers
-          </h2>
-          <%= if @matching_devs == [] do %>
-            <p class="text-muted-foreground">Add skills to see matching developers</p>
-          <% else %>
-            <%= for dev <- @matching_devs do %>
-              <div class="mb-6 bg-card p-4 rounded-lg border border-border">
-                <div class="flex mb-2 gap-3">
-                  <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
-                  <div class="flex-grow">
-                    <div class="flex justify-between">
-                      <div>
-                        <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                        <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
-                      </div>
-                      <div class="flex flex-col items-end">
-                        <div class="text-muted-foreground">Earned</div>
-                        <div class="font-semibold text-success font-display">
-                          <%= Money.format!(dev.amount, "USD") %>
+        <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
+          <div class={
+            classes(
+              hidden: @step < 2,
+              block: @step >= 2
+            )
+          }>
+            <h2 class="text-lg font-semibold uppercase mb-6 text-center">
+              You're in good company
+            </h2>
+            <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16 saturate-0">
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/cal"
+              >
+                <img
+                  src="https://algora.io/banners/calcom.png"
+                  alt="Cal.com"
+                  class="col-auto w-[10rem] mt-3"
+                />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/qdrant"
+              >
+                <img
+                  src="https://algora.io/banners/qdrant.png"
+                  alt="Qdrant"
+                  class="col-auto w-[11rem]"
+                />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/remotion"
+              >
+                <img
+                  src="https://algora.io/banners/remotion.png"
+                  alt="Remotion"
+                  class="col-auto w-full"
+                />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/zio"
+              >
+                <img src="https://algora.io/banners/zio.png" alt="ZIO" class="col-auto w-[13rem]" />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/triggerdotdev"
+              >
+                <img
+                  src="https://algora.io/banners/triggerdotdev.png"
+                  alt="Trigger.dev"
+                  class="col-auto w-full"
+                />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/tembo"
+              >
+                <img src="https://algora.io/banners/tembo.png" alt="Tembo" class="col-auto w-[13rem]" />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/maybe-finance"
+              >
+                <img src="https://algora.io/banners/maybe.png" alt="Maybe" class="col-auto w-full" />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/golemcloud"
+              >
+                <img
+                  src="https://algora.io/banners/golem.png"
+                  alt="Golem Cloud"
+                  class="col-auto w-full"
+                />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/aidenybai"
+              >
+                <img src="https://algora.io/banners/million.png" alt="Million" class="col-auto w-36" />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/tailcallhq"
+              >
+                <AlgoraWeb.Components.Wordmarks.tailcall class="col-auto w-[13rem]" />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/highlight"
+              >
+                <img
+                  src="https://algora.io/banners/highlight.png"
+                  alt="Highlight"
+                  class="col-auto w-44"
+                />
+              </a>
+              <a
+                class="relative flex items-center justify-center"
+                href="https://console.algora.io/org/dittofeed"
+              >
+                <img
+                  src="https://algora.io/banners/dittofeed.png"
+                  alt="Dittofeed"
+                  class="col-auto w-40"
+                />
+              </a>
+            </div>
+          </div>
+          <div
+            div
+            class={
+              classes(
+                hidden: @step != 1,
+                block: @step == 1
+              )
+            }
+          >
+            <h2 class="text-lg font-semibold uppercase mb-4">
+              Matching Developers
+            </h2>
+            <%= if @matching_devs == [] do %>
+              <p class="text-muted-foreground">Add skills to see matching developers</p>
+            <% else %>
+              <%= for dev <- @matching_devs do %>
+                <div class="mb-6 bg-card p-4 rounded-lg border border-border">
+                  <div class="flex mb-2 gap-3">
+                    <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
+                    <div class="flex-grow">
+                      <div class="flex justify-between">
+                        <div>
+                          <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                          <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
+                        </div>
+                        <div class="flex flex-col items-end">
+                          <div class="text-muted-foreground">Earned</div>
+                          <div class="font-semibold text-success font-display">
+                            <%= Money.format!(dev.amount, "USD") %>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div class="pt-3 text-sm">
-                      <div class="-ml-1 text-sm flex flex-wrap gap-3">
-                        <%= for skill <- dev.skills do %>
-                          <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
-                            <%= skill %>
-                          </span>
-                        <% end %>
+                      <div class="pt-3 text-sm">
+                        <div class="-ml-1 text-sm flex flex-wrap gap-3">
+                          <%= for skill <- dev.skills do %>
+                            <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
+                              <%= skill %>
+                            </span>
+                          <% end %>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              <% end %>
             <% end %>
-          <% end %>
+          </div>
         </div>
       </div>
     </div>

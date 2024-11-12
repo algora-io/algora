@@ -11,13 +11,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       intentions: [],
       email: "",
       domain: "",
-      verification_code: ""
+      verification_code: "",
+      company_types: [],
+      hiring_status: nil
     }
 
     {:ok,
      socket
      |> assign(:step, 1)
-     |> assign(:total_steps, 2)
+     |> assign(:total_steps, 4)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
      |> assign(:code_valid, nil)}
@@ -49,11 +51,21 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     Previous
                   </.button>
                   <.button phx-click="next_step" variant="default">
-                    Sign up
+                    Next
                   </.button>
                 <% 3 -> %>
-                  <.button phx-click="next_step" class="ml-auto">
-                    Submit
+                  <.button phx-click="prev_step" variant="secondary">
+                    Previous
+                  </.button>
+                  <.button phx-click="next_step" variant="default">
+                    Next
+                  </.button>
+                <% 4 -> %>
+                  <.button phx-click="prev_step" variant="secondary">
+                    Previous
+                  </.button>
+                  <.button phx-click="next_step" variant="default">
+                    Sign up
                   </.button>
                 <% _ -> %>
                   <div></div>
@@ -143,17 +155,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </div>
 
-      <div>
+      <div class="hidden">
         <h2 class="text-4xl font-semibold text-white mb-2">
-          What are you looking to do?
+          Which of the following describe you?
         </h2>
         <p class="text-gray-400">Select all that apply</p>
 
         <div class="mt-4 grid grid-cols-1 gap-4">
           <%= for {intention, label} <- [
             {"bounties", "Use bounties with my own developers"},
-            {"projects", "Share bounties with Algora developers"},
-            {"jobs", "Hire full-time engineers"},
+            {"projects", "I'm looking to collaborate flexibly with developers"},
+            {"jobs", "I'm currently hiring full-time engineers"},
           ] do %>
             <div class="relative flex items-center">
               <div class="flex items-center">
@@ -180,6 +192,64 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def render_step(%{step: 2} = assigns) do
+    ~H"""
+    <div class="space-y-8">
+      <div>
+        <div class="space-y-6">
+          <div>
+            <label class="block text-4xl font-semibold mb-4">
+              Which of the following best describes you?
+            </label>
+            <div class="space-y-3">
+              <%= for {type, label} <- [
+                {"opensource", "Open source company"},
+                {"closedsource", "Closed source company"},
+                {"agency", "Agency / consultancy / studio"},
+                {"nonprofit", "Non-profit / FOSS"}
+              ] do %>
+                <label class="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    name="company_type"
+                    value={type}
+                    checked={type in (@context.company_types || [])}
+                    phx-click="toggle_company_type"
+                    phx-value-type={type}
+                    class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                  />
+                  <span class="text-base"><%= label %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <label class="block text-4xl font-semibold mb-2">Are you hiring full-time?</label>
+            <div class="space-y-3">
+              <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
+                <label class="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    name="hiring_status"
+                    value={value}
+                    checked={@context.hiring_status == value}
+                    phx-click="update_context"
+                    phx-value-field="hiring_status"
+                    phx-value-value={value}
+                    class="h-5 w-5 rounded-full border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                  />
+                  <span class="text-base"><%= label %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  def render_step(%{step: 3} = assigns) do
     ~H"""
     <div class="space-y-4">
       <h2 class="text-4xl font-semibold mb-2">
@@ -239,7 +309,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  def render_step(%{step: 3} = assigns) do
+  def render_step(%{step: 4} = assigns) do
     ~H"""
     <div class="space-y-8">
       <div>
@@ -381,5 +451,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   defp get_matching_devs(context) do
     Accounts.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
+  end
+
+  def handle_event("toggle_company_type", %{"type" => type}, socket) do
+    current_types = socket.assigns.context.company_types || []
+
+    updated_types =
+      if type in current_types,
+        do: List.delete(current_types, type),
+        else: [type | current_types]
+
+    updated_context = Map.put(socket.assigns.context, :company_types, updated_types)
+    {:noreply, assign(socket, context: updated_context)}
   end
 end

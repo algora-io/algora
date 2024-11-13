@@ -22,73 +22,70 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white sm:flex relative">
-      <div class="flex-grow px-8 py-16 bg-gray-950/25">
-        <div class="max-w-3xl mx-auto">
-          <div class="flex items-center gap-4 text-lg mb-6 font-display">
-            <span class="text-gray-300"><%= @step %> / <%= @total_steps %></span>
-            <h1 class="text-lg text-gray-200 font-semibold uppercase">Get started</h1>
-          </div>
-          <div class="mb-8">
-            <%= render_step(assigns) %>
-          </div>
-          <div class="flex justify-between">
-            <%= if @step > 1 do %>
-              <button
-                phx-click="prev_step"
-                class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Previous
-              </button>
-            <% else %>
-              <div></div>
-            <% end %>
-            <%= if @step < @total_steps do %>
-              <button
-                phx-click="next_step"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Next
-              </button>
-            <% else %>
-              <button
-                phx-click="submit"
-                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Sign up
-              </button>
-            <% end %>
+    <div class="min-h-screen bg-card">
+      <div class="flex-1 flex">
+        <div class="flex-grow px-8 py-16">
+          <div class="max-w-3xl mx-auto">
+            <div class="flex items-center gap-4 text-lg mb-6">
+              <span class="text-muted-foreground">
+                <%= @step %> / <%= @total_steps %>
+              </span>
+              <h1 class="text-lg font-semibold uppercase">Get started</h1>
+            </div>
+
+            <div class="mb-4">
+              <%= render_step(assigns) %>
+            </div>
+
+            <div class="flex justify-between">
+              <%= if @step > 1 do %>
+                <.button phx-click="prev_step" variant="secondary">
+                  Previous
+                </.button>
+              <% else %>
+                <div></div>
+              <% end %>
+              <%= if @step < @total_steps do %>
+                <.button phx-click="next_step" variant="default">
+                  Next
+                </.button>
+              <% else %>
+                <.button phx-click="submit" variant="default">
+                  Sign up
+                </.button>
+              <% end %>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="sm:w-1/3 border-l-2 border-gray-700 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto">
-        <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
-          Open Bounties
-        </h2>
-        <%= if @bounties == [] do %>
-          <p class="text-gray-400">No open bounties available</p>
-        <% else %>
-          <%= for bounty <- @bounties do %>
-            <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
-              <div class="flex flex-col">
-                <div class="flex justify-between items-center mb-2">
-                  <div class="font-mono text-2xl font-extrabold text-emerald-300">
-                    <%= Money.format!(bounty.amount, bounty.currency) %>
+        <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
+          <h2 class="text-lg font-semibold uppercase mb-4">
+            Open Bounties
+          </h2>
+          <%= if @bounties == [] do %>
+            <p class="text-muted-foreground">No open bounties available</p>
+          <% else %>
+            <%= for bounty <- @bounties do %>
+              <div class="mb-4 bg-card p-4 rounded-lg border border-border">
+                <div class="flex flex-col">
+                  <div class="flex justify-between items-center mb-2">
+                    <div class="font-mono text-2xl font-extrabold text-success">
+                      <%= Money.format!(bounty.amount, bounty.currency) %>
+                    </div>
+                  </div>
+                  <div class="text-sm text-muted-foreground mb-1">
+                    <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
+                  </div>
+                  <div class="font-medium">
+                    <%= bounty.task.title %>
+                  </div>
+                  <div class="text-xs text-muted-foreground mt-2">
+                    <%= Algora.Util.time_ago(bounty.inserted_at) %>
                   </div>
                 </div>
-                <div class="text-sm text-gray-300 mb-1">
-                  <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
-                </div>
-                <div class="text-white font-medium">
-                  <%= bounty.task.title %>
-                </div>
-                <div class="text-xs text-gray-400 mt-2">
-                  <%= Algora.Util.time_ago(bounty.inserted_at) %>
-                </div>
               </div>
-            </div>
+            <% end %>
           <% end %>
-        <% end %>
+        </div>
       </div>
     </div>
     """
@@ -98,29 +95,31 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="text-4xl font-semibold text-white mb-2">
+        <h2 class="text-4xl font-semibold mb-2">
           What is your tech stack?
         </h2>
-        <p class="text-gray-400">Select the technologies you work with</p>
+        <p class="text-muted-foreground">Select the technologies you work with</p>
 
         <div class="mt-4">
-          <input
+          <.input
             type="text"
+            name="skill_input"
+            value=""
             placeholder="Elixir, Phoenix, PostgreSQL, etc."
             phx-keydown="handle_skill_input"
             phx-debounce="200"
-            class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full bg-background border-input"
           />
         </div>
 
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for skill <- @context.skills do %>
-            <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
+            <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
               <%= skill %>
               <button
                 phx-click="remove_skill"
                 phx-value-skill={skill}
-                class="ml-2 text-indigo-300 hover:text-indigo-100"
+                class="ml-2 text-success hover:text-success/80"
               >
                 ×
               </button>
@@ -130,31 +129,27 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       </div>
 
       <div class="mt-8">
-        <h2 class="text-4xl font-semibold text-white mb-2">
+        <h2 class="text-4xl font-semibold mb-2">
           What are you looking to do?
         </h2>
-        <p class="text-gray-400">Select all that apply</p>
+        <p class="text-muted-foreground">Select all that apply</p>
 
-        <div class="mt-4 grid grid-cols-1 gap-4">
+        <div class="mt-4 space-y-3">
           <%= for {intention, label} <- [
             {"bounties", "Find open source bounties"},
             {"jobs", "Find full-time jobs"},
             {"projects", "Find freelancing projects"},
           ] do %>
-            <div class="relative flex items-start">
-              <div class="flex h-6 items-center">
-                <input
-                  type="checkbox"
-                  phx-click="toggle_intention"
-                  phx-value-intention={intention}
-                  checked={intention in @context.intentions}
-                  class="h-4 w-4 rounded border-gray-700 bg-gray-800 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-gray-900"
-                />
-              </div>
-              <div class="ml-3 text-sm leading-6">
-                <label class="text-gray-300"><%= label %></label>
-              </div>
-            </div>
+            <label class="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                phx-click="toggle_intention"
+                phx-value-intention={intention}
+                checked={intention in @context.intentions}
+                class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+              />
+              <span class="text-base"><%= label %></span>
+            </label>
           <% end %>
         </div>
       </div>
@@ -165,15 +160,15 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   def render_step(%{step: 2} = assigns) do
     ~H"""
     <div class="space-y-8">
-      <h2 class="text-4xl font-semibold text-white"></h2>
+      <h2 class="text-4xl font-semibold"></h2>
 
       <div class="space-y-6">
         <.link
           href={Algora.Github.authorize_url()}
           rel="noopener"
-          class="mt-8 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400"
+          class="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50"
         >
-          <AlgoraWeb.Components.Logos.github class="w-5 h-5 mr-2" /> Sign in with GitHub
+          <.icon name="tabler-brand-github" class="w-5 h-5 mr-2" /> Sign in with GitHub
         </.link>
       </div>
     </div>

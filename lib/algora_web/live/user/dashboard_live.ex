@@ -10,12 +10,15 @@ defmodule AlgoraWeb.User.DashboardLive do
     socket =
       socket
       |> assign(:tech_stack, tech_stack)
-      |> assign(:view_mode, "default")
+      |> assign(:view_mode, "compact")
+      |> assign(:available_to_work, true)
+      |> assign(:hourly_rate, 50)
+      |> assign(:hours_per_week, 40)
       |> assign(
         :bounties,
         Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
-        |> intersperse_hourly_bounties()
       )
+      |> assign(:hourly_bounties, fetch_hourly_bounties())
       |> assign(:achievements, fetch_achievements())
 
     {:ok, socket}
@@ -24,7 +27,29 @@ defmodule AlgoraWeb.User.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="flex-1 lg:pr-96 bg-background text-foreground">
-      <!-- Bounties Section -->
+      <!-- Hourly Bounties Section -->
+      <div class="relative h-full max-w-4xl mx-auto p-6">
+        <div class="flex justify-between px-6">
+          <div class="flex flex-col space-y-1.5">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight">
+              Hourly contracts
+            </h2>
+            <p class="text-sm text-muted-foreground">Paid out weekly</p>
+          </div>
+        </div>
+        <div class="px-6 -ml-4">
+          <div class="relative w-full overflow-auto">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for bounty <- @hourly_bounties do %>
+                  <.default_view bounty={bounty} />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Regular Bounties Section -->
       <div class="relative h-full max-w-4xl mx-auto p-6">
         <div class="flex justify-between px-6">
           <div class="flex flex-col space-y-1.5">
@@ -41,34 +66,6 @@ defmodule AlgoraWeb.User.DashboardLive do
               <span class="sr-only">Compact view</span>
             </.toggle_group_item>
           </.toggle_group>
-        </div>
-        <!-- Tech Stack Input -->
-        <div class="px-6 pt-3">
-          <.input
-            id="tech-input"
-            name="tech-input"
-            value=""
-            type="text"
-            placeholder="Elixir, Phoenix, PostgreSQL, etc."
-            phx-keydown="handle_tech_input"
-            phx-debounce="200"
-            phx-hook="ClearInput"
-            class="w-full bg-background border-input"
-          />
-          <div class="flex flex-wrap gap-3 mt-4">
-            <%= for tech <- @tech_stack do %>
-              <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
-                <%= tech %>
-                <button
-                  phx-click="remove_tech"
-                  phx-value-tech={tech}
-                  class="ml-2 text-success hover:text-success/80"
-                >
-                  ×
-                </button>
-              </div>
-            <% end %>
-          </div>
         </div>
         <div class="px-6 pt-3 -ml-4">
           <div class="relative w-full overflow-auto">
@@ -89,8 +86,82 @@ defmodule AlgoraWeb.User.DashboardLive do
     </div>
     <!-- Sidebar -->
     <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8">
-      <!-- Achievements Section -->
+      <!-- Availability Section -->
       <div class="flex items-center justify-between">
+        <label for="available" class="text-sm font-medium">Available to work</label>
+        <.switch
+          id="available"
+          name="available"
+          value={@available_to_work}
+          phx-click="toggle_availability"
+        />
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-4">
+        <div>
+          <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
+          <div class="mt-2 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-display">
+              $
+            </span>
+            <.input
+              type="number"
+              min="0"
+              id="hourly-rate"
+              name="hourly-rate"
+              value={@hourly_rate}
+              phx-keydown="handle_hourly_rate"
+              phx-debounce="200"
+              phx-hook="ClearInput"
+              class="w-full bg-background border-input font-display ps-6"
+            />
+          </div>
+        </div>
+        <div>
+          <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
+          <.input
+            type="number"
+            min="0"
+            max="168"
+            id="hours-per-week"
+            name="hours-per-week"
+            value={@hours_per_week}
+            phx-keydown="handle_hours_per_week"
+            phx-debounce="200"
+            class="mt-2 w-full bg-background border-input font-display"
+          />
+        </div>
+      </div>
+      <!-- Tech Stack Section -->
+      <div class="mt-4">
+        <label for="tech-input" class="text-sm font-medium">Tech stack</label>
+        <.input
+          id="tech-input"
+          name="tech-input"
+          value=""
+          type="text"
+          placeholder="Elixir, Phoenix, PostgreSQL, etc."
+          phx-keydown="handle_tech_input"
+          phx-debounce="200"
+          phx-hook="ClearInput"
+          class="mt-2 w-full bg-background border-input"
+        />
+        <div class="flex flex-wrap gap-3 mt-4">
+          <%= for tech <- @tech_stack do %>
+            <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
+              <%= tech %>
+              <button
+                phx-click="remove_tech"
+                phx-value-tech={tech}
+                class="ml-2 text-success hover:text-success/80"
+              >
+                ×
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <!-- Achievements Section -->
+      <div class="mt-8 flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
         <.link
           class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
@@ -123,8 +194,60 @@ defmodule AlgoraWeb.User.DashboardLive do
       %{status: :current, name: "Create Stripe account"},
       %{status: :upcoming, name: "Earn first bounty"},
       %{status: :upcoming, name: "Earn through referral"},
-      %{status: :upcoming, name: "Earn $10K"},
-      %{status: :upcoming, name: "Earn $50K"}
+      %{status: :upcoming, name: "Earn $10K"}
+    ]
+  end
+
+  defp fetch_hourly_bounties do
+    [
+      %{
+        amount: Decimal.new(75),
+        currency: "USD",
+        expected_hours: 20,
+        task: %{title: "Algora: Open source bounties"},
+        owner: %{
+          handle: "algora",
+          name: "Algora",
+          og_image_url: "https://algora.io/og.png",
+          avatar_url:
+            "https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
+        },
+        tech_stack: ["Elixir", "Phoenix", "Membrane"],
+        hourly: true,
+        expected_hours: 40
+      },
+      %{
+        amount: Decimal.new(150),
+        currency: "USD",
+        expected_hours: 15,
+        task: %{title: "Deploy invincible backends | Golem"},
+        owner: %{
+          handle: "golemcloud",
+          name: "Golem Cloud",
+          og_image_url:
+            "https://cdn.prod.website-files.com/64721eeec7cd7ef4f6f1683e/64c7adf49bfa809ce0c06161_og-golem.png",
+          avatar_url:
+            "https://console.algora.io/_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F133607167%3Fs%3D200%26v%3D4&w=1920&q=75"
+        },
+        tech_stack: ["Rust", "WASM"],
+        hourly: true,
+        expected_hours: 30
+      },
+      %{
+        amount: Decimal.new(150),
+        currency: "USD",
+        expected_hours: 25,
+        task: %{title: "Qdrant - Vector Database"},
+        owner: %{
+          handle: "qdrant",
+          name: "Qdrant",
+          og_image_url: "https://qdrant.tech/images/previews/social-preview-A.png",
+          avatar_url: "https://qdrant.tech/favicon/favicon.ico"
+        },
+        tech_stack: ["Rust"],
+        hourly: true,
+        expected_hours: 20
+      }
     ]
   end
 
@@ -196,39 +319,9 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply, assign(socket, :view_mode, mode)}
   end
 
-  defp intersperse_hourly_bounties(bounties) do
-    hourly_bounties = [
-      %{
-        amount: Decimal.new(75),
-        currency: "USD",
-        task: %{title: "Full-stack Elixir engineer for livestreaming platform"},
-        owner: %{
-          handle: "algora",
-          name: "Algora",
-          avatar_url:
-            "https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
-        },
-        tech_stack: ["elixir", "phoenix", "membrane"],
-        hourly: true
-      },
-      %{
-        amount: Decimal.new(150),
-        currency: "USD",
-        task: %{title: "Rust backend engineer (contract)"},
-        owner: %{
-          handle: "golemcloud",
-          name: "Golem Cloud",
-          avatar_url:
-            "https://console.algora.io/_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F133607167%3Fs%3D200%26v%3D4&w=1920&q=75"
-        },
-        tech_stack: ["rust", "wasm"],
-        hourly: true
-      }
-    ]
-
-    bounties
-    |> Enum.zip(Stream.cycle(hourly_bounties))
-    |> Enum.flat_map(fn {bounty, hourly} -> [bounty, hourly] end)
+  def handle_event("accept_contract", %{"org" => _org_handle}, socket) do
+    # TODO: Implement contract acceptance logic
+    {:noreply, socket}
   end
 
   def compact_view(%{bounty: %{hourly: true}} = assigns) do
@@ -293,43 +386,59 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
       <td class="p-4 align-middle">
-        <div class="flex items-center gap-4">
-          <.link href={~p"/org/#{@bounty.owner.handle}"}>
-            <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-              <img
-                class="aspect-square h-full w-full"
-                alt={@bounty.owner.name}
-                src={@bounty.owner.avatar_url}
-              />
-            </span>
-          </.link>
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <.link href={~p"/org/#{@bounty.owner.handle}"}>
+              <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
+                <.avatar_image src={@bounty.owner.og_image_url} alt={@bounty.owner.name} />
+                <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+              </.avatar>
+            </.link>
 
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-1 text-sm text-muted-foreground">
-              <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-                <%= @bounty.owner.name %>
-              </.link>
-            </div>
-
-            <div class="group flex items-center gap-2">
-              <div class="font-display text-xl font-semibold text-success">
-                <%= Money.format!(@bounty.amount, @bounty.currency) %>/hr
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-1 text-base text-foreground">
+                <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+                  <%= @bounty.task.title %>
+                </.link>
               </div>
-              <.link
-                navigate={~p"/org/#{@bounty.owner.handle}"}
-                class="text-foreground group-hover:underline line-clamp-1"
-              >
-                <%= @bounty.task.title %>
-              </.link>
-            </div>
 
-            <div class="flex flex-wrap gap-2">
-              <%= for tag <- @bounty.tech_stack do %>
+              <div class="group flex items-center gap-2">
+                <div class="font-display text-xl font-semibold text-success">
+                  <%= Money.format!(@bounty.amount, @bounty.currency) %>/hr
+                </div>
                 <span class="text-sm text-muted-foreground">
-                  #<%= tag %>
+                  · <%= @bounty.expected_hours %> hours/week
                 </span>
-              <% end %>
+              </div>
+
+              <div class="mt-1 flex flex-wrap gap-2">
+                <%= for tag <- @bounty.tech_stack do %>
+                  <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
+                    <%= tag %>
+                  </div>
+                <% end %>
+              </div>
             </div>
+          </div>
+
+          <div class="flex flex-col items-end gap-3">
+            <div class="text-right">
+              <div class="text-sm text-muted-foreground">Total contract value</div>
+              <div class="font-display text-lg font-semibold text-foreground">
+                <%= Money.format!(
+                  Decimal.mult(@bounty.amount, @bounty.expected_hours),
+                  @bounty.currency
+                ) %> / wk
+              </div>
+            </div>
+            <.button
+              variant="secondary"
+              phx-click="accept_contract"
+              phx-value-org={@bounty.owner.handle}
+              size="sm"
+            >
+              <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Accept contract
+            </.button>
           </div>
         </div>
       </td>
@@ -343,13 +452,12 @@ defmodule AlgoraWeb.User.DashboardLive do
       <td class="p-4 align-middle">
         <div class="flex items-center gap-4">
           <.link href={~p"/org/#{@bounty.owner.handle}"}>
-            <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-              <img
-                class="aspect-square h-full w-full"
-                alt={@bounty.owner.name}
-                src={@bounty.owner.avatar_url}
-              />
-            </span>
+            <.avatar class="h-14 w-14 rounded-xl">
+              <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
+              <.avatar_fallback>
+                <%= String.first(@bounty.owner.name) %>
+              </.avatar_fallback>
+            </.avatar>
           </.link>
 
           <div class="flex flex-col gap-1">

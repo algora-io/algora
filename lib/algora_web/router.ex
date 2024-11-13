@@ -42,6 +42,8 @@ defmodule AlgoraWeb.Router do
       live "/user/installations", User.InstallationsLive, :index
 
       live "/@/:handle", User.ProfileLive, :index
+
+      live "/contracts/:id", Contract.ViewLive
     end
 
     live_session :org,

@@ -1178,11 +1178,16 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate badge(assigns), to: AlgoraWeb.Components.UI.Badge
   defdelegate button(assigns), to: AlgoraWeb.Components.UI.Button
   defdelegate card_content(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate card_description(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate card_footer(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate card_header(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate card_title(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate card(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate checkbox(assigns), to: AlgoraWeb.Components.UI.Checkbox
   defdelegate data_table(assigns), to: AlgoraWeb.Components.UI.DataTable
+  defdelegate dropdown_menu(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
+  defdelegate dropdown_menu_content(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
+  defdelegate dropdown_menu_trigger(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
   defdelegate form_control(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_description(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_item(assigns), to: AlgoraWeb.Components.UI.Form

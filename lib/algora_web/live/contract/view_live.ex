@@ -215,7 +215,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
      socket
      |> assign(:contract, contract)
      |> assign(:page_title, "#{contract.developer.name} <> #{contract.company.name}")
-     |> assign(:messages, messages)}
+     |> assign(:messages, messages)
+     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_release_modal, false)
+     |> assign(:show_dispute_modal, false)}
   end
 
   def render(assigns) do
@@ -251,7 +254,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               </div>
             </div>
             <div>
-              <.badge variant="success">Active</.badge>
+              <.badge variant="primary">Active</.badge>
             </div>
           </div>
           <!-- Stats Grid -->
@@ -340,7 +343,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         </div>
 
                         <div class="flex items-center gap-2">
-                          <.button>
+                          <.button phx-click={JS.push("show_release_renew_modal")}>
                             Release & Renew
                           </.button>
 
@@ -505,7 +508,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         </div>
 
         <.scroll_area
-          class="flex-1 p-4 flex flex-col-reverse h-full"
+          class="flex-1 p-4 flex flex-col-reverse h-full gap-6"
           id="messages-container"
           phx-hook="ScrollToBottom"
         >
@@ -566,6 +569,258 @@ defmodule AlgoraWeb.Contract.ViewLive do
         </div>
       </div>
     </div>
+    <.drawer show={@show_release_renew_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <h3 class="text-lg font-semibold">Release Payment & Renew Contract</h3>
+      </.drawer_header>
+      <.drawer_content>
+        <div class="grid grid-cols-2 gap-8">
+          <div>
+            <form phx-submit="release_and_renew" class="space-y-6">
+              <.form_item>
+                <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
+                <.form_control>
+                  <.input
+                    type="textarea"
+                    rows={10}
+                    name="feedback"
+                    value=""
+                    placeholder="Share your experience working with the developer..."
+                    required
+                  />
+                </.form_control>
+                <.form_description>
+                  Your feedback helps other companies make informed decisions.
+                </.form_description>
+              </.form_item>
+
+              <div class="flex gap-4">
+                <.button variant="outline" type="button" on_cancel="close_drawer">
+                  Cancel
+                </.button>
+                <.button type="submit">
+                  <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release & Renew
+                </.button>
+              </div>
+            </form>
+          </div>
+
+          <div class="space-y-6">
+            <.card>
+              <.card_header>
+                <.card_title>Escrow Release</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="font-medium">Total</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+            <.card>
+              <.card_header>
+                <.card_title>New Payment Summary</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Renewal Amount</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Algora Fees (19%)</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(@contract.escrow_amount, Decimal.new("0.19")),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Transactions Fees (4%)</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(@contract.escrow_amount, Decimal.new("0.04")),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                  <div class="h-px bg-border" />
+                  <div class="flex justify-between">
+                    <dt class="font-medium">Total</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(@contract.escrow_amount, Decimal.new("1.23")),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+          </div>
+        </div>
+      </.drawer_content>
+    </.drawer>
+
+    <.drawer show={@show_release_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <h3 class="text-lg font-semibold">Release Payment</h3>
+      </.drawer_header>
+      <.drawer_content>
+        <div class="grid grid-cols-2 gap-8">
+          <div>
+            <form phx-submit="release_payment" class="space-y-6">
+              <.form_item>
+                <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
+                <.form_control>
+                  <.input
+                    type="textarea"
+                    rows={10}
+                    name="feedback"
+                    value=""
+                    placeholder="Share your experience working with the developer..."
+                    required
+                  />
+                </.form_control>
+                <.form_description>
+                  Your feedback helps other companies make informed decisions.
+                </.form_description>
+              </.form_item>
+
+              <div class="flex gap-4">
+                <.button variant="outline" type="button" on_cancel="close_drawer">
+                  Cancel
+                </.button>
+                <.button type="submit">
+                  <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
+                </.button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <.card>
+              <.card_header>
+                <.card_title>Payment Details</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Amount</dt>
+                    <dd class="font-semibold">
+                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Hours</dt>
+                    <dd class="font-semibold">20 hours</dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Rate</dt>
+                    <dd class="font-semibold">
+                      <%= Money.format!(@contract.hourly_rate, "USD") %>/hr
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+          </div>
+        </div>
+      </.drawer_content>
+    </.drawer>
+
+    <.drawer show={@show_dispute_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <h3 class="text-lg font-semibold text-destructive">Raise Payment Dispute</h3>
+      </.drawer_header>
+      <.drawer_content>
+        <div class="grid grid-cols-2 gap-8">
+          <div>
+            <form phx-submit="raise_dispute" class="space-y-6">
+              <.form_item>
+                <.form_label>Reason for dispute</.form_label>
+                <.form_control>
+                  <.input
+                    type="textarea"
+                    rows={10}
+                    name="reason"
+                    value=""
+                    placeholder="Please provide detailed information about why you're disputing this payment..."
+                    class="min-h-[120px]"
+                    required
+                  />
+                </.form_control>
+                <.form_description>
+                  Be specific about any issues or concerns. This will help resolve the dispute faster.
+                </.form_description>
+              </.form_item>
+
+              <.alert variant="destructive" class="mt-4">
+                <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" />
+                Disputes should only be raised for serious issues. Our team will review your case within 24 hours.
+              </.alert>
+
+              <div class="flex gap-4">
+                <.button variant="outline" type="button" on_cancel="close_drawer">
+                  Cancel
+                </.button>
+                <.button variant="destructive" type="submit">
+                  <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" /> Raise Dispute
+                </.button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <.card>
+              <.card_header>
+                <.card_title>Dispute Information</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Disputed Amount</dt>
+                    <dd class="font-semibold">
+                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Contract Period</dt>
+                    <dd class="font-semibold">
+                      <%= Calendar.strftime(@contract.start_date, "%B %d") %> - <%= Calendar.strftime(
+                        @contract.next_payment,
+                        "%B %d, %Y"
+                      ) %>
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+
+            <.card class="mt-4">
+              <.card_header>
+                <.card_title>Dispute Process</.card_title>
+              </.card_header>
+              <.card_content>
+                <ol class="space-y-4 list-decimal list-inside text-sm text-muted-foreground">
+                  <li>Our team will review your case within 24 hours</li>
+                  <li>Both parties will be contacted for additional information</li>
+                  <li>Resolution typically occurs within 5 business days</li>
+                  <li>Funds remain in escrow until the dispute is resolved</li>
+                </ol>
+              </.card_content>
+            </.card>
+          </div>
+        </div>
+      </.drawer_content>
+    </.drawer>
     """
   end
 
@@ -581,5 +836,33 @@ defmodule AlgoraWeb.Contract.ViewLive do
     }
 
     {:noreply, update(socket, :messages, &(&1 ++ [new_message]))}
+  end
+
+  def handle_event("show_release_renew_modal", _, socket) do
+    {:noreply, assign(socket, :show_release_renew_modal, true)}
+  end
+
+  def handle_event("show_release_modal", _, socket) do
+    {:noreply, assign(socket, :show_release_modal, true)}
+  end
+
+  def handle_event("show_dispute_modal", _, socket) do
+    {:noreply, assign(socket, :show_dispute_modal, true)}
+  end
+
+  def handle_event("release_and_renew", %{"feedback" => _feedback}, socket) do
+    # Add your release and renew logic here
+    {:noreply,
+     socket
+     |> assign(:show_release_renew_modal, false)
+     |> put_flash(:info, "Payment released and contract renewed successfully")}
+  end
+
+  def handle_event("close_drawer", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_release_modal, false)
+     |> assign(:show_dispute_modal, false)}
   end
 end

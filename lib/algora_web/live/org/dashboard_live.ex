@@ -372,9 +372,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.bounties_card current_org={@current_org} bounties={@recent_bounties} />
       </div>
 
-      <.drawer show={@show_dev_drawer} phx-click="close_drawer">
+      <.drawer show={@show_dev_drawer} on_cancel="close_drawer">
         <%= if @selected_dev do %>
-          <.drawer_header>
+          <.drawer_header class="flex items-center gap-4">
             <img src={@selected_dev.avatar_url} alt="" class="w-20 h-20 rounded-full" />
             <div>
               <h4 class="text-xl font-semibold">

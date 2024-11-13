@@ -21,6 +21,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
   # Main drawer wrapper
   attr :show, :boolean, default: false, doc: "Controls drawer visibility"
   attr :class, :string, default: nil
+  attr :on_cancel, JS, default: %JS{}
   attr :rest, :global
   slot :inner_block, required: true
 
@@ -30,18 +31,31 @@ defmodule AlgoraWeb.Components.UI.Drawer do
       class={
         classes([
           "fixed inset-0 bg-black/90 z-50 transition-all duration-300",
-          "#{if @show, do: "opacity-100", else: "opacity-0 pointer-events-none"}",
-          @class
+          "#{if @show, do: "opacity-100", else: "opacity-0 pointer-events-none"}"
         ])
       }
-      {@rest}
+      phx-click={@on_cancel}
     >
       <div
-        class={"fixed inset-x-0 bottom-0 z-50 h-[80vh] rounded-t-xl bg-background border transform transition-transform duration-300 ease-in-out #{if @show, do: "translate-y-0", else: "translate-y-full"}"}
-        onclick="event.stopPropagation()"
+        class={
+          classes([
+            "fixed inset-x-0 bottom-0 z-50 rounded-t-xl bg-background border transform transition-transform duration-300 ease-in-out",
+            "#{if @show, do: "translate-y-0", else: "translate-y-full"}",
+            @class
+          ])
+        }
+        {@rest}
       >
-        <div class="flex flex-col relative h-full p-6">
-          <%= render_slot(@inner_block) %>
+        <div class="relative h-full">
+          <button
+            phx-click={@on_cancel}
+            class="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+          >
+            <AlgoraWeb.CoreComponents.icon name="tabler-x" class="w-5 h-5" />
+          </button>
+          <div class="flex flex-col relative h-full p-6" onclick="event.stopPropagation()">
+            <%= render_slot(@inner_block) %>
+          </div>
         </div>
       </div>
     </div>
@@ -54,13 +68,8 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   def drawer_header(assigns) do
     ~H"""
-    <div class={classes(["flex justify-between items-start", @class])} {@rest}>
-      <div class="flex items-start gap-4">
-        <%= render_slot(@inner_block) %>
-      </div>
-      <button phx-click="close_drawer" class="text-muted-foreground hover:text-foreground">
-        <AlgoraWeb.CoreComponents.icon name="tabler-x" class="w-5 h-5" />
-      </button>
+    <div class={classes([@class])} {@rest}>
+      <%= render_slot(@inner_block) %>
     </div>
     """
   end

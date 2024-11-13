@@ -251,9 +251,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
     {:ok,
      socket
      |> assign(:contract, contract)
-     |> assign(:page_title, "#{contract.developer.name} <> #{contract.company.name}")
+     |> assign(:page_title, "Contract with #{contract.developer.name}")
      |> assign(:messages, messages)
-     |> assign(:show_release_renew_modal, true)
+     |> assign(:show_release_renew_modal, false)
      |> assign(:show_release_modal, false)
      |> assign(:show_dispute_modal, false)
      |> assign(:fee_data, fee_data)}
@@ -609,17 +609,21 @@ defmodule AlgoraWeb.Contract.ViewLive do
     </div>
     <.drawer show={@show_release_renew_modal} on_cancel="close_drawer">
       <.drawer_header>
-        <h3 class="text-lg font-semibold">Release Payment & Renew Contract</h3>
+        <h3 class="text-base text-muted-foreground uppercase font-display font-semibold">
+          Release Payment & Renew Contract
+        </h3>
       </.drawer_header>
-      <.drawer_content>
+      <.drawer_content class="mt-4">
         <div class="grid grid-cols-2 gap-8">
           <div class="space-y-8">
             <.form_item>
-              <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
+              <.form_label class="text-lg font-semibold mb-6">
+                How was your experience working with <%= @contract.developer.name %>?
+              </.form_label>
               <.form_control>
                 <.input
                   type="textarea"
-                  rows={8}
+                  rows={6}
                   name="feedback"
                   value=""
                   placeholder="Share your experience working with the developer..."
@@ -630,6 +634,58 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 Your feedback helps other companies make informed decisions.
               </.form_description>
             </.form_item>
+            <.card>
+              <.card_header>
+                <.card_title>Past Escrow Release</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">
+                      Payout amount (<%= @contract.hours_per_week %> hours x <%= Money.format!(
+                        @contract.hourly_rate,
+                        "USD"
+                      ) %>/hr)
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">
+                      Escrow balance
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      -<%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between opacity-0">
+                    <dt class="text-muted-foreground">
+                      Algora fees (<%= @fee_data.fee_percentage %>%)
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(
+                          @contract.escrow_amount,
+                          Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
+                        ),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                  <div class="h-px bg-border" />
+                  <div class="flex justify-between">
+                    <dt class="font-medium">Total Due</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(0, "USD") %>
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+          </div>
+
+          <div class="flex flex-col gap-8">
             <div>
               <h3 class="text-lg font-semibold mb-6">Algora Fee Tier</h3>
               <div class="space-y-2">
@@ -687,44 +743,18 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </div>
 
                 <div class="text-base text-muted-foreground">
-                  Current fee: <%= @fee_data.fee_percentage %>%
+                  Current fee:
+                  <span class="font-semibold font-display"><%= @fee_data.fee_percentage %>%</span>
                 </div>
                 <div class="text-base text-muted-foreground">
-                  Total paid to date: <%= Money.format!(@fee_data.total_paid, "USD") %>
+                  Total paid to date:
+                  <span class="font-semibold font-display">
+                    <%= Money.format!(@fee_data.total_paid, "USD") %>
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="flex flex-col gap-8">
-            <.card>
-              <.card_header>
-                <.card_title>Past Escrow Release</.card_title>
-              </.card_header>
-              <.card_content>
-                <dl class="space-y-4">
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Payout amount (<%= @contract.hours_per_week %> hours per week @ <%= Money.format!(
-                        @contract.hourly_rate,
-                        "USD"
-                      ) %>/hr)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@contract.escrow_amount, "USD") %>
-                    </dd>
-                  </div>
-                  <div class="h-px bg-border" />
-                  <div class="flex justify-between">
-                    <dt class="font-medium">Total</dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@contract.escrow_amount, "USD") %>
-                    </dd>
-                  </div>
-                </dl>
-              </.card_content>
-            </.card>
-            <.card>
+            <.card class="mt-1">
               <.card_header>
                 <.card_title>New Escrow Payment Summary</.card_title>
               </.card_header>
@@ -732,7 +762,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Renewal amount (<%= @contract.hours_per_week %> hours per week @ <%= Money.format!(
+                      Renewal amount (<%= @contract.hours_per_week %> hours x <%= Money.format!(
                         @contract.hourly_rate,
                         "USD"
                       ) %>/hr)
@@ -766,7 +796,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
-                    <dt class="font-medium">Total</dt>
+                    <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
                         Decimal.mult(@contract.escrow_amount, Decimal.new("1.23")),
@@ -796,35 +826,33 @@ defmodule AlgoraWeb.Contract.ViewLive do
       </.drawer_header>
       <.drawer_content>
         <div class="grid grid-cols-2 gap-8">
-          <div>
-            <form phx-submit="release_payment" class="space-y-6">
-              <.form_item>
-                <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
-                <.form_control>
-                  <.input
-                    type="textarea"
-                    rows={8}
-                    name="feedback"
-                    value=""
-                    placeholder="Share your experience working with the developer..."
-                    required
-                  />
-                </.form_control>
-                <.form_description>
-                  Your feedback helps other companies make informed decisions.
-                </.form_description>
-              </.form_item>
+          <form phx-submit="release_payment" class="space-y-6">
+            <.form_item>
+              <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
+              <.form_control>
+                <.input
+                  type="textarea"
+                  rows={8}
+                  name="feedback"
+                  value=""
+                  placeholder="Share your experience working with the developer..."
+                  required
+                />
+              </.form_control>
+              <.form_description>
+                Your feedback helps other companies make informed decisions.
+              </.form_description>
+            </.form_item>
 
-              <div class="flex gap-4">
-                <.button variant="outline" type="button" on_cancel="close_drawer">
-                  Cancel
-                </.button>
-                <.button type="submit">
-                  <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
-                </.button>
-              </div>
-            </form>
-          </div>
+            <div class="flex gap-4">
+              <.button variant="outline" type="button" on_cancel="close_drawer">
+                Cancel
+              </.button>
+              <.button type="submit">
+                <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
+              </.button>
+            </div>
+          </form>
 
           <div>
             <.card>

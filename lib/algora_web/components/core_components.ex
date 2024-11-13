@@ -1172,6 +1172,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate accordion_item(assigns), to: AlgoraWeb.Components.UI.Accordion
   defdelegate accordion_trigger(assigns), to: AlgoraWeb.Components.UI.Accordion
   defdelegate accordion(assigns), to: AlgoraWeb.Components.UI.Accordion
+  defdelegate alert(assigns), to: AlgoraWeb.Components.UI.Alert
   defdelegate avatar_fallback(assigns), to: AlgoraWeb.Components.UI.Avatar
   defdelegate avatar_image(assigns), to: AlgoraWeb.Components.UI.Avatar
   defdelegate avatar(assigns), to: AlgoraWeb.Components.UI.Avatar
@@ -1185,6 +1186,16 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate card(assigns), to: AlgoraWeb.Components.UI.Card
   defdelegate checkbox(assigns), to: AlgoraWeb.Components.UI.Checkbox
   defdelegate data_table(assigns), to: AlgoraWeb.Components.UI.DataTable
+  defdelegate dialog(assigns), to: AlgoraWeb.Components.UI.Dialog
+  defdelegate dialog_content(assigns), to: AlgoraWeb.Components.UI.Dialog
+  defdelegate dialog_description(assigns), to: AlgoraWeb.Components.UI.Dialog
+  defdelegate dialog_footer(assigns), to: AlgoraWeb.Components.UI.Dialog
+  defdelegate dialog_header(assigns), to: AlgoraWeb.Components.UI.Dialog
+  defdelegate dialog_title(assigns), to: AlgoraWeb.Components.UI.Dialog
+  defdelegate drawer(assigns), to: AlgoraWeb.Components.UI.Drawer
+  defdelegate drawer_content(assigns), to: AlgoraWeb.Components.UI.Drawer
+  defdelegate drawer_header(assigns), to: AlgoraWeb.Components.UI.Drawer
+  defdelegate drawer_footer(assigns), to: AlgoraWeb.Components.UI.Drawer
   defdelegate dropdown_menu(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
   defdelegate dropdown_menu_content(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
   defdelegate dropdown_menu_trigger(assigns), to: AlgoraWeb.Components.UI.DropdownMenu

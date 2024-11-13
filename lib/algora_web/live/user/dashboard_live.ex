@@ -88,7 +88,15 @@ defmodule AlgoraWeb.User.DashboardLive do
     <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8">
       <!-- Availability Section -->
       <div class="flex items-center justify-between">
-        <label for="available" class="text-sm font-medium">Available to work</label>
+        <div class="flex items-center gap-2">
+          <label for="available" class="text-sm font-medium">Available to work</label>
+          <.tooltip>
+            <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
+            <.tooltip_content side="bottom" class="max-w-xs text-sm">
+              When enabled, you will receive hourly contract offers
+            </.tooltip_content>
+          </.tooltip>
+        </div>
         <.switch
           id="available"
           name="available"
@@ -179,7 +187,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           <% end %>
         </ol>
       </nav>
-      <div class="pt-8">
+      <div class="pt-8 opacity-0">
         <.link href="https://algora.io/challenges/golem">
           <img src={~p"/images/golem-challenge.png"} alt="Golem Challenge" class="aspect-video block" />
         </.link>

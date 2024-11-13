@@ -69,7 +69,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
           phx-window-keydown={JS.exec("phx-hide-modal", to: "##{@id}")}
           phx-key="escape"
           phx-click-away={JS.exec("phx-hide-modal", to: "##{@id}")}
-          class="w-full sm:max-w-[425px]"
+          class="w-full"
         >
           <div
             role="dialog"
@@ -167,5 +167,21 @@ defmodule AlgoraWeb.Components.UI.Dialog do
     |> JS.hide(to: "##{id}", transition: {"_", "_", "_"}, time: 150)
     |> JS.remove_class("overflow-hidden", to: "body")
     |> JS.pop_focus()
+  end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def dialog_content(assigns) do
+    ~H"""
+    <div class={
+      classes([
+        "relative grid gap-4 border-none bg-background p-6",
+        @class
+      ])
+    }>
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
   end
 end

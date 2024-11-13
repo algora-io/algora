@@ -28,13 +28,50 @@ defmodule AlgoraWeb.Contract.ViewLive do
         ]
       })
 
+    # Calculate fee tier data
+    total_paid = Decimal.new("4500")
+
+    fee_tiers = [
+      %{threshold: 0, fee: 19},
+      %{threshold: 3000, fee: 15},
+      %{threshold: 5000, fee: 10},
+      %{threshold: 15000, fee: 5}
+    ]
+
+    fee_data = %{
+      total_paid: total_paid,
+      fee_tiers: fee_tiers,
+      fee_percentage:
+        cond do
+          Decimal.compare(total_paid, Decimal.new("15000")) != :lt -> 5
+          Decimal.compare(total_paid, Decimal.new("5000")) != :lt -> 10
+          Decimal.compare(total_paid, Decimal.new("3000")) != :lt -> 15
+          true -> 19
+        end,
+      progress:
+        case {
+          Decimal.compare(total_paid, Decimal.new("5000")),
+          Decimal.compare(total_paid, Decimal.new("3000"))
+        } do
+          {:lt, :gt} ->
+            start_percent = 40.0
+            end_percent = 60.0
+            progress_in_range = (Decimal.to_float(total_paid) - 3000) / (5000 - 3000)
+            start_percent + (end_percent - start_percent) * progress_in_range
+
+          _ ->
+            30.0
+        end
+    }
+
     contract = %{
       id: id,
       status: :active,
       start_date: ~D[2024-03-01],
       hourly_rate: Decimal.new(75),
       hours_per_week: 20,
-      total_paid: Decimal.new(3000),
+      # Updated to use the same total_paid
+      total_paid: total_paid,
       escrow_amount: Decimal.new(1500),
       next_payment: ~D[2024-03-22],
       company: company,
@@ -216,9 +253,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:contract, contract)
      |> assign(:page_title, "#{contract.developer.name} <> #{contract.company.name}")
      |> assign(:messages, messages)
-     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_release_renew_modal, true)
      |> assign(:show_release_modal, false)
-     |> assign(:show_dispute_modal, false)}
+     |> assign(:show_dispute_modal, false)
+     |> assign(:fee_data, fee_data)}
   end
 
   def render(assigns) do
@@ -575,43 +613,108 @@ defmodule AlgoraWeb.Contract.ViewLive do
       </.drawer_header>
       <.drawer_content>
         <div class="grid grid-cols-2 gap-8">
-          <div>
-            <form phx-submit="release_and_renew" class="space-y-6">
-              <.form_item>
-                <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
-                <.form_control>
-                  <.input
-                    type="textarea"
-                    rows={10}
-                    name="feedback"
-                    value=""
-                    placeholder="Share your experience working with the developer..."
-                    required
-                  />
-                </.form_control>
-                <.form_description>
-                  Your feedback helps other companies make informed decisions.
-                </.form_description>
-              </.form_item>
+          <div class="space-y-8">
+            <.form_item>
+              <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
+              <.form_control>
+                <.input
+                  type="textarea"
+                  rows={8}
+                  name="feedback"
+                  value=""
+                  placeholder="Share your experience working with the developer..."
+                  required
+                />
+              </.form_control>
+              <.form_description>
+                Your feedback helps other companies make informed decisions.
+              </.form_description>
+            </.form_item>
+            <div>
+              <h3 class="text-lg font-semibold mb-6">Algora Fee Tier</h3>
+              <div class="space-y-2">
+                <div class="space-y-4">
+                  <div class="flex justify-between text-lg font-medium font-display">
+                    <%= for tier <- @fee_data.fee_tiers do %>
+                      <span><%= tier.fee %>%</span>
+                    <% end %>
+                  </div>
 
-              <div class="flex gap-4">
-                <.button variant="outline" type="button" on_cancel="close_drawer">
-                  Cancel
-                </.button>
-                <.button type="submit">
-                  <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release & Renew
-                </.button>
+                  <div class="relative">
+                    <!-- Progress bar -->
+                    <div class="h-2 bg-muted/50 rounded-full">
+                      <div
+                        class="h-full bg-primary rounded-full transition-all duration-500"
+                        style={"width: #{@fee_data.progress}%"}
+                      />
+                    </div>
+                    <!-- Threshold circles -->
+                    <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between pointer-events-none">
+                      <%= for tier <- @fee_data.fee_tiers do %>
+                        <div class={[
+                          "h-4 w-4 rounded-full border-2 border-background",
+                          if Decimal.compare(@fee_data.total_paid, Decimal.new(tier.threshold)) !=
+                               :lt do
+                            "bg-success"
+                          else
+                            "bg-muted"
+                          end
+                        ]}>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                  <!-- Updated threshold numbers alignment -->
+                  <div class="flex justify-between text-lg font-display font-medium relative">
+                    <%= for {tier, index} <- Enum.with_index(@fee_data.fee_tiers) do %>
+                      <div
+                        class={
+                          classes([
+                            "transform translate-x-1/3",
+                            index == 0 && "translate-x-0",
+                            index == length(@fee_data.fee_tiers) - 1 && "translate-x-0"
+                          ])
+                        }
+                        style={
+                          if !Enum.member?([0, length(@fee_data.fee_tiers) - 1], index),
+                            do: "left: #{index * 100 / (length(@fee_data.fee_tiers) - 1)}%"
+                        }
+                      >
+                        <%= Money.format!(Decimal.new(tier.threshold), "USD") %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+
+                <div class="text-base text-muted-foreground">
+                  Current fee: <%= @fee_data.fee_percentage %>%
+                </div>
+                <div class="text-base text-muted-foreground">
+                  Total paid to date: <%= Money.format!(@fee_data.total_paid, "USD") %>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
 
-          <div class="space-y-6">
+          <div class="flex flex-col gap-8">
             <.card>
               <.card_header>
-                <.card_title>Escrow Release</.card_title>
+                <.card_title>Past Escrow Release</.card_title>
               </.card_header>
               <.card_content>
                 <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">
+                      Payout amount (<%= @contract.hours_per_week %> hours per week @ <%= Money.format!(
+                        @contract.hourly_rate,
+                        "USD"
+                      ) %>/hr)
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total</dt>
                     <dd class="font-semibold font-display tabular-nums">
@@ -623,27 +726,37 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </.card>
             <.card>
               <.card_header>
-                <.card_title>New Payment Summary</.card_title>
+                <.card_title>New Escrow Payment Summary</.card_title>
               </.card_header>
               <.card_content>
                 <dl class="space-y-4">
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Renewal Amount</dt>
+                    <dt class="text-muted-foreground">
+                      Renewal amount (<%= @contract.hours_per_week %> hours per week @ <%= Money.format!(
+                        @contract.hourly_rate,
+                        "USD"
+                      ) %>/hr)
+                    </dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(@contract.escrow_amount, "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Algora Fees (19%)</dt>
+                    <dt class="text-muted-foreground">
+                      Algora fees (<%= @fee_data.fee_percentage %>%)
+                    </dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
-                        Decimal.mult(@contract.escrow_amount, Decimal.new("0.19")),
+                        Decimal.mult(
+                          @contract.escrow_amount,
+                          Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
+                        ),
                         "USD"
                       ) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Transactions Fees (4%)</dt>
+                    <dt class="text-muted-foreground">Transaction fees (4%)</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
                         Decimal.mult(@contract.escrow_amount, Decimal.new("0.04")),
@@ -664,6 +777,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </dl>
               </.card_content>
             </.card>
+            <div class="ml-auto flex gap-4">
+              <.button variant="outline" type="button" on_cancel="close_drawer">
+                Cancel
+              </.button>
+              <.button type="submit">
+                <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release & Renew
+              </.button>
+            </div>
           </div>
         </div>
       </.drawer_content>
@@ -682,7 +803,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <.form_control>
                   <.input
                     type="textarea"
-                    rows={10}
+                    rows={8}
                     name="feedback"
                     value=""
                     placeholder="Share your experience working with the developer..."

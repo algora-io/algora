@@ -213,8 +213,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             "https://console.algora.io/asset/storage/v1/object/public/images/org/clcq81tsi0001mj08ikqffh87-1715034576051"
         },
         tech_stack: ["Elixir", "Phoenix", "Membrane"],
-        hourly: true,
-        expected_hours: 40
+        hourly: true
       },
       %{
         amount: Decimal.new(150),
@@ -230,8 +229,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             "https://console.algora.io/_next/image?url=https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F133607167%3Fs%3D200%26v%3D4&w=1920&q=75"
         },
         tech_stack: ["Rust", "WASM"],
-        hourly: true,
-        expected_hours: 30
+        hourly: true
       },
       %{
         amount: Decimal.new(150),
@@ -245,8 +243,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           avatar_url: "https://qdrant.tech/favicon/favicon.ico"
         },
         tech_stack: ["Rust"],
-        hourly: true,
-        expected_hours: 20
+        hourly: true
       }
     ]
   end

@@ -50,8 +50,14 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                   Next
                 </.button>
               <% else %>
-                <.button phx-click="submit" variant="default">
-                  Sign up
+                <.button>
+                  <.link
+                    href={Algora.Github.authorize_url()}
+                    rel="noopener"
+                    class="inline-flex items-center"
+                  >
+                    <.icon name="tabler-brand-github" class="w-5 h-5 mr-2" /> Sign in with GitHub
+                  </.link>
                 </.button>
               <% end %>
             </div>
@@ -100,7 +106,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         </h2>
         <p class="text-muted-foreground">Select the technologies you work with</p>
 
-        <div class="mt-4">
+        <div class="relative mt-1">
           <.input
             type="text"
             name="skill_input"
@@ -134,21 +140,29 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         </h2>
         <p class="text-muted-foreground">Select all that apply</p>
 
-        <div class="mt-4 space-y-3">
-          <%= for {intention, label} <- [
-            {"bounties", "Find open source bounties"},
-            {"jobs", "Find full-time jobs"},
-            {"projects", "Find freelancing projects"},
+        <div class="-ml-4 mt-2">
+          <%= for {intention, label, description, icon} <- [
+            {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
+            {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
+            {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
           ] do %>
-            <label class="flex items-center space-x-3">
+            <label class="p-4 flex items-center gap-3 rounded-lg hover:bg-muted cursor-pointer">
               <input
                 type="checkbox"
                 phx-click="toggle_intention"
                 phx-value-intention={intention}
                 checked={intention in @context.intentions}
-                class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                class="h-10 w-10 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
               />
-              <span class="text-base"><%= label %></span>
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <.icon name={icon} class="w-5 h-5 text-muted-foreground" />
+                  <span class="font-medium"><%= label %></span>
+                </div>
+                <p class="text-sm text-muted-foreground mt-0.5">
+                  <%= description %>
+                </p>
+              </div>
             </label>
           <% end %>
         </div>
@@ -160,16 +174,19 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   def render_step(%{step: 2} = assigns) do
     ~H"""
     <div class="space-y-8">
-      <h2 class="text-4xl font-semibold"></h2>
+      <div>
+        <h2 class="text-4xl font-semibold mb-2">
+          Connect your GitHub account
+        </h2>
+        <p class="text-muted-foreground mb-6">
+          Sign in with GitHub to join our developer community and start earning bounties.
+        </p>
 
-      <div class="space-y-6">
-        <.link
-          href={Algora.Github.authorize_url()}
-          rel="noopener"
-          class="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50"
-        >
-          <.icon name="tabler-brand-github" class="w-5 h-5 mr-2" /> Sign in with GitHub
-        </.link>
+        <p class="text-sm text-muted-foreground/75">
+          By continuing, you agree to Algora's
+          <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
+          and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
+        </p>
       </div>
     </div>
     """

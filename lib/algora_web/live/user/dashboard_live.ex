@@ -155,12 +155,12 @@ defmodule AlgoraWeb.User.DashboardLive do
         />
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for tech <- @tech_stack do %>
-            <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
+            <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
               <%= tech %>
               <button
                 phx-click="remove_tech"
                 phx-value-tech={tech}
-                class="ml-2 text-success hover:text-success/80"
+                class="ml-1 text-foreground hover:text-foreground/80"
               >
                 ×
               </button>
@@ -436,13 +436,10 @@ defmodule AlgoraWeb.User.DashboardLive do
                 ) %> / wk
               </div>
             </div>
-            <.button
-              variant="secondary"
-              phx-click="accept_contract"
-              phx-value-org={@bounty.owner.handle}
-              size="sm"
-            >
-              <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Accept contract
+            <.button phx-click="accept_contract" phx-value-org={@bounty.owner.handle} size="sm">
+              <.link navigate={~p"/contracts/1337"}>
+                Accept contract
+              </.link>
             </.button>
           </div>
         </div>

@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def mount(_params, _session, socket) do
     tech_stack = ["Elixir", "Phoenix", "Membrane"]
-    hourly_rate = 150
+    hourly_rate = 50
     hours_per_week = 20
 
     org =
@@ -54,9 +54,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <div class="flex justify-between px-6">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Hourly contracts
+              My matches
             </h2>
-            <p class="text-sm text-muted-foreground">Paid out weekly</p>
+            <p class="text-sm text-muted-foreground">
+              Based on tech stack and hourly rate
+            </p>
           </div>
         </div>
         <div class="px-6 -ml-4">

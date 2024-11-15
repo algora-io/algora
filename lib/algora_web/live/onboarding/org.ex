@@ -12,14 +12,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       email: "",
       domain: "",
       verification_code: "",
+      code_sent?: false,
       company_types: [],
-      hiring_status: nil
+      hiring_status: nil,
+      hourly_rate_min: nil,
+      hourly_rate_max: nil,
+      hours_per_week: nil
     }
 
     {:ok,
      socket
-     |> assign(:step, 1)
-     |> assign(:total_steps, 2)
+     |> assign(:step, 3)
+     |> assign(:total_steps, 3)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
      |> assign(:code_valid, nil)}
@@ -82,7 +86,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               block: @step >= 2
             )
           }>
-            <h2 class="text-lg font-semibold uppercase mb-6 text-center">
+            <h2 class="text-lg font-semibold uppercase mb-6">
               You're in good company
             </h2>
             <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16 saturate-0">
@@ -278,52 +282,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <% end %>
         </div>
       </div>
-      <div class="mt-4">
-        <label class="block text-4xl font-semibold mb-2">Are you hiring full-time?</label>
-        <div class="space-y-3">
-          <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
-            <label class="flex items-center space-x-3">
-              <input
-                type="radio"
-                name="hiring_status"
-                value={value}
-                checked={@context.hiring_status == value}
-                phx-click="update_context"
-                phx-value-field="hiring_status"
-                phx-value-value={value}
-                class="h-5 w-5 rounded-full border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
-              />
-              <span class="text-base"><%= label %></span>
-            </label>
-          <% end %>
-        </div>
-      </div>
-      <div class="mt-8">
-        <label class="block text-4xl font-semibold mb-4">
-          Which of the following best describes you?
-        </label>
-        <div class="space-y-3">
-          <%= for {type, label} <- [
-                {"opensource", "Open source company"},
-                {"closedsource", "Closed source company"},
-                {"agency", "Agency / consultancy / studio"},
-                {"nonprofit", "Non-profit / FOSS"}
-              ] do %>
-            <label class="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                name="company_type"
-                value={type}
-                checked={type in (@context.company_types || [])}
-                phx-click="toggle_company_type"
-                phx-value-type={type}
-                class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
-              />
-              <span class="text-base"><%= label %></span>
-            </label>
-          <% end %>
-        </div>
-      </div>
     </div>
     """
   end
@@ -388,7 +346,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  def render_step(%{step: 3} = assigns) do
+  def render_step(%{step: 2, code_sent?: true} = assigns) do
     ~H"""
     <div class="space-y-8">
       <div>
@@ -420,6 +378,125 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
+  def render_step(%{step: 3} = assigns) do
+    ~H"""
+    <div class="space-y-8">
+      <div>
+        <h2 class="text-4xl font-semibold">
+          Let's personalize your experience
+        </h2>
+        <p class="text-muted-foreground mt-2">
+          We'll use this information to match you with the best developers
+        </p>
+      </div>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-xl font-semibold mb-4">Hourly Rate (USD)</label>
+          <div class="flex items-center gap-4">
+            <div class="flex-1">
+              <label class="block text-sm font-medium mb-2">Min</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <span class="text-muted-foreground">$</span>
+                </div>
+                <.input
+                  type="number"
+                  name="hourly_rate_min"
+                  value={@context.hourly_rate_min}
+                  placeholder="0"
+                  class="w-full pl-8 bg-background border-input"
+                  phx-blur="update_context"
+                  phx-value-field="hourly_rate_min"
+                />
+              </div>
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm font-medium mb-2">Max</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <span class="text-muted-foreground">$</span>
+                </div>
+                <.input
+                  type="number"
+                  name="hourly_rate_max"
+                  value={@context.hourly_rate_max}
+                  placeholder="0"
+                  class="w-full pl-8 bg-background border-input"
+                  phx-blur="update_context"
+                  phx-value-field="hourly_rate_max"
+                />
+              </div>
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm font-medium mb-2">Total hours per week</label>
+              <div class="relative">
+                <.input
+                  type="number"
+                  name="hours_per_week"
+                  value={@context.hours_per_week}
+                  placeholder="40"
+                  class="w-full bg-background border-input"
+                  phx-blur="update_context"
+                  phx-value-field="hours_per_week"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xl font-semibold mb-4">Are you hiring full-time?</label>
+          <div class="space-y-3">
+            <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
+              <label class="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  name="hiring_status"
+                  value={value}
+                  checked={@context.hiring_status == value}
+                  phx-click="update_context"
+                  phx-value-field="hiring_status"
+                  phx-value-value={value}
+                  class="h-5 w-5 rounded-full border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                />
+                <span class="text-base"><%= label %></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xl font-semibold mb-4">
+            Which of the following best describes you?
+          </label>
+          <div class="space-y-3">
+            <%= for {type, label} <- [
+                  {"opensource", "Open source company"},
+                  {"closedsource", "Closed source company"},
+                  {"agency", "Agency / consultancy / studio"},
+                  {"nonprofit", "Non-profit / FOSS"}
+                ] do %>
+              <label class="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  name="company_type"
+                  value={type}
+                  checked={type in (@context.company_types || [])}
+                  phx-click="toggle_company_type"
+                  phx-value-type={type}
+                  class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                />
+                <span class="text-base"><%= label %></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   defp update_context_field(context, "skills", _value, %{"skill" => skill}) do
     skills =
       if skill in context.skills,
@@ -441,7 +518,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     Map.put(context, String.to_atom(field), value)
   end
 
+  # def handle_event("next_step", _, %{assigns: %{step: 2}} = socket) do
+  #   dbg("this")
+  #   {:noreply, assign(socket, step: 2, code_sent?: true)}
+  # end
+
   def handle_event("next_step", _, socket) do
+    dbg("that")
+    dbg(socket.assigns)
     {:noreply, assign(socket, step: socket.assigns.step + 1)}
   end
 
@@ -476,7 +560,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     updated_context = update_context_field(socket.assigns.context, "email", email, params)
     matching_devs = get_matching_devs(updated_context)
-    {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
+
+    {:noreply,
+     socket
+     |> assign(:code_sent?, true)
+     |> assign(:context, updated_context)
+     |> assign(:matching_devs, matching_devs)}
   end
 
   def handle_event(
@@ -528,10 +617,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, socket}
   end
 
-  defp get_matching_devs(context) do
-    Accounts.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
-  end
-
   def handle_event("toggle_company_type", %{"type" => type}, socket) do
     current_types = socket.assigns.context.company_types || []
 
@@ -542,5 +627,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     updated_context = Map.put(socket.assigns.context, :company_types, updated_types)
     {:noreply, assign(socket, context: updated_context)}
+  end
+
+  defp get_matching_devs(context) do
+    Accounts.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
   end
 end

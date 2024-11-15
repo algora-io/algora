@@ -10,7 +10,16 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       intentions: []
     }
 
-    bounties = Bounties.list_bounties(status: :open, limit: 5)
+    bounties =
+      Bounties.list_bounties(
+        status: :completed,
+        limit: 50,
+        solver_country: "US",
+        sort_by: :amount
+      )
+      |> Enum.uniq_by(& &1.solver.id)
+
+    dbg(bounties)
 
     {:ok,
      socket
@@ -65,27 +74,44 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         </div>
         <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
           <h2 class="text-lg font-semibold uppercase mb-4">
-            Open Bounties
+            Recently Completed Bounties
           </h2>
           <%= if @bounties == [] do %>
-            <p class="text-muted-foreground">No open bounties available</p>
+            <p class="text-muted-foreground">No completed bounties available</p>
           <% else %>
             <%= for bounty <- @bounties do %>
               <div class="mb-4 bg-card p-4 rounded-lg border border-border">
-                <div class="flex flex-col">
-                  <div class="flex justify-between items-center mb-2">
-                    <div class="font-mono text-2xl font-extrabold text-success">
+                <div class="flex gap-4">
+                  <div class="flex-1">
+                    <div class="font-mono text-2xl font-extrabold text-success mb-2">
                       <%= Money.format!(bounty.amount, bounty.currency) %>
                     </div>
+                    <div class="text-sm text-muted-foreground mb-1">
+                      <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
+                    </div>
+                    <div class="font-medium">
+                      <%= bounty.task.title %>
+                    </div>
+                    <div class="text-xs text-muted-foreground mt-2">
+                      <%= Algora.Util.time_ago(bounty.inserted_at) %>
+                    </div>
                   </div>
-                  <div class="text-sm text-muted-foreground mb-1">
-                    <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
-                  </div>
-                  <div class="font-medium">
-                    <%= bounty.task.title %>
-                  </div>
-                  <div class="text-xs text-muted-foreground mt-2">
-                    <%= Algora.Util.time_ago(bounty.inserted_at) %>
+
+                  <div class="w-32 flex flex-col items-center border-l border-border pl-4">
+                    <h3 class="text-xs font-medium text-muted-foreground uppercase mb-3">
+                      Awarded to
+                    </h3>
+                    <img
+                      src={bounty.solver.avatar_url}
+                      class="w-16 h-16 rounded-full mb-2"
+                      alt={bounty.solver.name}
+                    />
+                    <div class="text-sm font-medium text-center">
+                      <%= bounty.solver.name %>
+                      <span class="ml-1">
+                        <%= Algora.Misc.CountryEmojis.get(bounty.solver.country, "🌎") %>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

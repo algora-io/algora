@@ -2,6 +2,7 @@ defmodule Algora.Bounties do
   import Ecto.Query
 
   alias Algora.Bounties.Bounty
+  alias Algora.Payments.Transaction
   alias Algora.Bounties.Claim
   alias Algora.Repo
   alias Algora.Accounts.User
@@ -27,7 +28,9 @@ defmodule Algora.Bounties do
             optional(:owner_id) => integer(),
             optional(:limit) => non_neg_integer(),
             optional(:status) => :open | :completed,
-            optional(:tech_stack) => [String.t()]
+            optional(:tech_stack) => [String.t()],
+            optional(:solver_country) => String.t(),
+            optional(:sort_by) => :amount | :date
           }
         ) :: [map()]
   def list_bounties(params) do
@@ -40,12 +43,23 @@ defmodule Algora.Bounties do
         _ -> Bounty.open()
       end
 
+    order_by =
+      case params[:sort_by] do
+        :amount -> [desc: :amount, desc: :inserted_at, desc: :id]
+        :date -> [desc: :inserted_at, desc: :id]
+        _ -> [desc: :inserted_at, desc: :id]
+      end
+
     query =
       from b in sq,
         join: t in assoc(b, :task),
         join: o in assoc(b, :owner),
         left_join: r in assoc(t, :repository),
         left_join: u in assoc(r, :user),
+        left_join: tr in Transaction,
+        on: tr.bounty_id == b.id and not is_nil(tr.succeeded_at),
+        left_join: solver in User,
+        on: solver.id == tr.receiver_id,
         select: %{
           id: b.id,
           inserted_at: b.inserted_at,
@@ -57,6 +71,13 @@ defmodule Algora.Bounties do
             handle: o.handle,
             avatar_url: o.avatar_url
           },
+          solver: %{
+            id: solver.id,
+            name: coalesce(solver.name, solver.handle),
+            handle: solver.handle,
+            avatar_url: solver.avatar_url,
+            country: solver.country
+          },
           task: %{
             title: t.title,
             # HACK: remove these once we have a way to get the owner and repo from the task
@@ -66,12 +87,20 @@ defmodule Algora.Bounties do
           }
         },
         limit: ^limit,
-        order_by: [desc: b.inserted_at, desc: b.id]
+        order_by: ^order_by
 
     query
     |> Bounty.filter_by_org_id(params[:owner_id])
     |> Bounty.filter_by_tech_stack(params[:tech_stack])
+    |> filter_by_solver_country(params[:solver_country])
     |> Repo.all()
+  end
+
+  defp filter_by_solver_country(query, nil), do: query
+
+  defp filter_by_solver_country(query, country) do
+    from [b, t, o, r, u, tr, solver] in query,
+      where: solver.country == ^country
   end
 
   def fetch_stats(org_id \\ nil) do

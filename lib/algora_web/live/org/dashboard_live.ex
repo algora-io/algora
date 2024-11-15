@@ -47,7 +47,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
       |> assign(:contract_template, contract_template)
       |> assign(:achievements, fetch_achievements())
-      |> assign(:show_begin_collaboration_drawer, true)
+      |> assign(:show_begin_collaboration_drawer, false)
 
     {:ok, socket}
   end
@@ -247,24 +247,58 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <.card_title>How it works</.card_title>
               </.card_header>
               <.card_content>
-                <ol class="space-y-4 list-decimal list-inside text-sm text-muted-foreground">
-                  <li>Add your credit card to initiate the collaboration</li>
-                  <li>
-                    <%= if @selected_dev do %>
-                      Once the developer accepts,
-                      <span class="font-semibold text-foreground">
-                        <%= Money.format!(
-                          Decimal.mult(Decimal.new(@hourly_rate), Decimal.new(@hours_per_week)),
-                          "USD"
-                        ) %>
+                <div class="space-y-8">
+                  <div class="relative flex gap-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-success bg-success text-background">
+                      <.icon name="tabler-credit-card" class="h-5 w-5" />
+                    </div>
+                    <div class="flex flex-col pt-1.5">
+                      <span class="text-sm font-medium">Add payment method</span>
+                      <span class="text-sm text-muted-foreground">
+                        Add your credit card to initiate the collaboration
                       </span>
-                      will be charged and held in escrow
-                    <% else %>
-                      Once the developer accepts, the amount will be charged and held in escrow
-                    <% end %>
-                  </li>
-                  <li>If you're satisfied, you can release the funds to the developer and renew</li>
-                </ol>
+                    </div>
+                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                  </div>
+
+                  <div class="relative flex gap-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background">
+                      <.icon name="tabler-lock" class="h-5 w-5" />
+                    </div>
+                    <div class="flex flex-col pt-1.5">
+                      <span class="text-sm font-medium">Funds held in escrow</span>
+                      <%= if @selected_dev do %>
+                        <span class="text-sm text-muted-foreground">
+                          Once accepted,
+                          <span class="font-semibold text-foreground">
+                            <%= Money.format!(
+                              Decimal.mult(Decimal.new(@hourly_rate), Decimal.new(@hours_per_week)),
+                              "USD"
+                            ) %>
+                          </span>
+                          will be held securely
+                        </span>
+                      <% else %>
+                        <span class="text-sm text-muted-foreground">
+                          Once the developer accepts, the amount will be held securely
+                        </span>
+                      <% end %>
+                    </div>
+                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                  </div>
+
+                  <div class="relative flex gap-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-border bg-background">
+                      <.icon name="tabler-check" class="h-5 w-5" />
+                    </div>
+                    <div class="flex flex-col pt-1.5">
+                      <span class="text-sm font-medium">Release and renew</span>
+                      <span class="text-sm text-muted-foreground">
+                        Release funds to the developer and continue collaboration
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </.card_content>
             </.card>
 

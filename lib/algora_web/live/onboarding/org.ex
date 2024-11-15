@@ -35,11 +35,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <div class="flex-1 flex">
         <div class="flex-grow px-8 py-16">
           <div class="max-w-3xl mx-auto">
-            <div class="flex items-center gap-4 text-lg mb-6">
+            <div class="flex items-center gap-4 text-lg mb-4">
               <span class="text-muted-foreground">
                 <%= min(@step, @total_steps) %> / <%= @total_steps %>
               </span>
-              <h1 class="text-lg font-semibold uppercase">Get started</h1>
+              <h1 class="text-lg font-semibold uppercase">
+                <%= case @step do %>
+                  <% 3 -> %>
+                    Last step
+                  <% _ -> %>
+                    Get started
+                <% end %>
+              </h1>
             </div>
 
             <div class="mb-4">
@@ -373,7 +380,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render_step(%{step: 3} = assigns) do
     ~H"""
-    <div class="space-y-4">
+    <div class="space-y-6">
       <div>
         <h2 class="text-4xl font-semibold">
           Let's personalize your experience

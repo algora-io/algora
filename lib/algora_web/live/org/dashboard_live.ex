@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </p>
           </div>
         </div>
-        <div class="px-6 -ml-4">
+        <div class="px-6">
           <div class="relative w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
@@ -98,7 +98,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.toggle_group_item>
           </.toggle_group>
         </div>
-        <div class="px-6 pt-3 -ml-4">
+        <div class="px-6 pt-3 -mx-4">
           <div class="relative w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
@@ -116,7 +116,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </div>
     </div>
     <!-- Sidebar -->
-    <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8">
+    <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8 scrollbar-thin">
       <!-- Availability Section -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -191,12 +191,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
         />
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for tech <- @tech_stack do %>
-            <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
+            <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
               <%= tech %>
               <button
                 phx-click="remove_tech"
                 phx-value-tech={tech}
-                class="ml-2 text-success hover:text-success/80"
+                class="ml-1 text-foreground hover:text-foreground/80"
               >
                 ×
               </button>
@@ -507,7 +507,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def compact_view(assigns) do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 py-0 align-middle">
+      <td class="py-1 px-4 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
             <%= Money.format!(@bounty.amount, @bounty.currency) %>
@@ -537,12 +537,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def contract_template(assigns) do
     ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 align-middle">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex items-start gap-4">
+    <tr class="border-b transition-colors">
+      <td class="py-4 align-middle">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4">
             <.link href={~p"/org/#{@contract.owner.handle}"}>
-              <.avatar class="h-24 w-auto aspect-[1200/630] rounded-lg">
+              <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
                 <.avatar_image src={@contract.owner.og_image_url} alt={@contract.owner.name} />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
               </.avatar>
@@ -574,9 +574,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </div>
           </div>
 
-          <div class="flex flex-col items-end gap-3">
-            <.button phx-click="begin_collaboration" size="sm">
-              Begin collaboration
+          <div class="mx-auto">
+            <.button phx-click="begin_collaboration" size="lg">
+              Start collaborating
             </.button>
           </div>
         </div>
@@ -635,10 +635,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def matching_dev(assigns) do
     ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 align-middle">
+    <tr class="border-b transition-colors">
+      <td class="py-4 align-middle">
         <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
+          <div class="flex items-start gap-4">
             <.link href={~p"/org/#{@user.handle}"}>
               <.avatar class="h-20 w-20 rounded-full">
                 <.avatar_image src={@user.avatar_url} alt={@user.name} />
@@ -657,9 +657,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <div class="font-display text-xl font-semibold text-success">
                   <%= Money.format!(@user.hourly_rate, @user.currency) %>/hr
                 </div>
-                <span class="text-sm text-muted-foreground opacity-0">
-                  · <%= @user.hours_per_week %> hours/week
-                </span>
               </div>
 
               <div class="mt-1 flex flex-wrap gap-2">
@@ -668,6 +665,34 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     <%= tag %>
                   </div>
                 <% end %>
+              </div>
+            </div>
+          </div>
+          <div class="max-w-xs w-full rounded-lg bg-card p-4 text-sm border border-border">
+            <div class="flex items-center gap-1 mb-2">
+              <%= for i <- 1..5 do %>
+                <.icon
+                  name="tabler-star-filled"
+                  class={"w-4 h-4 #{if i <= @user.review.stars, do: "text-warning", else: "text-muted-foreground/25"}"}
+                />
+              <% end %>
+            </div>
+            <p class="text-sm mb-2"><%= @user.review.comment %></p>
+            <div class="flex items-center gap-3">
+              <.avatar class="h-8 w-8">
+                <.avatar_image
+                  src={@user.review.reviewer.avatar_url}
+                  alt={@user.review.reviewer.name}
+                />
+                <.avatar_fallback>
+                  <%= String.first(@user.review.reviewer.name) %>
+                </.avatar_fallback>
+              </.avatar>
+              <div class="flex flex-col">
+                <p class="text-sm font-medium"><%= @user.review.reviewer.name %></p>
+                <p class="text-xs text-muted-foreground">
+                  <%= @user.review.reviewer.role %> at <%= @user.review.reviewer.company %>
+                </p>
               </div>
             </div>
           </div>
@@ -683,17 +708,50 @@ defmodule AlgoraWeb.Org.DashboardLive do
       %{
         hourly_rate: 100,
         hours_per_week: 30,
-        currency: "USD"
+        currency: "USD",
+        review: %{
+          stars: 5,
+          comment:
+            "Exceptional problem-solving skills and great communication throughout the project.",
+          reviewer: %{
+            name: "John A De Goes",
+            role: "CEO",
+            company: "Golem Cloud",
+            avatar_url:
+              "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+          }
+        }
       },
       %{
         hourly_rate: 120,
         hours_per_week: 20,
-        currency: "USD"
+        currency: "USD",
+        review: %{
+          stars: 4,
+          comment:
+            "Delivered high-quality work ahead of schedule. Would definitely work with again.",
+          reviewer: %{
+            name: "Michael Torres",
+            role: "CTO",
+            company: "StartupXYZ",
+            avatar_url: "/images/avatars/michael-torres.jpg"
+          }
+        }
       },
       %{
         hourly_rate: 150,
         hours_per_week: 10,
-        currency: "USD"
+        currency: "USD",
+        review: %{
+          stars: 5,
+          comment: "Outstanding technical expertise and professional attitude.",
+          reviewer: %{
+            name: "Emily Watson",
+            role: "Product Director",
+            company: "DevLabs",
+            avatar_url: "/images/avatars/emily-watson.jpg"
+          }
+        }
       }
     ])
     |> Enum.map(fn {user, data} -> Map.merge(user, data) end)

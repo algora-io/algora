@@ -373,7 +373,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render_step(%{step: 3} = assigns) do
     ~H"""
-    <div class="space-y-8">
+    <div class="space-y-4">
       <div>
         <h2 class="text-4xl font-semibold">
           Let's personalize your experience
@@ -385,7 +385,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
       <div class="space-y-8">
         <div>
-          <label class="block text-lg font-semibold mb-3">Hourly Rate (USD)</label>
+          <label class="block text-lg font-semibold mb-1">Hourly Rate (USD)</label>
+          <p class="text-muted-foreground mb-3 text-sm">
+            Enter the range of hourly rates you're looking for
+          </p>
           <div class="flex items-center gap-4">
             <div class="flex-1">
               <label class="block text-sm font-medium mb-2">Min</label>
@@ -436,7 +439,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
 
         <div>
-          <label class="block text-lg font-semibold mb-3">Are you hiring full-time?</label>
+          <label class="block text-lg font-semibold mb-1">Are you hiring full-time?</label>
+          <p class="text-muted-foreground mb-3 text-sm">
+            We will match you with developers who are looking for full-time work
+          </p>
           <div class="grid grid-cols-2 gap-4">
             <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
               <label class={[
@@ -471,9 +477,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
 
         <div>
-          <label class="block text-lg font-semibold mb-3">
+          <label class="block text-lg font-semibold mb-1">
             Which of the following best describes you?
           </label>
+          <p class="text-muted-foreground mb-3 text-sm">
+            Select all that apply
+          </p>
           <div class="grid grid-cols-2 gap-4">
             <%= for {type, label} <- [
                   {"opensource", "Open source company"},

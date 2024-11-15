@@ -609,9 +609,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     </div>
     <.drawer show={@show_release_renew_modal} on_cancel="close_drawer">
       <.drawer_header>
-        <h3 class="text-base text-muted-foreground uppercase font-display font-semibold">
-          Release Payment & Renew Contract
-        </h3>
+        Release Payment & Renew Contract
       </.drawer_header>
       <.drawer_content class="mt-4">
         <div class="grid grid-cols-2 gap-8">

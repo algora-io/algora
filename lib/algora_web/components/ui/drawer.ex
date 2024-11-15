@@ -68,7 +68,15 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   def drawer_header(assigns) do
     ~H"""
-    <div class={classes([@class])} {@rest}>
+    <div
+      class={
+        classes([
+          "text-base text-muted-foreground uppercase font-display font-semibold pb-4",
+          @class
+        ])
+      }
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </div>
     """

@@ -75,8 +75,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
           <div class={
             classes(
-              hidden: @step < 2,
-              block: @step >= 2
+              hidden: @step != 2,
+              block: @step == 2
             )
           }>
             <h2 class="text-lg font-semibold uppercase mb-6">
@@ -189,8 +189,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             div
             class={
               classes(
-                hidden: @step != 1,
-                block: @step == 1
+                hidden: @step == 2,
+                block: @step != 2
               )
             }
           >

@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Bounties.Bounty
   alias Algora.Money
   alias Algora.Accounts
+  alias AlgoraWeb.Org.Forms.JobForm
 
   defp middle_rate(%{min: min, max: max}), do: Decimal.div(Decimal.add(min, max), Decimal.new(2))
 
@@ -28,6 +29,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
       tech_stack: tech_stack
     }
 
+    job_form =
+      %JobForm{}
+      |> JobForm.changeset(%{
+        work_type: "remote"
+      })
+      |> to_form(as: :job_form)
+
     socket =
       socket
       |> assign(:tech_stack, tech_stack)
@@ -44,6 +52,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       |> assign(:contract_template, contract_template)
       |> assign(:achievements, fetch_achievements())
       |> assign(:show_begin_collaboration_drawer, false)
+      |> assign(:job_form, job_form)
 
     {:ok, socket}
   end
@@ -74,6 +83,134 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+      <!-- Job Creation Section -->
+      <div class="relative h-full max-w-4xl mx-auto p-6">
+        <div class="relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
+          <div class="pt-6 px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+              <h2 class="text-2xl font-semibold">Create New Job</h2>
+              <.tooltip>
+                <.tooltip_trigger>
+                  <.icon name="tabler-help" class="w-5 h-5 text-muted-foreground" />
+                </.tooltip_trigger>
+                <.tooltip_content side="bottom" class="w-80 p-3 space-y-2">
+                  <p class="font-medium">Example Jobs:</p>
+                  <div class="space-y-2 text-sm">
+                    <div>
+                      <p class="font-medium">Senior Backend Engineer</p>
+                      <p class="text-muted-foreground">
+                        Lead development of our core API infrastructure and microservices
+                      </p>
+                    </div>
+                    <div>
+                      <p class="font-medium">Frontend Developer</p>
+                      <p class="text-muted-foreground">
+                        Build responsive web applications using React and TypeScript
+                      </p>
+                    </div>
+                  </div>
+                </.tooltip_content>
+              </.tooltip>
+            </div>
+            <.button type="submit" phx-disable-with="Creating..." size="sm">
+              Create job
+            </.button>
+          </div>
+          <.simple_form
+            for={@job_form}
+            phx-change="validate_job"
+            phx-submit="create_job"
+            class="p-6 space-y-6"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
+              <div>
+                <.label for="title" class="text-sm font-medium mb-2">
+                  Title
+                </.label>
+                <.input
+                  type="text"
+                  field={@job_form[:title]}
+                  placeholder="Brief description of the task"
+                  required
+                  class="w-full bg-background border-input rounded-lg"
+                />
+              </div>
+              <fieldset>
+                <legend class="text-sm font-medium mb-2">Annual Compensation Range</legend>
+                <div class="mt-1 grid grid-cols-2 rounded-lg overflow-hidden border border-border divide-x divide-border">
+                  <div>
+                    <div class="relative">
+                      <.input
+                        placeholder="From"
+                        field={@job_form[:min_compensation]}
+                        min="0"
+                        class="rounded-none border-none"
+                      />
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span class="text-muted-foreground text-sm">USD</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="relative">
+                      <.input
+                        placeholder="To"
+                        field={@job_form[:max_compensation]}
+                        min="0"
+                        class="rounded-none border-none"
+                      />
+                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <span class="text-muted-foreground text-sm">USD</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+
+            <fieldset class="space-y-4">
+              <legend class="text-sm font-medium">Work Type</legend>
+              <div class="grid grid-cols-2 gap-4">
+                <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @job_form[:work_type].value == "remote", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+                  <.input
+                    type="radio"
+                    name="job_form[work_type]"
+                    field={@job_form[:work_type]}
+                    value="remote"
+                    checked={@job_form[:work_type].value == "remote"}
+                    class="sr-only"
+                  />
+                  <span class="flex flex-col">
+                    <span class="flex items-center gap-2">
+                      <.icon name="tabler-world" class="w-5 h-5" />
+                      <span class="font-medium">Remote</span>
+                    </span>
+                    <span class="mt-1 text-sm text-muted-foreground">Work from anywhere</span>
+                  </span>
+                </label>
+
+                <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @job_form[:work_type].value == "in_person", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+                  <.input
+                    type="radio"
+                    name="job_form[work_type]"
+                    field={@job_form[:work_type]}
+                    value="in_person"
+                    checked={@job_form[:work_type].value == "in_person"}
+                    class="sr-only"
+                  />
+                  <span class="flex flex-col">
+                    <span class="flex items-center gap-2">
+                      <.icon name="tabler-building" class="w-5 h-5" />
+                      <span class="font-medium">In-Person</span>
+                    </span>
+                    <span class="mt-1 text-sm text-muted-foreground">Office-based work</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+          </.simple_form>
         </div>
       </div>
     </div>
@@ -463,6 +600,29 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       _ ->
         {:noreply, socket}
+    end
+  end
+
+  def handle_event("validate_job", %{"job_form" => params}, socket) do
+    form =
+      %JobForm{}
+      |> JobForm.changeset(params)
+      |> Map.put(:action, :validate)
+      |> to_form(as: :job_form)
+
+    {:noreply, assign(socket, job_form: form)}
+  end
+
+  def handle_event("create_job", %{"job_form" => params}, socket) do
+    case JobForm.changeset(params) do
+      {:ok, job} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Job created successfully")
+         |> redirect(to: ~p"/jobs/#{job}")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, job_form: to_form(changeset, as: :job_form))}
     end
   end
 

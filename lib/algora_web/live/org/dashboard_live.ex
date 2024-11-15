@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
       |> assign(:contract_template, contract_template)
       |> assign(:achievements, fetch_achievements())
-      |> assign(:show_begin_collaboration_drawer, false)
+      |> assign(:show_begin_collaboration_drawer, true)
 
     {:ok, socket}
   end
@@ -224,21 +224,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
       on_cancel="close_drawer"
     >
       <.drawer_header>
-        <h3 class="text-lg font-semibold">Begin Collaboration</h3>
+        Begin Collaboration
       </.drawer_header>
       <.drawer_content class="space-y-6">
-        <div class="flex flex-col gap-2">
-          <label for="note" class="text-sm font-medium">Message to developer</label>
-          <.input
-            type="textarea"
-            id="note"
-            name="note"
-            value=""
-            placeholder="Introduce yourself and describe what you'd like to collaborate on..."
-            rows="4"
-          />
-        </div>
-
         <.card>
           <.card_header>
             <.card_title>How it works</.card_title>
@@ -358,13 +346,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
     {:noreply, socket}
   end
 
-  def handle_event("begin_collaboration", %{"user_id" => user_id}, socket) do
-    selected_dev = Enum.find(socket.assigns.matching_devs, &(&1.id == user_id))
-
-    {:noreply,
-     socket
-     |> assign(:selected_dev, selected_dev)
-     |> assign(:show_begin_collaboration_drawer, true)}
+  def handle_event("begin_collaboration", _, socket) do
+    {:noreply, socket |> assign(:show_begin_collaboration_drawer, true)}
   end
 
   def handle_event("submit_collaboration", _params, socket) do
@@ -411,10 +394,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
       <td class="p-4 align-middle">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-4">
             <.link href={~p"/org/#{@contract.owner.handle}"}>
-              <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
+              <.avatar class="h-24 w-auto aspect-[1200/630] rounded-lg">
                 <.avatar_image src={@contract.owner.og_image_url} alt={@contract.owner.name} />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
               </.avatar>
@@ -447,15 +430,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
 
           <div class="flex flex-col items-end gap-3">
-            <div class="text-right">
-              <div class="text-sm text-muted-foreground">Total contract value</div>
-              <div class="font-display text-lg font-semibold text-foreground">
-                <%= Money.format!(
-                  Decimal.mult(@contract.amount, @contract.expected_hours),
-                  @contract.currency
-                ) %> / wk
-              </div>
-            </div>
+            <.button phx-click="begin_collaboration" size="sm">
+              Begin collaboration
+            </.button>
           </div>
         </div>
       </td>
@@ -548,17 +525,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <% end %>
               </div>
             </div>
-          </div>
-
-          <div class="flex flex-col items-end gap-3">
-            <.button
-              variant="secondary"
-              phx-click="begin_collaboration"
-              phx-value-user_id={@user.id}
-              size="sm"
-            >
-              <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Begin collaboration
-            </.button>
           </div>
         </div>
       </td>

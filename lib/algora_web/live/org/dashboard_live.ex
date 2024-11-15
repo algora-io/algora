@@ -5,9 +5,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Money
   alias Algora.Accounts
 
+  defp middle_rate(%{min: min, max: max}), do: Decimal.div(Decimal.add(min, max), Decimal.new(2))
+
   def mount(_params, _session, socket) do
     tech_stack = ["Elixir", "Phoenix", "Membrane"]
-    hourly_rate = 50
+    hourly_rate = %{min: 50, max: 100}
     hours_per_week = 20
 
     org =
@@ -18,7 +20,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       })
 
     contract_template = %{
-      amount: Decimal.new(hourly_rate),
+      hourly_rate: hourly_rate,
       currency: "USD",
       expected_hours: hours_per_week,
       task: %{title: org.og_title},
@@ -33,6 +35,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
       |> assign(:looking_to_collaborate, true)
       |> assign(:hourly_rate, hourly_rate)
       |> assign(:hours_per_week, hours_per_week)
+      |> assign(
+        :weekly_amount,
+        Decimal.mult(middle_rate(hourly_rate), Decimal.new(hours_per_week))
+      )
       |> assign(:selected_dev, nil)
       |> assign(
         :bounties,
@@ -131,7 +137,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </div>
       <div class="mt-4 grid grid-cols-2 gap-4">
         <div>
-          <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
+          <label for="hourly-rate-min" class="text-sm font-medium">Min hourly rate (USD)</label>
           <div class="mt-2 relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 font-display">
               $
@@ -139,10 +145,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <.input
               type="number"
               min="0"
-              id="hourly-rate"
-              name="hourly-rate"
-              value={@hourly_rate}
-              phx-keydown="handle_hourly_rate"
+              id="hourly-rate-min"
+              name="hourly-rate-min"
+              value={@hourly_rate.min}
+              phx-keydown="handle_hourly_rate_min"
               phx-debounce="200"
               phx-hook="ClearInput"
               class="w-full bg-background border-input font-display ps-6"
@@ -150,18 +156,23 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </div>
         <div>
-          <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
-          <.input
-            type="number"
-            min="0"
-            max="168"
-            id="hours-per-week"
-            name="hours-per-week"
-            value={@hours_per_week}
-            phx-keydown="handle_hours_per_week"
-            phx-debounce="200"
-            class="mt-2 w-full bg-background border-input font-display"
-          />
+          <label for="hourly-rate-max" class="text-sm font-medium">Max hourly rate (USD)</label>
+          <div class="mt-2 relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-display">
+              $
+            </span>
+            <.input
+              type="number"
+              min="0"
+              id="hourly-rate-max"
+              name="hourly-rate-max"
+              value={@hourly_rate.max}
+              phx-keydown="handle_hourly_rate_max"
+              phx-debounce="200"
+              phx-hook="ClearInput"
+              class="w-full bg-background border-input font-display ps-6"
+            />
+          </div>
         </div>
       </div>
       <!-- Tech Stack Section -->
@@ -227,28 +238,104 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Begin Collaboration
       </.drawer_header>
       <.drawer_content class="space-y-6">
-        <.card>
-          <.card_header>
-            <.card_title>How it works</.card_title>
-          </.card_header>
-          <.card_content>
-            <ol class="space-y-4 list-decimal list-inside text-sm text-muted-foreground">
-              <li>Add your credit card to initiate the collaboration</li>
-              <li>
-                <%= if @selected_dev do %>
-                  Once the developer accepts,
-                  <span class="font-semibold text-foreground">
-                    $<%= @selected_dev.hourly_rate * @selected_dev.hours_per_week %>
-                  </span>
-                  will be charged and held in escrow
-                <% else %>
-                  Once the developer accepts, the weekly amount will be charged and held in escrow
-                <% end %>
-              </li>
-              <li>At the end of each week, you can release the funds to the developer</li>
-            </ol>
-          </.card_content>
-        </.card>
+        <div class="grid grid-cols-5 gap-6">
+          <div class="col-span-3 rounded-lg ring-1 ring-border aspect-video w-full h-full bg-card">
+          </div>
+          <div class="col-span-2 space-y-6">
+            <.card>
+              <.card_header>
+                <.card_title>How it works</.card_title>
+              </.card_header>
+              <.card_content>
+                <ol class="space-y-4 list-decimal list-inside text-sm text-muted-foreground">
+                  <li>Add your credit card to initiate the collaboration</li>
+                  <li>
+                    <%= if @selected_dev do %>
+                      Once the developer accepts,
+                      <span class="font-semibold text-foreground">
+                        <%= Money.format!(
+                          Decimal.mult(Decimal.new(@hourly_rate), Decimal.new(@hours_per_week)),
+                          "USD"
+                        ) %>
+                      </span>
+                      will be charged and held in escrow
+                    <% else %>
+                      Once the developer accepts, the amount will be charged and held in escrow
+                    <% end %>
+                  </li>
+                  <li>If you're satisfied, you can release the funds to the developer and renew</li>
+                </ol>
+              </.card_content>
+            </.card>
+
+            <.card>
+              <.card_header>
+                <.card_title>Payment Summary</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">
+                      Weekly amount (<%= @hours_per_week %> hours x <%= Money.format!(
+                        middle_rate(@hourly_rate),
+                        "USD"
+                      ) %>/hr)
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(@weekly_amount, "USD") %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">
+                      Algora fees (19%)
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(@weekly_amount, Decimal.new("0.19")),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">Transaction fees (4%)</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(@weekly_amount, Decimal.new("0.04")),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                  <div class="h-px bg-border" />
+                  <div class="flex justify-between">
+                    <dt class="font-medium">Total Due</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.mult(@weekly_amount, Decimal.new("1.23")),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                </dl>
+                <div class="mt-1 text-muted-foreground text-sm">
+                  <p>Estimated based on the middle of your hourly rate range.</p>
+                  <p>
+                    Actual charges may vary (up to
+                    <span class="font-semibold">
+                      <%= Money.format!(
+                        Decimal.mult(
+                          Decimal.mult(@hourly_rate.max, Decimal.new(@hours_per_week)),
+                          Decimal.new("1.23")
+                        ),
+                        "USD"
+                      ) %>
+                    </span>
+                    including fees).
+                  </p>
+                </div>
+              </.card_content>
+            </.card>
+          </div>
+        </div>
 
         <div class="flex justify-end gap-3">
           <.button variant="outline" phx-click="close_drawer">
@@ -352,11 +439,35 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def handle_event("submit_collaboration", _params, socket) do
     # TODO: Implement payment method addition and collaboration initiation
-    {:noreply, socket}
+    {:noreply, socket |> redirect(to: ~p"/contracts/123")}
   end
 
   def handle_event("close_drawer", _, socket) do
     {:noreply, socket |> assign(:show_begin_collaboration_drawer, false)}
+  end
+
+  def handle_event("handle_hourly_rate_min", %{"value" => value}, socket) do
+    case Integer.parse(value) do
+      {min_rate, _} when min_rate >= 0 ->
+        current_max = socket.assigns.hourly_rate.max
+        new_rate = %{min: min_rate, max: max(min_rate, current_max)}
+        {:noreply, assign(socket, :hourly_rate, new_rate)}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("handle_hourly_rate_max", %{"value" => value}, socket) do
+    case Integer.parse(value) do
+      {max_rate, _} when max_rate >= 0 ->
+        current_min = socket.assigns.hourly_rate.min
+        new_rate = %{min: min(max_rate, current_min), max: max_rate}
+        {:noreply, assign(socket, :hourly_rate, new_rate)}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   def compact_view(assigns) do
@@ -412,7 +523,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.format!(@contract.amount, @contract.currency) %>/hr
+                  $<%= @contract.hourly_rate.min %> - $<%= @contract.hourly_rate.max %>/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
                   · <%= @contract.expected_hours %> hours/week
@@ -512,7 +623,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <div class="font-display text-xl font-semibold text-success">
                   <%= Money.format!(@user.hourly_rate, @user.currency) %>/hr
                 </div>
-                <span class="text-sm text-muted-foreground">
+                <span class="text-sm text-muted-foreground opacity-0">
                   · <%= @user.hours_per_week %> hours/week
                 </span>
               </div>

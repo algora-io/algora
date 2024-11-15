@@ -64,14 +64,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     Previous
                   </.button>
                   <.button phx-click="next_step" variant="default">
-                    Sign up
-                  </.button>
-                <% 4 -> %>
-                  <.button phx-click="prev_step" variant="secondary">
-                    Previous
-                  </.button>
-                  <.button phx-click="next_step" variant="default">
-                    Submit
+                    Meet developers
                   </.button>
                 <% _ -> %>
                   <div></div>
@@ -250,7 +243,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     ~H"""
     <div>
       <div>
-        <h2 class="text-4xl font-semibold mb-2">
+        <h2 class="text-4xl font-semibold mb-3">
           What is your tech stack?
         </h2>
         <p class="text-muted-foreground">Select the technologies you work with</p>
@@ -289,7 +282,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def render_step(%{step: 2} = assigns) do
     ~H"""
     <div class="space-y-4">
-      <h2 class="text-4xl font-semibold mb-2">
+      <h2 class="text-4xl font-semibold mb-3">
         Join Algora with your team
       </h2>
 
@@ -350,7 +343,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="text-4xl font-semibold mb-2">
+        <h2 class="text-4xl font-semibold mb-3">
           Verify your email
         </h2>
         <p class="text-muted-foreground">
@@ -390,9 +383,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </p>
       </div>
 
-      <div class="space-y-6">
+      <div class="space-y-8">
         <div>
-          <label class="block text-xl font-semibold mb-4">Hourly Rate (USD)</label>
+          <label class="block text-lg font-semibold mb-3">Hourly Rate (USD)</label>
           <div class="flex items-center gap-4">
             <div class="flex-1">
               <label class="block text-sm font-medium mb-2">Min</label>
@@ -401,7 +394,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   <span class="text-muted-foreground">$</span>
                 </div>
                 <.input
-                  type="number"
                   name="hourly_rate_min"
                   value={@context.hourly_rate_min}
                   placeholder="0"
@@ -418,7 +410,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   <span class="text-muted-foreground">$</span>
                 </div>
                 <.input
-                  type="number"
                   name="hourly_rate_max"
                   value={@context.hourly_rate_max}
                   placeholder="0"
@@ -432,7 +423,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               <label class="block text-sm font-medium mb-2">Total hours per week</label>
               <div class="relative">
                 <.input
-                  type="number"
                   name="hours_per_week"
                   value={@context.hours_per_week}
                   placeholder="40"
@@ -446,10 +436,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
 
         <div>
-          <label class="block text-xl font-semibold mb-4">Are you hiring full-time?</label>
-          <div class="space-y-3">
+          <label class="block text-lg font-semibold mb-3">Are you hiring full-time?</label>
+          <div class="grid grid-cols-2 gap-4">
             <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
-              <label class="flex items-center space-x-3">
+              <label class={[
+                "relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
+                @context.hiring_status == value && "border-primary bg-primary/10",
+                @context.hiring_status != value && "border-border"
+              ]}>
                 <input
                   type="radio"
                   name="hiring_status"
@@ -458,26 +453,40 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   phx-click="update_context"
                   phx-value-field="hiring_status"
                   phx-value-value={value}
-                  class="h-5 w-5 rounded-full border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                  class="sr-only"
                 />
-                <span class="text-base"><%= label %></span>
+                <span class="flex flex-1 items-center justify-between">
+                  <span class="text-sm font-medium"><%= label %></span>
+                  <.icon
+                    name="tabler-check"
+                    class={[
+                      "size-5 text-primary",
+                      @context.hiring_status != value && "invisible"
+                    ]}
+                  />
+                </span>
               </label>
             <% end %>
           </div>
         </div>
 
         <div>
-          <label class="block text-xl font-semibold mb-4">
+          <label class="block text-lg font-semibold mb-3">
             Which of the following best describes you?
           </label>
-          <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-4">
             <%= for {type, label} <- [
                   {"opensource", "Open source company"},
                   {"closedsource", "Closed source company"},
                   {"agency", "Agency / consultancy / studio"},
                   {"nonprofit", "Non-profit / FOSS"}
                 ] do %>
-              <label class="flex items-center space-x-3">
+              <label class={[
+                "relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
+                type in (@context.company_types || []) && "border-primary bg-primary/10",
+                type not in (@context.company_types || []) && "border-border"
+              ]}>
                 <input
                   type="checkbox"
                   name="company_type"
@@ -485,9 +494,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   checked={type in (@context.company_types || [])}
                   phx-click="toggle_company_type"
                   phx-value-type={type}
-                  class="h-5 w-5 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                  class="sr-only"
                 />
-                <span class="text-base"><%= label %></span>
+                <span class="flex flex-1 items-center justify-between">
+                  <span class="text-sm font-medium"><%= label %></span>
+                  <.icon
+                    name="tabler-check"
+                    class={[
+                      "size-5 text-primary",
+                      type not in (@context.company_types || []) && "invisible"
+                    ]}
+                  />
+                </span>
               </label>
             <% end %>
           </div>

@@ -40,10 +40,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Decimal.mult(middle_rate(hourly_rate), Decimal.new(hours_per_week))
       )
       |> assign(:selected_dev, nil)
-      |> assign(
-        :bounties,
-        Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
-      )
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
       |> assign(:contract_template, contract_template)
       |> assign(:achievements, fetch_achievements())
@@ -74,40 +70,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <.contract_template contract={@contract_template} />
                 <%= for user <- @matching_devs do %>
                   <.matching_dev user={user} />
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <!-- Regular Bounties Section -->
-      <div class="relative h-full max-w-4xl mx-auto p-6">
-        <div class="flex justify-between px-6">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">Bounties for you</h2>
-            <p class="text-sm text-muted-foreground">Based on your tech stack</p>
-          </div>
-          <.toggle_group :let={builder} type="single" value={@view_mode}>
-            <.toggle_group_item builder={builder} value="default" class="gap-2" phx-click="view_mode">
-              <.icon name="tabler-layout-list" class="h-4 w-4" />
-              <span class="sr-only">Default view</span>
-            </.toggle_group_item>
-            <.toggle_group_item builder={builder} value="compact" class="gap-2" phx-click="view_mode">
-              <.icon name="tabler-baseline-density-medium" class="h-4 w-4" />
-              <span class="sr-only">Compact view</span>
-            </.toggle_group_item>
-          </.toggle_group>
-        </div>
-        <div class="px-6 pt-3 -mx-4">
-          <div class="relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for bounty <- @bounties do %>
-                  <%= if @view_mode == "compact" do %>
-                    <.compact_view bounty={bounty} />
-                  <% else %>
-                    <.default_view bounty={bounty} />
-                  <% end %>
                 <% end %>
               </tbody>
             </table>

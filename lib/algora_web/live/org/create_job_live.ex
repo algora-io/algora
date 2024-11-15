@@ -24,6 +24,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
      )
      |> assign(:selected_dev, nil)
      |> assign(:show_dev_drawer, false)
+     |> assign(:is_published, false)
+     |> assign(:show_publish_job_drawer, false)
      |> assign(:form, form)}
   end
 
@@ -239,18 +241,18 @@ defmodule AlgoraWeb.Org.CreateJobLive do
         </div>
       </div>
 
-      <div class="opacity-0 mt-8 p-6 relative rounded-lg border bg-card text-card-foreground">
+      <div class="mt-8 p-6 relative rounded-lg border bg-card text-card-foreground">
         <div class="flex justify-between mb-6">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">Applicants</h2>
             <p class="text-sm text-muted-foreground">
-              Developers interested in freelancing with you
+              Developers interested in working full-time with you
             </p>
           </div>
         </div>
 
         <div class="relative w-full overflow-auto">
-          <table class="w-full caption-bottom text-sm">
+          <table class={classes(["w-full caption-bottom text-sm", "blur-sm": !@is_published])}>
             <thead class="[&_tr]:border-b">
               <tr class="border-b transition-colors hover:bg-background/50">
                 <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -310,7 +312,12 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     </div>
                   </td>
                   <td class="p-4 align-middle text-right">
-                    <.button phx-click="view_dev" phx-value-id={dev.id} size="sm" variant="default">
+                    <.button
+                      phx-click="view_dev"
+                      phx-value-id={dev.id}
+                      size="sm"
+                      variant={if @is_published, do: "default", else: "outline"}
+                    >
                       View Profile
                     </.button>
                   </td>
@@ -318,6 +325,16 @@ defmodule AlgoraWeb.Org.CreateJobLive do
               <% end %>
             </tbody>
           </table>
+          <%= if !@is_published do %>
+            <div class="absolute bg-gradient-to-b from-transparent to-card inset-0"></div>
+            <div class="absolute flex items-center justify-center inset-0 z-10">
+              <div class="bg-black">
+                <.button type="button" variant="default" size="xl" phx-click="publish_job">
+                  Publish Job
+                </.button>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
 
@@ -438,6 +455,105 @@ defmodule AlgoraWeb.Org.CreateJobLive do
         <% end %>
       </.drawer>
     </div>
+    <.drawer id="publish-job-drawer" show={@show_publish_job_drawer} on_cancel="close_drawer">
+      <.drawer_header>
+        Publish Job
+      </.drawer_header>
+      <.drawer_content class="space-y-6">
+        <div class="grid grid-cols-5 gap-6">
+          <div class="col-span-3 rounded-lg ring-1 ring-border aspect-video w-full h-full bg-card">
+          </div>
+          <div class="col-span-2 space-y-6">
+            <.card>
+              <.card_header>
+                <.card_title>Why Algora?</.card_title>
+              </.card_header>
+              <.card_content>
+                <div class="space-y-8">
+                  <div class="relative flex gap-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-success bg-success text-background">
+                      <.icon name="tabler-users" class="h-5 w-5" />
+                    </div>
+                    <div class="flex flex-col pt-1.5">
+                      <span class="text-sm font-medium">Reach Top Talent</span>
+                      <span class="text-sm text-muted-foreground">
+                        Publish to the Algora network of proven developers
+                      </span>
+                    </div>
+                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                  </div>
+
+                  <div class="relative flex gap-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-success bg-success text-background">
+                      <.icon name="tabler-list-check" class="h-5 w-5" />
+                    </div>
+                    <div class="flex flex-col pt-1.5">
+                      <span class="text-sm font-medium">Track Applicants</span>
+                      <span class="text-sm text-muted-foreground">
+                        Review and manage candidates in one place
+                      </span>
+                    </div>
+                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                  </div>
+
+                  <div class="relative flex gap-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-success bg-success text-background">
+                      <.icon name="tabler-briefcase" class="h-5 w-5" />
+                    </div>
+                    <div class="flex flex-col pt-1.5">
+                      <span class="text-sm font-medium">Contract-to-Hire</span>
+                      <span class="text-sm text-muted-foreground">
+                        Test fit with paid trial projects before hiring
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </.card_content>
+            </.card>
+
+            <.card>
+              <.card_header>
+                <.card_title>Payment Summary</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="space-y-4">
+                  <div class="flex justify-between">
+                    <dt class="text-muted-foreground">
+                      Job posting
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.new(599),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                  <div class="h-px bg-border" />
+                  <div class="flex justify-between">
+                    <dt class="font-medium">Total Due</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.new(599),
+                        "USD"
+                      ) %>
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <.button variant="outline" phx-click="close_drawer">
+            Cancel
+          </.button>
+          <.button phx-click="submit_collaboration">
+            <.icon name="tabler-credit-card" class="w-4 h-4 mr-2" /> Pay with Stripe
+          </.button>
+        </div>
+      </.drawer_content>
+    </.drawer>
     """
   end
 
@@ -562,6 +678,10 @@ defmodule AlgoraWeb.Org.CreateJobLive do
     end
   end
 
+  def handle_event("publish_job", _, socket) do
+    {:noreply, socket |> assign(:show_publish_job_drawer, true)}
+  end
+
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
     dev = Accounts.get_user_with_stats(dev_id)
 
@@ -574,7 +694,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   def handle_event("close_drawer", _, socket) do
     {:noreply,
      socket
-     |> assign(:show_dev_drawer, false)}
+     |> assign(:show_dev_drawer, false)
+     |> assign(:show_publish_job_drawer, false)}
   end
 
   def handle_event("accept_dev", %{"id" => dev_id}, socket) do
@@ -585,6 +706,15 @@ defmodule AlgoraWeb.Org.CreateJobLive do
      |> assign(:show_dev_drawer, false)
      |> assign(:selected_dev, nil)
      |> assign(:matching_devs, Enum.reject(socket.assigns.matching_devs, &(&1.id == dev_id)))}
+  end
+
+  def handle_event("begin_collaboration", _, socket) do
+    {:noreply, socket |> assign(:show_publish_job_drawer, true)}
+  end
+
+  def handle_event("submit_collaboration", _params, socket) do
+    # TODO: Implement payment method addition and collaboration initiation
+    {:noreply, socket |> redirect(to: ~p"/contracts/123")}
   end
 
   defp get_url_icon(nil), do: "tabler-link"

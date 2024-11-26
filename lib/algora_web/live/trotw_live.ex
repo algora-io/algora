@@ -133,7 +133,7 @@ defmodule AlgoraWeb.TROTWLive do
     transactions_query =
       from t in Transaction,
         join: u in Users.User,
-        on: t.receiver_id == u.id,
+        on: t.recipient_id == u.id,
         where: not is_nil(u.country) and not is_nil(t.succeeded_at),
         group_by: [
           u.id,

@@ -81,7 +81,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
     transactions_query =
       from t in Transaction,
         join: u in Users.User,
-        on: t.receiver_id == u.id,
+        on: t.recipient_id == u.id,
         where: t.succeeded_at >= ^start_date and t.succeeded_at <= ^end_date,
         where: not is_nil(u.country),
         group_by: [

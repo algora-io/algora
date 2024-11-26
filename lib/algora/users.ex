@@ -17,9 +17,9 @@ defmodule Algora.Users do
     transfer_amounts_query =
       from t in Algora.Payments.Transaction,
         where: t.type == :transfer,
-        group_by: t.receiver_id,
+        group_by: t.recipient_id,
         select: %{
-          receiver_id: t.receiver_id,
+          recipient_id: t.recipient_id,
           sum: sum(t.amount)
         }
 
@@ -29,7 +29,7 @@ defmodule Algora.Users do
     |> filter_by_skills(opts[:skills])
     |> filter_by_ids(opts[:ids])
     |> limit(^Keyword.get(opts, :limit, 100))
-    |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.receiver_id)
+    |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.recipient_id)
     |> order_by([u, ta], desc: coalesce(ta.sum, 0), desc: u.stargazers_count)
     |> select([u, ta], {u, ta.sum})
     |> Repo.all()
@@ -144,14 +144,14 @@ defmodule Algora.Users do
     transfer_amounts_query =
       from t in Algora.Payments.Transaction,
         where: t.type == :transfer,
-        group_by: t.receiver_id,
+        group_by: t.recipient_id,
         select: %{
-          receiver_id: t.receiver_id,
+          recipient_id: t.recipient_id,
           sum: sum(t.amount)
         }
 
     case User
-         |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.receiver_id)
+         |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.recipient_id)
          |> where([u], u.id == ^id)
          |> select([u, ta], {u, ta.sum})
          |> Repo.one() do

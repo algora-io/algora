@@ -13,7 +13,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
 
       # add :account_id, references(:accounts)
       # add :customer_id, references(:customers)
-      add :receiver_id, references(:users)
+      add :recipient_id, references(:users)
       add :bounty_id, references(:bounties)
       # add :claim_id, references(:claims)
       # add :project_id, references(:projects)
@@ -24,7 +24,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     # Add indexes for foreign keys and commonly queried fields
     # create index(:transactions, [:account_id])
     # create index(:transactions, [:customer_id])
-    create index(:transactions, [:receiver_id])
+    create index(:transactions, [:recipient_id])
     create index(:transactions, [:bounty_id])
     # create index(:transactions, [:claim_id])
     # create index(:transactions, [:project_id])

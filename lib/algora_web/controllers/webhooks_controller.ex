@@ -104,12 +104,12 @@ defmodule AlgoraWeb.WebhooksController do
 
   defp execute_command({"tip", args}, _author, _params) when not is_nil(args) do
     amount = Regex.run(~r/\$(\d+)/, args)
-    receiver = Regex.run(~r/@(\w+)/, args)
+    recipient = Regex.run(~r/@(\w+)/, args)
 
-    case {amount, receiver} do
-      {[_, amount], [_, receiver]} -> Logger.info("Tip $#{amount} to @#{receiver}")
-      {[_, amount], nil} -> Logger.info("Tip $#{amount} to unspecified receiver")
-      {nil, [_, receiver]} -> Logger.info("Tip (no amount) to @#{receiver}")
+    case {amount, recipient} do
+      {[_, amount], [_, recipient]} -> Logger.info("Tip $#{amount} to @#{recipient}")
+      {[_, amount], nil} -> Logger.info("Tip $#{amount} to unspecified recipient")
+      {nil, [_, recipient]} -> Logger.info("Tip (no amount) to @#{recipient}")
       _ -> Logger.info("Invalid tip format")
     end
   end

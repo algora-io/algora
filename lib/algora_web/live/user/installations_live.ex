@@ -125,7 +125,7 @@ defmodule AlgoraWeb.User.InstallationsLive do
   end
 
   def mount(_params, _session, socket) do
-    installations = Installations.list_user_installations(socket.assigns.current_user.id)
+    installations = Workspace.list_user_installations(socket.assigns.current_user.id)
     {:ok, socket |> assign(:installations, installations)}
   end
 end

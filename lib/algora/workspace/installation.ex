@@ -1,4 +1,4 @@
-defmodule Algora.Installations.Installation do
+defmodule Algora.Workspace.Installation do
   use Algora.Model
 
   @type t() :: %__MODULE__{}

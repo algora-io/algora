@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.TROTWLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -132,7 +132,7 @@ defmodule AlgoraWeb.TROTWLive do
   defp get_weekly_rankings do
     transactions_query =
       from t in Transaction,
-        join: u in Accounts.User,
+        join: u in Users.User,
         on: t.receiver_id == u.id,
         where: not is_nil(u.country) and not is_nil(t.succeeded_at),
         group_by: [

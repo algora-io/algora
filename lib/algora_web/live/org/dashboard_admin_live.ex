@@ -3,7 +3,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Money
-  alias Algora.Accounts
+  alias Algora.Users
   alias AlgoraWeb.Org.Forms.JobForm
 
   defp middle_rate(%{min: min, max: max}), do: Decimal.div(Decimal.add(min, max), Decimal.new(2))
@@ -825,7 +825,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   end
 
   defp fetch_matching_devs(tech_stack) do
-    Accounts.list_matching_devs(tech_stack: tech_stack, limit: 3)
+    Users.list_matching_devs(tech_stack: tech_stack, limit: 3)
     |> Enum.zip([
       %{
         hourly_rate: 100,

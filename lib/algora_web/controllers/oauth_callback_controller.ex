@@ -3,12 +3,12 @@ defmodule AlgoraWeb.OAuthCallbackController do
   require Logger
 
   alias Algora.Github
-  alias Algora.Accounts
+  alias Algora.Users
 
   def new(conn, %{"provider" => "github", "code" => code, "state" => state} = params) do
     with {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
-         {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
+         {:ok, user} <- Users.register_github_user(primary, info, emails, token) do
       conn =
         if params["return_to"] do
           conn |> put_session(:user_return_to, params["return_to"])
@@ -78,8 +78,8 @@ defmodule AlgoraWeb.OAuthCallbackController do
   end
 
   defp get_or_register_user(email) do
-    case Accounts.get_user_by_email(email) do
-      nil -> Accounts.register_org(%{email: email})
+    case Users.get_user_by_email(email) do
+      nil -> Users.register_org(%{email: email})
       user -> {:ok, user}
     end
   end

@@ -23,7 +23,7 @@ defmodule Algora.Contracts.Contract do
 
     # Relationships
     belongs_to :company, Algora.Organizations.Organization
-    belongs_to :developer, Algora.Accounts.User
+    belongs_to :developer, Algora.Users.User
     has_many :payments, Algora.Contracts.Payment
     has_many :disputes, Algora.Contracts.Dispute
     has_many :reviews, Algora.Contracts.Review

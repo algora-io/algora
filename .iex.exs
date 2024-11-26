@@ -2,7 +2,7 @@ import Ecto.Query
 import Ecto.Changeset
 
 alias Algora.Admin
-alias Algora.Accounts
+alias Algora.Users
 alias Algora.Repo
 alias Algora.Github
 

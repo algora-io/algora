@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Onboarding.OrgLive do
   require Logger
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Money
 
   def mount(_params, _session, socket) do
@@ -664,6 +664,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   defp get_matching_devs(context) do
-    Accounts.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
+    Users.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
   end
 end

@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.Org.CreateLive do
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Money
 
   def mount(_params, session, socket) do
@@ -16,7 +16,7 @@ defmodule AlgoraWeb.Org.CreateLive do
      socket
      |> assign(org: org)
      |> assign(current_user: %{email: session["user_email"]})
-     |> assign(matching_orgs: Accounts.list_orgs(limit: 5))}
+     |> assign(matching_orgs: Users.list_orgs(limit: 5))}
   end
 
   def render(assigns) do

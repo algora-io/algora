@@ -12,7 +12,7 @@ defmodule Algora.Payments.Customer do
     field :name, :string
     field :region, Ecto.Enum, values: [:US, :EU]
 
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :user, Algora.Users.User
     has_many :transactions, Algora.Payments.Transaction
 
     timestamps()

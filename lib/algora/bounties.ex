@@ -5,7 +5,7 @@ defmodule Algora.Bounties do
   alias Algora.Payments.Transaction
   alias Algora.Bounties.Claim
   alias Algora.Repo
-  alias Algora.Accounts.User
+  alias Algora.Users.User
   alias Algora.Organizations.Member
 
   @spec create_bounty(

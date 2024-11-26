@@ -1,12 +1,12 @@
 defmodule AlgoraWeb.CompaniesLive do
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Users
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:featured_devs, Accounts.list_featured_devs())
+     |> assign(:featured_devs, Users.list_featured_devs())
      |> assign(:stats, fetch_stats())
      |> assign(:mobile_menu_open, false)
      |> assign(:expanded_faq, nil)

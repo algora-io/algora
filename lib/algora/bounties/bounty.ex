@@ -10,8 +10,8 @@ defmodule Algora.Bounties.Bounty do
     field :payment_type, Ecto.Enum, values: [:fixed, :hourly]
 
     belongs_to :ticket, Algora.Workspace.Ticket
-    belongs_to :owner, Algora.Accounts.User
-    belongs_to :creator, Algora.Accounts.User
+    belongs_to :owner, Algora.Users.User
+    belongs_to :creator, Algora.Users.User
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :transactions, Algora.Payments.Transaction

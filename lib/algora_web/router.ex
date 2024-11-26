@@ -34,6 +34,12 @@ defmodule AlgoraWeb.Router do
     get "/auth/logout", OAuthCallbackController, :sign_out
     delete "/auth/logout", OAuthCallbackController, :sign_out
 
+    live_session :admin,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
+      live "/admin/analytics", Admin.CompanyAnalyticsLive
+    end
+
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do

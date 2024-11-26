@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Org.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.{Money, Organizations, Bounties, Accounts}
   alias Algora.Bounties.Bounty
-  import AlgoraWeb.Components.StatCard
 
   def mount(%{"org_handle" => handle}, _session, socket) do
     org = Organizations.get_org_by_handle!(handle)

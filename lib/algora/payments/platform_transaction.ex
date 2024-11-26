@@ -1,10 +1,10 @@
-defmodule Algora.Payments.BalanceTransaction do
+defmodule Algora.Payments.PlatformTransaction do
   use Algora.Model
 
   @type t() :: %__MODULE__{}
 
   @derive {Inspect, except: [:provider_meta]}
-  schema "balance_transactions" do
+  schema "platform_transactions" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map

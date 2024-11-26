@@ -1,12 +1,12 @@
-defmodule Algora.Work.Task do
+defmodule Algora.Workspace.Ticket do
   use Algora.Model
 
-  alias Algora.Work.Task
+  alias Algora.Workspace.Ticket
 
   @type t() :: %__MODULE__{}
 
   @derive {Inspect, except: [:provider_meta]}
-  schema "tasks" do
+  schema "tickets" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map
@@ -17,7 +17,7 @@ defmodule Algora.Work.Task do
     field :number, :integer
     field :url, :string
 
-    belongs_to :repository, Algora.Work.Repository
+    belongs_to :repository, Algora.Workspace.Repository
     has_many :bounties, Algora.Bounties.Bounty
 
     timestamps()
@@ -33,7 +33,7 @@ defmodule Algora.Work.Task do
       repository_id: repo.id
     }
 
-    %Task{provider: "github", provider_meta: meta}
+    %Ticket{provider: "github", provider_meta: meta}
     |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id])
     |> generate_id()
     |> validate_required([:provider_id, :title, :number, :url, :repository_id])

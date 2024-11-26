@@ -1,9 +1,9 @@
-defmodule Algora.Work do
+defmodule Algora.Workspace do
   require Logger
   import Ecto.Query
 
-  alias Algora.Work.Task
-  alias Algora.Work.Repository
+  alias Algora.Workspace.Ticket
+  alias Algora.Workspace.Repository
   alias Algora.Accounts.User
   alias Algora.Repo
   alias Algora.Github
@@ -13,9 +13,9 @@ defmodule Algora.Work do
     conflict_target: [:provider, :provider_id]
   ]
 
-  @type task_type :: :issue | :pull_request
+  @type ticket_type :: :issue | :pull_request
 
-  @spec upsert_task(
+  @spec upsert_ticket(
           :github,
           %{
             token: Github.token(),
@@ -25,17 +25,17 @@ defmodule Algora.Work do
             meta: map()
           }
         ) ::
-          {:ok, Task.t()} | {:error, atom()}
-  def upsert_task(:github, %{
+          {:ok, Ticket.t()} | {:error, atom()}
+  def upsert_ticket(:github, %{
         token: token,
         owner: owner,
         repo: repo,
         meta: meta
       }) do
-    Logger.info("Upserting task #{owner}/#{repo}/#{meta["number"]}")
+    Logger.info("Upserting ticket #{owner}/#{repo}/#{meta["number"]}")
 
     with {:ok, repo} <- fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
-      Task.github_changeset(repo, meta)
+      Ticket.github_changeset(repo, meta)
       |> Repo.insert(@upsert_options)
     end
   end
@@ -68,33 +68,33 @@ defmodule Algora.Work do
     end
   end
 
-  @spec fetch_task(:github, %{
+  @spec fetch_ticket(:github, %{
           token: Github.token(),
           url: String.t()
-        }) :: {:ok, Task.t()} | {:error, atom()}
-  def fetch_task(:github, %{token: token, url: url}) do
-    Logger.info("Fetching task #{url}")
+        }) :: {:ok, Ticket.t()} | {:error, atom()}
+  def fetch_ticket(:github, %{token: token, url: url}) do
+    Logger.info("Fetching ticket #{url}")
 
     case parse_url(url) do
       {:ok, %{owner: owner, repo: repo, number: number}} ->
-        fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number})
+        fetch_ticket(:github, %{token: token, owner: owner, repo: repo, number: number})
 
       {:error, error} ->
         {:error, error}
     end
   end
 
-  @spec fetch_task(:github, %{
+  @spec fetch_ticket(:github, %{
           token: Github.token(),
           owner: String.t(),
           repo: String.t(),
           number: integer()
-        }) :: {:ok, Task.t()} | {:error, atom()}
-  def fetch_task(:github, %{token: token, owner: owner, repo: repo, number: number}) do
-    Logger.info("Fetching task #{owner}/#{repo}/#{number}")
+        }) :: {:ok, Ticket.t()} | {:error, atom()}
+  def fetch_ticket(:github, %{token: token, owner: owner, repo: repo, number: number}) do
+    Logger.info("Fetching ticket #{owner}/#{repo}/#{number}")
 
     query =
-      from t in Task,
+      from t in Ticket,
         join: r in assoc(t, :repository),
         join: u in assoc(r, :user),
         where:
@@ -107,7 +107,7 @@ defmodule Algora.Work do
       nil ->
         case Github.get_issue(token, owner, repo, number) do
           {:ok, meta} ->
-            upsert_task(:github, %{
+            upsert_ticket(:github, %{
               token: token,
               owner: owner,
               repo: repo,
@@ -119,8 +119,8 @@ defmodule Algora.Work do
             {:error, error}
         end
 
-      task ->
-        {:ok, task}
+      ticket ->
+        {:ok, ticket}
     end
   end
 

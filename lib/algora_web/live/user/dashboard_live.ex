@@ -212,7 +212,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         amount: Decimal.new(75),
         currency: "USD",
         expected_hours: 20,
-        task: %{title: "Algora: Open source bounties"},
+        ticket: %{title: "Algora: Open source bounties"},
         owner: %{
           handle: "algora",
           name: "Algora",
@@ -227,7 +227,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         amount: Decimal.new(150),
         currency: "USD",
         expected_hours: 15,
-        task: %{title: "Deploy invincible backends | Golem"},
+        ticket: %{title: "Deploy invincible backends | Golem"},
         owner: %{
           handle: "golemcloud",
           name: "Golem Cloud",
@@ -243,7 +243,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         amount: Decimal.new(150),
         currency: "USD",
         expected_hours: 25,
-        task: %{title: "Qdrant - Vector Database"},
+        ticket: %{title: "Qdrant - Vector Database"},
         owner: %{
           handle: "qdrant",
           name: "Qdrant",
@@ -342,7 +342,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             navigate={~p"/org/#{@bounty.owner.handle}"}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
-            <%= @bounty.task.title %>
+            <%= @bounty.ticket.title %>
           </.link>
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
@@ -369,7 +369,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             href={Bounty.url(@bounty)}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
-            <%= @bounty.task.title %>
+            <%= @bounty.ticket.title %>
           </.link>
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
@@ -403,7 +403,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             <div class="flex flex-col gap-1">
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-                  <%= @bounty.task.title %>
+                  <%= @bounty.ticket.title %>
                 </.link>
               </div>
 
@@ -478,7 +478,7 @@ defmodule AlgoraWeb.User.DashboardLive do
                 <%= Money.format!(@bounty.amount, @bounty.currency) %>
               </div>
               <div class="text-foreground group-hover:underline line-clamp-1">
-                <%= @bounty.task.title %>
+                <%= @bounty.ticket.title %>
               </div>
             </.link>
 

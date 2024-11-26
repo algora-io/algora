@@ -1,8 +1,8 @@
-defmodule Algora.Repo.Migrations.CreateTasks do
+defmodule Algora.Repo.Migrations.CreateTickets do
   use Ecto.Migration
 
   def change do
-    create table(:tasks) do
+    create table(:tickets) do
       add :provider, :string
       add :provider_id, :string
       add :provider_meta, :map
@@ -18,9 +18,9 @@ defmodule Algora.Repo.Migrations.CreateTasks do
       timestamps()
     end
 
-    create index(:tasks, [:repository_id])
+    create index(:tickets, [:repository_id])
 
     # TODO: Reenable this after migration is complete.
-    # create unique_index(:tasks, [:provider, :provider_id])
+    # create unique_index(:tickets, [:provider, :provider_id])
   end
 end

@@ -186,7 +186,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     />
                   </div>
                   <div>
-                    <.label for="task_url" class="text-sm font-medium mb-2">
+                    <.label for="ticket_url" class="text-sm font-medium mb-2">
                       Ticket
                       <span class="font-normal text-muted-foreground  ">
                         (GitHub, Linear, Figma, Jira, Google Docs...)
@@ -195,13 +195,13 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     <div class="relative">
                       <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <.icon
-                          name={get_url_icon(@form[:task_url].value)}
+                          name={get_url_icon(@form[:ticket_url].value)}
                           class="w-5 h-5 text-muted-foreground"
                         />
                       </div>
                       <.input
                         type="url"
-                        field={@form[:task_url]}
+                        field={@form[:ticket_url]}
                         placeholder="https://github.com/owner/repo/issues/123"
                         required
                         class="w-full pl-10 bg-background border-input rounded-lg"
@@ -581,7 +581,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
               <.link
                 class="group relative flex flex-col items-start gap-x-4 gap-y-2 py-4 sm:flex-row sm:items-center"
                 rel="noopener"
-                href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">
@@ -589,12 +589,12 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
-                      <%= bounty.task.title %>
+                      <%= bounty.ticket.title %>
                     </h2>
                   </div>
                   <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
-                      <span class="truncate">tv#<%= bounty.task.number %></span>
+                      <span class="truncate">tv#<%= bounty.ticket.number %></span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
                         <circle cx="1" cy="1" r="1"></circle>
                       </svg>

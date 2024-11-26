@@ -82,7 +82,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
               <.link
                 class="group relative flex flex-col items-start gap-x-4 gap-y-2 py-4 sm:flex-row sm:items-center"
                 rel="noopener"
-                href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">
@@ -90,12 +90,12 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
-                      <%= bounty.task.title %>
+                      <%= bounty.ticket.title %>
                     </h2>
                   </div>
                   <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
-                      <span class="truncate">tv#<%= bounty.task.number %></span>
+                      <span class="truncate">tv#<%= bounty.ticket.number %></span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
                         <circle cx="1" cy="1" r="1"></circle>
                       </svg>

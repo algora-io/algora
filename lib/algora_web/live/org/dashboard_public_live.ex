@@ -197,7 +197,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
             href={Bounty.url(@bounty)}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
-            <%= @bounty.task.title %>
+            <%= @bounty.ticket.title %>
           </.link>
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">

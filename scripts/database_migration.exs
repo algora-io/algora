@@ -21,7 +21,7 @@ defmodule DatabaseMigration do
   """
 
   alias Algora.Accounts.User
-  alias Algora.Work.Task
+  alias Algora.Workspace.Ticket
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
 
@@ -29,7 +29,7 @@ defmodule DatabaseMigration do
     "User" => "users",
     "Org" => "users",
     "GithubUser" => "users",
-    "Task" => "tasks",
+    "Ticket" => "tickets",
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
     "Bounty" => "bounties",
@@ -42,7 +42,7 @@ defmodule DatabaseMigration do
     "User" => User,
     "Org" => User,
     "GithubUser" => User,
-    "Task" => Task,
+    "Ticket" => Ticket,
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
     "Bounty" => Bounty,
@@ -51,11 +51,11 @@ defmodule DatabaseMigration do
     "Claim" => nil
   }
 
-  @backfilled_tables ["repositories", "transactions", "bounties", "tasks", "users"]
+  @backfilled_tables ["repositories", "transactions", "bounties", "tickets", "users"]
 
   @relevant_tables Map.keys(@table_mappings)
 
-  defp transform("Task", row, db) do
+  defp transform("Ticket", row, db) do
     github_issue =
       db |> Map.get("GithubIssue", []) |> Enum.find(&(&1["id"] == row["issue_id"]))
 
@@ -146,7 +146,7 @@ defmodule DatabaseMigration do
 
     row =
       row
-      |> Map.put("task_id", row["task_id"])
+      |> Map.put("ticket_id", row["ticket_id"])
       |> Map.put("owner_id", row["org_id"])
       |> Map.put("creator_id", row["poster_id"])
       |> Map.put("inserted_at", row["created_at"])

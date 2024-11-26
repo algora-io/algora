@@ -1,7 +1,7 @@
-defmodule Algora.Work.Repository do
+defmodule Algora.Workspace.Repository do
   use Algora.Model
 
-  alias Algora.Work.Repository
+  alias Algora.Workspace.Repository
 
   @type t() :: %__MODULE__{}
 
@@ -14,7 +14,7 @@ defmodule Algora.Work.Repository do
     field :name, :string
     field :url, :string
 
-    has_many :tasks, Algora.Work.Task
+    has_many :tickets, Algora.Workspace.Ticket
     belongs_to :user, Algora.Accounts.User
 
     timestamps()

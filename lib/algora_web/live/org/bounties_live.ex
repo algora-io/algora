@@ -125,17 +125,17 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           <.link
                             rel="noopener"
                             class="inline-flex flex-col group/issue"
-                            href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                            href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
                           >
                             <div class="flex items-center gap-4">
                               <div class="truncate">
                                 <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
-                                  <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
+                                  <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %>#<%= bounty.ticket.number %>
                                 </p>
                               </div>
                             </div>
                             <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
-                              <%= bounty.task.title %>
+                              <%= bounty.ticket.title %>
                             </p>
                           </.link>
                           <p class="flex items-center gap-1.5 text-xs text-gray-400">

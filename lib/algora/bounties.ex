@@ -52,7 +52,7 @@ defmodule Algora.Bounties do
 
     query =
       from b in sq,
-        join: t in assoc(b, :task),
+        join: t in assoc(b, :ticket),
         join: o in assoc(b, :owner),
         left_join: r in assoc(t, :repository),
         left_join: u in assoc(r, :user),
@@ -78,9 +78,9 @@ defmodule Algora.Bounties do
             avatar_url: solver.avatar_url,
             country: solver.country
           },
-          task: %{
+          ticket: %{
             title: t.title,
-            # HACK: remove these once we have a way to get the owner and repo from the task
+            # HACK: remove these once we have a way to get the owner and repo from the ticket
             owner: coalesce(u.provider_login, o.handle),
             repo: coalesce(r.name, o.handle),
             number: t.number

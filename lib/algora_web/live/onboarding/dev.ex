@@ -87,10 +87,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                       <%= Money.format!(bounty.amount, bounty.currency) %>
                     </div>
                     <div class="text-sm text-muted-foreground mb-1">
-                      <%= bounty.task.owner %>/<%= bounty.task.repo %>#<%= bounty.task.number %>
+                      <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %>#<%= bounty.ticket.number %>
                     </div>
                     <div class="font-medium">
-                      <%= bounty.task.title %>
+                      <%= bounty.ticket.title %>
                     </div>
                     <div class="text-xs text-muted-foreground mt-2">
                       <%= Algora.Util.time_ago(bounty.inserted_at) %>

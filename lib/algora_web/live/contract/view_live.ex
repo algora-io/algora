@@ -1,263 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
-  alias Algora.Users
-  alias Algora.Money
-  alias Algora.Organizations
 
-  def mount(%{"id" => id}, _session, socket) do
-    company = Organizations.get_org_by_handle!("algora")
-
-    developer =
-      Users.list_matching_devs(limit: 20, skills: ["Elixir", "Phoenix"])
-      |> Enum.at(8)
-      |> Map.merge(%{
-        timezone: "PST (UTC-8)",
-        location: "Vancouver, Canada",
-        availability: "Available for work",
-        rate: "$120/hr",
-        skills: ["Elixir", "Phoenix", "React", "TypeScript", "PostgreSQL"],
-        socials: [
-          %{name: "GitHub", url: "https://github.com/dev123", icon: "tabler-brand-github"},
-          %{name: "Twitter", url: "https://twitter.com/dev123", icon: "tabler-brand-twitter"},
-          %{
-            name: "LinkedIn",
-            url: "https://linkedin.com/in/dev123",
-            icon: "tabler-brand-linkedin"
-          },
-          %{name: "Website", url: "https://dev123.com", icon: "tabler-world"}
-        ]
-      })
-
-    # Calculate fee tier data
-    total_paid = Decimal.new("4500")
-
-    fee_tiers = [
-      %{threshold: 0, fee: 19},
-      %{threshold: 3000, fee: 15},
-      %{threshold: 5000, fee: 10},
-      %{threshold: 15000, fee: 5}
-    ]
-
-    fee_data = %{
-      total_paid: total_paid,
-      fee_tiers: fee_tiers,
-      fee_percentage:
-        cond do
-          Decimal.compare(total_paid, Decimal.new("15000")) != :lt -> 5
-          Decimal.compare(total_paid, Decimal.new("5000")) != :lt -> 10
-          Decimal.compare(total_paid, Decimal.new("3000")) != :lt -> 15
-          true -> 19
-        end,
-      progress:
-        case {
-          Decimal.compare(total_paid, Decimal.new("5000")),
-          Decimal.compare(total_paid, Decimal.new("3000"))
-        } do
-          {:lt, :gt} ->
-            start_percent = 40.0
-            end_percent = 60.0
-            progress_in_range = (Decimal.to_float(total_paid) - 3000) / (5000 - 3000)
-            start_percent + (end_percent - start_percent) * progress_in_range
-
-          _ ->
-            30.0
-        end
-    }
-
-    contract = %{
-      id: id,
-      status: :active,
-      start_date: ~D[2024-03-01],
-      hourly_rate: Decimal.new(75),
-      hours_per_week: 20,
-      # Updated to use the same total_paid
-      total_paid: total_paid,
-      escrow_amount: Decimal.new(1500),
-      next_payment: ~D[2024-03-22],
-      company: company,
-      developer: developer,
-      payment_history: [
-        %{
-          date: ~D[2024-03-15],
-          amount: Decimal.new(1500),
-          hours: 20,
-          status: :completed
-        },
-        %{
-          date: ~D[2024-03-08],
-          amount: Decimal.new(1500),
-          hours: 20,
-          status: :completed
-        },
-        %{
-          date: ~D[2024-03-01],
-          amount: Decimal.new(1500),
-          hours: 20,
-          status: :completed
-        }
-      ]
-    }
-
-    # Add chat messages setup
-    messages = [
-      %{
-        id: 1,
-        sender: socket.assigns.current_user,
-        content:
-          "yo! saw you've worked with Phoenix LiveView before. we're building a real-time collab tool and could use your expertise",
-        sent_at: "11:30 AM",
-        date: "Monday",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 2,
-        sender: contract.developer,
-        content:
-          "hey! yeah I've built a few things with LiveView. what kind of collab tool are you working on?",
-        sent_at: "11:45 AM",
-        date: "Monday",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 3,
-        sender: socket.assigns.current_user,
-        content:
-          "it's like figma but for devs - shared coding environment with real-time cursors, chat, etc. biggest challenge right now is handling presence with 1000+ concurrent users",
-        sent_at: "2:30 PM",
-        date: "Monday",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 4,
-        sender: contract.developer,
-        content:
-          "oh nice! yeah Phoenix Presence would work well for that. I did something similar with LiveView for a collaborative whiteboard. had to do some tricks with debouncing to handle the cursor updates efficiently",
-        sent_at: "3:15 PM",
-        date: "Monday",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 5,
-        sender: socket.assigns.current_user,
-        content:
-          "that's exactly what we need! mind taking a look at our presence.ex module? getting some weird race conditions when users disconnect",
-        sent_at: "9:30 AM",
-        date: "Yesterday",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 6,
-        sender: contract.developer,
-        content:
-          "sure, drop a gist link. also check out :pg2 vs :pg - we had to switch because of similar issues at scale",
-        sent_at: "9:45 AM",
-        date: "Yesterday",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 7,
-        sender: socket.assigns.current_user,
-        content:
-          "awesome, here's the gist: https://gist.github.com/... also curious how you handled the pubsub sharding",
-        sent_at: "10:15 AM",
-        date: "Yesterday",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 8,
-        sender: contract.developer,
-        content:
-          "for pubsub we ended up using Redis as a backend with multiple nodes. I can share our config later today",
-        sent_at: "10:30 AM",
-        date: "Yesterday",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 9,
-        sender: socket.assigns.current_user,
-        content: "that would be super helpful! we're hitting similar scaling issues",
-        sent_at: "11:00 AM",
-        date: "Yesterday",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 10,
-        sender: contract.developer,
-        content: "here's our Redis setup: [code snippet]. we're using clustering with 3 nodes",
-        sent_at: "2:30 PM",
-        date: "Yesterday",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 11,
-        sender: socket.assigns.current_user,
-        content: "this looks great! one question about the failover configuration...",
-        sent_at: "3:00 PM",
-        date: "Yesterday",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 12,
-        sender: contract.developer,
-        content:
-          "we're using Redis Sentinel for that. it automatically handles primary node election",
-        sent_at: "3:15 PM",
-        date: "Yesterday",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 13,
-        sender: socket.assigns.current_user,
-        content:
-          "morning! got those changes implemented and the presence system is much more stable now",
-        sent_at: "9:00 AM",
-        date: "Today",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      },
-      %{
-        id: 14,
-        sender: contract.developer,
-        content:
-          "great to hear! what kind of improvement are you seeing in terms of connection handling?",
-        sent_at: "9:15 AM",
-        date: "Today",
-        is_self: false,
-        avatar_url: contract.developer.avatar_url
-      },
-      %{
-        id: 15,
-        sender: socket.assigns.current_user,
-        content: "massive difference - went from ~70% successful reconnects to 99%+",
-        sent_at: "9:30 AM",
-        date: "Today",
-        is_self: true,
-        avatar_url: socket.assigns.current_user.avatar_url
-      }
-    ]
-
-    {:ok,
-     socket
-     |> assign(:contract, contract)
-     |> assign(:page_title, "Contract with #{contract.developer.name}")
-     |> assign(:messages, messages)
-     |> assign(:show_release_renew_modal, false)
-     |> assign(:show_release_modal, false)
-     |> assign(:show_dispute_modal, false)
-     |> assign(:fee_data, fee_data)}
-  end
+  alias Algora.{Contracts, Chat, Reviews, Repo, Money}
 
   def render(assigns) do
     ~H"""
@@ -971,45 +715,168 @@ defmodule AlgoraWeb.Contract.ViewLive do
     """
   end
 
-  def handle_event("send_message", %{"message" => content}, socket) do
-    new_message = %{
-      id: System.unique_integer([:positive]),
-      sender: socket.assigns.current_user,
-      content: content,
-      sent_at: Time.utc_now() |> Time.to_string() |> String.slice(0..4),
-      date: "Today",
-      is_self: true,
-      avatar_url: socket.assigns.current_user.avatar_url
-    }
+  def mount(%{"id" => id}, _session, socket) do
+    # Load contract with associations
+    contract =
+      Contracts.get_contract!(id)
+      |> Repo.preload([
+        :client,
+        :provider,
+        :transactions,
+        :reviews,
+        :timesheets,
+        original_contract: [:renewals]
+      ])
 
-    {:noreply, update(socket, :messages, &(&1 ++ [new_message]))}
+    # Get or create chat thread between client and provider
+    {:ok, thread} = get_or_create_thread(contract)
+
+    # Load chat messages
+    messages =
+      Chat.list_messages(thread.id)
+      |> Enum.map(&format_message(&1, socket.assigns.current_user))
+
+    # Calculate fee data
+    fee_data = calculate_fee_data(contract)
+
+    {:ok,
+     socket
+     |> assign(:contract, contract)
+     |> assign(:page_title, "Contract with #{contract.provider.name}")
+     |> assign(:messages, messages)
+     |> assign(:thread, thread)
+     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_release_modal, false)
+     |> assign(:show_dispute_modal, false)
+     |> assign(:fee_data, fee_data)}
   end
 
-  def handle_event("show_release_renew_modal", _, socket) do
-    {:noreply, assign(socket, :show_release_renew_modal, true)}
-  end
+  # Handle releasing payment and renewing contract
+  def handle_event("release_and_renew", %{"feedback" => feedback}, socket) do
+    contract = socket.assigns.contract
 
-  def handle_event("show_release_modal", _, socket) do
-    {:noreply, assign(socket, :show_release_modal, true)}
-  end
+    # Process payment
+    {:ok, {_updated_contract, _charge, _transfer}} =
+      Contracts.process_payment(contract, %{
+        # Get from Stripe
+        stripe_charge_id: "ch_xxx",
+        # Get from Stripe
+        stripe_transfer_id: "tr_xxx",
+        stripe_metadata: %{},
+        fee_percentage: socket.assigns.fee_data.fee_percentage
+      })
 
-  def handle_event("show_dispute_modal", _, socket) do
-    {:noreply, assign(socket, :show_dispute_modal, true)}
-  end
+    # Create review
+    {:ok, _review} =
+      Reviews.create_review(%{
+        contract_id: contract.id,
+        reviewer_id: socket.assigns.current_user.id,
+        reviewee_id: contract.provider_id,
+        # Get from form
+        rating: 5,
+        content: feedback,
+        visibility: :public
+      })
 
-  def handle_event("release_and_renew", %{"feedback" => _feedback}, socket) do
-    # Add your release and renew logic here
+    # Renew contract
+    {:ok, new_contract} = Contracts.renew_contract(contract)
+
     {:noreply,
      socket
+     |> assign(:contract, new_contract)
      |> assign(:show_release_renew_modal, false)
      |> put_flash(:info, "Payment released and contract renewed successfully")}
   end
 
-  def handle_event("close_drawer", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_release_renew_modal, false)
-     |> assign(:show_release_modal, false)
-     |> assign(:show_dispute_modal, false)}
+  # Handle sending chat messages
+  def handle_event("send_message", %{"message" => content}, socket) do
+    {:ok, message} =
+      Chat.send_message(
+        socket.assigns.thread.id,
+        socket.assigns.current_user.id,
+        content
+      )
+
+    new_message = format_message(message, socket.assigns.current_user)
+
+    {:noreply, update(socket, :messages, &(&1 ++ [new_message]))}
+  end
+
+  # Private helpers
+
+  defp get_or_create_thread(contract) do
+    case Chat.get_thread_for_users(contract.client_id, contract.provider_id) do
+      nil -> Chat.create_direct_thread(contract.client, contract.provider)
+      thread -> {:ok, thread}
+    end
+  end
+
+  defp format_message(message, current_user) do
+    %{
+      id: message.id,
+      sender: message.sender,
+      content: message.content,
+      sent_at: format_time(message.inserted_at),
+      date: format_date(message.inserted_at),
+      is_self: message.sender_id == current_user.id,
+      avatar_url: message.sender.avatar_url
+    }
+  end
+
+  defp calculate_fee_data(contract) do
+    fee_tiers = [
+      %{threshold: 0, fee: 19},
+      %{threshold: 3000, fee: 15},
+      %{threshold: 5000, fee: 10},
+      %{threshold: 15000, fee: 5}
+    ]
+
+    %{
+      total_paid: contract.total_paid,
+      fee_tiers: fee_tiers,
+      fee_percentage: calculate_fee_percentage(contract.total_paid),
+      progress: calculate_progress(contract.total_paid)
+    }
+  end
+
+  defp calculate_fee_percentage(total_paid) do
+    cond do
+      Decimal.compare(total_paid, Decimal.new("15000")) != :lt -> 5
+      Decimal.compare(total_paid, Decimal.new("5000")) != :lt -> 10
+      Decimal.compare(total_paid, Decimal.new("3000")) != :lt -> 15
+      true -> 19
+    end
+  end
+
+  defp calculate_progress(total_paid) do
+    case {
+      Decimal.compare(total_paid, Decimal.new("5000")),
+      Decimal.compare(total_paid, Decimal.new("3000"))
+    } do
+      {:lt, :gt} ->
+        start_percent = 40.0
+        end_percent = 60.0
+        progress_in_range = (Decimal.to_float(total_paid) - 3000) / (5000 - 3000)
+        start_percent + (end_percent - start_percent) * progress_in_range
+
+      _ ->
+        30.0
+    end
+  end
+
+  defp format_time(datetime) do
+    datetime
+    |> DateTime.to_time()
+    |> Time.to_string()
+    |> String.slice(0..4)
+  end
+
+  defp format_date(datetime) do
+    case Date.diff(Date.utc_today(), DateTime.to_date(datetime)) do
+      0 -> "Today"
+      1 -> "Yesterday"
+      n when n <= 7 -> Calendar.strftime(datetime, "%A")
+      _ -> Calendar.strftime(datetime, "%B %d")
+    end
   end
 end

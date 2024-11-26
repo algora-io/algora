@@ -115,22 +115,22 @@ defmodule AlgoraWeb.User.ProfileLive do
                             </.link>
                             <.icon name="tabler-chevron-right" class="h-4 w-4" />
                             <.link
-                              href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                              href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
                               class="hover:underline"
                             >
-                              <%= bounty.task.repo %>#<%= bounty.task.number %>
+                              <%= bounty.ticket.repo %>#<%= bounty.ticket.number %>
                             </.link>
                           </div>
 
                           <.link
-                            href={"https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"}
+                            href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
                             class="group flex items-center gap-2"
                           >
                             <div class="font-display text-xl font-semibold text-success">
                               <%= Money.format!(bounty.amount, "USD") %>
                             </div>
                             <div class="text-foreground group-hover:underline line-clamp-1">
-                              <%= bounty.task.title %>
+                              <%= bounty.ticket.title %>
                             </div>
                           </.link>
                         </div>

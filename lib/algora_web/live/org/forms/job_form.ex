@@ -4,7 +4,7 @@ defmodule AlgoraWeb.Org.Forms.JobForm do
 
   embedded_schema do
     field :title, :string
-    field :task_url, :string
+    field :ticket_url, :string
     field :work_type, :string, default: "remote"
     field :min_compensation, :integer
     field :max_compensation, :integer
@@ -18,8 +18,8 @@ defmodule AlgoraWeb.Org.Forms.JobForm do
 
   def changeset(form, attrs \\ %{}) do
     form
-    |> cast(attrs, [:title, :task_url, :work_type, :min_compensation, :max_compensation])
-    |> validate_required([:title, :task_url, :work_type])
+    |> cast(attrs, [:title, :ticket_url, :work_type, :min_compensation, :max_compensation])
+    |> validate_required([:title, :ticket_url, :work_type])
     |> cast_embed(:projects, with: &project_changeset/2)
   end
 

@@ -9,7 +9,7 @@ defmodule Algora.Bounties.Bounty do
     field :currency, :string
     field :payment_type, Ecto.Enum, values: [:fixed, :hourly]
 
-    belongs_to :task, Algora.Work.Task
+    belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, Algora.Accounts.User
     belongs_to :creator, Algora.Accounts.User
     has_many :attempts, Algora.Bounties.Attempt
@@ -21,9 +21,9 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :currency, :task_id, :owner_id, :creator_id])
+    |> cast(attrs, [:amount, :currency, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
-    |> validate_required([:amount, :currency, :task_id, :owner_id, :creator_id])
+    |> validate_required([:amount, :currency, :ticket_id, :owner_id, :creator_id])
     |> validate_number(:amount, greater_than: 0)
     |> validate_currency()
   end
@@ -33,13 +33,14 @@ defmodule Algora.Bounties.Bounty do
   end
 
   def url(bounty),
-    do: "https://github.com/#{bounty.task.owner}/#{bounty.task.repo}/issues/#{bounty.task.number}"
+    do:
+      "https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"
 
   def path(bounty),
-    do: "#{bounty.task.repo}##{bounty.task.number}"
+    do: "#{bounty.ticket.repo}##{bounty.ticket.number}"
 
   def full_path(bounty),
-    do: "#{bounty.task.owner}/#{bounty.task.repo}##{bounty.task.number}"
+    do: "#{bounty.ticket.owner}/#{bounty.ticket.repo}##{bounty.ticket.number}"
 
   def open(query \\ Bounty) do
     from b in query,
@@ -116,7 +117,7 @@ defmodule Algora.Bounties.Bounty do
   def create_changeset(bounty, attrs) do
     bounty
     |> cast(attrs, [:amount, :currency, :payment_type])
-    |> cast_assoc(:task)
+    |> cast_assoc(:ticket)
     |> validate_required([:amount, :currency])
     |> validate_number(:amount, greater_than: 0)
   end

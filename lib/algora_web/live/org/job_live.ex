@@ -216,7 +216,7 @@ defmodule AlgoraWeb.Org.JobLive do
                       <thead class="[&_tr]:border-b sr-only">
                         <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
                           <th class="px-4 text-muted-foreground text-left align-middle font-medium h-12">
-                            Task
+                            Ticket
                           </th>
                         </tr>
                       </thead>
@@ -251,7 +251,7 @@ defmodule AlgoraWeb.Org.JobLive do
                                     href={Bounty.url(bounty)}
                                     class="truncate text-sm text-foreground hover:underline max-w-[400px]"
                                   >
-                                    <%= bounty.task.title %>
+                                    <%= bounty.ticket.title %>
                                   </.link>
 
                                   <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">

@@ -664,7 +664,7 @@ defmodule AlgoraWeb.DevLive do
                       <thead class="[&_tr]:border-b">
                         <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
                           <th class="px-4 text-muted-foreground text-left align-middle font-medium h-12">
-                            Task
+                            Ticket
                           </th>
                           <th class="hidden px-4 text-muted-foreground text-left align-middle font-medium h-12 sm:table-cell">
                             Owner
@@ -702,9 +702,9 @@ defmodule AlgoraWeb.DevLive do
                           <%= for bounty <- @bounties do %>
                             <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
                               <td class="p-4 align-middle">
-                                <div class="font-medium"><%= bounty.task.title %></div>
+                                <div class="font-medium"><%= bounty.ticket.title %></div>
                                 <div class="hidden text-sm text-muted-foreground md:inline">
-                                  <%= bounty.task.owner %>/<%= bounty.task.repo %> #<%= bounty.task.number %>
+                                  <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %> #<%= bounty.ticket.number %>
                                 </div>
                               </td>
                               <td class="hidden p-4 align-middle sm:table-cell">

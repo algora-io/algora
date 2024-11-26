@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       hourly_rate: hourly_rate,
       currency: "USD",
       expected_hours: hours_per_week,
-      task: %{title: org.og_title},
+      ticket: %{title: org.og_title},
       owner: org,
       tech_stack: tech_stack
     }
@@ -639,7 +639,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             href={Bounty.url(@bounty)}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
-            <%= @bounty.task.title %>
+            <%= @bounty.ticket.title %>
           </.link>
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
@@ -673,7 +673,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             <div class="flex flex-col gap-1">
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link href={~p"/org/#{@contract.owner.handle}"} class="font-semibold hover:underline">
-                  <%= @contract.task.title %>
+                  <%= @contract.ticket.title %>
                 </.link>
               </div>
 
@@ -737,7 +737,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <%= Money.format!(@bounty.amount, @bounty.currency) %>
               </div>
               <div class="text-foreground group-hover:underline line-clamp-1">
-                <%= @bounty.task.title %>
+                <%= @bounty.ticket.title %>
               </div>
             </.link>
 

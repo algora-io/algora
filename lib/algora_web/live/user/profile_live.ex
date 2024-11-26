@@ -1,11 +1,11 @@
 defmodule AlgoraWeb.User.ProfileLive do
   use AlgoraWeb, :live_view
-  alias Algora.{Money, Accounts, Bounties}
+  alias Algora.{Money, Users, Bounties}
 
   def mount(%{"handle" => handle}, _session, socket) do
     # HACK: fix
-    user = Accounts.get_user_by!(handle: handle)
-    user = Accounts.get_user_with_stats(user.id)
+    user = Users.get_user_by!(handle: handle)
+    user = Users.get_user_with_stats(user.id)
 
     socket =
       socket

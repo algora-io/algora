@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Project.ViewLive do
   use AlgoraWeb, :live_view
   alias Algora.Money
-  alias Algora.Accounts
+  alias Algora.Users
 
   def mount(%{"id" => id}, _session, socket) do
     # Mock data for a single project
@@ -22,7 +22,7 @@ defmodule AlgoraWeb.Project.ViewLive do
       total_steps: 5
     }
 
-    matching_devs = Accounts.list_matching_devs(country: "US", limit: 6, skills: project.skills)
+    matching_devs = Users.list_matching_devs(country: "US", limit: 6, skills: project.skills)
 
     {:ok,
      socket

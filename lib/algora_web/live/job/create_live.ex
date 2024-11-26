@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.Job.CreateLive do
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Money
 
   def mount(_params, session, socket) do
@@ -349,6 +349,6 @@ defmodule AlgoraWeb.Job.CreateLive do
   defp next_step_label(4), do: "Description"
 
   defp get_matching_devs(job) do
-    Accounts.list_matching_devs(limit: 5, country: job.country, skills: job.skills)
+    Users.list_matching_devs(limit: 5, country: job.country, skills: job.skills)
   end
 end

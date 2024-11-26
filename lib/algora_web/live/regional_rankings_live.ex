@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.RegionalRankingsLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -80,7 +80,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
     # Get all transactions in date range
     transactions_query =
       from t in Transaction,
-        join: u in Accounts.User,
+        join: u in Users.User,
         on: t.receiver_id == u.id,
         where: t.succeeded_at >= ^start_date and t.succeeded_at <= ^end_date,
         where: not is_nil(u.country),

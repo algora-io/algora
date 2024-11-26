@@ -6,8 +6,8 @@ defmodule Algora.Organizations.Member do
   schema "members" do
     field :role, Ecto.Enum, values: [:admin, :mod, :expert]
 
-    belongs_to :org, Algora.Accounts.User
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :org, Algora.Users.User
+    belongs_to :user, Algora.Users.User
 
     timestamps()
   end

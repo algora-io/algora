@@ -1,9 +1,9 @@
-defmodule Algora.Accounts do
+defmodule Algora.Users do
   import Ecto.Query
   import Ecto.Changeset
 
   alias Algora.Repo
-  alias Algora.Accounts.{User, Identity}
+  alias Algora.Users.{User, Identity}
 
   @spec list_matching_devs(
           params :: %{

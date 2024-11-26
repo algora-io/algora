@@ -1,8 +1,8 @@
 defmodule AlgoraWeb.User.SettingsLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts
-  alias Algora.Accounts.User
+  alias Algora.Users
+  alias Algora.Users.User
 
   def render(assigns) do
     ~H"""
@@ -49,7 +49,7 @@ defmodule AlgoraWeb.User.SettingsLive do
   end
 
   def handle_event("save", %{"user" => params}, socket) do
-    case Accounts.update_settings(socket.assigns.current_user, params) do
+    case Users.update_settings(socket.assigns.current_user, params) do
       {:ok, user} ->
         {:noreply,
          socket

@@ -4,13 +4,13 @@ defmodule AlgoraWeb.UserAuth do
   import Phoenix.Controller
 
   alias Phoenix.LiveView
-  alias Algora.Accounts
+  alias Algora.Users
 
   def on_mount(:current_user, _params, session, socket) do
     case session do
       %{"user_id" => user_id} ->
         {:cont,
-         Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user(user_id) end)}
+         Phoenix.Component.assign_new(socket, :current_user, fn -> Users.get_user(user_id) end)}
 
       %{} ->
         {:cont, Phoenix.Component.assign(socket, :current_user, nil)}
@@ -22,10 +22,10 @@ defmodule AlgoraWeb.UserAuth do
       %{"user_id" => user_id} ->
         new_socket =
           Phoenix.Component.assign_new(socket, :current_user, fn ->
-            Accounts.get_user!(user_id)
+            Users.get_user!(user_id)
           end)
 
-        %Accounts.User{} = new_socket.assigns.current_user
+        %Users.User{} = new_socket.assigns.current_user
         {:cont, new_socket}
 
       %{} ->
@@ -38,9 +38,9 @@ defmodule AlgoraWeb.UserAuth do
   def on_mount(:ensure_admin, _params, session, socket) do
     case session do
       %{"user_id" => user_id} ->
-        user = Accounts.get_user!(user_id)
+        user = Users.get_user!(user_id)
 
-        if Accounts.admin?(user) do
+        if Users.admin?(user) do
           {:cont, socket}
         else
           {:halt, LiveView.redirect(socket, to: ~p"/status/404")}
@@ -110,7 +110,7 @@ defmodule AlgoraWeb.UserAuth do
   """
   def fetch_current_user(conn, _opts) do
     user_id = get_session(conn, :user_id)
-    user = user_id && Accounts.get_user(user_id)
+    user = user_id && Users.get_user(user_id)
     assign(conn, :current_user, user)
   end
 
@@ -148,7 +148,7 @@ defmodule AlgoraWeb.UserAuth do
   def require_authenticated_admin(conn, _opts) do
     user = conn.assigns[:current_user]
 
-    if user && Algora.Accounts.admin?(user) do
+    if user && Algora.Users.admin?(user) do
       assign(conn, :current_admin, user)
     else
       conn

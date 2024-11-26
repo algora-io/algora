@@ -6,7 +6,7 @@ defmodule Algora.Projects.Project do
   schema "projects" do
     field :name, :string
 
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :user, Algora.Users.User
     has_many :milestones, Algora.Projects.Milestone
     has_many :assignees, Algora.Projects.Assignee
     has_many :transactions, Algora.Payments.Transaction

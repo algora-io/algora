@@ -5,7 +5,7 @@ defmodule Algora.Jobs.Application do
 
   schema "applications" do
     belongs_to :job, Algora.Jobs.Job
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :user, Algora.Users.User
 
     timestamps()
   end

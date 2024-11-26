@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Money
   alias Algora.Organizations
 
@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     company = Organizations.get_org_by_handle!("algora")
 
     developer =
-      Accounts.list_matching_devs(limit: 20, skills: ["Elixir", "Phoenix"])
+      Users.list_matching_devs(limit: 20, skills: ["Elixir", "Phoenix"])
       |> Enum.at(8)
       |> Map.merge(%{
         timezone: "PST (UTC-8)",

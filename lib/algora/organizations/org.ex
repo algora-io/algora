@@ -1,7 +1,7 @@
 defmodule Algora.Organizations.Org do
   use Algora.Model
 
-  alias Algora.Accounts.User
+  alias Algora.Users.User
 
   def changeset(org, params) do
     org

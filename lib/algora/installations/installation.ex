@@ -13,8 +13,8 @@ defmodule Algora.Installations.Installation do
     field :avatar_url, :string
     field :repository_selection, :string
 
-    belongs_to :owner, Algora.Accounts.User
-    belongs_to :connected_user, Algora.Accounts.User
+    belongs_to :owner, Algora.Users.User
+    belongs_to :connected_user, Algora.Users.User
 
     timestamps()
   end
@@ -26,11 +26,18 @@ defmodule Algora.Installations.Installation do
       avatar_url: data["account"]["avatar_url"],
       repository_selection: data["repository_selection"],
       provider_id: to_string(data["id"]),
-      provider_login: data["account"]["login"],
+      provider_login: data["account"]["login"]
     }
 
     installation
-    |> cast(params, [:owner_id, :connected_user_id, :avatar_url, :repository_selection, :provider_id, :provider_login])
+    |> cast(params, [
+      :owner_id,
+      :connected_user_id,
+      :avatar_url,
+      :repository_selection,
+      :provider_id,
+      :provider_login
+    ])
     |> validate_required([:owner_id, :connected_user_id, :provider_id, :provider_login])
     |> generate_id()
     |> put_change(:provider, "github")

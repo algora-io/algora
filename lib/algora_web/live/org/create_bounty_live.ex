@@ -4,11 +4,11 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   alias Algora.Bounties
   alias Algora.Money
   alias AlgoraWeb.Org.Forms.BountyForm
-  alias Algora.Accounts
+  alias Algora.Users
 
   def mount(_params, _session, socket) do
     recent_bounties = Bounties.list_bounties(limit: 10)
-    matching_devs = Accounts.list_matching_devs(org_id: socket.assigns.current_org.id, limit: 5)
+    matching_devs = Users.list_matching_devs(org_id: socket.assigns.current_org.id, limit: 5)
 
     changeset =
       %BountyForm{}
@@ -607,7 +607,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
-    dev = Accounts.get_user_with_stats(dev_id)
+    dev = Users.get_user_with_stats(dev_id)
 
     {:noreply,
      socket

@@ -4,7 +4,7 @@ defmodule Algora.Jobs.Job do
   @type t() :: %__MODULE__{}
 
   schema "jobs" do
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :user, Algora.Users.User
 
     timestamps()
   end

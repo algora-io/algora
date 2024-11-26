@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.LeaderboardLive do
   use AlgoraWeb, :live_view
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Money
@@ -16,7 +16,7 @@ defmodule AlgoraWeb.LeaderboardLive do
 
   def handle_event("toggle-need-avatar", %{"user-id" => user_id}, socket) do
     {:ok, _user} =
-      Accounts.get_user!(user_id) |> change() |> put_change(:need_avatar, true) |> Repo.update()
+      Users.get_user!(user_id) |> change() |> put_change(:need_avatar, true) |> Repo.update()
 
     # Refresh the data
     top_earners = get_top_earners()
@@ -92,7 +92,7 @@ defmodule AlgoraWeb.LeaderboardLive do
   defp get_top_earners do
     # First get the totals per user
     user_totals =
-      from u in Accounts.User,
+      from u in Users.User,
         join: t in Transaction,
         on: t.receiver_id == u.id and not is_nil(t.succeeded_at),
         group_by: [u.id, u.name, u.provider_login, u.avatar_url, u.country, u.need_avatar],

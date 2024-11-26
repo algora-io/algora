@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Org.JobLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts
+  alias Algora.Users
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Money
@@ -88,7 +88,7 @@ defmodule AlgoraWeb.Org.JobLive do
     ]
 
     matching_devs =
-      Accounts.list_matching_devs(
+      Users.list_matching_devs(
         limit: 5,
         country: job.country,
         skills: job.tech_stack

@@ -2,7 +2,7 @@ defmodule Algora.Analytics.CompanyAnalytics do
   use Ecto.Schema
 
   schema "company_analytics" do
-    belongs_to :organization, Algora.Accounts.User
+    belongs_to :organization, Algora.Users.User
 
     # Registration & Onboarding
     field :joined_at, :utc_datetime

@@ -1,7 +1,7 @@
 defmodule Algora.Organizations do
   import Ecto.Query
 
-  alias Algora.Accounts.User
+  alias Algora.Users.User
   alias Algora.Organizations.Org
   alias Algora.Organizations.Member
   alias Algora.Repo

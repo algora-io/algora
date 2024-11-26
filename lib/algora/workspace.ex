@@ -4,7 +4,7 @@ defmodule Algora.Workspace do
 
   alias Algora.Workspace.Ticket
   alias Algora.Workspace.Repository
-  alias Algora.Accounts.User
+  alias Algora.Users.User
   alias Algora.Repo
   alias Algora.Github
 

@@ -18,7 +18,7 @@ defmodule Algora.Payments.Account do
     field :region, Ecto.Enum, values: [:US, :EU]
     field :stale, :boolean, default: false
 
-    belongs_to :user, Algora.Accounts.User
+    belongs_to :user, Algora.Users.User
     has_many :transactions, Algora.Payments.Transaction
 
     timestamps()

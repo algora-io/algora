@@ -1,4 +1,4 @@
-defmodule Algora.Repo.Migrations.CreateAccountTables do
+defmodule Algora.Repo.Migrations.CreateUserTables do
   use Ecto.Migration
 
   def change do

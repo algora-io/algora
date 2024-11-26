@@ -52,4 +52,14 @@ defmodule Algora.Chat do
     |> where(thread_id: ^thread_id, user_id: ^user_id)
     |> Repo.update_all(set: [last_read_at: DateTime.utc_now()])
   end
+
+  def get_thread_for_users(user1_id, user2_id) do
+    Thread
+    |> join(:inner, [t], p in Participant, on: p.thread_id == t.id)
+    |> where([t, p], p.user_id in [^user1_id, ^user2_id])
+    |> group_by([t], t.id)
+    |> having([t, p], count(p.id) == 2)
+    |> limit(1)
+    |> Repo.one()
+  end
 end

@@ -2,7 +2,7 @@ defmodule Algora.Users.User do
   use Algora.Model
 
   alias Algora.Users.{User, Identity}
-  alias Algora.Installations.Installation
+  alias Algora.Workspace.Installation
 
   @type t() :: %__MODULE__{}
 

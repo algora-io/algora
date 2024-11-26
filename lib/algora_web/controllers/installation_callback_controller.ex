@@ -77,12 +77,12 @@ defmodule AlgoraWeb.InstallationCallbackController do
   defp extract_github_handle(_), do: {:error, 404}
 
   defp upsert_installation(user, org, installation) do
-    case Installations.get_installation_by_provider_id("github", installation["id"]) do
+    case Workspace.get_installation_by_provider_id("github", installation["id"]) do
       nil ->
-        Installations.create_installation(:github, user, org, installation)
+        Workspace.create_installation(:github, user, org, installation)
 
       existing_installation ->
-        Installations.update_installation(:github, user, org, existing_installation, installation)
+        Workspace.update_installation(:github, user, org, existing_installation, installation)
     end
   end
 

@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Org.HomeLive do
+defmodule AlgoraWeb.Org.DashboardPublicLive do
   use AlgoraWeb, :live_view
   alias Algora.{Money, Organizations, Bounties, Accounts}
   alias Algora.Bounties.Bounty

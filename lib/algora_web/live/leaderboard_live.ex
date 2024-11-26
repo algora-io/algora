@@ -94,7 +94,7 @@ defmodule AlgoraWeb.LeaderboardLive do
     user_totals =
       from u in Users.User,
         join: t in Transaction,
-        on: t.receiver_id == u.id and not is_nil(t.succeeded_at),
+        on: t.recipient_id == u.id and not is_nil(t.succeeded_at),
         group_by: [u.id, u.name, u.provider_login, u.avatar_url, u.country, u.need_avatar],
         select: %{
           id: u.id,

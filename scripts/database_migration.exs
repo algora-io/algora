@@ -186,7 +186,7 @@ defmodule DatabaseMigration do
         |> Map.put("amount", Decimal.div(Decimal.new(row["amount"]), 100))
         |> Map.put("currency", row["currency"])
         |> Map.put("bounty_id", claim["bounty_id"])
-        |> Map.put("receiver_id", user["id"])
+        |> Map.put("recipient_id", user["id"])
         |> Map.put("inserted_at", row["created_at"])
         |> Map.put("updated_at", row["updated_at"])
       else

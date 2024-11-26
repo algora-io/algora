@@ -59,7 +59,7 @@ defmodule Algora.Bounties do
         left_join: tr in Transaction,
         on: tr.bounty_id == b.id and not is_nil(tr.succeeded_at),
         left_join: solver in User,
-        on: solver.id == tr.receiver_id,
+        on: solver.id == tr.recipient_id,
         select: %{
           id: b.id,
           inserted_at: b.inserted_at,

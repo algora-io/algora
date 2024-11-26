@@ -1,7 +1,6 @@
 defmodule AlgoraWeb.Org.AnalyticsLive do
   use AlgoraWeb, :live_view
 
-  import AlgoraWeb.Components.StatCard
   alias Algora.Bounties
   alias Algora.Money
 

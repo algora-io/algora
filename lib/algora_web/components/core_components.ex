@@ -1232,6 +1232,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate sheet_header(assigns), to: AlgoraWeb.Components.UI.Sheet
   defdelegate sheet_title(assigns), to: AlgoraWeb.Components.UI.Sheet
   defdelegate sheet(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate stat_card(assigns), to: AlgoraWeb.Components.UI.StatCard
   defdelegate switch(assigns), to: AlgoraWeb.Components.UI.Switch
   defdelegate tabs_content(assigns), to: AlgoraWeb.Components.UI.Tabs
   defdelegate tabs_list(assigns), to: AlgoraWeb.Components.UI.Tabs

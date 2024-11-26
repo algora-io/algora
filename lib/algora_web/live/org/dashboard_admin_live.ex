@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Org.DashboardLive do
+defmodule AlgoraWeb.Org.DashboardAdminLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
   alias Algora.Bounties.Bounty

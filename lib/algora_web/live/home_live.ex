@@ -4,7 +4,9 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Money
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(%{"country_code" => country_code}, _session, socket) do
+    Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
+
     {:ok,
      socket
      |> assign(:featured_devs, Users.list_featured_devs())

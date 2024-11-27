@@ -43,7 +43,7 @@ defmodule AlgoraWeb do
         layouts: [html: AlgoraWeb.Layouts]
 
       import Plug.Conn
-      import AlgoraWeb.Gettext
+      use Gettext, backend: AlgoraWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -87,7 +87,7 @@ defmodule AlgoraWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import AlgoraWeb.CoreComponents
-      import AlgoraWeb.Gettext
+      use Gettext, backend: AlgoraWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

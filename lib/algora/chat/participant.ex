@@ -9,4 +9,10 @@ defmodule Algora.Chat.Participant do
 
     timestamps()
   end
+
+  def changeset(participant, attrs) do
+    participant
+    |> cast(attrs, [:last_read_at])
+    |> validate_required([:last_read_at])
+  end
 end

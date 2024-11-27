@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.User.InstallationsLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Installations
+  alias Algora.Workspace
   alias Algora.Github
 
   def render(assigns) do

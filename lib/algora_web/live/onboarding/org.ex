@@ -472,10 +472,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   <span class="text-sm font-medium"><%= label %></span>
                   <.icon
                     name="tabler-check"
-                    class={[
-                      "size-5 text-primary",
-                      @context.hiring_status != value && "invisible"
-                    ]}
+                    class={
+                      classes([
+                        "size-5 text-primary",
+                        @context.hiring_status != value && "invisible"
+                      ])
+                    }
                   />
                 </span>
               </label>
@@ -516,10 +518,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   <span class="text-sm font-medium"><%= label %></span>
                   <.icon
                     name="tabler-check"
-                    class={[
-                      "size-5 text-primary",
-                      type not in (@context.company_types || []) && "invisible"
-                    ]}
+                    class={
+                      classes([
+                        "size-5 text-primary",
+                        type not in (@context.company_types || []) && "invisible"
+                      ])
+                    }
                   />
                 </span>
               </label>

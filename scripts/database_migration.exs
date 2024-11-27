@@ -29,7 +29,7 @@ defmodule DatabaseMigration do
     "User" => "users",
     "Org" => "users",
     "GithubUser" => "users",
-    "Ticket" => "tickets",
+    "Task" => "tickets",
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
     "Bounty" => "bounties",
@@ -42,7 +42,7 @@ defmodule DatabaseMigration do
     "User" => User,
     "Org" => User,
     "GithubUser" => User,
-    "Ticket" => Ticket,
+    "Task" => Ticket,
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
     "Bounty" => Bounty,
@@ -55,7 +55,7 @@ defmodule DatabaseMigration do
 
   @relevant_tables Map.keys(@table_mappings)
 
-  defp transform("Ticket", row, db) do
+  defp transform("Task", row, db) do
     github_issue =
       db |> Map.get("GithubIssue", []) |> Enum.find(&(&1["id"] == row["issue_id"]))
 
@@ -558,11 +558,11 @@ defmodule DatabaseMigration do
   end
 
   def run!() do
-    input_file = ".local/prod_db.sql"
+    # input_file = ".local/prod_db.sql"
     output_file = ".local/prod_db_new.sql"
 
-    IO.puts("Processing dump...")
-    #  :ok = process_dump(input_file, output_file)
+    # IO.puts("Processing dump...")
+    # :ok = process_dump(input_file, output_file)
 
     IO.puts("Clearing tables...")
     :ok = clear_tables!()

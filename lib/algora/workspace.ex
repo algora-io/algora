@@ -33,8 +33,6 @@ defmodule Algora.Workspace do
         repo: repo,
         meta: meta
       }) do
-    Logger.info("Upserting ticket #{owner}/#{repo}/#{meta["number"]}")
-
     with {:ok, repo} <- fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
       Ticket.github_changeset(repo, meta)
       |> Repo.insert(@upsert_options)
@@ -44,8 +42,6 @@ defmodule Algora.Workspace do
   @spec upsert_repository(:github, %{token: Github.token(), owner: String.t(), meta: map()}) ::
           {:ok, Repository.t()} | {:error, atom()}
   def upsert_repository(:github, %{token: token, owner: owner, meta: meta}) do
-    Logger.info("Upserting repository #{owner}/#{meta["name"]}")
-
     with {:ok, user} <- fetch_user(:github, %{token: token, id: meta["owner"]["id"]}),
          {:ok, repo} <- Repository.github_changeset(user, meta) |> Repo.insert(@upsert_options) do
       {:ok, repo}
@@ -58,8 +54,6 @@ defmodule Algora.Workspace do
 
   @spec upsert_user(:github, %{meta: map()}) :: {:ok, User.t()} | {:error, atom()}
   def upsert_user(:github, %{meta: meta}) do
-    Logger.info("Upserting user #{meta["login"]}")
-
     with {:ok, user} <- User.github_changeset(meta) |> Repo.insert(@upsert_options) do
       {:ok, user}
     else
@@ -74,8 +68,6 @@ defmodule Algora.Workspace do
           url: String.t()
         }) :: {:ok, Ticket.t()} | {:error, atom()}
   def fetch_ticket(:github, %{token: token, url: url}) do
-    Logger.info("Fetching ticket #{url}")
-
     case parse_url(url) do
       {:ok, %{owner: owner, repo: repo, number: number}} ->
         fetch_ticket(:github, %{token: token, owner: owner, repo: repo, number: number})
@@ -92,8 +84,6 @@ defmodule Algora.Workspace do
           number: integer()
         }) :: {:ok, Ticket.t()} | {:error, atom()}
   def fetch_ticket(:github, %{token: token, owner: owner, repo: repo, number: number}) do
-    Logger.info("Fetching ticket #{owner}/#{repo}/#{number}")
-
     query =
       from t in Ticket,
         join: r in assoc(t, :repository),
@@ -128,8 +118,6 @@ defmodule Algora.Workspace do
   @spec fetch_user(:github, %{token: Github.token(), id: String.t()}) ::
           {:ok, User.t()} | {:error, atom()}
   def fetch_user(:github, %{token: token, id: id}) do
-    Logger.info("Fetching user #{id}")
-
     query =
       from u in User,
         where: u.provider == "github" and u.provider_id == ^to_string(id),
@@ -151,8 +139,6 @@ defmodule Algora.Workspace do
   @spec fetch_user(:github, %{token: Github.token(), login: String.t()}) ::
           {:ok, User.t()} | {:error, atom()}
   def fetch_user(:github, %{token: token, login: login}) do
-    Logger.info("Fetching user #{login}")
-
     query =
       from u in User,
         where: u.provider == "github" and u.provider_login == ^login,
@@ -174,8 +160,6 @@ defmodule Algora.Workspace do
   @spec fetch_repository(:github, %{token: Github.token(), owner: String.t(), repo: String.t()}) ::
           {:ok, Repository.t()} | {:error, atom()}
   def fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
-    Logger.info("Fetching repository #{owner}/#{repo}")
-
     query =
       from r in Repository,
         join: u in assoc(r, :user),
@@ -196,8 +180,6 @@ defmodule Algora.Workspace do
   @spec fetch_repository(:github, %{token: Github.token(), id: String.t()}) ::
           {:ok, Repository.t()} | {:error, atom()}
   def fetch_repository(:github, %{token: token, id: id}) do
-    Logger.info("Fetching repository #{id}")
-
     query =
       from r in Repository,
         join: u in assoc(r, :user),

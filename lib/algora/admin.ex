@@ -45,8 +45,6 @@ defmodule Algora.Admin do
   end
 
   defp update_tickets(url, repo_id) do
-    Logger.info("Updating tickets for #{url} to #{repo_id}")
-
     from(t in Algora.Workspace.Ticket,
       where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)
     )

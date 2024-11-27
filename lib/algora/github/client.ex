@@ -9,29 +9,35 @@ defmodule Algora.Github.Client do
   def http(host, method, path, headers, body \\ "") do
     cache_path = ".local/github/#{path}.json"
     url = "https://#{host}#{path}"
+    headers = [{"Content-Type", "application/json"} | headers]
+    request = Finch.build(method, url, headers, body)
 
-    case read_from_cache(cache_path) do
-      {:ok, cached_data} ->
-        {:ok, cached_data}
-
-      :error ->
-        headers = [{"Content-Type", "application/json"} | headers]
-        request = Finch.build(method, url, headers, body)
-
-        case Finch.request(request, Algora.Finch) do
-          {:ok, %Finch.Response{status: 200, body: body}} ->
-            decoded_body = Jason.decode!(body)
-            write_to_cache(cache_path, decoded_body)
-            {:ok, decoded_body}
-
-          {:ok, %Finch.Response{body: body}} ->
-            {:ok, Jason.decode!(body)}
-
-          {:error, reason} ->
-            {:error, reason}
-        end
+    with :error <- read_from_cache(cache_path),
+         {:ok, response} <- Finch.request(request, Algora.Finch),
+         {:ok, body} <- handle_response(response) do
+      write_to_cache(cache_path, body)
+      {:ok, body}
+    else
+      {:ok, cached_data} -> {:ok, cached_data}
+      {:error, reason} -> {:error, reason}
     end
   end
+
+  defp handle_response(%Finch.Response{body: body}) do
+    case Jason.decode(body) do
+      {:ok, decoded_body} -> maybe_handle_error(decoded_body)
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp maybe_handle_error(%{"message" => message, "status" => status} = body) do
+    case Integer.parse(status) do
+      {code, _} when code >= 400 -> {:error, "#{code} #{message}"}
+      _ -> {:ok, body}
+    end
+  end
+
+  defp maybe_handle_error(body), do: {:ok, body}
 
   defp read_from_cache(cache_path) do
     if File.exists?(cache_path) do

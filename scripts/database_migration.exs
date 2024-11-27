@@ -146,7 +146,7 @@ defmodule DatabaseMigration do
 
     row =
       row
-      |> Map.put("ticket_id", row["ticket_id"])
+      |> Map.put("ticket_id", row["task_id"])
       |> Map.put("owner_id", row["org_id"])
       |> Map.put("creator_id", row["poster_id"])
       |> Map.put("inserted_at", row["created_at"])
@@ -189,6 +189,8 @@ defmodule DatabaseMigration do
         |> Map.put("recipient_id", user["id"])
         |> Map.put("inserted_at", row["created_at"])
         |> Map.put("updated_at", row["updated_at"])
+        |> Map.put("status", if(row["succeeded_at"] == nil, do: :pending, else: :succeeded))
+        |> Map.put("succeeded_at", row["succeeded_at"])
       else
         nil
       end

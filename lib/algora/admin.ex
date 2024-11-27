@@ -37,6 +37,10 @@ defmodule Algora.Admin do
          {:ok, repo} <- Workspace.fetch_repository(:github, %{token: token!(), id: repo["id"]}),
          :ok <- update_tickets(url, repo.id) do
       {:ok, repo}
+    else
+      error ->
+        Logger.error("Failed to backfill repo #{url}: #{inspect(error)}")
+        {:error, error}
     end
   end
 

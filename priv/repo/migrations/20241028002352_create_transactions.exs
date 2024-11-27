@@ -6,28 +6,32 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :provider, :string
       add :provider_id, :string
       add :provider_meta, :map
-      add :succeeded_at, :utc_datetime
       add :amount, :decimal, null: false
       add :currency, :string, null: false
       add :type, :string
+      add :status, :string
+      add :succeeded_at, :utc_datetime
+      add :refunded_at, :utc_datetime
 
-      # add :account_id, references(:accounts)
-      # add :customer_id, references(:customers)
+      add :sender_id, references(:users)
       add :recipient_id, references(:users)
+      # add :contract_id, references(:contracts)
+      # add :timesheet_id, references(:timesheets)
       add :bounty_id, references(:bounties)
       # add :claim_id, references(:claims)
-      # add :project_id, references(:projects)
+      add :original_transaction_id, references(:transactions)
 
       timestamps()
     end
 
     # Add indexes for foreign keys and commonly queried fields
-    # create index(:transactions, [:account_id])
-    # create index(:transactions, [:customer_id])
+    create index(:transactions, [:sender_id])
     create index(:transactions, [:recipient_id])
+    # create index(:transactions, [:contract_id])
+    # create index(:transactions, [:timesheet_id])
     create index(:transactions, [:bounty_id])
     # create index(:transactions, [:claim_id])
-    # create index(:transactions, [:project_id])
+    create index(:transactions, [:original_transaction_id])
     create index(:transactions, [:provider_id])
   end
 end

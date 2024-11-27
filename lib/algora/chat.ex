@@ -7,7 +7,7 @@ defmodule Algora.Chat do
     Repo.transaction(fn ->
       {:ok, thread} =
         %Thread{}
-        |> Thread.changeset(%{type: :direct})
+        |> Thread.changeset(%{})
         |> Repo.insert()
 
       # Add participants

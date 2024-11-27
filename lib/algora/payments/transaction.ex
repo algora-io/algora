@@ -15,8 +15,8 @@ defmodule Algora.Payments.Transaction do
     field :succeeded_at, :utc_datetime
     field :refunded_at, :utc_datetime
 
-    # belongs_to :timesheet, Algora.Contracts.Timesheet
-    # belongs_to :contract, Algora.Contracts.Contract
+    belongs_to :timesheet, Algora.Contracts.Timesheet
+    belongs_to :contract, Algora.Contracts.Contract
     belongs_to :sender, Algora.Users.User
     belongs_to :recipient, Algora.Users.User
     # belongs_to :claim, Algora.Bounties.Claim

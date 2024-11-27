@@ -19,7 +19,7 @@ defmodule DatabaseMigration do
   - Set the output_file to your desired output file path.
   - Run the script using: elixir scripts/database_migration.exs
   """
-
+  require Logger
   alias Algora.Users.User
   alias Algora.Workspace.Ticket
   alias Algora.Bounties.Bounty
@@ -551,9 +551,20 @@ defmodule DatabaseMigration do
   end
 
   defp psql(commands) do
-    case System.cmd("psql", [System.fetch_env!("DATABASE_URL") | commands]) do
-      {res, 0} -> {:ok, res}
-      {_, code} -> {:error, code}
+    {res, code} =
+      System.cmd("psql", [System.fetch_env!("DATABASE_URL") | commands], stderr_to_stdout: true)
+
+    cond do
+      code != 0 ->
+        Logger.error(res)
+        {:error, code}
+
+      String.contains?(res, "ERROR:") ->
+        Logger.error(res)
+        {:error, :something_went_wrong}
+
+      true ->
+        {:ok, res}
     end
   end
 

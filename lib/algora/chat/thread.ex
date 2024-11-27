@@ -3,7 +3,6 @@ defmodule Algora.Chat.Thread do
 
   schema "threads" do
     field :title, :string
-    field :type, Ecto.Enum, values: [:direct, :group]
 
     has_many :messages, Algora.Chat.Message
     has_many :participants, Algora.Chat.Participant
@@ -13,7 +12,7 @@ defmodule Algora.Chat.Thread do
 
   def changeset(thread, attrs) do
     thread
-    |> cast(attrs, [:title, :type])
-    |> validate_required([:type])
+    |> cast(attrs, [:title])
+    |> validate_required([:title])
   end
 end

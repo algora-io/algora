@@ -15,8 +15,8 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
 
       add :sender_id, references(:users)
       add :recipient_id, references(:users)
-      # add :contract_id, references(:contracts)
-      # add :timesheet_id, references(:timesheets)
+      add :contract_id, references(:contracts)
+      add :timesheet_id, references(:timesheets)
       add :bounty_id, references(:bounties)
       # add :claim_id, references(:claims)
       add :original_transaction_id, references(:transactions)
@@ -27,8 +27,8 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     # Add indexes for foreign keys and commonly queried fields
     create index(:transactions, [:sender_id])
     create index(:transactions, [:recipient_id])
-    # create index(:transactions, [:contract_id])
-    # create index(:transactions, [:timesheet_id])
+    create index(:transactions, [:contract_id])
+    create index(:transactions, [:timesheet_id])
     create index(:transactions, [:bounty_id])
     # create index(:transactions, [:claim_id])
     create index(:transactions, [:original_transaction_id])

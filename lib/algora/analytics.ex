@@ -1,11 +1,7 @@
 defmodule Algora.Analytics do
-  import Ecto.Query
-  alias Algora.Repo
-  alias Algora.Analytics.CompanyAnalytics
-
   def get_company_analytics(period \\ "30d") do
     days = String.replace(period, "d", "") |> String.to_integer()
-    since = DateTime.utc_now() |> DateTime.add(-days * 24 * 3600)
+    _since = DateTime.utc_now() |> DateTime.add(-days * 24 * 3600)
 
     # Mock data for demonstration
     %{
@@ -25,7 +21,7 @@ defmodule Algora.Analytics do
     }
   end
 
-  def get_funnel_data(period \\ "30d") do
+  def get_funnel_data(_period \\ "30d") do
     # Mock funnel data
     %{
       registered: 100,

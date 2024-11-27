@@ -4,7 +4,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
 
   alias Algora.Users
   alias Algora.Organizations
-  alias Algora.Installations
+  alias Algora.Workspace
   alias Algora.Github
 
   def new(conn, params) do

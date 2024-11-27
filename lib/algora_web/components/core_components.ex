@@ -12,7 +12,7 @@ defmodule AlgoraWeb.CoreComponents do
   use AlgoraWeb, :verified_routes
 
   alias Phoenix.LiveView.JS
-  import AlgoraWeb.Gettext
+  use Gettext, backend: AlgoraWeb.Gettext
 
   slot :inner_block
 

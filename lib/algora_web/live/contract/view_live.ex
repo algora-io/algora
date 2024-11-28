@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   Contract with <%= @contract.provider.name %>
                 </h1>
                 <p class="text-sm text-muted-foreground">
-                  Started <%= Calendar.strftime(@contract.start_date, "%B %d, %Y") %>
+                  Started <%= Calendar.strftime(@contract.start_date, "%b %d, %Y") %>
                 </p>
               </div>
             </div>
@@ -112,9 +112,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                   Ready to release payment for <%= timesheet.hours_worked %> hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(timesheet.start_date, "%B %d") %> - <%= Calendar.strftime(
-                                    timesheet.end_date,
-                                    "%B %d, %Y"
+                                  <%= Calendar.strftime(@contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                                    @contract.end_date,
+                                    "%b %d, %Y"
                                   ) %>
                                 </div>
                               </div>
@@ -184,9 +184,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                   Processing payment for <%= timesheet.hours_worked %> hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(timesheet.start_date, "%B %d") %> - <%= Calendar.strftime(
+                                  <%= Calendar.strftime(timesheet.start_date, "%b %d") %> - <%= Calendar.strftime(
                                     timesheet.end_date,
-                                    "%B %d, %Y"
+                                    "%b %d, %Y"
                                   ) %>
                                 </div>
                               </div>
@@ -209,9 +209,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                   Payment for <%= timesheet.hours_worked %> hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(timesheet.start_date, "%B %d") %> - <%= Calendar.strftime(
+                                  <%= Calendar.strftime(timesheet.start_date, "%b %d") %> - <%= Calendar.strftime(
                                     timesheet.end_date,
-                                    "%B %d, %Y"
+                                    "%b %d, %Y"
                                   ) %>
                                 </div>
                               </div>
@@ -309,7 +309,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <div>
                         <div class="font-medium">Contract signed by both parties</div>
                         <div class="text-sm text-muted-foreground">
-                          <%= Calendar.strftime(@contract.start_date, "%B %d, %Y") %>
+                          <%= Calendar.strftime(@contract.start_date, "%b %d, %Y") %>
                         </div>
                       </div>
                     </div>
@@ -734,9 +734,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Contract Period</dt>
                     <dd class="font-semibold">
-                      <%= Calendar.strftime(@contract.start_date, "%B %d") %> - <%= Calendar.strftime(
+                      <%= Calendar.strftime(@contract.start_date, "%b %d") %> - <%= Calendar.strftime(
                         @contract.end_date,
-                        "%B %d, %Y"
+                        "%b %d, %Y"
                       ) %>
                     </dd>
                   </div>
@@ -933,7 +933,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       0 -> "Today"
       1 -> "Yesterday"
       n when n <= 7 -> Calendar.strftime(datetime, "%A")
-      _ -> Calendar.strftime(datetime, "%B %d")
+      _ -> Calendar.strftime(datetime, "%b %d")
     end
   end
 

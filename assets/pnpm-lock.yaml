@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  emoji-picker-element:
+    specifier: ^1.25.0
+    version: 1.25.0
   framer-motion:
     specifier: ^11.11.10
     version: 11.11.10
@@ -16,6 +19,9 @@ devDependencies:
   '@types/phoenix_live_view':
     specifier: ^0.18.4
     version: 0.18.4
+  tailwindcss-animate:
+    specifier: ^1.0.7
+    version: 1.0.7
 
 packages:
 
@@ -28,6 +34,10 @@ packages:
     dependencies:
       '@types/phoenix': 1.6.4
     dev: true
+
+  /emoji-picker-element@1.25.0:
+    resolution: {integrity: sha512-UcUMxqIuneLCsEJ5KpqTD1xaHZyUpg6Oa7uCVe5AMXXpsW3C2TNegbNLXj2/rlbyr6qVMf7lXTFyzvFEarOIUg==}
+    dev: false
 
   /framer-motion@11.11.10:
     resolution: {integrity: sha512-061Bt1jL/vIm+diYIiA4dP/Yld7vD47ROextS7ESBW5hr4wQFhxB5D5T5zAc3c/5me3cOa+iO5LqhA38WDln/A==}
@@ -45,6 +55,12 @@ packages:
     dependencies:
       tslib: 2.8.0
     dev: false
+
+  /tailwindcss-animate@1.0.7:
+    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dev: true
 
   /tslib@2.8.0:
     resolution: {integrity: sha512-jWVzBLplnCmoaTr13V9dYbiQ99wvZRd0vNWaDRg+aVYRcjDF3nDksxFDE/+fkXnKhpnUUkmx5pK/v8mCtLVqZA==}

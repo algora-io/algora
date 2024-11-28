@@ -233,3 +233,10 @@ input:-webkit-autofill:active {
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+emoji-picker {
+  border-radius: theme("borderRadius.lg");
+  border: 1px solid theme("colors.border");
+  background: theme("colors.background");
+  box-shadow: theme("boxShadow.lg");
+}

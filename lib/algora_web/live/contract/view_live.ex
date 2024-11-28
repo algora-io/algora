@@ -376,9 +376,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
         <div class="mt-auto border-t border-border p-4 flex-none bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <form phx-submit="send_message" class="flex gap-2 items-center">
-            <.button type="button" variant="ghost" size="icon">
-              <.icon name="tabler-plus" class="w-4 h-4" />
-            </.button>
             <div class="flex-1 relative">
               <.input
                 id="message-input"
@@ -393,9 +390,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                 <.button type="button" variant="ghost" size="icon-sm">
                   <.icon name="tabler-mood-smile" class="w-4 h-4" />
-                </.button>
-                <.button type="button" variant="ghost" size="icon-sm">
-                  <.icon name="tabler-paperclip" class="w-4 h-4" />
                 </.button>
               </div>
             </div>

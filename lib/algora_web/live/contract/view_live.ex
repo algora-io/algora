@@ -948,6 +948,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       nil -> [contract | contract.renewals]
       _ -> [contract.original_contract | contract.original_contract.renewals]
     end
+    |> Enum.uniq_by(& &1.id)
     |> Enum.sort_by(& &1.start_date, {:desc, DateTime})
   end
 

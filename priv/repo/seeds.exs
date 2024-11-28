@@ -5,6 +5,7 @@
 alias Algora.Repo
 alias Algora.Users.{User, Identity}
 alias Algora.Contracts.{Contract, Timesheet}
+alias Algora.Chat.{Thread, Message, Participant}
 alias Algora.Payments.Transaction
 alias Algora.Organizations.Member
 
@@ -41,12 +42,11 @@ user =
       name: "Erlich Bachman",
       handle: "erich",
       bio: "Founder of Aviato, Incubator extraordinaire",
-      avatar_url:
-        "https://static.wikia.nocookie.net/silicon-valley/images/1/1f/Erlich_Bachman.jpg",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/erich.jpg",
       location: "Palo Alto, CA",
       country: "US",
       timezone: "America/Los_Angeles",
-      tech_stack: ["Python", "JavaScript", "Ruby"],
+      tech_stack: ["HTML"],
       featured: true,
       fee_pct: 19,
       activated: true,
@@ -85,11 +85,9 @@ org =
       handle: "piedpiper",
       bio:
         "Making the world a better place through constructing elegant hierarchies for maximum code re-use and extensibility",
-      avatar_url:
-        "http://mattingly.design/articles/wp-content/uploads/2019/10/pied-piper-tshirt-logo.gif",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
       og_title: "Pied Piper | Middle-Out Compression Platform",
-      og_image_url:
-        "https://mattingly.design/articles/wp-content/uploads/2020/07/silicon-valley-logo-story-arc.jpg",
+      og_image_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-banner.jpg",
       location: "Palo Alto, CA",
       country: "US",
       timezone: "America/Los_Angeles",
@@ -125,10 +123,36 @@ amount = Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
 
 original_contract_id = Nanoid.generate()
 
+contractor =
+  Repo.insert!(
+    %User{
+      id: Nanoid.generate(),
+      type: :individual,
+      email: "thecarver@example.com",
+      name: "Kevin 'The Carver'",
+      handle: "thecarver",
+      bio:
+        "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/thecarver.jpg",
+      location: "Palo Alto, CA",
+      country: "US",
+      timezone: "America/Los_Angeles",
+      tech_stack: ["Python", "AWS", "Cloud Architecture", "DevOps", "System Architecture"],
+      featured: true,
+      fee_pct: 19,
+      activated: true,
+      website_url: "https://kevinthecarver.dev",
+      twitter_url: "https://twitter.com/thecarver",
+      github_url: "https://github.com/thecarver",
+      linkedin_url: "https://linkedin.com/in/thecarver"
+    },
+    Seeds.upsert_opts([:email])
+  )
+
 contract1 =
   Repo.insert!(%Contract{
     id: original_contract_id,
-    provider_id: user.id,
+    provider_id: contractor.id,
     client_id: org.id,
     status: :completed,
     hourly_rate: hourly_rate,
@@ -143,7 +167,7 @@ contract1 =
 contract2 =
   Repo.insert!(%Contract{
     id: Nanoid.generate(),
-    provider_id: user.id,
+    provider_id: contractor.id,
     client_id: org.id,
     status: :completed,
     hourly_rate: hourly_rate,
@@ -158,7 +182,7 @@ contract2 =
 contract3 =
   Repo.insert!(%Contract{
     id: Nanoid.generate(),
-    provider_id: user.id,
+    provider_id: contractor.id,
     client_id: org.id,
     status: :active,
     hourly_rate: hourly_rate,
@@ -253,3 +277,48 @@ transfer2 =
     type: :transfer,
     status: :succeeded
   })
+
+# Create direct chat thread
+thread =
+  Repo.insert!(%Thread{
+    id: Nanoid.generate(),
+    title: "#{org.name} x #{contractor.name}"
+  })
+
+# Add thread participants
+for participant_user <- [org, contractor] do
+  Repo.insert!(%Participant{
+    id: Nanoid.generate(),
+    thread_id: thread.id,
+    user_id: participant_user.id,
+    last_read_at: DateTime.utc_now()
+  })
+end
+
+# Seed messages
+messages = [
+  {user.id,
+   "hey kevin, i heard you're the best cloud architect in the valley. we need someone to help scale pied piper's infrastructure"},
+  {contractor.id,
+   "thanks for reaching out! i've been following pied piper's middle-out compression algorithm - really cool stuff"},
+  {user.id,
+   "our current setup is basically just a bunch of aws instances held together with duct tape and prayers lol"},
+  {contractor.id,
+   "classic startup architecture. i specialize in tearing down and rebuilding scalable cloud infrastructure. when do you need this done?"},
+  {user.id, "asap. our user base is growing exponentially and the servers are already sweating"},
+  {contractor.id,
+   "i can start next week. fair warning though - my methods are a bit... unconventional. but they work"},
+  {user.id,
+   "as long as you can handle the traffic spikes, i don't care if you have to sacrifice a goat to the aws gods"},
+  {contractor.id,
+   "no goats needed, but i'll need root access and a lot of coffee. let's do this 🚀"}
+]
+
+for {sender_id, content} <- messages do
+  Repo.insert!(%Message{
+    id: Nanoid.generate(),
+    thread_id: thread.id,
+    sender_id: sender_id,
+    content: content
+  })
+end

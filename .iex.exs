@@ -2,9 +2,12 @@ import Ecto.Query
 import Ecto.Changeset
 
 alias Algora.Admin
-alias Algora.Users
-alias Algora.Repo
+alias Algora.Contracts.Contract
 alias Algora.Github
+alias Algora.Organizations.Member
+alias Algora.Repo
+alias Algora.Users
+alias Algora.Users.{User, Identity}
 
 import AlgoraWeb.WebhooksController
 

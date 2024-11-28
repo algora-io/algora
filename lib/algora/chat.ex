@@ -38,7 +38,7 @@ defmodule Algora.Chat do
   def list_messages(thread_id, limit \\ 50) do
     Message
     |> where(thread_id: ^thread_id)
-    |> order_by(desc: :inserted_at)
+    |> order_by(asc: :inserted_at)
     |> limit(^limit)
     |> Repo.all()
   end

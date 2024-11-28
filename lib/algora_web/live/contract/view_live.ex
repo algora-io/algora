@@ -796,6 +796,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
     messages =
       Chat.list_messages(thread.id)
+      |> Repo.preload(:sender)
       |> Enum.map(&format_message(&1, socket.assigns.current_user))
 
     fee_data = calculate_fee_data(contract)
@@ -854,6 +855,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         content
       )
 
+    message = Repo.preload(message, :sender)
     new_message = format_message(message, socket.assigns.current_user)
 
     {:noreply, update(socket, :messages, &(&1 ++ [new_message]))}

@@ -14,21 +14,21 @@ defmodule AlgoraWeb.Contract.ViewLive do
             <div class="flex items-center gap-4">
               <div class="flex -space-x-2">
                 <.avatar class="h-12 w-12 ring-2 ring-background">
-                  <.avatar_image src={@contract.company.avatar_url} />
+                  <.avatar_image src={@contract.client.avatar_url} />
                   <.avatar_fallback>
-                    <%= String.slice(@contract.company.name, 0, 2) %>
+                    <%= String.slice(@contract.client.name, 0, 2) %>
                   </.avatar_fallback>
                 </.avatar>
                 <.avatar class="h-12 w-12 ring-2 ring-background">
-                  <.avatar_image src={@contract.developer.avatar_url} />
+                  <.avatar_image src={@contract.provider.avatar_url} />
                   <.avatar_fallback>
-                    <%= String.slice(@contract.developer.name, 0, 2) %>
+                    <%= String.slice(@contract.provider.name, 0, 2) %>
                   </.avatar_fallback>
                 </.avatar>
               </div>
               <div>
                 <h1 class="text-2xl font-semibold">
-                  Contract with <%= @contract.developer.name %>
+                  Contract with <%= @contract.provider.name %>
                 </h1>
                 <p class="text-sm text-muted-foreground">
                   Started <%= Calendar.strftime(@contract.start_date, "%B %d, %Y") %>
@@ -189,12 +189,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <.card_content>
                     <div class="flex items-center gap-4">
                       <.avatar class="h-16 w-16">
-                        <.avatar_image src={@contract.company.avatar_url} />
+                        <.avatar_image src={@contract.client.avatar_url} />
                       </.avatar>
                       <div>
-                        <div class="font-medium text-lg"><%= @contract.company.name %></div>
+                        <div class="font-medium text-lg"><%= @contract.client.name %></div>
                         <div class="text-sm text-muted-foreground">
-                          @<%= @contract.company.handle %>
+                          @<%= @contract.client.handle %>
                         </div>
                       </div>
                     </div>
@@ -209,12 +209,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <div class="space-y-4">
                       <div class="flex items-center gap-4">
                         <.avatar class="h-16 w-16">
-                          <.avatar_image src={@contract.developer.avatar_url} />
+                          <.avatar_image src={@contract.provider.avatar_url} />
                         </.avatar>
                         <div>
-                          <div class="font-medium text-lg"><%= @contract.developer.name %></div>
+                          <div class="font-medium text-lg"><%= @contract.provider.name %></div>
                           <div class="text-sm text-muted-foreground">
-                            @<%= @contract.developer.handle %>
+                            @<%= @contract.provider.handle %>
                           </div>
                         </div>
                       </div>
@@ -222,16 +222,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <div class="pt-4 space-y-2">
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
                           <.icon name="tabler-map-pin" class="w-4 h-4" />
-                          <%= @contract.developer.location %>
+                          <%= @contract.provider.location %>
                         </div>
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
                           <.icon name="tabler-clock" class="w-4 h-4" />
-                          <%= @contract.developer.timezone %>
+                          <%= @contract.provider.timezone %>
                         </div>
                       </div>
 
                       <div class="flex flex-wrap gap-2 pt-2">
-                        <%= for skill <- @contract.developer.skills do %>
+                        <%= for skill <- @contract.provider.skills do %>
                           <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
                             <%= skill %>
                           </span>
@@ -274,16 +274,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
           <div class="flex items-center gap-3">
             <div class="relative">
               <.avatar>
-                <.avatar_image src={@contract.developer.avatar_url} alt="Developer avatar" />
+                <.avatar_image src={@contract.provider.avatar_url} alt="Developer avatar" />
                 <.avatar_fallback>
-                  <%= String.slice(@contract.developer.name, 0, 2) %>
+                  <%= String.slice(@contract.provider.name, 0, 2) %>
                 </.avatar_fallback>
               </.avatar>
               <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
               </div>
             </div>
             <div>
-              <h2 class="text-lg font-semibold"><%= @contract.developer.name %></h2>
+              <h2 class="text-lg font-semibold"><%= @contract.provider.name %></h2>
               <p class="text-xs text-muted-foreground">Active now</p>
             </div>
           </div>
@@ -360,7 +360,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
           <div class="space-y-8">
             <.form_item>
               <.form_label class="text-lg font-semibold mb-6">
-                How was your experience working with <%= @contract.developer.name %>?
+                How was your experience working with <%= @contract.provider.name %>?
               </.form_label>
               <.form_control>
                 <.input
@@ -570,7 +570,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         <div class="grid grid-cols-2 gap-8">
           <form phx-submit="release_payment" class="space-y-6">
             <.form_item>
-              <.form_label>Feedback for <%= @contract.developer.name %></.form_label>
+              <.form_label>Feedback for <%= @contract.provider.name %></.form_label>
               <.form_control>
                 <.input
                   type="textarea"

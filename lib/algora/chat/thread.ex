@@ -14,5 +14,6 @@ defmodule Algora.Chat.Thread do
     thread
     |> cast(attrs, [:title])
     |> validate_required([:title])
+    |> generate_id()
   end
 end

@@ -12,7 +12,10 @@ defmodule Algora.Chat.Participant do
 
   def changeset(participant, attrs) do
     participant
-    |> cast(attrs, [:last_read_at])
-    |> validate_required([:last_read_at])
+    |> cast(attrs, [:last_read_at, :thread_id, :user_id])
+    |> validate_required([:last_read_at, :thread_id, :user_id])
+    |> foreign_key_constraint(:thread_id)
+    |> foreign_key_constraint(:user_id)
+    |> generate_id()
   end
 end

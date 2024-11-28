@@ -7,13 +7,17 @@ defmodule Algora.Chat do
     Repo.transaction(fn ->
       {:ok, thread} =
         %Thread{}
-        |> Thread.changeset(%{})
+        |> Thread.changeset(%{title: "#{user_1.handle} <> #{user_2.handle}"})
         |> Repo.insert()
 
       # Add participants
       for user <- [user_1, user_2] do
         %Participant{}
-        |> Participant.changeset(%{thread_id: thread.id, user_id: user.id})
+        |> Participant.changeset(%{
+          thread_id: thread.id,
+          user_id: user.id,
+          last_read_at: DateTime.utc_now()
+        })
         |> Repo.insert!()
       end
 

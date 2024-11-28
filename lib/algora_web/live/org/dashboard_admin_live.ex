@@ -9,31 +9,22 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   defp middle_rate(%{min: min, max: max}), do: Decimal.div(Decimal.add(min, max), Decimal.new(2))
 
   def mount(_params, _session, socket) do
-    tech_stack = ["Elixir", "Phoenix", "Membrane"]
+    %{tech_stack: tech_stack} = socket.assigns.current_org
     hourly_rate = %{min: 50, max: 100}
     hours_per_week = 20
-
-    org =
-      socket.assigns.current_org
-      |> Map.merge(%{
-        og_title: "Algora: Open source bounties",
-        og_image_url: "https://algora.io/og.png"
-      })
 
     contract_template = %{
       hourly_rate: hourly_rate,
       currency: "USD",
       expected_hours: hours_per_week,
-      ticket: %{title: org.og_title},
-      owner: org,
+      ticket: %{title: socket.assigns.current_org.og_title},
+      owner: socket.assigns.current_org,
       tech_stack: tech_stack
     }
 
     job_form =
       %JobForm{}
-      |> JobForm.changeset(%{
-        work_type: "remote"
-      })
+      |> JobForm.changeset(%{work_type: "remote"})
       |> to_form(as: :job_form)
 
     socket =
@@ -826,7 +817,12 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
   defp fetch_matching_devs(tech_stack) do
     Users.list_matching_devs(tech_stack: tech_stack, limit: 3)
-    |> Enum.zip([
+    |> Enum.zip(fetch_reviews())
+    |> Enum.map(fn {user, data} -> Map.merge(user, data) end)
+  end
+
+  defp fetch_reviews() do
+    [
       %{
         hourly_rate: 100,
         hours_per_week: 30,
@@ -875,7 +871,6 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           }
         }
       }
-    ])
-    |> Enum.map(fn {user, data} -> Map.merge(user, data) end)
+    ]
   end
 end

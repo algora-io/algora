@@ -62,6 +62,9 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
               Based on tech stack and hourly rate
             </p>
           </div>
+          <.button phx-click="begin_collaboration" size="lg">
+            Start collaborating
+          </.button>
         </div>
         <div class="px-6">
           <div class="relative w-full overflow-auto">
@@ -685,12 +688,6 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <% end %>
               </div>
             </div>
-          </div>
-
-          <div class="mx-auto">
-            <.button phx-click="begin_collaboration" size="lg">
-              Start collaborating
-            </.button>
           </div>
         </div>
       </td>

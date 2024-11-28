@@ -2,6 +2,7 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket, type ViewHook } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
+import "emoji-picker-element";
 
 // TODO: add eslint & biome
 // TODO: enable strict mode
@@ -439,6 +440,64 @@ const Hooks = {
           (domainInput as HTMLInputElement).value = domain;
           // Trigger the change event to update the server state
           domainInput.dispatchEvent(new Event("change"));
+        }
+      });
+    },
+  },
+  EmojiPicker: {
+    mounted() {
+      const button = this.el;
+      const container = document.getElementById("emoji-picker-container");
+      const input = document.getElementById(
+        "message-input"
+      ) as HTMLInputElement;
+      const picker = container?.querySelector("emoji-picker");
+      let isVisible = false;
+
+      // Toggle picker visibility
+      button.addEventListener("click", () => {
+        isVisible = !isVisible;
+        if (isVisible) {
+          container?.classList.remove("hidden");
+        } else {
+          container?.classList.add("hidden");
+        }
+      });
+
+      // Handle emoji selection
+      picker?.addEventListener("emoji-click", (event: any) => {
+        const emoji = event.detail.unicode;
+        const cursorPosition = input.selectionStart || 0;
+
+        // Insert emoji at cursor position
+        const currentValue = input.value;
+        input.value =
+          currentValue.slice(0, cursorPosition) +
+          emoji +
+          currentValue.slice(cursorPosition);
+
+        // Move cursor after emoji
+        input.setSelectionRange(
+          cursorPosition + emoji.length,
+          cursorPosition + emoji.length
+        );
+
+        // Hide picker after selection
+        container?.classList.add("hidden");
+        isVisible = false;
+
+        // Focus back on input
+        input.focus();
+      });
+
+      // Close picker when clicking outside
+      document.addEventListener("click", (event) => {
+        if (
+          !container?.contains(event.target as Node) &&
+          !button.contains(event.target as Node)
+        ) {
+          container?.classList.add("hidden");
+          isVisible = false;
         }
       });
     },

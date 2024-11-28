@@ -15,6 +15,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "dependencies": {
+    "emoji-picker-element": "^1.25.0",
     "framer-motion": "^11.11.10"
   }
 }

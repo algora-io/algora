@@ -388,7 +388,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 phx-hook="ClearInput"
               />
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                <.button type="button" variant="ghost" size="icon-sm">
+                <.button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  phx-hook="EmojiPicker"
+                  id="emoji-trigger"
+                >
                   <.icon name="tabler-mood-smile" class="w-4 h-4" />
                 </.button>
               </div>
@@ -397,6 +403,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.icon name="tabler-send" class="w-4 h-4" />
             </.button>
           </form>
+          <!-- Add the emoji picker element (hidden by default) -->
+          <div id="emoji-picker-container" class="hidden absolute bottom-[80px] right-4">
+            <emoji-picker></emoji-picker>
+          </div>
         </div>
       </div>
     </div>

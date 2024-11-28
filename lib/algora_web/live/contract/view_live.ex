@@ -787,6 +787,18 @@ defmodule AlgoraWeb.Contract.ViewLive do
         ]
       ])
 
+    # Get all contracts in the chain
+    contract_chain = get_contract_chain(contract)
+
+    # Calculate total_paid from completed transfers across all contracts
+    total_paid =
+      contract_chain
+      |> Enum.flat_map(& &1.transactions)
+      |> Enum.filter(&(&1.type == :transfer))
+      |> Enum.reduce(Decimal.new(0), &Decimal.add(&1.amount, &2))
+
+    contract = Map.put(contract, :total_paid, total_paid)
+
     transactions = Contracts.get_all_transactions_for_contract(contract.id)
 
     {:ok, thread} = get_or_create_thread(contract)

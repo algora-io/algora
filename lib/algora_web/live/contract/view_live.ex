@@ -381,11 +381,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </.button>
             <div class="flex-1 relative">
               <.input
+                id="message-input"
                 type="text"
                 name="message"
                 value=""
                 placeholder="Type a message..."
+                autocomplete="off"
                 class="flex-1 pr-24"
+                phx-hook="ClearInput"
               />
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                 <.button type="button" variant="ghost" size="icon-sm">
@@ -858,7 +861,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
     message = Repo.preload(message, :sender)
     new_message = format_message(message, socket.assigns.current_user)
 
-    {:noreply, update(socket, :messages, &(&1 ++ [new_message]))}
+    {:noreply,
+     socket
+     |> update(:messages, &(&1 ++ [new_message]))
+     |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
   defp get_or_create_thread(contract) do

@@ -15,4 +15,11 @@ defmodule Algora.Contracts.Timesheet do
 
     timestamps()
   end
+
+  def changeset(timesheet, attrs) do
+    timesheet
+    |> cast(attrs, [:hours_worked, :start_date, :end_date, :description])
+    |> validate_required([:hours_worked, :start_date, :end_date])
+    |> generate_id()
+  end
 end

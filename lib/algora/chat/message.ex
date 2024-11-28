@@ -14,5 +14,6 @@ defmodule Algora.Chat.Message do
     message
     |> cast(attrs, [:content, :thread_id, :sender_id])
     |> validate_required([:content, :thread_id, :sender_id])
+    |> generate_id()
   end
 end

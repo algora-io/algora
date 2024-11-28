@@ -18,6 +18,7 @@ defmodule Algora.Contracts.Contract do
 
     has_many :transactions, Algora.Payments.Transaction
     has_many :reviews, Algora.Reviews.Review
+    has_many :timesheets, Algora.Contracts.Timesheet
 
     timestamps()
   end
@@ -48,5 +49,6 @@ defmodule Algora.Contracts.Contract do
     |> validate_number(:hourly_rate, greater_than: 0)
     |> foreign_key_constraint(:client_id)
     |> foreign_key_constraint(:provider_id)
+    |> generate_id()
   end
 end

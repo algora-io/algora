@@ -12,11 +12,12 @@ defmodule Algora.Payments.Transaction do
     field :currency, :string
     field :type, Ecto.Enum, values: [:charge, :transfer, :refund]
     field :status, Ecto.Enum, values: [:pending, :processing, :succeeded, :failed, :canceled]
-    field :succeeded_at, :utc_datetime
-    field :refunded_at, :utc_datetime
+    field :succeeded_at, :utc_datetime_usec
+    field :refunded_at, :utc_datetime_usec
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Algora.Contracts.Contract
+    belongs_to :original_contract, Algora.Contracts.Contract
     belongs_to :sender, Algora.Users.User
     belongs_to :recipient, Algora.Users.User
     # belongs_to :claim, Algora.Bounties.Claim

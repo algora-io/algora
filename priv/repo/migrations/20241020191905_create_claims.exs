@@ -11,11 +11,11 @@ defmodule Algora.Repo.Migrations.CreateClaims do
 
       add :status, :string
 
-      add :merged_at, :utc_datetime
-      add :approved_at, :utc_datetime
-      add :rejected_at, :utc_datetime
-      add :charged_at, :utc_datetime
-      add :transferred_at, :utc_datetime
+      add :merged_at, :utc_datetime_usec
+      add :approved_at, :utc_datetime_usec
+      add :rejected_at, :utc_datetime_usec
+      add :charged_at, :utc_datetime_usec
+      add :transferred_at, :utc_datetime_usec
 
       add :title, :string
       add :description, :string

@@ -15,11 +15,11 @@ defmodule Algora.Bounties.Claim do
     field :status, Ecto.Enum,
       values: [:pending, :merged, :approved, :rejected, :charged, :transferred]
 
-    field :merged_at, :utc_datetime
-    field :approved_at, :utc_datetime
-    field :rejected_at, :utc_datetime
-    field :charged_at, :utc_datetime
-    field :transferred_at, :utc_datetime
+    field :merged_at, :utc_datetime_usec
+    field :approved_at, :utc_datetime_usec
+    field :rejected_at, :utc_datetime_usec
+    field :charged_at, :utc_datetime_usec
+    field :transferred_at, :utc_datetime_usec
 
     field :title, :string
     field :description, :string

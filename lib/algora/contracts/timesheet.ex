@@ -5,12 +5,11 @@ defmodule Algora.Contracts.Timesheet do
 
   schema "timesheets" do
     field :hours_worked, :integer
-    field :start_date, :date
-    field :end_date, :date
+    field :start_date, :utc_datetime_usec
+    field :end_date, :utc_datetime_usec
     field :description, :string
 
     belongs_to :contract, Algora.Contracts.Contract
-    belongs_to :provider, Algora.Users.User
     has_many :transactions, Algora.Payments.Transaction
 
     timestamps()

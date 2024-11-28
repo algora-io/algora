@@ -2,7 +2,7 @@ defmodule Algora.Chat.Participant do
   use Algora.Model
 
   schema "chat_participants" do
-    field :last_read_at, :utc_datetime
+    field :last_read_at, :utc_datetime_usec
 
     belongs_to :thread, Algora.Chat.Thread
     belongs_to :user, Algora.Users.User

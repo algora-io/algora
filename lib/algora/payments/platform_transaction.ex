@@ -9,7 +9,7 @@ defmodule Algora.Payments.PlatformTransaction do
     field :provider_id, :string
     field :provider_meta, :map
 
-    field :succeeded_at, :utc_datetime
+    field :succeeded_at, :utc_datetime_usec
     field :amount, :decimal
     field :currency, :string
     field :type, :string

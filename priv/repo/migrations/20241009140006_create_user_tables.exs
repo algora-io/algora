@@ -19,6 +19,8 @@ defmodule Algora.Repo.Migrations.CreateUserTables do
       add :type, :string, null: false, default: "individual"
       add :bio, :text
       add :location, :string
+      add :country, :string
+      add :timezone, :string
       add :stargazers_count, :integer, null: false, default: 0
       add :domain, :string
       add :tech_stack, {:array, :string}, null: false, default: "{}"

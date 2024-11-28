@@ -13,7 +13,7 @@ config :algora,
     "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
   admin_emails: ["zafer@algora.io", "ioannis@algora.io"],
   ecto_repos: [Algora.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime_usec]
 
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,
@@ -94,6 +94,8 @@ config :tails,
     "foreground",
     "gray"
   ]
+
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

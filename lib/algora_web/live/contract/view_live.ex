@@ -62,7 +62,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">In Escrow</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.format!(@contract.escrow_amount, "USD") %>
+                  <%= Money.format!(@escrow_amount, "USD") %>
                 </div>
               </.card_content>
             </.card>
@@ -99,81 +99,131 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-8">
-                    <!-- Upcoming Payment -->
-                    <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
-                      <div class="flex items-center gap-4">
-                        <div class="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center">
-                          <.icon name="tabler-clock" class="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <div class="font-medium">
-                            Upcoming payment for 20 hours
-                          </div>
-                          <div class="text-sm text-muted-foreground">
-                            <%= Calendar.strftime(@contract.next_payment, "%B %d, %Y") %>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <div class="text-right mr-4">
-                          <div class="font-medium font-display">
-                            <%= Money.format!(@contract.escrow_amount, "USD") %>
-                          </div>
-                          <div class="text-sm text-muted-foreground">
-                            Pending
-                          </div>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                          <.button phx-click={JS.push("show_release_renew_modal")}>
-                            Release & Renew
-                          </.button>
-
-                          <.dropdown_menu>
-                            <.dropdown_menu_trigger>
-                              <.button variant="ghost" size="icon">
-                                <.icon name="tabler-dots-vertical" class="w-4 h-4" />
-                              </.button>
-                            </.dropdown_menu_trigger>
-                            <.dropdown_menu_content class="w-56 rounded-md border bg-popover p-1 shadow-md">
-                              <div class="px-2 py-1.5 text-sm cursor-pointer hover:bg-muted rounded-sm flex items-center">
-                                <.icon name="tabler-arrow-right" class="w-4 h-4 mr-2" />
-                                Release without renew
+                    <%= for contract <- get_contract_chain(@contract) do %>
+                      <%= case get_payment_status(contract) do %>
+                        <% {:pending_release, timesheet} -> %>
+                          <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
+                            <div class="flex items-center gap-4">
+                              <div class="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center">
+                                <.icon name="tabler-clock" class="w-5 h-5 text-primary" />
                               </div>
-                              <div class="h-px bg-border my-1" />
-                              <div class="px-2 py-1.5 text-sm cursor-pointer hover:bg-muted rounded-sm flex items-center text-destructive">
-                                <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" /> Dispute
+                              <div>
+                                <div class="font-medium">
+                                  Ready to release payment for <%= timesheet.hours_worked %> hours
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                  <%= Calendar.strftime(timesheet.start_date, "%B %d") %> - <%= Calendar.strftime(
+                                    timesheet.end_date,
+                                    "%B %d, %Y"
+                                  ) %>
+                                </div>
                               </div>
-                            </.dropdown_menu_content>
-                          </.dropdown_menu>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Past Payments -->
-                    <%= for payment <- @contract.payment_history do %>
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-4">
-                          <div class="h-9 w-9 rounded-full bg-muted flex items-center justify-center">
-                            <.icon name="tabler-credit-card" class="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div class="font-medium">
-                              Payment for <%= payment.hours %> hours
                             </div>
-                            <div class="text-sm text-muted-foreground">
-                              <%= Calendar.strftime(payment.date, "%B %d, %Y") %>
+                            <div class="flex items-center gap-2">
+                              <div class="text-right mr-4">
+                                <div class="font-medium font-display">
+                                  <%= Money.format!(calculate_amount(contract, timesheet), "USD") %>
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                  Ready to Release
+                                </div>
+                              </div>
+
+                              <div class="flex items-center gap-2">
+                                <.button phx-click={
+                                  JS.push("show_release_renew_modal",
+                                    value: %{contract_id: contract.id}
+                                  )
+                                }>
+                                  Release & Renew
+                                </.button>
+
+                                <.dropdown_menu>
+                                  <.dropdown_menu_trigger>
+                                    <.button variant="ghost" size="icon">
+                                      <.icon name="tabler-dots-vertical" class="w-4 h-4" />
+                                    </.button>
+                                  </.dropdown_menu_trigger>
+                                  <.dropdown_menu_content>
+                                    <.dropdown_menu_item phx-click={
+                                      JS.push("show_release_modal",
+                                        value: %{contract_id: contract.id}
+                                      )
+                                    }>
+                                      <.icon name="tabler-arrow-right" class="w-4 h-4 mr-2" />
+                                      Release without renew
+                                    </.dropdown_menu_item>
+                                    <.dropdown_menu_separator />
+                                    <.dropdown_menu_item
+                                      phx-click={
+                                        JS.push("show_dispute_modal",
+                                          value: %{contract_id: contract.id}
+                                        )
+                                      }
+                                      class="text-destructive"
+                                    >
+                                      <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" />
+                                      Dispute
+                                    </.dropdown_menu_item>
+                                  </.dropdown_menu_content>
+                                </.dropdown_menu>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div class="text-right">
-                          <div class="font-medium font-display">
-                            <%= Money.format!(payment.amount, "USD") %>
+                        <% {:processing, timesheet} -> %>
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                              <div class="h-9 w-9 rounded-full bg-warning/20 flex items-center justify-center">
+                                <.icon
+                                  name="tabler-loader-2"
+                                  class="w-5 h-5 text-warning animate-spin"
+                                />
+                              </div>
+                              <div>
+                                <div class="font-medium">
+                                  Processing payment for <%= timesheet.hours_worked %> hours
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                  <%= Calendar.strftime(timesheet.start_date, "%B %d") %> - <%= Calendar.strftime(
+                                    timesheet.end_date,
+                                    "%B %d, %Y"
+                                  ) %>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <div class="font-medium font-display">
+                                <%= Money.format!(calculate_amount(contract, timesheet), "USD") %>
+                              </div>
+                              <div class="text-sm text-muted-foreground">Processing</div>
+                            </div>
                           </div>
-                          <div class="text-sm text-muted-foreground">
-                            <%= String.capitalize(to_string(payment.status)) %>
+                        <% {:completed, timesheet, transaction} -> %>
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                              <div class="h-9 w-9 rounded-full bg-success/20 flex items-center justify-center">
+                                <.icon name="tabler-check" class="w-5 h-5 text-success" />
+                              </div>
+                              <div>
+                                <div class="font-medium">
+                                  Payment for <%= timesheet.hours_worked %> hours
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                  <%= Calendar.strftime(timesheet.start_date, "%B %d") %> - <%= Calendar.strftime(
+                                    timesheet.end_date,
+                                    "%B %d, %Y"
+                                  ) %>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <div class="font-medium font-display">
+                                <%= Money.format!(transaction.amount, "USD") %>
+                              </div>
+                              <div class="text-sm text-muted-foreground">Paid</div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                      <% end %>
                     <% end %>
                   </div>
                 </.card_content>
@@ -224,14 +274,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
                           <.icon name="tabler-map-pin" class="w-4 h-4" />
                           <%= @contract.provider.location %>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-clock" class="w-4 h-4" />
-                          <%= @contract.provider.timezone %>
-                        </div>
+                        <%= if @contract.provider.timezone do %>
+                          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <.icon name="tabler-clock" class="w-4 h-4" />
+                            <%= Algora.Time.friendly_timezone(@contract.provider.timezone) %>
+                          </div>
+                        <% end %>
                       </div>
 
                       <div class="flex flex-wrap gap-2 pt-2">
-                        <%= for skill <- @contract.provider.skills do %>
+                        <%= for skill <- @contract.provider.tech_stack do %>
                           <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
                             <%= skill %>
                           </span>
@@ -390,7 +442,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                      <%= Money.format!(@escrow_amount, "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -398,7 +450,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       Escrow balance
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      -<%= Money.format!(@contract.escrow_amount, "USD") %>
+                      -<%= Money.format!(@escrow_amount, "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between opacity-0">
@@ -408,7 +460,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
                         Decimal.mult(
-                          @contract.escrow_amount,
+                          @escrow_amount,
                           Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
                         ),
                         "USD"
@@ -510,7 +562,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                      <%= Money.format!(@escrow_amount, "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -520,7 +572,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
                         Decimal.mult(
-                          @contract.escrow_amount,
+                          @escrow_amount,
                           Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
                         ),
                         "USD"
@@ -531,7 +583,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dt class="text-muted-foreground">Transaction fees (4%)</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
-                        Decimal.mult(@contract.escrow_amount, Decimal.new("0.04")),
+                        Decimal.mult(@escrow_amount, Decimal.new("0.04")),
                         "USD"
                       ) %>
                     </dd>
@@ -541,7 +593,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
-                        Decimal.mult(@contract.escrow_amount, Decimal.new("1.23")),
+                        Decimal.mult(@escrow_amount, Decimal.new("1.23")),
                         "USD"
                       ) %>
                     </dd>
@@ -606,7 +658,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Amount</dt>
                     <dd class="font-semibold">
-                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                      <%= Money.format!(@escrow_amount, "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -679,14 +731,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Disputed Amount</dt>
                     <dd class="font-semibold">
-                      <%= Money.format!(@contract.escrow_amount, "USD") %>
+                      <%= Money.format!(@escrow_amount, "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Contract Period</dt>
                     <dd class="font-semibold">
                       <%= Calendar.strftime(@contract.start_date, "%B %d") %> - <%= Calendar.strftime(
-                        @contract.next_payment,
+                        @contract.end_date,
                         "%B %d, %Y"
                       ) %>
                     </dd>
@@ -716,32 +768,45 @@ defmodule AlgoraWeb.Contract.ViewLive do
   end
 
   def mount(%{"id" => id}, _session, socket) do
-    # Load contract with associations
     contract =
       Contracts.get_contract!(id)
       |> Repo.preload([
         :client,
         :provider,
+        :timesheets,
         :transactions,
         :reviews,
-        :timesheets,
-        original_contract: [:renewals]
+        original_contract: [
+          :timesheets,
+          :transactions,
+          renewals: [
+            :timesheets,
+            :transactions
+          ]
+        ],
+        renewals: [
+          :timesheets,
+          :transactions
+        ]
       ])
 
-    # Get or create chat thread between client and provider
+    transactions = Contracts.get_all_transactions_for_contract(contract.id)
+
     {:ok, thread} = get_or_create_thread(contract)
 
-    # Load chat messages
     messages =
       Chat.list_messages(thread.id)
       |> Enum.map(&format_message(&1, socket.assigns.current_user))
 
-    # Calculate fee data
     fee_data = calculate_fee_data(contract)
+
+    escrow_amount = Decimal.mult(contract.hourly_rate, Decimal.new(contract.hours_per_week))
 
     {:ok,
      socket
      |> assign(:contract, contract)
+     |> assign(:transactions, transactions)
+     |> assign(:escrow_amount, escrow_amount)
      |> assign(:page_title, "Contract with #{contract.provider.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)
@@ -751,34 +816,27 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:fee_data, fee_data)}
   end
 
-  # Handle releasing payment and renewing contract
   def handle_event("release_and_renew", %{"feedback" => feedback}, socket) do
     contract = socket.assigns.contract
 
-    # Process payment
     {:ok, {_updated_contract, _charge, _transfer}} =
       Contracts.process_payment(contract, %{
-        # Get from Stripe
         stripe_charge_id: "ch_xxx",
-        # Get from Stripe
         stripe_transfer_id: "tr_xxx",
         stripe_metadata: %{},
         fee_percentage: socket.assigns.fee_data.fee_percentage
       })
 
-    # Create review
     {:ok, _review} =
       Reviews.create_review(%{
         contract_id: contract.id,
         reviewer_id: socket.assigns.current_user.id,
         reviewee_id: contract.provider_id,
-        # Get from form
         rating: 5,
         content: feedback,
         visibility: :public
       })
 
-    # Renew contract
     {:ok, new_contract} = Contracts.renew_contract(contract)
 
     {:noreply,
@@ -788,7 +846,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> put_flash(:info, "Payment released and contract renewed successfully")}
   end
 
-  # Handle sending chat messages
   def handle_event("send_message", %{"message" => content}, socket) do
     {:ok, message} =
       Chat.send_message(
@@ -801,8 +858,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
     {:noreply, update(socket, :messages, &(&1 ++ [new_message]))}
   end
-
-  # Private helpers
 
   defp get_or_create_thread(contract) do
     case Chat.get_thread_for_users(contract.client_id, contract.provider_id) do
@@ -878,5 +933,49 @@ defmodule AlgoraWeb.Contract.ViewLive do
       n when n <= 7 -> Calendar.strftime(datetime, "%A")
       _ -> Calendar.strftime(datetime, "%B %d")
     end
+  end
+
+  defp get_contract_chain(contract) do
+    case contract.original_contract_id do
+      nil -> [contract | contract.renewals]
+      _ -> [contract.original_contract | contract.original_contract.renewals]
+    end
+    |> Enum.sort_by(& &1.start_date, {:desc, DateTime})
+  end
+
+  defp get_payment_status(contract) do
+    case {get_latest_timesheet(contract), get_latest_transaction(contract)} do
+      {nil, _} ->
+        nil
+
+      {timesheet, nil} ->
+        {:pending_release, timesheet}
+
+      {timesheet, %{stripe_transfer_id: nil, status: :processing}} ->
+        {:processing, timesheet}
+
+      {timesheet, transaction = %{stripe_transfer_id: transfer_id}}
+      when not is_nil(transfer_id) ->
+        {:completed, timesheet, transaction}
+
+      {timesheet, _} ->
+        {:pending_release, timesheet}
+    end
+  end
+
+  defp get_latest_timesheet(contract) do
+    contract.timesheets
+    |> Enum.sort_by(& &1.end_date, {:desc, DateTime})
+    |> List.first()
+  end
+
+  defp get_latest_transaction(contract) do
+    contract.transactions
+    |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
+    |> List.first()
+  end
+
+  defp calculate_amount(contract, timesheet) do
+    Decimal.mult(contract.hourly_rate, Decimal.new(timesheet.hours_worked))
   end
 end

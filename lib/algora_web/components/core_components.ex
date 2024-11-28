@@ -1196,9 +1196,11 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate drawer_content(assigns), to: AlgoraWeb.Components.UI.Drawer
   defdelegate drawer_header(assigns), to: AlgoraWeb.Components.UI.Drawer
   defdelegate drawer_footer(assigns), to: AlgoraWeb.Components.UI.Drawer
-  defdelegate dropdown_menu(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
   defdelegate dropdown_menu_content(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
+  defdelegate dropdown_menu_item(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
+  defdelegate dropdown_menu_separator(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
   defdelegate dropdown_menu_trigger(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
+  defdelegate dropdown_menu(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
   defdelegate form_control(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_description(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_item(assigns), to: AlgoraWeb.Components.UI.Form

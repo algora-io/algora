@@ -12,6 +12,14 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
+  def get_all_transactions_for_contract(contract_id) do
+    from(t in Transaction,
+      where: t.original_contract_id == ^contract_id,
+      order_by: [desc: t.inserted_at]
+    )
+    |> Repo.all()
+  end
+
   def renew_contract(contract, attrs \\ %{}) do
     next_sequence = get_next_sequence_number(contract)
 

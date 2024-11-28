@@ -62,7 +62,8 @@ defmodule Algora.MixProject do
       {:salad_ui, "~> 0.11.0", only: [:dev]},
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
-      {:mox, "~> 1.0", only: :test}
+      {:mox, "~> 1.0", only: :test},
+      {:tzdata, "~> 1.1"}
     ]
   end
 

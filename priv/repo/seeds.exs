@@ -25,6 +25,22 @@ defmodule Seeds do
       "Etc/UTC"
     )
   end
+
+  def calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate) do
+    case previous_timesheet do
+      nil ->
+        # First period - charge full amount
+        Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
+
+      timesheet ->
+        # Subsequent periods - adjust based on previous usage
+        # Need to charge enough to have hours_per_week available after accounting for previous over/under usage
+        previous_charged = hours_per_week
+        previous_used = timesheet.hours_worked
+        hours_to_charge = hours_per_week - (previous_charged - previous_used)
+        Decimal.mult(hourly_rate, Decimal.new(hours_to_charge))
+    end
+  end
 end
 
 github_id =
@@ -198,7 +214,7 @@ timesheet1 =
   Repo.insert!(%Timesheet{
     id: Nanoid.generate(),
     contract_id: contract1.id,
-    hours_worked: hours_per_week,
+    hours_worked: 42,
     start_date: Seeds.to_datetime(-21),
     end_date: Seeds.to_datetime(-14)
   })
@@ -207,7 +223,7 @@ timesheet2 =
   Repo.insert!(%Timesheet{
     id: Nanoid.generate(),
     contract_id: contract2.id,
-    hours_worked: hours_per_week,
+    hours_worked: 35,
     start_date: Seeds.to_datetime(-14),
     end_date: Seeds.to_datetime(-7)
   })
@@ -216,17 +232,18 @@ timesheet3 =
   Repo.insert!(%Timesheet{
     id: Nanoid.generate(),
     contract_id: contract3.id,
-    hours_worked: hours_per_week,
+    hours_worked: 38,
     start_date: Seeds.to_datetime(-7),
     end_date: Seeds.to_datetime(0)
   })
 
+# Create charges using the helper function
 charge1 =
   Repo.insert!(%Transaction{
     id: Nanoid.generate(),
     contract_id: contract1.id,
     original_contract_id: original_contract_id,
-    amount: amount,
+    amount: Seeds.calculate_charge_amount(nil, hours_per_week, hourly_rate),
     currency: "USD",
     type: :charge,
     status: :succeeded
@@ -237,7 +254,7 @@ charge2 =
     id: Nanoid.generate(),
     contract_id: contract2.id,
     original_contract_id: original_contract_id,
-    amount: amount,
+    amount: Seeds.calculate_charge_amount(timesheet1, hours_per_week, hourly_rate),
     currency: "USD",
     type: :charge,
     status: :succeeded
@@ -248,7 +265,7 @@ charge3 =
     id: Nanoid.generate(),
     contract_id: contract3.id,
     original_contract_id: original_contract_id,
-    amount: amount,
+    amount: Seeds.calculate_charge_amount(timesheet2, hours_per_week, hourly_rate),
     currency: "USD",
     type: :charge,
     status: :succeeded
@@ -260,7 +277,7 @@ transfer1 =
     contract_id: contract1.id,
     original_contract_id: original_contract_id,
     timesheet_id: timesheet1.id,
-    amount: amount,
+    amount: Decimal.mult(hourly_rate, Decimal.new(42)),
     currency: "USD",
     type: :transfer,
     status: :succeeded
@@ -272,7 +289,7 @@ transfer2 =
     contract_id: contract2.id,
     original_contract_id: original_contract_id,
     timesheet_id: timesheet2.id,
-    amount: amount,
+    amount: Decimal.mult(hourly_rate, Decimal.new(35)),
     currency: "USD",
     type: :transfer,
     status: :succeeded

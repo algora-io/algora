@@ -7,8 +7,8 @@ defmodule Algora.Repo.Migrations.CreateContracts do
       add :sequence_number, :integer, null: false, default: 1
       add :hourly_rate, :decimal, null: false
       add :hours_per_week, :integer, null: false
-      add :start_date, :date, null: false
-      add :end_date, :date
+      add :start_date, :utc_datetime_usec, null: false
+      add :end_date, :utc_datetime_usec
       add :total_paid, :decimal, null: false, default: 0
 
       add :original_contract_id, references(:contracts, on_delete: :nilify_all)

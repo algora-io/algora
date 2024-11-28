@@ -101,4 +101,37 @@ defmodule AlgoraWeb.Components.UI.DropdownMenu do
   defp hide(js \\ %JS{}) do
     JS.set_attribute(js, {"data-state", "closed"})
   end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+  attr :disabled, :boolean, default: false
+  attr :rest, :global
+
+  def dropdown_menu_item(assigns) do
+    ~H"""
+    <div
+      class={
+        classes([
+          "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
+          "hover:bg-muted focus:bg-muted",
+          "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          @class
+        ])
+      }
+      data-disabled={@disabled}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  def dropdown_menu_separator(assigns) do
+    ~H"""
+    <div class={classes(["h-px bg-border my-1", @class])} {@rest} role="separator" />
+    """
+  end
 end

@@ -22,6 +22,7 @@ defmodule Algora.Users.User do
     field :avatar_url, :string
     field :location, :string
     field :country, :string
+    field :timezone, :string
     field :stargazers_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []
@@ -233,6 +234,11 @@ defmodule Algora.Users.User do
     |> generate_id()
     |> validate_required([:provider_id, :provider_login, :type])
     |> unique_constraint([:provider, :provider_id])
+  end
+
+  def validate_timezone(changeset) do
+    changeset
+    |> validate_inclusion(:timezone, Tzdata.zone_list())
   end
 
   defp type_from_provider(:github, "Organization"), do: :organization

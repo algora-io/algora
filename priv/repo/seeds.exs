@@ -4,7 +4,8 @@
 
 alias Algora.Repo
 alias Algora.Users.{User, Identity}
-alias Algora.Contracts.Contract
+alias Algora.Contracts.{Contract, Timesheet}
+alias Algora.Payments.Transaction
 alias Algora.Organizations.Member
 
 defmodule Seeds do
@@ -14,6 +15,14 @@ defmodule Seeds do
       conflict_target: conflict_target,
       returning: true
     ]
+  end
+
+  def to_datetime(days_offset) do
+    DateTime.new!(
+      Date.add(Date.utc_today(), days_offset),
+      ~T[00:00:00.000000],
+      "Etc/UTC"
+    )
   end
 end
 
@@ -36,6 +45,7 @@ user =
         "https://static.wikia.nocookie.net/silicon-valley/images/1/1f/Erlich_Bachman.jpg",
       location: "Palo Alto, CA",
       country: "US",
+      timezone: "America/Los_Angeles",
       tech_stack: ["Python", "JavaScript", "Ruby"],
       featured: true,
       fee_pct: 19,
@@ -82,6 +92,7 @@ org =
         "https://mattingly.design/articles/wp-content/uploads/2020/07/silicon-valley-logo-story-arc.jpg",
       location: "Palo Alto, CA",
       country: "US",
+      timezone: "America/Los_Angeles",
       stargazers_count: 2481,
       domain: "piedpiper.com",
       tech_stack: ["C", "Java", "Python"],
@@ -108,16 +119,137 @@ _member =
     Seeds.upsert_opts([:user_id, :org_id])
   )
 
-_contract =
+hourly_rate = Decimal.new("75.00")
+hours_per_week = 40
+amount = Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
+
+original_contract_id = Nanoid.generate()
+
+contract1 =
+  Repo.insert!(%Contract{
+    id: original_contract_id,
+    provider_id: user.id,
+    client_id: org.id,
+    status: :completed,
+    hourly_rate: hourly_rate,
+    hours_per_week: hours_per_week,
+    start_date: Seeds.to_datetime(-21),
+    end_date: Seeds.to_datetime(-14),
+    total_paid: Decimal.new("0"),
+    sequence_number: 1,
+    original_contract_id: original_contract_id
+  })
+
+contract2 =
+  Repo.insert!(%Contract{
+    id: Nanoid.generate(),
+    provider_id: user.id,
+    client_id: org.id,
+    status: :completed,
+    hourly_rate: hourly_rate,
+    hours_per_week: hours_per_week,
+    start_date: Seeds.to_datetime(-14),
+    end_date: Seeds.to_datetime(-7),
+    total_paid: Decimal.new("0"),
+    sequence_number: 2,
+    original_contract_id: original_contract_id
+  })
+
+contract3 =
   Repo.insert!(%Contract{
     id: Nanoid.generate(),
     provider_id: user.id,
     client_id: org.id,
     status: :active,
-    hourly_rate: Decimal.new("75.00"),
-    hours_per_week: 40,
-    start_date: Date.utc_today(),
-    end_date: Date.add(Date.utc_today(), 7),
+    hourly_rate: hourly_rate,
+    hours_per_week: hours_per_week,
+    start_date: Seeds.to_datetime(-7),
+    end_date: Seeds.to_datetime(0),
     total_paid: Decimal.new("0"),
-    sequence_number: 1
+    sequence_number: 3,
+    original_contract_id: original_contract_id
+  })
+
+timesheet1 =
+  Repo.insert!(%Timesheet{
+    id: Nanoid.generate(),
+    contract_id: contract1.id,
+    hours_worked: hours_per_week,
+    start_date: Seeds.to_datetime(-21),
+    end_date: Seeds.to_datetime(-14)
+  })
+
+timesheet2 =
+  Repo.insert!(%Timesheet{
+    id: Nanoid.generate(),
+    contract_id: contract2.id,
+    hours_worked: hours_per_week,
+    start_date: Seeds.to_datetime(-14),
+    end_date: Seeds.to_datetime(-7)
+  })
+
+timesheet3 =
+  Repo.insert!(%Timesheet{
+    id: Nanoid.generate(),
+    contract_id: contract3.id,
+    hours_worked: hours_per_week,
+    start_date: Seeds.to_datetime(-7),
+    end_date: Seeds.to_datetime(0)
+  })
+
+charge1 =
+  Repo.insert!(%Transaction{
+    id: Nanoid.generate(),
+    contract_id: contract1.id,
+    original_contract_id: original_contract_id,
+    amount: amount,
+    currency: "USD",
+    type: :charge,
+    status: :succeeded
+  })
+
+charge2 =
+  Repo.insert!(%Transaction{
+    id: Nanoid.generate(),
+    contract_id: contract2.id,
+    original_contract_id: original_contract_id,
+    amount: amount,
+    currency: "USD",
+    type: :charge,
+    status: :succeeded
+  })
+
+charge3 =
+  Repo.insert!(%Transaction{
+    id: Nanoid.generate(),
+    contract_id: contract3.id,
+    original_contract_id: original_contract_id,
+    amount: amount,
+    currency: "USD",
+    type: :charge,
+    status: :succeeded
+  })
+
+transfer1 =
+  Repo.insert!(%Transaction{
+    id: Nanoid.generate(),
+    contract_id: contract1.id,
+    original_contract_id: original_contract_id,
+    timesheet_id: timesheet1.id,
+    amount: amount,
+    currency: "USD",
+    type: :transfer,
+    status: :succeeded
+  })
+
+transfer2 =
+  Repo.insert!(%Transaction{
+    id: Nanoid.generate(),
+    contract_id: contract2.id,
+    original_contract_id: original_contract_id,
+    timesheet_id: timesheet2.id,
+    amount: amount,
+    currency: "USD",
+    type: :transfer,
+    status: :succeeded
   })

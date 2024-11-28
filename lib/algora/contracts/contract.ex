@@ -6,8 +6,8 @@ defmodule Algora.Contracts.Contract do
     field :sequence_number, :integer, default: 1
     field :hourly_rate, :decimal
     field :hours_per_week, :integer
-    field :start_date, :date
-    field :end_date, :date
+    field :start_date, :utc_datetime_usec
+    field :end_date, :utc_datetime_usec
     field :total_paid, :decimal, default: Decimal.new(0)
 
     belongs_to :original_contract, Algora.Contracts.Contract

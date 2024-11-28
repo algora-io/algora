@@ -956,18 +956,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
       {nil, _} ->
         nil
 
-      {timesheet, nil} ->
-        {:pending_release, timesheet}
-
-      {timesheet, %{stripe_transfer_id: nil, status: :processing}} ->
-        {:processing, timesheet}
-
-      {timesheet, transaction = %{stripe_transfer_id: transfer_id}}
-      when not is_nil(transfer_id) ->
-        {:completed, timesheet, transaction}
-
-      {timesheet, _} ->
-        {:pending_release, timesheet}
+      {timesheet, transaction} ->
+        cond do
+          transaction.type == :transfer -> {:completed, timesheet, transaction}
+          transaction.type == :charge -> {:pending_release, timesheet}
+          transaction.type == :refund -> {:refunded, timesheet}
+        end
     end
   end
 

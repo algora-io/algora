@@ -571,22 +571,24 @@ defmodule DatabaseMigration do
   end
 
   def run!() do
-    # input_file = ".local/prod_db.sql"
+    input_file = ".local/prod_db.sql"
     output_file = ".local/prod_db_new.sql"
 
-    # IO.puts("Processing dump...")
-    # :ok = process_dump(input_file, output_file)
+    if File.exists?(input_file) or File.exists?(output_file) do
+      # IO.puts("Processing dump...")
+      # :ok = process_dump(input_file, output_file)
 
-    IO.puts("Clearing tables...")
-    :ok = clear_tables!()
+      IO.puts("Clearing tables...")
+      :ok = clear_tables!()
 
-    IO.puts("Importing new data...")
-    {:ok, _} = psql(["-f", output_file])
+      IO.puts("Importing new data...")
+      {:ok, _} = psql(["-f", output_file])
 
-    IO.puts("Backfilling repositories...")
-    :ok = Algora.Admin.backfill_repos!()
+      IO.puts("Backfilling repositories...")
+      :ok = Algora.Admin.backfill_repos!()
 
-    IO.puts("Migration completed successfully")
+      IO.puts("Migration completed successfully")
+    end
   end
 end
 

@@ -48,6 +48,9 @@ defmodule Algora.Users.User do
     field :slack_url, :string
     field :linkedin_url, :string
 
+    field :og_title, :string
+    field :og_image_url, :string
+
     has_many :identities, Identity
     has_many :memberships, Algora.Organizations.Member, foreign_key: :user_id
     has_many :members, Algora.Organizations.Member, foreign_key: :org_id

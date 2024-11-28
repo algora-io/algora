@@ -40,6 +40,9 @@ defmodule Algora.Repo.Migrations.CreateUserTables do
       add :slack_url, :string
       add :linkedin_url, :string
 
+      add :og_title, :string
+      add :og_image_url, :string
+
       timestamps()
     end
 

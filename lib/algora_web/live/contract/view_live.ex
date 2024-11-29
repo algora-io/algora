@@ -43,7 +43,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
           <div class="grid grid-cols-4 gap-4 mt-8">
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">Hourly Rate</div>
+                <div class="text-sm text-muted-foreground mb-2">Hourly rate</div>
                 <div class="text-2xl font-semibold font-display">
                   <%= Money.format!(@contract.hourly_rate, "USD") %>/hr
                 </div>
@@ -52,15 +52,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">Hours per Week</div>
+                <div class="text-sm text-muted-foreground mb-2">Hours per week</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= @contract.hours_per_week %>h
+                  <%= @contract.hours_per_week %>
                 </div>
               </.card_content>
             </.card>
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">In Escrow</div>
+                <div class="text-sm text-muted-foreground mb-2">In escrow</div>
                 <div class="text-2xl font-semibold font-display">
                   <%= Money.format!(@escrow_amount, "USD") %>
                 </div>
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </.card>
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">Total Paid</div>
+                <div class="text-sm text-muted-foreground mb-2">Total paid</div>
                 <div class="text-2xl font-semibold font-display">
                   <%= Money.format!(@contract.total_paid, "USD") %>
                 </div>
@@ -455,13 +455,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Payout amount (<%= @contract.hours_per_week %> hours x <%= Money.format!(
+                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.format!(
                         @contract.hourly_rate,
                         "USD"
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@escrow_amount, "USD") %>
+                      <%= Money.format!(calculate_amount(@contract, @timesheet), "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -472,25 +472,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       -<%= Money.format!(@escrow_amount, "USD") %>
                     </dd>
                   </div>
-                  <div class="flex justify-between opacity-0">
-                    <dt class="text-muted-foreground">
-                      Algora fees (<%= @fee_data.fee_percentage %>%)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(
-                          @escrow_amount,
-                          Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
-                        ),
-                        "USD"
-                      ) %>
-                    </dd>
-                  </div>
+                  <div class="h-5"></div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(0, "USD") %>
+                      <%= Money.format!(
+                        Decimal.sub(calculate_amount(@contract, @timesheet), @escrow_amount),
+                        "USD"
+                      ) %>
                     </dd>
                   </div>
                 </dl>
@@ -612,7 +602,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.format!(
-                        Decimal.mult(@escrow_amount, Decimal.new("1.23")),
+                        Decimal.mult(
+                          @escrow_amount,
+                          Decimal.add(
+                            Decimal.new("1"),
+                            Decimal.add(
+                              Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100)),
+                              Decimal.new("0.04")
+                            )
+                          )
+                        ),
                         "USD"
                       ) %>
                     </dd>
@@ -810,41 +809,41 @@ defmodule AlgoraWeb.Contract.ViewLive do
       ])
 
     # Get all contracts in the chain
-    contract_chain = get_contract_chain(contract)
+    contracts = get_contract_chain(contract)
 
-    # Calculate total_paid from completed transfers across all contracts
+    # Calculate total paid from all transfers across the contract chain
     total_paid =
-      contract_chain
+      contracts
       |> Enum.flat_map(& &1.transactions)
       |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Decimal.new(0), &Decimal.add(&1.amount, &2))
+      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
 
-    contract = Map.put(contract, :total_paid, total_paid)
+    timesheet = get_latest_timesheet(contract)
 
-    transactions = Contracts.get_all_transactions_for_contract(contract.id)
+    latest_charge =
+      contract.transactions
+      |> Enum.filter(&(&1.type == :charge))
+      |> Enum.sort_by(& &1.inserted_at, :desc)
+      |> List.first()
 
     {:ok, thread} = get_or_create_thread(contract)
+    messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
 
-    messages =
-      Chat.list_messages(thread.id)
-      |> Repo.preload(:sender)
-
-    fee_data = calculate_fee_data(contract)
-
-    escrow_amount = Decimal.mult(contract.hourly_rate, Decimal.new(contract.hours_per_week))
 
     {:ok,
      socket
-     |> assign(:contract, contract)
-     |> assign(:transactions, transactions)
-     |> assign(:escrow_amount, escrow_amount)
+     # Update the contract's total_paid
+     |> assign(:contract, %{contract | total_paid: total_paid})
+     |> assign(:timesheet, timesheet)
+     |> assign(:latest_charge, latest_charge)
+     |> assign(:escrow_amount, calculate_escrow_amount(contract))
      |> assign(:page_title, "Contract with #{contract.provider.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)
      |> assign(:show_release_renew_modal, false)
      |> assign(:show_release_modal, false)
      |> assign(:show_dispute_modal, false)
-     |> assign(:fee_data, fee_data)}
+     |> assign(:fee_data, calculate_fee_data(contract))}
   end
 
   def handle_event("release_and_renew", %{"feedback" => feedback}, socket) do
@@ -901,6 +900,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
   end
 
   defp calculate_fee_data(contract) do
+    # Get all contracts in the chain
+    contracts = get_contract_chain(contract)
+
+    # Calculate total paid from all transfers
+    total_paid =
+      contracts
+      |> Enum.flat_map(& &1.transactions)
+      |> Enum.filter(&(&1.type == :transfer))
+      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+
     fee_tiers = [
       %{threshold: 0, fee: 19},
       %{threshold: 3000, fee: 15},
@@ -909,10 +918,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
     ]
 
     %{
-      total_paid: contract.total_paid,
+      total_paid: total_paid,
       fee_tiers: fee_tiers,
-      fee_percentage: calculate_fee_percentage(contract.total_paid),
-      progress: calculate_progress(contract.total_paid)
+      fee_percentage: calculate_fee_percentage(total_paid),
+      progress: calculate_progress(total_paid)
     }
   end
 
@@ -926,18 +935,22 @@ defmodule AlgoraWeb.Contract.ViewLive do
   end
 
   defp calculate_progress(total_paid) do
-    case {
-      Decimal.compare(total_paid, Decimal.new("5000")),
-      Decimal.compare(total_paid, Decimal.new("3000"))
-    } do
-      {:lt, :gt} ->
-        start_percent = 40.0
-        end_percent = 60.0
-        progress_in_range = (Decimal.to_float(total_paid) - 3000) / (5000 - 3000)
-        start_percent + (end_percent - start_percent) * progress_in_range
+    cond do
+      # Over $15,000 - 100% progress
+      Decimal.compare(total_paid, Decimal.new("15000")) != :lt ->
+        100.0
 
-      _ ->
-        30.0
+      # Between $5,000 and $15,000 - Calculate progress in this range
+      Decimal.compare(total_paid, Decimal.new("5000")) != :lt ->
+        66.6 + Decimal.to_float(Decimal.sub(total_paid, Decimal.new("5000"))) / 10000 * 33.3
+
+      # Between $3,000 and $5,000 - Calculate progress in this range
+      Decimal.compare(total_paid, Decimal.new("3000")) != :lt ->
+        33.3 + Decimal.to_float(Decimal.sub(total_paid, Decimal.new("3000"))) / 2000 * 33.3
+
+      # Under $3,000 - Calculate progress in first range
+      true ->
+        Decimal.to_float(total_paid) / 3000 * 33.3
     end
   end
 
@@ -978,5 +991,82 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
   defp calculate_amount(contract, timesheet) do
     Decimal.mult(contract.hourly_rate, Decimal.new(timesheet.hours_worked))
+  end
+
+  def handle_event("show_release_modal", %{"contract_id" => contract_id}, socket) do
+    {:noreply, assign(socket, :show_release_modal, true)}
+  end
+
+  def handle_event("show_dispute_modal", %{"contract_id" => contract_id}, socket) do
+    {:noreply, assign(socket, :show_dispute_modal, true)}
+  end
+
+  def handle_event("show_release_renew_modal", %{"contract_id" => contract_id}, socket) do
+    {:noreply, assign(socket, :show_release_renew_modal, true)}
+  end
+
+  def handle_event("close_drawer", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_release_modal, false)
+     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_dispute_modal, false)}
+  end
+
+  def handle_event("release_payment", %{"feedback" => feedback}, socket) do
+    contract = socket.assigns.contract
+
+    {:ok, {_updated_contract, _charge, _transfer}} =
+      Contracts.process_payment(contract, %{
+        stripe_charge_id: "ch_xxx",
+        stripe_transfer_id: "tr_xxx",
+        stripe_metadata: %{},
+        fee_percentage: socket.assigns.fee_data.fee_percentage
+      })
+
+    {:ok, _review} =
+      Reviews.create_review(%{
+        contract_id: contract.id,
+        reviewer_id: socket.assigns.current_user.id,
+        reviewee_id: contract.provider_id,
+        rating: 5,
+        content: feedback,
+        visibility: :public
+      })
+
+    {:noreply,
+     socket
+     |> assign(:show_release_modal, false)
+     |> put_flash(:info, "Payment released successfully")}
+  end
+
+  def handle_event("raise_dispute", %{"reason" => reason}, socket) do
+    # Add dispute handling logic here
+
+    {:noreply,
+     socket
+     |> assign(:show_dispute_modal, false)
+     |> put_flash(:info, "Dispute raised successfully")}
+  end
+
+  defp calculate_escrow_amount(contract) do
+    # Get all contracts in the chain
+    contracts = get_contract_chain(contract)
+
+    # Sum all charges across all contracts
+    total_charged =
+      contracts
+      |> Enum.flat_map(& &1.transactions)
+      |> Enum.filter(&(&1.type == :charge))
+      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+
+    # Sum all transfers across all contracts
+    total_transferred =
+      contracts
+      |> Enum.flat_map(& &1.transactions)
+      |> Enum.filter(&(&1.type == :transfer))
+      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+
+    Decimal.sub(total_charged, total_transferred)
   end
 end

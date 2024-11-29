@@ -8,8 +8,7 @@ alias Algora.Organizations.Member
 alias Algora.Repo
 alias Algora.Users
 alias Algora.Users.{User, Identity}
-
-import AlgoraWeb.WebhooksController
+alias Algora.Payments.{Customer, Account, PaymentMethod}
 
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity])
 

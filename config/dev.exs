@@ -12,6 +12,9 @@ config :stripity_stripe,
   api_key: System.get_env("STRIPE_SECRET_KEY")
 
 config :algora, :stripe,
+  secret_key: System.get_env("STRIPE_SECRET_KEY"),
+  publishable_key: System.get_env("STRIPE_PUBLISHABLE_KEY"),
+  webhook_secret: System.get_env("STRIPE_WEBHOOK_SECRET"),
   test_customer_id: System.get_env("STRIPE_TEST_CUSTOMER_ID"),
   test_account_id: System.get_env("STRIPE_TEST_ACCOUNT_ID")
 

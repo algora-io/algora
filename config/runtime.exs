@@ -29,6 +29,9 @@ if config_env() == :prod do
     webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
     private_key: System.fetch_env!("GITHUB_PRIVATE_KEY")
 
+  config :stripity_stripe,
+    api_key: System.fetch_env!("STRIPE_SECRET_KEY")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

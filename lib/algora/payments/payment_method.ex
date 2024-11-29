@@ -6,6 +6,7 @@ defmodule Algora.Payments.PaymentMethod do
     field :provider_id, :string
     field :provider_meta, :map
     field :provider_customer_id, :string
+    field :is_default, :boolean, default: true
 
     belongs_to :customer, Algora.Payments.Customer
 

@@ -13,7 +13,7 @@ defmodule Algora.Repo.Migrations.CreateCustomers do
       timestamps()
     end
 
-    create index(:customers, [:user_id])
     create unique_index(:customers, [:provider, :provider_id])
+    create unique_index(:customers, [:user_id])
   end
 end

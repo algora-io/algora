@@ -67,6 +67,8 @@ defmodule Algora.Users.User do
     has_many :provider_contracts, Algora.Contracts.Contract, foreign_key: :provider_id
     has_many :client_contracts, Algora.Contracts.Contract, foreign_key: :client_id
 
+    has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
+
     timestamps()
   end
 

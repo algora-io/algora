@@ -14,6 +14,10 @@ defmodule Algora.Payments.Customer do
 
     belongs_to :user, Algora.Users.User
 
+    has_one :default_payment_method, Algora.Payments.PaymentMethod,
+      foreign_key: :customer_id,
+      where: [is_default: true]
+
     timestamps()
   end
 
@@ -21,5 +25,6 @@ defmodule Algora.Payments.Customer do
     customer
     |> cast(attrs, [:user_id, :provider, :provider_id, :provider_meta, :name, :region])
     |> validate_required([:user_id, :provider, :provider_id, :provider_meta, :name, :region])
+    |> unique_constraint(:user_id)
   end
 end

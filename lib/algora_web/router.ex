@@ -48,8 +48,6 @@ defmodule AlgoraWeb.Router do
       live "/user/installations", User.InstallationsLive, :index
 
       live "/@/:handle", User.ProfileLive, :index
-
-      live "/contracts/:id", Contract.ViewLive
     end
 
     live_session :org,
@@ -60,6 +58,7 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/bounties/new", Org.CreateBountyLive, :new
       live "/org/:org_handle/jobs/new", Org.CreateJobLive, :new
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
+      live "/org/:org_handle/contracts/:id", Contract.ViewLive
       live "/org/:org_handle/projects", Project.IndexLive, :index
       # live "/org/:org_handle/projects/:id", Project.ViewLive
       live "/org/:org_handle/jobs", Org.JobsLive, :index

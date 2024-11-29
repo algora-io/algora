@@ -302,17 +302,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-4">
-                    <div class="flex items-center gap-4">
-                      <div class="h-9 w-9 rounded-full bg-muted flex items-center justify-center">
-                        <.icon name="tabler-file-check" class="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div class="font-medium">Contract signed by both parties</div>
-                        <div class="text-sm text-muted-foreground">
-                          <%= Calendar.strftime(@contract.start_date, "%b %d, %Y") %>
-                        </div>
-                      </div>
-                    </div>
+                    <%= for activity <- get_contract_activity(@contract) do %>
+                      <.timeline_activity activity={activity} />
+                    <% end %>
                   </div>
                 </.card_content>
               </.card>
@@ -829,7 +821,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
     {:ok, thread} = get_or_create_thread(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
 
-
     {:ok,
      socket
      # Update the contract's total_paid
@@ -1068,5 +1059,112 @@ defmodule AlgoraWeb.Contract.ViewLive do
       |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
 
     Decimal.sub(total_charged, total_transferred)
+  end
+
+  defp get_contract_activity(contract) do
+    # Get all contracts in the chain ordered by start date (oldest first)
+    contracts =
+      get_contract_chain(contract)
+      |> Enum.sort_by(& &1.start_date, :asc)
+
+    # Build timeline by processing each contract period sequentially
+    contracts
+    |> Enum.with_index()
+    |> Enum.flat_map(fn {contract, index} ->
+      [
+        # 0. Initial escrow charge
+        contract.transactions
+        |> Enum.filter(&(&1.type == :charge))
+        |> Enum.map(fn transaction ->
+          %{
+            type: :escrow,
+            description: "Payment escrowed: #{Money.format!(transaction.amount, "USD")}",
+            date: transaction.inserted_at,
+            amount: transaction.amount
+          }
+        end),
+
+        # 1. Contract start
+        if(index != 0) do
+          %{
+            type: :renewal,
+            description: "Contract renewed for another period",
+            date: contract.inserted_at,
+            amount: nil
+          }
+        end,
+
+        # 2. Timesheet submissions
+        contract.timesheets
+        |> Enum.sort_by(& &1.inserted_at)
+        |> Enum.map(fn timesheet ->
+          %{
+            type: :timesheet,
+            description: "Timesheet submitted for #{timesheet.hours_worked} hours",
+            date: timesheet.inserted_at,
+            amount: calculate_amount(contract, timesheet)
+          }
+        end),
+
+        # 3. Payment releases (transfers)
+        contract.transactions
+        |> Enum.filter(&(&1.type == :transfer))
+        |> Enum.sort_by(& &1.inserted_at)
+        |> Enum.map(fn transaction ->
+          %{
+            type: :release,
+            description: "Payment released: #{Money.format!(transaction.amount, "USD")}",
+            date: transaction.inserted_at,
+            amount: transaction.amount
+          }
+        end)
+      ]
+      |> List.flatten()
+    end)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.sort_by(& &1.date, {:desc, DateTime})
+  end
+
+  defp timeline_activity(assigns) do
+    ~H"""
+    <div class="flex items-center gap-4">
+      <div class={[
+        "h-9 w-9 rounded-full flex items-center justify-center",
+        activity_background_class(@activity.type)
+      ]}>
+        <.icon name={activity_icon(@activity.type)} class="w-5 h-5" />
+      </div>
+      <div class="flex-1">
+        <div class="font-medium">
+          <%= @activity.description %>
+        </div>
+        <div class="text-sm text-muted-foreground">
+          <%= Calendar.strftime(@activity.date, "%b %d, %Y, %H:%M:%S") %>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp activity_icon(type) do
+    case type do
+      :signed -> "tabler-file-check"
+      :timesheet -> "tabler-clock"
+      :escrow -> "tabler-wallet"
+      :release -> "tabler-cash"
+      :refund -> "tabler-arrow-back"
+      :renewal -> "tabler-refresh"
+    end
+  end
+
+  defp activity_background_class(type) do
+    case type do
+      :signed -> "bg-primary/20"
+      :timesheet -> "bg-warning/20"
+      :escrow -> "bg-info/20"
+      :release -> "bg-success/20"
+      :refund -> "bg-destructive/20"
+      :renewal -> "bg-primary/20"
+    end
   end
 end

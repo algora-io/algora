@@ -883,6 +883,62 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
+  def handle_event("show_release_modal", %{"contract_id" => _contract_id}, socket) do
+    {:noreply, assign(socket, :show_release_modal, true)}
+  end
+
+  def handle_event("show_dispute_modal", %{"contract_id" => _contract_id}, socket) do
+    {:noreply, assign(socket, :show_dispute_modal, true)}
+  end
+
+  def handle_event("show_release_renew_modal", %{"contract_id" => _contract_id}, socket) do
+    {:noreply, assign(socket, :show_release_renew_modal, true)}
+  end
+
+  def handle_event("close_drawer", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_release_modal, false)
+     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_dispute_modal, false)}
+  end
+
+  def handle_event("release_payment", %{"feedback" => feedback}, socket) do
+    contract = socket.assigns.contract
+
+    {:ok, {_updated_contract, _charge, _transfer}} =
+      Contracts.process_payment(contract, %{
+        stripe_charge_id: "ch_xxx",
+        stripe_transfer_id: "tr_xxx",
+        stripe_metadata: %{},
+        fee_percentage: socket.assigns.fee_data.fee_percentage
+      })
+
+    {:ok, _review} =
+      Reviews.create_review(%{
+        contract_id: contract.id,
+        reviewer_id: socket.assigns.current_user.id,
+        reviewee_id: contract.provider_id,
+        rating: 5,
+        content: feedback,
+        visibility: :public
+      })
+
+    {:noreply,
+     socket
+     |> assign(:show_release_modal, false)
+     |> put_flash(:info, "Payment released successfully")}
+  end
+
+  def handle_event("raise_dispute", %{"reason" => _reason}, socket) do
+    # Add dispute handling logic here
+
+    {:noreply,
+     socket
+     |> assign(:show_dispute_modal, false)
+     |> put_flash(:info, "Dispute raised successfully")}
+  end
+
   defp get_or_create_thread(contract) do
     case Chat.get_thread_for_users(contract.client_id, contract.provider_id) do
       nil -> Chat.create_direct_thread(contract.client, contract.provider)
@@ -984,61 +1040,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     Decimal.mult(contract.hourly_rate, Decimal.new(timesheet.hours_worked))
   end
 
-  def handle_event("show_release_modal", %{"contract_id" => contract_id}, socket) do
-    {:noreply, assign(socket, :show_release_modal, true)}
-  end
 
-  def handle_event("show_dispute_modal", %{"contract_id" => contract_id}, socket) do
-    {:noreply, assign(socket, :show_dispute_modal, true)}
-  end
-
-  def handle_event("show_release_renew_modal", %{"contract_id" => contract_id}, socket) do
-    {:noreply, assign(socket, :show_release_renew_modal, true)}
-  end
-
-  def handle_event("close_drawer", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_release_modal, false)
-     |> assign(:show_release_renew_modal, false)
-     |> assign(:show_dispute_modal, false)}
-  end
-
-  def handle_event("release_payment", %{"feedback" => feedback}, socket) do
-    contract = socket.assigns.contract
-
-    {:ok, {_updated_contract, _charge, _transfer}} =
-      Contracts.process_payment(contract, %{
-        stripe_charge_id: "ch_xxx",
-        stripe_transfer_id: "tr_xxx",
-        stripe_metadata: %{},
-        fee_percentage: socket.assigns.fee_data.fee_percentage
-      })
-
-    {:ok, _review} =
-      Reviews.create_review(%{
-        contract_id: contract.id,
-        reviewer_id: socket.assigns.current_user.id,
-        reviewee_id: contract.provider_id,
-        rating: 5,
-        content: feedback,
-        visibility: :public
-      })
-
-    {:noreply,
-     socket
-     |> assign(:show_release_modal, false)
-     |> put_flash(:info, "Payment released successfully")}
-  end
-
-  def handle_event("raise_dispute", %{"reason" => reason}, socket) do
-    # Add dispute handling logic here
-
-    {:noreply,
-     socket
-     |> assign(:show_dispute_modal, false)
-     |> put_flash(:info, "Dispute raised successfully")}
-  end
 
   defp calculate_escrow_amount(contract) do
     # Get all contracts in the chain

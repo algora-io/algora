@@ -48,4 +48,20 @@ defmodule Algora.Organizations do
         where: m.user_id == ^user.id and m.org_id == o.id
     )
   end
+
+  def list_org_members(org) do
+    Repo.all(
+      from u in User,
+        join: m in assoc(u, :memberships),
+        where: m.org_id == ^org.id and m.user_id == u.id
+    )
+  end
+
+  def list_org_contractors(org) do
+    Repo.all(
+      from u in User,
+        join: c in assoc(u, :provider_contracts),
+        where: c.client_id == ^org.id and c.provider_id == u.id
+    )
+  end
 end

@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Reviews, Repo, Money}
+  alias Algora.{Contracts, Chat, Reviews, Repo, Money, Organizations}
 
   def render(assigns) do
     ~H"""
@@ -234,7 +234,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <div class="grid grid-cols-2 gap-2">
                 <.card>
                   <.card_header>
-                    <.card_title>Company</.card_title>
+                    <.card_title>Client</.card_title>
                   </.card_header>
                   <.card_content>
                     <div class="flex items-center gap-4">
@@ -248,47 +248,60 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         </div>
                       </div>
                     </div>
+                    <div class="pt-6 flex flex-wrap gap-2">
+                      <%= for tech <- @contract.client.tech_stack do %>
+                        <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                          <%= tech %>
+                        </span>
+                      <% end %>
+                    </div>
+                    <div class="pt-6 flex -space-x-1">
+                      <%= for member <- @org_members do %>
+                        <.avatar class="h-9 w-9 ring-2 ring-background">
+                          <.avatar_image src={member.avatar_url} />
+                          <.avatar_fallback>
+                            <%= String.slice(member.name, 0, 2) %>
+                          </.avatar_fallback>
+                        </.avatar>
+                      <% end %>
+                    </div>
                   </.card_content>
                 </.card>
 
                 <.card>
                   <.card_header>
-                    <.card_title>Developer</.card_title>
+                    <.card_title>Provider</.card_title>
                   </.card_header>
                   <.card_content>
-                    <div class="space-y-4">
-                      <div class="flex items-center gap-4">
-                        <.avatar class="h-16 w-16">
-                          <.avatar_image src={@contract.provider.avatar_url} />
-                        </.avatar>
-                        <div>
-                          <div class="font-medium text-lg"><%= @contract.provider.name %></div>
-                          <div class="text-sm text-muted-foreground">
-                            @<%= @contract.provider.handle %>
-                          </div>
+                    <div class="flex items-center gap-4">
+                      <.avatar class="h-16 w-16">
+                        <.avatar_image src={@contract.provider.avatar_url} />
+                      </.avatar>
+                      <div>
+                        <div class="font-medium text-lg"><%= @contract.provider.name %></div>
+                        <div class="text-sm text-muted-foreground">
+                          @<%= @contract.provider.handle %>
                         </div>
                       </div>
-
-                      <div class="pt-4 space-y-2">
+                    </div>
+                    <div class="pt-6 flex flex-wrap gap-2">
+                      <%= for tech <- @contract.provider.tech_stack do %>
+                        <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                          <%= tech %>
+                        </span>
+                      <% end %>
+                    </div>
+                    <div class="pt-6 space-y-2">
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-map-pin" class="w-4 h-4" />
+                        <%= @contract.provider.location %>
+                      </div>
+                      <%= if @contract.provider.timezone do %>
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-map-pin" class="w-4 h-4" />
-                          <%= @contract.provider.location %>
+                          <.icon name="tabler-clock" class="w-4 h-4" />
+                          <%= Algora.Time.friendly_timezone(@contract.provider.timezone) %>
                         </div>
-                        <%= if @contract.provider.timezone do %>
-                          <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                            <.icon name="tabler-clock" class="w-4 h-4" />
-                            <%= Algora.Time.friendly_timezone(@contract.provider.timezone) %>
-                          </div>
-                        <% end %>
-                      </div>
-
-                      <div class="flex flex-wrap gap-2 pt-2">
-                        <%= for skill <- @contract.provider.tech_stack do %>
-                          <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                            <%= skill %>
-                          </span>
-                        <% end %>
-                      </div>
+                      <% end %>
                     </div>
                   </.card_content>
                 </.card>
@@ -834,7 +847,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:show_release_renew_modal, false)
      |> assign(:show_release_modal, false)
      |> assign(:show_dispute_modal, false)
-     |> assign(:fee_data, calculate_fee_data(contract))}
+     |> assign(:fee_data, calculate_fee_data(contract))
+     |> assign(:org_members, Organizations.list_org_members(contract.client))
+     |> assign(:tech_stack, ["Python", "AWS", "React", "Node.js"])}
   end
 
   def handle_event("release_and_renew", %{"feedback" => feedback}, socket) do
@@ -1039,8 +1054,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
   defp calculate_amount(contract, timesheet) do
     Decimal.mult(contract.hourly_rate, Decimal.new(timesheet.hours_worked))
   end
-
-
 
   defp calculate_escrow_amount(contract) do
     # Get all contracts in the chain

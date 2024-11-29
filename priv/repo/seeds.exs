@@ -3,7 +3,7 @@
 #     mix run priv/repo/seeds.exs <your-github-id>
 
 require Logger
-alias Algora.Repo
+alias Algora.{Repo, Util}
 alias Algora.Users.{User, Identity}
 alias Algora.Contracts.{Contract, Timesheet}
 alias Algora.Chat.{Thread, Message, Participant}
@@ -116,7 +116,6 @@ defmodule Seeds do
       _transfer =
         Repo.insert!(%Transaction{
           id: Nanoid.generate(),
-          original_transaction_id: charge.id,
           contract_id: contract.id,
           original_contract_id: original_contract_id,
           timesheet_id: timesheet.id,
@@ -134,22 +133,6 @@ defmodule Seeds do
 
     {contract, timesheet}
   end
-
-  def to_plain_map(struct) when is_struct(struct) do
-    struct
-    |> Map.from_struct()
-    |> to_plain_map()
-  end
-
-  def to_plain_map(map) when is_map(map) do
-    Map.new(map, fn {k, v} -> {k, to_plain_map(v)} end)
-  end
-
-  def to_plain_map(list) when is_list(list) do
-    Enum.map(list, &to_plain_map/1)
-  end
-
-  def to_plain_map(value), do: value
 end
 
 github_id =
@@ -348,7 +331,7 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
         id: Nanoid.generate(),
         provider: "stripe",
         provider_id: cus.id,
-        provider_meta: Map.from_struct(cus),
+        provider_meta: Util.normalize_struct(cus),
         name: cus.name,
         region: :US,
         user_id: pied_piper.id
@@ -362,7 +345,7 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
         id: Nanoid.generate(),
         provider: "stripe",
         provider_id: pm.id,
-        provider_meta: Map.from_struct(pm),
+        provider_meta: Util.normalize_struct(pm),
         provider_customer_id: cus.id,
         customer_id: customer.id
       },
@@ -378,7 +361,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
       id: Nanoid.generate(),
       provider: "stripe",
       provider_id: acct.id,
-      provider_meta: Seeds.to_plain_map(acct),
+      provider_meta: Util.normalize_struct(acct),
       name: acct.business_profile.name,
       details_submitted: acct.details_submitted,
       charges_enabled: acct.charges_enabled,

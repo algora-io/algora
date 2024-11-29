@@ -111,24 +111,26 @@ defmodule Seeds do
           )
       })
 
-    # Create transfer
-    _transfer =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        original_transaction_id: charge.id,
-        contract_id: contract.id,
-        original_contract_id: original_contract_id,
-        timesheet_id: timesheet.id,
-        amount: Decimal.mult(hourly_rate, Decimal.new(hours_worked)),
-        currency: "USD",
-        type: :transfer,
-        status: :succeeded,
-        inserted_at:
-          Seeds.to_datetime(
-            end_date.day,
-            Time.new!(Enum.random(19..23), Enum.random(0..59), Enum.random(0..59), 0)
-          )
-      })
+    if status == :completed do
+      # Create transfer
+      _transfer =
+        Repo.insert!(%Transaction{
+          id: Nanoid.generate(),
+          original_transaction_id: charge.id,
+          contract_id: contract.id,
+          original_contract_id: original_contract_id,
+          timesheet_id: timesheet.id,
+          amount: Decimal.mult(hourly_rate, Decimal.new(hours_worked)),
+          currency: "USD",
+          type: :transfer,
+          status: :succeeded,
+          inserted_at:
+            Seeds.to_datetime(
+              end_date.day,
+              Time.new!(Enum.random(19..23), Enum.random(0..59), Enum.random(0..59), 0)
+            )
+        })
+    end
 
     {contract, timesheet}
   end

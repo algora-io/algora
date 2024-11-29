@@ -492,7 +492,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
               </.card_content>
             </.card>
           </div>
-
           <div class="flex flex-col gap-8">
             <div>
               <h3 class="text-lg font-semibold mb-6">Algora Fee Tier</h3>
@@ -660,43 +659,56 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 Your feedback helps other companies make informed decisions.
               </.form_description>
             </.form_item>
-
-            <div class="flex gap-4">
-              <.button variant="outline" type="button" on_cancel="close_drawer">
-                Cancel
-              </.button>
-              <.button type="submit">
-                <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
-              </.button>
-            </div>
           </form>
 
-          <div>
+          <div class="flex flex-col gap-8">
             <.card>
               <.card_header>
-                <.card_title>Payment Details</.card_title>
+                <.card_title>Past Escrow Release</.card_title>
               </.card_header>
               <.card_content>
                 <dl class="space-y-4">
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Amount</dt>
-                    <dd class="font-semibold">
-                      <%= Money.format!(@escrow_amount, "USD") %>
+                    <dt class="text-muted-foreground">
+                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.format!(
+                        @contract.hourly_rate,
+                        "USD"
+                      ) %>/hr)
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(calculate_amount(@contract, @timesheet), "USD") %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Hours</dt>
-                    <dd class="font-semibold">20 hours</dd>
+                    <dt class="text-muted-foreground">
+                      Escrow balance
+                    </dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      -<%= Money.format!(@escrow_amount, "USD") %>
+                    </dd>
                   </div>
+                  <div class="h-px bg-border" />
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Rate</dt>
-                    <dd class="font-semibold">
-                      <%= Money.format!(@contract.hourly_rate, "USD") %>/hr
+                    <dt class="font-medium">Total Due</dt>
+                    <dd class="font-semibold font-display tabular-nums">
+                      <%= Money.format!(
+                        Decimal.sub(calculate_amount(@contract, @timesheet), @escrow_amount),
+                        "USD"
+                      ) %>
                     </dd>
                   </div>
                 </dl>
               </.card_content>
             </.card>
+
+            <div class="mt-auto flex gap-4 justify-end">
+              <.button variant="outline" type="button" on_cancel="close_drawer">
+                Cancel
+              </.button>
+              <.button type="submit" form="release-payment-form">
+                <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
+              </.button>
+            </div>
           </div>
         </div>
       </.drawer_content>
@@ -974,9 +986,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
     fee_tiers = [
       %{threshold: 0, fee: 19},
-      %{threshold: 3000, fee: 15},
-      %{threshold: 5000, fee: 10},
-      %{threshold: 15000, fee: 5}
+      %{threshold: 3_000, fee: 15},
+      %{threshold: 5_000, fee: 10},
+      %{threshold: 15_000, fee: 5}
     ]
 
     %{

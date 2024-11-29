@@ -5,6 +5,7 @@ defmodule Algora.Payments.PaymentMethod do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map
+    field :provider_customer_id, :string
 
     belongs_to :customer, Algora.Payments.Customer
 
@@ -13,7 +14,7 @@ defmodule Algora.Payments.PaymentMethod do
 
   def changeset(payment_method, attrs) do
     payment_method
-    |> cast(attrs, [:provider, :provider_id, :provider_meta])
-    |> validate_required([:provider, :provider_id, :provider_meta])
+    |> cast(attrs, [:provider, :provider_id, :provider_meta, :provider_customer_id])
+    |> validate_required([:provider, :provider_id, :provider_meta, :provider_customer_id])
   end
 end

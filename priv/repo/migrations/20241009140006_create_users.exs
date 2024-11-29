@@ -1,9 +1,7 @@
-defmodule Algora.Repo.Migrations.CreateUserTables do
+defmodule Algora.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   def change do
-    execute "CREATE EXTENSION IF NOT EXISTS citext", ""
-
     create table(:users) do
       add :provider, :string
       add :provider_id, :string
@@ -45,6 +43,9 @@ defmodule Algora.Repo.Migrations.CreateUserTables do
       add :og_title, :string
       add :og_image_url, :string
 
+      add :last_context, :string
+      add :need_avatar, :boolean, default: false
+
       timestamps()
     end
 
@@ -53,21 +54,5 @@ defmodule Algora.Repo.Migrations.CreateUserTables do
     create unique_index(:users, [:provider, :provider_id])
     create index(:users, [:featured])
     create index(:users, [:priority])
-
-    create table(:identities) do
-      add :user_id, references(:users, on_delete: :delete_all), null: false
-      add :provider, :string, null: false
-      add :provider_token, :string, null: false
-      add :provider_email, :string, null: false
-      add :provider_login, :string, null: false
-      add :provider_id, :string, null: false
-      add :provider_meta, :map, default: "{}", null: false
-
-      timestamps()
-    end
-
-    create index(:identities, [:user_id])
-    create index(:identities, [:provider])
-    create unique_index(:identities, [:user_id, :provider])
   end
 end

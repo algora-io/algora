@@ -24,6 +24,22 @@ defmodule Algora.Util do
     end
   end
 
+  def normalize_struct(struct) when is_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> normalize_struct()
+  end
+
+  def normalize_struct(map) when is_map(map) do
+    Map.new(map, fn {k, v} -> {k, normalize_struct(v)} end)
+  end
+
+  def normalize_struct(list) when is_list(list) do
+    Enum.map(list, &normalize_struct/1)
+  end
+
+  def normalize_struct(value), do: value
+
   # TODO: Implement this for all countries
   def locale_from_country_code("gr"), do: "el"
   def locale_from_country_code(country_code), do: country_code

@@ -1,14 +1,16 @@
 import Ecto.Query
 import Ecto.Changeset
 
-alias Algora.Admin
-alias Algora.Contracts.Contract
-alias Algora.Github
+alias Algora.{Admin, Github, Repo}
+
+alias Algora.Contracts
+alias Algora.Contracts.{Contract, Timesheet}
+alias Algora.Organizations
 alias Algora.Organizations.Member
-alias Algora.Repo
+alias Algora.Payments
+alias Algora.Payments.{Customer, Account, PaymentMethod, Transaction}
 alias Algora.Users
 alias Algora.Users.{User, Identity}
-alias Algora.Payments.{Customer, Account, PaymentMethod}
 
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity])
 

@@ -18,4 +18,11 @@ defmodule Algora.Money do
     {dividend, _remainder} = Money.split(money, parts)
     [dividend | split(Money.sub!(money, dividend), parts - 1)]
   end
+
+  def to_integer(money) do
+    {_, amount_int, _, _} = Money.to_integer_exp(money)
+    amount_int
+  end
+
+  defdelegate to_decimal(money), to: M
 end

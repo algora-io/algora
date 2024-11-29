@@ -18,10 +18,10 @@ defmodule Seeds do
     ]
   end
 
-  def to_datetime(days_offset) do
+  def to_datetime(days_offset, time \\ ~T[00:00:00.000000]) do
     DateTime.new!(
       Date.add(Date.utc_today(), days_offset),
-      ~T[00:00:00.000000],
+      time,
       "Etc/UTC"
     )
   end
@@ -49,7 +49,7 @@ github_id =
     _ -> "123456789"
   end
 
-user =
+erich =
   Repo.insert!(
     %User{
       id: Nanoid.generate(),
@@ -63,9 +63,6 @@ user =
       country: "US",
       timezone: "America/Los_Angeles",
       tech_stack: ["HTML"],
-      featured: true,
-      fee_pct: 19,
-      activated: true,
       website_url: "https://aviato.com",
       twitter_url: "https://twitter.com/erich",
       github_url: "https://github.com/erich",
@@ -76,22 +73,120 @@ user =
     Seeds.upsert_opts([:provider, :provider_id])
   )
 
-_identity =
+Repo.insert!(
+  %Identity{
+    id: Nanoid.generate(),
+    user_id: erich.id,
+    provider: erich.provider,
+    provider_id: erich.provider_id,
+    provider_token: "",
+    provider_email: erich.email,
+    provider_login: erich.handle,
+    provider_name: erich.name
+  },
+  Seeds.upsert_opts([:provider, :user_id])
+)
+
+richard =
   Repo.insert!(
-    %Identity{
+    %User{
       id: Nanoid.generate(),
-      user_id: user.id,
-      provider: user.provider,
-      provider_id: user.provider_id,
-      provider_token: "",
-      provider_email: user.email,
-      provider_login: user.handle,
-      provider_name: user.name
+      type: :individual,
+      email: "richard@example.com",
+      name: "Richard Hendricks",
+      handle: "richard",
+      bio: "CEO of Pied Piper. Creator of the middle-out compression algorithm.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/richard.jpg",
+      location: "Palo Alto, CA",
+      country: "US",
+      timezone: "America/Los_Angeles",
+      tech_stack: ["Python", "C++", "Algorithms"],
+      github_url: "https://github.com/richard"
     },
-    Seeds.upsert_opts([:provider, :user_id])
+    Seeds.upsert_opts([:email])
   )
 
-org =
+dinesh =
+  Repo.insert!(
+    %User{
+      id: Nanoid.generate(),
+      type: :individual,
+      email: "dinesh@example.com",
+      name: "Dinesh Chugtai",
+      handle: "dinesh",
+      bio: "Lead Frontend Engineer at Pied Piper. Java bad, Python good.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/dinesh.png",
+      location: "Palo Alto, CA",
+      country: "US",
+      timezone: "America/Los_Angeles",
+      tech_stack: ["Python", "JavaScript", "Frontend"],
+      github_url: "https://github.com/dinesh"
+    },
+    Seeds.upsert_opts([:email])
+  )
+
+gilfoyle =
+  Repo.insert!(
+    %User{
+      id: Nanoid.generate(),
+      type: :individual,
+      email: "gilfoyle@example.com",
+      name: "Bertram Gilfoyle",
+      handle: "gilfoyle",
+      bio: "Systems Architect. Security. DevOps. Satanist.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/gilfoyle.jpg",
+      location: "Palo Alto, CA",
+      country: "US",
+      timezone: "America/Los_Angeles",
+      tech_stack: ["Python", "DevOps", "Security", "Linux"],
+      github_url: "https://github.com/gilfoyle"
+    },
+    Seeds.upsert_opts([:email])
+  )
+
+jared =
+  Repo.insert!(
+    %User{
+      id: Nanoid.generate(),
+      type: :individual,
+      email: "jared@example.com",
+      name: "Jared Dunn",
+      handle: "jared",
+      bio: "COO of Pied Piper. Former Hooli executive. Excel wizard.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jared.png",
+      location: "Palo Alto, CA",
+      country: "US",
+      timezone: "America/Los_Angeles",
+      tech_stack: ["Excel", "Project Management"],
+      github_url: "https://github.com/jared"
+    },
+    Seeds.upsert_opts([:email])
+  )
+
+carver =
+  Repo.insert!(
+    %User{
+      id: Nanoid.generate(),
+      type: :individual,
+      email: "carver@example.com",
+      name: "Kevin 'The Carver'",
+      handle: "carver",
+      bio:
+        "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/carver.jpg",
+      location: "Palo Alto, CA",
+      country: "US",
+      timezone: "America/Los_Angeles",
+      tech_stack: ["Python", "AWS", "Cloud Architecture", "DevOps", "System Architecture"],
+      website_url: "https://kevinthecarver.dev",
+      twitter_url: "https://twitter.com/carver",
+      github_url: "https://github.com/carver",
+      linkedin_url: "https://linkedin.com/in/carver"
+    },
+    Seeds.upsert_opts([:email])
+  )
+
+pied_piper =
   Repo.insert!(
     %User{
       id: Nanoid.generate(),
@@ -109,7 +204,7 @@ org =
       timezone: "America/Los_Angeles",
       stargazers_count: 2481,
       domain: "piedpiper.com",
-      tech_stack: ["C", "Java", "Python"],
+      tech_stack: ["C++", "Java", "Python", "JavaScript"],
       featured: true,
       fee_pct: 19,
       activated: true,
@@ -122,16 +217,17 @@ org =
     Seeds.upsert_opts([:email])
   )
 
-_member =
+for user <- [erich, richard, dinesh, gilfoyle, jared] do
   Repo.insert!(
     %Member{
       id: Nanoid.generate(),
       user_id: user.id,
-      org_id: org.id,
+      org_id: pied_piper.id,
       role: :admin
     },
     Seeds.upsert_opts([:user_id, :org_id])
   )
+end
 
 hourly_rate = Decimal.new("75.00")
 hours_per_week = 40
@@ -139,37 +235,11 @@ amount = Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
 
 original_contract_id = Nanoid.generate()
 
-contractor =
-  Repo.insert!(
-    %User{
-      id: Nanoid.generate(),
-      type: :individual,
-      email: "thecarver@example.com",
-      name: "Kevin 'The Carver'",
-      handle: "thecarver",
-      bio:
-        "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/thecarver.jpg",
-      location: "Palo Alto, CA",
-      country: "US",
-      timezone: "America/Los_Angeles",
-      tech_stack: ["Python", "AWS", "Cloud Architecture", "DevOps", "System Architecture"],
-      featured: true,
-      fee_pct: 19,
-      activated: true,
-      website_url: "https://kevinthecarver.dev",
-      twitter_url: "https://twitter.com/thecarver",
-      github_url: "https://github.com/thecarver",
-      linkedin_url: "https://linkedin.com/in/thecarver"
-    },
-    Seeds.upsert_opts([:email])
-  )
-
 contract1 =
   Repo.insert!(%Contract{
     id: original_contract_id,
-    provider_id: contractor.id,
-    client_id: org.id,
+    provider_id: carver.id,
+    client_id: pied_piper.id,
     status: :completed,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
@@ -183,8 +253,8 @@ contract1 =
 contract2 =
   Repo.insert!(%Contract{
     id: Nanoid.generate(),
-    provider_id: contractor.id,
-    client_id: org.id,
+    provider_id: carver.id,
+    client_id: pied_piper.id,
     status: :completed,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
@@ -198,8 +268,8 @@ contract2 =
 contract3 =
   Repo.insert!(%Contract{
     id: Nanoid.generate(),
-    provider_id: contractor.id,
-    client_id: org.id,
+    provider_id: carver.id,
+    client_id: pied_piper.id,
     status: :active,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
@@ -237,7 +307,6 @@ timesheet3 =
     end_date: Seeds.to_datetime(0)
   })
 
-# Create charges using the helper function
 charge1 =
   Repo.insert!(%Transaction{
     id: Nanoid.generate(),
@@ -271,9 +340,10 @@ charge3 =
     status: :succeeded
   })
 
-transfer1 =
+_transfer1 =
   Repo.insert!(%Transaction{
     id: Nanoid.generate(),
+    original_transaction_id: charge1.id,
     contract_id: contract1.id,
     original_contract_id: original_contract_id,
     timesheet_id: timesheet1.id,
@@ -283,9 +353,10 @@ transfer1 =
     status: :succeeded
   })
 
-transfer2 =
+_transfer2 =
   Repo.insert!(%Transaction{
     id: Nanoid.generate(),
+    original_transaction_id: charge2.id,
     contract_id: contract2.id,
     original_contract_id: original_contract_id,
     timesheet_id: timesheet2.id,
@@ -295,47 +366,52 @@ transfer2 =
     status: :succeeded
   })
 
-# Create direct chat thread
 thread =
   Repo.insert!(%Thread{
     id: Nanoid.generate(),
-    title: "#{org.name} x #{contractor.name}"
+    title: "#{pied_piper.name} x #{carver.name}"
   })
 
-# Add thread participants
-for participant_user <- [org, contractor] do
+for user <- [pied_piper, carver, erich, richard, dinesh, gilfoyle] do
   Repo.insert!(%Participant{
     id: Nanoid.generate(),
     thread_id: thread.id,
-    user_id: participant_user.id,
+    user_id: user.id,
     last_read_at: DateTime.utc_now()
   })
 end
 
-# Seed messages
 messages = [
-  {user.id,
-   "hey kevin, i heard you're the best cloud architect in the valley. we need someone to help scale pied piper's infrastructure"},
-  {contractor.id,
-   "thanks for reaching out! i've been following pied piper's middle-out compression algorithm - really cool stuff"},
-  {user.id,
-   "our current setup is basically just a bunch of aws instances held together with duct tape and prayers lol"},
-  {contractor.id,
-   "classic startup architecture. i specialize in tearing down and rebuilding scalable cloud infrastructure. when do you need this done?"},
-  {user.id, "asap. our user base is growing exponentially and the servers are already sweating"},
-  {contractor.id,
-   "i can start next week. fair warning though - my methods are a bit... unconventional. but they work"},
-  {user.id,
-   "as long as you can handle the traffic spikes, i don't care if you have to sacrifice a goat to the aws gods"},
-  {contractor.id,
-   "no goats needed, but i'll need root access and a lot of coffee. let's do this 🚀"}
+  {erich,
+   "hey kevin, i heard you're the best cloud architect in the valley. we need someone to help scale pied piper's infrastructure",
+   Seeds.to_datetime(-4, ~T[09:15:00.000000])},
+  {carver,
+   "thanks for reaching out! i've been following pied piper's middle-out compression algorithm - really excited about its potential",
+   Seeds.to_datetime(-4, ~T[09:45:00.000000])},
+  {richard, "yeah our infrastructure needs help. we're getting crushed by the user growth",
+   Seeds.to_datetime(-4, ~T[14:20:00.000000])},
+  {gilfoyle, "the current setup is adequate. but i suppose a second opinion wouldn't hurt",
+   Seeds.to_datetime(-3, ~T[15:05:00.000000])},
+  {dinesh, "adequate? the servers catch fire every time we deploy",
+   Seeds.to_datetime(-3, ~T[15:12:00.000000])},
+  {jared,
+   "our uptime metrics have been concerning. i've prepared a spreadsheet tracking all incidents",
+   Seeds.to_datetime(-2, ~T[10:30:00.000000])},
+  {carver,
+   "i specialize in unconventional but effective solutions. fair warning - my methods might seem chaotic at first",
+   Seeds.to_datetime(-1, ~T[11:45:00.000000])},
+  {gilfoyle, "chaos is good. keeps everyone on their toes",
+   Seeds.to_datetime(-1, ~T[16:20:00.000000])},
+  {carver, "give me root access and a week. i'll make your infrastructure bulletproof 🚀",
+   Seeds.to_datetime(0, ~T[09:00:00.000000])}
 ]
 
-for {sender_id, content} <- messages do
+for {sender, content, inserted_at} <- messages do
   Repo.insert!(%Message{
     id: Nanoid.generate(),
     thread_id: thread.id,
-    sender_id: sender_id,
-    content: content
+    sender_id: sender.id,
+    content: content,
+    inserted_at: inserted_at
   })
 end

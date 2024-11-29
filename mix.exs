@@ -63,7 +63,8 @@ defmodule Algora.MixProject do
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
       {:mox, "~> 1.0", only: :test},
-      {:tzdata, "~> 1.1"}
+      {:tzdata, "~> 1.1"},
+      {:stripity_stripe, "~> 2.0"}
     ]
   end
 

@@ -8,6 +8,13 @@ config :algora, :github,
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
   private_key: System.get_env("GITHUB_PRIVATE_KEY")
 
+config :stripity_stripe,
+  api_key: System.get_env("STRIPE_SECRET_KEY")
+
+config :algora, :stripe,
+  test_customer_id: System.get_env("STRIPE_TEST_CUSTOMER_ID"),
+  test_account_id: System.get_env("STRIPE_TEST_ACCOUNT_ID")
+
 # Configure your database
 config :algora, Algora.Repo,
   url: System.get_env("DATABASE_URL"),

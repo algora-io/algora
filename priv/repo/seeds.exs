@@ -2,6 +2,7 @@
 #
 #     mix run priv/repo/seeds.exs <your-github-id>
 
+require Logger
 alias Algora.Repo
 alias Algora.Users.{User, Identity}
 alias Algora.Contracts.{Contract, Timesheet}
@@ -40,6 +41,96 @@ defmodule Seeds do
         hours_to_charge = hours_per_week - (previous_charged - previous_used)
         Decimal.mult(hourly_rate, Decimal.new(hours_to_charge))
     end
+  end
+
+  def create_contract_cycle(params) do
+    %{
+      provider_id: provider_id,
+      client_id: client_id,
+      hourly_rate: hourly_rate,
+      hours_per_week: hours_per_week,
+      start_date: start_date,
+      end_date: end_date,
+      sequence_number: sequence_number,
+      original_contract_id: original_contract_id,
+      previous_timesheet: previous_timesheet,
+      hours_worked: hours_worked,
+      status: status
+    } = params
+
+    # Create contract
+    contract =
+      Repo.insert!(%Contract{
+        id: if(sequence_number == 1, do: original_contract_id, else: Nanoid.generate()),
+        provider_id: provider_id,
+        client_id: client_id,
+        status: status,
+        hourly_rate: hourly_rate,
+        hours_per_week: hours_per_week,
+        start_date: start_date,
+        end_date: end_date,
+        total_paid: Decimal.new("0"),
+        sequence_number: sequence_number,
+        original_contract_id: original_contract_id,
+        inserted_at:
+          Seeds.to_datetime(
+            start_date.day,
+            Time.new!(Enum.random(9..16), Enum.random(0..59), Enum.random(0..59), 0)
+          )
+      })
+
+    # Create charge
+    charge =
+      Repo.insert!(%Transaction{
+        id: Nanoid.generate(),
+        contract_id: contract.id,
+        original_contract_id: original_contract_id,
+        amount: calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate),
+        currency: "USD",
+        type: :charge,
+        status: :succeeded,
+        inserted_at:
+          Seeds.to_datetime(
+            start_date.day,
+            Time.new!(Enum.random(17..20), Enum.random(0..59), Enum.random(0..59), 0)
+          )
+      })
+
+    # Create timesheet
+    timesheet =
+      Repo.insert!(%Timesheet{
+        id: Nanoid.generate(),
+        contract_id: contract.id,
+        hours_worked: hours_worked,
+        start_date: start_date,
+        end_date: end_date,
+        inserted_at:
+          Seeds.to_datetime(
+            end_date.day,
+            Time.new!(Enum.random(15..19), Enum.random(0..59), Enum.random(0..59), 0)
+          )
+      })
+
+    # Create transfer
+    _transfer =
+      Repo.insert!(%Transaction{
+        id: Nanoid.generate(),
+        original_transaction_id: charge.id,
+        contract_id: contract.id,
+        original_contract_id: original_contract_id,
+        timesheet_id: timesheet.id,
+        amount: Decimal.mult(hourly_rate, Decimal.new(hours_worked)),
+        currency: "USD",
+        type: :transfer,
+        status: :succeeded,
+        inserted_at:
+          Seeds.to_datetime(
+            end_date.day,
+            Time.new!(Enum.random(19..23), Enum.random(0..59), Enum.random(0..59), 0)
+          )
+      })
+
+    {contract, timesheet}
   end
 end
 
@@ -235,135 +326,49 @@ amount = Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
 
 original_contract_id = Nanoid.generate()
 
-contract1 =
-  Repo.insert!(%Contract{
-    id: original_contract_id,
+{_contract1, timesheet1} =
+  Seeds.create_contract_cycle(%{
     provider_id: carver.id,
     client_id: pied_piper.id,
-    status: :completed,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
     start_date: Seeds.to_datetime(-21),
     end_date: Seeds.to_datetime(-14),
-    total_paid: Decimal.new("0"),
     sequence_number: 1,
-    original_contract_id: original_contract_id
+    original_contract_id: original_contract_id,
+    previous_timesheet: nil,
+    hours_worked: 42,
+    status: :completed
   })
 
-contract2 =
-  Repo.insert!(%Contract{
-    id: Nanoid.generate(),
+{_contract2, timesheet2} =
+  Seeds.create_contract_cycle(%{
     provider_id: carver.id,
     client_id: pied_piper.id,
-    status: :completed,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
     start_date: Seeds.to_datetime(-14),
     end_date: Seeds.to_datetime(-7),
-    total_paid: Decimal.new("0"),
     sequence_number: 2,
-    original_contract_id: original_contract_id
+    original_contract_id: original_contract_id,
+    previous_timesheet: timesheet1,
+    hours_worked: 35,
+    status: :completed
   })
 
-contract3 =
-  Repo.insert!(%Contract{
-    id: Nanoid.generate(),
+{_contract3, _timesheet3} =
+  Seeds.create_contract_cycle(%{
     provider_id: carver.id,
     client_id: pied_piper.id,
-    status: :active,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
     start_date: Seeds.to_datetime(-7),
     end_date: Seeds.to_datetime(0),
-    total_paid: Decimal.new("0"),
     sequence_number: 3,
-    original_contract_id: original_contract_id
-  })
-
-timesheet1 =
-  Repo.insert!(%Timesheet{
-    id: Nanoid.generate(),
-    contract_id: contract1.id,
-    hours_worked: 42,
-    start_date: Seeds.to_datetime(-21),
-    end_date: Seeds.to_datetime(-14)
-  })
-
-timesheet2 =
-  Repo.insert!(%Timesheet{
-    id: Nanoid.generate(),
-    contract_id: contract2.id,
-    hours_worked: 35,
-    start_date: Seeds.to_datetime(-14),
-    end_date: Seeds.to_datetime(-7)
-  })
-
-timesheet3 =
-  Repo.insert!(%Timesheet{
-    id: Nanoid.generate(),
-    contract_id: contract3.id,
+    original_contract_id: original_contract_id,
+    previous_timesheet: timesheet2,
     hours_worked: 38,
-    start_date: Seeds.to_datetime(-7),
-    end_date: Seeds.to_datetime(0)
-  })
-
-charge1 =
-  Repo.insert!(%Transaction{
-    id: Nanoid.generate(),
-    contract_id: contract1.id,
-    original_contract_id: original_contract_id,
-    amount: Seeds.calculate_charge_amount(nil, hours_per_week, hourly_rate),
-    currency: "USD",
-    type: :charge,
-    status: :succeeded
-  })
-
-charge2 =
-  Repo.insert!(%Transaction{
-    id: Nanoid.generate(),
-    contract_id: contract2.id,
-    original_contract_id: original_contract_id,
-    amount: Seeds.calculate_charge_amount(timesheet1, hours_per_week, hourly_rate),
-    currency: "USD",
-    type: :charge,
-    status: :succeeded
-  })
-
-charge3 =
-  Repo.insert!(%Transaction{
-    id: Nanoid.generate(),
-    contract_id: contract3.id,
-    original_contract_id: original_contract_id,
-    amount: Seeds.calculate_charge_amount(timesheet2, hours_per_week, hourly_rate),
-    currency: "USD",
-    type: :charge,
-    status: :succeeded
-  })
-
-_transfer1 =
-  Repo.insert!(%Transaction{
-    id: Nanoid.generate(),
-    original_transaction_id: charge1.id,
-    contract_id: contract1.id,
-    original_contract_id: original_contract_id,
-    timesheet_id: timesheet1.id,
-    amount: Decimal.mult(hourly_rate, Decimal.new(42)),
-    currency: "USD",
-    type: :transfer,
-    status: :succeeded
-  })
-
-_transfer2 =
-  Repo.insert!(%Transaction{
-    id: Nanoid.generate(),
-    original_transaction_id: charge2.id,
-    contract_id: contract2.id,
-    original_contract_id: original_contract_id,
-    timesheet_id: timesheet2.id,
-    amount: Decimal.mult(hourly_rate, Decimal.new(35)),
-    currency: "USD",
-    type: :transfer,
-    status: :succeeded
+    status: :active
   })
 
 thread =
@@ -415,3 +420,7 @@ for {sender, content, inserted_at} <- messages do
     inserted_at: inserted_at
   })
 end
+
+Logger.info(
+  "Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{original_contract_id}"
+)

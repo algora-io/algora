@@ -363,6 +363,7 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
         provider: "stripe",
         provider_id: pm.id,
         provider_meta: Map.from_struct(pm),
+        provider_customer_id: cus.id,
         customer_id: customer.id
       },
       Seeds.upsert_opts([:provider, :provider_id])

@@ -7,7 +7,7 @@ alias Algora.Repo
 alias Algora.Users.{User, Identity}
 alias Algora.Contracts.{Contract, Timesheet}
 alias Algora.Chat.{Thread, Message, Participant}
-alias Algora.Payments.Transaction
+alias Algora.Payments.{Transaction, Customer, PaymentMethod, Account}
 alias Algora.Organizations.Member
 
 defmodule Seeds do
@@ -134,6 +134,22 @@ defmodule Seeds do
 
     {contract, timesheet}
   end
+
+  def to_plain_map(struct) when is_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> to_plain_map()
+  end
+
+  def to_plain_map(map) when is_map(map) do
+    Map.new(map, fn {k, v} -> {k, to_plain_map(v)} end)
+  end
+
+  def to_plain_map(list) when is_list(list) do
+    Enum.map(list, &to_plain_map/1)
+  end
+
+  def to_plain_map(value), do: value
 end
 
 github_id =
@@ -322,10 +338,62 @@ for user <- [erich, richard, dinesh, gilfoyle, jared] do
   )
 end
 
+if customer_id = Algora.config([:stripe, :test_customer_id]) do
+  {:ok, cus} = Stripe.Customer.retrieve(customer_id)
+  {:ok, pm} = Stripe.PaymentMethod.retrieve(cus.invoice_settings.default_payment_method)
+
+  customer =
+    Repo.insert!(
+      %Customer{
+        id: Nanoid.generate(),
+        provider: "stripe",
+        provider_id: cus.id,
+        provider_meta: Map.from_struct(cus),
+        name: cus.name,
+        region: :US,
+        user_id: pied_piper.id
+      },
+      Seeds.upsert_opts([:provider, :provider_id])
+    )
+
+  _payment_method =
+    Repo.insert!(
+      %PaymentMethod{
+        id: Nanoid.generate(),
+        provider: "stripe",
+        provider_id: pm.id,
+        provider_meta: Map.from_struct(pm),
+        customer_id: customer.id
+      },
+      Seeds.upsert_opts([:provider, :provider_id])
+    )
+end
+
+if account_id = Algora.config([:stripe, :test_account_id]) do
+  {:ok, acct} = Stripe.Account.retrieve(account_id)
+
+  Repo.insert!(
+    %Account{
+      id: Nanoid.generate(),
+      provider: "stripe",
+      provider_id: acct.id,
+      provider_meta: Seeds.to_plain_map(acct),
+      name: acct.business_profile.name,
+      details_submitted: acct.details_submitted,
+      charges_enabled: acct.charges_enabled,
+      service_agreement: "recipient",
+      country: acct.country,
+      type: String.to_atom(acct.type),
+      region: :US,
+      stale: false,
+      user_id: carver.id
+    },
+    Seeds.upsert_opts([:provider, :provider_id])
+  )
+end
+
 hourly_rate = Decimal.new("75.00")
 hours_per_week = 40
-amount = Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
-
 original_contract_id = Nanoid.generate()
 
 {_contract1, timesheet1} =

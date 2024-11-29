@@ -41,6 +41,11 @@ defmodule AlgoraWeb.Endpoint do
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
+  plug Stripe.WebhookPlug,
+    at: "/webhooks/stripe",
+    handler: AlgoraWeb.Webhooks.StripeController,
+    secret: {Algora, :config, [[:stripe, :webhook_secret]]}
+
   plug :parse_body
 
   opts = [

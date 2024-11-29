@@ -32,6 +32,11 @@ if config_env() == :prod do
   config :stripity_stripe,
     api_key: System.fetch_env!("STRIPE_SECRET_KEY")
 
+  config :algora, :stripe,
+    secret_key: System.fetch_env!("STRIPE_SECRET_KEY"),
+    publishable_key: System.fetch_env!("STRIPE_PUBLISHABLE_KEY"),
+    webhook_secret: System.fetch_env!("STRIPE_WEBHOOK_SECRET")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

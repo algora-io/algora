@@ -347,17 +347,26 @@ defmodule AlgoraWeb.Contract.ViewLive do
           phx-hook="ScrollToBottom"
         >
           <div class="space-y-6">
-            <%= for {date, messages} <- Enum.group_by(@messages, & &1.date) do %>
+            <%= for {date, messages} <- @messages
+                |> Enum.group_by(fn msg ->
+                  case Date.diff(Date.utc_today(), DateTime.to_date(msg.inserted_at)) do
+                    0 -> "Today"
+                    1 -> "Yesterday"
+                    n when n <= 7 -> Calendar.strftime(msg.inserted_at, "%A")
+                    _ -> Calendar.strftime(msg.inserted_at, "%b %d")
+                  end
+                end)
+                |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, :asc) do %>
               <div class="flex items-center justify-center">
                 <div class="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">
                   <%= date %>
                 </div>
               </div>
 
-              <%= for message <- messages do %>
+              <%= for message <- Enum.sort_by(messages, & &1.inserted_at, :asc) do %>
                 <div class="flex gap-3 group">
                   <.avatar class="h-8 w-8">
-                    <.avatar_image src={message.avatar_url} />
+                    <.avatar_image src={message.sender.avatar_url} />
                     <.avatar_fallback>
                       <%= String.slice(message.sender.name, 0, 2) %>
                     </.avatar_fallback>
@@ -365,7 +374,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
                     <%= message.content %>
                     <div class="text-[10px] mt-1 text-muted-foreground">
-                      <%= message.sent_at %>
+                      <%= message.inserted_at
+                      |> DateTime.to_time()
+                      |> Time.to_string()
+                      |> String.slice(0..4) %>
                     </div>
                   </div>
                 </div>
@@ -816,7 +828,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
     messages =
       Chat.list_messages(thread.id)
       |> Repo.preload(:sender)
-      |> Enum.map(&format_message(&1, socket.assigns.current_user))
 
     fee_data = calculate_fee_data(contract)
 
@@ -875,11 +886,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
       )
 
     message = Repo.preload(message, :sender)
-    new_message = format_message(message, socket.assigns.current_user)
 
     {:noreply,
      socket
-     |> update(:messages, &(&1 ++ [new_message]))
+     |> update(:messages, &(&1 ++ [message]))
      |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
@@ -888,18 +898,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
       nil -> Chat.create_direct_thread(contract.client, contract.provider)
       thread -> {:ok, thread}
     end
-  end
-
-  defp format_message(message, current_user) do
-    %{
-      id: message.id,
-      sender: message.sender,
-      content: message.content,
-      sent_at: format_time(message.inserted_at),
-      date: format_date(message.inserted_at),
-      is_self: message.sender_id == current_user.id,
-      avatar_url: message.sender.avatar_url
-    }
   end
 
   defp calculate_fee_data(contract) do
@@ -940,22 +938,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
       _ ->
         30.0
-    end
-  end
-
-  defp format_time(datetime) do
-    datetime
-    |> DateTime.to_time()
-    |> Time.to_string()
-    |> String.slice(0..4)
-  end
-
-  defp format_date(datetime) do
-    case Date.diff(Date.utc_today(), DateTime.to_date(datetime)) do
-      0 -> "Today"
-      1 -> "Yesterday"
-      n when n <= 7 -> Calendar.strftime(datetime, "%A")
-      _ -> Calendar.strftime(datetime, "%b %d")
     end
   end
 

@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Router do
   scope "/webhooks", AlgoraWeb do
     pipe_through :api
 
-    post "/:provider", WebhooksController, :new
+    post "/github", Webhooks.GithubController, :new
   end
 
   scope "/", AlgoraWeb do

@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Reviews, Repo, Organizations}
+  alias Algora.{Contracts, Chat, Reviews, Repo, Organizations, FeeTier}
 
   def render(assigns) do
     ~H"""
@@ -548,7 +548,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
                 <div class="text-base text-muted-foreground">
                   Current fee:
-                  <span class="font-semibold font-display"><%= @fee_data.fee_percentage %>%</span>
+                  <span class="font-semibold font-display"><%= @fee_data.current_fee %>%</span>
                 </div>
                 <div class="text-base text-muted-foreground">
                   Total paid to date:
@@ -576,13 +576,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Algora fees (<%= @fee_data.fee_percentage %>%)
+                      Algora fees (<%= @fee_data.current_fee %>%)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.to_string!(
                         Money.mult!(
                           @escrow_amount,
-                          Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
+                          Decimal.div(Decimal.new(@fee_data.current_fee), Decimal.new(100))
                         )
                       ) %>
                     </dd>
@@ -606,7 +606,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         Money.mult!(
                           @escrow_amount,
                           Decimal.add(
-                            Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100)),
+                            Decimal.div(Decimal.new(@fee_data.current_fee), Decimal.new(100)),
                             Decimal.new("1.04")
                           )
                         )
@@ -863,7 +863,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         stripe_charge_id: "ch_xxx",
         stripe_transfer_id: "tr_xxx",
         stripe_metadata: %{},
-        fee_percentage: socket.assigns.fee_data.fee_percentage
+        fee_percentage: socket.assigns.fee_data.current_fee
       })
 
     {:ok, _review} =
@@ -929,7 +929,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         stripe_charge_id: "ch_xxx",
         stripe_transfer_id: "tr_xxx",
         stripe_metadata: %{},
-        fee_percentage: socket.assigns.fee_data.fee_percentage
+        fee_percentage: socket.assigns.fee_data.current_fee
       })
 
     {:ok, _review} =
@@ -975,71 +975,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
       |> Enum.filter(&(&1.type == :transfer))
       |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
 
-    fee_tiers = [
-      %{threshold: Money.zero(:USD), fee: 19},
-      %{threshold: Money.new!(3000, :USD), fee: 15},
-      %{threshold: Money.new!(5000, :USD), fee: 10},
-      %{threshold: Money.new!(15000, :USD), fee: 5}
-    ]
+    fee_tiers = FeeTier.all()
+    current_fee = FeeTier.calculate_fee_percentage(total_paid)
 
     %{
       total_paid: total_paid,
       fee_tiers: fee_tiers,
-      fee_percentage: calculate_fee_percentage(total_paid),
-      progress: calculate_progress(total_paid)
+      current_fee: current_fee,
+      progress: FeeTier.calculate_progress(total_paid)
     }
-  end
-
-  defp calculate_fee_percentage(total_paid) do
-    cond do
-      Money.compare!(total_paid, Money.new!(15000, :USD)) != :lt -> 5
-      Money.compare!(total_paid, Money.new!(5000, :USD)) != :lt -> 10
-      Money.compare!(total_paid, Money.new!(3000, :USD)) != :lt -> 15
-      true -> 19
-    end
-  end
-
-  defp calculate_progress(total_paid) do
-    tiers = [
-      {Money.new!(3000, :USD), 33.3},
-      {Money.new!(5000, :USD), 66.6},
-      {Money.new!(15000, :USD), 100.0}
-    ]
-
-    first_tier = Money.new!(3000, :USD)
-
-    case Enum.find(tiers, fn {threshold, _} -> Money.compare!(total_paid, threshold) == :lt end) do
-      nil ->
-        100.0
-
-      {^first_tier, max_percent} ->
-        percentage_of(total_paid, first_tier) * max_percent
-
-      {threshold, max_percent} ->
-        {prev_threshold, prev_percent} = get_previous_tier(tiers, threshold)
-
-        progress_in_tier =
-          percentage_of(
-            Money.sub!(total_paid, prev_threshold),
-            Money.sub!(threshold, prev_threshold)
-          )
-
-        prev_percent + progress_in_tier * (max_percent - prev_percent)
-    end
-  end
-
-  defp percentage_of(amount, total) do
-    amount
-    |> Money.to_decimal()
-    |> Decimal.div(Money.to_decimal(total))
-    |> Decimal.to_float()
-  end
-
-  defp get_previous_tier(tiers, threshold) do
-    tiers
-    |> Enum.reduce_while(nil, fn tier = {amount, _}, acc ->
-      if Money.equal?(amount, threshold), do: {:halt, acc}, else: {:cont, tier}
-    end)
   end
 
   defp get_contract_chain(contract) do

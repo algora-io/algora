@@ -5,7 +5,6 @@ defmodule AlgoraWeb.RegionalRankingsLive do
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Money
   import Ecto.Query
 
   def mount(_params, _session, socket) do
@@ -43,7 +42,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
                         #1 <%= region %>
                       </div>
                       <div class="text-sm font-medium text-success">
-                        <%= Money.format!(user.total_earned, :USD) %>
+                        <%= Money.to_string!(user.total_earned) %>
                       </div>
                     </div>
                     <div class="flex items-center space-x-4">

@@ -5,8 +5,7 @@ defmodule Algora.Bounties.Bounty do
   @type t() :: %__MODULE__{}
 
   schema "bounties" do
-    field :amount, :decimal
-    field :currency, :string
+    field :amount, Money.Ecto.Composite.Type
     field :payment_type, Ecto.Enum, values: [:fixed, :hourly]
 
     belongs_to :ticket, Algora.Workspace.Ticket
@@ -21,15 +20,10 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :currency, :ticket_id, :owner_id, :creator_id])
+    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
-    |> validate_required([:amount, :currency, :ticket_id, :owner_id, :creator_id])
+    |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> validate_number(:amount, greater_than: 0)
-    |> validate_currency()
-  end
-
-  def validate_currency(changeset) do
-    changeset |> validate_inclusion(:currency, ["USD"])
   end
 
   def url(bounty),
@@ -116,9 +110,9 @@ defmodule Algora.Bounties.Bounty do
 
   def create_changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :currency, :payment_type])
+    |> cast(attrs, [:amount, :payment_type])
     |> cast_assoc(:ticket)
-    |> validate_required([:amount, :currency])
+    |> validate_required([:amount])
     |> validate_number(:amount, greater_than: 0)
   end
 end

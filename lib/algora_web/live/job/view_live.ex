@@ -1,6 +1,5 @@
 defmodule AlgoraWeb.Job.ViewLive do
   use AlgoraWeb, :live_view
-  alias Algora.Money
 
   def mount(%{"id" => id}, _session, socket) do
     # Mock data for a single job (in production, you'd fetch this from your database)
@@ -72,10 +71,7 @@ defmodule AlgoraWeb.Job.ViewLive do
                     <% :hourly -> %>
                       $<%= @job.budget.from %>-<%= @job.budget.to %>/hour
                     <% :fixed -> %>
-                      <%= Money.format!(@job.budget.from, "USD") %>-<%= Money.format!(
-                        @job.budget.to,
-                        "USD"
-                      ) %>
+                      <%= Money.to_string!(@job.budget.from) %>-<%= Money.to_string!(@job.budget.to) %>
                   <% end %>
                 </div>
                 <div class="text-sm text-gray-400">

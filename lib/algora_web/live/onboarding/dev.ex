@@ -1,7 +1,6 @@
 defmodule AlgoraWeb.Onboarding.DevLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
-  alias Algora.Money
 
   def mount(_params, _session, socket) do
     context = %{
@@ -84,7 +83,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                 <div class="flex gap-4">
                   <div class="flex-1">
                     <div class="font-mono text-2xl font-extrabold text-success mb-2">
-                      <%= Money.format!(bounty.amount, bounty.currency) %>
+                      <%= Money.to_string!(bounty.amount) %>
                     </div>
                     <div class="text-sm text-muted-foreground mb-1">
                       <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %>#<%= bounty.ticket.number %>

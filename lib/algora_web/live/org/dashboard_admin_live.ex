@@ -2,20 +2,18 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
-  alias Algora.Money
   alias Algora.Users
   alias AlgoraWeb.Org.Forms.JobForm
 
-  defp middle_rate(%{min: min, max: max}), do: Decimal.div(Decimal.add(min, max), Decimal.new(2))
+  def middle_rate(%{min: min, max: max}), do: Money.div!(Money.add!(min, max), 2)
 
   def mount(_params, _session, socket) do
     %{tech_stack: tech_stack} = socket.assigns.current_org
-    hourly_rate = %{min: 50, max: 100}
+    hourly_rate = %{min: Money.new!(50, :USD), max: Money.new!(100, :USD)}
     hours_per_week = 20
 
     contract_template = %{
       hourly_rate: hourly_rate,
-      currency: "USD",
       expected_hours: hours_per_week,
       ticket: %{title: socket.assigns.current_org.og_title},
       owner: socket.assigns.current_org,
@@ -34,10 +32,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       |> assign(:looking_to_collaborate, true)
       |> assign(:hourly_rate, hourly_rate)
       |> assign(:hours_per_week, hours_per_week)
-      |> assign(
-        :weekly_amount,
-        Decimal.mult(middle_rate(hourly_rate), Decimal.new(hours_per_week))
-      )
+      |> assign(:weekly_amount, Money.mult!(middle_rate(hourly_rate), hours_per_week))
       |> assign(:selected_dev, nil)
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
       |> assign(:contract_template, contract_template)
@@ -364,10 +359,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         <span class="text-sm text-muted-foreground">
                           Once accepted,
                           <span class="font-semibold text-foreground">
-                            <%= Money.format!(
-                              Decimal.mult(Decimal.new(@hourly_rate), Decimal.new(@hours_per_week)),
-                              "USD"
-                            ) %>
+                            <%= Money.to_string!(Money.mult!(@hourly_rate, @hours_per_week)) %>
                           </span>
                           will be held securely
                         </span>
@@ -403,13 +395,12 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Weekly amount (<%= @hours_per_week %> hours x <%= Money.format!(
-                        middle_rate(@hourly_rate),
-                        "USD"
+                      Weekly amount (<%= @hours_per_week %> hours x <%= Money.to_string!(
+                        middle_rate(@hourly_rate)
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@weekly_amount, "USD") %>
+                      <%= Money.to_string!(@weekly_amount) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -417,29 +408,20 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                       Algora fees (19%)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(@weekly_amount, Decimal.new("0.19")),
-                        "USD"
-                      ) %>
+                      <%= Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.19"))) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Transaction fees (4%)</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(@weekly_amount, Decimal.new("0.04")),
-                        "USD"
-                      ) %>
+                      <%= Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.04"))) %>
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(@weekly_amount, Decimal.new("1.23")),
-                        "USD"
-                      ) %>
+                      <%= Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("1.23"))) %>
                     </dd>
                   </div>
                 </dl>
@@ -448,12 +430,11 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   <p>
                     Actual charges may vary (up to
                     <span class="font-semibold">
-                      <%= Money.format!(
-                        Decimal.mult(
-                          Decimal.mult(@hourly_rate.max, Decimal.new(@hours_per_week)),
+                      <%= Money.to_string!(
+                        Money.mult!(
+                          Money.mult!(@hourly_rate.max, @hours_per_week),
                           Decimal.new("1.23")
-                        ),
-                        "USD"
+                        )
                       ) %>
                     </span>
                     including fees).
@@ -626,7 +607,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       <td class="py-1 px-4 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            <%= Money.format!(@bounty.amount, @bounty.currency) %>
+            <%= Money.to_string!(@bounty.amount) %>
           </div>
 
           <.link
@@ -722,7 +703,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
             <.link href={Bounty.url(@bounty)} class="group flex items-center gap-2">
               <div class="font-display text-xl font-semibold text-success">
-                <%= Money.format!(@bounty.amount, @bounty.currency) %>
+                <%= Money.to_string!(@bounty.amount) %>
               </div>
               <div class="text-foreground group-hover:underline line-clamp-1">
                 <%= @bounty.ticket.title %>
@@ -765,7 +746,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.format!(@user.hourly_rate, @user.currency) %>/hr
+                  <%= Money.to_string!(@user.hourly_rate) %>/hr
                 </div>
               </div>
 
@@ -821,9 +802,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   defp fetch_reviews() do
     [
       %{
-        hourly_rate: 100,
+        hourly_rate: Money.new!(100, :USD),
         hours_per_week: 30,
-        currency: "USD",
         review: %{
           stars: 5,
           comment:
@@ -838,9 +818,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         }
       },
       %{
-        hourly_rate: 120,
+        hourly_rate: Money.new!(120, :USD),
         hours_per_week: 20,
-        currency: "USD",
         review: %{
           stars: 4,
           comment:
@@ -854,9 +833,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         }
       },
       %{
-        hourly_rate: 150,
+        hourly_rate: Money.new!(150, :USD),
         hours_per_week: 10,
-        currency: "USD",
         review: %{
           stars: 5,
           comment: "Outstanding technical expertise and professional attitude.",

@@ -1,6 +1,5 @@
 defmodule AlgoraWeb.Project.IndexLive do
   use AlgoraWeb, :live_view
-  alias Algora.Money
 
   def mount(_params, _session, socket) do
     projects = [
@@ -10,7 +9,7 @@ defmodule AlgoraWeb.Project.IndexLive do
         country: "US",
         skills: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
         scope: %{size: "medium", duration: "medium", experience: "intermediate"},
-        budget: %{type: :hourly, from: 50, to: 75},
+        budget: %{type: :hourly, from: Money.new!(50, :USD), to: Money.new!(75, :USD)},
         description: "Looking for an experienced developer to build a real-time chat system...",
         posted_at: ~N[2024-03-15 10:00:00],
         client: %{
@@ -25,7 +24,7 @@ defmodule AlgoraWeb.Project.IndexLive do
         country: "UK",
         skills: ["Elixir", "Phoenix", "PostgreSQL", "JavaScript"],
         scope: %{size: "large", duration: "long", experience: "expert"},
-        budget: %{type: :fixed, from: 15000, to: 20000},
+        budget: %{type: :fixed, from: Money.new!(15_000, :USD), to: Money.new!(20_000, :USD)},
         description: "Need to build a scalable e-commerce platform...",
         posted_at: ~N[2024-03-14 15:30:00],
         client: %{
@@ -102,9 +101,8 @@ defmodule AlgoraWeb.Project.IndexLive do
                       <% :hourly -> %>
                         $<%= project.budget.from %>-<%= project.budget.to %>/hour
                       <% :fixed -> %>
-                        <%= Money.format!(project.budget.from, "USD") %>-<%= Money.format!(
-                          project.budget.to,
-                          "USD"
+                        <%= Money.to_string!(project.budget.from) %>-<%= Money.to_string!(
+                          project.budget.to
                         ) %>
                     <% end %>
                   </div>

@@ -141,30 +141,18 @@ defmodule DatabaseMigration do
   defp transform("GithubUser", _row, _db), do: nil
 
   defp transform("Bounty", row, db) do
-    reward =
-      db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
+    reward = db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
 
-    row =
-      row
-      |> Map.put("ticket_id", row["task_id"])
-      |> Map.put("owner_id", row["org_id"])
-      |> Map.put("creator_id", row["poster_id"])
-      |> Map.put("inserted_at", row["created_at"])
-      |> Map.put("updated_at", row["updated_at"])
-
-    row =
-      if reward do
-        row
-        |> Map.put("amount", Decimal.div(Decimal.new(reward["amount"]), 100))
-        |> Map.put("currency", reward["currency"])
-      else
-        # TODO: make the fields nullable instead
-        row
-        |> Map.put("amount", 0)
-        |> Map.put("currency", "USD")
-      end
+    amount =
+      if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
 
     row
+    |> Map.put("ticket_id", row["task_id"])
+    |> Map.put("owner_id", row["org_id"])
+    |> Map.put("creator_id", row["poster_id"])
+    |> Map.put("inserted_at", row["created_at"])
+    |> Map.put("updated_at", row["updated_at"])
+    |> Map.put("amount", amount)
   end
 
   defp transform("BountyTransfer", row, db) do
@@ -183,8 +171,10 @@ defmodule DatabaseMigration do
         |> Map.put("type", "transfer")
         |> Map.put("provider", "stripe")
         |> Map.put("provider_id", row["transfer_id"])
-        |> Map.put("amount", Decimal.div(Decimal.new(row["amount"]), 100))
-        |> Map.put("currency", row["currency"])
+        |> Map.put(
+          "amount",
+          Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+        )
         |> Map.put("bounty_id", claim["bounty_id"])
         |> Map.put("recipient_id", user["id"])
         |> Map.put("inserted_at", row["created_at"])
@@ -384,6 +374,8 @@ defmodule DatabaseMigration do
     [copy_statement | data_lines] ++ ["\\.\n\n"]
   end
 
+  defp serialize_value(%Money{} = value), do: "(#{value.currency},#{value.amount})"
+
   defp serialize_value(%Decimal{} = value), do: Decimal.to_string(value)
 
   defp serialize_value(value) when is_map(value) or is_list(value) do
@@ -575,8 +567,8 @@ defmodule DatabaseMigration do
     output_file = ".local/prod_db_new.sql"
 
     if File.exists?(input_file) or File.exists?(output_file) do
-      # IO.puts("Processing dump...")
-      # :ok = process_dump(input_file, output_file)
+      IO.puts("Processing dump...")
+      :ok = process_dump(input_file, output_file)
 
       IO.puts("Clearing tables...")
       :ok = clear_tables!()

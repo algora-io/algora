@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.Org.DashboardPublicLive do
   use AlgoraWeb, :live_view
-  alias Algora.{Money, Organizations, Bounties, Users}
+  alias Algora.{Organizations, Bounties, Users}
   alias Algora.Bounties.Bounty
 
   def mount(%{"org_handle" => handle}, _session, socket) do
@@ -83,14 +83,14 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
         <.stat_card
           title="Open Bounties"
-          value={Money.format!(@stats.open_bounties_amount, @stats.currency)}
+          value={Money.to_string!(@stats.open_bounties_amount)}
           subtext={"#{@stats.open_bounties_count} bounties"}
           href={~p"/org/#{@org.handle}/bounties?status=open"}
           icon="tabler-diamond"
         />
         <.stat_card
           title="Total Awarded"
-          value={Money.format!(@stats.total_awarded, @stats.currency)}
+          value={Money.to_string!(@stats.total_awarded)}
           subtext={"#{@stats.completed_bounties_count} bounties"}
           href={~p"/org/#{@org.handle}/bounties?status=completed"}
           icon="tabler-gift"
@@ -174,7 +174,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
                 </div>
               </.link>
               <div class="flex-shrink-0 font-display text-success font-medium">
-                <%= Money.format!(earner.amount, "USD") %>
+                <%= Money.to_string!(earner.amount) %>
               </div>
             </div>
           <% end %>
@@ -190,7 +190,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
       <td class="p-4 py-0 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            <%= Money.format!(@bounty.amount, @bounty.currency) %>
+            <%= Money.to_string!(@bounty.amount) %>
           </div>
 
           <.link

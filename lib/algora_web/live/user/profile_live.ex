@@ -1,6 +1,6 @@
 defmodule AlgoraWeb.User.ProfileLive do
   use AlgoraWeb, :live_view
-  alias Algora.{Money, Users, Bounties}
+  alias Algora.{Users, Bounties}
 
   def mount(%{"handle" => handle}, _session, socket) do
     # HACK: fix
@@ -61,7 +61,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= Money.format!(@user.amount, "USD") %>
+              <%= Money.to_string!(@user.amount) %>
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Total Earnings</div>
@@ -127,7 +127,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                             class="group flex items-center gap-2"
                           >
                             <div class="font-display text-xl font-semibold text-success">
-                              <%= Money.format!(bounty.amount, "USD") %>
+                              <%= Money.to_string!(bounty.amount) %>
                             </div>
                             <div class="text-foreground group-hover:underline line-clamp-1">
                               <%= bounty.ticket.title %>

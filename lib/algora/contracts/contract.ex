@@ -4,11 +4,14 @@ defmodule Algora.Contracts.Contract do
   schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :completed, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1
-    field :hourly_rate, :decimal
+    field :hourly_rate, Money.Ecto.Composite.Type, no_fraction_if_integer: true
     field :hours_per_week, :integer
     field :start_date, :utc_datetime_usec
     field :end_date, :utc_datetime_usec
-    field :total_paid, :decimal, default: Decimal.new(0)
+
+    field :total_paid, Money.Ecto.Composite.Type,
+      default: Money.zero(:USD),
+      no_fraction_if_integer: true
 
     belongs_to :original_contract, Algora.Contracts.Contract
     has_many :renewals, Algora.Contracts.Contract, foreign_key: :original_contract_id

@@ -8,8 +8,7 @@ defmodule Algora.Payments.Transaction do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map
-    field :amount, :decimal
-    field :currency, :string
+    field :amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
     field :type, Ecto.Enum, values: [:charge, :transfer, :refund]
     field :status, Ecto.Enum, values: [:pending, :processing, :succeeded, :failed, :canceled]
     field :succeeded_at, :utc_datetime_usec
@@ -34,7 +33,6 @@ defmodule Algora.Payments.Transaction do
       :provider_id,
       :provider_meta,
       :amount,
-      :currency,
       :type,
       :status,
       :timesheet_id,
@@ -49,11 +47,9 @@ defmodule Algora.Payments.Transaction do
       :provider_id,
       :provider_meta,
       :amount,
-      :currency,
       :type,
       :status
     ])
-    |> validate_number(:amount, greater_than: 0)
     |> foreign_key_constraint(:sender_id)
     |> foreign_key_constraint(:recipient_id)
   end

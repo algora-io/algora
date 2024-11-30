@@ -2,7 +2,6 @@ defmodule AlgoraWeb.User.DashboardLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
-  alias Algora.Money
 
   def mount(_params, _session, socket) do
     tech_stack = ["Rust", "Elixir"]
@@ -12,7 +11,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:tech_stack, tech_stack)
       |> assign(:view_mode, "compact")
       |> assign(:available_to_work, true)
-      |> assign(:hourly_rate, 50)
+      |> assign(:hourly_rate, Money.new!(50, :USD))
       |> assign(:hours_per_week, 40)
       |> assign(
         :bounties,
@@ -209,8 +208,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   defp fetch_hourly_bounties do
     [
       %{
-        amount: Decimal.new(75),
-        currency: "USD",
+        amount: Money.new!(75, :USD),
         expected_hours: 20,
         ticket: %{title: "Algora: Open source bounties"},
         owner: %{
@@ -224,8 +222,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         hourly: true
       },
       %{
-        amount: Decimal.new(150),
-        currency: "USD",
+        amount: Money.new!(150, :USD),
         expected_hours: 15,
         ticket: %{title: "Deploy invincible backends | Golem"},
         owner: %{
@@ -240,8 +237,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         hourly: true
       },
       %{
-        amount: Decimal.new(150),
-        currency: "USD",
+        amount: Money.new!(150, :USD),
         expected_hours: 25,
         ticket: %{title: "Qdrant - Vector Database"},
         owner: %{
@@ -335,7 +331,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       <td class="p-4 py-0 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            <%= Money.format!(@bounty.amount, @bounty.currency) %>/hr
+            <%= Money.to_string!(@bounty.amount) %>/hr
           </div>
 
           <.link
@@ -362,7 +358,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       <td class="p-4 py-0 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            <%= Money.format!(@bounty.amount, @bounty.currency) %>
+            <%= Money.to_string!(@bounty.amount) %>
           </div>
 
           <.link
@@ -409,7 +405,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.format!(@bounty.amount, @bounty.currency) %>/hr
+                  <%= Money.to_string!(@bounty.amount) %>/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
                   · <%= @bounty.expected_hours %> hours/week
@@ -430,10 +426,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             <div class="text-right">
               <div class="text-sm text-muted-foreground">Total contract value</div>
               <div class="font-display text-lg font-semibold text-foreground">
-                <%= Money.format!(
-                  Decimal.mult(@bounty.amount, @bounty.expected_hours),
-                  @bounty.currency
-                ) %> / wk
+                <%= Money.to_string!(Money.mult!(@bounty.amount, @bounty.expected_hours)) %> / wk
               </div>
             </div>
             <.button phx-click="accept_contract" phx-value-org={@bounty.owner.handle} size="sm">
@@ -475,7 +468,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
             <.link href={Bounty.url(@bounty)} class="group flex items-center gap-2">
               <div class="font-display text-xl font-semibold text-success">
-                <%= Money.format!(@bounty.amount, @bounty.currency) %>
+                <%= Money.to_string!(@bounty.amount) %>
               </div>
               <div class="text-foreground group-hover:underline line-clamp-1">
                 <%= @bounty.ticket.title %>

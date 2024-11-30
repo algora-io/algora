@@ -1,6 +1,5 @@
 defmodule AlgoraWeb.Project.ViewLive do
   use AlgoraWeb, :live_view
-  alias Algora.Money
   alias Algora.Users
 
   def mount(%{"id" => id}, _session, socket) do
@@ -10,7 +9,7 @@ defmodule AlgoraWeb.Project.ViewLive do
       title: "Build Real-time Chat Application",
       country: "US",
       skills: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
-      budget: %{type: :hourly, from: 50, to: 75},
+      budget: %{type: :hourly, from: Money.new!(50, :USD), to: Money.new!(75, :USD)},
       description: "Looking for an experienced developer to build a real-time chat system...",
       posted_at: ~N[2024-03-15 10:00:00],
       client: %{
@@ -67,9 +66,8 @@ defmodule AlgoraWeb.Project.ViewLive do
                   <% :hourly -> %>
                     $<%= @project.budget.from %>-<%= @project.budget.to %>/hour
                   <% :fixed -> %>
-                    <%= Money.format!(@project.budget.from, "USD") %>-<%= Money.format!(
-                      @project.budget.to,
-                      "USD"
+                    <%= Money.to_string!(@project.budget.from) %>-<%= Money.to_string!(
+                      @project.budget.to
                     ) %>
                 <% end %>
               </div>
@@ -134,7 +132,7 @@ defmodule AlgoraWeb.Project.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="text-gray-400 text-sm">Earned</div>
-                              <div class="font-semibold"><%= Money.format!(dev.amount, "USD") %></div>
+                              <div class="font-semibold"><%= Money.to_string!(dev.amount) %></div>
                             </div>
                           </div>
                           <div class="mt-2 flex flex-wrap gap-2">

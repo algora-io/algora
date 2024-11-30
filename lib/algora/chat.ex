@@ -66,4 +66,16 @@ defmodule Algora.Chat do
     |> limit(1)
     |> Repo.one()
   end
+
+  def get_or_create_thread(contract) do
+    case get_thread_for_users(contract.client_id, contract.provider_id) do
+      nil -> create_direct_thread(contract.client, contract.provider)
+      thread -> {:ok, thread}
+    end
+  end
+
+  def get_or_create_thread!(contract) do
+    {:ok, thread} = get_or_create_thread(contract)
+    thread
+  end
 end

@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Reviews, Repo, Organizations, FeeTier, Util}
+  alias Algora.{Contracts, Chat, Repo, Organizations, FeeTier, Util}
 
   def render(assigns) do
     ~H"""
@@ -99,8 +99,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-8">
-                    <%= for contract <- get_contract_chain(@contract) do %>
-                      <%= case get_payment_status(contract) do %>
+                    <%= for contract <- Contracts.get_contract_chain(@contract) do %>
+                      <%= case Contracts.get_payment_status(contract) do %>
                         <% {:pending_release, timesheet} -> %>
                           <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
                             <div class="flex items-center gap-4">
@@ -122,7 +122,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             <div class="flex items-center gap-2">
                               <div class="text-right mr-4">
                                 <div class="font-medium font-display">
-                                  <%= Money.to_string!(calculate_amount(contract, timesheet)) %>
+                                  <%= Money.to_string!(
+                                    Contracts.calculate_amount(contract, timesheet)
+                                  ) %>
                                 </div>
                                 <div class="text-sm text-muted-foreground">
                                   Ready to Release
@@ -193,7 +195,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="font-medium font-display">
-                                <%= Money.to_string!(calculate_amount(contract, timesheet)) %>
+                                <%= Money.to_string!(Contracts.calculate_amount(contract, timesheet)) %>
                               </div>
                               <div class="text-sm text-muted-foreground">Processing</div>
                             </div>
@@ -315,7 +317,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-4">
-                    <%= for activity <- get_contract_activity(@contract) do %>
+                    <%= for activity <- Contracts.get_contract_activity(@contract) do %>
                       <.timeline_activity activity={activity} />
                     <% end %>
                   </div>
@@ -465,7 +467,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(calculate_amount(@contract, @timesheet)) %>
+                      <%= Money.to_string!(Contracts.calculate_amount(@contract, @timesheet)) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -482,7 +484,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.to_string!(
-                        Money.sub!(calculate_amount(@contract, @timesheet), @escrow_amount)
+                        Money.sub!(Contracts.calculate_amount(@contract, @timesheet), @escrow_amount)
                       ) %>
                     </dd>
                   </div>
@@ -656,7 +658,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(calculate_amount(@contract, @timesheet)) %>
+                      <%= Money.to_string!(Contracts.calculate_amount(@contract, @timesheet)) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -672,7 +674,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.to_string!(
-                        Money.sub!(calculate_amount(@contract, @timesheet), @escrow_amount)
+                        Money.sub!(Contracts.calculate_amount(@contract, @timesheet), @escrow_amount)
                       ) %>
                     </dd>
                   </div>
@@ -804,71 +806,33 @@ defmodule AlgoraWeb.Contract.ViewLive do
         ]
       ])
 
-    # Get all contracts in the chain
-    contracts = get_contract_chain(contract)
-
-    # Calculate total paid from all transfers across the contract chain
-    total_paid =
-      contracts
-      |> Enum.flat_map(& &1.transactions)
-      |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-
-    timesheet = get_latest_timesheet(contract)
-
-    latest_charge =
-      contract.transactions
-      |> Enum.filter(&(&1.type == :charge))
-      |> Enum.sort_by(& &1.inserted_at, :desc)
-      |> List.first()
-
-    {:ok, thread} = get_or_create_thread(contract)
+    contract_chain = Contracts.get_contract_chain(contract)
+    total_paid = Contracts.calculate_total_paid(contract_chain)
+    latest_charge = Contracts.get_latest_charge(contract)
+    escrow_amount = Contracts.calculate_escrow_amount(contract_chain)
+    timesheet = Contracts.get_latest_timesheet(contract)
+    thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
 
     {:ok,
      socket
-     # Update the contract's total_paid
      |> assign(:contract, %{contract | total_paid: total_paid})
      |> assign(:timesheet, timesheet)
      |> assign(:latest_charge, latest_charge)
-     |> assign(:escrow_amount, calculate_escrow_amount(contract))
+     |> assign(:escrow_amount, escrow_amount)
      |> assign(:page_title, "Contract with #{contract.provider.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)
      |> assign(:show_release_renew_modal, false)
      |> assign(:show_release_modal, false)
      |> assign(:show_dispute_modal, false)
-     |> assign(:fee_data, calculate_fee_data(contract))
-     |> assign(:org_members, Organizations.list_org_members(contract.client))
-     |> assign(:tech_stack, ["Python", "AWS", "React", "Node.js"])}
+     |> assign(:fee_data, Contracts.calculate_fee_data(contract_chain))
+     |> assign(:org_members, Organizations.list_org_members(contract.client))}
   end
 
-  def handle_event("release_and_renew", %{"feedback" => feedback}, socket) do
-    contract = socket.assigns.contract
-
-    {:ok, {_updated_contract, _charge, _transfer}} =
-      Contracts.process_payment(contract, %{
-        stripe_charge_id: "ch_xxx",
-        stripe_transfer_id: "tr_xxx",
-        stripe_metadata: %{},
-        fee_percentage: socket.assigns.fee_data.current_fee
-      })
-
-    {:ok, _review} =
-      Reviews.create_review(%{
-        contract_id: contract.id,
-        reviewer_id: socket.assigns.current_user.id,
-        reviewee_id: contract.provider_id,
-        rating: 5,
-        content: feedback,
-        visibility: :public
-      })
-
-    {:ok, new_contract} = Contracts.renew_contract(contract)
-
+  def handle_event("release_and_renew", %{"feedback" => _feedback}, socket) do
     {:noreply,
      socket
-     |> assign(:contract, new_contract)
      |> assign(:show_release_renew_modal, false)
      |> put_flash(:info, "Payment released and contract renewed successfully")}
   end
@@ -889,6 +853,30 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
+  def handle_event("close_drawer", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_release_modal, false)
+     |> assign(:show_release_renew_modal, false)
+     |> assign(:show_dispute_modal, false)}
+  end
+
+  def handle_event("release_payment", %{"feedback" => _feedback}, socket) do
+    # TODO
+    {:noreply,
+     socket
+     |> assign(:show_release_modal, false)
+     |> put_flash(:info, "Payment released successfully")}
+  end
+
+  def handle_event("raise_dispute", %{"reason" => _reason}, socket) do
+    # TODO
+    {:noreply,
+     socket
+     |> assign(:show_dispute_modal, false)
+     |> put_flash(:info, "Dispute raised successfully")}
+  end
+
   def handle_event("show_release_modal", %{"contract_id" => _contract_id}, socket) do
     {:noreply, assign(socket, :show_release_modal, true)}
   end
@@ -899,206 +887,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
   def handle_event("show_release_renew_modal", %{"contract_id" => _contract_id}, socket) do
     {:noreply, assign(socket, :show_release_renew_modal, true)}
-  end
-
-  def handle_event("close_drawer", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_release_modal, false)
-     |> assign(:show_release_renew_modal, false)
-     |> assign(:show_dispute_modal, false)}
-  end
-
-  def handle_event("release_payment", %{"feedback" => feedback}, socket) do
-    contract = socket.assigns.contract
-
-    {:ok, {_updated_contract, _charge, _transfer}} =
-      Contracts.process_payment(contract, %{
-        stripe_charge_id: "ch_xxx",
-        stripe_transfer_id: "tr_xxx",
-        stripe_metadata: %{},
-        fee_percentage: socket.assigns.fee_data.current_fee
-      })
-
-    {:ok, _review} =
-      Reviews.create_review(%{
-        contract_id: contract.id,
-        reviewer_id: socket.assigns.current_user.id,
-        reviewee_id: contract.provider_id,
-        rating: 5,
-        content: feedback,
-        visibility: :public
-      })
-
-    {:noreply,
-     socket
-     |> assign(:show_release_modal, false)
-     |> put_flash(:info, "Payment released successfully")}
-  end
-
-  def handle_event("raise_dispute", %{"reason" => _reason}, socket) do
-    # Add dispute handling logic here
-
-    {:noreply,
-     socket
-     |> assign(:show_dispute_modal, false)
-     |> put_flash(:info, "Dispute raised successfully")}
-  end
-
-  defp get_or_create_thread(contract) do
-    case Chat.get_thread_for_users(contract.client_id, contract.provider_id) do
-      nil -> Chat.create_direct_thread(contract.client, contract.provider)
-      thread -> {:ok, thread}
-    end
-  end
-
-  defp calculate_fee_data(contract) do
-    # Get all contracts in the chain
-    contracts = get_contract_chain(contract)
-
-    # Calculate total paid from all transfers
-    total_paid =
-      contracts
-      |> Enum.flat_map(& &1.transactions)
-      |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-
-    fee_tiers = FeeTier.all()
-    current_fee = FeeTier.calculate_fee_percentage(total_paid)
-    transaction_fee = Decimal.new("0.04")
-
-    %{
-      total_paid: total_paid,
-      fee_tiers: fee_tiers,
-      current_fee: current_fee,
-      transaction_fee: transaction_fee,
-      total_fee: Decimal.add(current_fee, transaction_fee),
-      progress: FeeTier.calculate_progress(total_paid)
-    }
-  end
-
-  defp get_contract_chain(contract) do
-    case contract.original_contract_id do
-      nil -> [contract | contract.renewals]
-      _ -> [contract.original_contract | contract.original_contract.renewals]
-    end
-    |> Enum.uniq_by(& &1.id)
-    |> Enum.sort_by(& &1.start_date, {:desc, DateTime})
-  end
-
-  defp get_payment_status(contract) do
-    case {get_latest_timesheet(contract), get_latest_transaction(contract)} do
-      {nil, _} ->
-        nil
-
-      {timesheet, transaction} ->
-        cond do
-          transaction.type == :transfer -> {:completed, timesheet, transaction}
-          transaction.type == :charge -> {:pending_release, timesheet}
-          transaction.type == :refund -> {:refunded, timesheet}
-        end
-    end
-  end
-
-  defp get_latest_timesheet(contract) do
-    contract.timesheets
-    |> Enum.sort_by(& &1.end_date, {:desc, DateTime})
-    |> List.first()
-  end
-
-  defp get_latest_transaction(contract) do
-    contract.transactions
-    |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
-    |> List.first()
-  end
-
-  defp calculate_amount(contract, timesheet) do
-    Money.mult!(contract.hourly_rate, timesheet.hours_worked)
-  end
-
-  defp calculate_escrow_amount(contract) do
-    # Get all contracts in the chain
-    contracts = get_contract_chain(contract)
-
-    # Sum all charges across all contracts
-    total_charged =
-      contracts
-      |> Enum.flat_map(& &1.transactions)
-      |> Enum.filter(&(&1.type == :charge))
-      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-
-    # Sum all transfers across all contracts
-    total_transferred =
-      contracts
-      |> Enum.flat_map(& &1.transactions)
-      |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-
-    Money.sub!(total_charged, total_transferred)
-  end
-
-  defp get_contract_activity(contract) do
-    # Get all contracts in the chain ordered by start date (oldest first)
-    contracts =
-      get_contract_chain(contract)
-      |> Enum.sort_by(& &1.start_date, :asc)
-
-    # Build timeline by processing each contract period sequentially
-    contracts
-    |> Enum.with_index()
-    |> Enum.flat_map(fn {contract, index} ->
-      [
-        # 0. Initial escrow charge
-        contract.transactions
-        |> Enum.filter(&(&1.type == :charge))
-        |> Enum.map(fn transaction ->
-          %{
-            type: :escrow,
-            description: "Payment escrowed: #{Money.to_string!(transaction.amount)}",
-            date: transaction.inserted_at,
-            amount: transaction.amount
-          }
-        end),
-
-        # 1. Contract start
-        if(index != 0) do
-          %{
-            type: :renewal,
-            description: "Contract renewed for another period",
-            date: contract.inserted_at,
-            amount: nil
-          }
-        end,
-
-        # 2. Timesheet submissions
-        contract.timesheets
-        |> Enum.sort_by(& &1.inserted_at)
-        |> Enum.map(fn timesheet ->
-          %{
-            type: :timesheet,
-            description: "Timesheet submitted for #{timesheet.hours_worked} hours",
-            date: timesheet.inserted_at,
-            amount: calculate_amount(contract, timesheet)
-          }
-        end),
-
-        # 3. Payment releases (transfers)
-        contract.transactions
-        |> Enum.filter(&(&1.type == :transfer))
-        |> Enum.sort_by(& &1.inserted_at)
-        |> Enum.map(fn transaction ->
-          %{
-            type: :release,
-            description: "Payment released: #{Money.to_string!(transaction.amount)}",
-            date: transaction.inserted_at,
-            amount: transaction.amount
-          }
-        end)
-      ]
-      |> List.flatten()
-    end)
-    |> Enum.reject(&is_nil/1)
-    |> Enum.sort_by(& &1.date, {:desc, DateTime})
   end
 
   defp timeline_activity(assigns) do

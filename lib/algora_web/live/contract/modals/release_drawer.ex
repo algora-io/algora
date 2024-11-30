@@ -1,7 +1,11 @@
 defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   use AlgoraWeb.LiveComponent
 
-  alias Algora.{Contracts, Util}
+  import Ecto.Query
+  import Ecto.Changeset
+
+  alias Algora.{Contracts, MoneyUtils, Repo, Util, Users.User}
+  alias Algora.Payments.Transaction
 
   attr :show, :boolean, required: true
   attr :on_cancel, :string, required: true
@@ -82,7 +86,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                 <.button variant="outline" type="button" on_cancel="close_drawer">
                   Cancel
                 </.button>
-                <.button type="submit" form="release-payment-form">
+                <.button phx-click="release" phx-target={@myself} type="submit">
                   <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
                 </.button>
               </div>
@@ -92,5 +96,72 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
       </.drawer>
     </div>
     """
+  end
+
+  @impl true
+  def handle_event("release", _params, socket) do
+    %{contract: contract, timesheet: timesheet, escrow_amount: escrow_amount, fee_data: fee_data} =
+      socket.assigns
+
+    org =
+      from(u in User,
+        where: u.handle == ^contract.client.handle,
+        preload: [customer: :default_payment_method]
+      )
+      |> Repo.one!()
+
+    # Previous period's remaining balance (hours worked minus escrow)
+    previous_period_balance =
+      Money.sub!(Contracts.calculate_amount(contract, timesheet), escrow_amount)
+
+    # Final amount including platform fees
+    grand_total = Money.mult!(previous_period_balance, Decimal.add(1, fee_data.total_fee))
+
+    if Money.positive?(grand_total) do
+      transaction =
+        Repo.insert!(%Transaction{
+          id: Nanoid.generate(),
+          amount: grand_total,
+          provider: "stripe",
+          provider_id: nil,
+          provider_meta: nil,
+          type: :charge,
+          status: :pending,
+          succeeded_at: nil,
+          contract_id: contract.id,
+          original_contract_id: contract.original_contract_id
+        })
+
+      case Stripe.PaymentIntent.create(%{
+             amount: MoneyUtils.to_minor_units(grand_total),
+             currency: to_string(grand_total.currency),
+             customer: org.customer.provider_id,
+             payment_method: org.customer.default_payment_method.provider_id,
+             off_session: true,
+             confirm: true
+           }) do
+        {:ok, ch} ->
+          transaction
+          |> change(%{
+            provider_id: ch.id,
+            provider_meta: Util.normalize_struct(ch),
+            status: if(ch.status == "succeeded", do: :succeeded, else: :processing),
+            succeeded_at: if(ch.status == "succeeded", do: DateTime.utc_now(), else: nil)
+          })
+          |> Repo.update!()
+
+        {:error, error} ->
+          transaction
+          |> change(%{
+            status: :failed,
+            provider_meta: %{error: error}
+          })
+          |> Repo.update!()
+
+          {:error, error}
+      end
+    end
+
+    {:noreply, socket}
   end
 end

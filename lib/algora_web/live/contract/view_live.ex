@@ -536,7 +536,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         }
                         style={
                           if !Enum.member?([0, length(@fee_data.fee_tiers) - 1], index),
-                            do: "left: #{index * 100 / (length(@fee_data.fee_tiers) - 1)}%"
+                            do: "left: #{Util.format_pct(tier.progress)}"
                         }
                       >
                         <%= Money.to_string!(tier.threshold) %>

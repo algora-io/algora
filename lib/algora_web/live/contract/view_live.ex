@@ -497,7 +497,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <div class="space-y-4">
                   <div class="flex justify-between text-lg font-medium font-display">
                     <%= for tier <- @fee_data.fee_tiers do %>
-                      <span><%= tier.fee %>%</span>
+                      <span><%= tier.fee |> Decimal.mult(100) |> Decimal.round(0) %>%</span>
                     <% end %>
                   </div>
 
@@ -548,7 +548,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
                 <div class="text-base text-muted-foreground">
                   Current fee:
-                  <span class="font-semibold font-display"><%= @fee_data.current_fee %>%</span>
+                  <span class="font-semibold font-display">
+                    <%= @fee_data.current_fee |> Decimal.mult(100) |> Decimal.round(0) %>%
+                  </span>
                 </div>
                 <div class="text-base text-muted-foreground">
                   Total paid to date:

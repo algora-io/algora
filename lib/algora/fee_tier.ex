@@ -6,22 +6,22 @@ defmodule Algora.FeeTier do
   @tiers [
     %{
       threshold: Money.new!(0, :USD, no_fraction_if_integer: true),
-      fee: 19,
+      fee: Decimal.new("0.19"),
       progress_percent: 0.0
     },
     %{
       threshold: Money.new!(3_000, :USD, no_fraction_if_integer: true),
-      fee: 15,
+      fee: Decimal.new("0.15"),
       progress_percent: 33.3
     },
     %{
       threshold: Money.new!(5_000, :USD, no_fraction_if_integer: true),
-      fee: 10,
+      fee: Decimal.new("0.10"),
       progress_percent: 66.6
     },
     %{
       threshold: Money.new!(15_000, :USD, no_fraction_if_integer: true),
-      fee: 5,
+      fee: Decimal.new("0.05"),
       progress_percent: 100.0
     }
   ]

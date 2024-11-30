@@ -19,3 +19,4 @@ defmodule Helpers do
 end
 
 import Helpers
+import Money.Sigil

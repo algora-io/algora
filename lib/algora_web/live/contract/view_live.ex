@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Repo, Organizations, FeeTier, Util}
+  alias Algora.{Contracts, Chat, Repo, Organizations}
 
   def render(assigns) do
     ~H"""
@@ -429,357 +429,37 @@ defmodule AlgoraWeb.Contract.ViewLive do
         </div>
       </div>
     </div>
-    <.drawer show={@show_release_renew_modal} on_cancel="close_drawer">
-      <.drawer_header>
-        Release Payment & Renew Contract
-      </.drawer_header>
-      <.drawer_content class="mt-4">
-        <div class="grid grid-cols-2 gap-8">
-          <div class="space-y-8">
-            <.form_item>
-              <.form_label class="text-lg font-semibold mb-6">
-                How was your experience working with <%= @contract.provider.name %>?
-              </.form_label>
-              <.form_control>
-                <.input
-                  type="textarea"
-                  rows={6}
-                  name="feedback"
-                  value=""
-                  placeholder="Share your experience working with the developer..."
-                  required
-                />
-              </.form_control>
-              <.form_description>
-                Your feedback helps other companies make informed decisions.
-              </.form_description>
-            </.form_item>
-            <.card>
-              <.card_header>
-                <.card_title>Past Escrow Release</.card_title>
-              </.card_header>
-              <.card_content>
-                <dl class="space-y-4">
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.to_string!(
-                        @contract.hourly_rate
-                      ) %>/hr)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Contracts.calculate_amount(@contract, @timesheet)) %>
-                    </dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Escrow balance
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      -<%= Money.to_string!(@escrow_amount) %>
-                    </dd>
-                  </div>
-                  <div class="h-5"></div>
-                  <div class="h-px bg-border" />
-                  <div class="flex justify-between">
-                    <dt class="font-medium">Total Due</dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(
-                        Money.sub!(Contracts.calculate_amount(@contract, @timesheet), @escrow_amount)
-                      ) %>
-                    </dd>
-                  </div>
-                </dl>
-              </.card_content>
-            </.card>
-          </div>
-          <div class="flex flex-col gap-8">
-            <div>
-              <h3 class="text-lg font-semibold mb-6">Algora Fee Tier</h3>
-              <div class="space-y-2">
-                <div class="space-y-4">
-                  <div class="flex justify-between text-lg font-medium font-display">
-                    <%= for tier <- @fee_data.fee_tiers do %>
-                      <span><%= Util.format_pct(tier.fee) %></span>
-                    <% end %>
-                  </div>
 
-                  <div class="relative">
-                    <!-- Progress bar -->
-                    <div class="h-2 bg-muted/50 rounded-full">
-                      <div
-                        class="h-full bg-primary rounded-full transition-all duration-500"
-                        style={"width: #{Util.format_pct(@fee_data.progress)}"}
-                      />
-                    </div>
-                    <!-- Threshold circles -->
-                    <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between pointer-events-none">
-                      <%= for tier <- @fee_data.fee_tiers do %>
-                        <div class={
-                          classes([
-                            "h-4 w-4 rounded-full border-2 border-background",
-                            if(FeeTier.threshold_met?(@fee_data.total_paid, tier),
-                              do: "bg-success",
-                              else: "bg-muted"
-                            )
-                          ])
-                        }>
-                        </div>
-                      <% end %>
-                    </div>
-                  </div>
-                  <div class="flex justify-between text-lg font-display font-medium relative">
-                    <%= for {tier, index} <- Enum.with_index(@fee_data.fee_tiers) do %>
-                      <div
-                        class={
-                          classes([
-                            "transform translate-x-1/3",
-                            index == 0 && "translate-x-0",
-                            index == length(@fee_data.fee_tiers) - 1 && "translate-x-0"
-                          ])
-                        }
-                        style={
-                          if !Enum.member?([0, length(@fee_data.fee_tiers) - 1], index),
-                            do: "left: #{Util.format_pct(tier.progress)}"
-                        }
-                      >
-                        <%= Money.to_string!(tier.threshold) %>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
+    <.live_component
+      module={AlgoraWeb.Contract.Modals.ReleaseRenewDrawer}
+      id="release-renew-drawer"
+      show={@show_release_renew_modal}
+      on_cancel="close_drawer"
+      contract={@contract}
+      timesheet={@timesheet}
+      escrow_amount={@escrow_amount}
+      fee_data={@fee_data}
+    />
 
-                <div class="text-base text-muted-foreground">
-                  Current fee:
-                  <span class="font-semibold font-display">
-                    <%= Util.format_pct(@fee_data.current_fee) %>
-                  </span>
-                </div>
-                <div class="text-base text-muted-foreground">
-                  Total paid to date:
-                  <span class="font-semibold font-display">
-                    <%= Money.to_string!(@fee_data.total_paid) %>
-                  </span>
-                </div>
-              </div>
-            </div>
-            <.card class="mt-1">
-              <.card_header>
-                <.card_title>New Escrow Payment Summary</.card_title>
-              </.card_header>
-              <.card_content>
-                <dl class="space-y-4">
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Renewal amount (<%= @contract.hours_per_week %> hours x <%= Money.to_string!(
-                        @contract.hourly_rate
-                      ) %>/hr)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(@escrow_amount) %>
-                    </dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Algora fees (<%= Util.format_pct(@fee_data.current_fee) %>)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.current_fee)) %>
-                    </dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Transaction fees (<%= Util.format_pct(@fee_data.transaction_fee) %>)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.transaction_fee)) %>
-                    </dd>
-                  </div>
-                  <div class="h-px bg-border" />
-                  <div class="flex justify-between">
-                    <dt class="font-medium">Total Due</dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(
-                        Money.mult!(@escrow_amount, Decimal.add(1, @fee_data.total_fee))
-                      ) %>
-                    </dd>
-                  </div>
-                </dl>
-              </.card_content>
-            </.card>
-            <div class="ml-auto flex gap-4">
-              <.button variant="outline" type="button" on_cancel="close_drawer">
-                Cancel
-              </.button>
-              <.button type="submit">
-                <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release & Renew
-              </.button>
-            </div>
-          </div>
-        </div>
-      </.drawer_content>
-    </.drawer>
+    <.live_component
+      module={AlgoraWeb.Contract.Modals.ReleaseDrawer}
+      id="release-drawer"
+      show={@show_release_modal}
+      on_cancel="close_drawer"
+      contract={@contract}
+      timesheet={@timesheet}
+      escrow_amount={@escrow_amount}
+    />
 
-    <.drawer show={@show_release_modal} on_cancel="close_drawer">
-      <.drawer_header>
-        <h3 class="text-lg font-semibold">Release Payment</h3>
-      </.drawer_header>
-      <.drawer_content>
-        <div class="grid grid-cols-2 gap-8">
-          <form phx-submit="release_payment" class="space-y-6">
-            <.form_item>
-              <.form_label>Feedback for <%= @contract.provider.name %></.form_label>
-              <.form_control>
-                <.input
-                  type="textarea"
-                  rows={8}
-                  name="feedback"
-                  value=""
-                  placeholder="Share your experience working with the developer..."
-                  required
-                />
-              </.form_control>
-              <.form_description>
-                Your feedback helps other companies make informed decisions.
-              </.form_description>
-            </.form_item>
-          </form>
-
-          <div class="flex flex-col gap-8">
-            <.card>
-              <.card_header>
-                <.card_title>Past Escrow Release</.card_title>
-              </.card_header>
-              <.card_content>
-                <dl class="space-y-4">
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.to_string!(
-                        @contract.hourly_rate
-                      ) %>/hr)
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Contracts.calculate_amount(@contract, @timesheet)) %>
-                    </dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">
-                      Escrow balance
-                    </dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      -<%= Money.to_string!(@escrow_amount) %>
-                    </dd>
-                  </div>
-                  <div class="h-px bg-border" />
-                  <div class="flex justify-between">
-                    <dt class="font-medium">Total Due</dt>
-                    <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(
-                        Money.sub!(Contracts.calculate_amount(@contract, @timesheet), @escrow_amount)
-                      ) %>
-                    </dd>
-                  </div>
-                </dl>
-              </.card_content>
-            </.card>
-
-            <div class="mt-auto flex gap-4 justify-end">
-              <.button variant="outline" type="button" on_cancel="close_drawer">
-                Cancel
-              </.button>
-              <.button type="submit" form="release-payment-form">
-                <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
-              </.button>
-            </div>
-          </div>
-        </div>
-      </.drawer_content>
-    </.drawer>
-
-    <.drawer show={@show_dispute_modal} on_cancel="close_drawer">
-      <.drawer_header>
-        <h3 class="text-lg font-semibold text-destructive">Raise Payment Dispute</h3>
-      </.drawer_header>
-      <.drawer_content>
-        <div class="grid grid-cols-2 gap-8">
-          <div>
-            <form phx-submit="raise_dispute" class="space-y-6">
-              <.form_item>
-                <.form_label>Reason for dispute</.form_label>
-                <.form_control>
-                  <.input
-                    type="textarea"
-                    rows={10}
-                    name="reason"
-                    value=""
-                    placeholder="Please provide detailed information about why you're disputing this payment..."
-                    class="min-h-[120px]"
-                    required
-                  />
-                </.form_control>
-                <.form_description>
-                  Be specific about any issues or concerns. This will help resolve the dispute faster.
-                </.form_description>
-              </.form_item>
-
-              <.alert variant="destructive" class="mt-4">
-                <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" />
-                Disputes should only be raised for serious issues. Our team will review your case within 24 hours.
-              </.alert>
-
-              <div class="flex gap-4">
-                <.button variant="outline" type="button" on_cancel="close_drawer">
-                  Cancel
-                </.button>
-                <.button variant="destructive" type="submit">
-                  <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" /> Raise Dispute
-                </.button>
-              </div>
-            </form>
-          </div>
-
-          <div>
-            <.card>
-              <.card_header>
-                <.card_title>Dispute Information</.card_title>
-              </.card_header>
-              <.card_content>
-                <dl class="space-y-4">
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Disputed Amount</dt>
-                    <dd class="font-semibold">
-                      <%= Money.to_string!(@escrow_amount) %>
-                    </dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Contract Period</dt>
-                    <dd class="font-semibold">
-                      <%= Calendar.strftime(@contract.start_date, "%b %d") %> - <%= Calendar.strftime(
-                        @contract.end_date,
-                        "%b %d, %Y"
-                      ) %>
-                    </dd>
-                  </div>
-                </dl>
-              </.card_content>
-            </.card>
-
-            <.card class="mt-4">
-              <.card_header>
-                <.card_title>Dispute Process</.card_title>
-              </.card_header>
-              <.card_content>
-                <ol class="space-y-4 list-decimal list-inside text-sm text-muted-foreground">
-                  <li>Our team will review your case within 24 hours</li>
-                  <li>Both parties will be contacted for additional information</li>
-                  <li>Resolution typically occurs within 5 business days</li>
-                  <li>Funds remain in escrow until the dispute is resolved</li>
-                </ol>
-              </.card_content>
-            </.card>
-          </div>
-        </div>
-      </.drawer_content>
-    </.drawer>
+    <.live_component
+      module={AlgoraWeb.Contract.Modals.DisputeDrawer}
+      id="dispute-drawer"
+      show={@show_dispute_modal}
+      on_cancel="close_drawer"
+      contract={@contract}
+      timesheet={@timesheet}
+      escrow_amount={@escrow_amount}
+    />
     """
   end
 
@@ -859,22 +539,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:show_release_modal, false)
      |> assign(:show_release_renew_modal, false)
      |> assign(:show_dispute_modal, false)}
-  end
-
-  def handle_event("release_payment", %{"feedback" => _feedback}, socket) do
-    # TODO
-    {:noreply,
-     socket
-     |> assign(:show_release_modal, false)
-     |> put_flash(:info, "Payment released successfully")}
-  end
-
-  def handle_event("raise_dispute", %{"reason" => _reason}, socket) do
-    # TODO
-    {:noreply,
-     socket
-     |> assign(:show_dispute_modal, false)
-     |> put_flash(:info, "Dispute raised successfully")}
   end
 
   def handle_event("show_release_modal", %{"contract_id" => _contract_id}, socket) do

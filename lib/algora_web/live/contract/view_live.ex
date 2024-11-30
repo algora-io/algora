@@ -132,11 +132,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
 
                               <div class="flex items-center gap-2">
-                                <.button phx-click={
-                                  JS.push("show_release_renew_modal",
-                                    value: %{contract_id: contract.id}
-                                  )
-                                }>
+                                <.button phx-click="show_release_renew_modal">
                                   Release & Renew
                                 </.button>
 
@@ -147,21 +143,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                     </.button>
                                   </.dropdown_menu_trigger>
                                   <.dropdown_menu_content>
-                                    <.dropdown_menu_item phx-click={
-                                      JS.push("show_release_modal",
-                                        value: %{contract_id: contract.id}
-                                      )
-                                    }>
+                                    <.dropdown_menu_item phx-click="show_release_modal">
                                       <.icon name="tabler-arrow-right" class="w-4 h-4 mr-2" />
                                       Release without renew
                                     </.dropdown_menu_item>
                                     <.dropdown_menu_separator />
                                     <.dropdown_menu_item
-                                      phx-click={
-                                        JS.push("show_dispute_modal",
-                                          value: %{contract_id: contract.id}
-                                        )
-                                      }
+                                      phx-click="show_dispute_modal"
                                       class="text-destructive"
                                     >
                                       <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" />
@@ -510,13 +498,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:org_members, Organizations.list_org_members(contract.client))}
   end
 
-  def handle_event("release_and_renew", %{"feedback" => _feedback}, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_release_renew_modal, false)
-     |> put_flash(:info, "Payment released and contract renewed successfully")}
-  end
-
   def handle_event("send_message", %{"message" => content}, socket) do
     {:ok, message} =
       Chat.send_message(
@@ -541,15 +522,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:show_dispute_modal, false)}
   end
 
-  def handle_event("show_release_modal", %{"contract_id" => _contract_id}, socket) do
+  def handle_event("show_release_modal", _params, socket) do
     {:noreply, assign(socket, :show_release_modal, true)}
   end
 
-  def handle_event("show_dispute_modal", %{"contract_id" => _contract_id}, socket) do
+  def handle_event("show_dispute_modal", _params, socket) do
     {:noreply, assign(socket, :show_dispute_modal, true)}
   end
 
-  def handle_event("show_release_renew_modal", %{"contract_id" => _contract_id}, socket) do
+  def handle_event("show_release_renew_modal", _params, socket) do
     {:noreply, assign(socket, :show_release_renew_modal, true)}
   end
 

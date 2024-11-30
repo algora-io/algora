@@ -33,9 +33,7 @@ defmodule Algora.FeeTier do
     tier =
       @tiers
       |> Enum.reverse()
-      |> Enum.find(List.first(@tiers), fn tier ->
-        Money.compare!(total_paid, tier.threshold) in [:gt, :eq]
-      end)
+      |> Enum.find(List.first(@tiers), &threshold_met?(total_paid, &1))
 
     tier.fee
   end
@@ -69,9 +67,7 @@ defmodule Algora.FeeTier do
   end
 
   defp find_current_tier(total_paid) do
-    Enum.find(@tiers, fn tier ->
-      Money.compare!(total_paid, tier.threshold) == :lt
-    end)
+    Enum.find(@tiers, &(Money.compare!(total_paid, &1.threshold) == :lt))
   end
 
   defp find_previous_tier(nil), do: List.last(@tiers)
@@ -82,8 +78,16 @@ defmodule Algora.FeeTier do
   end
 
   defp percentage_of(amount, total) do
-    amount
-    |> Money.to_decimal()
-    |> Decimal.div(Money.to_decimal(total))
+    Decimal.div(
+      Money.to_decimal(amount),
+      Money.to_decimal(total)
+    )
+  end
+
+  @doc """
+  Returns true if the total paid amount has met or exceeded a tier's threshold.
+  """
+  def threshold_met?(total_paid, tier) do
+    Money.compare!(total_paid, tier.threshold) != :lt
   end
 end

@@ -512,14 +512,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <!-- Threshold circles -->
                     <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between pointer-events-none">
                       <%= for tier <- @fee_data.fee_tiers do %>
-                        <div class={[
-                          "h-4 w-4 rounded-full border-2 border-background",
-                          if Money.compare!(@fee_data.total_paid, tier.threshold) != :lt do
-                            "bg-success"
-                          else
-                            "bg-muted"
-                          end
-                        ]}>
+                        <div class={
+                          classes([
+                            "h-4 w-4 rounded-full border-2 border-background",
+                            if(FeeTier.threshold_met?(@fee_data.total_paid, tier),
+                              do: "bg-success",
+                              else: "bg-muted"
+                            )
+                          ])
+                        }>
                         </div>
                       <% end %>
                     </div>

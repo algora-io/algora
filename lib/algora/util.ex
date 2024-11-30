@@ -24,6 +24,15 @@ defmodule Algora.Util do
     end
   end
 
+  def format_pct(percentage) do
+    percentage
+    |> Decimal.mult(100)
+    |> Decimal.to_string()
+    |> String.trim_trailing("0")
+    |> String.trim_trailing(".")
+    |> Kernel.<>("%")
+  end
+
   def normalize_struct(struct) when is_struct(struct) do
     struct
     |> Map.from_struct()

@@ -36,26 +36,27 @@ defmodule AlgoraWeb.Components.UI.Drawer do
       }
       phx-click={@on_cancel}
     >
-      <div
-        class={
-          classes([
-            "fixed inset-x-0 bottom-0 z-50 rounded-t-xl bg-background border transform transition-transform duration-300 ease-in-out",
-            "#{if @show, do: "translate-y-0", else: "translate-y-full"}",
-            @class
-          ])
-        }
-        {@rest}
-      >
-        <div class="relative h-full">
-          <button
-            phx-click={@on_cancel}
-            class="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-          >
-            <AlgoraWeb.CoreComponents.icon name="tabler-x" class="w-5 h-5" />
-          </button>
-          <div class="flex flex-col relative h-full p-6" onclick="event.stopPropagation()">
-            <%= render_slot(@inner_block) %>
-          </div>
+    </div>
+    <div
+      class={
+        classes([
+          "fixed inset-x-0 bottom-0 z-50 rounded-t-xl bg-background border transform transition-transform duration-300 ease-in-out",
+          "#{if @show, do: "translate-y-0", else: "translate-y-full"}",
+          @class
+        ])
+      }
+      {@rest}
+    >
+      <div class="relative h-full">
+        <button
+          phx-click={@on_cancel}
+          type="button"
+          class="w-10 h-10 absolute z-50 top-4 right-4 text-muted-foreground hover:text-foreground flex items-center justify-center"
+        >
+          <AlgoraWeb.CoreComponents.icon name="tabler-x" class="w-5 h-5" />
+        </button>
+        <div class="flex flex-col relative h-full p-6">
+          <%= render_slot(@inner_block) %>
         </div>
       </div>
     </div>

@@ -7,22 +7,22 @@ defmodule Algora.FeeTier do
     %{
       threshold: Money.new!(0, :USD, no_fraction_if_integer: true),
       fee: Decimal.new("0.19"),
-      progress_percent: 0.0
+      progress: Decimal.new("0.00")
     },
     %{
       threshold: Money.new!(3_000, :USD, no_fraction_if_integer: true),
       fee: Decimal.new("0.15"),
-      progress_percent: 33.3
+      progress: Decimal.new("0.33")
     },
     %{
       threshold: Money.new!(5_000, :USD, no_fraction_if_integer: true),
       fee: Decimal.new("0.10"),
-      progress_percent: 66.6
+      progress: Decimal.new("0.66")
     },
     %{
       threshold: Money.new!(15_000, :USD, no_fraction_if_integer: true),
       fee: Decimal.new("0.05"),
-      progress_percent: 100.0
+      progress: Decimal.new("1.00")
     }
   ]
 
@@ -48,23 +48,23 @@ defmodule Algora.FeeTier do
     case {prev_tier, tier} do
       {nil, _tier} ->
         # First tier - calculate progress towards first threshold
-        percentage_of(total_paid, next_threshold) * 100.0
+        percentage_of(total_paid, next_threshold)
 
       {_prev_tier, nil} ->
         # Beyond last tier
-        100.0
+        Decimal.new("1.00")
 
       {prev_tier, _tier} ->
         # Between tiers - calculate progress between thresholds
-        base_progress = prev_tier.progress_percent
+        base_progress = prev_tier.progress
 
         segment_progress =
           percentage_of(
             Money.sub!(total_paid, prev_tier.threshold),
             Money.sub!(next_threshold, prev_tier.threshold)
-          ) * 100.0
+          )
 
-        base_progress + segment_progress
+        Decimal.add(base_progress, segment_progress)
     end
   end
 
@@ -85,6 +85,5 @@ defmodule Algora.FeeTier do
     amount
     |> Money.to_decimal()
     |> Decimal.div(Money.to_decimal(total))
-    |> Decimal.to_float()
   end
 end

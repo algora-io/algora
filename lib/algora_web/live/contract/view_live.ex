@@ -506,7 +506,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <div class="h-2 bg-muted/50 rounded-full">
                       <div
                         class="h-full bg-primary rounded-full transition-all duration-500"
-                        style={"width: #{@fee_data.progress}%"}
+                        style={"width: #{@fee_data.progress |> Decimal.mult(100)}%"}
                       />
                     </div>
                     <!-- Threshold circles -->
@@ -524,7 +524,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <% end %>
                     </div>
                   </div>
-                  <!-- Updated threshold numbers alignment -->
                   <div class="flex justify-between text-lg font-display font-medium relative">
                     <%= for {tier, index} <- Enum.with_index(@fee_data.fee_tiers) do %>
                       <div
@@ -578,26 +577,20 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Algora fees (<%= @fee_data.current_fee %>%)
+                      Algora fees (<%= @fee_data.current_fee |> Decimal.mult(100) |> Decimal.round(0) %>%)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(
-                        Money.mult!(
-                          @escrow_amount,
-                          Decimal.div(Decimal.new(@fee_data.current_fee), Decimal.new(100))
-                        )
-                      ) %>
+                      <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.current_fee)) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Transaction fees (4%)</dt>
+                    <dt class="text-muted-foreground">
+                      Transaction fees (<%= @fee_data.transaction_fee
+                      |> Decimal.mult(100)
+                      |> Decimal.round(0) %>%)
+                    </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(
-                        Money.mult!(
-                          @escrow_amount,
-                          Decimal.new("0.04")
-                        )
-                      ) %>
+                      <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.transaction_fee)) %>
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
@@ -605,13 +598,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.to_string!(
-                        Money.mult!(
-                          @escrow_amount,
-                          Decimal.add(
-                            Decimal.div(Decimal.new(@fee_data.current_fee), Decimal.new(100)),
-                            Decimal.new("1.04")
-                          )
-                        )
+                        Money.mult!(@escrow_amount, Decimal.add(1, @fee_data.total_fee))
                       ) %>
                     </dd>
                   </div>
@@ -979,11 +966,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
     fee_tiers = FeeTier.all()
     current_fee = FeeTier.calculate_fee_percentage(total_paid)
+    transaction_fee = Decimal.new("0.04")
 
     %{
       total_paid: total_paid,
       fee_tiers: fee_tiers,
       current_fee: current_fee,
+      transaction_fee: transaction_fee,
+      total_fee: Decimal.add(current_fee, transaction_fee),
       progress: FeeTier.calculate_progress(total_paid)
     }
   end

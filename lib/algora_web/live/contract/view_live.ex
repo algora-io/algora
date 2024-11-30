@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Reviews, Repo, Organizations, FeeTier}
+  alias Algora.{Contracts, Chat, Reviews, Repo, Organizations, FeeTier, Util}
 
   def render(assigns) do
     ~H"""
@@ -497,7 +497,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <div class="space-y-4">
                   <div class="flex justify-between text-lg font-medium font-display">
                     <%= for tier <- @fee_data.fee_tiers do %>
-                      <span><%= tier.fee |> Decimal.mult(100) |> Decimal.round(0) %>%</span>
+                      <span><%= Util.format_pct(tier.fee) %></span>
                     <% end %>
                   </div>
 
@@ -506,7 +506,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <div class="h-2 bg-muted/50 rounded-full">
                       <div
                         class="h-full bg-primary rounded-full transition-all duration-500"
-                        style={"width: #{@fee_data.progress |> Decimal.mult(100)}%"}
+                        style={"width: #{Util.format_pct(@fee_data.progress)}"}
                       />
                     </div>
                     <!-- Threshold circles -->
@@ -548,7 +548,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <div class="text-base text-muted-foreground">
                   Current fee:
                   <span class="font-semibold font-display">
-                    <%= @fee_data.current_fee |> Decimal.mult(100) |> Decimal.round(0) %>%
+                    <%= Util.format_pct(@fee_data.current_fee) %>
                   </span>
                 </div>
                 <div class="text-base text-muted-foreground">
@@ -577,7 +577,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Algora fees (<%= @fee_data.current_fee |> Decimal.mult(100) |> Decimal.round(0) %>%)
+                      Algora fees (<%= Util.format_pct(@fee_data.current_fee) %>)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.current_fee)) %>
@@ -585,9 +585,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Transaction fees (<%= @fee_data.transaction_fee
-                      |> Decimal.mult(100)
-                      |> Decimal.round(0) %>%)
+                      Transaction fees (<%= Util.format_pct(@fee_data.transaction_fee) %>)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
                       <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.transaction_fee)) %>

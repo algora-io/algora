@@ -1,7 +1,6 @@
 defmodule AlgoraWeb.Org.CreateLive do
   use AlgoraWeb, :live_view
   alias Algora.Users
-  alias Algora.Money
 
   def mount(_params, session, socket) do
     org = %{
@@ -103,7 +102,7 @@ defmodule AlgoraWeb.Org.CreateLive do
                     <div class="flex flex-col items-end">
                       <div class="text-gray-300">Awarded</div>
                       <div class="text-white font-semibold">
-                        <%= Money.format!(org.amount, "USD") %>
+                        <%= Money.to_string!(org.amount) %>
                       </div>
                     </div>
                   </div>

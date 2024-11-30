@@ -31,7 +31,7 @@ defmodule Seeds do
     case previous_timesheet do
       nil ->
         # First period - charge full amount
-        Decimal.mult(hourly_rate, Decimal.new(hours_per_week))
+        Money.mult!(hourly_rate, hours_per_week)
 
       timesheet ->
         # Subsequent periods - adjust based on previous usage
@@ -39,7 +39,7 @@ defmodule Seeds do
         previous_charged = hours_per_week
         previous_used = timesheet.hours_worked
         hours_to_charge = hours_per_week - (previous_charged - previous_used)
-        Decimal.mult(hourly_rate, Decimal.new(hours_to_charge))
+        Money.mult!(hourly_rate, hours_to_charge)
     end
   end
 
@@ -58,7 +58,6 @@ defmodule Seeds do
       status: status
     } = params
 
-    # Create contract
     contract =
       Repo.insert!(%Contract{
         id: if(sequence_number == 1, do: original_contract_id, else: Nanoid.generate()),
@@ -69,7 +68,7 @@ defmodule Seeds do
         hours_per_week: hours_per_week,
         start_date: start_date,
         end_date: end_date,
-        total_paid: Decimal.new("0"),
+        total_paid: Money.zero(:USD),
         sequence_number: sequence_number,
         original_contract_id: original_contract_id,
         inserted_at:
@@ -79,14 +78,12 @@ defmodule Seeds do
           )
       })
 
-    # Create charge
-    charge =
+    _charge =
       Repo.insert!(%Transaction{
         id: Nanoid.generate(),
         contract_id: contract.id,
         original_contract_id: original_contract_id,
         amount: calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate),
-        currency: "USD",
         type: :charge,
         status: :succeeded,
         inserted_at:
@@ -96,7 +93,6 @@ defmodule Seeds do
           )
       })
 
-    # Create timesheet
     timesheet =
       Repo.insert!(%Timesheet{
         id: Nanoid.generate(),
@@ -112,15 +108,13 @@ defmodule Seeds do
       })
 
     if status == :completed do
-      # Create transfer
       _transfer =
         Repo.insert!(%Transaction{
           id: Nanoid.generate(),
           contract_id: contract.id,
           original_contract_id: original_contract_id,
           timesheet_id: timesheet.id,
-          amount: Decimal.mult(hourly_rate, Decimal.new(hours_worked)),
-          currency: "USD",
+          amount: Money.mult!(hourly_rate, hours_worked),
           type: :transfer,
           status: :succeeded,
           inserted_at:
@@ -376,7 +370,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
   )
 end
 
-hourly_rate = Decimal.new("75.00")
+hourly_rate = Money.new!(75, :USD)
 hours_per_week = 40
 original_contract_id = Nanoid.generate()
 

@@ -3,7 +3,6 @@ defmodule AlgoraWeb.LeaderboardLive do
   alias Algora.Users
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Money
   import Ecto.Query
   import Ecto.Changeset
 
@@ -43,8 +42,8 @@ defmodule AlgoraWeb.LeaderboardLive do
                 <span class="font-display text-3xl font-semibold text-emerald-300">
                   <%= users
                   |> Enum.map(& &1.total_earned)
-                  |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
-                  |> Money.format!(:USD, fractional_digits: 0) %>
+                  |> Enum.reduce(Money.zero(:USD), &Money.add!/2)
+                  |> Money.to_string!() %>
                 </span>
               </div>
             </.card_header>
@@ -73,7 +72,7 @@ defmodule AlgoraWeb.LeaderboardLive do
               </:col>
               <:col :let={user} label="Earnings" align="right">
                 <span class="font-display text-3xl font-semibold text-emerald-300">
-                  <%= Money.format!(user.total_earned, :USD, fractional_digits: 0) %>
+                  <%= Money.to_string!(user.total_earned) %>
                 </span>
               </:col>
               <:col :let={user} label="Bounties" align="right">
@@ -130,15 +129,15 @@ defmodule AlgoraWeb.LeaderboardLive do
     users
     |> Enum.group_by(& &1.country)
     |> Enum.map(fn {country, users} ->
-      {country, Enum.sort_by(users, & &1.total_earned, {:desc, Decimal})}
+      {country, Enum.sort_by(users, & &1.total_earned, {:desc, Money})}
     end)
     |> Enum.sort_by(
       fn {_country, users} ->
         users
         |> Enum.map(& &1.total_earned)
-        |> Enum.reduce(Decimal.new(0), &Decimal.add/2)
+        |> Enum.reduce(Money.zero(:USD), &Money.add!/2)
       end,
-      {:desc, Decimal}
+      {:desc, Money}
     )
   end
 end

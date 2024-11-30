@@ -4,7 +4,6 @@ defmodule AlgoraWeb.Org.JobLive do
   alias Algora.Users
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
-  alias Algora.Money
 
   def mount(_params, _session, socket) do
     job = %{
@@ -150,7 +149,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     <%= if @job[:hourly_rate] do %>
                       <div class="text-right">
                         <div class="text-primary font-semibold font-display text-3xl">
-                          <%= Money.format!(@job.hourly_rate, "USD") %>/hour
+                          <%= Money.to_string!(@job.hourly_rate) %>/hour
                         </div>
                         <div class="text-sm text-muted-foreground">
                           Hourly Rate
@@ -244,7 +243,7 @@ defmodule AlgoraWeb.Org.JobLive do
                               <td class="p-4 py-0 align-middle">
                                 <div class="flex items-center gap-4">
                                   <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-                                    <%= Money.format!(bounty.amount, bounty.currency) %>
+                                    <%= Money.to_string!(bounty.amount) %>
                                   </div>
 
                                   <.link
@@ -325,7 +324,7 @@ defmodule AlgoraWeb.Org.JobLive do
                             <div class="text-right shrink-0">
                               <div class="text-sm text-muted-foreground">Earned</div>
                               <div class="font-medium">
-                                <%= Money.format!(dev.amount, "USD") %>
+                                <%= Money.to_string!(dev.amount) %>
                               </div>
                             </div>
                           </div>

@@ -1,7 +1,6 @@
 defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.Users
-  alias Algora.Money
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
@@ -281,7 +280,7 @@ defmodule AlgoraWeb.HomeLive do
         <div class="mt-1 text-muted-foreground text-xs">
           <span class="font-medium">Total Earned:</span>
           <span class="font-bold text-sm text-foreground">
-            <%= @dev.amount |> Money.format!("USD", fractional_digits: 0) %>
+            <%= Money.to_string!(@dev.amount) %>
           </span>
         </div>
       </div>

@@ -10,8 +10,7 @@ defmodule Algora.Payments.PlatformTransaction do
     field :provider_meta, :map
 
     field :succeeded_at, :utc_datetime_usec
-    field :amount, :decimal
-    field :currency, :string
+    field :amount, Money.Ecto.Composite.Type
     field :type, :string
     field :reporting_category, :string
 
@@ -20,7 +19,7 @@ defmodule Algora.Payments.PlatformTransaction do
 
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:provider, :provider_id, :provider_meta, :amount, :currency])
-    |> validate_required([:provider, :provider_id, :provider_meta, :amount, :currency])
+    |> cast(attrs, [:provider, :provider_id, :provider_meta, :amount])
+    |> validate_required([:provider, :provider_id, :provider_meta, :amount])
   end
 end

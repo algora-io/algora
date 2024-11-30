@@ -19,8 +19,7 @@ defmodule Algora.Payments do
     transaction =
       Repo.insert!(%Transaction{
         id: Nanoid.generate(),
-        amount: Money.to_decimal(amount),
-        currency: to_string(amount.currency),
+        amount: amount,
         provider: "stripe",
         provider_id: nil,
         provider_meta: nil,

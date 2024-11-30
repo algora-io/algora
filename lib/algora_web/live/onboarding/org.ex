@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   require Logger
   use AlgoraWeb, :live_view
   alias Algora.Users
-  alias Algora.Money
 
   def mount(_params, _session, socket) do
     context = %{
@@ -220,7 +219,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                         <div class="flex flex-col items-end">
                           <div class="text-muted-foreground">Earned</div>
                           <div class="font-semibold text-success font-display">
-                            <%= Money.format!(dev.amount, "USD") %>
+                            <%= Money.to_string!(dev.amount) %>
                           </div>
                         </div>
                       </div>

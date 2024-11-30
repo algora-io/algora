@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
-  alias Algora.Money
   alias AlgoraWeb.Org.Forms.BountyForm
   alias Algora.Users
 
@@ -12,10 +11,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
 
     changeset =
       %BountyForm{}
-      |> BountyForm.changeset(%{
-        payment_type: "fixed",
-        currency: "USD"
-      })
+      |> BountyForm.changeset(%{payment_type: "fixed"})
 
     {:ok,
      socket
@@ -351,7 +347,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                         </div>
                         <div class="flex items-center gap-1">
                           <.icon name="tabler-cash" class="w-4 h-4" />
-                          <span><%= Money.format!(dev.amount, "USD") %></span>
+                          <span><%= Money.to_string!(dev.amount) %></span>
                         </div>
                       </div>
                     </div>
@@ -403,7 +399,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                     <div class="p-4 rounded-lg bg-card border border-border">
                       <div class="flex items-center gap-2 mb-2">
                         <div class="text-2xl font-bold font-display">
-                          <%= Money.format!(@selected_dev.amount, "USD") %>
+                          <%= Money.to_string!(@selected_dev.amount) %>
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Total Earnings</div>
@@ -537,7 +533,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                 </div>
                 <div class="pl-6">
                   <div class="flex-none rounded-lg px-3 py-1 font-display tabular-nums text-lg font-extrabold ring-1 ring-inset bg-success/5 text-success ring-success/30">
-                    <%= Money.format!(bounty.amount, bounty.currency) %>
+                    <%= Money.to_string!(bounty.amount) %>
                   </div>
                 </div>
               </.link>

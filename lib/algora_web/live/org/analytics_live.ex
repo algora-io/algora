@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
-  alias Algora.Money
 
   def mount(_params, _session, socket) do
     org_id = socket.assigns.current_org.id
@@ -23,14 +22,14 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <.stat_card
           title="Open Bounties"
-          value={Money.format!(@stats.open_bounties_amount, @stats.currency)}
+          value={Money.to_string!(@stats.open_bounties_amount)}
           subtext={"#{@stats.open_bounties_count} bounties"}
           href={"/org/#{@current_org.handle}/bounties?status=open"}
           icon="tabler-diamond"
         />
         <.stat_card
           title="Total Awarded"
-          value={Money.format!(@stats.total_awarded, @stats.currency)}
+          value={Money.to_string!(@stats.total_awarded)}
           subtext={"#{@stats.completed_bounties_count} bounties / tips"}
           href={"/org/#{@current_org.handle}/bounties?status=completed"}
           icon="tabler-gift"
@@ -107,7 +106,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                 </div>
                 <div class="pl-6">
                   <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-emerald-400/5 text-emerald-400 ring-emerald-400/30">
-                    <%= Money.format!(bounty.amount, bounty.currency) %>
+                    <%= Money.to_string!(bounty.amount) %>
                   </div>
                 </div>
               </.link>
@@ -170,9 +169,9 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
     """
   end
 
-  defp activity_text(%{type: :bounty_awarded, user: user, amount: amount, currency: currency}) do
+  defp activity_text(%{type: :bounty_awarded, user: user, amount: amount}) do
     Phoenix.HTML.raw(
-      "<strong class='font-bold'>Algora</strong> awarded <strong class='font-bold'>#{user}</strong> a <strong class='font-bold'>#{Money.format!(amount, currency)}</strong> bounty"
+      "<strong class='font-bold'>Algora</strong> awarded <strong class='font-bold'>#{user}</strong> a <strong class='font-bold'>#{Money.to_string!(amount)}</strong> bounty"
     )
   end
 
@@ -188,8 +187,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
         url: "https://github.com/algora-io/tv/issues/105",
         type: :bounty_awarded,
         user: "urbit-pilled",
-        amount: 50,
-        currency: "USD",
+        amount: Money.new!(50, :USD),
         days_ago: 1
       },
       %{
@@ -202,8 +200,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
         url: "https://github.com/algora-io/tv/issues/103",
         type: :bounty_awarded,
         user: "gilest",
-        amount: 75,
-        currency: "USD",
+        amount: Money.new!(75, :USD),
         days_ago: 6
       },
       %{

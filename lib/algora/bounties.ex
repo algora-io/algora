@@ -64,7 +64,6 @@ defmodule Algora.Bounties do
           id: b.id,
           inserted_at: b.inserted_at,
           amount: b.amount,
-          currency: b.currency,
           tech_stack: o.tech_stack,
           owner: %{
             name: coalesce(o.name, o.handle),
@@ -110,9 +109,9 @@ defmodule Algora.Bounties do
     members_query = Member |> Member.filter_by_org_id(org_id)
 
     open_bounties = Repo.aggregate(open_bounties_query, :count, :id)
-    open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || Decimal.new(0)
+    open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || Money.zero(:USD)
 
-    total_awarded = Repo.aggregate(rewarded_bounties_query, :sum, :amount) || Decimal.new(0)
+    total_awarded = Repo.aggregate(rewarded_bounties_query, :sum, :amount) || Money.zero(:USD)
     completed_bounties = Repo.aggregate(rewarded_bounties_query, :count, :id)
 
     solvers_count_last_month =
@@ -130,7 +129,6 @@ defmodule Algora.Bounties do
     members_count = Repo.aggregate(members_query, :count, :id)
 
     %{
-      currency: "USD",
       open_bounties_amount: open_bounties_amount,
       open_bounties_count: open_bounties,
       total_awarded: total_awarded,

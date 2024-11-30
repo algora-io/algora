@@ -5,7 +5,6 @@ defmodule AlgoraWeb.TROTWLive do
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Money
   import Ecto.Query
 
   def mount(_params, _session, socket) do
@@ -91,7 +90,7 @@ defmodule AlgoraWeb.TROTWLive do
                         <%= region %>
                       </div>
                       <div class="font-display text-2xl font-semibold text-success">
-                        <%= Money.format!(total_earned, :USD) %>
+                        <%= Money.to_string!(total_earned) %>
                       </div>
                     </div>
 
@@ -111,7 +110,7 @@ defmodule AlgoraWeb.TROTWLive do
                             <div class="flex flex-col items-center gap-1">
                               <span class="font-medium">@<%= earner.handle %></span>
                               <span class="text-sm font-display text-muted-foreground">
-                                <%= Money.format!(earner.total_earned, :USD) %>
+                                <%= Money.to_string!(earner.total_earned) %>
                               </span>
                             </div>
                           </.tooltip_content>
@@ -162,8 +161,8 @@ defmodule AlgoraWeb.TROTWLive do
         |> Enum.reject(fn {region, _} -> is_nil(region) end)
         |> Enum.map(fn {region, region_entries} ->
           total =
-            Enum.reduce(region_entries, Decimal.new(0), fn entry, acc ->
-              Decimal.add(acc, entry.total_earned)
+            Enum.reduce(region_entries, Money.zero(:USD), fn entry, acc ->
+              Money.add!(acc, entry.total_earned)
             end)
 
           top_earners =

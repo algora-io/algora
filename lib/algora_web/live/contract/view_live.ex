@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Reviews, Repo, Money, Organizations}
+  alias Algora.{Contracts, Chat, Reviews, Repo, Organizations}
 
   def render(assigns) do
     ~H"""
@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Hourly rate</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.format!(@contract.hourly_rate, "USD") %>/hr
+                  <%= Money.to_string!(@contract.hourly_rate) %>/hr
                 </div>
               </.card_content>
             </.card>
@@ -62,7 +62,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">In escrow</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.format!(@escrow_amount, "USD") %>
+                  <%= Money.to_string!(@escrow_amount) %>
                 </div>
               </.card_content>
             </.card>
@@ -70,7 +70,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Total paid</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.format!(@contract.total_paid, "USD") %>
+                  <%= Money.to_string!(@contract.total_paid) %>
                 </div>
               </.card_content>
             </.card>
@@ -122,7 +122,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             <div class="flex items-center gap-2">
                               <div class="text-right mr-4">
                                 <div class="font-medium font-display">
-                                  <%= Money.format!(calculate_amount(contract, timesheet), "USD") %>
+                                  <%= Money.to_string!(calculate_amount(contract, timesheet)) %>
                                 </div>
                                 <div class="text-sm text-muted-foreground">
                                   Ready to Release
@@ -193,7 +193,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="font-medium font-display">
-                                <%= Money.format!(calculate_amount(contract, timesheet), "USD") %>
+                                <%= Money.to_string!(calculate_amount(contract, timesheet)) %>
                               </div>
                               <div class="text-sm text-muted-foreground">Processing</div>
                             </div>
@@ -218,7 +218,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="font-medium font-display">
-                                <%= Money.format!(transaction.amount, "USD") %>
+                                <%= Money.to_string!(transaction.amount) %>
                               </div>
                               <div class="text-sm text-muted-foreground">Paid</div>
                             </div>
@@ -460,13 +460,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.format!(
-                        @contract.hourly_rate,
-                        "USD"
+                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.to_string!(
+                        @contract.hourly_rate
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(calculate_amount(@contract, @timesheet), "USD") %>
+                      <%= Money.to_string!(calculate_amount(@contract, @timesheet)) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -474,7 +473,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       Escrow balance
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      -<%= Money.format!(@escrow_amount, "USD") %>
+                      -<%= Money.to_string!(@escrow_amount) %>
                     </dd>
                   </div>
                   <div class="h-5"></div>
@@ -482,9 +481,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.sub(calculate_amount(@contract, @timesheet), @escrow_amount),
-                        "USD"
+                      <%= Money.to_string!(
+                        Money.sub!(calculate_amount(@contract, @timesheet), @escrow_amount)
                       ) %>
                     </dd>
                   </div>
@@ -516,8 +514,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <%= for tier <- @fee_data.fee_tiers do %>
                         <div class={[
                           "h-4 w-4 rounded-full border-2 border-background",
-                          if Decimal.compare(@fee_data.total_paid, Decimal.new(tier.threshold)) !=
-                               :lt do
+                          if Money.compare!(@fee_data.total_paid, tier.threshold) != :lt do
                             "bg-success"
                           else
                             "bg-muted"
@@ -543,7 +540,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             do: "left: #{index * 100 / (length(@fee_data.fee_tiers) - 1)}%"
                         }
                       >
-                        <%= Money.format!(Decimal.new(tier.threshold), "USD") %>
+                        <%= Money.to_string!(tier.threshold) %>
                       </div>
                     <% end %>
                   </div>
@@ -556,7 +553,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <div class="text-base text-muted-foreground">
                   Total paid to date:
                   <span class="font-semibold font-display">
-                    <%= Money.format!(@fee_data.total_paid, "USD") %>
+                    <%= Money.to_string!(@fee_data.total_paid) %>
                   </span>
                 </div>
               </div>
@@ -569,13 +566,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Renewal amount (<%= @contract.hours_per_week %> hours x <%= Money.format!(
-                        @contract.hourly_rate,
-                        "USD"
+                      Renewal amount (<%= @contract.hours_per_week %> hours x <%= Money.to_string!(
+                        @contract.hourly_rate
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(@escrow_amount, "USD") %>
+                      <%= Money.to_string!(@escrow_amount) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -583,21 +579,22 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       Algora fees (<%= @fee_data.fee_percentage %>%)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(
+                      <%= Money.to_string!(
+                        Money.mult!(
                           @escrow_amount,
                           Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100))
-                        ),
-                        "USD"
+                        )
                       ) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Transaction fees (4%)</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(@escrow_amount, Decimal.new("0.04")),
-                        "USD"
+                      <%= Money.to_string!(
+                        Money.mult!(
+                          @escrow_amount,
+                          Decimal.new("0.04")
+                        )
                       ) %>
                     </dd>
                   </div>
@@ -605,18 +602,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.mult(
+                      <%= Money.to_string!(
+                        Money.mult!(
                           @escrow_amount,
                           Decimal.add(
-                            Decimal.new("1"),
-                            Decimal.add(
-                              Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100)),
-                              Decimal.new("0.04")
-                            )
+                            Decimal.div(Decimal.new(@fee_data.fee_percentage), Decimal.new(100)),
+                            Decimal.new("1.04")
                           )
-                        ),
-                        "USD"
+                        )
                       ) %>
                     </dd>
                   </div>
@@ -670,13 +663,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.format!(
-                        @contract.hourly_rate,
-                        "USD"
+                      Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.to_string!(
+                        @contract.hourly_rate
                       ) %>/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(calculate_amount(@contract, @timesheet), "USD") %>
+                      <%= Money.to_string!(calculate_amount(@contract, @timesheet)) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -684,16 +676,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       Escrow balance
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      -<%= Money.format!(@escrow_amount, "USD") %>
+                      -<%= Money.to_string!(@escrow_amount) %>
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.format!(
-                        Decimal.sub(calculate_amount(@contract, @timesheet), @escrow_amount),
-                        "USD"
+                      <%= Money.to_string!(
+                        Money.sub!(calculate_amount(@contract, @timesheet), @escrow_amount)
                       ) %>
                     </dd>
                   </div>
@@ -766,7 +757,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Disputed Amount</dt>
                     <dd class="font-semibold">
-                      <%= Money.format!(@escrow_amount, "USD") %>
+                      <%= Money.to_string!(@escrow_amount) %>
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -833,7 +824,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       contracts
       |> Enum.flat_map(& &1.transactions)
       |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
 
     timesheet = get_latest_timesheet(contract)
 
@@ -982,13 +973,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
       contracts
       |> Enum.flat_map(& &1.transactions)
       |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
 
     fee_tiers = [
-      %{threshold: 0, fee: 19},
-      %{threshold: 3_000, fee: 15},
-      %{threshold: 5_000, fee: 10},
-      %{threshold: 15_000, fee: 5}
+      %{threshold: Money.zero(:USD), fee: 19},
+      %{threshold: Money.new!(3000, :USD), fee: 15},
+      %{threshold: Money.new!(5000, :USD), fee: 10},
+      %{threshold: Money.new!(15000, :USD), fee: 5}
     ]
 
     %{
@@ -1001,31 +992,54 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
   defp calculate_fee_percentage(total_paid) do
     cond do
-      Decimal.compare(total_paid, Decimal.new("15000")) != :lt -> 5
-      Decimal.compare(total_paid, Decimal.new("5000")) != :lt -> 10
-      Decimal.compare(total_paid, Decimal.new("3000")) != :lt -> 15
+      Money.compare!(total_paid, Money.new!(15000, :USD)) != :lt -> 5
+      Money.compare!(total_paid, Money.new!(5000, :USD)) != :lt -> 10
+      Money.compare!(total_paid, Money.new!(3000, :USD)) != :lt -> 15
       true -> 19
     end
   end
 
   defp calculate_progress(total_paid) do
-    cond do
-      # Over $15,000 - 100% progress
-      Decimal.compare(total_paid, Decimal.new("15000")) != :lt ->
+    tiers = [
+      {Money.new!(3000, :USD), 33.3},
+      {Money.new!(5000, :USD), 66.6},
+      {Money.new!(15000, :USD), 100.0}
+    ]
+
+    first_tier = Money.new!(3000, :USD)
+
+    case Enum.find(tiers, fn {threshold, _} -> Money.compare!(total_paid, threshold) == :lt end) do
+      nil ->
         100.0
 
-      # Between $5,000 and $15,000 - Calculate progress in this range
-      Decimal.compare(total_paid, Decimal.new("5000")) != :lt ->
-        66.6 + Decimal.to_float(Decimal.sub(total_paid, Decimal.new("5000"))) / 10000 * 33.3
+      {^first_tier, max_percent} ->
+        percentage_of(total_paid, first_tier) * max_percent
 
-      # Between $3,000 and $5,000 - Calculate progress in this range
-      Decimal.compare(total_paid, Decimal.new("3000")) != :lt ->
-        33.3 + Decimal.to_float(Decimal.sub(total_paid, Decimal.new("3000"))) / 2000 * 33.3
+      {threshold, max_percent} ->
+        {prev_threshold, prev_percent} = get_previous_tier(tiers, threshold)
 
-      # Under $3,000 - Calculate progress in first range
-      true ->
-        Decimal.to_float(total_paid) / 3000 * 33.3
+        progress_in_tier =
+          percentage_of(
+            Money.sub!(total_paid, prev_threshold),
+            Money.sub!(threshold, prev_threshold)
+          )
+
+        prev_percent + progress_in_tier * (max_percent - prev_percent)
     end
+  end
+
+  defp percentage_of(amount, total) do
+    amount
+    |> Money.to_decimal()
+    |> Decimal.div(Money.to_decimal(total))
+    |> Decimal.to_float()
+  end
+
+  defp get_previous_tier(tiers, threshold) do
+    tiers
+    |> Enum.reduce_while(nil, fn tier = {amount, _}, acc ->
+      if Money.equal?(amount, threshold), do: {:halt, acc}, else: {:cont, tier}
+    end)
   end
 
   defp get_contract_chain(contract) do
@@ -1064,7 +1078,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
   end
 
   defp calculate_amount(contract, timesheet) do
-    Decimal.mult(contract.hourly_rate, Decimal.new(timesheet.hours_worked))
+    Money.mult!(contract.hourly_rate, timesheet.hours_worked)
   end
 
   defp calculate_escrow_amount(contract) do
@@ -1076,16 +1090,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
       contracts
       |> Enum.flat_map(& &1.transactions)
       |> Enum.filter(&(&1.type == :charge))
-      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
 
     # Sum all transfers across all contracts
     total_transferred =
       contracts
       |> Enum.flat_map(& &1.transactions)
       |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Decimal.new(0), &Decimal.add(&2, &1.amount))
+      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
 
-    Decimal.sub(total_charged, total_transferred)
+    Money.sub!(total_charged, total_transferred)
   end
 
   defp get_contract_activity(contract) do
@@ -1105,7 +1119,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         |> Enum.map(fn transaction ->
           %{
             type: :escrow,
-            description: "Payment escrowed: #{Money.format!(transaction.amount, "USD")}",
+            description: "Payment escrowed: #{Money.to_string!(transaction.amount)}",
             date: transaction.inserted_at,
             amount: transaction.amount
           }
@@ -1140,7 +1154,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         |> Enum.map(fn transaction ->
           %{
             type: :release,
-            description: "Payment released: #{Money.format!(transaction.amount, "USD")}",
+            description: "Payment released: #{Money.to_string!(transaction.amount)}",
             date: transaction.inserted_at,
             amount: transaction.amount
           }

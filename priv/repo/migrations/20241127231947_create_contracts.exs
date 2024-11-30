@@ -5,12 +5,11 @@ defmodule Algora.Repo.Migrations.CreateContracts do
     create table(:contracts) do
       add :status, :string, null: false
       add :sequence_number, :integer, null: false, default: 1
-      add :hourly_rate, :decimal, null: false
+      add :hourly_rate, :money_with_currency, null: false
       add :hours_per_week, :integer, null: false
       add :start_date, :utc_datetime_usec, null: false
       add :end_date, :utc_datetime_usec
-      add :total_paid, :decimal, null: false, default: 0
-
+      add :total_paid, :money_with_currency, null: false
       add :original_contract_id, references(:contracts, on_delete: :nilify_all)
       add :client_id, references(:users, on_delete: :restrict), null: false
       add :provider_id, references(:users, on_delete: :restrict), null: false

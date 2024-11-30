@@ -3,8 +3,7 @@ defmodule Algora.Repo.Migrations.CreateBounties do
 
   def change do
     create table(:bounties) do
-      add :amount, :decimal, null: false
-      add :currency, :string, null: false
+      add :amount, :money_with_currency
       add :payment_type, :string, default: "fixed"
       add :ticket_id, references(:tickets, on_delete: :restrict), null: false
       add :owner_id, references(:users, on_delete: :restrict), null: false

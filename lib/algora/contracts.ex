@@ -32,7 +32,7 @@ defmodule Algora.Contracts do
         client_id: contract.client_id,
         provider_id: contract.provider_id,
         start_date: Date.utc_today(),
-        total_paid: Decimal.new(0)
+        total_paid: Money.zero(:USD)
       })
     )
     |> Repo.insert()
@@ -46,7 +46,6 @@ defmodule Algora.Contracts do
         provider_id: charge_id,
         provider_meta: attrs.stripe_metadata,
         amount: calculate_total_amount(contract, attrs.fee_percentage),
-        currency: "USD",
         type: :charge,
         status: :completed,
         sender_id: contract.client_id,
@@ -62,8 +61,7 @@ defmodule Algora.Contracts do
         provider: "stripe",
         provider_id: attrs.stripe_transfer_id,
         provider_meta: attrs.stripe_metadata,
-        amount: contract.hourly_rate |> Decimal.mult(Decimal.new(contract.hours_per_week)),
-        currency: "USD",
+        amount: Money.mult!(contract.hourly_rate, contract.hours_per_week),
         type: :transfer,
         status: :completed,
         sender_id: contract.client_id,
@@ -98,14 +96,14 @@ defmodule Algora.Contracts do
   end
 
   defp calculate_total_amount(contract, fee_percentage) do
-    base_amount = Decimal.mult(contract.hourly_rate, Decimal.new(contract.hours_per_week))
-    fee = Decimal.mult(base_amount, Decimal.div(Decimal.new(fee_percentage), Decimal.new(100)))
-    Decimal.add(base_amount, fee)
+    base_amount = Money.mult!(contract.hourly_rate, contract.hours_per_week)
+    fee = Money.mult!(base_amount, fee_percentage)
+    Money.add!(base_amount, fee)
   end
 
   defp update_contract_total_paid(contract, amount) do
     contract
-    |> Contract.changeset(%{total_paid: Decimal.add(contract.total_paid, amount)})
+    |> Contract.changeset(%{total_paid: Money.add!(contract.total_paid, amount)})
     |> Repo.update()
   end
 end

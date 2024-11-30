@@ -9,7 +9,6 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
     field :amount, :decimal
     field :expected_hours, :integer
     field :payment_type, :string
-    field :currency, :string
     field :sharing_type, :string
     field :share_emails, :string
     field :share_url, :string
@@ -23,16 +22,14 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
       :amount,
       :expected_hours,
       :payment_type,
-      :currency,
       :sharing_type,
       :share_emails,
       :share_url
     ])
-    |> validate_required([:title, :ticket_url, :amount, :payment_type, :currency])
+    |> validate_required([:title, :ticket_url, :amount, :payment_type])
     |> validate_number(:amount, greater_than: 0)
     |> validate_expected_hours()
     |> validate_inclusion(:payment_type, ["fixed", "hourly"])
-    |> validate_inclusion(:currency, ["USD"])
     |> validate_inclusion(:sharing_type, ["private", "platform"])
     |> put_default_sharing_type()
     |> validate_ticket_url()

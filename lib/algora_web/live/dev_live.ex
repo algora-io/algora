@@ -1,8 +1,6 @@
 defmodule AlgoraWeb.DevLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.Money
-
   def mount(_params, _session, socket) do
     project = %{
       title: "Looking for an Elixir developer to build a real-time chat application",
@@ -521,7 +519,7 @@ defmodule AlgoraWeb.DevLive do
                     <%= if @project[:hourly_rate] do %>
                       <div class="text-right">
                         <div class="text-primary font-semibold font-display text-3xl">
-                          <%= Money.format!(@project.hourly_rate, "USD") %>/hour
+                          <%= Money.to_string!(@project.hourly_rate) %>/hour
                         </div>
                         <div class="text-sm text-muted-foreground">
                           Hourly Rate
@@ -726,7 +724,7 @@ defmodule AlgoraWeb.DevLive do
                                 <%= Calendar.strftime(bounty.inserted_at, "%Y-%m-%d") %>
                               </td>
                               <td class="p-4 text-right align-middle">
-                                <%= Money.format!(bounty.amount, bounty.currency) %>
+                                <%= Money.to_string!(bounty.amount) %>
                               </td>
                             </tr>
                           <% end %>
@@ -785,7 +783,7 @@ defmodule AlgoraWeb.DevLive do
                             <div class="text-right shrink-0">
                               <div class="text-sm text-muted-foreground">Earned</div>
                               <div class="font-medium">
-                                <%= Money.format!(dev.amount, "USD") %>
+                                <%= Money.to_string!(dev.amount) %>
                               </div>
                             </div>
                           </div>

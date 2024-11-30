@@ -4,7 +4,7 @@ defmodule Algora.Payments do
   import Ecto.Query
   import Ecto.Changeset
 
-  alias Algora.{Repo, Money, Util, Users.User}
+  alias Algora.{Repo, Util, Users.User, MoneyUtils}
   alias Algora.Payments.Transaction
 
   @spec create_charge(String.t(), Money.t()) :: {:ok, Stripe.PaymentIntent.t()} | {:error, any()}
@@ -29,7 +29,7 @@ defmodule Algora.Payments do
       })
 
     case Stripe.PaymentIntent.create(%{
-           amount: Money.to_integer(amount),
+           amount: MoneyUtils.to_minor_units(amount),
            currency: to_string(amount.currency),
            customer: org.customer.provider_id,
            payment_method: org.customer.default_payment_method.provider_id,

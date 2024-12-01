@@ -20,15 +20,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </.avatar_fallback>
                 </.avatar>
                 <.avatar class="h-12 w-12 ring-2 ring-background">
-                  <.avatar_image src={@contract.provider.avatar_url} />
+                  <.avatar_image src={@contract.contractor.avatar_url} />
                   <.avatar_fallback>
-                    <%= String.slice(@contract.provider.name, 0, 2) %>
+                    <%= String.slice(@contract.contractor.name, 0, 2) %>
                   </.avatar_fallback>
                 </.avatar>
               </div>
               <div>
                 <h1 class="text-2xl font-semibold">
-                  Contract with <%= @contract.provider.name %>
+                  Contract with <%= @contract.contractor.name %>
                 </h1>
                 <p class="text-sm text-muted-foreground">
                   Started <%= Calendar.strftime(@contract.start_date, "%b %d, %Y") %>
@@ -237,17 +237,17 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <.card_content>
                     <div class="flex items-center gap-4">
                       <.avatar class="h-16 w-16">
-                        <.avatar_image src={@contract.provider.avatar_url} />
+                        <.avatar_image src={@contract.contractor.avatar_url} />
                       </.avatar>
                       <div>
-                        <div class="font-medium text-lg"><%= @contract.provider.name %></div>
+                        <div class="font-medium text-lg"><%= @contract.contractor.name %></div>
                         <div class="text-sm text-muted-foreground">
-                          @<%= @contract.provider.handle %>
+                          @<%= @contract.contractor.handle %>
                         </div>
                       </div>
                     </div>
                     <div class="pt-6 flex flex-wrap gap-2">
-                      <%= for tech <- @contract.provider.tech_stack do %>
+                      <%= for tech <- @contract.contractor.tech_stack do %>
                         <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
                           <%= tech %>
                         </span>
@@ -256,12 +256,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <div class="pt-6 space-y-2">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-map-pin" class="w-4 h-4" />
-                        <%= @contract.provider.location %>
+                        <%= @contract.contractor.location %>
                       </div>
-                      <%= if @contract.provider.timezone do %>
+                      <%= if @contract.contractor.timezone do %>
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
                           <.icon name="tabler-clock" class="w-4 h-4" />
-                          <%= Algora.Time.friendly_timezone(@contract.provider.timezone) %>
+                          <%= Algora.Time.friendly_timezone(@contract.contractor.timezone) %>
                         </div>
                       <% end %>
                     </div>
@@ -293,16 +293,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
           <div class="flex items-center gap-3">
             <div class="relative">
               <.avatar>
-                <.avatar_image src={@contract.provider.avatar_url} alt="Developer avatar" />
+                <.avatar_image src={@contract.contractor.avatar_url} alt="Developer avatar" />
                 <.avatar_fallback>
-                  <%= String.slice(@contract.provider.name, 0, 2) %>
+                  <%= String.slice(@contract.contractor.name, 0, 2) %>
                 </.avatar_fallback>
               </.avatar>
               <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
               </div>
             </div>
             <div>
-              <h2 class="text-lg font-semibold"><%= @contract.provider.name %></h2>
+              <h2 class="text-lg font-semibold"><%= @contract.contractor.name %></h2>
               <p class="text-xs text-muted-foreground">Active now</p>
             </div>
           </div>
@@ -428,7 +428,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       Contracts.get_contract!(id)
       |> Repo.preload([
         :client,
-        :provider,
+        :contractor,
         :timesheets,
         :transactions,
         :reviews,
@@ -460,7 +460,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:timesheet, timesheet)
      |> assign(:latest_charge, latest_charge)
      |> assign(:escrow_amount, escrow_amount)
-     |> assign(:page_title, "Contract with #{contract.provider.name}")
+     |> assign(:page_title, "Contract with #{contract.contractor.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)
      |> assign(:show_release_renew_modal, false)

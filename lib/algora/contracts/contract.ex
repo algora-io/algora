@@ -17,7 +17,7 @@ defmodule Algora.Contracts.Contract do
     has_many :renewals, Algora.Contracts.Contract, foreign_key: :original_contract_id
 
     belongs_to :client, Algora.Users.User
-    belongs_to :provider, Algora.Users.User
+    belongs_to :contractor, Algora.Users.User
 
     has_many :transactions, Algora.Payments.Transaction
     has_many :reviews, Algora.Reviews.Review
@@ -38,7 +38,7 @@ defmodule Algora.Contracts.Contract do
       :total_paid,
       :original_contract_id,
       :client_id,
-      :provider_id
+      :contractor_id
     ])
     |> validate_required([
       :status,
@@ -46,12 +46,12 @@ defmodule Algora.Contracts.Contract do
       :hours_per_week,
       :start_date,
       :client_id,
-      :provider_id
+      :contractor_id
     ])
     |> validate_number(:hours_per_week, greater_than: 0)
     |> validate_number(:hourly_rate, greater_than: 0)
     |> foreign_key_constraint(:client_id)
-    |> foreign_key_constraint(:provider_id)
+    |> foreign_key_constraint(:contractor_id)
     |> generate_id()
   end
 end

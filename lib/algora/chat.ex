@@ -68,8 +68,8 @@ defmodule Algora.Chat do
   end
 
   def get_or_create_thread(contract) do
-    case get_thread_for_users(contract.client_id, contract.provider_id) do
-      nil -> create_direct_thread(contract.client, contract.provider)
+    case get_thread_for_users(contract.client_id, contract.contractor_id) do
+      nil -> create_direct_thread(contract.client, contract.contractor)
       thread -> {:ok, thread}
     end
   end

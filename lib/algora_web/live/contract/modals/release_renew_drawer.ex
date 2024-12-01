@@ -27,7 +27,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
             <div class="space-y-8">
               <.form_item>
                 <.form_label class="text-lg font-semibold mb-6">
-                  How was your experience working with <%= @contract.provider.name %>?
+                  How was your experience working with <%= @contract.contractor.name %>?
                 </.form_label>
                 <.form_control>
                   <.input

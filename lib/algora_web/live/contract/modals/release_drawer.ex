@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
           <div class="grid grid-cols-2 gap-8">
             <form phx-submit="release_payment" class="space-y-6">
               <.form_item>
-                <.form_label>Feedback for <%= @contract.provider.name %></.form_label>
+                <.form_label>Feedback for <%= @contract.contractor.name %></.form_label>
                 <.form_control>
                   <.input
                     type="textarea"

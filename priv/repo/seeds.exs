@@ -45,7 +45,7 @@ defmodule Seeds do
 
   def create_contract_cycle(params) do
     %{
-      provider_id: provider_id,
+      contractor_id: contractor_id,
       client_id: client_id,
       hourly_rate: hourly_rate,
       hours_per_week: hours_per_week,
@@ -61,7 +61,7 @@ defmodule Seeds do
     contract =
       Repo.insert!(%Contract{
         id: if(sequence_number == 1, do: original_contract_id, else: Nanoid.generate()),
-        provider_id: provider_id,
+        contractor_id: contractor_id,
         client_id: client_id,
         status: status,
         hourly_rate: hourly_rate,
@@ -376,7 +376,7 @@ original_contract_id = Nanoid.generate()
 
 {_contract1, timesheet1} =
   Seeds.create_contract_cycle(%{
-    provider_id: carver.id,
+    contractor_id: carver.id,
     client_id: pied_piper.id,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
@@ -391,7 +391,7 @@ original_contract_id = Nanoid.generate()
 
 {_contract2, timesheet2} =
   Seeds.create_contract_cycle(%{
-    provider_id: carver.id,
+    contractor_id: carver.id,
     client_id: pied_piper.id,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,
@@ -406,7 +406,7 @@ original_contract_id = Nanoid.generate()
 
 {_contract3, _timesheet3} =
   Seeds.create_contract_cycle(%{
-    provider_id: carver.id,
+    contractor_id: carver.id,
     client_id: pied_piper.id,
     hourly_rate: hourly_rate,
     hours_per_week: hours_per_week,

@@ -60,8 +60,8 @@ defmodule Algora.Organizations do
   def list_org_contractors(org) do
     Repo.all(
       from u in User,
-        join: c in assoc(u, :provider_contracts),
-        where: c.client_id == ^org.id and c.provider_id == u.id
+        join: c in assoc(u, :contractor_contracts),
+        where: c.client_id == ^org.id and c.contractor_id == u.id
     )
   end
 end

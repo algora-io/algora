@@ -12,13 +12,13 @@ defmodule Algora.Repo.Migrations.CreateContracts do
       add :total_paid, :money_with_currency, null: false
       add :original_contract_id, references(:contracts, on_delete: :nilify_all)
       add :client_id, references(:users, on_delete: :restrict), null: false
-      add :provider_id, references(:users, on_delete: :restrict), null: false
+      add :contractor_id, references(:users, on_delete: :restrict), null: false
 
       timestamps()
     end
 
     create index(:contracts, [:original_contract_id])
     create index(:contracts, [:client_id])
-    create index(:contracts, [:provider_id])
+    create index(:contracts, [:contractor_id])
   end
 end

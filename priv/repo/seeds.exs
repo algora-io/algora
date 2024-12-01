@@ -58,6 +58,10 @@ defmodule Seeds do
       status: status
     } = params
 
+    total_fee = Money.zero(:USD)
+    net_amount = calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate)
+    gross_amount = Money.add!(net_amount, total_fee)
+
     contract =
       Repo.insert!(%Contract{
         id: if(sequence_number == 1, do: original_contract_id, else: Nanoid.generate()),
@@ -83,7 +87,9 @@ defmodule Seeds do
         id: Nanoid.generate(),
         contract_id: contract.id,
         original_contract_id: original_contract_id,
-        amount: calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate),
+        gross_amount: gross_amount,
+        net_amount: net_amount,
+        total_fee: total_fee,
         type: :charge,
         status: :succeeded,
         inserted_at:
@@ -114,7 +120,9 @@ defmodule Seeds do
           contract_id: contract.id,
           original_contract_id: original_contract_id,
           timesheet_id: timesheet.id,
-          amount: Money.mult!(hourly_rate, hours_worked),
+          gross_amount: net_amount,
+          net_amount: net_amount,
+          total_fee: Money.zero(:USD),
           type: :transfer,
           status: :succeeded,
           inserted_at:

@@ -7,8 +7,19 @@ defmodule Algora.Payments do
   alias Algora.{Repo, Util, Users.User, MoneyUtils}
   alias Algora.Payments.Transaction
 
-  @spec create_charge(String.t(), Money.t()) :: {:ok, Stripe.PaymentIntent.t()} | {:error, any()}
-  def create_charge(org_handle, amount) do
+  def get_provider_fee(:stripe, pi) do
+    with [ch] <- pi.charges.data,
+         {:ok, txn} <- Stripe.BalanceTransaction.retrieve(ch.balance_transaction),
+         %Money{} = amount <- Money.from_integer(txn.fee, txn.currency) do
+      amount
+    else
+      _ -> nil
+    end
+  end
+
+  @spec create_charge(String.t(), Money.t(), Money.t()) ::
+          {:ok, Stripe.PaymentIntent.t()} | {:error, any()}
+  def create_charge(org_handle, net_amount, total_fee) do
     org =
       from(u in User,
         where: u.handle == ^org_handle,
@@ -16,10 +27,14 @@ defmodule Algora.Payments do
       )
       |> Repo.one!()
 
+    gross_amount = Money.add!(net_amount, total_fee)
+
     transaction =
       Repo.insert!(%Transaction{
         id: Nanoid.generate(),
-        amount: amount,
+        gross_amount: gross_amount,
+        net_amount: net_amount,
+        total_fee: total_fee,
         provider: "stripe",
         provider_id: nil,
         provider_meta: nil,
@@ -29,8 +44,8 @@ defmodule Algora.Payments do
       })
 
     case Stripe.PaymentIntent.create(%{
-           amount: MoneyUtils.to_minor_units(amount),
-           currency: to_string(amount.currency),
+           amount: MoneyUtils.to_minor_units(gross_amount),
+           currency: to_string(gross_amount.currency),
            customer: org.customer.provider_id,
            payment_method: org.customer.default_payment_method.provider_id,
            off_session: true,
@@ -41,6 +56,7 @@ defmodule Algora.Payments do
         |> change(%{
           provider_id: ch.id,
           provider_meta: Util.normalize_struct(ch),
+          provider_fee: get_provider_fee(:stripe, ch),
           status: if(ch.status == "succeeded", do: :succeeded, else: :processing),
           succeeded_at: if(ch.status == "succeeded", do: DateTime.utc_now(), else: nil)
         })

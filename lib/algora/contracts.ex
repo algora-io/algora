@@ -9,7 +9,7 @@ defmodule Algora.Contracts do
           nil
           | {:completed, Timesheet.t(), Transaction.t()}
           | {:pending_release, Timesheet.t()}
-          | {:refunded, Timesheet.t()}
+          | {:reversed, Timesheet.t()}
 
   def get_contract!(id), do: Repo.get!(Contract, id)
 
@@ -39,7 +39,7 @@ defmodule Algora.Contracts do
         cond do
           transaction.type == :transfer -> {:completed, timesheet, transaction}
           transaction.type == :charge -> {:pending_release, timesheet}
-          transaction.type == :refund -> {:refunded, timesheet}
+          transaction.type == :reversal -> {:reversed, timesheet}
         end
     end
   end

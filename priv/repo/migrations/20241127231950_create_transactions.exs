@@ -10,7 +10,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :type, :string
       add :status, :string
       add :succeeded_at, :utc_datetime_usec
-      add :refunded_at, :utc_datetime_usec
+      add :reversed_at, :utc_datetime_usec
 
       add :sender_id, references(:users)
       add :recipient_id, references(:users)

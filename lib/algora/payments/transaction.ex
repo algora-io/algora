@@ -9,10 +9,10 @@ defmodule Algora.Payments.Transaction do
     field :provider_id, :string
     field :provider_meta, :map
     field :amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
-    field :type, Ecto.Enum, values: [:charge, :transfer, :refund]
-    field :status, Ecto.Enum, values: [:pending, :processing, :succeeded, :failed, :canceled]
+    field :type, Ecto.Enum, values: [:charge, :transfer, :reversal]
+    field :status, Ecto.Enum, values: [:initialized, :pending, :succeeded, :failed, :canceled]
     field :succeeded_at, :utc_datetime_usec
-    field :refunded_at, :utc_datetime_usec
+    field :reversed_at, :utc_datetime_usec
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Algora.Contracts.Contract

@@ -160,34 +160,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                             </div>
                           </div>
-                        <% {:processing, timesheet} -> %>
-                          <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                              <div class="h-9 w-9 rounded-full bg-warning/20 flex items-center justify-center">
-                                <.icon
-                                  name="tabler-loader-2"
-                                  class="w-5 h-5 text-warning animate-spin"
-                                />
-                              </div>
-                              <div>
-                                <div class="font-medium">
-                                  Processing payment for <%= timesheet.hours_worked %> hours
-                                </div>
-                                <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(timesheet.start_date, "%b %d") %> - <%= Calendar.strftime(
-                                    timesheet.end_date,
-                                    "%b %d, %Y"
-                                  ) %>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="text-right">
-                              <div class="font-medium font-display">
-                                <%= Money.to_string!(Contracts.calculate_amount(contract, timesheet)) %>
-                              </div>
-                              <div class="text-sm text-muted-foreground">Processing</div>
-                            </div>
-                          </div>
                         <% {:completed, timesheet, transaction} -> %>
                           <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
@@ -561,7 +533,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       :timesheet -> "tabler-clock"
       :escrow -> "tabler-wallet"
       :release -> "tabler-cash"
-      :refund -> "tabler-arrow-back"
+      :reversal -> "tabler-arrow-back"
       :renewal -> "tabler-refresh"
     end
   end
@@ -572,7 +544,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       :timesheet -> "bg-warning/20"
       :escrow -> "bg-info/20"
       :release -> "bg-success/20"
-      :refund -> "bg-destructive/20"
+      :reversal -> "bg-destructive/20"
       :renewal -> "bg-primary/20"
     end
   end

@@ -126,7 +126,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
           provider_id: nil,
           provider_meta: nil,
           type: :charge,
-          status: :pending,
+          status: :initialized,
           succeeded_at: nil,
           contract_id: contract.id,
           original_contract_id: contract.original_contract_id
@@ -145,7 +145,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
           |> change(%{
             provider_id: ch.id,
             provider_meta: Util.normalize_struct(ch),
-            status: if(ch.status == "succeeded", do: :succeeded, else: :processing),
+            status: if(ch.status == "succeeded", do: :succeeded, else: :pending),
             succeeded_at: if(ch.status == "succeeded", do: DateTime.utc_now(), else: nil)
           })
           |> Repo.update!()

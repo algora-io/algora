@@ -24,7 +24,7 @@ defmodule Algora.Payments do
         provider_id: nil,
         provider_meta: nil,
         type: :charge,
-        status: :pending,
+        status: :initialized,
         succeeded_at: nil
       })
 
@@ -41,7 +41,7 @@ defmodule Algora.Payments do
         |> change(%{
           provider_id: ch.id,
           provider_meta: Util.normalize_struct(ch),
-          status: if(ch.status == "succeeded", do: :succeeded, else: :processing),
+          status: if(ch.status == "succeeded", do: :succeeded, else: :pending),
           succeeded_at: if(ch.status == "succeeded", do: DateTime.utc_now(), else: nil)
         })
         |> Repo.update!()

@@ -6,7 +6,12 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :provider, :string
       add :provider_id, :string
       add :provider_meta, :map
-      add :amount, :money_with_currency
+
+      add :gross_amount, :money_with_currency
+      add :net_amount, :money_with_currency
+      add :total_fee, :money_with_currency
+      add :provider_fee, :money_with_currency
+
       add :type, :string
       add :status, :string
       add :succeeded_at, :utc_datetime_usec

@@ -8,7 +8,12 @@ defmodule Algora.Payments.Transaction do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map
-    field :amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+
+    field :gross_amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :net_amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :total_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :provider_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+
     field :type, Ecto.Enum, values: [:charge, :transfer, :reversal]
     field :status, Ecto.Enum, values: [:initialized, :processing, :succeeded, :failed, :canceled]
     field :succeeded_at, :utc_datetime_usec

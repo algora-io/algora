@@ -4,7 +4,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   import Ecto.Query
   import Ecto.Changeset
 
-  alias Algora.{Contracts, MoneyUtils, Repo, Util, Users.User}
+  alias Algora.{Contracts, MoneyUtils, Payments, Repo, Util, Users.User}
   alias Algora.Payments.Transaction
 
   attr :show, :boolean, required: true
@@ -110,18 +110,17 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
       )
       |> Repo.one!()
 
-    # Previous period's remaining balance (hours worked minus escrow)
-    previous_period_balance =
-      Money.sub!(Contracts.calculate_amount(contract, timesheet), escrow_amount)
+    net_amount = Money.sub!(Contracts.calculate_amount(contract, timesheet), escrow_amount)
+    total_fee = Money.mult!(net_amount, fee_data.total_fee)
+    gross_amount = Money.add!(net_amount, total_fee)
 
-    # Final amount including platform fees
-    grand_total = Money.mult!(previous_period_balance, Decimal.add(1, fee_data.total_fee))
-
-    if Money.positive?(grand_total) do
+    if Money.positive?(gross_amount) do
       transaction =
         Repo.insert!(%Transaction{
           id: Nanoid.generate(),
-          amount: grand_total,
+          gross_amount: gross_amount,
+          net_amount: net_amount,
+          total_fee: total_fee,
           provider: "stripe",
           provider_id: nil,
           provider_meta: nil,
@@ -133,20 +132,21 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
         })
 
       case Stripe.PaymentIntent.create(%{
-             amount: MoneyUtils.to_minor_units(grand_total),
-             currency: to_string(grand_total.currency),
+             amount: MoneyUtils.to_minor_units(gross_amount),
+             currency: to_string(gross_amount.currency),
              customer: org.customer.provider_id,
              payment_method: org.customer.default_payment_method.provider_id,
              off_session: true,
              confirm: true
            }) do
-        {:ok, ch} ->
+        {:ok, pi} ->
           transaction
           |> change(%{
-            provider_id: ch.id,
-            provider_meta: Util.normalize_struct(ch),
-            status: if(ch.status == "succeeded", do: :succeeded, else: :processing),
-            succeeded_at: if(ch.status == "succeeded", do: DateTime.utc_now(), else: nil)
+            provider_id: pi.id,
+            provider_meta: Util.normalize_struct(pi),
+            provider_fee: Payments.get_provider_fee(:stripe, pi),
+            status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
+            succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
           })
           |> Repo.update!()
 

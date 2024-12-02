@@ -74,7 +74,7 @@ defmodule Algora.Contracts do
     |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
   end
 
-  def calculate_escrow_amount(contract_chain) do
+  def calculate_prepaid_amount(contract_chain) do
     total_charged = calculate_total_charged(contract_chain)
     total_paid = calculate_total_paid(contract_chain)
     Money.sub!(total_charged, total_paid)
@@ -135,13 +135,13 @@ defmodule Algora.Contracts do
     |> Enum.with_index()
     |> Enum.flat_map(fn {contract, index} ->
       [
-        # 0. Initial escrow charge
+        # 0. Initial prepayment
         contract.transactions
         |> Enum.filter(&(&1.type == :charge))
         |> Enum.map(fn transaction ->
           %{
-            type: :escrow,
-            description: "Payment escrowed: #{Money.to_string!(transaction.amount)}",
+            type: :prepayment,
+            description: "Prepayment: #{Money.to_string!(transaction.amount)}",
             date: transaction.inserted_at,
             amount: transaction.amount
           }

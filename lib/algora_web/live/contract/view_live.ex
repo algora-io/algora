@@ -62,7 +62,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">In escrow</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(@escrow_amount) %>
+                  <%= Money.to_string!(@prepaid_amount) %>
                 </div>
               </.card_content>
             </.card>
@@ -397,7 +397,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       on_cancel="close_drawer"
       contract={@contract}
       timesheet={@timesheet}
-      escrow_amount={@escrow_amount}
+      prepaid_amount={@prepaid_amount}
       fee_data={@fee_data}
     />
 
@@ -408,7 +408,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       on_cancel="close_drawer"
       contract={@contract}
       timesheet={@timesheet}
-      escrow_amount={@escrow_amount}
+      prepaid_amount={@prepaid_amount}
     />
 
     <.live_component
@@ -418,7 +418,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
       on_cancel="close_drawer"
       contract={@contract}
       timesheet={@timesheet}
-      escrow_amount={@escrow_amount}
+      prepaid_amount={@prepaid_amount}
     />
     """
   end
@@ -449,7 +449,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     contract_chain = Contracts.get_contract_chain(contract)
     total_paid = Contracts.calculate_total_paid(contract_chain)
     latest_charge = Contracts.get_latest_charge(contract)
-    escrow_amount = Contracts.calculate_escrow_amount(contract_chain)
+    prepaid_amount = Contracts.calculate_prepaid_amount(contract_chain)
     timesheet = Contracts.get_latest_timesheet(contract)
     thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
@@ -459,7 +459,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:contract, %{contract | total_paid: total_paid})
      |> assign(:timesheet, timesheet)
      |> assign(:latest_charge, latest_charge)
-     |> assign(:escrow_amount, escrow_amount)
+     |> assign(:prepaid_amount, prepaid_amount)
      |> assign(:page_title, "Contract with #{contract.contractor.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)
@@ -531,7 +531,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     case type do
       :signed -> "tabler-file-check"
       :timesheet -> "tabler-clock"
-      :escrow -> "tabler-wallet"
+      :prepayment -> "tabler-wallet"
       :release -> "tabler-cash"
       :reversal -> "tabler-arrow-back"
       :renewal -> "tabler-refresh"
@@ -542,7 +542,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     case type do
       :signed -> "bg-primary/20"
       :timesheet -> "bg-warning/20"
-      :escrow -> "bg-info/20"
+      :prepayment -> "bg-info/20"
       :release -> "bg-success/20"
       :reversal -> "bg-destructive/20"
       :renewal -> "bg-primary/20"

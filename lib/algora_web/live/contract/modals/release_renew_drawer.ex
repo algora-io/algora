@@ -11,7 +11,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
   attr :on_cancel, :string, required: true
   attr :contract, :map, required: true
   attr :timesheet, :map, required: true
-  attr :escrow_amount, :map, required: true
+  attr :prepaid_amount, :map, required: true
   attr :fee_data, :map, required: true
 
   @impl true
@@ -64,7 +64,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= Money.to_string!(@escrow_amount) %>
+                        -<%= Money.to_string!(@prepaid_amount) %>
                       </dd>
                     </div>
                     <div class="h-5"></div>
@@ -75,7 +75,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         <%= Money.to_string!(
                           Money.sub!(
                             Contracts.calculate_amount(@contract, @timesheet),
-                            @escrow_amount
+                            @prepaid_amount
                           )
                         ) %>
                       </dd>
@@ -167,7 +167,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(@escrow_amount) %>
+                        <%= Money.to_string!(@prepaid_amount) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -175,7 +175,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Algora fees (<%= Util.format_pct(@fee_data.current_fee) %>)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.current_fee)) %>
+                        <%= Money.to_string!(Money.mult!(@prepaid_amount, @fee_data.current_fee)) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -183,7 +183,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Transaction fees (<%= Util.format_pct(@fee_data.transaction_fee) %>)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(Money.mult!(@escrow_amount, @fee_data.transaction_fee)) %>
+                        <%= Money.to_string!(Money.mult!(@prepaid_amount, @fee_data.transaction_fee)) %>
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
@@ -191,7 +191,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dt class="font-medium">Total Due</dt>
                       <dd class="font-semibold font-display tabular-nums">
                         <%= Money.to_string!(
-                          Money.mult!(@escrow_amount, Decimal.add(1, @fee_data.total_fee))
+                          Money.mult!(@prepaid_amount, Decimal.add(1, @fee_data.total_fee))
                         ) %>
                       </dd>
                     </div>
@@ -216,7 +216,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
 
   @impl true
   def handle_event("release_and_renew", _params, socket) do
-    %{contract: contract, timesheet: timesheet, escrow_amount: escrow_amount, fee_data: fee_data} =
+    %{
+      contract: contract,
+      timesheet: timesheet,
+      prepaid_amount: prepaid_amount,
+      fee_data: fee_data
+    } =
       socket.assigns
 
     org =
@@ -228,13 +233,13 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
 
     # Previous period's remaining balance (hours worked minus escrow)
     previous_period_balance =
-      Money.sub!(Contracts.calculate_amount(contract, timesheet), escrow_amount)
+      Money.sub!(Contracts.calculate_amount(contract, timesheet), prepaid_amount)
 
-    # New escrow amount for next period
-    new_escrow_amount = Money.mult!(contract.hourly_rate, contract.hours_per_week)
+    # New prepayment for next period
+    new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
 
     # Combined total of both periods
-    net_amount = Money.add!(previous_period_balance, new_escrow_amount)
+    net_amount = Money.add!(previous_period_balance, new_prepayment)
 
     total_fee = Money.mult!(net_amount, fee_data.total_fee)
 

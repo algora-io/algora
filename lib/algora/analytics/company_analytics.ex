@@ -18,7 +18,7 @@ defmodule Algora.Analytics.CompanyAnalytics do
     # Contract Metrics
     field :total_contracts, :integer, default: 0
     field :active_contracts, :integer, default: 0
-    field :escrowed_contracts, :integer, default: 0
+    field :prepaid_contracts, :integer, default: 0
     field :released_contracts, :integer, default: 0
     field :renewed_contracts, :integer, default: 0
     field :disputed_contracts, :integer, default: 0

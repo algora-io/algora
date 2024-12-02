@@ -11,7 +11,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   attr :on_cancel, :string, required: true
   attr :contract, :map, required: true
   attr :timesheet, :map, required: true
-  attr :escrow_amount, :map, required: true
+  attr :prepaid_amount, :map, required: true
 
   def render(assigns) do
     ~H"""
@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= Money.to_string!(@escrow_amount) %>
+                        -<%= Money.to_string!(@prepaid_amount) %>
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
@@ -73,7 +73,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         <%= Money.to_string!(
                           Money.sub!(
                             Contracts.calculate_amount(@contract, @timesheet),
-                            @escrow_amount
+                            @prepaid_amount
                           )
                         ) %>
                       </dd>
@@ -100,7 +100,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
 
   @impl true
   def handle_event("release", _params, socket) do
-    %{contract: contract, timesheet: timesheet, escrow_amount: escrow_amount, fee_data: fee_data} =
+    %{
+      contract: contract,
+      timesheet: timesheet,
+      prepaid_amount: prepaid_amount,
+      fee_data: fee_data
+    } =
       socket.assigns
 
     org =
@@ -110,7 +115,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
       )
       |> Repo.one!()
 
-    net_amount = Money.sub!(Contracts.calculate_amount(contract, timesheet), escrow_amount)
+    net_amount = Money.sub!(Contracts.calculate_amount(contract, timesheet), prepaid_amount)
     total_fee = Money.mult!(net_amount, fee_data.total_fee)
     gross_amount = Money.add!(net_amount, total_fee)
 

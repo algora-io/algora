@@ -55,4 +55,9 @@ defmodule Algora.Payments.Transaction do
     ])
     |> foreign_key_constraint(:user_id)
   end
+
+  def todo(query) do
+    from t in query,
+      where: t.type == :transfer and t.status == :succeeded and is_nil(t.reversed_at)
+  end
 end

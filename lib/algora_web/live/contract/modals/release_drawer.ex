@@ -55,7 +55,9 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(Contracts.calculate_amount(@contract, @timesheet)) %>
+                        <%= Money.to_string!(
+                          Contracts.calculate_transfer_amount(@contract, @timesheet)
+                        ) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -72,7 +74,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                       <dd class="font-semibold font-display tabular-nums">
                         <%= Money.to_string!(
                           Money.sub!(
-                            Contracts.calculate_amount(@contract, @timesheet),
+                            Contracts.calculate_transfer_amount(@contract, @timesheet),
                             @prepaid_amount
                           )
                         ) %>
@@ -115,7 +117,9 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
       )
       |> Repo.one!()
 
-    net_amount = Money.sub!(Contracts.calculate_amount(contract, timesheet), prepaid_amount)
+    net_amount =
+      Money.sub!(Contracts.calculate_transfer_amount(contract, timesheet), prepaid_amount)
+
     total_fee = Money.mult!(net_amount, fee_data.total_fee)
     gross_amount = Money.add!(net_amount, total_fee)
 

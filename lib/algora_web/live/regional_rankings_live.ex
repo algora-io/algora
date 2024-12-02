@@ -80,7 +80,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
     transactions_query =
       from t in Transaction,
         join: u in Users.User,
-        on: t.recipient_id == u.id,
+        on: t.user_id == u.id,
         where: t.succeeded_at >= ^start_date and t.succeeded_at <= ^end_date,
         where: not is_nil(u.country),
         group_by: [
@@ -98,7 +98,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
           avatar_url: u.avatar_url,
           country: u.country,
           week: fragment("date_trunc('week', ?::timestamp)", t.succeeded_at),
-          total_earned: sum(t.amount)
+          total_earned: sum(t.net_amount)
         }
 
     # Get transactions and organize by week and region

@@ -5,6 +5,11 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     create table(:transactions) do
       add :provider, :string
       add :provider_id, :string
+      add :provider_charge_id, :string
+      add :provider_payment_intent_id, :string
+      add :provider_transfer_id, :string
+      add :provider_invoice_id, :string
+      add :provider_balance_transaction_id, :string
       add :provider_meta, :map
 
       add :gross_amount, :money_with_currency

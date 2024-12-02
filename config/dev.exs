@@ -9,7 +9,8 @@ config :algora, :github,
   private_key: System.get_env("GITHUB_PRIVATE_KEY")
 
 config :stripity_stripe,
-  api_key: System.get_env("STRIPE_SECRET_KEY")
+  api_key: System.get_env("STRIPE_SECRET_KEY"),
+  api_version: "2022-11-15"
 
 config :algora, :stripe,
   secret_key: System.get_env("STRIPE_SECRET_KEY"),

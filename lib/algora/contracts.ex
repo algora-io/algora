@@ -185,8 +185,6 @@ defmodule Algora.Contracts do
         customer: contract.client.customer.provider_id
       })
 
-    dbg(invoice)
-
     line_items = [
       %{
         amount: transfer_amount,
@@ -194,7 +192,7 @@ defmodule Algora.Contracts do
           "Payment for completed work - #{timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
       },
       %{
-        amount: -prepaid_amount,
+        amount: Money.negate!(prepaid_amount),
         description: "Less: Previously prepaid amount"
       },
       %{
@@ -218,7 +216,7 @@ defmodule Algora.Contracts do
           invoice: invoice.id,
           customer: contract.client.customer.provider_id,
           amount: MoneyUtils.to_minor_units(line_item.amount),
-          currency: to_string(line_item.currency),
+          currency: to_string(line_item.amount.currency),
           description: line_item.description
         })
     end
@@ -239,21 +237,26 @@ defmodule Algora.Contracts do
         original_contract_id: contract.original_contract_id
       })
 
-    case Stripe.Invoice.pay(invoice.id, %{
-           off_session: true,
-           payment_method: contract.client.customer.default_payment_method.provider_id
-         })
-         |> dbg() do
-      {:ok, pi} ->
+    case Stripe.Invoice.pay(
+           invoice.id,
+           %{
+             off_session: true,
+             payment_method: contract.client.customer.default_payment_method.provider_id
+           }
+         ) do
+      {:ok, invoice} ->
         transaction
         |> change(%{
-          provider_id: pi.id,
-          provider_meta: Util.normalize_struct(pi),
-          provider_fee: Payments.get_provider_fee(:stripe, pi),
-          status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
-          succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
+          provider_id: invoice.id,
+          provider_meta: Util.normalize_struct(invoice),
+          provider_invoice_id: invoice.id,
+          # provider_fee: Payments.get_provider_fee_from_invoice(invoice),
+          status: if(invoice.paid, do: :succeeded, else: :processing),
+          succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)
         })
         |> Repo.update!()
+
+        {:ok, invoice}
 
       {:error, error} ->
         transaction

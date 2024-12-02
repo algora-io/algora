@@ -9,11 +9,34 @@ defmodule Algora.Payments do
 
   def get_transaction_fee_pct(), do: Decimal.new("0.04")
 
-  def get_provider_fee(:stripe, pi) do
-    with [ch] <- pi.charges.data,
-         {:ok, txn} <- Stripe.BalanceTransaction.retrieve(ch.balance_transaction),
-         %Money{} = amount <- Money.from_integer(txn.fee, txn.currency) do
+  def get_provider_fee_from_balance_transaction(txn) do
+    with %Money{} = amount <- Money.from_integer(txn.fee, txn.currency) do
       amount
+    else
+      _ -> nil
+    end
+  end
+
+  def get_provider_fee_from_invoice(%{charge: %{balance_transaction: txn}})
+      when not is_nil(txn) do
+    get_provider_fee_from_balance_transaction(txn)
+  end
+
+  def get_provider_fee_from_invoice(%{id: id}) do
+    case Stripe.Invoice.retrieve(id, expand: ["charge.balance_transaction"]) do
+      {:ok, invoice} ->
+        get_provider_fee_from_balance_transaction(invoice.charge.balance_transaction)
+
+      _ ->
+        nil
+    end
+  end
+
+  # TODO: This is not used anymore
+  def get_provider_fee_from_payment_intent(pi) do
+    with [ch] <- pi.charges.data,
+         {:ok, txn} <- Stripe.BalanceTransaction.retrieve(ch.balance_transaction) do
+      get_provider_fee_from_balance_transaction(txn)
     else
       _ -> nil
     end
@@ -53,14 +76,14 @@ defmodule Algora.Payments do
            off_session: true,
            confirm: true
          }) do
-      {:ok, ch} ->
+      {:ok, pi} ->
         transaction
         |> change(%{
-          provider_id: ch.id,
-          provider_meta: Util.normalize_struct(ch),
-          provider_fee: get_provider_fee(:stripe, ch),
-          status: if(ch.status == "succeeded", do: :succeeded, else: :processing),
-          succeeded_at: if(ch.status == "succeeded", do: DateTime.utc_now(), else: nil)
+          provider_id: pi.id,
+          provider_meta: Util.normalize_struct(pi),
+          provider_fee: get_provider_fee_from_payment_intent(pi),
+          status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
+          succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
         })
         |> Repo.update!()
 

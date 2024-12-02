@@ -73,9 +73,9 @@ defmodule Algora.Contracts do
   end
 
   def calculate_monthly_amount(contract) do
-    weekly = calculate_weekly_amount(contract)
-    # Assuming 4.33 weeks per month on average
-    Money.mult!(weekly, Decimal.new("4.33"))
+    contract
+    |> calculate_weekly_amount()
+    |> Money.mult!(4)
   end
 
   def list_contract_activity(contract) do

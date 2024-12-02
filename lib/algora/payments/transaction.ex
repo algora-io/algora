@@ -7,6 +7,11 @@ defmodule Algora.Payments.Transaction do
   schema "transactions" do
     field :provider, :string
     field :provider_id, :string
+    field :provider_charge_id, :string
+    field :provider_payment_intent_id, :string
+    field :provider_transfer_id, :string
+    field :provider_invoice_id, :string
+    field :provider_balance_transaction_id, :string
     field :provider_meta, :map
 
     field :gross_amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true

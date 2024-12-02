@@ -5,6 +5,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   @impl true
   def handle_event(%Stripe.Event{type: "charge.succeeded"} = event) do
     Logger.info("Stripe #{event.type} event: #{event.id}")
+    dbg(event)
+    :ok
   end
 
   @impl true

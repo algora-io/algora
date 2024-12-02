@@ -12,13 +12,12 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :total_fee, :money_with_currency
       add :provider_fee, :money_with_currency
 
-      add :type, :string
-      add :status, :string
+      add :type, :string, null: false
+      add :status, :string, null: false
       add :succeeded_at, :utc_datetime_usec
       add :reversed_at, :utc_datetime_usec
 
-      add :sender_id, references(:users)
-      add :recipient_id, references(:users)
+      add :user_id, references(:users), null: false
       add :contract_id, references(:contracts)
       add :original_contract_id, references(:contracts)
       add :timesheet_id, references(:timesheets)
@@ -30,8 +29,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     end
 
     # Add indexes for foreign keys and commonly queried fields
-    create index(:transactions, [:sender_id])
-    create index(:transactions, [:recipient_id])
+    create index(:transactions, [:user_id])
     create index(:transactions, [:contract_id])
     create index(:transactions, [:original_contract_id])
     create index(:transactions, [:timesheet_id])

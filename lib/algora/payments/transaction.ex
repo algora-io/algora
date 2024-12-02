@@ -22,8 +22,7 @@ defmodule Algora.Payments.Transaction do
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Algora.Contracts.Contract
     belongs_to :original_contract, Algora.Contracts.Contract
-    belongs_to :sender, Algora.Users.User
-    belongs_to :recipient, Algora.Users.User
+    belongs_to :user, Algora.Users.User
     # belongs_to :claim, Algora.Bounties.Claim
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :original_transaction, Algora.Payments.Transaction
@@ -42,8 +41,7 @@ defmodule Algora.Payments.Transaction do
       :status,
       :timesheet_id,
       :contract_id,
-      :sender_id,
-      :recipient_id,
+      :user_id,
       :bounty_id,
       :original_transaction_id
     ])
@@ -55,7 +53,6 @@ defmodule Algora.Payments.Transaction do
       :type,
       :status
     ])
-    |> foreign_key_constraint(:sender_id)
-    |> foreign_key_constraint(:recipient_id)
+    |> foreign_key_constraint(:user_id)
   end
 end

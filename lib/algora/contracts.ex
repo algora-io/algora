@@ -79,65 +79,77 @@ defmodule Algora.Contracts do
   end
 
   def list_contract_activity(contract) do
-    contract =
-      contract
-      |> Ecto.reset_fields([:chain])
-      |> Repo.preload(chain: contract_chain_query(order_by: [asc: :start_date]))
+    contract
+    |> Ecto.reset_fields([:chain])
+    |> Repo.preload(chain: contract_chain_query(order_by: [asc: :start_date]))
+    |> build_contract_timeline()
+  end
 
-    # Build timeline by processing each contract period sequentially
+  defp build_contract_timeline(contract) do
     contract.chain
     |> Enum.with_index()
-    |> Enum.flat_map(fn {contract, index} ->
-      [
-        # 0. Initial prepayment
-        contract.transactions
-        |> Enum.filter(&(&1.type == :charge))
-        |> Enum.map(fn transaction ->
-          %{
-            type: :prepayment,
-            description: "Prepayment: #{Money.to_string!(transaction.net_amount)}",
-            date: transaction.inserted_at,
-            amount: transaction.net_amount
-          }
-        end),
-
-        # 1. Contract start
-        if(index != 0) do
-          %{
-            type: :renewal,
-            description: "Contract renewed for another period",
-            date: contract.inserted_at,
-            amount: nil
-          }
-        end,
-
-        # 2. Timesheet submissions
-        if contract.timesheet do
-          %{
-            type: :timesheet,
-            description: "Timesheet submitted for #{contract.timesheet.hours_worked} hours",
-            date: contract.timesheet.inserted_at,
-            amount: calculate_transfer_amount(contract, contract.timesheet)
-          }
-        end,
-
-        # 3. Payment releases (transfers)
-        contract.transactions
-        |> Enum.filter(&(&1.type == :transfer))
-        |> Enum.sort_by(& &1.inserted_at)
-        |> Enum.map(fn transaction ->
-          %{
-            type: :release,
-            description: "Payment released: #{Money.to_string!(transaction.net_amount)}",
-            date: transaction.inserted_at,
-            amount: transaction.net_amount
-          }
-        end)
-      ]
-      |> List.flatten()
-    end)
+    |> Enum.flat_map(&process_contract_period/1)
     |> Enum.reject(&is_nil/1)
     |> Enum.sort_by(& &1.date, {:desc, DateTime})
+  end
+
+  defp process_contract_period({contract, index}) do
+    [
+      process_initial_prepayment(contract),
+      process_contract_renewal(contract, index),
+      process_timesheet_submission(contract),
+      process_payment_releases(contract)
+    ]
+    |> List.flatten()
+  end
+
+  defp process_initial_prepayment(contract) do
+    contract.transactions
+    |> Enum.filter(&(&1.type == :charge))
+    |> Enum.map(
+      &%{
+        type: :prepayment,
+        description: "Prepayment: #{Money.to_string!(&1.net_amount)}",
+        date: &1.inserted_at,
+        amount: &1.net_amount
+      }
+    )
+  end
+
+  defp process_contract_renewal(contract, index) do
+    if index != 0 do
+      %{
+        type: :renewal,
+        description: "Contract renewed for another period",
+        date: contract.inserted_at,
+        amount: nil
+      }
+    end
+  end
+
+  defp process_timesheet_submission(contract) do
+    if contract.timesheet do
+      %{
+        type: :timesheet,
+        description: "Timesheet submitted for #{contract.timesheet.hours_worked} hours",
+        date: contract.timesheet.inserted_at,
+        amount: calculate_transfer_amount(contract, contract.timesheet)
+      }
+    end
+  end
+
+  defp process_payment_releases(contract) do
+    contract.transactions
+    |> Enum.filter(&(&1.type == :transfer))
+    |> Enum.sort_by(& &1.inserted_at)
+    |> Enum.map(
+      &%{
+        type: :release,
+        description: "Payment released: #{Money.to_string!(&1.net_amount)}",
+        date: &1.inserted_at,
+        amount: &1.net_amount
+      }
+    )
   end
 
   def get_timesheet(id), do: Repo.get(Timesheet, id)

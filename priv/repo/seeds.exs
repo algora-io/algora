@@ -72,7 +72,6 @@ defmodule Seeds do
         hours_per_week: hours_per_week,
         start_date: start_date,
         end_date: end_date,
-        total_paid: Money.zero(:USD),
         sequence_number: sequence_number,
         original_contract_id: original_contract_id,
         inserted_at:
@@ -104,8 +103,6 @@ defmodule Seeds do
         id: Nanoid.generate(),
         contract_id: contract.id,
         hours_worked: hours_worked,
-        start_date: start_date,
-        end_date: end_date,
         inserted_at:
           Seeds.to_datetime(
             end_date.day,

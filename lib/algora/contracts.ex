@@ -1,9 +1,15 @@
 defmodule Algora.Contracts do
+  import Ecto.Changeset
+  import Ecto.Query
+
   alias Algora.Repo
   alias Algora.Contracts.Contract
   alias Algora.FeeTier
-
-  @transaction_fee Decimal.new("0.04")
+  alias Algora.Contracts.Timesheet
+  alias Algora.Payments.Transaction
+  alias Algora.Payments
+  alias Algora.Util
+  alias Algora.MoneyUtils
 
   @type payment_status ::
           nil
@@ -11,7 +17,18 @@ defmodule Algora.Contracts do
           | {:pending_release, Timesheet.t()}
           | {:reversed, Timesheet.t()}
 
-  def get_contract!(id), do: Repo.get!(Contract, id)
+  def get_contract(id, opts \\ []) do
+    preload = Keyword.get(opts, :preload, [])
+
+    Repo.one(from c in Contract, where: c.id == ^id, preload: ^preload)
+  end
+
+  def contract_chain_query(opts \\ []) do
+    order_by = Keyword.get(opts, :order_by, desc: :start_date)
+    preload = Keyword.get(opts, :preload, [])
+
+    from(c in Contract, order_by: ^order_by, preload: ^preload)
+  end
 
   def create_contract(attrs) do
     %Contract{}
@@ -19,74 +36,25 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  def get_contract_chain(contract) do
-    case contract.original_contract_id do
-      nil -> [contract | contract.renewals]
-      _ -> [contract.original_contract | contract.original_contract.renewals]
-    end
-    |> Enum.uniq_by(& &1.id)
-    |> Enum.sort_by(& &1.start_date, {:desc, DateTime})
-  end
-
   @spec get_payment_status(Contract.t()) :: payment_status()
-
   def get_payment_status(contract) do
-    case {get_latest_timesheet(contract), get_latest_transaction(contract)} do
-      {nil, _} ->
+    case {contract.timesheet, contract.latest_transfer, contract.latest_charge} do
+      {nil, _, _} ->
         nil
 
-      {timesheet, transaction} ->
-        cond do
-          transaction.type == :transfer -> {:completed, timesheet, transaction}
-          transaction.type == :charge -> {:pending_release, timesheet}
-          transaction.type == :reversal -> {:reversed, timesheet}
-        end
+      {timesheet, %Transaction{status: :succeeded} = transfer, _} ->
+        {:completed, timesheet, transfer}
+
+      {timesheet, _, %Transaction{status: :succeeded}} ->
+        {:pending_release, timesheet}
+
+      {timesheet, nil, nil} ->
+        {:reversed, timesheet}
     end
   end
 
-  def get_latest_timesheet(contract) do
-    contract.timesheets
-    |> Enum.sort_by(& &1.end_date, {:desc, DateTime})
-    |> List.first()
-  end
-
-  def get_latest_transaction(contract) do
-    contract.transactions
-    |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
-    |> List.first()
-  end
-
-  def calculate_amount(contract, timesheet) do
-    Money.mult!(contract.hourly_rate, timesheet.hours_worked)
-  end
-
-  def calculate_total_paid(contract_chain) do
-    contract_chain
-    |> Enum.flat_map(& &1.transactions)
-    |> Enum.filter(&(&1.type == :transfer))
-    |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-  end
-
-  def calculate_total_charged(contract_chain) do
-    contract_chain
-    |> Enum.flat_map(& &1.transactions)
-    |> Enum.filter(&(&1.type == :charge))
-    |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-  end
-
-  def calculate_prepaid_amount(contract_chain) do
-    total_charged = calculate_total_charged(contract_chain)
-    total_paid = calculate_total_paid(contract_chain)
-    Money.sub!(total_charged, total_paid)
-  end
-
-  def calculate_fee_data(contract_chain) do
-    total_paid =
-      contract_chain
-      |> Enum.flat_map(& &1.transactions)
-      |> Enum.filter(&(&1.type == :transfer))
-      |> Enum.reduce(Money.zero(:USD), &Money.add!(&2, &1.amount))
-
+  def calculate_fee_data(contract) do
+    total_paid = calculate_total_charged_to_client_net(contract)
     fee_tiers = FeeTier.all()
     current_fee = FeeTier.calculate_fee_percentage(total_paid)
 
@@ -94,24 +62,10 @@ defmodule Algora.Contracts do
       total_paid: total_paid,
       fee_tiers: fee_tiers,
       current_fee: current_fee,
-      transaction_fee: @transaction_fee,
-      total_fee: Decimal.add(current_fee, @transaction_fee),
+      transaction_fee: Payments.get_transaction_fee_pct(),
+      total_fee: Decimal.add(current_fee, Payments.get_transaction_fee_pct()),
       progress: FeeTier.calculate_progress(total_paid)
     }
-  end
-
-  def get_latest_charge(contract) do
-    contract.transactions
-    |> Enum.filter(&(&1.type == :charge))
-    |> Enum.sort_by(& &1.inserted_at, :desc)
-    |> List.first()
-  end
-
-  def get_latest_transfer(contract) do
-    contract.transactions
-    |> Enum.filter(&(&1.type == :transfer))
-    |> Enum.sort_by(& &1.inserted_at, :desc)
-    |> List.first()
   end
 
   def calculate_weekly_amount(contract) do
@@ -124,14 +78,14 @@ defmodule Algora.Contracts do
     Money.mult!(weekly, Decimal.new("4.33"))
   end
 
-  def get_contract_activity(contract) do
-    # Get all contracts in the chain ordered by start date (oldest first)
-    contracts =
-      get_contract_chain(contract)
-      |> Enum.sort_by(& &1.start_date, :asc)
+  def list_contract_activity(contract) do
+    contract =
+      contract
+      |> Ecto.reset_fields([:chain])
+      |> Repo.preload(chain: contract_chain_query(order_by: [asc: :start_date]))
 
     # Build timeline by processing each contract period sequentially
-    contracts
+    contract.chain
     |> Enum.with_index()
     |> Enum.flat_map(fn {contract, index} ->
       [
@@ -141,9 +95,9 @@ defmodule Algora.Contracts do
         |> Enum.map(fn transaction ->
           %{
             type: :prepayment,
-            description: "Prepayment: #{Money.to_string!(transaction.amount)}",
+            description: "Prepayment: #{Money.to_string!(transaction.net_amount)}",
             date: transaction.inserted_at,
-            amount: transaction.amount
+            amount: transaction.net_amount
           }
         end),
 
@@ -158,16 +112,14 @@ defmodule Algora.Contracts do
         end,
 
         # 2. Timesheet submissions
-        contract.timesheets
-        |> Enum.sort_by(& &1.inserted_at)
-        |> Enum.map(fn timesheet ->
+        if contract.timesheet do
           %{
             type: :timesheet,
-            description: "Timesheet submitted for #{timesheet.hours_worked} hours",
-            date: timesheet.inserted_at,
-            amount: calculate_amount(contract, timesheet)
+            description: "Timesheet submitted for #{contract.timesheet.hours_worked} hours",
+            date: contract.timesheet.inserted_at,
+            amount: calculate_transfer_amount(contract, contract.timesheet)
           }
-        end),
+        end,
 
         # 3. Payment releases (transfers)
         contract.transactions
@@ -176,9 +128,9 @@ defmodule Algora.Contracts do
         |> Enum.map(fn transaction ->
           %{
             type: :release,
-            description: "Payment released: #{Money.to_string!(transaction.amount)}",
+            description: "Payment released: #{Money.to_string!(transaction.net_amount)}",
             date: transaction.inserted_at,
-            amount: transaction.amount
+            amount: transaction.net_amount
           }
         end)
       ]
@@ -186,5 +138,154 @@ defmodule Algora.Contracts do
     end)
     |> Enum.reject(&is_nil/1)
     |> Enum.sort_by(& &1.date, {:desc, DateTime})
+  end
+
+  def get_timesheet(id), do: Repo.get(Timesheet, id)
+  def get_timesheet!(id), do: Repo.get!(Timesheet, id)
+
+  def release_and_renew(timesheet) do
+    timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
+
+    contract = timesheet.contract
+    prepaid_amount = calculate_prepaid_balance(contract)
+    fee_data = calculate_fee_data(contract)
+
+    # Calculate amount for completed work
+    transfer_amount = calculate_transfer_amount(contract, timesheet)
+
+    # Calculate new prepayment for next period
+    new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
+
+    # Net amount is completed work + new prepayment - previous prepayment
+    net_amount = Money.add!(Money.sub!(transfer_amount, prepaid_amount), new_prepayment)
+
+    # Calculate platform and processing fees
+    platform_fee = Money.mult!(net_amount, fee_data.current_fee)
+    transaction_fee = Money.mult!(net_amount, fee_data.transaction_fee)
+    total_fee = Money.add!(platform_fee, transaction_fee)
+
+    # Total amount including all fees
+    gross_amount = Money.add!(net_amount, total_fee)
+
+    {:ok, invoice} =
+      Stripe.Invoice.create(%{
+        auto_advance: false,
+        customer: contract.client.customer.provider_id
+      })
+
+    dbg(invoice)
+
+    line_items = [
+      %{
+        amount: transfer_amount,
+        description:
+          "Payment for completed work - #{timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+      },
+      %{
+        amount: -prepaid_amount,
+        description: "Less: Previously prepaid amount"
+      },
+      %{
+        amount: new_prepayment,
+        description:
+          "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+      },
+      %{
+        amount: platform_fee,
+        description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"
+      },
+      %{
+        amount: transaction_fee,
+        description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"
+      }
+    ]
+
+    for line_item <- line_items do
+      {:ok, _} =
+        Stripe.Invoiceitem.create(%{
+          invoice: invoice.id,
+          customer: contract.client.customer.provider_id,
+          amount: MoneyUtils.to_minor_units(line_item.amount),
+          currency: to_string(line_item.currency),
+          description: line_item.description
+        })
+    end
+
+    transaction =
+      Repo.insert!(%Transaction{
+        id: Nanoid.generate(),
+        gross_amount: gross_amount,
+        net_amount: net_amount,
+        total_fee: total_fee,
+        provider: "stripe",
+        provider_id: nil,
+        provider_meta: nil,
+        type: :charge,
+        status: :initialized,
+        succeeded_at: nil,
+        contract_id: contract.id,
+        original_contract_id: contract.original_contract_id
+      })
+
+    case Stripe.Invoice.pay(invoice.id, %{
+           off_session: true,
+           payment_method: contract.client.customer.default_payment_method.provider_id
+         })
+         |> dbg() do
+      {:ok, pi} ->
+        transaction
+        |> change(%{
+          provider_id: pi.id,
+          provider_meta: Util.normalize_struct(pi),
+          provider_fee: Payments.get_provider_fee(:stripe, pi),
+          status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
+          succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
+        })
+        |> Repo.update!()
+
+      {:error, error} ->
+        transaction
+        |> change(%{
+          status: :failed,
+          provider_meta: %{error: error}
+        })
+        |> Repo.update!()
+
+        {:error, error}
+    end
+  end
+
+  defp sum_transactions_query(contract, type, amount_field) do
+    from(t in Transaction,
+      join: c in Contract,
+      on: c.original_contract_id == ^contract.original_contract_id,
+      where: t.contract_id == c.id and t.type == ^type and t.status == :succeeded,
+      select: sum(field(t, ^amount_field))
+    )
+    |> Repo.one()
+    |> Kernel.||(Money.zero(:USD))
+  end
+
+  def calculate_total_transferred_to_contractor(contract) do
+    sum_transactions_query(contract, :transfer, :net_amount)
+  end
+
+  def calculate_total_charged_to_client_gross(contract) do
+    sum_transactions_query(contract, :charge, :gross_amount)
+  end
+
+  def calculate_total_charged_to_client_net(contract) do
+    sum_transactions_query(contract, :charge, :net_amount)
+  end
+
+  # This represents money that has been charged to the client but not yet released to the contractor
+  def calculate_prepaid_balance(contract) do
+    total_charged = calculate_total_charged_to_client_net(contract)
+    total_transferred = calculate_total_transferred_to_contractor(contract)
+    Money.sub!(total_charged, total_transferred)
+  end
+
+  def calculate_transfer_amount(contract, timesheet) do
+    Money.mult!(contract.hourly_rate, timesheet.hours_worked)
   end
 end

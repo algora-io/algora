@@ -47,8 +47,6 @@ defmodule Seeds do
     %{
       contractor_id: contractor_id,
       client_id: client_id,
-      hourly_rate: hourly_rate,
-      hours_per_week: hours_per_week,
       start_date: start_date,
       end_date: end_date,
       sequence_number: sequence_number,
@@ -58,6 +56,8 @@ defmodule Seeds do
       status: status
     } = params
 
+    hourly_rate = Money.new!(75, :USD)
+    hours_per_week = 40
     total_fee = Money.zero(:USD)
     net_amount = calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate)
     gross_amount = Money.add!(net_amount, total_fee)
@@ -92,7 +92,7 @@ defmodule Seeds do
         total_fee: total_fee,
         type: :charge,
         status: :succeeded,
-        inserted_at:
+        succeeded_at:
           Seeds.to_datetime(
             start_date.day,
             Time.new!(Enum.random(17..20), Enum.random(0..59), Enum.random(0..59), 0)
@@ -125,7 +125,7 @@ defmodule Seeds do
           total_fee: Money.zero(:USD),
           type: :transfer,
           status: :succeeded,
-          inserted_at:
+          succeeded_at:
             Seeds.to_datetime(
               end_date.day,
               Time.new!(Enum.random(19..23), Enum.random(0..59), Enum.random(0..59), 0)
@@ -378,54 +378,32 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
   )
 end
 
-hourly_rate = Money.new!(75, :USD)
-hours_per_week = 40
 original_contract_id = Nanoid.generate()
+num_cycles = 20
 
-{_contract1, timesheet1} =
-  Seeds.create_contract_cycle(%{
-    contractor_id: carver.id,
-    client_id: pied_piper.id,
-    hourly_rate: hourly_rate,
-    hours_per_week: hours_per_week,
-    start_date: Seeds.to_datetime(-21),
-    end_date: Seeds.to_datetime(-14),
-    sequence_number: 1,
-    original_contract_id: original_contract_id,
-    previous_timesheet: nil,
-    hours_worked: 42,
-    status: :completed
-  })
+{:ok, final_contract} =
+  Enum.reduce_while(1..num_cycles, {:ok, nil}, fn sequence_number, {:ok, prev_timesheet} ->
+    days_offset = -((num_cycles - sequence_number + 1) * 7)
 
-{_contract2, timesheet2} =
-  Seeds.create_contract_cycle(%{
-    contractor_id: carver.id,
-    client_id: pied_piper.id,
-    hourly_rate: hourly_rate,
-    hours_per_week: hours_per_week,
-    start_date: Seeds.to_datetime(-14),
-    end_date: Seeds.to_datetime(-7),
-    sequence_number: 2,
-    original_contract_id: original_contract_id,
-    previous_timesheet: timesheet1,
-    hours_worked: 35,
-    status: :completed
-  })
+    hours_worked = Enum.random(35..45)
 
-{_contract3, _timesheet3} =
-  Seeds.create_contract_cycle(%{
-    contractor_id: carver.id,
-    client_id: pied_piper.id,
-    hourly_rate: hourly_rate,
-    hours_per_week: hours_per_week,
-    start_date: Seeds.to_datetime(-7),
-    end_date: Seeds.to_datetime(0),
-    sequence_number: 3,
-    original_contract_id: original_contract_id,
-    previous_timesheet: timesheet2,
-    hours_worked: 38,
-    status: :active
-  })
+    status = if sequence_number == num_cycles, do: :active, else: :completed
+
+    {_contract, timesheet} =
+      Seeds.create_contract_cycle(%{
+        contractor_id: carver.id,
+        client_id: pied_piper.id,
+        start_date: Seeds.to_datetime(days_offset),
+        end_date: Seeds.to_datetime(days_offset + 7),
+        sequence_number: sequence_number,
+        original_contract_id: original_contract_id,
+        previous_timesheet: prev_timesheet,
+        hours_worked: hours_worked,
+        status: status
+      })
+
+    {:cont, {:ok, timesheet}}
+  end)
 
 thread =
   Repo.insert!(%Thread{

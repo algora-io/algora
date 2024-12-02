@@ -61,7 +61,7 @@ defmodule Algora.Users.User do
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project
     has_many :repositories, Algora.Workspace.Repository
-    has_many :transactions, Algora.Payments.Transaction, foreign_key: :recipient_id
+    has_many :transactions, Algora.Payments.Transaction, foreign_key: :user_id
     has_many :owned_installations, Installation, foreign_key: :owner_id
     has_many :connected_installations, Installation, foreign_key: :connected_user_id
     has_many :contractor_contracts, Algora.Contracts.Contract, foreign_key: :contractor_id

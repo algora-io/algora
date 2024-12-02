@@ -9,19 +9,27 @@ defmodule Algora.Contracts.Contract do
     field :start_date, :utc_datetime_usec
     field :end_date, :utc_datetime_usec
 
-    field :total_paid, Money.Ecto.Composite.Type,
-      default: Money.zero(:USD),
-      no_fraction_if_integer: true
-
     belongs_to :original_contract, Algora.Contracts.Contract
     has_many :renewals, Algora.Contracts.Contract, foreign_key: :original_contract_id
+
+    has_many :chain,
+      through: [:original_contract, :renewals],
+      where: [original_contract_id: nil]
 
     belongs_to :client, Algora.Users.User
     belongs_to :contractor, Algora.Users.User
 
     has_many :transactions, Algora.Payments.Transaction
     has_many :reviews, Algora.Reviews.Review
-    has_many :timesheets, Algora.Contracts.Timesheet
+    has_one :timesheet, Algora.Contracts.Timesheet
+
+    has_one :latest_charge, Algora.Payments.Transaction,
+      where: [status: :succeeded, type: :charge],
+      preload_order: [desc: :succeeded_at]
+
+    has_one :latest_transfer, Algora.Payments.Transaction,
+      where: [status: :succeeded, type: :transfer],
+      preload_order: [desc: :succeeded_at]
 
     timestamps()
   end
@@ -35,7 +43,6 @@ defmodule Algora.Contracts.Contract do
       :hours_per_week,
       :start_date,
       :end_date,
-      :total_paid,
       :original_contract_id,
       :client_id,
       :contractor_id

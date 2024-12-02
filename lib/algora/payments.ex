@@ -7,6 +7,8 @@ defmodule Algora.Payments do
   alias Algora.{Repo, Util, Users.User, MoneyUtils}
   alias Algora.Payments.Transaction
 
+  def get_transaction_fee_pct(), do: Decimal.new("0.04")
+
   def get_provider_fee(:stripe, pi) do
     with [ch] <- pi.charges.data,
          {:ok, txn} <- Stripe.BalanceTransaction.retrieve(ch.balance_transaction),

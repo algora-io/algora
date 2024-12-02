@@ -70,7 +70,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Total paid</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(@contract.total_paid) %>
+                  <%= Money.to_string!(@total_paid) %>
                 </div>
               </.card_content>
             </.card>
@@ -99,7 +99,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-8">
-                    <%= for contract <- Contracts.get_contract_chain(@contract) do %>
+                    <%= for contract <- @contract.chain do %>
                       <%= case Contracts.get_payment_status(contract) do %>
                         <% {:pending_release, timesheet} -> %>
                           <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
@@ -123,7 +123,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               <div class="text-right mr-4">
                                 <div class="font-medium font-display">
                                   <%= Money.to_string!(
-                                    Contracts.calculate_amount(contract, timesheet)
+                                    Contracts.calculate_transfer_amount(contract, timesheet)
                                   ) %>
                                 </div>
                                 <div class="text-sm text-muted-foreground">
@@ -180,7 +180,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="font-medium font-display">
-                                <%= Money.to_string!(transaction.amount) %>
+                                <%= Money.to_string!(transaction.net_amount) %>
                               </div>
                               <div class="text-sm text-muted-foreground">Paid</div>
                             </div>
@@ -277,7 +277,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-4">
-                    <%= for activity <- Contracts.get_contract_activity(@contract) do %>
+                    <%= for activity <- Contracts.list_contract_activity(@contract) do %>
                       <.timeline_activity activity={activity} />
                     <% end %>
                   </div>
@@ -425,40 +425,29 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
   def mount(%{"id" => id}, _session, socket) do
     contract =
-      Contracts.get_contract!(id)
-      |> Repo.preload([
-        :client,
-        :contractor,
-        :timesheets,
-        :transactions,
-        :reviews,
-        original_contract: [
-          :timesheets,
-          :transactions,
-          renewals: [
-            :timesheets,
-            :transactions
-          ]
-        ],
-        renewals: [
-          :timesheets,
-          :transactions
+      Contracts.get_contract(id,
+        preload: [
+          :client,
+          :contractor,
+          :timesheet,
+          chain:
+            Contracts.contract_chain_query(
+              order_by: [desc: :start_date],
+              preload: [:timesheet, :latest_charge, :latest_transfer, :transactions]
+            )
         ]
-      ])
+      )
 
-    contract_chain = Contracts.get_contract_chain(contract)
-    total_paid = Contracts.calculate_total_paid(contract_chain)
-    latest_charge = Contracts.get_latest_charge(contract)
-    prepaid_amount = Contracts.calculate_prepaid_amount(contract_chain)
-    timesheet = Contracts.get_latest_timesheet(contract)
+    total_paid = Contracts.calculate_total_charged_to_client_net(contract)
+    prepaid_amount = Contracts.calculate_prepaid_balance(contract)
     thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
 
     {:ok,
      socket
-     |> assign(:contract, %{contract | total_paid: total_paid})
-     |> assign(:timesheet, timesheet)
-     |> assign(:latest_charge, latest_charge)
+     |> assign(:contract, contract)
+     |> assign(:timesheet, contract.timesheet)
+     |> assign(:total_paid, total_paid)
      |> assign(:prepaid_amount, prepaid_amount)
      |> assign(:page_title, "Contract with #{contract.contractor.name}")
      |> assign(:messages, messages)
@@ -466,7 +455,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
      |> assign(:show_release_renew_modal, false)
      |> assign(:show_release_modal, false)
      |> assign(:show_dispute_modal, false)
-     |> assign(:fee_data, Contracts.calculate_fee_data(contract_chain))
+     |> assign(:fee_data, Contracts.calculate_fee_data(contract))
      |> assign(:org_members, Organizations.list_org_members(contract.client))}
   end
 

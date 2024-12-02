@@ -165,18 +165,20 @@ defmodule DatabaseMigration do
     user =
       db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
 
+    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+
     row =
       if claim && user do
         row
         |> Map.put("type", "transfer")
         |> Map.put("provider", "stripe")
         |> Map.put("provider_id", row["transfer_id"])
-        |> Map.put(
-          "amount",
-          Money.from_integer(String.to_integer(row["amount"]), row["currency"])
-        )
+        |> Map.put("net_amount", amount)
+        |> Map.put("gross_amount", amount)
+        |> Map.put("total_fee", Money.zero(:USD))
         |> Map.put("bounty_id", claim["bounty_id"])
-        |> Map.put("recipient_id", user["id"])
+        ## TODO: this might be null but shouldn't
+        |> Map.put("user_id", user["id"])
         |> Map.put("inserted_at", row["created_at"])
         |> Map.put("updated_at", row["updated_at"])
         |> Map.put("status", if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded))

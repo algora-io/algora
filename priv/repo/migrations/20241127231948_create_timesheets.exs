@@ -13,6 +13,6 @@ defmodule Algora.Repo.Migrations.CreateTimesheets do
       timestamps()
     end
 
-    create index(:timesheets, [:contract_id])
+    create unique_index(:timesheets, [:contract_id])
   end
 end

@@ -1,11 +1,9 @@
 defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
   use AlgoraWeb.LiveComponent
 
-  import Ecto.Query
-  import Ecto.Changeset
-
-  alias Algora.{Contracts, FeeTier, MoneyUtils, Payments, Repo, Util, Users.User}
-  alias Algora.Payments.Transaction
+  alias Algora.Contracts
+  alias Algora.FeeTier
+  alias Algora.Util
 
   attr :show, :boolean, required: true
   attr :on_cancel, :string, required: true
@@ -56,7 +54,9 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(Contracts.calculate_amount(@contract, @timesheet)) %>
+                        <%= Money.to_string!(
+                          Contracts.calculate_transfer_amount(@contract, @timesheet)
+                        ) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -74,7 +74,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dd class="font-semibold font-display tabular-nums">
                         <%= Money.to_string!(
                           Money.sub!(
-                            Contracts.calculate_amount(@contract, @timesheet),
+                            Contracts.calculate_transfer_amount(@contract, @timesheet),
                             @prepaid_amount
                           )
                         ) %>
@@ -216,81 +216,18 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
 
   @impl true
   def handle_event("release_and_renew", _params, socket) do
-    %{
-      contract: contract,
-      timesheet: timesheet,
-      prepaid_amount: prepaid_amount,
-      fee_data: fee_data
-    } =
-      socket.assigns
+    %{timesheet: timesheet} = socket.assigns
 
-    org =
-      from(u in User,
-        where: u.handle == ^contract.client.handle,
-        preload: [customer: :default_payment_method]
-      )
-      |> Repo.one!()
-
-    # Previous period's remaining balance (hours worked minus escrow)
-    previous_period_balance =
-      Money.sub!(Contracts.calculate_amount(contract, timesheet), prepaid_amount)
-
-    # New prepayment for next period
-    new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
-
-    # Combined total of both periods
-    net_amount = Money.add!(previous_period_balance, new_prepayment)
-
-    total_fee = Money.mult!(net_amount, fee_data.total_fee)
-
-    gross_amount = Money.add!(net_amount, total_fee)
-
-    transaction =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        gross_amount: gross_amount,
-        net_amount: net_amount,
-        total_fee: total_fee,
-        provider: "stripe",
-        provider_id: nil,
-        provider_meta: nil,
-        type: :charge,
-        status: :initialized,
-        succeeded_at: nil,
-        contract_id: contract.id,
-        original_contract_id: contract.original_contract_id
-      })
-
-    case Stripe.PaymentIntent.create(%{
-           amount: MoneyUtils.to_minor_units(gross_amount),
-           currency: to_string(gross_amount.currency),
-           customer: org.customer.provider_id,
-           payment_method: org.customer.default_payment_method.provider_id,
-           off_session: true,
-           confirm: true
-         }) do
-      {:ok, pi} ->
-        transaction
-        |> change(%{
-          provider_id: pi.id,
-          provider_meta: Util.normalize_struct(pi),
-          provider_fee: Payments.get_provider_fee(:stripe, pi),
-          status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
-          succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
-        })
-        |> Repo.update!()
+    case Contracts.release_and_renew(timesheet) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:success, "Payment released and contract renewed")}
 
       {:error, error} ->
-        transaction
-        |> change(%{
-          status: :failed,
-          provider_meta: %{error: error}
-        })
-        |> Repo.update!()
-
-        {:error, error}
+        {:noreply,
+         socket
+         |> put_flash(:error, "Error releasing payment: #{inspect(error)}")}
     end
-
-    {:noreply, socket}
   end
 end

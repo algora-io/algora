@@ -171,8 +171,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                   Payment for <%= timesheet.hours_worked %> hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(timesheet.start_date, "%b %d") %> - <%= Calendar.strftime(
-                                    timesheet.end_date,
+                                  <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                                    contract.end_date,
                                     "%b %d, %Y"
                                   ) %>
                                 </div>

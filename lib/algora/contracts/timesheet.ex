@@ -5,8 +5,6 @@ defmodule Algora.Contracts.Timesheet do
 
   schema "timesheets" do
     field :hours_worked, :integer
-    field :start_date, :utc_datetime_usec
-    field :end_date, :utc_datetime_usec
     field :description, :string
 
     belongs_to :contract, Algora.Contracts.Contract
@@ -17,8 +15,8 @@ defmodule Algora.Contracts.Timesheet do
 
   def changeset(timesheet, attrs) do
     timesheet
-    |> cast(attrs, [:hours_worked, :start_date, :end_date, :description])
-    |> validate_required([:hours_worked, :start_date, :end_date])
+    |> cast(attrs, [:hours_worked, :description])
+    |> validate_required([:hours_worked])
     |> generate_id()
   end
 end

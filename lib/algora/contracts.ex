@@ -157,15 +157,16 @@ defmodule Algora.Contracts do
   def get_timesheet(id), do: Repo.get(Timesheet, id)
   def get_timesheet!(id), do: Repo.get!(Timesheet, id)
 
-  def initialize_charge(%{
-        contract: contract,
-        timesheet: timesheet,
-        invoice: invoice,
-        gross_amount: gross_amount,
-        net_amount: net_amount,
-        total_fee: total_fee,
-        line_items: line_items
-      }) do
+  defp initialize_charge(
+         %{
+           contract: contract,
+           invoice: invoice,
+           gross_amount: gross_amount,
+           net_amount: net_amount,
+           total_fee: total_fee,
+           line_items: line_items
+         } = params
+       ) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
@@ -177,7 +178,7 @@ defmodule Algora.Contracts do
       status: :initialized,
       contract_id: contract.id,
       original_contract_id: contract.original_contract_id,
-      timesheet_id: timesheet.id,
+      timesheet_id: get_in(params, [:timesheet, :id]),
       user_id: contract.client_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
@@ -194,12 +195,12 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  def initialize_transfer(%{
-        contract: contract,
-        timesheet: timesheet,
-        invoice: invoice,
-        transfer_amount: transfer_amount
-      }) do
+  defp initialize_transfer(%{
+         contract: contract,
+         timesheet: timesheet,
+         invoice: invoice,
+         transfer_amount: transfer_amount
+       }) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
@@ -226,7 +227,41 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  defp initialize_transactions(contract, timesheet) do
+  defp initialize_prepayment_transaction(contract) do
+    fee_data = calculate_fee_data(contract)
+
+    net_charge_amount = Money.mult!(contract.hourly_rate, contract.hours_per_week)
+    platform_fee = Money.mult!(net_charge_amount, fee_data.current_fee)
+    transaction_fee = Money.mult!(net_charge_amount, fee_data.transaction_fee)
+    total_fee = Money.add!(platform_fee, transaction_fee)
+    gross_charge_amount = Money.add!(net_charge_amount, total_fee)
+
+    line_items = [
+      %{
+        amount: net_charge_amount,
+        description:
+          "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+      },
+      %{
+        amount: platform_fee,
+        description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"
+      },
+      %{
+        amount: transaction_fee,
+        description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"
+      }
+    ]
+
+    initialize_charge(%{
+      contract: contract,
+      line_items: line_items,
+      gross_amount: gross_charge_amount,
+      net_amount: net_charge_amount,
+      total_fee: total_fee
+    })
+  end
+
+  defp initialize_release_transactions(contract, timesheet) do
     prepaid_amount = calculate_prepaid_balance(contract)
     fee_data = calculate_fee_data(contract)
 
@@ -288,7 +323,7 @@ defmodule Algora.Contracts do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
     contract = timesheet.contract
 
-    with {:ok, {charge, transfer}} <- initialize_transactions(contract, timesheet),
+    with {:ok, {charge, transfer}} <- initialize_release_transactions(contract, timesheet),
          {:ok, invoice} <- generate_invoice(contract, charge),
          {:ok, invoice} <- pay_invoice(contract, invoice, charge, transfer) do
       {:ok, invoice}
@@ -301,6 +336,16 @@ defmodule Algora.Contracts do
 
     with {:ok, invoice} <- release_contract(timesheet),
          {:ok, _new_contract} <- renew_contract(contract) do
+      {:ok, invoice}
+    end
+  end
+
+  def prepay_contract(contract) do
+    contract = contract |> Repo.preload(client: [customer: :default_payment_method])
+
+    with {:ok, charge} <- initialize_prepayment_transaction(contract),
+         {:ok, invoice} <- generate_invoice(contract, charge),
+         {:ok, invoice} <- pay_invoice(contract, invoice, charge, nil) do
       {:ok, invoice}
     end
   end
@@ -341,7 +386,7 @@ defmodule Algora.Contracts do
       {:ok, invoice} ->
         status = if invoice.paid, do: :succeeded, else: :processing
         update_transaction_status(charge, invoice, status)
-        transfer_funds(contract, transfer)
+        if transfer, do: transfer_funds(contract, transfer)
 
         {:ok, invoice}
 
@@ -431,26 +476,5 @@ defmodule Algora.Contracts do
 
   def calculate_transfer_amount(contract, timesheet) do
     Money.mult!(contract.hourly_rate, timesheet.hours_worked)
-  end
-
-  def prepay(contract) do
-    # Calculate the initial prepayment amount
-    prepayment_amount = Money.mult!(contract.hourly_rate, contract.hours_per_week)
-
-    # Create a transaction for the prepayment
-    transaction =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        contract_id: contract.id,
-        original_contract_id: contract.original_contract_id,
-        gross_amount: prepayment_amount,
-        net_amount: prepayment_amount,
-        total_fee: Money.zero(:USD),
-        type: :charge,
-        status: :succeeded,
-        succeeded_at: DateTime.utc_now()
-      })
-
-    {:ok, transaction}
   end
 end

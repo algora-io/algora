@@ -224,7 +224,7 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  def initialize_transactions(contract, timesheet) do
+  defp initialize_transactions(contract, timesheet) do
     prepaid_amount = calculate_prepaid_balance(contract)
     fee_data = calculate_fee_data(contract)
 
@@ -261,48 +261,66 @@ defmodule Algora.Contracts do
       }
     ]
 
-    with {:ok, charge} <-
-           initialize_charge(%{
-             contract: contract,
-             timesheet: timesheet,
-             line_items: line_items,
-             gross_amount: gross_charge_amount,
-             net_amount: net_charge_amount,
-             total_fee: total_fee
-           }),
-         {:ok, transfer} <-
-           initialize_transfer(%{
-             contract: contract,
-             timesheet: timesheet,
-             transfer_amount: transfer_amount
-           }) do
-      {:ok, charge, transfer}
-    end
+    Repo.transact(fn ->
+      with {:ok, charge} <-
+             initialize_charge(%{
+               contract: contract,
+               timesheet: timesheet,
+               line_items: line_items,
+               gross_amount: gross_charge_amount,
+               net_amount: net_charge_amount,
+               total_fee: total_fee
+             }),
+           {:ok, transfer} <-
+             initialize_transfer(%{
+               contract: contract,
+               timesheet: timesheet,
+               transfer_amount: transfer_amount
+             }) do
+        {:ok, {charge, transfer}}
+      end
+    end)
   end
 
   def release_and_renew(timesheet) do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
     contract = timesheet.contract
 
-    {:ok, charge, _transfer} = initialize_transactions(contract, timesheet)
-
-    {:ok, invoice} =
-      Algora.Stripe.create_invoice(%{
-        auto_advance: false,
-        customer: contract.client.customer.provider_id
-      })
-
-    for line_item <- charge.line_items do
-      {:ok, _} =
-        Algora.Stripe.create_invoice_item(%{
-          invoice: invoice.id,
-          customer: contract.client.customer.provider_id,
-          amount: MoneyUtils.to_minor_units(line_item.amount),
-          currency: to_string(line_item.amount.currency),
-          description: line_item.description
-        })
+    with {:ok, {charge, _transfer}} <- initialize_transactions(contract, timesheet),
+         {:ok, invoice} <- generate_invoice(contract, charge),
+         {:ok, invoice} <- pay_invoice(contract, invoice, charge) do
+      {:ok, invoice}
     end
+  end
 
+  defp generate_invoice(contract, charge) do
+    with {:ok, invoice} <-
+           Algora.Stripe.create_invoice(%{
+             auto_advance: false,
+             customer: contract.client.customer.provider_id
+           }),
+         {:ok, _line_items} <- create_line_items(contract, invoice, charge) do
+      {:ok, invoice}
+    end
+  end
+
+  defp create_line_items(contract, invoice, charge) do
+    charge.line_items
+    |> Enum.reduce_while({:ok, []}, fn line_item, {:ok, acc} ->
+      case Algora.Stripe.create_invoice_item(%{
+             invoice: invoice.id,
+             customer: contract.client.customer.provider_id,
+             amount: MoneyUtils.to_minor_units(line_item.amount),
+             currency: to_string(line_item.amount.currency),
+             description: line_item.description
+           }) do
+        {:ok, item} -> {:cont, {:ok, [item | acc]}}
+        {:error, error} -> {:halt, {:error, error}}
+      end
+    end)
+  end
+
+  defp pay_invoice(contract, invoice, charge) do
     case Algora.Stripe.pay_invoice(
            invoice.id,
            %{
@@ -314,10 +332,10 @@ defmodule Algora.Contracts do
         with {:ok, _charge} <- update_transaction_after_payment(charge, invoice),
              true <- invoice.paid,
              {:ok, contract} <- update_contract_status(contract, :paid),
-             {:ok, new_contract} <- renew_contract(contract) do
-          {:ok, invoice, new_contract}
+             {:ok, _new_contract} <- renew_contract(contract) do
+          {:ok, invoice}
         else
-          _ -> {:ok, invoice, nil}
+          _ -> {:ok, invoice}
         end
 
       {:error, error} ->
@@ -329,8 +347,8 @@ defmodule Algora.Contracts do
     end
   end
 
-  def transfer_funds(%Transaction{type: :transfer} = transaction)
-      when transaction.status != :succeeded do
+  defp transfer_funds(%Transaction{type: :transfer} = transaction)
+       when transaction.status != :succeeded do
     case Algora.Stripe.create_transfer(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
            currency: to_string(transaction.net_amount.currency),
@@ -346,7 +364,7 @@ defmodule Algora.Contracts do
     end
   end
 
-  def handle_charge_succeeded(contract) do
+  defp handle_charge_succeeded(contract) do
     with {:ok, contract} <- update_contract_status(contract, :paid) do
       {:ok, contract}
     end

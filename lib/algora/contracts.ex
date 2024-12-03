@@ -157,8 +157,8 @@ defmodule Algora.Contracts do
 
   def release_and_renew(timesheet) do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
-
     contract = timesheet.contract
+
     prepaid_amount = calculate_prepaid_balance(contract)
     fee_data = calculate_fee_data(contract)
 
@@ -248,13 +248,33 @@ defmodule Algora.Contracts do
         transaction
         |> change(%{
           provider_meta: Util.normalize_struct(invoice),
-          # provider_fee: Payments.get_provider_fee_from_invoice(invoice),
           status: if(invoice.paid, do: :succeeded, else: :processing),
           succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)
         })
-        |> Repo.update()
+        |> Repo.update!()
 
-        {:ok, invoice}
+        # Create new contract for the next period
+        new_contract =
+          Repo.insert!(%Contract{
+            id: Nanoid.generate(),
+            contractor_id: contract.contractor_id,
+            client_id: contract.client_id,
+            status: :active,
+            hourly_rate: contract.hourly_rate,
+            hours_per_week: contract.hours_per_week,
+            start_date: contract.end_date,
+            end_date: contract.end_date |> DateTime.add(7, :day),
+            sequence_number: contract.sequence_number + 1,
+            original_contract_id: contract.original_contract_id,
+            inserted_at: DateTime.utc_now()
+          })
+
+        # Mark the current contract as completed
+        contract
+        |> change(%{status: :completed})
+        |> Repo.update!()
+
+        {:ok, invoice, new_contract}
 
       {:error, error} ->
         transaction
@@ -300,5 +320,26 @@ defmodule Algora.Contracts do
 
   def calculate_transfer_amount(contract, timesheet) do
     Money.mult!(contract.hourly_rate, timesheet.hours_worked)
+  end
+
+  def prepay(contract) do
+    # Calculate the initial prepayment amount
+    prepayment_amount = Money.mult!(contract.hourly_rate, contract.hours_per_week)
+
+    # Create a transaction for the prepayment
+    transaction =
+      Repo.insert!(%Transaction{
+        id: Nanoid.generate(),
+        contract_id: contract.id,
+        original_contract_id: contract.original_contract_id,
+        gross_amount: prepayment_amount,
+        net_amount: prepayment_amount,
+        total_fee: Money.zero(:USD),
+        type: :charge,
+        status: :succeeded,
+        succeeded_at: DateTime.utc_now()
+      })
+
+    {:ok, transaction}
   end
 end

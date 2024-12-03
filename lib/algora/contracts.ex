@@ -224,15 +224,15 @@ defmodule Algora.Contracts do
     transaction =
       Repo.insert!(%Transaction{
         id: Nanoid.generate(),
+        provider: "stripe",
+        provider_id: invoice.id,
+        provider_meta: Util.normalize_struct(invoice),
+        provider_invoice_id: invoice.id,
         gross_amount: gross_amount,
         net_amount: net_amount,
         total_fee: total_fee,
-        provider: "stripe",
-        provider_id: nil,
-        provider_meta: nil,
         type: :charge,
         status: :initialized,
-        succeeded_at: nil,
         contract_id: contract.id,
         original_contract_id: contract.original_contract_id
       })
@@ -247,9 +247,7 @@ defmodule Algora.Contracts do
       {:ok, invoice} ->
         transaction
         |> change(%{
-          provider_id: invoice.id,
           provider_meta: Util.normalize_struct(invoice),
-          provider_invoice_id: invoice.id,
           # provider_fee: Payments.get_provider_fee_from_invoice(invoice),
           status: if(invoice.paid, do: :succeeded, else: :processing),
           succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)

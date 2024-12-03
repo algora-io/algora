@@ -252,7 +252,7 @@ defmodule Algora.Contracts do
           status: if(invoice.paid, do: :succeeded, else: :processing),
           succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)
         })
-        |> Repo.update!()
+        |> Repo.update()
 
         {:ok, invoice}
 
@@ -262,7 +262,7 @@ defmodule Algora.Contracts do
           status: :failed,
           provider_meta: %{error: error}
         })
-        |> Repo.update!()
+        |> Repo.update()
 
         {:error, error}
     end

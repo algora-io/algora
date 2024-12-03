@@ -4,7 +4,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   import Ecto.Query
   import Ecto.Changeset
 
-  alias Algora.{Contracts, MoneyUtils, Payments, Repo, Util, Users.User}
+  alias Algora.Contracts
+  alias Algora.MoneyUtils
+  alias Algora.Payments
+  alias Algora.Repo
+  alias Algora.Util
+  alias Algora.Users.User
   alias Algora.Payments.Transaction
 
   attr :show, :boolean, required: true
@@ -50,12 +55,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                   <dl class="space-y-4">
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Payout amount (<%= @timesheet.hours_worked %> hours x <%= Money.to_string!(
+                        Payout amount (<%= @timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
                           @contract.hourly_rate
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(
+                        <%= MoneyUtils.fmt_precise!(
                           Contracts.calculate_transfer_amount(@contract, @timesheet)
                         ) %>
                       </dd>
@@ -65,14 +70,14 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= Money.to_string!(@prepaid_amount) %>
+                        -<%= MoneyUtils.fmt_precise!(@prepaid_amount) %>
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= Money.to_string!(
+                        <%= MoneyUtils.fmt_precise!(
                           Money.sub!(
                             Contracts.calculate_transfer_amount(@contract, @timesheet),
                             @prepaid_amount

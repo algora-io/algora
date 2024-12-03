@@ -156,13 +156,14 @@ defmodule Algora.Contracts do
   def get_timesheet(id), do: Repo.get(Timesheet, id)
   def get_timesheet!(id), do: Repo.get!(Timesheet, id)
 
-  def initialize_stripe_charge(%{
+  def initialize_charge(%{
         contract: contract,
         timesheet: timesheet,
         invoice: invoice,
         gross_amount: gross_amount,
         net_amount: net_amount,
-        total_fee: total_fee
+        total_fee: total_fee,
+        line_items: line_items
       }) do
     %Transaction{}
     |> change(%{
@@ -178,7 +179,8 @@ defmodule Algora.Contracts do
       user_id: contract.client_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
-      total_fee: total_fee
+      total_fee: total_fee,
+      line_items: line_items
     })
     |> validate_positive(:gross_amount)
     |> validate_positive(:net_amount)
@@ -190,7 +192,7 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  def initialize_stripe_transfer(%{
+  def initialize_transfer(%{
         contract: contract,
         timesheet: timesheet,
         invoice: invoice,
@@ -222,35 +224,17 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  def release_and_renew(timesheet) do
-    timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
-    contract = timesheet.contract
-
+  def initialize_transactions(contract, timesheet) do
     prepaid_amount = calculate_prepaid_balance(contract)
     fee_data = calculate_fee_data(contract)
 
-    # Calculate amount for completed work
     transfer_amount = calculate_transfer_amount(contract, timesheet)
-
-    # Calculate new prepayment for next period
     new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
-
-    # Net amount is completed work + new prepayment - previous prepayment
-    net_charge_amount = Money.add!(Money.sub!(transfer_amount, prepaid_amount), new_prepayment)
-
-    # Calculate platform and processing fees
+    net_charge_amount = Money.sub!(Money.add!(transfer_amount, new_prepayment), prepaid_amount)
     platform_fee = Money.mult!(net_charge_amount, fee_data.current_fee)
     transaction_fee = Money.mult!(net_charge_amount, fee_data.transaction_fee)
     total_fee = Money.add!(platform_fee, transaction_fee)
-
-    # Total amount including all fees
     gross_charge_amount = Money.add!(net_charge_amount, total_fee)
-
-    {:ok, invoice} =
-      Algora.Stripe.create_invoice(%{
-        auto_advance: false,
-        customer: contract.client.customer.provider_id
-      })
 
     line_items = [
       %{
@@ -277,7 +261,38 @@ defmodule Algora.Contracts do
       }
     ]
 
-    for line_item <- line_items do
+    with {:ok, charge} <-
+           initialize_charge(%{
+             contract: contract,
+             timesheet: timesheet,
+             line_items: line_items,
+             gross_amount: gross_charge_amount,
+             net_amount: net_charge_amount,
+             total_fee: total_fee
+           }),
+         {:ok, transfer} <-
+           initialize_transfer(%{
+             contract: contract,
+             timesheet: timesheet,
+             transfer_amount: transfer_amount
+           }) do
+      {:ok, charge, transfer}
+    end
+  end
+
+  def release_and_renew(timesheet) do
+    timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
+    contract = timesheet.contract
+
+    {:ok, charge, _transfer} = initialize_transactions(contract, timesheet)
+
+    {:ok, invoice} =
+      Algora.Stripe.create_invoice(%{
+        auto_advance: false,
+        customer: contract.client.customer.provider_id
+      })
+
+    for line_item <- charge.line_items do
       {:ok, _} =
         Algora.Stripe.create_invoice_item(%{
           invoice: invoice.id,
@@ -287,24 +302,6 @@ defmodule Algora.Contracts do
           description: line_item.description
         })
     end
-
-    {:ok, charge} =
-      initialize_stripe_charge(%{
-        contract: contract,
-        timesheet: timesheet,
-        invoice: invoice,
-        gross_amount: gross_charge_amount,
-        net_amount: net_charge_amount,
-        total_fee: total_fee
-      })
-
-    {:ok, _transfer} =
-      initialize_stripe_transfer(%{
-        contract: contract,
-        timesheet: timesheet,
-        invoice: invoice,
-        transfer_amount: transfer_amount
-      })
 
     case Algora.Stripe.pay_invoice(
            invoice.id,

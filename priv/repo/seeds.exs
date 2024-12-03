@@ -7,8 +7,34 @@ alias Algora.{Repo, Util}
 alias Algora.Users.{User, Identity}
 alias Algora.Contracts.{Contract, Timesheet}
 alias Algora.Chat.{Thread, Message, Participant}
-alias Algora.Payments.{Transaction, Customer, PaymentMethod, Account}
+alias Algora.Payments.{Customer, PaymentMethod, Account}
 alias Algora.Organizations.Member
+
+Application.put_env(:algora, :stripe_impl, Algora.Stripe.SeedImpl)
+
+defmodule Algora.Stripe.SeedImpl do
+  @behaviour Algora.Stripe.Behaviour
+
+  @impl true
+  def create_invoice(params) do
+    {:ok, %{id: "inv_#{Nanoid.generate()}", customer: params.customer}}
+  end
+
+  @impl true
+  def create_invoice_item(params) do
+    {:ok, %{id: "ii_#{Nanoid.generate()}", amount: params.amount}}
+  end
+
+  @impl true
+  def pay_invoice(_invoice_id, _params) do
+    {:ok,
+     %{
+       id: "inv_#{Nanoid.generate()}",
+       paid: true,
+       status: "paid"
+     }}
+  end
+end
 
 defmodule Seeds do
   def upsert_opts(conflict_target) do
@@ -25,112 +51,6 @@ defmodule Seeds do
       time,
       "Etc/UTC"
     )
-  end
-
-  def calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate) do
-    case previous_timesheet do
-      nil ->
-        # First period - charge full amount
-        Money.mult!(hourly_rate, hours_per_week)
-
-      timesheet ->
-        # Subsequent periods - adjust based on previous usage
-        # Need to charge enough to have hours_per_week available after accounting for previous over/under usage
-        previous_charged = hours_per_week
-        previous_used = timesheet.hours_worked
-        hours_to_charge = hours_per_week - (previous_charged - previous_used)
-        Money.mult!(hourly_rate, hours_to_charge)
-    end
-  end
-
-  def create_contract_cycle(params) do
-    %{
-      contractor_id: contractor_id,
-      client_id: client_id,
-      start_date: start_date,
-      end_date: end_date,
-      sequence_number: sequence_number,
-      original_contract_id: original_contract_id,
-      previous_timesheet: previous_timesheet,
-      hours_worked: hours_worked,
-      status: status
-    } = params
-
-    hourly_rate = Money.new!(75, :USD)
-    hours_per_week = 40
-    total_fee = Money.zero(:USD)
-    net_amount = calculate_charge_amount(previous_timesheet, hours_per_week, hourly_rate)
-    gross_amount = Money.add!(net_amount, total_fee)
-
-    contract =
-      Repo.insert!(%Contract{
-        id: if(sequence_number == 1, do: original_contract_id, else: Nanoid.generate()),
-        contractor_id: contractor_id,
-        client_id: client_id,
-        status: status,
-        hourly_rate: hourly_rate,
-        hours_per_week: hours_per_week,
-        start_date: start_date,
-        end_date: end_date,
-        sequence_number: sequence_number,
-        original_contract_id: original_contract_id,
-        inserted_at:
-          Seeds.to_datetime(
-            start_date.day,
-            Time.new!(Enum.random(9..16), Enum.random(0..59), Enum.random(0..59), 0)
-          )
-      })
-
-    _charge =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        contract_id: contract.id,
-        original_contract_id: original_contract_id,
-        gross_amount: gross_amount,
-        net_amount: net_amount,
-        total_fee: total_fee,
-        type: :charge,
-        status: :succeeded,
-        succeeded_at:
-          Seeds.to_datetime(
-            start_date.day,
-            Time.new!(Enum.random(17..20), Enum.random(0..59), Enum.random(0..59), 0)
-          )
-      })
-
-    timesheet =
-      Repo.insert!(%Timesheet{
-        id: Nanoid.generate(),
-        contract_id: contract.id,
-        hours_worked: hours_worked,
-        inserted_at:
-          Seeds.to_datetime(
-            end_date.day,
-            Time.new!(Enum.random(15..19), Enum.random(0..59), Enum.random(0..59), 0)
-          )
-      })
-
-    if status == :completed do
-      _transfer =
-        Repo.insert!(%Transaction{
-          id: Nanoid.generate(),
-          contract_id: contract.id,
-          original_contract_id: original_contract_id,
-          timesheet_id: timesheet.id,
-          gross_amount: net_amount,
-          net_amount: net_amount,
-          total_fee: Money.zero(:USD),
-          type: :transfer,
-          status: :succeeded,
-          succeeded_at:
-            Seeds.to_datetime(
-              end_date.day,
-              Time.new!(Enum.random(19..23), Enum.random(0..59), Enum.random(0..59), 0)
-            )
-        })
-    end
-
-    {contract, timesheet}
   end
 end
 
@@ -378,29 +298,42 @@ end
 original_contract_id = Nanoid.generate()
 num_cycles = 20
 
-{:ok, final_contract} =
-  Enum.reduce_while(1..num_cycles, {:ok, nil}, fn sequence_number, {:ok, prev_timesheet} ->
-    days_offset = -((num_cycles - sequence_number + 1) * 7)
+# Create the initial contract
+initial_contract =
+  Repo.insert!(%Contract{
+    id: original_contract_id,
+    contractor_id: carver.id,
+    client_id: pied_piper.id,
+    status: :active,
+    hourly_rate: Money.new!(75, :USD),
+    hours_per_week: 40,
+    start_date: Seeds.to_datetime(-num_cycles * 7),
+    end_date: Seeds.to_datetime(-(num_cycles - 1) * 7),
+    sequence_number: 1,
+    original_contract_id: original_contract_id,
+    inserted_at: Seeds.to_datetime(-num_cycles * 7)
+  })
 
-    hours_worked = Enum.random(35..45)
+# Prepay the initial contract
+{:ok, _initial_prepayment} = Algora.Contracts.prepay(initial_contract)
 
-    status = if sequence_number == num_cycles, do: :active, else: :completed
+# Iterate over the cycles to create timesheets and release & renew contracts
+Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract ->
+  days_offset = -((num_cycles - sequence_number + 1) * 7)
+  hours_worked = Enum.random(35..45)
 
-    {_contract, timesheet} =
-      Seeds.create_contract_cycle(%{
-        contractor_id: carver.id,
-        client_id: pied_piper.id,
-        start_date: Seeds.to_datetime(days_offset),
-        end_date: Seeds.to_datetime(days_offset + 7),
-        sequence_number: sequence_number,
-        original_contract_id: original_contract_id,
-        previous_timesheet: prev_timesheet,
-        hours_worked: hours_worked,
-        status: status
-      })
+  timesheet =
+    Repo.insert!(%Timesheet{
+      id: Nanoid.generate(),
+      contract_id: contract.id,
+      hours_worked: hours_worked,
+      inserted_at: Seeds.to_datetime(days_offset + 7)
+    })
 
-    {:cont, {:ok, timesheet}}
-  end)
+  {:ok, _invoice, new_contract} = Algora.Contracts.release_and_renew(timesheet)
+
+  {:cont, new_contract}
+end)
 
 thread =
   Repo.insert!(%Thread{

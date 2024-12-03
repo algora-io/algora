@@ -88,22 +88,22 @@ defmodule Algora.Contracts do
   defp build_contract_timeline(contract) do
     contract.chain
     |> Enum.with_index()
-    |> Enum.flat_map(&process_contract_period/1)
+    |> Enum.flat_map(&build_contract_period/1)
     |> Enum.reject(&is_nil/1)
     |> Enum.sort_by(& &1.date, {:desc, DateTime})
   end
 
-  defp process_contract_period({contract, index}) do
+  defp build_contract_period({contract, index}) do
     [
-      process_initial_prepayment(contract),
-      process_contract_renewal(contract, index),
-      process_timesheet_submission(contract),
-      process_payment_releases(contract)
+      build_initial_prepayment(contract),
+      build_contract_renewal(contract, index),
+      build_timesheet_submission(contract),
+      build_payment_releases(contract)
     ]
     |> List.flatten()
   end
 
-  defp process_initial_prepayment(contract) do
+  defp build_initial_prepayment(contract) do
     contract.transactions
     |> Enum.filter(&(&1.type == :charge))
     |> Enum.map(
@@ -116,7 +116,7 @@ defmodule Algora.Contracts do
     )
   end
 
-  defp process_contract_renewal(contract, index) do
+  defp build_contract_renewal(contract, index) do
     if index != 0 do
       %{
         type: :renewal,
@@ -127,7 +127,7 @@ defmodule Algora.Contracts do
     end
   end
 
-  defp process_timesheet_submission(contract) do
+  defp build_timesheet_submission(contract) do
     if contract.timesheet do
       %{
         type: :timesheet,
@@ -138,7 +138,7 @@ defmodule Algora.Contracts do
     end
   end
 
-  defp process_payment_releases(contract) do
+  defp build_payment_releases(contract) do
     contract.transactions
     |> Enum.filter(&(&1.type == :transfer))
     |> Enum.sort_by(& &1.inserted_at)

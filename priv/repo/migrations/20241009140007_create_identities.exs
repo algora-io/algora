@@ -16,6 +16,6 @@ defmodule Algora.Repo.Migrations.CreateIdentities do
 
     create index(:identities, [:user_id])
     create index(:identities, [:provider])
-    create unique_index(:identities, [:user_id, :provider])
+    create unique_index(:identities, [:provider, :provider_id])
   end
 end

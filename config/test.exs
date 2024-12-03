@@ -36,3 +36,5 @@ config :algora, :github,
   app_id: System.get_env("GITHUB_APP_ID"),
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
   private_key: System.get_env("GITHUB_PRIVATE_KEY")
+
+config :algora, :stripe_impl, Algora.StripeMock

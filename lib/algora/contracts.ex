@@ -13,7 +13,7 @@ defmodule Algora.Contracts do
 
   @type payment_status ::
           nil
-          | {:completed, Timesheet.t(), Transaction.t()}
+          | {:paid, Timesheet.t(), Transaction.t()}
           | {:pending_release, Timesheet.t()}
           | {:reversed, Timesheet.t()}
 
@@ -43,7 +43,7 @@ defmodule Algora.Contracts do
         nil
 
       {timesheet, %Transaction{status: :succeeded} = transfer, _} ->
-        {:completed, timesheet, transfer}
+        {:paid, timesheet, transfer}
 
       {timesheet, _, %Transaction{status: :succeeded}} ->
         {:pending_release, timesheet}
@@ -169,15 +169,15 @@ defmodule Algora.Contracts do
     new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
 
     # Net amount is completed work + new prepayment - previous prepayment
-    net_amount = Money.add!(Money.sub!(transfer_amount, prepaid_amount), new_prepayment)
+    net_charge_amount = Money.add!(Money.sub!(transfer_amount, prepaid_amount), new_prepayment)
 
     # Calculate platform and processing fees
-    platform_fee = Money.mult!(net_amount, fee_data.current_fee)
-    transaction_fee = Money.mult!(net_amount, fee_data.transaction_fee)
+    platform_fee = Money.mult!(net_charge_amount, fee_data.current_fee)
+    transaction_fee = Money.mult!(net_charge_amount, fee_data.transaction_fee)
     total_fee = Money.add!(platform_fee, transaction_fee)
 
     # Total amount including all fees
-    gross_amount = Money.add!(net_amount, total_fee)
+    gross_charge_amount = Money.add!(net_charge_amount, total_fee)
 
     {:ok, invoice} =
       Algora.Stripe.create_invoice(%{
@@ -221,21 +221,43 @@ defmodule Algora.Contracts do
         })
     end
 
-    transaction =
+    charge =
       Repo.insert!(%Transaction{
         id: Nanoid.generate(),
         provider: "stripe",
         provider_id: invoice.id,
         provider_meta: Util.normalize_struct(invoice),
         provider_invoice_id: invoice.id,
-        gross_amount: gross_amount,
-        net_amount: net_amount,
+        gross_amount: gross_charge_amount,
+        net_amount: net_charge_amount,
         total_fee: total_fee,
         type: :charge,
         status: :initialized,
         contract_id: contract.id,
-        original_contract_id: contract.original_contract_id
+        original_contract_id: contract.original_contract_id,
+        timesheet_id: timesheet.id,
+        user_id: contract.client_id
       })
+
+    transfer =
+      Repo.insert!(%Transaction{
+        id: Nanoid.generate(),
+        provider: "stripe",
+        provider_id: invoice.id,
+        provider_meta: Util.normalize_struct(invoice),
+        provider_invoice_id: invoice.id,
+        gross_amount: transfer_amount,
+        net_amount: transfer_amount,
+        total_fee: Money.zero(:USD),
+        type: :transfer,
+        status: :initialized,
+        contract_id: contract.id,
+        original_contract_id: contract.original_contract_id,
+        timesheet_id: timesheet.id,
+        user_id: contract.contractor_id
+      })
+
+    {:ok, charge, transfer}
 
     case Algora.Stripe.pay_invoice(
            invoice.id,
@@ -245,47 +267,77 @@ defmodule Algora.Contracts do
            }
          ) do
       {:ok, invoice} ->
-        transaction
-        |> change(%{
-          provider_meta: Util.normalize_struct(invoice),
-          status: if(invoice.paid, do: :succeeded, else: :processing),
-          succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)
-        })
-        |> Repo.update!()
-
-        # Create new contract for the next period
-        new_contract =
-          Repo.insert!(%Contract{
-            id: Nanoid.generate(),
-            contractor_id: contract.contractor_id,
-            client_id: contract.client_id,
-            status: :active,
-            hourly_rate: contract.hourly_rate,
-            hours_per_week: contract.hours_per_week,
-            start_date: contract.end_date,
-            end_date: contract.end_date |> DateTime.add(7, :day),
-            sequence_number: contract.sequence_number + 1,
-            original_contract_id: contract.original_contract_id,
-            inserted_at: DateTime.utc_now()
-          })
-
-        # Mark the current contract as completed
-        contract
-        |> change(%{status: :completed})
-        |> Repo.update!()
-
-        {:ok, invoice, new_contract}
+        with {:ok, _charge} <- update_transaction_after_payment(charge, invoice),
+             true <- invoice.paid,
+             {:ok, contract} <- update_contract_status(contract, :paid),
+             {:ok, new_contract} <- renew_contract(contract) do
+          {:ok, invoice, new_contract}
+        else
+          _ -> {:ok, invoice, nil}
+        end
 
       {:error, error} ->
-        transaction
-        |> change(%{
-          status: :failed,
-          provider_meta: %{error: error}
-        })
+        charge
+        |> change(%{status: :failed, provider_meta: %{error: error}})
         |> Repo.update()
 
         {:error, error}
     end
+  end
+
+  def transfer_funds(%Transaction{type: :transfer} = transaction)
+      when transaction.status != :succeeded do
+    case Algora.Stripe.create_transfer(%{
+           amount: MoneyUtils.to_minor_units(transaction.net_amount),
+           currency: to_string(transaction.net_amount.currency),
+           destination: transaction.user_id
+         }) do
+      {:ok, stripe_transfer} ->
+        transaction
+        |> change(%{provider_meta: Util.normalize_struct(stripe_transfer)})
+        |> Repo.update()
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  def handle_charge_succeeded(contract) do
+    with {:ok, contract} <- update_contract_status(contract, :paid) do
+      {:ok, contract}
+    end
+  end
+
+  defp update_transaction_after_payment(transaction, invoice) do
+    transaction
+    |> change(%{
+      provider_meta: Util.normalize_struct(invoice),
+      status: if(invoice.paid, do: :succeeded, else: :processing),
+      succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)
+    })
+    |> Repo.update()
+  end
+
+  defp update_contract_status(contract, status) do
+    contract
+    |> change(%{status: status})
+    |> Repo.update()
+  end
+
+  defp renew_contract(contract) do
+    Repo.insert(%Contract{
+      id: Nanoid.generate(),
+      contractor_id: contract.contractor_id,
+      client_id: contract.client_id,
+      status: :active,
+      hourly_rate: contract.hourly_rate,
+      hours_per_week: contract.hours_per_week,
+      start_date: contract.end_date,
+      end_date: contract.end_date |> DateTime.add(7, :day),
+      sequence_number: contract.sequence_number + 1,
+      original_contract_id: contract.original_contract_id,
+      inserted_at: DateTime.utc_now()
+    })
   end
 
   defp sum_transactions_query(contract, type, amount_field) do

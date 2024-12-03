@@ -284,13 +284,22 @@ defmodule Algora.Contracts do
     end)
   end
 
-  def release_and_renew(timesheet) do
+  def release_contract(timesheet) do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
     contract = timesheet.contract
 
     with {:ok, {charge, transfer}} <- initialize_transactions(contract, timesheet),
          {:ok, invoice} <- generate_invoice(contract, charge),
-         {:ok, invoice} <- pay_invoice(contract, invoice, charge, transfer),
+         {:ok, invoice} <- pay_invoice(contract, invoice, charge, transfer) do
+      {:ok, invoice}
+    end
+  end
+
+  def release_and_renew_contract(timesheet) do
+    timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
+    contract = timesheet.contract
+
+    with {:ok, invoice} <- release_contract(timesheet),
          {:ok, _new_contract} <- renew_contract(contract) do
       {:ok, invoice}
     end
@@ -379,19 +388,15 @@ defmodule Algora.Contracts do
   end
 
   defp renew_contract(contract) do
-    Repo.insert(%Contract{
+    contract
+    |> change(%{
       id: Nanoid.generate(),
-      contractor_id: contract.contractor_id,
-      client_id: contract.client_id,
       status: :active,
-      hourly_rate: contract.hourly_rate,
-      hours_per_week: contract.hours_per_week,
       start_date: contract.end_date,
       end_date: contract.end_date |> DateTime.add(7, :day),
-      sequence_number: contract.sequence_number + 1,
-      original_contract_id: contract.original_contract_id,
-      inserted_at: DateTime.utc_now()
+      sequence_number: contract.sequence_number + 1
     })
+    |> Repo.insert()
   end
 
   defp sum_transactions_query(contract, type, amount_field) do

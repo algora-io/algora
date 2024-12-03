@@ -180,7 +180,7 @@ defmodule Algora.Contracts do
     gross_amount = Money.add!(net_amount, total_fee)
 
     {:ok, invoice} =
-      Stripe.Invoice.create(%{
+      Algora.Stripe.create_invoice(%{
         auto_advance: false,
         customer: contract.client.customer.provider_id
       })
@@ -212,7 +212,7 @@ defmodule Algora.Contracts do
 
     for line_item <- line_items do
       {:ok, _} =
-        Stripe.Invoiceitem.create(%{
+        Algora.Stripe.create_invoice_item(%{
           invoice: invoice.id,
           customer: contract.client.customer.provider_id,
           amount: MoneyUtils.to_minor_units(line_item.amount),
@@ -237,7 +237,7 @@ defmodule Algora.Contracts do
         original_contract_id: contract.original_contract_id
       })
 
-    case Stripe.Invoice.pay(
+    case Algora.Stripe.pay_invoice(
            invoice.id,
            %{
              off_session: true,

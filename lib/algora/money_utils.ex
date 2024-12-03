@@ -1,7 +1,9 @@
 defmodule Algora.MoneyUtils do
+  def fmt_precise(money), do: Money.to_string(money, no_fraction_if_integer: false)
+  def fmt_precise!(money), do: Money.to_string!(money, no_fraction_if_integer: false)
+
   @spec split_evenly(Money.t(), non_neg_integer()) :: [Money.t()]
   def split_evenly(_money, 0), do: []
-
   def split_evenly(money, parts) do
     {dividend, _remainder} = Money.split(money, parts)
     [dividend | split_evenly(Money.sub!(money, dividend), parts - 1)]

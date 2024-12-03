@@ -1,6 +1,8 @@
-defmodule AlgoraWeb.WebhooksControllerTest do
+defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use AlgoraWeb.ConnCase
   import Mox
+
+  alias AlgoraWeb.Webhooks.GithubController
 
   setup :verify_on_exit!
 
@@ -80,30 +82,39 @@ defmodule AlgoraWeb.WebhooksControllerTest do
   defp setup_github_mocks(context) do
     setup_installation_token()
     setup_repository_permissions(context[:user] || @admin_user)
+    setup_create_issue_comment()
     :ok
   end
 
   defp setup_installation_token do
-    expect(
-      Algora.Github.MockClient,
+    stub(
+      Algora.GithubMock,
       :get_installation_token,
       fn _installation_id -> {:ok, %{"token" => "test_token"}} end
     )
   end
 
   defp setup_repository_permissions(@admin_user) do
-    expect(
-      Algora.Github.MockClient,
+    stub(
+      Algora.GithubMock,
       :get_repository_permissions,
       fn _token, _owner, _repo, _user -> {:ok, %{"permission" => "admin"}} end
     )
   end
 
   defp setup_repository_permissions(@unauthorized_user) do
-    expect(
-      Algora.Github.MockClient,
+    stub(
+      Algora.GithubMock,
       :get_repository_permissions,
       fn _token, _owner, _repo, _user -> {:ok, %{"permission" => "none"}} end
+    )
+  end
+
+  defp setup_create_issue_comment do
+    stub(
+      Algora.GithubMock,
+      :create_issue_comment,
+      fn _token, _owner, _repo, _issue_number, _body -> {:ok, %{"id" => 1}} end
     )
   end
 
@@ -116,6 +127,6 @@ defmodule AlgoraWeb.WebhooksControllerTest do
     amet
     """
 
-    AlgoraWeb.WebhooksController.process_commands(full_body, %{"login" => author}, @params)
+    GithubController.process_commands(full_body, %{"login" => author}, @params)
   end
 end

@@ -10,6 +10,7 @@ defmodule Algora.Contracts do
   alias Algora.Payments.Transaction
   alias Algora.Payments
   alias Algora.Util
+  alias Algora.Stripe
   alias Algora.MoneyUtils
 
   @type payment_status ::
@@ -167,6 +168,7 @@ defmodule Algora.Contracts do
       }) do
     %Transaction{}
     |> change(%{
+      id: Nanoid.generate(),
       provider: "stripe",
       provider_id: invoice.id,
       provider_meta: Util.normalize_struct(invoice),
@@ -286,19 +288,18 @@ defmodule Algora.Contracts do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
     contract = timesheet.contract
 
-    with {:ok, {charge, _transfer}} <- initialize_transactions(contract, timesheet),
+    with {:ok, {charge, transfer}} <- initialize_transactions(contract, timesheet),
          {:ok, invoice} <- generate_invoice(contract, charge),
-         {:ok, invoice} <- pay_invoice(contract, invoice, charge) do
+         {:ok, invoice} <- pay_invoice(contract, invoice, charge, transfer),
+         {:ok, _new_contract} <- renew_contract(contract) do
       {:ok, invoice}
     end
   end
 
   defp generate_invoice(contract, charge) do
-    with {:ok, invoice} <-
-           Algora.Stripe.create_invoice(%{
-             auto_advance: false,
-             customer: contract.client.customer.provider_id
-           }),
+    invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
+
+    with {:ok, invoice} <- Stripe.create_invoice(invoice_params),
          {:ok, _line_items} <- create_line_items(contract, invoice, charge) do
       {:ok, invoice}
     end
@@ -307,7 +308,7 @@ defmodule Algora.Contracts do
   defp create_line_items(contract, invoice, charge) do
     charge.line_items
     |> Enum.reduce_while({:ok, []}, fn line_item, {:ok, acc} ->
-      case Algora.Stripe.create_invoice_item(%{
+      case Stripe.create_invoice_item(%{
              invoice: invoice.id,
              customer: contract.client.customer.provider_id,
              amount: MoneyUtils.to_minor_units(line_item.amount),
@@ -320,8 +321,8 @@ defmodule Algora.Contracts do
     end)
   end
 
-  defp pay_invoice(contract, invoice, charge) do
-    case Algora.Stripe.pay_invoice(
+  defp pay_invoice(contract, invoice, charge, transfer) do
+    case Stripe.pay_invoice(
            invoice.id,
            %{
              off_session: true,
@@ -329,14 +330,11 @@ defmodule Algora.Contracts do
            }
          ) do
       {:ok, invoice} ->
-        with {:ok, _charge} <- update_transaction_after_payment(charge, invoice),
-             true <- invoice.paid,
-             {:ok, contract} <- update_contract_status(contract, :paid),
-             {:ok, _new_contract} <- renew_contract(contract) do
-          {:ok, invoice}
-        else
-          _ -> {:ok, invoice}
-        end
+        status = if invoice.paid, do: :succeeded, else: :processing
+        update_transaction_status(charge, invoice, status)
+        transfer_funds(contract, transfer)
+
+        {:ok, invoice}
 
       {:error, error} ->
         charge
@@ -347,42 +345,36 @@ defmodule Algora.Contracts do
     end
   end
 
-  defp transfer_funds(%Transaction{type: :transfer} = transaction)
+  defp transfer_funds(contract, %Transaction{type: :transfer} = transaction)
        when transaction.status != :succeeded do
-    case Algora.Stripe.create_transfer(%{
+    case Stripe.create_transfer(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
            currency: to_string(transaction.net_amount.currency),
            destination: transaction.user_id
          }) do
-      {:ok, stripe_transfer} ->
-        transaction
-        |> change(%{provider_meta: Util.normalize_struct(stripe_transfer)})
-        |> Repo.update()
+      {:ok, transfer} ->
+        update_transaction_status(transaction, transfer, :succeeded)
+        mark_contract_as_paid(contract)
+        {:ok, transfer}
 
       {:error, error} ->
         {:error, error}
     end
   end
 
-  defp handle_charge_succeeded(contract) do
-    with {:ok, contract} <- update_contract_status(contract, :paid) do
-      {:ok, contract}
-    end
-  end
-
-  defp update_transaction_after_payment(transaction, invoice) do
+  defp update_transaction_status(transaction, record, status) do
     transaction
     |> change(%{
-      provider_meta: Util.normalize_struct(invoice),
-      status: if(invoice.paid, do: :succeeded, else: :processing),
-      succeeded_at: if(invoice.paid, do: DateTime.utc_now(), else: nil)
+      provider_meta: Util.normalize_struct(record),
+      status: status,
+      succeeded_at: if(status == :succeeded, do: DateTime.utc_now(), else: nil)
     })
     |> Repo.update()
   end
 
-  defp update_contract_status(contract, status) do
+  defp mark_contract_as_paid(contract) do
     contract
-    |> change(%{status: status})
+    |> change(%{status: :paid})
     |> Repo.update()
   end
 

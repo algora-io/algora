@@ -4,7 +4,7 @@
 
 require Logger
 import Algora.Factory
-alias Algora.{Repo, Util}
+alias Algora.Util
 
 Application.put_env(:algora, :stripe_impl, Algora.Stripe.SeedImpl)
 
@@ -32,16 +32,6 @@ defmodule Algora.Stripe.SeedImpl do
   end
 end
 
-defmodule Seeds do
-  def upsert_opts(conflict_target) do
-    [
-      on_conflict: {:replace_all_except, [:id]},
-      conflict_target: conflict_target,
-      returning: true
-    ]
-  end
-end
-
 github_id =
   case System.argv() do
     [github_id] -> github_id
@@ -49,78 +39,86 @@ github_id =
   end
 
 erich =
-  Repo.insert!(
-    build(:user, %{provider_id: github_id}),
-    Seeds.upsert_opts([:provider, :provider_id])
+  upsert!(
+    :user,
+    [:provider, :provider_id],
+    %{provider_id: github_id}
   )
 
-Repo.insert!(
-  build(:identity, %{
+upsert!(
+  :identity,
+  [:provider, :provider_id],
+  %{
     user_id: erich.id,
     provider: erich.provider,
     provider_id: erich.provider_id,
     provider_email: erich.email,
     provider_login: erich.handle,
     provider_name: erich.name
-  }),
-  Seeds.upsert_opts([:provider, :user_id])
+  }
 )
 
 richard =
-  Repo.insert!(
-    build(:user, %{
+  upsert!(
+    :user,
+    [:email],
+    %{
       email: "richard@example.com",
       name: "Richard Hendricks",
       handle: "richard",
       bio: "CEO of Pied Piper. Creator of the middle-out compression algorithm.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/richard.jpg",
       tech_stack: ["Python", "C++"]
-    }),
-    Seeds.upsert_opts([:email])
+    }
   )
 
 dinesh =
-  Repo.insert!(
-    build(:user, %{
+  upsert!(
+    :user,
+    [:email],
+    %{
       email: "dinesh@example.com",
       name: "Dinesh Chugtai",
       handle: "dinesh",
       bio: "Lead Frontend Engineer at Pied Piper. Java bad, Python good.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/dinesh.png",
       tech_stack: ["Python", "JavaScript"]
-    }),
-    Seeds.upsert_opts([:email])
+    }
   )
 
 gilfoyle =
-  Repo.insert!(
-    build(:user, %{
+  upsert!(
+    :user,
+    [:email],
+    %{
       email: "gilfoyle@example.com",
       name: "Bertram Gilfoyle",
       handle: "gilfoyle",
       bio: "Systems Architect. Security. DevOps. Satanist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/gilfoyle.jpg",
       tech_stack: ["Python", "DevOps", "Security", "Linux"]
-    }),
-    Seeds.upsert_opts([:email])
+    }
   )
 
 jared =
-  Repo.insert!(
-    build(:user, %{
+  upsert!(
+    :user,
+    [:email],
+    %{
       email: "jared@example.com",
       name: "Jared Dunn",
       handle: "jared",
       bio: "COO of Pied Piper. Former Hooli executive. Excel wizard.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jared.png",
       tech_stack: ["Excel", "Project Management"]
-    }),
-    Seeds.upsert_opts([:email])
+    }
   )
 
 carver =
-  Repo.insert!(
-    build(:user, %{
+  upsert!(
+    :user,
+    [:email],
+    %{
       email: "carver@example.com",
       name: "Kevin 'The Carver'",
       handle: "carver",
@@ -128,20 +126,16 @@ carver =
         "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/carver.jpg",
       tech_stack: ["Python", "AWS", "Cloud Architecture", "DevOps", "System Architecture"]
-    }),
-    Seeds.upsert_opts([:email])
+    }
   )
 
-pied_piper =
-  Repo.insert!(
-    build(:organization),
-    Seeds.upsert_opts([:email])
-  )
+pied_piper = upsert!(:organization, [:email])
 
 for user <- [erich, richard, dinesh, gilfoyle, jared] do
-  Repo.insert!(
-    build(:member, %{user_id: user.id, org_id: pied_piper.id}),
-    Seeds.upsert_opts([:user_id, :org_id])
+  upsert!(
+    :member,
+    [:user_id, :org_id],
+    %{user_id: user.id, org_id: pied_piper.id}
   )
 end
 
@@ -150,33 +144,37 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
   {:ok, pm} = Stripe.PaymentMethod.retrieve(cus.invoice_settings.default_payment_method)
 
   customer =
-    Repo.insert!(
-      build(:customer, %{
+    upsert!(
+      :customer,
+      [:provider, :provider_id],
+      %{
         provider_id: cus.id,
         provider_meta: Util.normalize_struct(cus),
         name: cus.name,
         user_id: pied_piper.id
-      }),
-      Seeds.upsert_opts([:provider, :provider_id])
+      }
     )
 
   _payment_method =
-    Repo.insert!(
-      build(:payment_method, %{
+    upsert!(
+      :payment_method,
+      [:provider, :provider_id],
+      %{
         provider_id: pm.id,
         provider_meta: Util.normalize_struct(pm),
         provider_customer_id: cus.id,
         customer_id: customer.id
-      }),
-      Seeds.upsert_opts([:provider, :provider_id])
+      }
     )
 end
 
 if account_id = Algora.config([:stripe, :test_account_id]) do
   {:ok, acct} = Stripe.Account.retrieve(account_id)
 
-  Repo.insert!(
-    build(:account, %{
+  upsert!(
+    :account,
+    [:provider, :provider_id],
+    %{
       provider_id: acct.id,
       provider_meta: Util.normalize_struct(acct),
       name: acct.business_profile.name,
@@ -185,8 +183,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
       country: acct.country,
       type: String.to_atom(acct.type),
       user_id: carver.id
-    }),
-    Seeds.upsert_opts([:provider, :provider_id])
+    }
   )
 end
 
@@ -194,13 +191,14 @@ num_cycles = 20
 
 # Create the initial contract
 initial_contract =
-  Repo.insert!(
-    build(:contract, %{
+  insert!(
+    :contract,
+    %{
       contractor_id: carver.id,
       client_id: pied_piper.id,
       start_date: days_from_now(-num_cycles * 7),
       end_date: days_from_now(-(num_cycles - 1) * 7)
-    })
+    }
   )
 
 # Prepay the initial contract
@@ -209,32 +207,26 @@ initial_contract =
 # Iterate over the cycles to create timesheets and release & renew contracts
 Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract ->
   timesheet =
-    Repo.insert!(
-      build(:timesheet, %{
-        contract_id: contract.id,
-        hours_worked: Enum.random(35..45),
-        inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
-      })
-    )
+    insert!(:timesheet, %{
+      contract_id: contract.id,
+      hours_worked: Enum.random(35..45),
+      inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
+    })
 
   {:ok, _invoice, new_contract} = Algora.Contracts.release_and_renew(timesheet)
 
   {:cont, new_contract}
 end)
 
-thread =
-  Repo.insert!(
-    build(:thread, %{
-      title: "#{pied_piper.name} x #{carver.name}"
-    })
-  )
+thread = insert!(:thread, %{title: "#{pied_piper.name} x #{carver.name}"})
 
 for user <- [pied_piper, carver, erich, richard, dinesh, gilfoyle] do
-  Repo.insert!(
-    build(:participant, %{
+  insert!(
+    :participant,
+    %{
       thread_id: thread.id,
       user_id: user.id
-    })
+    }
   )
 end
 
@@ -264,13 +256,14 @@ messages = [
 ]
 
 for {sender, content, inserted_at} <- messages do
-  Repo.insert!(
-    build(:message, %{
+  insert!(
+    :message,
+    %{
       thread_id: thread.id,
       sender_id: sender.id,
       content: content,
       inserted_at: inserted_at
-    })
+    }
   )
 end
 

@@ -154,6 +154,16 @@ defmodule Algora.Factory do
     factory_name |> build(attributes) |> Repo.insert!()
   end
 
+  def upsert!(factory_name, conflict_target, attributes \\ []) do
+    factory_name
+    |> build(attributes)
+    |> Repo.insert!(
+      on_conflict: {:replace_all_except, [:id]},
+      conflict_target: conflict_target,
+      returning: true
+    )
+  end
+
   def days_from_now(days_offset, time \\ ~T[00:00:00.000000]) do
     DateTime.new!(
       Date.add(Date.utc_today(), days_offset),

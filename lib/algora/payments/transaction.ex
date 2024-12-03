@@ -38,31 +38,39 @@ defmodule Algora.Payments.Transaction do
   def changeset(transaction, attrs) do
     transaction
     |> cast(attrs, [
+      :id,
       :provider,
       :provider_id,
       :provider_meta,
-      :amount,
+      :provider_invoice_id,
+      :gross_amount,
+      :net_amount,
+      :total_fee,
       :type,
       :status,
       :timesheet_id,
       :contract_id,
+      :original_contract_id,
       :user_id,
-      :bounty_id,
-      :original_transaction_id
+      :succeeded_at
     ])
     |> validate_required([
+      :id,
       :provider,
       :provider_id,
       :provider_meta,
-      :amount,
+      :gross_amount,
+      :net_amount,
+      :total_fee,
       :type,
-      :status
+      :status,
+      :contract_id,
+      :original_contract_id,
+      :user_id
     ])
     |> foreign_key_constraint(:user_id)
-  end
-
-  def todo(query) do
-    from t in query,
-      where: t.type == :transfer and t.status == :succeeded and is_nil(t.reversed_at)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:original_contract_id)
+    |> foreign_key_constraint(:timesheet_id)
   end
 end

@@ -1,6 +1,7 @@
 defmodule Algora.Contracts do
   import Ecto.Changeset
   import Ecto.Query
+  import Algora.Validators
 
   alias Algora.Repo
   alias Algora.Contracts.Contract
@@ -155,6 +156,72 @@ defmodule Algora.Contracts do
   def get_timesheet(id), do: Repo.get(Timesheet, id)
   def get_timesheet!(id), do: Repo.get!(Timesheet, id)
 
+  def initialize_stripe_charge(%{
+        contract: contract,
+        timesheet: timesheet,
+        invoice: invoice,
+        gross_amount: gross_amount,
+        net_amount: net_amount,
+        total_fee: total_fee
+      }) do
+    %Transaction{}
+    |> change(%{
+      provider: "stripe",
+      provider_id: invoice.id,
+      provider_meta: Util.normalize_struct(invoice),
+      provider_invoice_id: invoice.id,
+      type: :charge,
+      status: :initialized,
+      contract_id: contract.id,
+      original_contract_id: contract.original_contract_id,
+      timesheet_id: timesheet.id,
+      user_id: contract.client_id,
+      gross_amount: gross_amount,
+      net_amount: net_amount,
+      total_fee: total_fee
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> validate_positive(:total_fee)
+    |> foreign_key_constraint(:original_contract_id)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:timesheet_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
+  def initialize_stripe_transfer(%{
+        contract: contract,
+        timesheet: timesheet,
+        invoice: invoice,
+        transfer_amount: transfer_amount
+      }) do
+    %Transaction{}
+    |> change(%{
+      id: Nanoid.generate(),
+      provider: "stripe",
+      provider_id: invoice.id,
+      provider_meta: Util.normalize_struct(invoice),
+      provider_invoice_id: invoice.id,
+      gross_amount: transfer_amount,
+      net_amount: transfer_amount,
+      total_fee: Money.zero(:USD),
+      type: :transfer,
+      status: :initialized,
+      contract_id: contract.id,
+      original_contract_id: contract.original_contract_id,
+      timesheet_id: timesheet.id,
+      user_id: contract.contractor_id
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> foreign_key_constraint(:original_contract_id)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:timesheet_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
   def release_and_renew(timesheet) do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
     contract = timesheet.contract
@@ -221,43 +288,23 @@ defmodule Algora.Contracts do
         })
     end
 
-    charge =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        provider: "stripe",
-        provider_id: invoice.id,
-        provider_meta: Util.normalize_struct(invoice),
-        provider_invoice_id: invoice.id,
+    {:ok, charge} =
+      initialize_stripe_charge(%{
+        contract: contract,
+        timesheet: timesheet,
+        invoice: invoice,
         gross_amount: gross_charge_amount,
         net_amount: net_charge_amount,
-        total_fee: total_fee,
-        type: :charge,
-        status: :initialized,
-        contract_id: contract.id,
-        original_contract_id: contract.original_contract_id,
-        timesheet_id: timesheet.id,
-        user_id: contract.client_id
+        total_fee: total_fee
       })
 
-    transfer =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        provider: "stripe",
-        provider_id: invoice.id,
-        provider_meta: Util.normalize_struct(invoice),
-        provider_invoice_id: invoice.id,
-        gross_amount: transfer_amount,
-        net_amount: transfer_amount,
-        total_fee: Money.zero(:USD),
-        type: :transfer,
-        status: :initialized,
-        contract_id: contract.id,
-        original_contract_id: contract.original_contract_id,
-        timesheet_id: timesheet.id,
-        user_id: contract.contractor_id
+    {:ok, _transfer} =
+      initialize_stripe_transfer(%{
+        contract: contract,
+        timesheet: timesheet,
+        invoice: invoice,
+        transfer_amount: transfer_amount
       })
-
-    {:ok, charge, transfer}
 
     case Algora.Stripe.pay_invoice(
            invoice.id,

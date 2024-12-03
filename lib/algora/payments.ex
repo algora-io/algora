@@ -3,9 +3,13 @@ defmodule Algora.Payments do
 
   import Ecto.Query
   import Ecto.Changeset
+  import Algora.Validators
 
-  alias Algora.{Repo, Util, Users.User, MoneyUtils}
+  alias Algora.Repo
+  alias Algora.Util
+  alias Algora.Payments.Customer
   alias Algora.Payments.Transaction
+  alias Algora.Payments.PaymentMethod
 
   def get_transaction_fee_pct(), do: Decimal.new("0.04")
 
@@ -42,60 +46,14 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec create_charge(String.t(), Money.t(), Money.t()) ::
-          {:ok, Stripe.PaymentIntent.t()} | {:error, any()}
-  def create_charge(org_handle, net_amount, total_fee) do
-    org =
-      from(u in User,
-        where: u.handle == ^org_handle,
-        preload: [customer: :default_payment_method]
-      )
-      |> Repo.one!()
+  def get_customer_by(fields), do: Repo.get_by(Customer, fields)
 
-    gross_amount = Money.add!(net_amount, total_fee)
-
-    transaction =
-      Repo.insert!(%Transaction{
-        id: Nanoid.generate(),
-        gross_amount: gross_amount,
-        net_amount: net_amount,
-        total_fee: total_fee,
-        provider: "stripe",
-        provider_id: nil,
-        provider_meta: nil,
-        type: :charge,
-        status: :initialized,
-        succeeded_at: nil
-      })
-
-    case Stripe.PaymentIntent.create(%{
-           amount: MoneyUtils.to_minor_units(gross_amount),
-           currency: to_string(gross_amount.currency),
-           customer: org.customer.provider_id,
-           payment_method: org.customer.default_payment_method.provider_id,
-           off_session: true,
-           confirm: true
-         }) do
-      {:ok, pi} ->
-        transaction
-        |> change(%{
-          provider_id: pi.id,
-          provider_meta: Util.normalize_struct(pi),
-          provider_fee: get_provider_fee_from_payment_intent(pi),
-          status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
-          succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
-        })
-        |> Repo.update!()
-
-      {:error, error} ->
-        transaction
-        |> change(%{
-          status: :failed,
-          provider_meta: %{error: error}
-        })
-        |> Repo.update!()
-
-        {:error, error}
-    end
+  def get_default_payment_method(org) do
+    from(pm in PaymentMethod,
+      join: c in assoc(pm, :customer),
+      join: u in assoc(c, :user),
+      where: u.id == ^org.id and pm.is_default == true
+    )
+    |> Repo.one()
   end
 end

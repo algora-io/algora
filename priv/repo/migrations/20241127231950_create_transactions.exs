@@ -16,6 +16,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :net_amount, :money_with_currency
       add :total_fee, :money_with_currency
       add :provider_fee, :money_with_currency
+      add :line_items, {:array, :map}
 
       add :type, :string, null: false
       add :status, :string, null: false

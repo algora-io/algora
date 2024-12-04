@@ -30,6 +30,11 @@ defmodule Algora.Stripe.SeedImpl do
        status: "paid"
      }}
   end
+
+  @impl true
+  def create_transfer(_params) do
+    {:ok, %{id: "tr_#{Nanoid.generate()}"}}
+  end
 end
 
 github_id =
@@ -202,7 +207,7 @@ initial_contract =
   )
 
 # Prepay the initial contract
-{:ok, _initial_prepayment} = Algora.Contracts.prepay(initial_contract)
+{:ok, _initial_prepayment} = Algora.Contracts.prepay_contract(initial_contract)
 
 # Iterate over the cycles to create timesheets and release & renew contracts
 Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract ->
@@ -213,7 +218,7 @@ Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract 
       inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
     })
 
-  {:ok, _invoice, new_contract} = Algora.Contracts.release_and_renew(timesheet)
+  {:ok, _invoice, new_contract} = Algora.Contracts.release_and_renew_contract(timesheet)
 
   {:cont, new_contract}
 end)

@@ -5,7 +5,7 @@ defmodule Algora.Repo.Migrations.CreatePaymentMethods do
     create table(:payment_methods) do
       add :provider, :string, null: false
       add :provider_id, :string, null: false
-      add :provider_meta, :map, null: false
+      add :provider_meta, :map, null: false, default: "{}"
       add :provider_customer_id, :string, null: false
       add :is_default, :boolean, null: false, default: true
 

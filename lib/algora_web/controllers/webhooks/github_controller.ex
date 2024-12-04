@@ -148,7 +148,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     do: Logger.info("Unhandled command: #{command}")
 
   def process_commands(body, author, params) when is_binary(body) do
-    body |> extract_commands() |> Enum.map(&execute_command(&1, author, params)) |> dbg()
+    body |> extract_commands() |> Enum.map(&execute_command(&1, author, params))
   end
 
   def process_commands(_body, _author, _params), do: nil

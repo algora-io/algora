@@ -18,8 +18,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       )
       |> Enum.uniq_by(& &1.solver.id)
 
-    dbg(bounties)
-
     {:ok,
      socket
      |> assign(:step, 1)

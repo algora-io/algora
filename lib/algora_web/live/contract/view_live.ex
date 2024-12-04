@@ -323,32 +323,34 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     _ -> Calendar.strftime(msg.inserted_at, "%b %d")
                   end
                 end)
-                |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, :asc) do %>
+                |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, Date) do %>
               <div class="flex items-center justify-center">
                 <div class="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">
                   <%= date %>
                 </div>
               </div>
 
-              <%= for message <- Enum.sort_by(messages, & &1.inserted_at, :asc) do %>
-                <div class="flex gap-3 group">
-                  <.avatar class="h-8 w-8">
-                    <.avatar_image src={message.sender.avatar_url} />
-                    <.avatar_fallback>
-                      <%= String.slice(message.sender.name, 0, 2) %>
-                    </.avatar_fallback>
-                  </.avatar>
-                  <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
-                    <%= message.content %>
-                    <div class="text-[10px] mt-1 text-muted-foreground">
-                      <%= message.inserted_at
-                      |> DateTime.to_time()
-                      |> Time.to_string()
-                      |> String.slice(0..4) %>
+              <div class="flex flex-col-reverse gap-6">
+                <%= for message <- Enum.sort_by(messages, & &1.inserted_at, Date) do %>
+                  <div class="flex gap-3 group">
+                    <.avatar class="h-8 w-8">
+                      <.avatar_image src={message.sender.avatar_url} />
+                      <.avatar_fallback>
+                        <%= String.slice(message.sender.name, 0, 2) %>
+                      </.avatar_fallback>
+                    </.avatar>
+                    <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
+                      <%= message.content %>
+                      <div class="text-[10px] mt-1 text-muted-foreground">
+                        <%= message.inserted_at
+                        |> DateTime.to_time()
+                        |> Time.to_string()
+                        |> String.slice(0..4) %>
+                      </div>
                     </div>
                   </div>
-                </div>
-              <% end %>
+                <% end %>
+              </div>
             <% end %>
           </div>
         </.scroll_area>

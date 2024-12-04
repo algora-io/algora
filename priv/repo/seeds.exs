@@ -218,7 +218,7 @@ Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract 
       inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
     })
 
-  {:ok, _invoice, new_contract} = Algora.Contracts.release_and_renew_contract(timesheet)
+  {:ok, {_ch, _tr, new_contract}} = Algora.Contracts.release_and_renew_contract(timesheet)
 
   {:cont, new_contract}
 end)

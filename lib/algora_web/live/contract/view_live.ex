@@ -160,7 +160,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                             </div>
                           </div>
-                        <% {:completed, timesheet, transaction} -> %>
+                        <% {:paid, timesheet, transaction} -> %>
                           <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
                               <div class="h-9 w-9 rounded-full bg-success/20 flex items-center justify-center">

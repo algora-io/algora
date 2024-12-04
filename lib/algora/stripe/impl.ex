@@ -17,4 +17,9 @@ defmodule Algora.Stripe.Impl do
   def pay_invoice(invoice_id, params) do
     Stripe.Invoice.pay(invoice_id, params)
   end
+
+  @impl true
+  def create_transfer(params) do
+    Stripe.Transfer.create(params)
+  end
 end

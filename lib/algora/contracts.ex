@@ -160,7 +160,6 @@ defmodule Algora.Contracts do
   defp initialize_charge(
          %{
            contract: contract,
-           invoice: invoice,
            gross_amount: gross_amount,
            net_amount: net_amount,
            total_fee: total_fee,
@@ -171,9 +170,6 @@ defmodule Algora.Contracts do
     |> change(%{
       id: Nanoid.generate(),
       provider: "stripe",
-      provider_id: invoice.id,
-      provider_meta: Util.normalize_struct(invoice),
-      provider_invoice_id: invoice.id,
       type: :charge,
       status: :initialized,
       contract_id: contract.id,
@@ -198,16 +194,12 @@ defmodule Algora.Contracts do
   defp initialize_transfer(%{
          contract: contract,
          timesheet: timesheet,
-         invoice: invoice,
          transfer_amount: transfer_amount
        }) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
       provider: "stripe",
-      provider_id: invoice.id,
-      provider_meta: Util.normalize_struct(invoice),
-      provider_invoice_id: invoice.id,
       gross_amount: transfer_amount,
       net_amount: transfer_amount,
       total_fee: Money.zero(:USD),
@@ -326,7 +318,7 @@ defmodule Algora.Contracts do
     with {:ok, {charge, transfer}} <- initialize_release_transactions(contract, timesheet),
          {:ok, invoice} <- generate_invoice(contract, charge),
          {:ok, invoice} <- pay_invoice(contract, invoice, charge, transfer) do
-      {:ok, invoice}
+      {:ok, {charge, transfer}}
     end
   end
 
@@ -334,9 +326,9 @@ defmodule Algora.Contracts do
     timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
     contract = timesheet.contract
 
-    with {:ok, invoice} <- release_contract(timesheet),
+    with {:ok, {charge, transfer}} <- release_contract(timesheet),
          {:ok, _new_contract} <- renew_contract(contract) do
-      {:ok, invoice}
+      {:ok, {charge, transfer}}
     end
   end
 
@@ -346,7 +338,7 @@ defmodule Algora.Contracts do
     with {:ok, charge} <- initialize_prepayment_transaction(contract),
          {:ok, invoice} <- generate_invoice(contract, charge),
          {:ok, invoice} <- pay_invoice(contract, invoice, charge, nil) do
-      {:ok, invoice}
+      {:ok, charge}
     end
   end
 
@@ -383,18 +375,15 @@ defmodule Algora.Contracts do
              payment_method: contract.client.customer.default_payment_method.provider_id
            }
          ) do
-      {:ok, invoice} ->
-        status = if invoice.paid, do: :succeeded, else: :processing
-        update_transaction_status(charge, invoice, status)
+      {:ok, stripe_invoice} ->
+        status = if stripe_invoice.paid, do: :succeeded, else: :processing
+        update_transaction_status(charge, stripe_invoice, status)
         if transfer, do: transfer_funds(contract, transfer)
 
-        {:ok, invoice}
+        {:ok, stripe_invoice}
 
       {:error, error} ->
-        charge
-        |> change(%{status: :failed, provider_meta: %{error: error}})
-        |> Repo.update()
-
+        update_transaction_status(charge, %{error: error}, :failed)
         {:error, error}
     end
   end
@@ -406,19 +395,30 @@ defmodule Algora.Contracts do
            currency: to_string(transaction.net_amount.currency),
            destination: transaction.user_id
          }) do
-      {:ok, transfer} ->
-        update_transaction_status(transaction, transfer, :succeeded)
+      {:ok, stripe_transfer} ->
+        update_transaction_status(transaction, stripe_transfer, :succeeded)
         mark_contract_as_paid(contract)
-        {:ok, transfer}
+        {:ok, stripe_transfer}
 
       {:error, error} ->
+        update_transaction_status(transaction, %{error: error}, :failed)
         {:error, error}
     end
+  end
+
+  defp update_transaction_status(transaction, %{error: error}, :failed) do
+    transaction
+    |> change(%{
+      provider_meta: %{error: error},
+      status: :failed,
+    })
+    |> Repo.update()
   end
 
   defp update_transaction_status(transaction, record, status) do
     transaction
     |> change(%{
+      provider_id: record.id,
       provider_meta: Util.normalize_struct(record),
       status: status,
       succeeded_at: if(status == :succeeded, do: DateTime.utc_now(), else: nil)

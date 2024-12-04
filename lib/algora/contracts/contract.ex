@@ -2,7 +2,7 @@ defmodule Algora.Contracts.Contract do
   use Algora.Model
 
   schema "contracts" do
-    field :status, Ecto.Enum, values: [:draft, :active, :completed, :cancelled, :disputed]
+    field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1
     field :hourly_rate, Money.Ecto.Composite.Type, no_fraction_if_integer: true
     field :hours_per_week, :integer

@@ -18,6 +18,7 @@ defmodule Algora.Payments.Transaction do
     field :net_amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
     field :total_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
     field :provider_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :line_items, {:array, :map}
 
     field :type, Ecto.Enum, values: [:charge, :transfer, :reversal]
     field :status, Ecto.Enum, values: [:initialized, :processing, :succeeded, :failed, :canceled]

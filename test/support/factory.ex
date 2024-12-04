@@ -117,6 +117,12 @@ defmodule Algora.Factory do
     }
   end
 
+  def build(:transaction) do
+    %Algora.Payments.Transaction{
+      id: Nanoid.generate()
+    }
+  end
+
   def build(:timesheet) do
     %Algora.Contracts.Timesheet{
       id: Nanoid.generate(),

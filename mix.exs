@@ -88,6 +88,7 @@ defmodule Algora.MixProject do
       "ecto.seed": ["run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "test.reset": ["cmd MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind algora", "esbuild algora"],
       "assets.deploy": [

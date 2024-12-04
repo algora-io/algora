@@ -166,7 +166,43 @@ defmodule Algora.ContractsTest do
                charge.provider_meta
     end
 
-    test "release payment handles partial prepayment correctly" do
+    test "release payment handles exact prepayment hours correctly" do
+      %{contract: contract} =
+        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
+
+      # Initial prepayment for 20 hours
+      {:ok, _charge} = Contracts.prepay_contract(contract)
+
+      # Submit timesheet for exactly 20 hours (matching prepaid amount)
+      timesheet = insert!(:timesheet, %{contract_id: contract.id, hours_worked: 20})
+      {:ok, {charge, transfer}} = Contracts.release_contract(timesheet)
+
+      # Verify amounts
+      # No additional charge needed
+      assert Money.equal?(charge.net_amount, ~M[0]usd)
+      # Full 20 hours payment
+      assert Money.equal?(transfer.net_amount, ~M[2000]usd)
+    end
+
+    test "release payment handles undertime correctly" do
+      %{contract: contract} =
+        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
+
+      # Initial prepayment for 20 hours
+      {:ok, _charge} = Contracts.prepay_contract(contract)
+
+      # Submit timesheet for 15 hours (5 less than prepaid)
+      timesheet = insert!(:timesheet, %{contract_id: contract.id, hours_worked: 15})
+      {:ok, {charge, transfer}} = Contracts.release_contract(timesheet)
+
+      # Verify amounts
+      # No additional charge needed
+      assert Money.equal?(charge.net_amount, ~M[0]usd)
+      # Only pay for hours worked
+      assert Money.equal?(transfer.net_amount, ~M[1500]usd)
+    end
+
+    test "release payment handles overtime correctly" do
       %{contract: contract} =
         setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
 

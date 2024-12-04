@@ -555,14 +555,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     Map.put(context, String.to_atom(field), value)
   end
 
-  # def handle_event("next_step", _, %{assigns: %{step: 2}} = socket) do
-  #   dbg("this")
-  #   {:noreply, assign(socket, step: 2, code_sent?: true)}
-  # end
-
   def handle_event("next_step", _, socket) do
-    dbg("that")
-    dbg(socket.assigns)
     {:noreply, assign(socket, step: socket.assigns.step + 1)}
   end
 

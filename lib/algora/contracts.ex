@@ -174,7 +174,7 @@ defmodule Algora.Contracts do
       status: :initialized,
       contract_id: contract.id,
       original_contract_id: contract.original_contract_id,
-      timesheet_id: get_in(params, [:timesheet, :id]),
+      timesheet_id: params[:timesheet] && params.timesheet.id,
       user_id: contract.client_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
@@ -317,7 +317,7 @@ defmodule Algora.Contracts do
 
     with {:ok, {charge, transfer}} <- initialize_release_transactions(contract, timesheet),
          {:ok, invoice} <- generate_invoice(contract, charge),
-         {:ok, invoice} <- pay_invoice(contract, invoice, charge, transfer) do
+         {:ok, _invoice} <- pay_invoice(contract, invoice, charge, transfer) do
       {:ok, {charge, transfer}}
     end
   end
@@ -327,8 +327,8 @@ defmodule Algora.Contracts do
     contract = timesheet.contract
 
     with {:ok, {charge, transfer}} <- release_contract(timesheet),
-         {:ok, _new_contract} <- renew_contract(contract) do
-      {:ok, {charge, transfer}}
+         {:ok, new_contract} <- renew_contract(contract) do
+      {:ok, {charge, transfer, new_contract}}
     end
   end
 
@@ -337,7 +337,7 @@ defmodule Algora.Contracts do
 
     with {:ok, charge} <- initialize_prepayment_transaction(contract),
          {:ok, invoice} <- generate_invoice(contract, charge),
-         {:ok, invoice} <- pay_invoice(contract, invoice, charge, nil) do
+         {:ok, _invoice} <- pay_invoice(contract, invoice, charge, nil) do
       {:ok, charge}
     end
   end
@@ -409,8 +409,8 @@ defmodule Algora.Contracts do
   defp update_transaction_status(transaction, %{error: error}, :failed) do
     transaction
     |> change(%{
-      provider_meta: %{error: error},
-      status: :failed,
+      provider_meta: Util.normalize_struct(%{error: error}),
+      status: :failed
     })
     |> Repo.update()
   end

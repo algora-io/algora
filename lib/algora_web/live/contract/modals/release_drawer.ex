@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   import Ecto.Changeset
 
   alias Algora.Contracts
+  alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Payments
   alias Algora.Repo
@@ -15,8 +16,6 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   attr :show, :boolean, required: true
   attr :on_cancel, :string, required: true
   attr :contract, :map, required: true
-  attr :timesheet, :map, required: true
-  attr :prepaid_amount, :map, required: true
 
   def render(assigns) do
     ~H"""
@@ -60,9 +59,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(
-                          Contracts.calculate_transfer_amount(@contract, @timesheet)
-                        ) %>
+                        <%= MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract)) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -70,7 +67,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= MoneyUtils.fmt_precise!(@prepaid_amount) %>
+                        -<%= MoneyUtils.fmt_precise!(Contract.balance(@contract)) %>
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
@@ -79,8 +76,8 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                       <dd class="font-semibold font-display tabular-nums">
                         <%= MoneyUtils.fmt_precise!(
                           Money.sub!(
-                            Contracts.calculate_transfer_amount(@contract, @timesheet),
-                            @prepaid_amount
+                            Contracts.calculate_transfer_amount(@contract),
+                            Contract.balance(@contract)
                           )
                         ) %>
                       </dd>
@@ -107,13 +104,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
 
   @impl true
   def handle_event("release", _params, socket) do
-    %{
-      contract: contract,
-      timesheet: timesheet,
-      prepaid_amount: prepaid_amount,
-      fee_data: fee_data
-    } =
-      socket.assigns
+    %{contract: contract, fee_data: fee_data} = socket.assigns
 
     org =
       from(u in User,
@@ -123,7 +114,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
       |> Repo.one!()
 
     net_amount =
-      Money.sub!(Contracts.calculate_transfer_amount(contract, timesheet), prepaid_amount)
+      Money.sub!(Contracts.calculate_transfer_amount(contract), Contract.balance(contract))
 
     total_fee = Money.mult!(net_amount, fee_data.total_fee)
     gross_amount = Money.add!(net_amount, total_fee)

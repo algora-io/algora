@@ -4,8 +4,6 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
   attr :show, :boolean, required: true
   attr :on_cancel, :string, required: true
   attr :contract, :map, required: true
-  attr :timesheet, :map, required: true
-  attr :prepaid_amount, :map, required: true
 
   def render(assigns) do
     ~H"""
@@ -62,7 +60,7 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">Disputed Amount</dt>
                       <dd class="font-semibold">
-                        <%= Money.to_string!(@prepaid_amount) %>
+                        <%= Money.to_string!(@contract.amount_debited) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">

@@ -20,7 +20,9 @@ defmodule Algora.Payments.Transaction do
     field :provider_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
     field :line_items, {:array, :map}
 
-    field :type, Ecto.Enum, values: [:charge, :transfer, :reversal]
+    field :type, Ecto.Enum,
+      values: [:charge, :transfer, :reversal, :debit, :credit, :deposit, :withdrawal]
+
     field :status, Ecto.Enum, values: [:initialized, :processing, :succeeded, :failed, :canceled]
     field :succeeded_at, :utc_datetime_usec
     field :reversed_at, :utc_datetime_usec

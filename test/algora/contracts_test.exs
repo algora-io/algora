@@ -59,27 +59,20 @@ defmodule Algora.ContractsTest do
     end)
   end
 
-  defp setup_contract_test_data(attrs) do
+  defp setup_contract(attrs) do
     client = insert!(:organization)
     contractor = insert!(:user)
     customer = insert!(:customer, %{user: client})
-    payment_method = insert!(:payment_method, %{customer: customer})
-
+    _payment_method = insert!(:payment_method, %{customer: customer})
     contract = insert!(:contract, Map.merge(%{client: client, contractor: contractor}, attrs))
 
-    %{
-      client: client,
-      contractor: contractor,
-      customer: customer,
-      payment_method: payment_method,
-      contract: contract
-    }
+    {:ok, contract} = Contracts.fetch_contract(contract.id)
+    contract
   end
 
   describe "contract payments" do
     test "initial prepayment calculates correct amounts" do
-      %{contract: contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
 
       # Calculate expected amounts
       net_amount = ~M[4000]usd
@@ -89,7 +82,7 @@ defmodule Algora.ContractsTest do
       gross_amount = ~M[4920]usd
 
       # Initialize the prepayment transaction
-      {:ok, charge} = Contracts.prepay_contract(contract)
+      {:ok, %{charge: charge}} = Contracts.prepay_contract(contract)
 
       # Verify amounts
       assert Money.equal?(charge.net_amount, net_amount)
@@ -100,7 +93,7 @@ defmodule Algora.ContractsTest do
       [prepayment, platform_fee_item, transaction_fee_item] = charge.line_items
 
       assert Money.equal?(prepayment.amount, net_amount)
-      assert prepayment.description =~ "40 hours @ $100.00/hr"
+      assert prepayment.description =~ "40 hours @ $100/hr"
 
       assert Money.equal?(platform_fee_item.amount, platform_fee)
       assert platform_fee_item.description =~ "19%"
@@ -110,47 +103,64 @@ defmodule Algora.ContractsTest do
     end
 
     test "fees decrease appropriately across multiple contract cycles" do
-      %{contract: contract0} =
-        setup_contract_test_data(%{hourly_rate: ~M[50]usd, hours_per_week: 20})
+      contract0 = setup_contract(%{hourly_rate: ~M[50]usd, hours_per_week: 20})
 
       # Initial prepayment (19% fee tier)
-      {:ok, initial_charge} = Contracts.prepay_contract(contract0)
-      assert Money.equal?(initial_charge.net_amount, ~M[1000]usd)
-      assert Money.equal?(initial_charge.total_fee, ~M[230]usd)
+      {:ok, txs0} = Contracts.prepay_contract(contract0)
+      fee0 = Money.mult!(txs0.charge.net_amount, Decimal.new("0.23"))
+      assert Money.equal?(txs0.charge.total_fee, fee0)
+      assert Money.equal?(txs0.charge.gross_amount, ~M[1230]usd)
+      assert Money.equal?(txs0.charge.net_amount, ~M[1000]usd)
+      assert txs0["debit"] == nil
+      assert txs0["credit"] == nil
+      assert txs0["transfer"] == nil
 
       # First cycle (still 19% tier)
-      timesheet = insert!(:timesheet, %{contract_id: contract0.id, hours_worked: 40})
-      {:ok, {charge1, transfer1, contract1}} = Contracts.release_and_renew_contract(timesheet)
-      assert Money.equal?(charge1.net_amount, ~M[2000]usd)
-      assert Money.equal?(transfer1.net_amount, ~M[2000]usd)
-      assert Money.equal?(charge1.total_fee, Money.mult!(charge1.net_amount, Decimal.new("0.23")))
+      insert!(:timesheet, %{contract_id: contract0.id, hours_worked: 40})
+      {:ok, contract0} = Contracts.fetch_contract(contract0.id)
+      {:ok, {txs1, contract1}} = Contracts.release_and_renew_contract(contract0)
+      fee1 = Money.mult!(txs1.charge.net_amount, Decimal.new("0.23"))
+      assert Money.equal?(txs1.charge.total_fee, fee1)
+      assert Money.equal?(txs1.charge.gross_amount, ~M[2460]usd)
+      assert Money.equal?(txs1.charge.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs1.debit.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs1.credit.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs1.transfer.net_amount, ~M[2000]usd)
 
       # Second cycle (drops to 15% tier)
-      timesheet = insert!(:timesheet, %{contract_id: contract1.id, hours_worked: 60})
-      {:ok, {charge2, transfer2, contract2}} = Contracts.release_and_renew_contract(timesheet)
-      assert Money.equal?(charge2.net_amount, ~M[3000]usd)
-      assert Money.equal?(transfer2.net_amount, ~M[3000]usd)
-      assert Money.equal?(charge2.total_fee, Money.mult!(charge2.net_amount, Decimal.new("0.19")))
+      insert!(:timesheet, %{contract_id: contract1.id, hours_worked: 60})
+      {:ok, contract1} = Contracts.fetch_contract(contract1.id)
+      {:ok, {txs2, contract2}} = Contracts.release_and_renew_contract(contract1)
+      fee2 = Money.mult!(txs2.charge.net_amount, Decimal.new("0.19"))
+      assert Money.equal?(txs2.charge.total_fee, fee2)
+      assert Money.equal?(txs2.charge.gross_amount, ~M[3570]usd)
+      assert Money.equal?(txs2.charge.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs2.debit.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs2.credit.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs2.transfer.net_amount, ~M[3000]usd)
 
       # Third cycle (drops to 10% tier)
-      timesheet = insert!(:timesheet, %{contract_id: contract2.id, hours_worked: 80})
-      {:ok, {charge3, transfer3, _contract3}} = Contracts.release_and_renew_contract(timesheet)
-      assert Money.equal?(charge3.net_amount, ~M[4000]usd)
-      assert Money.equal?(transfer3.net_amount, ~M[4000]usd)
-      assert Money.equal?(charge3.total_fee, Money.mult!(charge3.net_amount, Decimal.new("0.14")))
+      insert!(:timesheet, %{contract_id: contract2.id, hours_worked: 80})
+      {:ok, contract2} = Contracts.fetch_contract(contract2.id)
+      {:ok, {txs3, _contract3}} = Contracts.release_and_renew_contract(contract2)
+      fee3 = Money.mult!(txs3.charge.net_amount, Decimal.new("0.14"))
+      assert Money.equal?(txs3.charge.total_fee, fee3)
+      assert Money.equal?(txs3.charge.gross_amount, ~M[4560]usd)
+      assert Money.equal?(txs3.charge.net_amount, ~M[4000]usd)
+      assert Money.equal?(txs3.debit.net_amount, ~M[4000]usd)
+      assert Money.equal?(txs3.credit.net_amount, ~M[4000]usd)
+      assert Money.equal?(txs3.transfer.net_amount, ~M[4000]usd)
 
-      # Verify total charged to client
-      total_charged = Contracts.calculate_total_charged_to_client_net(contract0)
-      assert Money.equal?(total_charged, ~M[10_000]usd)
-
-      # Verify total transferred to contractor
-      total_transferred = Contracts.calculate_total_transferred_to_contractor(contract0)
-      assert Money.equal?(total_transferred, ~M[9_000]usd)
+      # Verify totals
+      {:ok, contract0} = Contracts.fetch_contract(contract0.id)
+      assert Money.equal?(contract0.total_charged, ~M[10_000]usd)
+      assert Money.equal?(contract0.total_debited, ~M[9_000]usd)
+      assert Money.equal?(contract0.total_credited, ~M[9_000]usd)
+      assert Money.equal?(contract0.total_transferred, ~M[9_000]usd)
     end
 
     test "prepayment fails when payment method is invalid" do
-      %{contract: contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
 
       payment_error = card_declined_error()
 
@@ -167,80 +177,85 @@ defmodule Algora.ContractsTest do
     end
 
     test "release payment handles exact prepayment hours correctly" do
-      %{contract: contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
 
       # Initial prepayment for 20 hours
       {:ok, _charge} = Contracts.prepay_contract(contract)
 
       # Submit timesheet for exactly 20 hours (matching prepaid amount)
-      timesheet = insert!(:timesheet, %{contract_id: contract.id, hours_worked: 20})
-      {:ok, {charge, transfer}} = Contracts.release_contract(timesheet)
+      insert!(:timesheet, %{contract_id: contract.id, hours_worked: 20})
+
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
+      {:ok, txs} = Contracts.release_contract(contract)
 
       # Verify amounts
       # No additional charge needed
-      assert Money.equal?(charge.net_amount, ~M[0]usd)
+      assert Money.equal?(txs.charge.net_amount, ~M[0]usd)
       # Full 20 hours payment
-      assert Money.equal?(transfer.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs.debit.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs.credit.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs.transfer.net_amount, ~M[2000]usd)
     end
 
     test "release payment handles undertime correctly" do
-      %{contract: contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
 
       # Initial prepayment for 20 hours
       {:ok, _charge} = Contracts.prepay_contract(contract)
 
       # Submit timesheet for 15 hours (5 less than prepaid)
-      timesheet = insert!(:timesheet, %{contract_id: contract.id, hours_worked: 15})
-      {:ok, {charge, transfer}} = Contracts.release_contract(timesheet)
+      insert!(:timesheet, %{contract_id: contract.id, hours_worked: 15})
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
+      {:ok, txs} = Contracts.release_contract(contract)
 
       # Verify amounts
       # No additional charge needed
-      assert Money.equal?(charge.net_amount, ~M[0]usd)
+      assert Money.equal?(txs.charge.net_amount, ~M[0]usd)
       # Only pay for hours worked
-      assert Money.equal?(transfer.net_amount, ~M[1500]usd)
+      assert Money.equal?(txs.debit.net_amount, ~M[1500]usd)
+      assert Money.equal?(txs.credit.net_amount, ~M[1500]usd)
+      assert Money.equal?(txs.transfer.net_amount, ~M[1500]usd)
     end
 
     test "release payment handles overtime correctly" do
-      %{contract: contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 20})
 
       # Initial prepayment for 20 hours
       {:ok, _charge} = Contracts.prepay_contract(contract)
 
       # Submit timesheet for 30 hours (10 more than prepaid)
-      timesheet = insert!(:timesheet, %{contract_id: contract.id, hours_worked: 30})
-      {:ok, {charge, transfer}} = Contracts.release_contract(timesheet)
+      insert!(:timesheet, %{contract_id: contract.id, hours_worked: 30})
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
+      {:ok, txs} = Contracts.release_contract(contract)
 
       # Verify amounts
       # Additional 10 hours @ $100
-      assert Money.equal?(charge.net_amount, ~M[1000]usd)
+      assert Money.equal?(txs.charge.net_amount, ~M[1000]usd)
       # Full 30 hours payment
-      assert Money.equal?(transfer.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs.debit.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs.credit.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs.transfer.net_amount, ~M[3000]usd)
     end
 
     test "contract renewal maintains correct chain relationship" do
-      %{contract: original_contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
 
-      timesheet = insert!(:timesheet, %{contract_id: original_contract.id, hours_worked: 40})
+      insert!(:timesheet, %{contract_id: contract.id, hours_worked: 40})
 
-      {:ok, {_charge, _transfer, renewed_contract}} =
-        Contracts.release_and_renew_contract(timesheet)
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
+      {:ok, {_txs, new_contract}} = Contracts.release_and_renew_contract(contract)
 
       # Verify chain relationships
-      assert renewed_contract.original_contract_id == original_contract.id
-      assert renewed_contract.sequence_number == 2
+      assert new_contract.original_contract_id == contract.id
+      assert new_contract.sequence_number == 2
 
       # Verify dates
-      assert DateTime.compare(renewed_contract.start_date, original_contract.end_date) == :eq
-      assert DateTime.diff(renewed_contract.end_date, renewed_contract.start_date, :day) == 7
+      assert DateTime.compare(new_contract.start_date, contract.end_date) == :eq
+      assert DateTime.diff(new_contract.end_date, new_contract.start_date, :day) == 7
     end
 
     test "calculate_fee_data returns correct tier progression" do
-      %{contract: contract} =
-        setup_contract_test_data(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
+      contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
 
       fee_data = Contracts.calculate_fee_data(contract)
 
@@ -249,12 +264,14 @@ defmodule Algora.ContractsTest do
       assert fee_data.progress == Decimal.new("0.00")
 
       insert!(:transaction, %{
+        original_contract_id: contract.id,
         contract_id: contract.id,
         type: :charge,
         status: :succeeded,
         net_amount: ~M[10000]usd
       })
 
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
       fee_data = Contracts.calculate_fee_data(contract)
       assert Money.equal?(fee_data.total_paid, ~M[10000]usd)
       assert Decimal.equal?(fee_data.current_fee, Decimal.new("0.10"))

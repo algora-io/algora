@@ -7,6 +7,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
   alias Algora.Repo
   alias Algora.Organizations
 
+  defp page_size, do: 10
+
   def render(assigns) do
     ~H"""
     <div class="flex">
@@ -211,6 +213,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             </div>
                           </div>
                       <% end %>
+                    <% end %>
+
+                    <%= if @has_more do %>
+                      <div class="flex justify-center">
+                        <.button variant="ghost" phx-click="load_more">
+                          <.icon name="tabler-arrow-down" class="w-4 h-4 mr-2" /> Load More
+                        </.button>
+                      </div>
                     <% end %>
                   </div>
                 </.card_content>
@@ -448,7 +458,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
   def mount(%{"id" => id}, _session, socket) do
     {:ok, contract} = Contracts.fetch_last_contract(id)
-    contract_chain = Contracts.list_contract_chain(original_contract_id: id)
+    contract_chain = Contracts.list_contract_chain(original_contract_id: id, limit: page_size())
     thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
 
@@ -456,6 +466,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
      socket
      |> assign(:contract, contract)
      |> assign(:contract_chain, contract_chain)
+     |> assign(:has_more, length(contract_chain) >= page_size())
      |> assign(:page_title, "Contract with #{contract.contractor.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)
@@ -500,6 +511,22 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
   def handle_event("show_release_renew_modal", _params, socket) do
     {:noreply, assign(socket, :show_release_renew_modal, true)}
+  end
+
+  def handle_event("load_more", _params, socket) do
+    %{contract_chain: contract_chain} = socket.assigns
+
+    more_items =
+      Contracts.list_contract_chain(
+        original_contract_id: socket.assigns.contract.original_contract_id,
+        before: List.last(contract_chain).sequence_number,
+        limit: page_size()
+      )
+
+    {:noreply,
+     socket
+     |> assign(:contract_chain, contract_chain ++ more_items)
+     |> assign(:has_more, length(more_items) >= page_size())}
   end
 
   defp timeline_activity(assigns) do

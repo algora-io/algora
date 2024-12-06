@@ -536,7 +536,10 @@ defmodule Algora.Contracts do
         total_withdrawn: sum_by_type(t, "withdrawal")
       })
 
-    Contract
+    base_contracts = Contract |> apply_criteria(criteria) |> select([c], c.id)
+
+    from(c in Contract)
+    |> join(:inner, [c], bc in subquery(base_contracts), on: c.id == bc.id)
     |> join(:inner, [c], client in assoc(c, :client), as: :cl)
     |> join(:inner, [c], contractor in assoc(c, :contractor), as: :ct)
     |> join(:left, [c], timesheet in assoc(c, :timesheet), as: :ts)
@@ -565,7 +568,6 @@ defmodule Algora.Contracts do
       client: cl,
       contractor: ct
     )
-    |> apply_criteria(criteria)
     |> Repo.all()
     |> Enum.map(&Contract.after_load/1)
   end

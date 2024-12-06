@@ -1,7 +1,11 @@
 defmodule AlgoraWeb.Contract.ViewLive do
   use AlgoraWeb, :live_view
 
-  alias Algora.{Contracts, Chat, Repo, Organizations}
+  alias Algora.Contracts
+  alias Algora.Contracts.Contract
+  alias Algora.Chat
+  alias Algora.Repo
+  alias Algora.Organizations
 
   def render(assigns) do
     ~H"""
@@ -62,7 +66,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">In escrow</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(@prepaid_amount) %>
+                  <%= Money.to_string!(Contract.balance(@contract.total_credited)) %>
                 </div>
               </.card_content>
             </.card>
@@ -70,7 +74,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Total paid</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(@total_paid) %>
+                  <%= Money.to_string!(@contract.total_credited) %>
                 </div>
               </.card_content>
             </.card>
@@ -99,9 +103,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-8">
-                    <%= for contract <- @contract.chain do %>
+                    <%= for contract <- @contract_chain do %>
                       <%= case Contracts.get_payment_status(contract) do %>
-                        <% {:pending_release, timesheet} -> %>
+                        <% {:pending_release, contract} -> %>
                           <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
                             <div class="flex items-center gap-4">
                               <div class="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center">
@@ -109,7 +113,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                               <div>
                                 <div class="font-medium">
-                                  Ready to release payment for <%= timesheet.hours_worked %> hours
+                                  Ready to release payment for <%= contract.timesheet.hours_worked %> hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
                                   <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
@@ -122,9 +126,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             <div class="flex items-center gap-2">
                               <div class="text-right mr-4">
                                 <div class="font-medium font-display">
-                                  <%= Money.to_string!(
-                                    Contracts.calculate_transfer_amount(contract, timesheet)
-                                  ) %>
+                                  <%= Money.to_string!(Contracts.calculate_transfer_amount(contract)) %>
                                 </div>
                                 <div class="text-sm text-muted-foreground">
                                   Ready to Release
@@ -160,7 +162,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                             </div>
                           </div>
-                        <% {:paid, timesheet, transaction} -> %>
+                        <% {:paid, contract} -> %>
                           <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
                               <div class="h-9 w-9 rounded-full bg-success/20 flex items-center justify-center">
@@ -168,7 +170,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                               <div>
                                 <div class="font-medium">
-                                  Payment for <%= timesheet.hours_worked %> hours
+                                  Payment for <%= contract.timesheet.hours_worked %> hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
                                   <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
@@ -180,7 +182,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="font-medium font-display">
-                                <%= Money.to_string!(transaction.net_amount) %>
+                                <%= Money.to_string!(contract.amount_credited) %>
                               </div>
                               <div class="text-sm text-muted-foreground">Paid</div>
                             </div>
@@ -277,7 +279,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </.card_header>
                 <.card_content>
                   <div class="space-y-4">
-                    <%= for activity <- Contracts.list_contract_activity(@contract) do %>
+                    <%= for activity <- Contracts.build_contract_timeline(@contract_chain) do %>
                       <.timeline_activity activity={activity} />
                     <% end %>
                   </div>
@@ -398,8 +400,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
       show={@show_release_renew_modal}
       on_cancel="close_drawer"
       contract={@contract}
-      timesheet={@timesheet}
-      prepaid_amount={@prepaid_amount}
       fee_data={@fee_data}
     />
 
@@ -409,8 +409,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
       show={@show_release_modal}
       on_cancel="close_drawer"
       contract={@contract}
-      timesheet={@timesheet}
-      prepaid_amount={@prepaid_amount}
     />
 
     <.live_component
@@ -419,38 +417,20 @@ defmodule AlgoraWeb.Contract.ViewLive do
       show={@show_dispute_modal}
       on_cancel="close_drawer"
       contract={@contract}
-      timesheet={@timesheet}
-      prepaid_amount={@prepaid_amount}
     />
     """
   end
 
   def mount(%{"id" => id}, _session, socket) do
-    contract =
-      Contracts.get_contract(id,
-        preload: [
-          :client,
-          :contractor,
-          :timesheet,
-          chain:
-            Contracts.contract_chain_query(
-              order_by: [desc: :start_date],
-              preload: [:timesheet, :latest_charge, :latest_transfer, :transactions]
-            )
-        ]
-      )
-
-    total_paid = Contracts.calculate_total_charged_to_client_net(contract)
-    prepaid_amount = Contracts.calculate_prepaid_balance(contract)
+    {:ok, contract} = Contracts.fetch_contract(id)
+    contract_chain = Contracts.list_contract_chain(original_contract_id: id)
     thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
 
     {:ok,
      socket
      |> assign(:contract, contract)
-     |> assign(:timesheet, contract.timesheet)
-     |> assign(:total_paid, total_paid)
-     |> assign(:prepaid_amount, prepaid_amount)
+     |> assign(:contract_chain, contract_chain)
      |> assign(:page_title, "Contract with #{contract.contractor.name}")
      |> assign(:messages, messages)
      |> assign(:thread, thread)

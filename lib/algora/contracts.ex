@@ -14,23 +14,10 @@ defmodule Algora.Contracts do
   alias Algora.MoneyUtils
 
   @type payment_status ::
-          nil
-          | {:paid, Timesheet.t(), Transaction.t()}
-          | {:pending_release, Timesheet.t()}
-          | {:reversed, Timesheet.t()}
-
-  def get_contract(id, opts \\ []) do
-    preload = Keyword.get(opts, :preload, [])
-
-    Repo.one(from c in Contract, where: c.id == ^id, preload: ^preload)
-  end
-
-  def contract_chain_query(opts \\ []) do
-    order_by = Keyword.get(opts, :order_by, desc: :start_date)
-    preload = Keyword.get(opts, :preload, [])
-
-    from(c in Contract, order_by: ^order_by, preload: ^preload)
-  end
+          {:paid, Contract.t()}
+          | {:pending_release, Contract.t()}
+          | {:pending_payment, Contract.t()}
+          | {:pending_timesheet, Contract.t()}
 
   def create_contract(attrs) do
     %Contract{}
@@ -40,23 +27,18 @@ defmodule Algora.Contracts do
 
   @spec get_payment_status(Contract.t()) :: payment_status()
   def get_payment_status(contract) do
-    case {contract.timesheet, contract.latest_transfer, contract.latest_charge} do
-      {nil, _, _} ->
-        nil
+    zero = Money.zero(:USD)
 
-      {timesheet, %Transaction{status: :succeeded} = transfer, _} ->
-        {:paid, timesheet, transfer}
-
-      {timesheet, _, %Transaction{status: :succeeded}} ->
-        {:pending_release, timesheet}
-
-      {timesheet, nil, nil} ->
-        {:reversed, timesheet}
+    case {contract.timesheet, contract.amount_debited, contract.amount_credited} do
+      {nil, _, _} -> {:pending_timesheet, contract}
+      {_, ^zero, _} -> {:pending_payment, contract}
+      {_, _, ^zero} -> {:pending_release, contract}
+      {_, _, _} -> {:paid, contract}
     end
   end
 
   def calculate_fee_data(contract) do
-    total_paid = calculate_total_charged_to_client_net(contract)
+    total_paid = contract.total_charged
     fee_tiers = FeeTier.all()
     current_fee = FeeTier.calculate_fee_percentage(total_paid)
 
@@ -80,15 +62,8 @@ defmodule Algora.Contracts do
     |> Money.mult!(4)
   end
 
-  def list_contract_activity(contract) do
-    contract
-    |> Ecto.reset_fields([:chain])
-    |> Repo.preload(chain: contract_chain_query(order_by: [asc: :start_date]))
-    |> build_contract_timeline()
-  end
-
-  defp build_contract_timeline(contract) do
-    contract.chain
+  def build_contract_timeline(contract_chain) do
+    contract_chain
     |> Enum.with_index()
     |> Enum.flat_map(&build_contract_period/1)
     |> Enum.reject(&is_nil/1)
@@ -135,7 +110,7 @@ defmodule Algora.Contracts do
         type: :timesheet,
         description: "Timesheet submitted for #{contract.timesheet.hours_worked} hours",
         date: contract.timesheet.inserted_at,
-        amount: calculate_transfer_amount(contract, contract.timesheet)
+        amount: calculate_transfer_amount(contract)
       }
     end
   end
@@ -157,15 +132,13 @@ defmodule Algora.Contracts do
   def get_timesheet(id), do: Repo.get(Timesheet, id)
   def get_timesheet!(id), do: Repo.get!(Timesheet, id)
 
-  defp initialize_charge(
-         %{
-           contract: contract,
-           gross_amount: gross_amount,
-           net_amount: net_amount,
-           total_fee: total_fee,
-           line_items: line_items
-         } = params
-       ) do
+  defp initialize_charge(%{
+         contract: contract,
+         gross_amount: gross_amount,
+         net_amount: net_amount,
+         total_fee: total_fee,
+         line_items: line_items
+       }) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
@@ -174,7 +147,7 @@ defmodule Algora.Contracts do
       status: :initialized,
       contract_id: contract.id,
       original_contract_id: contract.original_contract_id,
-      timesheet_id: params[:timesheet] && params.timesheet.id,
+      timesheet_id: contract.timesheet && contract.timesheet.id,
       user_id: contract.client_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
@@ -191,23 +164,67 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  defp initialize_transfer(%{
-         contract: contract,
-         timesheet: timesheet,
-         transfer_amount: transfer_amount
-       }) do
+  defp initialize_debit(%{contract: contract, amount: amount}) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
       provider: "stripe",
-      gross_amount: transfer_amount,
-      net_amount: transfer_amount,
+      type: :debit,
+      status: :initialized,
+      contract_id: contract.id,
+      original_contract_id: contract.original_contract_id,
+      timesheet_id: contract.timesheet.id,
+      user_id: contract.client_id,
+      gross_amount: amount,
+      net_amount: amount,
+      total_fee: Money.zero(:USD)
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> foreign_key_constraint(:original_contract_id)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:timesheet_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
+  defp initialize_credit(%{contract: contract, amount: amount}) do
+    %Transaction{}
+    |> change(%{
+      id: Nanoid.generate(),
+      provider: "stripe",
+      gross_amount: amount,
+      net_amount: amount,
+      total_fee: Money.zero(:USD),
+      type: :credit,
+      status: :initialized,
+      contract_id: contract.id,
+      original_contract_id: contract.original_contract_id,
+      timesheet_id: contract.timesheet.id,
+      user_id: contract.contractor_id
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> foreign_key_constraint(:original_contract_id)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:timesheet_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
+  defp initialize_transfer(%{contract: contract, amount: amount}) do
+    %Transaction{}
+    |> change(%{
+      id: Nanoid.generate(),
+      provider: "stripe",
+      gross_amount: amount,
+      net_amount: amount,
       total_fee: Money.zero(:USD),
       type: :transfer,
       status: :initialized,
       contract_id: contract.id,
       original_contract_id: contract.original_contract_id,
-      timesheet_id: timesheet.id,
+      timesheet_id: contract.timesheet.id,
       user_id: contract.contractor_id
     })
     |> validate_positive(:gross_amount)
@@ -244,22 +261,25 @@ defmodule Algora.Contracts do
       }
     ]
 
-    initialize_charge(%{
-      contract: contract,
-      line_items: line_items,
-      gross_amount: gross_charge_amount,
-      net_amount: net_charge_amount,
-      total_fee: total_fee
-    })
+    with {:ok, charge} <-
+           initialize_charge(%{
+             contract: contract,
+             line_items: line_items,
+             gross_amount: gross_charge_amount,
+             net_amount: net_charge_amount,
+             total_fee: total_fee
+           }) do
+      {:ok, %{charge: charge}}
+    end
   end
 
-  defp initialize_release_transactions(contract, timesheet) do
-    prepaid_amount = calculate_prepaid_balance(contract)
+  defp initialize_release_transactions(contract) do
+    balance = Contract.balance(contract)
     fee_data = calculate_fee_data(contract)
 
-    transfer_amount = calculate_transfer_amount(contract, timesheet)
+    transfer_amount = calculate_transfer_amount(contract)
     new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
-    net_charge_amount = Money.sub!(Money.add!(transfer_amount, new_prepayment), prepaid_amount)
+    net_charge_amount = Money.sub!(Money.add!(transfer_amount, new_prepayment), balance)
     platform_fee = Money.mult!(net_charge_amount, fee_data.current_fee)
     transaction_fee = Money.mult!(net_charge_amount, fee_data.transaction_fee)
     total_fee = Money.add!(platform_fee, transaction_fee)
@@ -269,10 +289,10 @@ defmodule Algora.Contracts do
       %{
         amount: transfer_amount,
         description:
-          "Payment for completed work - #{timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+          "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
       },
       %{
-        amount: Money.negate!(prepaid_amount),
+        amount: Money.negate!(balance),
         description: "Less: Previously prepaid amount"
       },
       %{
@@ -294,65 +314,53 @@ defmodule Algora.Contracts do
       with {:ok, charge} <-
              initialize_charge(%{
                contract: contract,
-               timesheet: timesheet,
                line_items: line_items,
                gross_amount: gross_charge_amount,
                net_amount: net_charge_amount,
                total_fee: total_fee
              }),
-           {:ok, transfer} <-
-             initialize_transfer(%{
-               contract: contract,
-               timesheet: timesheet,
-               transfer_amount: transfer_amount
-             }) do
-        {:ok, {charge, transfer}}
+           {:ok, debit} <- initialize_debit(%{contract: contract, amount: transfer_amount}),
+           {:ok, credit} <- initialize_credit(%{contract: contract, amount: transfer_amount}),
+           {:ok, transfer} <- initialize_transfer(%{contract: contract, amount: transfer_amount}) do
+        {:ok, %{charge: charge, debit: debit, credit: credit, transfer: transfer}}
       end
     end)
   end
 
-  def release_contract(timesheet) do
-    timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
-    contract = timesheet.contract
-
-    with {:ok, {charge, transfer}} <- initialize_release_transactions(contract, timesheet),
-         {:ok, invoice} <- generate_invoice(contract, charge),
-         {:ok, _invoice} <- pay_invoice(contract, invoice, charge, transfer) do
-      {:ok, {charge, transfer}}
+  def release_contract(contract) do
+    with {:ok, txs} <- initialize_release_transactions(contract),
+         {:ok, invoice} <- generate_invoice(contract, txs.charge.line_items),
+         {:ok, _invoice} <- pay_invoice(contract, invoice, txs) do
+      {:ok, txs}
     end
   end
 
-  def release_and_renew_contract(timesheet) do
-    timesheet = timesheet |> Repo.preload(contract: [client: [customer: :default_payment_method]])
-    contract = timesheet.contract
-
-    with {:ok, {charge, transfer}} <- release_contract(timesheet),
+  def release_and_renew_contract(contract) do
+    with {:ok, txs} <- release_contract(contract),
          {:ok, new_contract} <- renew_contract(contract) do
-      {:ok, {charge, transfer, new_contract}}
+      {:ok, {txs, new_contract}}
     end
   end
 
   def prepay_contract(contract) do
-    contract = contract |> Repo.preload(client: [customer: :default_payment_method])
-
-    with {:ok, charge} <- initialize_prepayment_transaction(contract),
-         {:ok, invoice} <- generate_invoice(contract, charge),
-         {:ok, _invoice} <- pay_invoice(contract, invoice, charge, nil) do
-      {:ok, charge}
+    with {:ok, txs} <- initialize_prepayment_transaction(contract),
+         {:ok, invoice} <- generate_invoice(contract, txs.charge.line_items),
+         {:ok, _invoice} <- pay_invoice(contract, invoice, txs) do
+      {:ok, txs}
     end
   end
 
-  defp generate_invoice(contract, charge) do
+  defp generate_invoice(contract, line_items) do
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
     with {:ok, invoice} <- Stripe.create_invoice(invoice_params),
-         {:ok, _line_items} <- create_line_items(contract, invoice, charge) do
+         {:ok, _line_items} <- create_line_items(contract, invoice, line_items) do
       {:ok, invoice}
     end
   end
 
-  defp create_line_items(contract, invoice, charge) do
-    charge.line_items
+  defp create_line_items(contract, invoice, line_items) do
+    line_items
     |> Enum.reduce_while({:ok, []}, fn line_item, {:ok, acc} ->
       case Stripe.create_invoice_item(%{
              invoice: invoice.id,
@@ -367,23 +375,27 @@ defmodule Algora.Contracts do
     end)
   end
 
-  defp pay_invoice(contract, invoice, charge, transfer) do
-    case Stripe.pay_invoice(
-           invoice.id,
-           %{
-             off_session: true,
-             payment_method: contract.client.customer.default_payment_method.provider_id
-           }
-         ) do
+  defp pay_invoice(contract, invoice, txs) do
+    pm_id = contract.client.customer.default_payment_method.provider_id
+
+    case Stripe.pay_invoice(invoice.id, %{off_session: true, payment_method: pm_id}) do
       {:ok, stripe_invoice} ->
         status = if stripe_invoice.paid, do: :succeeded, else: :processing
-        update_transaction_status(charge, stripe_invoice, status)
-        if transfer, do: transfer_funds(contract, transfer)
+
+        # TODO: do we need to lock the transactions here?
+        Repo.transact(fn ->
+          update_transaction_status(txs.charge, stripe_invoice, status)
+          if txs["debit"], do: update_transaction_status(txs.debit, stripe_invoice, status)
+          if txs["credit"], do: update_transaction_status(txs.credit, stripe_invoice, status)
+          {:ok, %{}}
+        end)
+
+        if txs["transfer"], do: transfer_funds(contract, txs.transfer)
 
         {:ok, stripe_invoice}
 
       {:error, error} ->
-        update_transaction_status(charge, %{error: error}, :failed)
+        update_transaction_status(txs.charge, %{error: error}, :failed)
         {:error, error}
     end
   end
@@ -433,48 +445,152 @@ defmodule Algora.Contracts do
   end
 
   defp renew_contract(contract) do
-    contract
+    %Contract{}
     |> change(%{
       id: Nanoid.generate(),
       status: :active,
       start_date: contract.end_date,
       end_date: contract.end_date |> DateTime.add(7, :day),
-      sequence_number: contract.sequence_number + 1
+      sequence_number: contract.sequence_number + 1,
+      original_contract_id: contract.original_contract_id,
+      client_id: contract.client_id,
+      contractor_id: contract.contractor_id,
+      hourly_rate: contract.hourly_rate,
+      hours_per_week: contract.hours_per_week
     })
     |> Repo.insert()
   end
 
-  defp sum_transactions_query(contract, type, amount_field) do
-    from(t in Transaction,
-      join: c in Contract,
-      on: c.original_contract_id == ^contract.original_contract_id,
-      where: t.contract_id == c.id and t.type == ^type and t.status == :succeeded,
-      select: sum(field(t, ^amount_field))
+  def calculate_transfer_amount(contract) do
+    Money.mult!(contract.hourly_rate, contract.timesheet.hours_worked)
+  end
+
+  defmacrop sum_by_type(t, type) do
+    quote do
+      sum(
+        fragment(
+          "CASE WHEN ? = ? THEN ? ELSE ('USD', 0)::money_with_currency END",
+          unquote(t).type,
+          unquote(type),
+          unquote(t).net_amount
+        )
+      )
+    end
+  end
+
+  defmacrop coalesce0(t) do
+    quote do
+      coalesce(unquote(t), fragment("('USD', 0)::money_with_currency"))
+    end
+  end
+
+  def fetch_contract(id) do
+    transaction_totals =
+      Transaction
+      |> group_by([t], t.original_contract_id)
+      |> select([t], %{
+        original_contract_id: t.original_contract_id,
+        total_credited: sum_by_type(t, "credit"),
+        total_charged: sum_by_type(t, "charge"),
+        total_debited: sum_by_type(t, "debit"),
+        total_withdrawn: sum_by_type(t, "withdrawal"),
+        total_deposited: sum_by_type(t, "deposit"),
+        total_transferred: sum_by_type(t, "transfer")
+      })
+
+    Contract
+    |> join(:inner, [c], cl in assoc(c, :client), as: :cl)
+    |> join(:inner, [c], co in assoc(c, :contractor), as: :co)
+    |> join(:left, [c], totals in subquery(transaction_totals),
+      on: totals.original_contract_id == c.original_contract_id,
+      as: :tt
     )
-    |> Repo.one()
-    |> Kernel.||(Money.zero(:USD))
+    |> join(:left, [c], ts in assoc(c, :timesheet), as: :ts)
+    |> join(:left, [cl: cl], cu in assoc(cl, :customer), as: :cu)
+    |> join(:left, [cu: cu], pm in assoc(cu, :default_payment_method), as: :pm)
+    |> select_merge([tt: tt], %{
+      total_credited: coalesce0(tt.total_credited),
+      total_charged: coalesce0(tt.total_charged),
+      total_debited: coalesce0(tt.total_debited),
+      total_withdrawn: coalesce0(tt.total_withdrawn),
+      total_deposited: coalesce0(tt.total_deposited),
+      total_transferred: coalesce0(tt.total_transferred)
+    })
+    |> preload(
+      [cl: cl, co: co, cu: cu, pm: pm, ts: ts],
+      client: {cl, customer: {cu, default_payment_method: pm}},
+      contractor: co,
+      timesheet: ts
+    )
+    |> Repo.fetch(id)
+    |> Contract.after_load()
   end
 
-  def calculate_total_transferred_to_contractor(contract) do
-    sum_transactions_query(contract, :transfer, :net_amount)
+  def list_contract_chain(criteria \\ []) do
+    transaction_amounts =
+      Transaction
+      |> where([t], t.original_contract_id == ^Keyword.get(criteria, :original_contract_id))
+      |> group_by([t], t.contract_id)
+      |> select([t], %{
+        contract_id: t.contract_id,
+        amount_credited: sum_by_type(t, "credit"),
+        amount_debited: sum_by_type(t, "debit")
+      })
+
+    transaction_totals =
+      Transaction
+      |> where([t], t.original_contract_id == ^Keyword.get(criteria, :original_contract_id))
+      |> group_by([t], t.original_contract_id)
+      |> select([t], %{
+        original_contract_id: t.original_contract_id,
+        total_charged: sum_by_type(t, "charge"),
+        total_credited: sum_by_type(t, "credit"),
+        total_debited: sum_by_type(t, "debit"),
+        total_deposited: sum_by_type(t, "deposit"),
+        total_transferred: sum_by_type(t, "transfer"),
+        total_withdrawn: sum_by_type(t, "withdrawal")
+      })
+
+    Contract
+    |> join(:left, [c], timesheet in assoc(c, :timesheet), as: :ts)
+    |> join(:left, [c], amounts in subquery(transaction_amounts),
+      on: amounts.contract_id == c.id,
+      as: :ta
+    )
+    |> join(:left, [c], totals in subquery(transaction_totals),
+      on: totals.original_contract_id == c.original_contract_id,
+      as: :tt
+    )
+    |> select_merge([ta: ta, tt: tt], %{
+      amount_credited: coalesce0(ta.amount_credited),
+      amount_debited: coalesce0(ta.amount_debited),
+      total_charged: coalesce0(tt.total_charged),
+      total_credited: coalesce0(tt.total_credited),
+      total_debited: coalesce0(tt.total_debited),
+      total_deposited: coalesce0(tt.total_deposited),
+      total_transferred: coalesce0(tt.total_transferred),
+      total_withdrawn: coalesce0(tt.total_withdrawn)
+    })
+    |> preload([ts: ts], timesheet: ts)
+    |> apply_criteria(criteria)
+    |> limit(50)
+    |> Repo.all()
+    |> Enum.map(&Contract.after_load/1)
   end
 
-  def calculate_total_charged_to_client_gross(contract) do
-    sum_transactions_query(contract, :charge, :gross_amount)
-  end
+  defp apply_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {:original_contract_id, id}, query ->
+        from([c] in query, where: c.original_contract_id == ^id)
 
-  def calculate_total_charged_to_client_net(contract) do
-    sum_transactions_query(contract, :charge, :net_amount)
-  end
+      {:paginate, %{after: [inserted_at, id]}}, query ->
+        from([c] in query, where: {c.inserted_at, c.id} > {^inserted_at, ^id})
 
-  # This represents money that has been charged to the client but not yet released to the contractor
-  def calculate_prepaid_balance(contract) do
-    total_charged = calculate_total_charged_to_client_net(contract)
-    total_transferred = calculate_total_transferred_to_contractor(contract)
-    Money.sub!(total_charged, total_transferred)
-  end
+      {:sort, %{sort_by: sort_by, sort_order: sort_order}}, query ->
+        from(q in query, order_by: [{^sort_order, ^sort_by}])
 
-  def calculate_transfer_amount(contract, timesheet) do
-    Money.mult!(contract.hourly_rate, timesheet.hours_worked)
+      _, query ->
+        query
+    end)
   end
 end

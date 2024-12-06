@@ -2,6 +2,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
   use AlgoraWeb.LiveComponent
 
   alias Algora.Contracts
+  alias Algora.Contracts.Contract
   alias Algora.FeeTier
   alias Algora.MoneyUtils
   alias Algora.Util
@@ -10,7 +11,6 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
   attr :on_cancel, :string, required: true
   attr :contract, :map, required: true
   attr :timesheet, :map, required: true
-  attr :prepaid_amount, :map, required: true
   attr :fee_data, :map, required: true
 
   @impl true
@@ -50,12 +50,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                   <dl class="space-y-4">
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Payout amount (<%= @timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
+                        Payout amount (<%= @contract.timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
                           @contract.hourly_rate
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract, @timesheet)) %>
+                        <%= MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract)) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= MoneyUtils.fmt_precise!(@prepaid_amount) %>
+                        -<%= MoneyUtils.fmt_precise!(Contract.balance(@contract)) %>
                       </dd>
                     </div>
                     <div class="h-5"></div>
@@ -73,8 +73,8 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dd class="font-semibold font-display tabular-nums">
                         <%= MoneyUtils.fmt_precise!(
                           Money.sub!(
-                            Contracts.calculate_transfer_amount(@contract, @timesheet),
-                            @prepaid_amount
+                            Contracts.calculate_transfer_amount(@contract),
+                            Contract.balance(@contract)
                           )
                         ) %>
                       </dd>
@@ -166,7 +166,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         ) %>/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(@prepaid_amount) %>
+                        <%= MoneyUtils.fmt_precise!(Contract.balance(@contract)) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -174,7 +174,9 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Algora fees (<%= Util.format_pct(@fee_data.current_fee) %>)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(Money.mult!(@prepaid_amount, @fee_data.current_fee)) %>
+                        <%= MoneyUtils.fmt_precise!(
+                          Money.mult!(Contract.balance(@contract), @fee_data.current_fee)
+                        ) %>
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -182,7 +184,9 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Transaction fees (<%= Util.format_pct(@fee_data.transaction_fee) %>)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(Money.mult!(@prepaid_amount, @fee_data.transaction_fee)) %>
+                        <%= MoneyUtils.fmt_precise!(
+                          Money.mult!(Contract.balance(@contract), @fee_data.transaction_fee)
+                        ) %>
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
@@ -190,7 +194,10 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dt class="font-medium">Total Due</dt>
                       <dd class="font-semibold font-display tabular-nums">
                         <%= MoneyUtils.fmt_precise!(
-                          Money.mult!(@prepaid_amount, Decimal.add(1, @fee_data.total_fee))
+                          Money.mult!(
+                            Contract.balance(@contract),
+                            Decimal.add(1, @fee_data.total_fee)
+                          )
                         ) %>
                       </dd>
                     </div>
@@ -215,9 +222,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
 
   @impl true
   def handle_event("release_and_renew", _params, socket) do
-    %{timesheet: timesheet} = socket.assigns
-
-    case Contracts.release_and_renew(timesheet) do
+    case Contracts.release_and_renew_contract(socket.assigns.contract) do
       {:ok, _} ->
         {:noreply,
          socket

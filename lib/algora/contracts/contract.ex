@@ -1,20 +1,27 @@
 defmodule Algora.Contracts.Contract do
   use Algora.Model
+  alias Money.Ecto.Composite.Type, as: MoneyType
 
   schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1
-    field :hourly_rate, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :hourly_rate, MoneyType, no_fraction_if_integer: true
     field :hours_per_week, :integer
     field :start_date, :utc_datetime_usec
     field :end_date, :utc_datetime_usec
 
+    field :amount_credited, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :amount_debited, MoneyType, virtual: true, no_fraction_if_integer: true
+
+    field :total_charged, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :total_credited, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :total_debited, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :total_deposited, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :total_transferred, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :total_withdrawn, MoneyType, virtual: true, no_fraction_if_integer: true
+
     belongs_to :original_contract, Algora.Contracts.Contract
     has_many :renewals, Algora.Contracts.Contract, foreign_key: :original_contract_id
-
-    has_many :chain,
-      through: [:original_contract, :renewals],
-      where: [original_contract_id: nil]
 
     belongs_to :client, Algora.Users.User
     belongs_to :contractor, Algora.Users.User
@@ -23,15 +30,40 @@ defmodule Algora.Contracts.Contract do
     has_many :reviews, Algora.Reviews.Review
     has_one :timesheet, Algora.Contracts.Timesheet
 
-    has_one :latest_charge, Algora.Payments.Transaction,
-      where: [status: :succeeded, type: :charge],
-      preload_order: [desc: :succeeded_at]
-
-    has_one :latest_transfer, Algora.Payments.Transaction,
-      where: [status: :succeeded, type: :transfer],
-      preload_order: [desc: :succeeded_at]
-
     timestamps()
+  end
+
+  def after_load({:ok, struct}), do: {:ok, after_load(struct)}
+  def after_load({:error, _} = result), do: result
+  def after_load(nil), do: nil
+
+  def after_load(struct) do
+    [
+      :amount_credited,
+      :amount_debited,
+      :total_charged,
+      :total_credited,
+      :total_debited,
+      :total_deposited,
+      :total_transferred,
+      :total_withdrawn
+    ]
+    |> Enum.reduce(struct, &maybe_convert_money_field(&2, &1))
+  end
+
+  defp maybe_convert_money_field(struct, field) do
+    case Map.get(struct, field) do
+      {currency, amount} -> Map.put(struct, field, Money.new!(currency, amount))
+      _ -> struct
+    end
+  end
+
+  def balance(contract) do
+    Money.zero(:USD)
+    |> Money.add!(contract.total_charged)
+    |> Money.add!(contract.total_deposited)
+    |> Money.sub!(contract.total_debited)
+    |> Money.sub!(contract.total_withdrawn)
   end
 
   def changeset(contract, attrs) do

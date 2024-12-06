@@ -1,7 +1,11 @@
 defmodule Algora.Payments.Transaction do
   use Algora.Model
+  alias Money.Ecto.Composite.Type, as: MoneyType
 
   @type t() :: %__MODULE__{}
+
+  @transaction_types [:charge, :transfer, :reversal, :debit, :credit, :deposit, :withdrawal]
+  @transaction_statuses [:initialized, :processing, :succeeded, :failed, :canceled]
 
   @derive {Inspect, except: [:provider_meta]}
   schema "transactions" do
@@ -14,18 +18,14 @@ defmodule Algora.Payments.Transaction do
     field :provider_balance_transaction_id, :string
     field :provider_meta, :map
 
-    field :gross_amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
-    field :net_amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
-    field :total_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
-    field :provider_fee, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :gross_amount, MoneyType, no_fraction_if_integer: true
+    field :net_amount, MoneyType, no_fraction_if_integer: true
+    field :total_fee, MoneyType, no_fraction_if_integer: true
+    field :provider_fee, MoneyType, no_fraction_if_integer: true
     field :line_items, {:array, :map}
 
-    field :type, Ecto.Enum,
-      values: [:charge, :transfer, :reversal, :debit, :credit, :deposit, :withdrawal]
-
-    field :status, Ecto.Enum, values: [:initialized, :processing, :succeeded, :failed, :canceled]
-    field :succeeded_at, :utc_datetime_usec
-    field :reversed_at, :utc_datetime_usec
+    field :type, Ecto.Enum, values: @transaction_types
+    field :status, Ecto.Enum, values: @transaction_statuses
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Algora.Contracts.Contract
@@ -35,6 +35,8 @@ defmodule Algora.Payments.Transaction do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :original_transaction, Algora.Payments.Transaction
 
+    field :succeeded_at, :utc_datetime_usec
+    field :reversed_at, :utc_datetime_usec
     timestamps()
   end
 

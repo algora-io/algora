@@ -66,7 +66,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">In escrow</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(Contract.balance(@contract.total_credited)) %>
+                  <%= Money.to_string!(Contract.balance(@contract)) %>
                 </div>
               </.card_content>
             </.card>
@@ -105,6 +105,29 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   <div class="space-y-8">
                     <%= for contract <- @contract_chain do %>
                       <%= case Contracts.get_payment_status(contract) do %>
+                        <% {:pending_timesheet, contract} -> %>
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                              <div class="h-9 w-9 rounded-full bg-warning/20 flex items-center justify-center">
+                                <.icon name="tabler-clock" class="w-5 h-5 text-warning" />
+                              </div>
+                              <div>
+                                <div class="font-medium">
+                                  Waiting for timesheet submission
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                  <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                                    contract.end_date,
+                                    "%b %d, %Y"
+                                  ) %>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <div class="font-medium font-display">Pending</div>
+                              <div class="text-sm text-muted-foreground">Timesheet</div>
+                            </div>
+                          </div>
                         <% {:pending_release, contract} -> %>
                           <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
                             <div class="flex items-center gap-4">
@@ -395,6 +418,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     </div>
 
     <.live_component
+      :if={@contract.timesheet}
       module={AlgoraWeb.Contract.Modals.ReleaseRenewDrawer}
       id="release-renew-drawer"
       show={@show_release_renew_modal}
@@ -404,6 +428,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     />
 
     <.live_component
+      :if={@contract.timesheet}
       module={AlgoraWeb.Contract.Modals.ReleaseDrawer}
       id="release-drawer"
       show={@show_release_modal}
@@ -422,10 +447,11 @@ defmodule AlgoraWeb.Contract.ViewLive do
   end
 
   def mount(%{"id" => id}, _session, socket) do
-    {:ok, contract} = Contracts.fetch_contract(id)
+    {:ok, contract} = Contracts.fetch_last_contract(id)
     contract_chain = Contracts.list_contract_chain(original_contract_id: id)
     thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
+    dbg(contract)
 
     {:ok,
      socket

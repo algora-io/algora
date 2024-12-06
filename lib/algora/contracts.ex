@@ -485,51 +485,26 @@ defmodule Algora.Contracts do
   end
 
   def fetch_contract(id) do
-    transaction_totals =
-      Transaction
-      |> group_by([t], t.original_contract_id)
-      |> select([t], %{
-        original_contract_id: t.original_contract_id,
-        total_credited: sum_by_type(t, "credit"),
-        total_charged: sum_by_type(t, "charge"),
-        total_debited: sum_by_type(t, "debit"),
-        total_withdrawn: sum_by_type(t, "withdrawal"),
-        total_deposited: sum_by_type(t, "deposit"),
-        total_transferred: sum_by_type(t, "transfer")
-      })
+    case list_contract_chain(id: id, limit: 1) do
+      [contract] -> {:ok, contract}
+      _ -> {:error, :not_found}
+    end
+  end
 
-    Contract
-    |> join(:inner, [c], cl in assoc(c, :client), as: :cl)
-    |> join(:inner, [c], co in assoc(c, :contractor), as: :co)
-    |> join(:left, [c], totals in subquery(transaction_totals),
-      on: totals.original_contract_id == c.original_contract_id,
-      as: :tt
-    )
-    |> join(:left, [c], ts in assoc(c, :timesheet), as: :ts)
-    |> join(:left, [cl: cl], cu in assoc(cl, :customer), as: :cu)
-    |> join(:left, [cu: cu], pm in assoc(cu, :default_payment_method), as: :pm)
-    |> select_merge([tt: tt], %{
-      total_credited: coalesce0(tt.total_credited),
-      total_charged: coalesce0(tt.total_charged),
-      total_debited: coalesce0(tt.total_debited),
-      total_withdrawn: coalesce0(tt.total_withdrawn),
-      total_deposited: coalesce0(tt.total_deposited),
-      total_transferred: coalesce0(tt.total_transferred)
-    })
-    |> preload(
-      [cl: cl, co: co, cu: cu, pm: pm, ts: ts],
-      client: {cl, customer: {cu, default_payment_method: pm}},
-      contractor: co,
-      timesheet: ts
-    )
-    |> Repo.fetch(id)
-    |> Contract.after_load()
+  def fetch_last_contract(id) do
+    case list_contract_chain(original_contract_id: id, limit: 1, order: :desc) do
+      [contract] -> {:ok, contract}
+      _ -> {:error, :not_found}
+    end
   end
 
   def list_contract_chain(criteria \\ []) do
+    criteria = Keyword.merge([order: :desc, limit: 50], criteria)
+
     transaction_amounts =
       Transaction
-      |> where([t], t.original_contract_id == ^Keyword.get(criteria, :original_contract_id))
+      |> maybe_filter_txs_by_contract_id(criteria)
+      |> maybe_filter_txs_by_original_contract_id(criteria)
       |> group_by([t], t.contract_id)
       |> select([t], %{
         contract_id: t.contract_id,
@@ -539,7 +514,8 @@ defmodule Algora.Contracts do
 
     transaction_totals =
       Transaction
-      |> where([t], t.original_contract_id == ^Keyword.get(criteria, :original_contract_id))
+      |> maybe_filter_txs_by_contract_id(criteria)
+      |> maybe_filter_txs_by_original_contract_id(criteria)
       |> group_by([t], t.original_contract_id)
       |> select([t], %{
         original_contract_id: t.original_contract_id,
@@ -552,7 +528,10 @@ defmodule Algora.Contracts do
       })
 
     Contract
+    |> join(:inner, [c], client in assoc(c, :client), as: :cl)
+    |> join(:inner, [c], contractor in assoc(c, :contractor), as: :ct)
     |> join(:left, [c], timesheet in assoc(c, :timesheet), as: :ts)
+    |> join(:left, [c], transactions in assoc(c, :transactions), as: :txs)
     |> join(:left, [c], amounts in subquery(transaction_amounts),
       on: amounts.contract_id == c.id,
       as: :ta
@@ -571,26 +550,62 @@ defmodule Algora.Contracts do
       total_transferred: coalesce0(tt.total_transferred),
       total_withdrawn: coalesce0(tt.total_withdrawn)
     })
-    |> preload([ts: ts], timesheet: ts)
+    |> preload([ts: ts, txs: txs, cl: cl, ct: ct],
+      timesheet: ts,
+      transactions: txs,
+      client: cl,
+      contractor: ct
+    )
     |> apply_criteria(criteria)
-    |> limit(50)
     |> Repo.all()
     |> Enum.map(&Contract.after_load/1)
   end
 
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
-      {:original_contract_id, id}, query ->
-        from([c] in query, where: c.original_contract_id == ^id)
+      {:id, id}, query ->
+        from([c] in query, where: c.id == ^id)
 
-      {:paginate, %{after: [inserted_at, id]}}, query ->
-        from([c] in query, where: {c.inserted_at, c.id} > {^inserted_at, ^id})
+      {:original_contract_id, original_contract_id}, query ->
+        from([c] in query, where: c.original_contract_id == ^original_contract_id)
 
-      {:sort, %{sort_by: sort_by, sort_order: sort_order}}, query ->
-        from(q in query, order_by: [{^sort_order, ^sort_by}])
+      {:after, sequence_number}, query ->
+        from([c] in query, where: c.sequence_number > ^sequence_number)
+
+      {:before, sequence_number}, query ->
+        from([c] in query, where: c.sequence_number < ^sequence_number)
+
+      {:order, :asc}, query ->
+        from([c] in query, order_by: [asc: c.sequence_number])
+
+      {:order, :desc}, query ->
+        from([c] in query, order_by: [desc: c.sequence_number])
+
+      {:limit, limit}, query ->
+        from([c] in query, limit: ^limit)
 
       _, query ->
         query
     end)
+  end
+
+  defp maybe_filter_txs_by_contract_id(query, criteria) do
+    dbg(criteria)
+    dbg(Keyword.get(criteria, :id))
+
+    case Keyword.get(criteria, :id) do
+      nil -> query
+      id -> from([t] in query, where: t.contract_id == ^id)
+    end
+  end
+
+  defp maybe_filter_txs_by_original_contract_id(query, criteria) do
+    dbg(criteria)
+    dbg(Keyword.get(criteria, :original_contract_id))
+
+    case Keyword.get(criteria, :original_contract_id) do
+      nil -> query
+      id -> from([t] in query, where: t.original_contract_id == ^id)
+    end
   end
 end

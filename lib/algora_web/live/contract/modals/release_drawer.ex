@@ -54,7 +54,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                   <dl class="space-y-4">
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Payout amount (<%= @timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
+                        Payout amount (<%= @contract.timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
                           @contract.hourly_rate
                         ) %>/hr)
                       </dt>

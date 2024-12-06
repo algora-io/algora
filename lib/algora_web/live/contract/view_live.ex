@@ -451,7 +451,6 @@ defmodule AlgoraWeb.Contract.ViewLive do
     contract_chain = Contracts.list_contract_chain(original_contract_id: id)
     thread = Chat.get_or_create_thread!(contract)
     messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
-    dbg(contract)
 
     {:ok,
      socket

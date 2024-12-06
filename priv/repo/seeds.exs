@@ -211,20 +211,13 @@ initial_contract =
 # Prepay the initial contract
 {:ok, _txs} = Algora.Contracts.prepay_contract(initial_contract)
 
-Logger.info("Initial contract: #{initial_contract.id}")
-
 # Iterate over the cycles to create timesheets and release & renew contracts
 Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract ->
-  Logger.info("Contract #{sequence_number}: #{contract.id}")
-
-  timesheet =
-    insert!(:timesheet, %{
-      contract_id: contract.id,
-      hours_worked: Enum.random(35..45),
-      inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
-    })
-
-  Logger.info("Timesheet #{timesheet.id} -> #{timesheet.contract_id}")
+  insert!(:timesheet, %{
+    contract_id: contract.id,
+    hours_worked: Enum.random(35..45),
+    inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
+  })
 
   {:ok, contract} = Algora.Contracts.fetch_contract(contract.id)
 

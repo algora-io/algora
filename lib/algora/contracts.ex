@@ -29,11 +29,10 @@ defmodule Algora.Contracts do
   def get_payment_status(contract) do
     zero = Money.zero(:USD)
 
-    case {contract.timesheet, contract.amount_debited, contract.amount_credited} do
-      {nil, _, _} -> {:pending_timesheet, contract}
-      {_, ^zero, _} -> {:pending_payment, contract}
-      {_, _, ^zero} -> {:pending_release, contract}
-      {_, _, _} -> {:paid, contract}
+    case {contract.timesheet, contract.amount_credited} do
+      {nil, _} -> {:pending_timesheet, contract}
+      {_, ^zero} -> {:pending_release, contract}
+      {_, _} -> {:paid, contract}
     end
   end
 
@@ -484,11 +483,21 @@ defmodule Algora.Contracts do
     end
   end
 
+  def fetch_contract!(id) do
+    {:ok, contract} = fetch_contract(id)
+    contract
+  end
+
   def fetch_contract(id) do
     case list_contract_chain(id: id, limit: 1) do
       [contract] -> {:ok, contract}
       _ -> {:error, :not_found}
     end
+  end
+
+  def fetch_last_contract!(id) do
+    {:ok, contract} = fetch_last_contract(id)
+    contract
   end
 
   def fetch_last_contract(id) do
@@ -590,9 +599,6 @@ defmodule Algora.Contracts do
   end
 
   defp maybe_filter_txs_by_contract_id(query, criteria) do
-    dbg(criteria)
-    dbg(Keyword.get(criteria, :id))
-
     case Keyword.get(criteria, :id) do
       nil -> query
       id -> from([t] in query, where: t.contract_id == ^id)
@@ -600,9 +606,6 @@ defmodule Algora.Contracts do
   end
 
   defp maybe_filter_txs_by_original_contract_id(query, criteria) do
-    dbg(criteria)
-    dbg(Keyword.get(criteria, :original_contract_id))
-
     case Keyword.get(criteria, :original_contract_id) do
       nil -> query
       id -> from([t] in query, where: t.original_contract_id == ^id)

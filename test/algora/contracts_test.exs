@@ -115,6 +115,9 @@ defmodule Algora.ContractsTest do
       assert txs0["credit"] == nil
       assert txs0["transfer"] == nil
 
+      {:ok, contract0} = Contracts.fetch_contract(contract0.id)
+      assert Money.equal?(contract0.total_charged, ~M[1000]usd)
+
       # First cycle (still 19% tier)
       insert!(:timesheet, %{contract_id: contract0.id, hours_worked: 40})
       {:ok, contract0} = Contracts.fetch_contract(contract0.id)
@@ -127,10 +130,14 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(txs1.credit.net_amount, ~M[2000]usd)
       assert Money.equal?(txs1.transfer.net_amount, ~M[2000]usd)
 
+      {:ok, contract1} = Contracts.fetch_contract(contract1.id)
+      assert Money.equal?(contract1.total_charged, ~M[3000]usd)
+
       # Second cycle (drops to 15% tier)
       insert!(:timesheet, %{contract_id: contract1.id, hours_worked: 60})
       {:ok, contract1} = Contracts.fetch_contract(contract1.id)
       {:ok, {txs2, contract2}} = Contracts.release_and_renew_contract(contract1)
+
       fee2 = Money.mult!(txs2.charge.net_amount, Decimal.new("0.19"))
       assert Money.equal?(txs2.charge.total_fee, fee2)
       assert Money.equal?(txs2.charge.gross_amount, ~M[3570]usd)
@@ -139,10 +146,13 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(txs2.credit.net_amount, ~M[3000]usd)
       assert Money.equal?(txs2.transfer.net_amount, ~M[3000]usd)
 
+      {:ok, contract2} = Contracts.fetch_contract(contract2.id)
+      assert Money.equal?(contract2.total_charged, ~M[6000]usd)
+
       # Third cycle (drops to 10% tier)
       insert!(:timesheet, %{contract_id: contract2.id, hours_worked: 80})
       {:ok, contract2} = Contracts.fetch_contract(contract2.id)
-      {:ok, {txs3, _contract3}} = Contracts.release_and_renew_contract(contract2)
+      {:ok, {txs3, contract3}} = Contracts.release_and_renew_contract(contract2)
       fee3 = Money.mult!(txs3.charge.net_amount, Decimal.new("0.14"))
       assert Money.equal?(txs3.charge.total_fee, fee3)
       assert Money.equal?(txs3.charge.gross_amount, ~M[4560]usd)
@@ -151,12 +161,11 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(txs3.credit.net_amount, ~M[4000]usd)
       assert Money.equal?(txs3.transfer.net_amount, ~M[4000]usd)
 
-      # Verify totals
-      {:ok, contract0} = Contracts.fetch_contract(contract0.id)
-      assert Money.equal?(contract0.total_charged, ~M[10_000]usd)
-      assert Money.equal?(contract0.total_debited, ~M[9_000]usd)
-      assert Money.equal?(contract0.total_credited, ~M[9_000]usd)
-      assert Money.equal?(contract0.total_transferred, ~M[9_000]usd)
+      {:ok, contract3} = Contracts.fetch_contract(contract3.id)
+      assert Money.equal?(contract3.total_charged, ~M[10_000]usd)
+      assert Money.equal?(contract3.total_debited, ~M[9_000]usd)
+      assert Money.equal?(contract3.total_credited, ~M[9_000]usd)
+      assert Money.equal?(contract3.total_transferred, ~M[9_000]usd)
     end
 
     test "prepayment fails when payment method is invalid" do
@@ -190,7 +199,7 @@ defmodule Algora.ContractsTest do
 
       # Verify amounts
       # No additional charge needed
-      assert Money.equal?(txs.charge.net_amount, ~M[0]usd)
+      assert txs.charge == nil
       # Full 20 hours payment
       assert Money.equal?(txs.debit.net_amount, ~M[2000]usd)
       assert Money.equal?(txs.credit.net_amount, ~M[2000]usd)
@@ -210,7 +219,7 @@ defmodule Algora.ContractsTest do
 
       # Verify amounts
       # No additional charge needed
-      assert Money.equal?(txs.charge.net_amount, ~M[0]usd)
+      assert txs.charge == nil
       # Only pay for hours worked
       assert Money.equal?(txs.debit.net_amount, ~M[1500]usd)
       assert Money.equal?(txs.credit.net_amount, ~M[1500]usd)

@@ -131,7 +131,9 @@ defmodule Algora.Contracts do
   def get_timesheet(id), do: Repo.get(Timesheet, id)
   def get_timesheet!(id), do: Repo.get!(Timesheet, id)
 
-  defp initialize_charge(%{
+  defp maybe_initialize_charge(%{line_items: []}), do: {:ok, nil}
+
+  defp maybe_initialize_charge(%{
          contract: contract,
          gross_amount: gross_amount,
          net_amount: net_amount,
@@ -261,7 +263,7 @@ defmodule Algora.Contracts do
     ]
 
     with {:ok, charge} <-
-           initialize_charge(%{
+           maybe_initialize_charge(%{
              contract: contract,
              line_items: line_items,
              gross_amount: gross_charge_amount,
@@ -272,52 +274,66 @@ defmodule Algora.Contracts do
     end
   end
 
-  defp initialize_release_transactions(contract) do
+  defp initialize_release_transactions(contract, renew) do
     balance = Contract.balance(contract)
     fee_data = calculate_fee_data(contract)
 
     transfer_amount = calculate_transfer_amount(contract)
-    new_prepayment = Money.mult!(contract.hourly_rate, contract.hours_per_week)
+
+    new_prepayment =
+      if renew,
+        do: Money.mult!(contract.hourly_rate, contract.hours_per_week),
+        else: Money.zero(:USD)
+
     net_charge_amount = Money.sub!(Money.add!(transfer_amount, new_prepayment), balance)
     platform_fee = Money.mult!(net_charge_amount, fee_data.current_fee)
     transaction_fee = Money.mult!(net_charge_amount, fee_data.transaction_fee)
     total_fee = Money.add!(platform_fee, transaction_fee)
     gross_charge_amount = Money.add!(net_charge_amount, total_fee)
 
-    line_items = [
-      %{
-        amount: transfer_amount,
-        description:
-          "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
-      },
-      %{
-        amount: Money.negate!(balance),
-        description: "Less: Previously prepaid amount"
-      },
-      %{
-        amount: new_prepayment,
-        description:
-          "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
-      },
-      %{
-        amount: platform_fee,
-        description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"
-      },
-      %{
-        amount: transaction_fee,
-        description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"
-      }
-    ]
+    line_items =
+      if Money.positive?(net_charge_amount) do
+        [
+          %{
+            amount: transfer_amount,
+            description:
+              "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+          },
+          %{
+            amount: Money.negate!(balance),
+            description: "Less: Previously prepaid amount"
+          },
+          if new_prepayment do
+            %{
+              amount: new_prepayment,
+              description:
+                "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+            }
+          end,
+          %{
+            amount: platform_fee,
+            description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"
+          },
+          %{
+            amount: transaction_fee,
+            description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"
+          }
+        ]
+        |> Enum.reject(&Money.zero?(&1.amount))
+      else
+        []
+      end
+
+    charge_params = %{
+      contract: contract,
+      line_items: line_items,
+      gross_amount: gross_charge_amount,
+      net_amount: net_charge_amount,
+      total_fee: total_fee
+    }
 
     Repo.transact(fn ->
-      with {:ok, charge} <-
-             initialize_charge(%{
-               contract: contract,
-               line_items: line_items,
-               gross_amount: gross_charge_amount,
-               net_amount: net_charge_amount,
-               total_fee: total_fee
-             }),
+      with {:ok, charge} <- maybe_initialize_charge(charge_params),
            {:ok, debit} <- initialize_debit(%{contract: contract, amount: transfer_amount}),
            {:ok, credit} <- initialize_credit(%{contract: contract, amount: transfer_amount}),
            {:ok, transfer} <- initialize_transfer(%{contract: contract, amount: transfer_amount}) do
@@ -326,16 +342,16 @@ defmodule Algora.Contracts do
     end)
   end
 
-  def release_contract(contract) do
-    with {:ok, txs} <- initialize_release_transactions(contract),
-         {:ok, invoice} <- generate_invoice(contract, txs.charge.line_items),
-         {:ok, _invoice} <- pay_invoice(contract, invoice, txs) do
+  def release_contract(contract, renew \\ false) do
+    with {:ok, txs} <- initialize_release_transactions(contract, renew),
+         {:ok, invoice} <- maybe_generate_invoice(contract, txs.charge),
+         {:ok, _invoice} <- maybe_pay_invoice(contract, invoice, txs) do
       {:ok, txs}
     end
   end
 
   def release_and_renew_contract(contract) do
-    with {:ok, txs} <- release_contract(contract),
+    with {:ok, txs} <- release_contract(contract, true),
          {:ok, new_contract} <- renew_contract(contract) do
       {:ok, {txs, new_contract}}
     end
@@ -343,17 +359,19 @@ defmodule Algora.Contracts do
 
   def prepay_contract(contract) do
     with {:ok, txs} <- initialize_prepayment_transaction(contract),
-         {:ok, invoice} <- generate_invoice(contract, txs.charge.line_items),
-         {:ok, _invoice} <- pay_invoice(contract, invoice, txs) do
+         {:ok, invoice} <- maybe_generate_invoice(contract, txs.charge),
+         {:ok, _invoice} <- maybe_pay_invoice(contract, invoice, txs) do
       {:ok, txs}
     end
   end
 
-  defp generate_invoice(contract, line_items) do
+  defp maybe_generate_invoice(_contract, nil), do: {:ok, nil}
+
+  defp maybe_generate_invoice(contract, charge) do
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
     with {:ok, invoice} <- Stripe.create_invoice(invoice_params),
-         {:ok, _line_items} <- create_line_items(contract, invoice, line_items) do
+         {:ok, _line_items} <- create_line_items(contract, invoice, charge.line_items) do
       {:ok, invoice}
     end
   end
@@ -374,23 +392,14 @@ defmodule Algora.Contracts do
     end)
   end
 
-  defp pay_invoice(contract, invoice, txs) do
+  defp maybe_pay_invoice(contract, nil, txs), do: release_funds(contract, nil, txs)
+
+  defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
     case Stripe.pay_invoice(invoice.id, %{off_session: true, payment_method: pm_id}) do
       {:ok, stripe_invoice} ->
-        status = if stripe_invoice.paid, do: :succeeded, else: :processing
-
-        # TODO: do we need to lock the transactions here?
-        Repo.transact(fn ->
-          update_transaction_status(txs.charge, stripe_invoice, status)
-          if txs["debit"], do: update_transaction_status(txs.debit, stripe_invoice, status)
-          if txs["credit"], do: update_transaction_status(txs.credit, stripe_invoice, status)
-          {:ok, %{}}
-        end)
-
-        if txs["transfer"], do: transfer_funds(contract, txs.transfer)
-
+        if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}
 
       {:error, error} ->
@@ -399,6 +408,14 @@ defmodule Algora.Contracts do
     end
   end
 
+  defp release_funds(contract, metadata, txs) do
+    if txs["debit"], do: update_transaction_status(txs.debit, metadata, :succeeded)
+    if txs["credit"], do: update_transaction_status(txs.credit, metadata, :succeeded)
+    if txs["transfer"], do: transfer_funds(contract, txs.transfer)
+    {:ok, %{}}
+  end
+
+  # TODO: do we need to lock the transactions here?
   defp transfer_funds(contract, %Transaction{type: :transfer} = transaction)
        when transaction.status != :succeeded do
     case Stripe.create_transfer(%{
@@ -523,7 +540,6 @@ defmodule Algora.Contracts do
 
     transaction_totals =
       Transaction
-      |> maybe_filter_txs_by_contract_id(criteria)
       |> maybe_filter_txs_by_original_contract_id(criteria)
       |> group_by([t], t.original_contract_id)
       |> select([t], %{
@@ -540,16 +556,18 @@ defmodule Algora.Contracts do
 
     from(c in Contract)
     |> join(:inner, [c], bc in subquery(base_contracts), on: c.id == bc.id)
-    |> join(:inner, [c], client in assoc(c, :client), as: :cl)
-    |> join(:inner, [c], contractor in assoc(c, :contractor), as: :ct)
-    |> join(:left, [c], timesheet in assoc(c, :timesheet), as: :ts)
-    |> join(:left, [c], transactions in assoc(c, :transactions), as: :txs)
-    |> join(:left, [c], amounts in subquery(transaction_amounts),
-      on: amounts.contract_id == c.id,
+    |> join(:inner, [c], cl in assoc(c, :client), as: :cl)
+    |> join(:inner, [c], ct in assoc(c, :contractor), as: :ct)
+    |> join(:left, [c, cl: cl], cu in assoc(cl, :customer), as: :cu)
+    |> join(:left, [c, cu: cu], dpm in assoc(cu, :default_payment_method), as: :dpm)
+    |> join(:left, [c], ts in assoc(c, :timesheet), as: :ts)
+    |> join(:left, [c], txs in assoc(c, :transactions), as: :txs)
+    |> join(:left, [c], ta in subquery(transaction_amounts),
+      on: ta.contract_id == c.id,
       as: :ta
     )
-    |> join(:left, [c], totals in subquery(transaction_totals),
-      on: totals.original_contract_id == c.original_contract_id,
+    |> join(:left, [c], tt in subquery(transaction_totals),
+      on: tt.original_contract_id == c.original_contract_id,
       as: :tt
     )
     |> select_merge([ta: ta, tt: tt], %{
@@ -562,10 +580,10 @@ defmodule Algora.Contracts do
       total_transferred: coalesce0(tt.total_transferred),
       total_withdrawn: coalesce0(tt.total_withdrawn)
     })
-    |> preload([ts: ts, txs: txs, cl: cl, ct: ct],
+    |> preload([ts: ts, txs: txs, cl: cl, ct: ct, cu: cu, dpm: dpm],
       timesheet: ts,
       transactions: txs,
-      client: cl,
+      client: {cl, customer: {cu, default_payment_method: dpm}},
       contractor: ct
     )
     |> Repo.all()
@@ -579,6 +597,9 @@ defmodule Algora.Contracts do
 
       {:original_contract_id, original_contract_id}, query ->
         from([c] in query, where: c.original_contract_id == ^original_contract_id)
+
+      {:original_only, true}, query ->
+        from([c] in query, where: c.id == c.original_contract_id)
 
       {:after, sequence_number}, query ->
         from([c] in query, where: c.sequence_number > ^sequence_number)

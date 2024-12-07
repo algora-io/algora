@@ -194,6 +194,17 @@ end
 
 num_cycles = 20
 
+# Create the contract template
+_contract_template =
+  insert!(
+    :contract,
+    %{
+      client_id: pied_piper.id,
+      start_date: days_from_now(-num_cycles * 7),
+      end_date: days_from_now(-(num_cycles - 1) * 7)
+    }
+  )
+
 # Create the initial contract
 initial_contract =
   insert!(

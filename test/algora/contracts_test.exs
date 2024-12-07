@@ -308,7 +308,7 @@ defmodule Algora.ContractsTest do
           }
         )
 
-        {:ok, %{}}
+        {:ok, :ok}
       end)
 
       {:ok, contract} = Contracts.fetch_contract(contract.id)

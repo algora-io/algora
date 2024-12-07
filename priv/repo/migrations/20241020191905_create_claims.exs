@@ -15,7 +15,7 @@ defmodule Algora.Repo.Migrations.CreateClaims do
       add :approved_at, :utc_datetime_usec
       add :rejected_at, :utc_datetime_usec
       add :charged_at, :utc_datetime_usec
-      add :transferred_at, :utc_datetime_usec
+      add :paid_at, :utc_datetime_usec
 
       add :title, :string
       add :description, :string

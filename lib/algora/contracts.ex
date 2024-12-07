@@ -441,7 +441,7 @@ defmodule Algora.Contracts do
     if txs["debit"], do: update_transaction_status(txs.debit, metadata, :succeeded)
     if txs["credit"], do: update_transaction_status(txs.credit, metadata, :succeeded)
     if txs["transfer"], do: transfer_funds(contract, txs.transfer)
-    {:ok, %{}}
+    {:ok, :ok}
   end
 
   # TODO: do we need to lock the transactions here?

@@ -90,7 +90,7 @@ defmodule Algora.Bounties do
 
     query
     |> Bounty.filter_by_org_id(params[:owner_id])
-    |> Bounty.filter_by_tech_stack(params[:tech_stack])
+    # |> Bounty.filter_by_tech_stack(params[:tech_stack])
     |> filter_by_solver_country(params[:solver_country])
     |> Repo.all()
   end

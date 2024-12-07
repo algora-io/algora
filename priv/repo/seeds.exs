@@ -5,6 +5,7 @@
 require Logger
 import Algora.Factory
 alias Algora.Util
+alias Algora.Repo
 
 Application.put_env(:algora, :stripe_impl, Algora.Stripe.SeedImpl)
 
@@ -289,3 +290,108 @@ end
 Logger.info(
   "Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}"
 )
+
+repos = [
+  {
+    "middle-out",
+    [
+      "Optimize algorithm performance",
+      "Add support for new file types",
+      "Improve error handling",
+      "Implement streaming compression",
+      "Add compression statistics API"
+    ]
+  },
+  {
+    "pied-piper-web",
+    [
+      "Fix memory leak in upload handler",
+      "Implement new dashboard UI",
+      "Add real-time compression stats",
+      "Integrate SSO authentication",
+      "Build file comparison view"
+    ]
+  },
+  {
+    "infra",
+    [
+      "Scale kubernetes cluster",
+      "Implement auto-scaling",
+      "Optimize cloud costs",
+      "Set up monitoring and alerts",
+      "Configure disaster recovery"
+    ]
+  }
+]
+
+for {repo_name, issues} <- repos do
+  repo =
+    insert!(:repository, %{
+      name: repo_name,
+      url: "https://github.com/piedpiper/#{repo_name}",
+      user_id: pied_piper.id
+    })
+
+  for {issue_title, index} <- Enum.with_index(issues, 1) do
+    ticket =
+      insert!(:ticket, %{
+        repository_id: repo.id,
+        title: issue_title,
+        description: "We need help implementing this feature to improve our platform.",
+        number: index,
+        url: "https://github.com/piedpiper/#{repo_name}/issues/#{index}"
+      })
+
+    amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
+
+    bounty =
+      insert!(:bounty, %{
+        ticket_id: ticket.id,
+        owner_id: pied_piper.id,
+        creator_id: richard.id,
+        amount: amount
+      })
+
+    if rem(index, 2) == 0 do
+      claim =
+        insert!(:claim, %{
+          bounty_id: bounty.id,
+          user_id: carver.id,
+          status: if(rem(index, 3) == 0, do: :pending, else: :paid),
+          title: "Implementation for #{issue_title}",
+          description: "Here's my solution to this issue.",
+          url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
+        })
+
+      # Create transaction pairs for paid claims
+      if claim.status == :paid do
+        debit_id = Nanoid.generate()
+        credit_id = Nanoid.generate()
+
+        Repo.transact(fn ->
+          insert!(:transaction, %{
+            id: debit_id,
+            linked_transaction_id: credit_id,
+            type: :debit,
+            status: :succeeded,
+            net_amount: amount,
+            user_id: pied_piper.id,
+            succeeded_at: claim.inserted_at
+          })
+
+          insert!(:transaction, %{
+            id: credit_id,
+            linked_transaction_id: debit_id,
+            type: :credit,
+            status: :succeeded,
+            net_amount: amount,
+            user_id: carver.id,
+            succeeded_at: claim.inserted_at
+          })
+
+          {:ok, :ok}
+        end)
+      end
+    end
+  end
+end

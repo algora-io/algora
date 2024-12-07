@@ -151,6 +151,52 @@ defmodule Algora.Factory do
     }
   end
 
+  def build(:repository) do
+    %Algora.Workspace.Repository{
+      id: Nanoid.generate(),
+      provider: "github",
+      provider_id: "#{:rand.uniform(999_999_999)}",
+      name: "middle-out",
+      url: "https://github.com/piedpiper/middle-out",
+      provider_meta: %{}
+    }
+  end
+
+  def build(:ticket) do
+    %Algora.Workspace.Ticket{
+      id: Nanoid.generate(),
+      provider: "github",
+      provider_id: "#{:rand.uniform(999_999_999)}",
+      type: :issue,
+      title: "Optimize compression algorithm for large files",
+      description: "We need to improve performance when handling files over 1GB",
+      number: :rand.uniform(100),
+      url: "https://github.com/piedpiper/middle-out/issues/1",
+      provider_meta: %{}
+    }
+  end
+
+  def build(:bounty) do
+    %Algora.Bounties.Bounty{
+      id: Nanoid.generate(),
+      payment_type: :fixed
+    }
+  end
+
+  def build(:claim) do
+    %Algora.Bounties.Claim{
+      id: Nanoid.generate(),
+      provider: "github",
+      provider_id: "#{:rand.uniform(999_999_999)}",
+      type: :code,
+      status: :pending,
+      title: "Implemented compression optimization",
+      description: "Added parallel processing for large files",
+      url: "https://github.com/piedpiper/middle-out/pull/2",
+      provider_meta: %{}
+    }
+  end
+
   # Convenience API
   def build(factory_name, attributes) do
     factory_name |> build() |> struct!(attributes)

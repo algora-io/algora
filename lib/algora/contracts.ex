@@ -553,6 +553,12 @@ defmodule Algora.Contracts do
     end
   end
 
+  def list_available_contracts(criteria \\ []) do
+    criteria
+    |> Keyword.merge(available?: true)
+    |> list_contract_chain()
+  end
+
   def list_contract_chain(criteria \\ []) do
     criteria = Keyword.merge([order: :desc, limit: 50], criteria)
 
@@ -586,7 +592,7 @@ defmodule Algora.Contracts do
     from(c in Contract)
     |> join(:inner, [c], bc in subquery(base_contracts), on: c.id == bc.id)
     |> join(:inner, [c], cl in assoc(c, :client), as: :cl)
-    |> join(:inner, [c], ct in assoc(c, :contractor), as: :ct)
+    |> join(:left, [c], ct in assoc(c, :contractor), as: :ct)
     |> join(:left, [c, cl: cl], cu in assoc(cl, :customer), as: :cu)
     |> join(:left, [c, cu: cu], dpm in assoc(cu, :default_payment_method), as: :dpm)
     |> join(:left, [c], ts in assoc(c, :timesheet), as: :ts)
@@ -627,7 +633,10 @@ defmodule Algora.Contracts do
       {:original_contract_id, original_contract_id}, query ->
         from([c] in query, where: c.original_contract_id == ^original_contract_id)
 
-      {:original_only, true}, query ->
+      {:available?, true}, query ->
+        from([c] in query, where: is_nil(c.contractor_id))
+
+      {:original?, true}, query ->
         from([c] in query, where: c.id == c.original_contract_id)
 
       {:after, sequence_number}, query ->

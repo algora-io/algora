@@ -1,6 +1,9 @@
 defmodule AlgoraWeb.User.ProfileLive do
   use AlgoraWeb, :live_view
-  alias Algora.{Users, Bounties}
+  alias Algora.Users
+  alias Algora.Bounties
+  alias Algora.Reviews
+  alias Algora.Reviews.Review
 
   def mount(%{"handle" => handle}, _session, socket) do
     # HACK: fix
@@ -10,9 +13,9 @@ defmodule AlgoraWeb.User.ProfileLive do
     socket =
       socket
       |> assign(:user, user)
-      |> assign(:page_title, "@#{handle}")
+      |> assign(:page_title, "#{handle}")
       |> assign(:completed_bounties, Bounties.list_bounties(limit: 10, status: :completed))
-      |> assign(:reviews, fetch_reviews())
+      |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
 
     {:ok, socket}
   end
@@ -147,17 +150,28 @@ defmodule AlgoraWeb.User.ProfileLive do
           <h2 class="text-lg font-semibold">Reviews</h2>
           <div class="grid gap-4">
             <%= for review <- @reviews do %>
-              <div class="rounded-lg bg-card p-4 text-sm border border-border">
+              <div class="w-full rounded-lg bg-card p-4 text-sm border border-border">
                 <div class="flex items-center gap-1 mb-2">
-                  <%= for i <- 1..5 do %>
+                  <%= for i <- 1..Review.max_rating() do %>
                     <.icon
                       name="tabler-star-filled"
-                      class={"w-4 h-4 #{if i <= review.stars, do: "text-warning", else: "text-muted-foreground/25"}"}
+                      class={"w-4 h-4 #{if i <= review.rating, do: "text-warning", else: "text-muted-foreground/25"}"}
                     />
                   <% end %>
                 </div>
-                <p class="text-sm mb-2"><%= review.comment %></p>
-                <p class="text-xs text-muted-foreground">— <%= review.company %></p>
+                <p class="text-sm mb-2"><%= review.content %></p>
+                <div class="flex items-center gap-3">
+                  <.avatar class="h-8 w-8">
+                    <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
+                    <.avatar_fallback>
+                      <%= String.first(review.reviewer.name) %>
+                    </.avatar_fallback>
+                  </.avatar>
+                  <div class="flex flex-col">
+                    <p class="text-sm font-medium"><%= review.reviewer.name %></p>
+                    <p class="text-xs text-muted-foreground"><%= review.organization.name %></p>
+                  </div>
+                </div>
               </div>
             <% end %>
           </div>
@@ -165,66 +179,5 @@ defmodule AlgoraWeb.User.ProfileLive do
       </div>
     </div>
     """
-  end
-
-  defp fetch_reviews do
-    [
-      %{
-        stars: 5,
-        comment:
-          "Exceptional problem-solving skills and great communication throughout the project.",
-        company: "TechCorp Inc."
-      },
-      %{
-        stars: 4,
-        comment:
-          "Delivered high-quality work ahead of schedule. Would definitely work with again.",
-        company: "StartupXYZ"
-      },
-      %{
-        stars: 5,
-        comment: "Outstanding technical expertise and professional attitude.",
-        company: "DevLabs"
-      },
-      %{
-        stars: 5,
-        comment:
-          "Brilliant developer who consistently delivers exceptional results. Their attention to detail is remarkable.",
-        company: "InnovateTech"
-      },
-      %{
-        stars: 5,
-        comment:
-          "Excellent problem-solver with strong architectural skills. A true professional.",
-        company: "CloudScale Solutions"
-      },
-      %{
-        stars: 5,
-        comment: "Outstanding collaboration and technical expertise. Exceeded all expectations.",
-        company: "DataFlow Systems"
-      },
-      %{
-        stars: 5,
-        comment: "Demonstrated deep knowledge of best practices and delivered pristine code.",
-        company: "CodeCraft Industries"
-      },
-      %{
-        stars: 5,
-        comment:
-          "Exceptional ability to understand complex requirements and implement elegant solutions.",
-        company: "Quantum Software"
-      },
-      %{
-        stars: 5,
-        comment: "Fantastic communication skills and technical prowess. A pleasure to work with.",
-        company: "ByteForge Labs"
-      },
-      %{
-        stars: 5,
-        comment:
-          "Delivered high-quality code with excellent documentation. Would hire again in a heartbeat.",
-        company: "Alpine Technologies"
-      }
-    ]
   end
 end

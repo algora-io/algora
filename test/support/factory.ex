@@ -197,6 +197,15 @@ defmodule Algora.Factory do
     }
   end
 
+  def build(:review) do
+    %Algora.Reviews.Review{
+      id: Nanoid.generate(),
+      rating: Algora.Reviews.Review.max_rating(),
+      content:
+        "Great developer who writes clean code, communicates well, and always delivers on time!"
+    }
+  end
+
   # Convenience API
   def build(factory_name, attributes) do
     factory_name |> build() |> struct!(attributes)

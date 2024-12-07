@@ -30,10 +30,22 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :timesheet_id, references(:timesheets)
       add :bounty_id, references(:bounties)
       # add :claim_id, references(:claims)
-      add :original_transaction_id, references(:transactions)
+      add :linked_transaction_id, references(:transactions)
 
       timestamps()
     end
+
+    # Drop the auto-generated constraint
+    execute "ALTER TABLE transactions DROP CONSTRAINT transactions_linked_transaction_id_fkey"
+
+    # Add our deferred constraint
+    execute """
+    ALTER TABLE transactions
+    ADD CONSTRAINT transactions_linked_transaction_id_fkey
+    FOREIGN KEY (linked_transaction_id)
+    REFERENCES transactions(id)
+    DEFERRABLE INITIALLY DEFERRED
+    """
 
     # Add indexes for foreign keys and commonly queried fields
     create index(:transactions, [:user_id])
@@ -42,7 +54,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     create index(:transactions, [:timesheet_id])
     create index(:transactions, [:bounty_id])
     # create index(:transactions, [:claim_id])
-    create index(:transactions, [:original_transaction_id])
+    create index(:transactions, [:linked_transaction_id])
     create index(:transactions, [:provider_id])
   end
 end

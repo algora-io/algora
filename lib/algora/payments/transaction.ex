@@ -33,7 +33,7 @@ defmodule Algora.Payments.Transaction do
     belongs_to :user, Algora.Users.User
     # belongs_to :claim, Algora.Bounties.Claim
     belongs_to :bounty, Algora.Bounties.Bounty
-    belongs_to :original_transaction, Algora.Payments.Transaction
+    belongs_to :linked_transaction, Algora.Payments.Transaction
 
     field :succeeded_at, :utc_datetime_usec
     field :reversed_at, :utc_datetime_usec

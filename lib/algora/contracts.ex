@@ -165,10 +165,15 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  defp initialize_debit(%{contract: contract, amount: amount}) do
+  defp initialize_debit(%{
+         id: id,
+         contract: contract,
+         amount: amount,
+         linked_transaction_id: linked_transaction_id
+       }) do
     %Transaction{}
     |> change(%{
-      id: Nanoid.generate(),
+      id: id,
       provider: "stripe",
       type: :debit,
       status: :initialized,
@@ -178,7 +183,8 @@ defmodule Algora.Contracts do
       user_id: contract.client_id,
       gross_amount: amount,
       net_amount: amount,
-      total_fee: Money.zero(:USD)
+      total_fee: Money.zero(:USD),
+      linked_transaction_id: linked_transaction_id
     })
     |> validate_positive(:gross_amount)
     |> validate_positive(:net_amount)
@@ -189,10 +195,15 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  defp initialize_credit(%{contract: contract, amount: amount}) do
+  defp initialize_credit(%{
+         id: id,
+         contract: contract,
+         amount: amount,
+         linked_transaction_id: linked_transaction_id
+       }) do
     %Transaction{}
     |> change(%{
-      id: Nanoid.generate(),
+      id: id,
       provider: "stripe",
       gross_amount: amount,
       net_amount: amount,
@@ -202,7 +213,8 @@ defmodule Algora.Contracts do
       contract_id: contract.id,
       original_contract_id: contract.original_contract_id,
       timesheet_id: contract.timesheet.id,
-      user_id: contract.contractor_id
+      user_id: contract.contractor_id,
+      linked_transaction_id: linked_transaction_id
     })
     |> validate_positive(:gross_amount)
     |> validate_positive(:net_amount)
@@ -324,6 +336,9 @@ defmodule Algora.Contracts do
         []
       end
 
+    debit_id = Nanoid.generate()
+    credit_id = Nanoid.generate()
+
     charge_params = %{
       contract: contract,
       line_items: line_items,
@@ -332,10 +347,24 @@ defmodule Algora.Contracts do
       total_fee: total_fee
     }
 
+    debit_params = %{
+      id: debit_id,
+      linked_transaction_id: credit_id,
+      contract: contract,
+      amount: transfer_amount
+    }
+
+    credit_params = %{
+      id: credit_id,
+      linked_transaction_id: debit_id,
+      contract: contract,
+      amount: transfer_amount
+    }
+
     Repo.transact(fn ->
       with {:ok, charge} <- maybe_initialize_charge(charge_params),
-           {:ok, debit} <- initialize_debit(%{contract: contract, amount: transfer_amount}),
-           {:ok, credit} <- initialize_credit(%{contract: contract, amount: transfer_amount}),
+           {:ok, debit} <- initialize_debit(debit_params),
+           {:ok, credit} <- initialize_credit(credit_params),
            {:ok, transfer} <- initialize_transfer(%{contract: contract, amount: transfer_amount}) do
         {:ok, %{charge: charge, debit: debit, credit: credit, transfer: transfer}}
       end

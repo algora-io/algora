@@ -395,3 +395,29 @@ for {repo_name, issues} <- repos do
     end
   end
 end
+
+reviews = [
+  {richard, Algora.Reviews.Review.max_rating() - 1,
+   "His cloud architecture is... unconventional, but it works. Like, really works. Our servers haven't crashed in weeks. Just wish he'd document things better."},
+  {gilfoyle, Algora.Reviews.Review.max_rating(),
+   "Finally, someone who understands that true system architecture requires embracing chaos. His security implementations are adequately paranoid. Satan would approve."},
+  {dinesh, Algora.Reviews.Review.max_rating() - 2,
+   "The infrastructure is faster, I'll give him that. But his code comments are borderline offensive and he keeps calling my frontend 'cute'. Still better than our previous setup."},
+  {jared, Algora.Reviews.Review.max_rating() - 1,
+   "Very efficient contractor! While his methods are somewhat anxiety-inducing, our uptime metrics have improved by 287%. Would recommend (with appropriate warnings)."}
+]
+
+for {reviewer, rating, content} <- reviews do
+  insert!(
+    :review,
+    %{
+      rating: rating,
+      content: content,
+      visibility: :public,
+      contract_id: initial_contract.id,
+      organization_id: pied_piper.id,
+      reviewer_id: reviewer.id,
+      reviewee_id: carver.id
+    }
+  )
+end

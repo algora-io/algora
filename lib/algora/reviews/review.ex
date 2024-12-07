@@ -9,6 +9,8 @@ defmodule Algora.Reviews.Review do
     field :visibility, Ecto.Enum, values: [:public, :private]
 
     belongs_to :contract, Algora.Contracts.Contract
+    belongs_to :bounty, Algora.Bounties.Bounty
+    belongs_to :organization, Algora.Users.User
     belongs_to :reviewer, Algora.Users.User
     belongs_to :reviewee, Algora.Users.User
 

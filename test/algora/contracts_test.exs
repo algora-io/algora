@@ -3,6 +3,7 @@ defmodule Algora.ContractsTest do
   import Algora.Factory
   import Money.Sigil
   alias Algora.Contracts
+  alias Algora.Payments
   alias Algora.Payments.Transaction
 
   def card_declined_error(),
@@ -103,54 +104,57 @@ defmodule Algora.ContractsTest do
     end
 
     test "fees decrease appropriately across multiple contract cycles" do
-      contract0 = setup_contract(%{hourly_rate: ~M[50]usd, hours_per_week: 20})
+      contract0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
 
       # Initial prepayment (19% fee tier)
       {:ok, txs0} = Contracts.prepay_contract(contract0)
       fee0 = Money.mult!(txs0.charge.net_amount, Decimal.new("0.23"))
       assert Money.equal?(txs0.charge.total_fee, fee0)
-      assert Money.equal?(txs0.charge.gross_amount, ~M[1230]usd)
-      assert Money.equal?(txs0.charge.net_amount, ~M[1000]usd)
+      assert Money.equal?(txs0.charge.gross_amount, ~M[3690]usd)
+      assert Money.equal?(txs0.charge.net_amount, ~M[3000]usd)
       assert txs0["debit"] == nil
       assert txs0["credit"] == nil
       assert txs0["transfer"] == nil
 
-      {:ok, contract0} = Contracts.fetch_contract(contract0.id)
-      assert Money.equal?(contract0.total_charged, ~M[1000]usd)
+      # Before first cycle
+      total_paid = Payments.get_total_paid(contract0.client_id, contract0.contractor_id)
+      assert Money.equal?(total_paid, ~M[0]usd)
 
       # First cycle (still 19% tier)
-      insert!(:timesheet, %{contract_id: contract0.id, hours_worked: 40})
+      insert!(:timesheet, %{contract_id: contract0.id, hours_worked: 30})
       {:ok, contract0} = Contracts.fetch_contract(contract0.id)
       {:ok, {txs1, contract1}} = Contracts.release_and_renew_contract(contract0)
       fee1 = Money.mult!(txs1.charge.net_amount, Decimal.new("0.23"))
       assert Money.equal?(txs1.charge.total_fee, fee1)
-      assert Money.equal?(txs1.charge.gross_amount, ~M[2460]usd)
-      assert Money.equal?(txs1.charge.net_amount, ~M[2000]usd)
-      assert Money.equal?(txs1.debit.net_amount, ~M[2000]usd)
-      assert Money.equal?(txs1.credit.net_amount, ~M[2000]usd)
-      assert Money.equal?(txs1.transfer.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs1.charge.gross_amount, ~M[3690]usd)
+      assert Money.equal?(txs1.charge.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs1.debit.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs1.credit.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs1.transfer.net_amount, ~M[3000]usd)
 
-      {:ok, contract1} = Contracts.fetch_contract(contract1.id)
-      assert Money.equal?(contract1.total_charged, ~M[3000]usd)
+      # After first cycle
+      total_paid = Payments.get_total_paid(contract1.client_id, contract1.contractor_id)
+      assert Money.equal?(total_paid, ~M[3000]usd)
 
       # Second cycle (drops to 15% tier)
-      insert!(:timesheet, %{contract_id: contract1.id, hours_worked: 60})
+      insert!(:timesheet, %{contract_id: contract1.id, hours_worked: 20})
       {:ok, contract1} = Contracts.fetch_contract(contract1.id)
       {:ok, {txs2, contract2}} = Contracts.release_and_renew_contract(contract1)
 
       fee2 = Money.mult!(txs2.charge.net_amount, Decimal.new("0.19"))
       assert Money.equal?(txs2.charge.total_fee, fee2)
-      assert Money.equal?(txs2.charge.gross_amount, ~M[3570]usd)
-      assert Money.equal?(txs2.charge.net_amount, ~M[3000]usd)
-      assert Money.equal?(txs2.debit.net_amount, ~M[3000]usd)
-      assert Money.equal?(txs2.credit.net_amount, ~M[3000]usd)
-      assert Money.equal?(txs2.transfer.net_amount, ~M[3000]usd)
+      assert Money.equal?(txs2.charge.gross_amount, ~M[2380]usd)
+      assert Money.equal?(txs2.charge.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs2.debit.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs2.credit.net_amount, ~M[2000]usd)
+      assert Money.equal?(txs2.transfer.net_amount, ~M[2000]usd)
 
-      {:ok, contract2} = Contracts.fetch_contract(contract2.id)
-      assert Money.equal?(contract2.total_charged, ~M[6000]usd)
+      # After second cycle
+      total_paid = Payments.get_total_paid(contract2.client_id, contract2.contractor_id)
+      assert Money.equal?(total_paid, ~M[5000]usd)
 
       # Third cycle (drops to 10% tier)
-      insert!(:timesheet, %{contract_id: contract2.id, hours_worked: 80})
+      insert!(:timesheet, %{contract_id: contract2.id, hours_worked: 40})
       {:ok, contract2} = Contracts.fetch_contract(contract2.id)
       {:ok, {txs3, contract3}} = Contracts.release_and_renew_contract(contract2)
       fee3 = Money.mult!(txs3.charge.net_amount, Decimal.new("0.14"))
@@ -161,8 +165,12 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(txs3.credit.net_amount, ~M[4000]usd)
       assert Money.equal?(txs3.transfer.net_amount, ~M[4000]usd)
 
+      # After third cycle
+      total_paid = Payments.get_total_paid(contract3.client_id, contract3.contractor_id)
+      assert Money.equal?(total_paid, ~M[9000]usd)
+
       {:ok, contract3} = Contracts.fetch_contract(contract3.id)
-      assert Money.equal?(contract3.total_charged, ~M[10_000]usd)
+      assert Money.equal?(contract3.total_charged, ~M[12_000]usd)
       assert Money.equal?(contract3.total_debited, ~M[9_000]usd)
       assert Money.equal?(contract3.total_credited, ~M[9_000]usd)
       assert Money.equal?(contract3.total_transferred, ~M[9_000]usd)
@@ -272,13 +280,36 @@ defmodule Algora.ContractsTest do
       assert Decimal.equal?(fee_data.current_fee, Decimal.new("0.19"))
       assert fee_data.progress == Decimal.new("0.00")
 
-      insert!(:transaction, %{
-        original_contract_id: contract.id,
-        contract_id: contract.id,
-        type: :charge,
-        status: :succeeded,
-        net_amount: ~M[10000]usd
-      })
+      Repo.transact(fn ->
+        debit_id = Nanoid.generate()
+        credit_id = Nanoid.generate()
+
+        insert!(
+          :transaction,
+          %{
+            id: debit_id,
+            linked_transaction_id: credit_id,
+            type: :debit,
+            status: :succeeded,
+            net_amount: ~M[10000]usd,
+            user_id: contract.client_id
+          }
+        )
+
+        insert!(
+          :transaction,
+          %{
+            id: credit_id,
+            linked_transaction_id: debit_id,
+            type: :credit,
+            status: :succeeded,
+            net_amount: ~M[10000]usd,
+            user_id: contract.contractor_id
+          }
+        )
+
+        {:ok, %{}}
+      end)
 
       {:ok, contract} = Contracts.fetch_contract(contract.id)
       fee_data = Contracts.calculate_fee_data(contract)

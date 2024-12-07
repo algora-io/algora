@@ -37,7 +37,7 @@ defmodule Algora.Contracts do
   end
 
   def calculate_fee_data(contract) do
-    total_paid = contract.total_charged
+    total_paid = Payments.get_total_paid(contract.client_id, contract.contractor_id)
     fee_tiers = FeeTier.all()
     current_fee = FeeTier.calculate_fee_percentage(total_paid)
 

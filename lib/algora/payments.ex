@@ -2,11 +2,8 @@ defmodule Algora.Payments do
   require Logger
 
   import Ecto.Query
-  import Ecto.Changeset
-  import Algora.Validators
 
   alias Algora.Repo
-  alias Algora.Util
   alias Algora.Payments.Customer
   alias Algora.Payments.Transaction
   alias Algora.Payments.PaymentMethod
@@ -55,5 +52,24 @@ defmodule Algora.Payments do
       where: u.id == ^org.id and pm.is_default == true
     )
     |> Repo.one()
+  end
+
+  def get_total_paid(client_id, contractor_id) do
+    Transaction
+    |> join(:inner, [t], lt in Transaction,
+      as: :lt,
+      on: t.linked_transaction_id == lt.id
+    )
+    |> where([t], t.user_id == ^client_id)
+    |> where([lt: lt], lt.user_id == ^contractor_id)
+    |> where([t], t.type == :debit)
+    |> where([lt: lt], lt.type == :credit)
+    |> where([t], t.status == :succeeded)
+    |> select([t], sum(t.net_amount))
+    |> Repo.one()
+    |> case do
+      nil -> Money.zero(:USD)
+      amount -> amount
+    end
   end
 end

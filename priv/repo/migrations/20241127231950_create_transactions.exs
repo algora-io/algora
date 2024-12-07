@@ -48,6 +48,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     """
 
     # Add indexes for foreign keys and commonly queried fields
+    create index(:transactions, [:user_id, :type, :status])
     create index(:transactions, [:user_id])
     create index(:transactions, [:contract_id])
     create index(:transactions, [:original_contract_id])

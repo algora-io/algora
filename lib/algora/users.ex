@@ -3,7 +3,9 @@ defmodule Algora.Users do
   import Ecto.Changeset
 
   alias Algora.Repo
-  alias Algora.Users.{User, Identity}
+  alias Algora.Users.User
+  alias Algora.Users.Identity
+  alias Algora.Payments.Transaction
 
   @spec list_matching_devs(
           params :: %{
@@ -15,7 +17,7 @@ defmodule Algora.Users do
         ) :: [map()]
   def list_matching_devs(opts) do
     transfer_amounts_query =
-      from t in Algora.Payments.Transaction,
+      from t in Transaction,
         where: t.type == :transfer,
         group_by: t.user_id,
         select: %{
@@ -140,20 +142,47 @@ defmodule Algora.Users do
 
   def get_user_by!(fields), do: Repo.get_by!(User, fields)
 
+  def count_solved_bounties(user_id) do
+    Transaction
+    |> where([t], t.user_id == ^user_id)
+    |> where([t], t.type == :credit)
+    |> where([t], t.status == :succeeded)
+    |> where([t], not is_nil(t.bounty_id))
+    |> select([t], count(t.bounty_id))
+    |> Repo.one() || Money.zero(:USD)
+  end
+
+  def count_contributed_projects(user_id) do
+    Transaction
+    |> join(:inner, [t], lt in assoc(t, :linked_transaction), as: :lt)
+    |> join(:inner, [lt: lt], org in assoc(lt, :user), as: :org)
+    |> where([t], t.user_id == ^user_id)
+    |> where([t], t.type == :credit)
+    |> where([t], t.status == :succeeded)
+    |> where([lt: lt], lt.type == :debit)
+    |> group_by([lt: lt], lt.user_id)
+    |> select([lt: lt], count(lt.user_id))
+    |> Repo.one() || Money.zero(:USD)
+  end
+
   def get_user_with_stats(id) do
-    transfer_amounts_query =
-      from t in Algora.Payments.Transaction,
-        where: t.type == :transfer,
-        group_by: t.user_id,
-        select: %{
-          user_id: t.user_id,
-          sum: sum(t.net_amount)
-        }
+    credit_amounts_query =
+      Transaction
+      |> where([t], t.type == :credit)
+      |> where([t], not is_nil(t.succeeded_at))
+      |> group_by([t], t.user_id)
+      |> select([t], %{
+        user_id: t.user_id,
+        sum: sum(t.net_amount)
+      })
 
     case User
-         |> join(:left, [u], ta in subquery(transfer_amounts_query), on: u.id == ta.user_id)
+         |> join(:left, [u], ta in subquery(credit_amounts_query),
+           on: u.id == ta.user_id,
+           as: :amounts
+         )
          |> where([u], u.id == ^id)
-         |> select([u, ta], {u, ta.sum})
+         |> select([u, amounts: ta], {u, ta.sum})
          |> Repo.one() do
       nil ->
         nil
@@ -165,9 +194,9 @@ defmodule Algora.Users do
           handle: user.handle,
           flag: get_flag(user),
           skills: user.tech_stack |> Enum.take(6),
-          amount: sum || 0,
-          bounties: :rand.uniform(40),
-          projects: :rand.uniform(10),
+          amount: sum || Money.new!(:USD, 0),
+          bounties: count_solved_bounties(user.id),
+          projects: count_contributed_projects(user.id),
           avatar_url: user.avatar_url,
           bio: user.bio,
           message: """

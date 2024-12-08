@@ -9,9 +9,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
     recent_bounties = Bounties.list_bounties(limit: 10)
     matching_devs = Users.list_matching_devs(org_id: socket.assigns.current_org.id, limit: 5)
 
-    changeset =
-      %BountyForm{}
-      |> BountyForm.changeset(%{payment_type: "fixed"})
+    changeset = %BountyForm{} |> BountyForm.changeset(%{})
 
     {:ok,
      socket
@@ -78,116 +76,6 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
               </div>
             </div>
           </div>
-
-          <fieldset class="mb-8">
-            <legend class="text-sm font-medium text-foreground mb-2">Payment Type</legend>
-            <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:payment_type].value == "fixed", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
-                <input
-                  type="radio"
-                  name="bounty_form[payment_type]"
-                  value="fixed"
-                  checked={@form[:payment_type].value == "fixed"}
-                  class="sr-only"
-                />
-                <span class="flex flex-1 flex-col">
-                  <span class="flex items-center mb-1">
-                    <span class="block text-sm font-medium text-foreground">Fixed Amount</span>
-                    <svg
-                      class={"ml-2 h-5 w-5 text-primary #{if @form[:payment_type].value != "fixed", do: 'invisible'}"}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </span>
-                  <span class="mt-1 text-sm text-muted-foreground">
-                    Pay upon full completion or reward milestones
-                  </span>
-
-                  <div class={"mt-3 transition-opacity duration-200 #{if @form[:payment_type].value != "fixed", do: 'opacity-0 h-0 overflow-hidden', else: 'opacity-100'}"}>
-                    <div class="relative">
-                      <.input
-                        field={@form[:amount]}
-                        min="1"
-                        step="0.01"
-                        placeholder="$1,000"
-                        required={@form[:payment_type].value == "fixed"}
-                        class="font-display w-full py-1.5 bg-background border-input rounded-lg text-sm text-success font-medium"
-                      />
-                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <span class="text-muted-foreground text-sm">USD</span>
-                      </div>
-                    </div>
-                  </div>
-                </span>
-              </label>
-
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:payment_type].value == "hourly", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
-                <input
-                  type="radio"
-                  name="bounty_form[payment_type]"
-                  value="hourly"
-                  checked={@form[:payment_type].value == "hourly"}
-                  class="sr-only"
-                />
-                <span class="flex flex-1 flex-col">
-                  <span class="flex items-center mb-1">
-                    <span class="block text-sm font-medium text-foreground">Hourly Rate</span>
-                    <svg
-                      class={"ml-2 h-5 w-5 text-primary #{if @form[:payment_type].value != "hourly", do: 'invisible'}"}
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                  </span>
-                  <span class="mt-1 text-sm text-muted-foreground">
-                    Pay as you go based on hours worked
-                  </span>
-
-                  <div class={"mt-3 transition-opacity duration-200 #{if @form[:payment_type].value != "hourly", do: 'opacity-0 h-0 overflow-hidden', else: 'opacity-100'}"}>
-                    <div class="grid grid-cols-2 gap-2">
-                      <div class="relative">
-                        <.input
-                          field={@form[:amount]}
-                          min="1"
-                          step="0.01"
-                          placeholder="$75"
-                          required={@form[:payment_type].value == "hourly"}
-                          class="font-display w-full py-1.5 bg-background border-input rounded-lg text-sm text-success font-medium"
-                        />
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <span class="text-muted-foreground text-sm">USD/h</span>
-                        </div>
-                      </div>
-                      <div class="relative">
-                        <.input
-                          field={@form[:expected_hours]}
-                          min="1"
-                          step="1"
-                          placeholder="10"
-                          required={@form[:payment_type].value == "hourly"}
-                          class="font-display w-full py-1.5 bg-background border-input rounded-lg text-sm"
-                        />
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <span class="text-muted-foreground text-sm">hours per week</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </span>
-              </label>
-            </div>
-          </fieldset>
 
           <fieldset class="mb-8">
             <legend class="text-sm font-medium text-foreground mb-2">Share Bounty With</legend>
@@ -564,13 +452,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
     if changeset.valid? do
       form_data = Ecto.Changeset.apply_changes(changeset)
 
-      # Calculate total amount for hourly payments
-      amount =
-        if form_data.payment_type == "hourly" do
-          Decimal.mult(form_data.amount, Decimal.new(form_data.expected_hours))
-        else
-          form_data.amount
-        end
+      amount = form_data.amount
 
       # Create params map in the format expected by Bounty.create_changeset
       bounty_params = %{

@@ -6,7 +6,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
   def mount(%{"org_handle" => handle}, _session, socket) do
     org = Organizations.get_org_by_handle!(handle)
     open_bounties = Bounties.list_bounties(owner_id: org.id, status: :open, limit: 5)
-    completed_bounties = Bounties.list_bounties(owner_id: org.id, status: :completed, limit: 5)
+    completed_bounties = Bounties.list_bounties(owner_id: org.id, status: :paid, limit: 5)
     top_earners = Users.list_matching_devs(limit: 10)
     stats = Bounties.fetch_stats(org.id)
 

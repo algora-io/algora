@@ -6,6 +6,7 @@ defmodule Algora.Bounties.Bounty do
 
   schema "bounties" do
     field :amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, Algora.Users.User

@@ -23,83 +23,88 @@ defmodule Algora.Bounties do
     |> Repo.insert()
   end
 
-  @spec list_bounties(
-          params :: %{
-            optional(:owner_id) => integer(),
-            optional(:limit) => non_neg_integer(),
-            optional(:status) => :open | :completed,
-            optional(:tech_stack) => [String.t()],
-            optional(:solver_country) => String.t(),
-            optional(:sort_by) => :amount | :date
-          }
-        ) :: [map()]
-  def list_bounties(params) do
-    limit = params[:limit] || 10
+  @type criteria :: %{
+          optional(:owner_id) => integer(),
+          optional(:limit) => non_neg_integer(),
+          optional(:status) => :open | :paid,
+          optional(:tech_stack) => [String.t()],
+          optional(:solver_country) => String.t(),
+          optional(:sort_by) => :amount | :date
+        }
 
-    sq =
-      case params[:status] do
-        :open -> Bounty.open()
-        :completed -> Bounty.completed()
-        _ -> Bounty.open()
-      end
+  @spec list_bounties(criteria :: criteria()) :: [map()]
+  def list_bounties(criteria \\ []) do
+    criteria = Keyword.merge([order: :date, limit: 10], criteria)
 
-    order_by =
-      case params[:sort_by] do
-        :amount -> [desc: :amount, desc: :inserted_at, desc: :id]
-        :date -> [desc: :inserted_at, desc: :id]
-        _ -> [desc: :inserted_at, desc: :id]
-      end
+    base_bounties =
+      Bounty
+      |> apply_criteria(criteria)
+      |> select([b], b.id)
 
-    query =
-      from b in sq,
-        join: t in assoc(b, :ticket),
-        join: o in assoc(b, :owner),
-        left_join: r in assoc(t, :repository),
-        left_join: u in assoc(r, :user),
-        left_join: tr in Transaction,
-        on: tr.bounty_id == b.id and not is_nil(tr.succeeded_at),
-        left_join: solver in User,
-        on: solver.id == tr.user_id,
-        select: %{
-          id: b.id,
-          inserted_at: b.inserted_at,
-          amount: b.amount,
-          tech_stack: o.tech_stack,
-          owner: %{
-            name: coalesce(o.name, o.handle),
-            handle: o.handle,
-            avatar_url: o.avatar_url
-          },
-          solver: %{
-            id: solver.id,
-            name: coalesce(solver.name, solver.handle),
-            handle: solver.handle,
-            avatar_url: solver.avatar_url,
-            country: solver.country
-          },
-          ticket: %{
-            title: t.title,
-            # HACK: remove these once we have a way to get the owner and repo from the ticket
-            owner: coalesce(u.provider_login, o.handle),
-            repo: coalesce(r.name, o.handle),
-            number: t.number
-          }
-        },
-        limit: ^limit,
-        order_by: ^order_by
-
-    query
-    |> Bounty.filter_by_org_id(params[:owner_id])
-    # |> Bounty.filter_by_tech_stack(params[:tech_stack])
-    |> filter_by_solver_country(params[:solver_country])
+    from(b in Bounty)
+    |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
+    |> join(:inner, [b], t in assoc(b, :ticket), as: :ticket)
+    |> join(:inner, [b], o in assoc(b, :owner), as: :owner)
+    |> join(:left, [ticket: t], r in assoc(t, :repository), as: :repo)
+    |> join(:left, [repo: r], u in assoc(r, :user), as: :user)
+    |> join(:left, [b], tr in Transaction,
+      on: tr.bounty_id == b.id and not is_nil(tr.succeeded_at),
+      as: :transaction
+    )
+    |> join(:left, [transaction: tr], solver in User,
+      on: solver.id == tr.user_id,
+      as: :solver
+    )
+    |> select([b, owner: o, ticket: t, user: u, repo: r, solver: solver], %{
+      id: b.id,
+      inserted_at: b.inserted_at,
+      amount: b.amount,
+      tech_stack: o.tech_stack,
+      owner: %{
+        name: coalesce(o.name, o.handle),
+        handle: o.handle,
+        avatar_url: o.avatar_url
+      },
+      solver: %{
+        id: solver.id,
+        name: coalesce(solver.name, solver.handle),
+        handle: solver.handle,
+        avatar_url: solver.avatar_url,
+        country: solver.country
+      },
+      ticket: %{
+        title: t.title,
+        owner: coalesce(u.provider_login, o.handle),
+        repo: coalesce(r.name, o.handle),
+        number: t.number
+      }
+    })
     |> Repo.all()
   end
 
-  defp filter_by_solver_country(query, nil), do: query
+  defp apply_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {:status, status}, query ->
+        from([b] in query, where: b.status == ^status)
 
-  defp filter_by_solver_country(query, country) do
-    from [b, t, o, r, u, tr, solver] in query,
-      where: solver.country == ^country
+      {:owner_id, owner_id}, query ->
+        from([b] in query, where: b.owner_id == ^owner_id)
+
+      {:solver_country, country}, query ->
+        from([b, solver: solver] in query, where: solver.country == ^country)
+
+      {:order, :amount}, query ->
+        from([b] in query, order_by: [desc: b.amount, desc: b.inserted_at, desc: b.id])
+
+      {:order, :date}, query ->
+        from([b] in query, order_by: [desc: b.inserted_at, desc: b.id])
+
+      {:limit, limit}, query ->
+        from([b] in query, limit: ^limit)
+
+      _, query ->
+        query
+    end)
   end
 
   def fetch_stats(org_id \\ nil) do

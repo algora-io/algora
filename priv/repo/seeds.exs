@@ -344,20 +344,24 @@ for {repo_name, issues} <- repos do
 
     amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
 
+    claimed = rem(index, 2) == 0
+    paid = rem(index, 3) == 0
+
     bounty =
       insert!(:bounty, %{
         ticket_id: ticket.id,
         owner_id: pied_piper.id,
         creator_id: richard.id,
-        amount: amount
+        amount: amount,
+        status: if(paid, do: :paid, else: :open)
       })
 
-    if rem(index, 2) == 0 do
+    if claimed do
       claim =
         insert!(:claim, %{
           bounty_id: bounty.id,
           user_id: carver.id,
-          status: if(rem(index, 3) == 0, do: :pending, else: :paid),
+          status: if(paid, do: :paid, else: :pending),
           title: "Implementation for #{issue_title}",
           description: "Here's my solution to this issue.",
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"

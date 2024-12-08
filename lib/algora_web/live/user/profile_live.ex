@@ -14,7 +14,7 @@ defmodule AlgoraWeb.User.ProfileLive do
       socket
       |> assign(:user, user)
       |> assign(:page_title, "#{handle}")
-      |> assign(:completed_bounties, Bounties.list_bounties(limit: 10, status: :completed))
+      |> assign(:completed_bounties, Bounties.list_bounties(limit: 10, status: :paid))
       |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
 
     {:ok, socket}

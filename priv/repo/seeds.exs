@@ -344,8 +344,8 @@ for {repo_name, issues} <- repos do
 
     amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
 
-    claimed = rem(index, 2) == 0
-    paid = rem(index, 3) == 0
+    claimed = rem(index, 2) > 0
+    paid = rem(index, 3) > 0
 
     bounty =
       insert!(:bounty, %{

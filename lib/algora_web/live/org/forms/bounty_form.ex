@@ -8,7 +8,6 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
     field :ticket_url, :string
     field :amount, :decimal
     field :expected_hours, :integer
-    field :payment_type, :string
     field :sharing_type, :string
     field :share_emails, :string
     field :share_url, :string
@@ -21,15 +20,12 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
       :ticket_url,
       :amount,
       :expected_hours,
-      :payment_type,
       :sharing_type,
       :share_emails,
       :share_url
     ])
-    |> validate_required([:title, :ticket_url, :amount, :payment_type])
+    |> validate_required([:title, :ticket_url, :amount])
     |> validate_number(:amount, greater_than: 0)
-    |> validate_expected_hours()
-    |> validate_inclusion(:payment_type, ["fixed", "hourly"])
     |> validate_inclusion(:sharing_type, ["private", "platform"])
     |> put_default_sharing_type()
     |> validate_ticket_url()
@@ -43,16 +39,6 @@ defmodule AlgoraWeb.Org.Forms.BountyForm do
         _ -> [ticket_url: "must be a valid GitHub issue URL"]
       end
     end)
-  end
-
-  defp validate_expected_hours(changeset) do
-    if get_field(changeset, :payment_type) == "hourly" do
-      changeset
-      |> validate_required([:expected_hours])
-      |> validate_number(:expected_hours, greater_than: 0)
-    else
-      changeset
-    end
   end
 
   defp put_default_sharing_type(changeset) do

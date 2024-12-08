@@ -178,8 +178,7 @@ defmodule Algora.Factory do
 
   def build(:bounty) do
     %Algora.Bounties.Bounty{
-      id: Nanoid.generate(),
-      payment_type: :fixed
+      id: Nanoid.generate()
     }
   end
 

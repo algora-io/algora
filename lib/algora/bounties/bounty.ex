@@ -6,7 +6,6 @@ defmodule Algora.Bounties.Bounty do
 
   schema "bounties" do
     field :amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
-    field :payment_type, Ecto.Enum, values: [:fixed, :hourly]
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, Algora.Users.User
@@ -110,7 +109,7 @@ defmodule Algora.Bounties.Bounty do
 
   def create_changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :payment_type])
+    |> cast(attrs, [:amount])
     |> cast_assoc(:ticket)
     |> validate_required([:amount])
     |> validate_number(:amount, greater_than: 0)

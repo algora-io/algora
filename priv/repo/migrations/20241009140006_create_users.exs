@@ -49,6 +49,11 @@ defmodule Algora.Repo.Migrations.CreateUsers do
       timestamps()
     end
 
+    execute(
+      "ALTER TABLE users ADD COLUMN display_name VARCHAR GENERATED ALWAYS AS (COALESCE(name, handle)) STORED",
+      "ALTER TABLE users DROP COLUMN display_name"
+    )
+
     create unique_index(:users, [:email])
     create unique_index(:users, [:handle])
     create unique_index(:users, [:provider, :provider_id])

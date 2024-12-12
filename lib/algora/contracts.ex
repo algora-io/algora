@@ -432,7 +432,7 @@ defmodule Algora.Contracts do
         {:ok, stripe_invoice}
 
       {:error, error} ->
-        update_transaction_status(txs.charge, %{error: error}, :failed)
+        update_transaction_status(txs.charge, {:error, error})
         {:error, error}
     end
   end
@@ -458,12 +458,12 @@ defmodule Algora.Contracts do
         {:ok, stripe_transfer}
 
       {:error, error} ->
-        update_transaction_status(transaction, %{error: error}, :failed)
+        update_transaction_status(transaction, {:error, error})
         {:error, error}
     end
   end
 
-  defp update_transaction_status(transaction, %{error: error}, :failed) do
+  defp update_transaction_status(transaction, {:error, error}) do
     transaction
     |> change(%{
       provider_meta: Util.normalize_struct(%{error: error}),

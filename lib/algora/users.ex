@@ -18,7 +18,7 @@ defmodule Algora.Users do
   def list_matching_devs(opts) do
     transfer_amounts_query =
       from t in Transaction,
-        where: t.type == :transfer,
+        where: t.type == :credit,
         group_by: t.user_id,
         select: %{
           user_id: t.user_id,
@@ -142,13 +142,22 @@ defmodule Algora.Users do
 
   def get_user_by!(fields), do: Repo.get_by!(User, fields)
 
+  def count_total_earnings(user_id) do
+    Transaction
+    |> where([t], t.user_id == ^user_id)
+    |> where([t], t.type == :credit)
+    |> where([t], t.status == :succeeded)
+    |> select([t], sum(t.net_amount))
+    |> Repo.one() || Money.zero(:USD)
+  end
+
   def count_solved_bounties(user_id) do
     Transaction
     |> where([t], t.user_id == ^user_id)
     |> where([t], t.type == :credit)
     |> where([t], t.status == :succeeded)
     |> where([t], not is_nil(t.bounty_id))
-    |> select([t], count(t.bounty_id))
+    |> select([t], count(fragment("DISTINCT ?", t.bounty_id)))
     |> Repo.one() || Money.zero(:USD)
   end
 
@@ -160,41 +169,23 @@ defmodule Algora.Users do
     |> where([t], t.type == :credit)
     |> where([t], t.status == :succeeded)
     |> where([lt: lt], lt.type == :debit)
-    |> group_by([lt: lt], lt.user_id)
-    |> select([lt: lt], count(lt.user_id))
+    |> select([lt: lt], count(fragment("DISTINCT ?", lt.user_id)))
     |> Repo.one() || Money.zero(:USD)
   end
 
   def get_user_with_stats(id) do
-    credit_amounts_query =
-      Transaction
-      |> where([t], t.type == :credit)
-      |> where([t], not is_nil(t.succeeded_at))
-      |> group_by([t], t.user_id)
-      |> select([t], %{
-        user_id: t.user_id,
-        sum: sum(t.net_amount)
-      })
-
-    case User
-         |> join(:left, [u], ta in subquery(credit_amounts_query),
-           on: u.id == ta.user_id,
-           as: :amounts
-         )
-         |> where([u], u.id == ^id)
-         |> select([u, amounts: ta], {u, ta.sum})
-         |> Repo.one() do
+    case User |> where([u], u.id == ^id) |> Repo.one() do
       nil ->
         nil
 
-      {user, sum} ->
+      user ->
         %{
           id: user.id,
           name: user.name || user.handle,
           handle: user.handle,
           flag: get_flag(user),
           skills: user.tech_stack |> Enum.take(6),
-          amount: sum || Money.new!(:USD, 0),
+          amount: count_total_earnings(user.id),
           bounties: count_solved_bounties(user.id),
           projects: count_contributed_projects(user.id),
           avatar_url: user.avatar_url,

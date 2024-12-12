@@ -193,7 +193,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
   )
 end
 
-num_cycles = 20
+num_cycles = 3
 
 # Create the contract template
 _contract_template =
@@ -345,7 +345,7 @@ for {repo_name, issues} <- repos do
     amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
 
     claimed = rem(index, 2) > 0
-    paid = rem(index, 3) > 0
+    paid = claimed and rem(index, 3) > 0
 
     bounty =
       insert!(:bounty, %{
@@ -368,7 +368,7 @@ for {repo_name, issues} <- repos do
         })
 
       # Create transaction pairs for paid claims
-      if claim.status == :paid do
+      if paid do
         debit_id = Nanoid.generate()
         credit_id = Nanoid.generate()
 
@@ -376,6 +376,7 @@ for {repo_name, issues} <- repos do
           insert!(:transaction, %{
             id: debit_id,
             linked_transaction_id: credit_id,
+            bounty_id: bounty.id,
             type: :debit,
             status: :succeeded,
             net_amount: amount,
@@ -386,6 +387,7 @@ for {repo_name, issues} <- repos do
           insert!(:transaction, %{
             id: credit_id,
             linked_transaction_id: debit_id,
+            bounty_id: bounty.id,
             type: :credit,
             status: :succeeded,
             net_amount: amount,

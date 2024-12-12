@@ -16,6 +16,7 @@ defmodule Algora.Users.User do
     field :type, Ecto.Enum, values: [:individual, :organization], default: :individual
     field :email, :string
     field :name, :string
+    field :display_name, :string
     field :handle, :string
     field :last_context, :string
     field :bio, :string

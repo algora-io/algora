@@ -1,6 +1,7 @@
 defmodule Algora.Contracts.Contract do
   use Algora.Model
   alias Money.Ecto.Composite.Type, as: MoneyType
+  alias Algora.MoneyUtils
 
   schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
@@ -48,14 +49,7 @@ defmodule Algora.Contracts.Contract do
       :total_transferred,
       :total_withdrawn
     ]
-    |> Enum.reduce(struct, &maybe_convert_money_field(&2, &1))
-  end
-
-  defp maybe_convert_money_field(struct, field) do
-    case Map.get(struct, field) do
-      {currency, amount} -> Map.put(struct, field, Money.new!(currency, amount))
-      _ -> struct
-    end
+    |> Enum.reduce(struct, &MoneyUtils.ensure_money_field(&2, &1))
   end
 
   def balance(contract) do

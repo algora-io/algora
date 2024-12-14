@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Job.ViewLive do
       id: id,
       title: "Senior Elixir Developer",
       country: "US",
-      skills: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
+      tech_stack: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
       scope: %{size: "medium", duration: "medium", experience: "intermediate"},
       budget: %{type: :hourly, from: 50, to: 75},
       description: """
@@ -94,13 +94,13 @@ defmodule AlgoraWeb.Job.ViewLive do
                 </div>
               </div>
 
-              <%!-- Skills Required --%>
+              <%!-- Tech Stack Required --%>
               <div class="bg-white/[7.5%] rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">Skills Required</h2>
+                <h2 class="text-lg font-semibold mb-4">Tech Stack Required</h2>
                 <div class="flex flex-wrap gap-2">
-                  <%= for skill <- @job.skills do %>
+                  <%= for tech <- @job.tech_stack do %>
                     <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                      <%= skill %>
+                      <%= tech %>
                     </span>
                   <% end %>
                 </div>

@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Project.ViewLive do
       id: id,
       title: "Build Real-time Chat Application",
       country: "US",
-      skills: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
+      tech_stack: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
       budget: %{type: :hourly, from: Money.new!(50, :USD), to: Money.new!(75, :USD)},
       description: "Looking for an experienced developer to build a real-time chat system...",
       posted_at: ~N[2024-03-15 10:00:00],
@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Project.ViewLive do
       total_steps: 5
     }
 
-    matching_devs = Users.list_developers(country: "US", limit: 6, skills: project.skills)
+    matching_devs = Users.list_developers(country: "US", limit: 6, tech_stack: project.tech_stack)
 
     {:ok,
      socket
@@ -42,9 +42,9 @@ defmodule AlgoraWeb.Project.ViewLive do
               </h1>
 
               <div class="flex flex-wrap gap-2 mb-4">
-                <%= for skill <- @project.skills do %>
+                <%= for tech <- @project.tech_stack do %>
                   <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                    <%= skill %>
+                    <%= tech %>
                   </span>
                 <% end %>
               </div>
@@ -136,9 +136,9 @@ defmodule AlgoraWeb.Project.ViewLive do
                             </div>
                           </div>
                           <div class="mt-2 flex flex-wrap gap-2">
-                            <%= for skill <- dev.skills do %>
+                            <%= for tech <- dev.tech_stack do %>
                               <span class="text-white rounded-xl px-2 py-0.5 text-xs ring-1 ring-white/20">
-                                <%= skill %>
+                                <%= tech %>
                               </span>
                             <% end %>
                           </div>

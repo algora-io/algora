@@ -258,7 +258,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                   Developer
                 </th>
                 <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                  Skills
+                  Tech stack
                 </th>
                 <th class="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
                   Actions
@@ -287,14 +287,14 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                   <td class="p-4 align-middle">
                     <div class="space-y-2">
                       <div class="-ml-2.5 flex flex-wrap gap-1">
-                        <%= for skill <- Enum.take(dev.skills, 3) do %>
+                        <%= for tech <- Enum.take(dev.tech_stack, 3) do %>
                           <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                            <%= skill %>
+                            <%= tech %>
                           </span>
                         <% end %>
-                        <%= if length(dev.skills) > 3 do %>
+                        <%= if length(dev.tech_stack) > 3 do %>
                           <span class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs text-muted-foreground">
-                            +<%= length(dev.skills) - 3 %> more
+                            +<%= length(dev.tech_stack) - 3 %> more
                           </span>
                         <% end %>
                       </div>
@@ -353,9 +353,9 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 @<%= @selected_dev.handle %>
               </div>
               <div class="-ml-1 mt-2 flex flex-wrap gap-2">
-                <%= for skill <- @selected_dev.skills do %>
+                <%= for tech <- @selected_dev.tech_stack do %>
                   <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                    <%= skill %>
+                    <%= tech %>
                   </span>
                 <% end %>
               </div>
@@ -420,7 +420,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 <h5 class="text-sm font-medium mb-3">Past Reviews</h5>
                 <div class="space-y-6">
                   <%= for review <- [
-                        %{stars: 5, comment: "Exceptional problem-solving skills and great communication throughout the project.", company: "TechCorp Inc."},
+                        %{stars: 5, comment: "Exceptional problem-solving tech_stack and great communication throughout the project.", company: "TechCorp Inc."},
                         %{stars: 4, comment: "Delivered high-quality work ahead of schedule. Would definitely work with again.", company: "StartupXYZ"},
                         %{stars: 5, comment: "Outstanding technical expertise and professional attitude.", company: "DevLabs"}
                       ] do %>

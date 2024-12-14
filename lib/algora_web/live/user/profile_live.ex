@@ -37,9 +37,9 @@ defmodule AlgoraWeb.User.ProfileLive do
             <p class="text-foreground max-w-2xl"><%= @user.bio %></p>
 
             <div class="flex flex-wrap gap-4">
-              <%= for skill <- @user.skills do %>
+              <%= for tech <- @user.tech_stack do %>
                 <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                  <%= skill %>
+                  <%= tech %>
                 </span>
               <% end %>
             </div>

@@ -565,7 +565,7 @@ defmodule AlgoraWeb.CompaniesLive do
       %{
         name: "Get Matched",
         description:
-          "Our AI matches you with the best developers for your project based on skills and experience."
+          "Our AI matches you with the best developers for your project based on tech stack and experience."
       },
       %{
         name: "Start Working",

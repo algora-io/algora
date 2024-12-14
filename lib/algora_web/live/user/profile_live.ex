@@ -6,9 +6,7 @@ defmodule AlgoraWeb.User.ProfileLive do
   alias Algora.Reviews.Review
 
   def mount(%{"handle" => handle}, _session, socket) do
-    # HACK: fix
-    user = Users.get_user_by!(handle: handle)
-    user = Users.get_user_with_stats(user.id)
+    {:ok, user} = Users.fetch_developer_by(handle: handle)
 
     {:ok,
      socket

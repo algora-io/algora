@@ -348,6 +348,6 @@ defmodule AlgoraWeb.Job.CreateLive do
   defp next_step_label(4), do: "Description"
 
   defp get_matching_devs(job) do
-    Users.list_matching_devs(limit: 5, country: job.country, skills: job.skills)
+    Users.list_developers(limit: 5, country: job.country, skills: job.skills)
   end
 end

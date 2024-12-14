@@ -660,6 +660,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   defp get_matching_devs(context) do
-    Users.list_matching_devs(limit: 5, country: context.country, skills: context.skills)
+    Users.list_developers(limit: 5, country: context.country, skills: context.skills)
   end
 end

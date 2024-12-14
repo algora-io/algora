@@ -794,7 +794,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   end
 
   defp fetch_matching_devs(tech_stack) do
-    Users.list_matching_devs(tech_stack: tech_stack, limit: 3)
+    Users.list_developers(tech_stack: tech_stack, limit: 3)
     |> Enum.zip(fetch_reviews())
     |> Enum.map(fn {user, data} -> Map.merge(user, data) end)
   end

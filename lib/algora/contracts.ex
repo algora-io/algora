@@ -3,6 +3,8 @@ defmodule Algora.Contracts do
   import Ecto.Query
   import Algora.Validators
 
+  require Algora.SQL
+
   alias Algora.Repo
   alias Algora.Contracts.Contract
   alias Algora.FeeTier
@@ -510,25 +512,6 @@ defmodule Algora.Contracts do
     Money.mult!(contract.hourly_rate, contract.timesheet.hours_worked)
   end
 
-  defmacrop sum_by_type(t, type) do
-    quote do
-      sum(
-        fragment(
-          "CASE WHEN ? = ? THEN ? ELSE ('USD', 0)::money_with_currency END",
-          unquote(t).type,
-          unquote(type),
-          unquote(t).net_amount
-        )
-      )
-    end
-  end
-
-  defmacrop coalesce0(t) do
-    quote do
-      coalesce(unquote(t), fragment("('USD', 0)::money_with_currency"))
-    end
-  end
-
   def fetch_contract!(id) do
     {:ok, contract} = fetch_contract(id)
     contract
@@ -569,8 +552,8 @@ defmodule Algora.Contracts do
       |> group_by([t], t.contract_id)
       |> select([t], %{
         contract_id: t.contract_id,
-        amount_credited: sum_by_type(t, "credit"),
-        amount_debited: sum_by_type(t, "debit")
+        amount_credited: Algora.SQL.sum_by_type(t, "credit"),
+        amount_debited: Algora.SQL.sum_by_type(t, "debit")
       })
 
     transaction_totals =
@@ -579,12 +562,12 @@ defmodule Algora.Contracts do
       |> group_by([t], t.original_contract_id)
       |> select([t], %{
         original_contract_id: t.original_contract_id,
-        total_charged: sum_by_type(t, "charge"),
-        total_credited: sum_by_type(t, "credit"),
-        total_debited: sum_by_type(t, "debit"),
-        total_deposited: sum_by_type(t, "deposit"),
-        total_transferred: sum_by_type(t, "transfer"),
-        total_withdrawn: sum_by_type(t, "withdrawal")
+        total_charged: Algora.SQL.sum_by_type(t, "charge"),
+        total_credited: Algora.SQL.sum_by_type(t, "credit"),
+        total_debited: Algora.SQL.sum_by_type(t, "debit"),
+        total_deposited: Algora.SQL.sum_by_type(t, "deposit"),
+        total_transferred: Algora.SQL.sum_by_type(t, "transfer"),
+        total_withdrawn: Algora.SQL.sum_by_type(t, "withdrawal")
       })
 
     base_contracts = Contract |> apply_criteria(criteria) |> select([c], c.id)
@@ -606,14 +589,14 @@ defmodule Algora.Contracts do
       as: :tt
     )
     |> select_merge([ta: ta, tt: tt], %{
-      amount_credited: coalesce0(ta.amount_credited),
-      amount_debited: coalesce0(ta.amount_debited),
-      total_charged: coalesce0(tt.total_charged),
-      total_credited: coalesce0(tt.total_credited),
-      total_debited: coalesce0(tt.total_debited),
-      total_deposited: coalesce0(tt.total_deposited),
-      total_transferred: coalesce0(tt.total_transferred),
-      total_withdrawn: coalesce0(tt.total_withdrawn)
+      amount_credited: Algora.SQL.money_or_zero(ta.amount_credited),
+      amount_debited: Algora.SQL.money_or_zero(ta.amount_debited),
+      total_charged: Algora.SQL.money_or_zero(tt.total_charged),
+      total_credited: Algora.SQL.money_or_zero(tt.total_credited),
+      total_debited: Algora.SQL.money_or_zero(tt.total_debited),
+      total_deposited: Algora.SQL.money_or_zero(tt.total_deposited),
+      total_transferred: Algora.SQL.money_or_zero(tt.total_transferred),
+      total_withdrawn: Algora.SQL.money_or_zero(tt.total_withdrawn)
     })
     |> preload([ts: ts, txs: txs, cl: cl, ct: ct, cu: cu, dpm: dpm],
       timesheet: ts,

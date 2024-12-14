@@ -1,16 +1,27 @@
 defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.Users
+  import Ecto.Query
+  alias Algora.Repo
+  alias Algora.Users.User
+  alias Algora.Payments.Transaction
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
     Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
 
+    stats = [
+      %{label: "Paid Out", value: Money.to_string!(get_total_paid_out())},
+      %{label: "Completed Bounties", value: get_completed_bounties_count()},
+      %{label: "Contributors", value: get_contributors_count()},
+      %{label: "Countries", value: get_countries_count()}
+    ]
+
     {:ok,
      socket
      |> assign(:featured_devs, Users.list_featured_developers(country_code))
      |> assign(:featured_orgs, list_featured_orgs())
-     |> assign(:stats, fetch_stats())}
+     |> assign(:stats, stats)}
   end
 
   @impl true
@@ -288,13 +299,39 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  def fetch_stats() do
-    [
-      %{label: "Paid Out", value: "$283,868"},
-      %{label: "Completed Bounties", value: "2,240"},
-      %{label: "Contributors", value: "509"},
-      %{label: "Countries", value: "67"}
-    ]
+  defp get_total_paid_out do
+    Repo.one(
+      from t in Transaction,
+        where: t.type == :credit and t.status == :succeeded,
+        select: sum(t.net_amount)
+    ) || Money.new(0, :USD)
+  end
+
+  defp get_completed_bounties_count do
+    Repo.one(
+      from t in Transaction,
+        where: t.type == :credit and t.status == :succeeded and not is_nil(t.bounty_id),
+        select: count(fragment("DISTINCT ?", t.bounty_id))
+    ) || 0
+  end
+
+  defp get_contributors_count do
+    Repo.one(
+      from t in Transaction,
+        where: t.type == :credit and t.status == :succeeded,
+        select: count(fragment("DISTINCT ?", t.user_id))
+    ) || 0
+  end
+
+  defp get_countries_count do
+    Repo.one(
+      from u in User,
+        join: t in Transaction,
+        on: t.user_id == u.id,
+        where: t.type == :credit and t.status == :succeeded,
+        where: not is_nil(u.country) and u.country != "",
+        select: count(fragment("DISTINCT ?", u.country))
+    ) || 0
   end
 
   def list_featured_orgs() do

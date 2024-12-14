@@ -143,32 +143,46 @@ defmodule AlgoraWeb.User.ProfileLive do
         </div>
         <!-- Reviews Column -->
         <div class="space-y-4">
-          <h2 class="text-lg font-semibold">Reviews</h2>
           <div class="grid gap-4">
-            <%= for review <- @reviews do %>
-              <div class="w-full rounded-lg bg-card p-4 text-sm border border-border">
-                <div class="flex items-center gap-1 mb-2">
-                  <%= for i <- 1..Review.max_rating() do %>
-                    <.icon
-                      name="tabler-star-filled"
-                      class={"w-4 h-4 #{if i <= review.rating, do: "text-warning", else: "text-muted-foreground/25"}"}
-                    />
-                  <% end %>
-                </div>
-                <p class="text-sm mb-2"><%= review.content %></p>
-                <div class="flex items-center gap-3">
-                  <.avatar class="h-8 w-8">
-                    <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
-                    <.avatar_fallback>
-                      <%= String.first(review.reviewer.name) %>
-                    </.avatar_fallback>
-                  </.avatar>
-                  <div class="flex flex-col">
-                    <p class="text-sm font-medium"><%= review.reviewer.name %></p>
-                    <p class="text-xs text-muted-foreground"><%= review.organization.name %></p>
+            <%= if Enum.empty?(@reviews) do %>
+              <.card class="text-center">
+                <.card_header>
+                  <div class="mx-auto rounded-full bg-muted p-4 mb-2">
+                    <.icon name="tabler-message-circle" class="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <.card_title>No reviews yet</.card_title>
+                  <.card_description>
+                    Reviews will appear here once this user receives feedback
+                  </.card_description>
+                </.card_header>
+              </.card>
+            <% else %>
+              <h2 class="text-lg font-semibold">Reviews</h2>
+              <%= for review <- @reviews do %>
+                <div class="w-full rounded-lg bg-card p-4 text-sm border border-border">
+                  <div class="flex items-center gap-1 mb-2">
+                    <%= for i <- 1..Review.max_rating() do %>
+                      <.icon
+                        name="tabler-star-filled"
+                        class={"w-4 h-4 #{if i <= review.rating, do: "text-warning", else: "text-muted-foreground/25"}"}
+                      />
+                    <% end %>
+                  </div>
+                  <p class="text-sm mb-2"><%= review.content %></p>
+                  <div class="flex items-center gap-3">
+                    <.avatar class="h-8 w-8">
+                      <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
+                      <.avatar_fallback>
+                        <%= String.first(review.reviewer.name) %>
+                      </.avatar_fallback>
+                    </.avatar>
+                    <div class="flex flex-col">
+                      <p class="text-sm font-medium"><%= review.reviewer.name %></p>
+                      <p class="text-xs text-muted-foreground"><%= review.organization.name %></p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              <% end %>
             <% end %>
           </div>
         </div>

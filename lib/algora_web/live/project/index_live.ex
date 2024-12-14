@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Project.IndexLive do
         id: 1,
         title: "Build Real-time Chat Application",
         country: "US",
-        skills: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
+        tech_stack: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
         scope: %{size: "medium", duration: "medium", experience: "intermediate"},
         budget: %{type: :hourly, from: Money.new!(50, :USD), to: Money.new!(75, :USD)},
         description: "Looking for an experienced developer to build a real-time chat system...",
@@ -22,7 +22,7 @@ defmodule AlgoraWeb.Project.IndexLive do
         id: 2,
         title: "E-commerce Platform Development",
         country: "UK",
-        skills: ["Elixir", "Phoenix", "PostgreSQL", "JavaScript"],
+        tech_stack: ["Elixir", "Phoenix", "PostgreSQL", "JavaScript"],
         scope: %{size: "large", duration: "long", experience: "expert"},
         budget: %{type: :fixed, from: Money.new!(15_000, :USD), to: Money.new!(20_000, :USD)},
         description: "Need to build a scalable e-commerce platform...",
@@ -117,9 +117,9 @@ defmodule AlgoraWeb.Project.IndexLive do
               </p>
 
               <div class="flex flex-wrap gap-2 mb-4">
-                <%= for skill <- project.skills do %>
+                <%= for tech <- project.tech_stack do %>
                   <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                    <%= skill %>
+                    <%= tech %>
                   </span>
                 <% end %>
               </div>

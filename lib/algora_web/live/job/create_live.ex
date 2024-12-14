@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Job.CreateLive do
   def mount(_params, session, socket) do
     job = %{
       country: "US",
-      skills: ["Elixir"],
+      tech_stack: ["Elixir"],
       title: "",
       scope: %{size: nil, duration: nil, experience: nil},
       budget: %{type: :hourly, from: nil, to: nil},
@@ -65,7 +65,7 @@ defmodule AlgoraWeb.Job.CreateLive do
           Matching Developers
         </h2>
         <%= if @matching_devs == [] do %>
-          <p class="text-gray-400">Add skills to see matching developers</p>
+          <p class="text-gray-400">Add tech_stack to see matching developers</p>
         <% else %>
           <%= for dev <- @matching_devs do %>
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
@@ -87,9 +87,9 @@ defmodule AlgoraWeb.Job.CreateLive do
 
                   <div class="pt-3 text-sm">
                     <div class="-ml-1 text-sm flex flex-wrap gap-1">
-                      <%= for skill <- dev.skills do %>
+                      <%= for tech <- dev.tech_stack do %>
                         <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
-                          <%= skill %>
+                          <%= tech %>
                         </span>
                       <% end %>
                     </div>
@@ -108,7 +108,7 @@ defmodule AlgoraWeb.Job.CreateLive do
     ~H"""
     <div class="space-y-8">
       <h2 class="text-4xl font-semibold text-white">
-        Which specific skills do you need your Elixir developer to have?
+        Which specific tech stack do you need your Elixir developer to have?
       </h2>
 
       <div>
@@ -120,12 +120,12 @@ defmodule AlgoraWeb.Job.CreateLive do
       </div>
 
       <div class="flex flex-wrap gap-3">
-        <%= for skill <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
+        <%= for tech <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
           <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
-            <%= skill %>
+            <%= tech %>
             <button
-              phx-click="remove_skill"
-              phx-value-skill={skill}
+              phx-click="remove_tech"
+              phx-value-tech={tech}
               class="ml-2 text-indigo-300 hover:text-indigo-100"
             >
               ×
@@ -135,15 +135,17 @@ defmodule AlgoraWeb.Job.CreateLive do
       </div>
 
       <div>
-        <h3 class="text-lg font-medium text-gray-400 mb-3">Popular skills for Software Developers</h3>
+        <h3 class="text-lg font-medium text-gray-400 mb-3">
+          Popular tech stacks for Software Developers
+        </h3>
         <div class="flex flex-wrap gap-3">
-          <%= for skill <- ["JavaScript", "CSS", "PHP", "React", "HTML", "Node.js", "iOS", "MySQL", "Python", "HTML5"] do %>
+          <%= for tech <- ["JavaScript", "CSS", "PHP", "React", "HTML", "Node.js", "iOS", "MySQL", "Python", "HTML5"] do %>
             <button
-              phx-click="add_skill"
-              phx-value-skill={skill}
+              phx-click="add_tech"
+              phx-value-tech={tech}
               class="bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm font-semibold flex items-center"
             >
-              + <%= skill %>
+              + <%= tech %>
             </button>
           <% end %>
         </div>
@@ -288,13 +290,13 @@ defmodule AlgoraWeb.Job.CreateLive do
     """
   end
 
-  defp update_job_field(job, "skills", _value, %{"skill" => skill}) do
-    skills =
-      if skill in job.skills,
-        do: List.delete(job.skills, skill),
-        else: [skill | job.skills]
+  defp update_job_field(job, "tech_stack", _value, %{"tech" => tech}) do
+    tech_stack =
+      if tech in job.tech_stack,
+        do: List.delete(job.tech_stack, tech),
+        else: [tech | job.tech_stack]
 
-    %{job | skills: skills}
+    %{job | tech_stack: tech_stack}
   end
 
   defp update_job_field(job, "scope." <> scope_field, value, _params) do
@@ -324,15 +326,15 @@ defmodule AlgoraWeb.Job.CreateLive do
     {:noreply, socket}
   end
 
-  def handle_event("add_skill", %{"skill" => skill}, socket) do
-    updated_skills = [skill | socket.assigns.job.skills] |> Enum.uniq()
-    updated_job = Map.put(socket.assigns.job, :skills, updated_skills)
+  def handle_event("add_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = [tech | socket.assigns.job.tech_stack] |> Enum.uniq()
+    updated_job = Map.put(socket.assigns.job, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, job: updated_job)}
   end
 
-  def handle_event("remove_skill", %{"skill" => skill}, socket) do
-    updated_skills = List.delete(socket.assigns.job.skills, skill)
-    updated_job = Map.put(socket.assigns.job, :skills, updated_skills)
+  def handle_event("remove_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = List.delete(socket.assigns.job.tech_stack, tech)
+    updated_job = Map.put(socket.assigns.job, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, job: updated_job)}
   end
 
@@ -348,6 +350,6 @@ defmodule AlgoraWeb.Job.CreateLive do
   defp next_step_label(4), do: "Description"
 
   defp get_matching_devs(job) do
-    Users.list_developers(limit: 5, country: job.country, skills: job.skills)
+    Users.list_developers(limit: 5, country: job.country, tech_stack: job.tech_stack)
   end
 end

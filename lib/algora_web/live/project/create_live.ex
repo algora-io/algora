@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Project.CreateLive do
   def mount(_params, session, socket) do
     project = %{
       country: "US",
-      skills: ["Elixir"],
+      tech_stack: ["Elixir"],
       title: "",
       visibility: :public
     }
@@ -66,7 +66,7 @@ defmodule AlgoraWeb.Project.CreateLive do
           Matching Developers
         </h2>
         <%= if @matching_devs == [] do %>
-          <p class="text-gray-400">Add skills to see matching developers</p>
+          <p class="text-gray-400">Add tech_stack to see matching developers</p>
         <% else %>
           <%= for dev <- @matching_devs do %>
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
@@ -94,9 +94,9 @@ defmodule AlgoraWeb.Project.CreateLive do
 
                   <div class="-m-1 pt-2 sm:pt-3 text-sm">
                     <div class="p-1 overflow-x-auto flex gap-2 scrollbar-thin pb-4">
-                      <%= for skill <- dev.skills do %>
+                      <%= for tech <- dev.tech_stack do %>
                         <span class="text-white rounded-xl px-2 py-0.5 text-xs sm:text-sm ring-1 ring-white/40 whitespace-nowrap">
-                          <%= skill %>
+                          <%= tech %>
                         </span>
                       <% end %>
                     </div>
@@ -127,12 +127,12 @@ defmodule AlgoraWeb.Project.CreateLive do
       </div>
 
       <div class="flex flex-wrap gap-3">
-        <%= for skill <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
+        <%= for tech <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
           <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
-            <%= skill %>
+            <%= tech %>
             <button
-              phx-click="remove_skill"
-              phx-value-skill={skill}
+              phx-click="remove_tech"
+              phx-value-tech={tech}
               class="ml-2 text-indigo-300 hover:text-indigo-100"
             >
               ×
@@ -256,13 +256,13 @@ defmodule AlgoraWeb.Project.CreateLive do
     """
   end
 
-  defp update_project_field(project, "skills", _value, %{"skill" => skill}) do
-    skills =
-      if skill in project.skills,
-        do: List.delete(project.skills, skill),
-        else: [skill | project.skills]
+  defp update_project_field(project, "tech_stack", _value, %{"tech" => tech}) do
+    tech_stack =
+      if tech in project.tech_stack,
+        do: List.delete(project.tech_stack, tech),
+        else: [tech | project.tech_stack]
 
-    %{project | skills: skills}
+    %{project | tech_stack: tech_stack}
   end
 
   defp update_project_field(project, "scope." <> scope_field, value, _params) do
@@ -306,15 +306,15 @@ defmodule AlgoraWeb.Project.CreateLive do
     {:noreply, socket}
   end
 
-  def handle_event("add_skill", %{"skill" => skill}, socket) do
-    updated_skills = [skill | socket.assigns.project.skills] |> Enum.uniq()
-    updated_project = Map.put(socket.assigns.project, :skills, updated_skills)
+  def handle_event("add_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = [tech | socket.assigns.project.tech_stack] |> Enum.uniq()
+    updated_project = Map.put(socket.assigns.project, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, project: updated_project)}
   end
 
-  def handle_event("remove_skill", %{"skill" => skill}, socket) do
-    updated_skills = List.delete(socket.assigns.project.skills, skill)
-    updated_project = Map.put(socket.assigns.project, :skills, updated_skills)
+  def handle_event("remove_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = List.delete(socket.assigns.project.tech_stack, tech)
+    updated_project = Map.put(socket.assigns.project, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, project: updated_project)}
   end
 
@@ -330,6 +330,6 @@ defmodule AlgoraWeb.Project.CreateLive do
   defp next_step_label(4), do: "Review"
 
   defp get_matching_devs(project) do
-    Users.list_developers(limit: 5, country: project.country, skills: project.skills)
+    Users.list_developers(limit: 5, country: project.country, tech_stack: project.tech_stack)
   end
 end

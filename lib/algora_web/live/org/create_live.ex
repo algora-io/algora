@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Org.CreateLive do
       handle: "",
       email_domain: "",
       country: "US",
-      skills: ["Elixir"]
+      tech_stack: ["Elixir"]
     }
 
     {:ok,
@@ -87,7 +87,7 @@ defmodule AlgoraWeb.Org.CreateLive do
           You're in good company
         </h2>
         <%= if @matching_orgs == [] do %>
-          <p class="text-gray-400">Add skills to see similar organizations</p>
+          <p class="text-gray-400">Add tech_stack to see similar organizations</p>
         <% else %>
           <%= for org <- @matching_orgs do %>
             <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
@@ -109,9 +109,9 @@ defmodule AlgoraWeb.Org.CreateLive do
 
                   <div class="pt-3 text-sm">
                     <div class="-ml-1 text-sm flex flex-wrap gap-1">
-                      <%= for skill <- org.tech_stack do %>
+                      <%= for tech_stack <- org.tech_stack do %>
                         <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
-                          <%= skill %>
+                          <%= tech_stack %>
                         </span>
                       <% end %>
                     </div>

@@ -6,7 +6,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def mount(_params, _session, socket) do
     context = %{
       country: "US",
-      skills: [],
+      tech_stack: [],
       intentions: [],
       email: "",
       domain: "",
@@ -204,7 +204,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               Matching Developers
             </h2>
             <%= if @matching_devs == [] do %>
-              <p class="text-muted-foreground">Add skills to see matching developers</p>
+              <p class="text-muted-foreground">Add tech stack to see matching developers</p>
             <% else %>
               <%= for dev <- @matching_devs do %>
                 <div class="mb-6 bg-card p-4 rounded-lg border border-border">
@@ -226,9 +226,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
                       <div class="pt-3 text-sm">
                         <div class="-ml-1 text-sm flex flex-wrap gap-3">
-                          <%= for skill <- dev.skills do %>
+                          <%= for tech <- dev.tech_stack do %>
                             <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
-                              <%= skill %>
+                              <%= tech %>
                             </span>
                           <% end %>
                         </div>
@@ -257,22 +257,22 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         <div class="mt-4">
           <.input
             type="text"
-            name="skill_input"
+            name="tech_input"
             value=""
             placeholder="Elixir, Phoenix, PostgreSQL, etc."
-            phx-keydown="handle_skill_input"
+            phx-keydown="handle_tech_input"
             phx-debounce="200"
             class="w-full bg-background border-input"
           />
         </div>
 
         <div class="flex flex-wrap gap-3 mt-4">
-          <%= for skill <- @context.skills do %>
+          <%= for tech <- @context.tech_stack do %>
             <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
-              <%= skill %>
+              <%= tech %>
               <button
-                phx-click="remove_skill"
-                phx-value-skill={skill}
+                phx-click="remove_tech"
+                phx-value-tech={tech}
                 class="ml-2 text-success hover:text-success/80"
               >
                 ×
@@ -534,13 +534,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp update_context_field(context, "skills", _value, %{"skill" => skill}) do
-    skills =
-      if skill in context.skills,
-        do: List.delete(context.skills, skill),
-        else: [skill | context.skills]
+  defp update_context_field(context, "tech_stack", _value, %{"tech" => tech}) do
+    tech_stack =
+      if tech in context.tech_stack,
+        do: List.delete(context.tech_stack, tech),
+        else: [tech | context.tech_stack]
 
-    %{context | skills: skills}
+    %{context | tech_stack: tech_stack}
   end
 
   defp update_context_field(context, "email" = _field, value, _params) do
@@ -568,15 +568,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, socket}
   end
 
-  def handle_event("add_skill", %{"skill" => skill}, socket) do
-    updated_skills = [skill | socket.assigns.context.skills] |> Enum.uniq()
-    updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
+  def handle_event("add_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = [tech | socket.assigns.context.tech_stack] |> Enum.uniq()
+    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  def handle_event("remove_skill", %{"skill" => skill}, socket) do
-    updated_skills = List.delete(socket.assigns.context.skills, skill)
-    updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
+  def handle_event("remove_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = List.delete(socket.assigns.context.tech_stack, tech)
+    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end
 
@@ -634,16 +634,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  def handle_event("handle_skill_input", %{"key" => "Enter", "value" => skill}, socket)
-      when byte_size(skill) > 0 do
-    updated_skills = [String.trim(skill) | socket.assigns.context.skills] |> Enum.uniq()
-    updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
+  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
+      when byte_size(tech) > 0 do
+    updated_tech_stack = [String.trim(tech) | socket.assigns.context.tech_stack] |> Enum.uniq()
+    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     matching_devs = get_matching_devs(updated_context)
 
     {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
   end
 
-  def handle_event("handle_skill_input", _params, socket) do
+  def handle_event("handle_tech_input", _params, socket) do
     {:noreply, socket}
   end
 
@@ -660,6 +660,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   defp get_matching_devs(context) do
-    Users.list_developers(limit: 5, country: context.country, skills: context.skills)
+    Users.list_developers(limit: 5, country: context.country, tech_stack: context.tech_stack)
   end
 end

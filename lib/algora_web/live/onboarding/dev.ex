@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   def mount(_params, _session, socket) do
     context = %{
       country: "US",
-      skills: [],
+      tech_stack: [],
       intentions: []
     }
 
@@ -132,22 +132,22 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         <div class="relative mt-1">
           <.input
             type="text"
-            name="skill_input"
+            name="tech_input"
             value=""
             placeholder="Elixir, Phoenix, PostgreSQL, etc."
-            phx-keydown="handle_skill_input"
+            phx-keydown="handle_tech_input"
             phx-debounce="200"
             class="w-full bg-background border-input"
           />
         </div>
 
         <div class="flex flex-wrap gap-3 mt-4">
-          <%= for skill <- @context.skills do %>
+          <%= for tech <- @context.tech_stack do %>
             <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
-              <%= skill %>
+              <%= tech %>
               <button
-                phx-click="remove_skill"
-                phx-value-skill={skill}
+                phx-click="remove_tech"
+                phx-value-tech={tech}
                 class="ml-2 text-success hover:text-success/80"
               >
                 ×
@@ -215,13 +215,13 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     """
   end
 
-  defp update_context_field(context, "skills", _value, %{"skill" => skill}) do
-    skills =
-      if skill in context.skills,
-        do: List.delete(context.skills, skill),
-        else: [skill | context.skills]
+  defp update_context_field(context, "tech_stack", _value, %{"tech" => tech}) do
+    tech_stack =
+      if tech in context.tech_stack,
+        do: List.delete(context.tech_stack, tech),
+        else: [tech | context.tech_stack]
 
-    %{context | skills: skills}
+    %{context | tech_stack: tech_stack}
   end
 
   defp update_context_field(context, "email" = _field, value, _params) do
@@ -249,15 +249,15 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     {:noreply, socket}
   end
 
-  def handle_event("add_skill", %{"skill" => skill}, socket) do
-    updated_skills = [skill | socket.assigns.context.skills] |> Enum.uniq()
-    updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
+  def handle_event("add_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = [tech | socket.assigns.context.tech_stack] |> Enum.uniq()
+    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  def handle_event("remove_skill", %{"skill" => skill}, socket) do
-    updated_skills = List.delete(socket.assigns.context.skills, skill)
-    updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
+  def handle_event("remove_tech", %{"tech" => tech}, socket) do
+    updated_tech_stack = List.delete(socket.assigns.context.tech_stack, tech)
+    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end
 
@@ -278,14 +278,14 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  def handle_event("handle_skill_input", %{"key" => "Enter", "value" => skill}, socket)
-      when byte_size(skill) > 0 do
-    updated_skills = [String.trim(skill) | socket.assigns.context.skills] |> Enum.uniq()
-    updated_context = Map.put(socket.assigns.context, :skills, updated_skills)
+  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
+      when byte_size(tech) > 0 do
+    updated_tech_stack = [String.trim(tech) | socket.assigns.context.tech_stack] |> Enum.uniq()
+    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  def handle_event("handle_skill_input", _params, socket) do
+  def handle_event("handle_tech_input", _params, socket) do
     {:noreply, socket}
   end
 end

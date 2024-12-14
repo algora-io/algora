@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Job.IndexLive do
         id: 1,
         title: "Senior Elixir Developer",
         country: "US",
-        skills: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
+        tech_stack: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
         scope: %{size: "medium", duration: "medium", experience: "intermediate"},
         budget: %{type: :hourly, from: Money.new!(50, :USD), to: Money.new!(75, :USD)},
         description: "Looking for an experienced developer to join our team...",
@@ -22,7 +22,7 @@ defmodule AlgoraWeb.Job.IndexLive do
         id: 2,
         title: "Full Stack Developer",
         country: "UK",
-        skills: ["Elixir", "Phoenix", "PostgreSQL", "JavaScript"],
+        tech_stack: ["Elixir", "Phoenix", "PostgreSQL", "JavaScript"],
         scope: %{size: "large", duration: "long", experience: "expert"},
         budget: %{type: :fixed, from: Money.new!(15_000, :USD), to: Money.new!(20_000, :USD)},
         description: "Need a full stack developer to join our growing team...",
@@ -112,9 +112,9 @@ defmodule AlgoraWeb.Job.IndexLive do
               </p>
 
               <div class="flex flex-wrap gap-2 mb-4">
-                <%= for skill <- job.skills do %>
+                <%= for tech <- job.tech_stack do %>
                   <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                    <%= skill %>
+                    <%= tech %>
                   </span>
                 <% end %>
               </div>

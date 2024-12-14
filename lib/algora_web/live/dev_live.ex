@@ -67,7 +67,7 @@ defmodule AlgoraWeb.DevLive do
     #   Users.list_developers(
     #     limit: 5,
     #     country: project.country,
-    #     skills: project.tech_stack
+    #     tech_stack: project.tech_stack
     #   )
 
     # bounties = Bounties.list_bounties(%{limit: 8})
@@ -789,9 +789,9 @@ defmodule AlgoraWeb.DevLive do
                           </div>
 
                           <div class="mt-2 flex flex-wrap gap-1">
-                            <%= for skill <- dev.skills do %>
+                            <%= for tech <- dev.tech_stack do %>
                               <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                <%= skill %>
+                                <%= tech %>
                               </span>
                             <% end %>
                           </div>

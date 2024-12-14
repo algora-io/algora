@@ -751,9 +751,9 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
               </div>
 
               <div class="mt-1 flex flex-wrap gap-2">
-                <%= for tag <- @user.skills do %>
+                <%= for tech <- @user.tech_stack do %>
                   <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
-                    <%= tag %>
+                    <%= tech %>
                   </div>
                 <% end %>
               </div>

@@ -8,7 +8,7 @@ defmodule AlgoraWeb.ChatLive do
     current_user = socket.assigns.current_user
 
     # Get all matching devs for the sidebar
-    matching_devs = Users.list_developers(limit: 20, skills: ["Elixir", "Phoenix"])
+    matching_devs = Users.list_developers(limit: 20, tech_stack: ["Elixir", "Phoenix"])
 
     # In mount function, create static chat histories
     chat_histories = [
@@ -119,7 +119,7 @@ defmodule AlgoraWeb.ChatLive do
         location: "Vancouver, Canada",
         availability: "Available for work",
         rate: "$120/hr",
-        skills: ["Elixir", "Phoenix", "React", "TypeScript", "PostgreSQL"],
+        tech_stack: ["Elixir", "Phoenix", "React", "TypeScript", "PostgreSQL"],
         socials: [
           %{name: "GitHub", url: "https://github.com/dev123", icon: "tabler-brand-github"},
           %{name: "Twitter", url: "https://twitter.com/dev123", icon: "tabler-brand-twitter"},
@@ -394,14 +394,14 @@ defmodule AlgoraWeb.ChatLive do
               <p class="text-sm text-muted-foreground">@<%= @other_user.handle %></p>
 
               <div class="-mx-1 mt-3 flex flex-wrap gap-1 justify-center">
-                <%= for skill <- Enum.take(@other_user.skills || [], 3) do %>
+                <%= for tech <- Enum.take(@other_user.tech_stack || [], 3) do %>
                   <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                    <%= skill %>
+                    <%= tech %>
                   </span>
                 <% end %>
-                <%= if length(@other_user.skills || []) > 3 do %>
+                <%= if length(@other_user.tech_stack || []) > 3 do %>
                   <span class="text-xs text-muted-foreground">
-                    +<%= length(@other_user.skills) - 3 %> more
+                    +<%= length(@other_user.tech_stack) - 3 %> more
                   </span>
                 <% end %>
               </div>

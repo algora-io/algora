@@ -102,7 +102,7 @@ gilfoyle =
       handle: "gilfoyle",
       bio: "Systems Architect. Security. DevOps. Satanist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/gilfoyle.jpg",
-      tech_stack: ["Python", "DevOps", "Security", "Linux"]
+      tech_stack: ["Python", "Rust", "Go", "Terraform"]
     }
   )
 
@@ -116,7 +116,7 @@ jared =
       handle: "jared",
       bio: "COO of Pied Piper. Former Hooli executive. Excel wizard.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jared.png",
-      tech_stack: ["Excel", "Project Management"]
+      tech_stack: ["Python", "SQL"]
     }
   )
 
@@ -131,7 +131,7 @@ carver =
       bio:
         "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/carver.jpg",
-      tech_stack: ["Python", "AWS", "Cloud Architecture", "DevOps", "System Architecture"]
+      tech_stack: ["Python", "Go", "Rust", "Terraform"]
     }
   )
 
@@ -438,7 +438,7 @@ big_head =
       handle: "bighead",
       bio: "Former Hooli executive. Accidental tech success. Stanford President.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
-      tech_stack: ["Python", "Management"],
+      tech_stack: ["Python", "JavaScript"],
       country: "IT"
     }
   )
@@ -453,7 +453,7 @@ jian_yang =
       handle: "jianyang",
       bio: "App developer. Creator of SeeFood and Smokation.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
-      tech_stack: ["Mobile Development", "AI/ML"],
+      tech_stack: ["Swift", "Python", "TensorFlow"],
       country: "HK"
     }
   )
@@ -468,7 +468,7 @@ john =
       handle: "john",
       bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
-      tech_stack: ["Infrastructure", "Networking", "Hardware"],
+      tech_stack: ["Perl", "Terraform", "C++", "C"],
       country: "GB"
     }
   )
@@ -483,7 +483,7 @@ aly =
       handle: "aly",
       bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",
-      tech_stack: ["Java", "Distributed Systems", "Kubernetes"],
+      tech_stack: ["Java", "Kotlin", "Go"],
       country: "IN"
     }
   )

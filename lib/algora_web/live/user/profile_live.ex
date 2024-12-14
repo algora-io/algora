@@ -86,60 +86,74 @@ defmodule AlgoraWeb.User.ProfileLive do
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Completed Bounties Column -->
         <div class="space-y-4">
-          <h2 class="text-lg font-semibold">Completed Bounties</h2>
-          <div class="-ml-4 relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for bounty <- @completed_bounties do %>
-                  <tr class="border-b transition-colors hover:bg-muted/10">
-                    <td class="p-4 align-middle">
-                      <div class="flex items-center gap-4">
-                        <.link href={~p"/org/#{bounty.owner.handle}"}>
-                          <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
-                            <img
-                              class="aspect-square h-full w-full"
-                              alt={bounty.owner.name}
-                              src={bounty.owner.avatar_url}
-                            />
-                          </span>
-                        </.link>
+          <%= if Enum.empty?(@completed_bounties) do %>
+            <.card class="text-center">
+              <.card_header>
+                <div class="mx-auto rounded-full bg-muted p-4 mb-2">
+                  <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+                </div>
+                <.card_title>No bounties yet</.card_title>
+                <.card_description>
+                  Completed bounties will appear here once this user solves a bounty
+                </.card_description>
+              </.card_header>
+            </.card>
+          <% else %>
+            <h2 class="text-lg font-semibold">Completed Bounties</h2>
+            <div class="-ml-4 relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for bounty <- @completed_bounties do %>
+                    <tr class="border-b transition-colors hover:bg-muted/10">
+                      <td class="p-4 align-middle">
+                        <div class="flex items-center gap-4">
+                          <.link href={~p"/org/#{bounty.owner.handle}"}>
+                            <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+                              <img
+                                class="aspect-square h-full w-full"
+                                alt={bounty.owner.display_name}
+                                src={bounty.owner.avatar_url}
+                              />
+                            </span>
+                          </.link>
 
-                        <div class="flex flex-col gap-1">
-                          <div class="flex items-center gap-1 text-sm text-muted-foreground">
+                          <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-1 text-sm text-muted-foreground">
+                              <.link
+                                href={~p"/org/#{bounty.owner.handle}"}
+                                class="font-semibold hover:underline"
+                              >
+                                <%= bounty.owner.display_name %>
+                              </.link>
+                              <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                              <.link
+                                href={"https://github.com/#{bounty.repository.owner.login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
+                                class="hover:underline"
+                              >
+                                <%= bounty.repository.name %>#<%= bounty.ticket.number %>
+                              </.link>
+                            </div>
+
                             <.link
-                              href={~p"/org/#{bounty.owner.handle}"}
-                              class="font-semibold hover:underline"
+                              href={"https://github.com/#{bounty.repository.owner.login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
+                              class="group flex items-center gap-2"
                             >
-                              <%= bounty.owner.name %>
-                            </.link>
-                            <.icon name="tabler-chevron-right" class="h-4 w-4" />
-                            <.link
-                              href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
-                              class="hover:underline"
-                            >
-                              <%= bounty.ticket.repo %>#<%= bounty.ticket.number %>
+                              <div class="font-display text-xl font-semibold text-success">
+                                <%= Money.to_string!(bounty.amount) %>
+                              </div>
+                              <div class="text-foreground group-hover:underline line-clamp-1">
+                                <%= bounty.ticket.title %>
+                              </div>
                             </.link>
                           </div>
-
-                          <.link
-                            href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
-                            class="group flex items-center gap-2"
-                          >
-                            <div class="font-display text-xl font-semibold text-success">
-                              <%= Money.to_string!(bounty.amount) %>
-                            </div>
-                            <div class="text-foreground group-hover:underline line-clamp-1">
-                              <%= bounty.ticket.title %>
-                            </div>
-                          </.link>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% end %>
         </div>
         <!-- Reviews Column -->
         <div class="space-y-4">

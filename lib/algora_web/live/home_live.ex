@@ -2,9 +2,12 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   alias Algora.Users
   import Ecto.Query
+  import Phoenix.LiveView.TagEngine
+  import Tails, only: [classes: 1]
   alias Algora.Repo
   alias Algora.Users.User
   alias Algora.Payments.Transaction
+  alias AlgoraWeb.Components.Wordmarks
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
@@ -20,7 +23,6 @@ defmodule AlgoraWeb.HomeLive do
     {:ok,
      socket
      |> assign(:featured_devs, Users.list_featured_developers(country_code))
-     |> assign(:featured_orgs, list_featured_orgs())
      |> assign(:stats, stats)}
   end
 
@@ -210,10 +212,8 @@ defmodule AlgoraWeb.HomeLive do
                   <h2 class="text-sm font-semibold leading-8 text-foreground">
                     Trusted by the world's most innovative teams
                   </h2>
-                  <div class="mt-6 grid grid-cols-5 gap-x-8 gap-y-4">
-                    <%= for org <- @featured_orgs do %>
-                      <img class="max-h-8 w-full object-contain" src={org.avatar_url} alt={org.name} />
-                    <% end %>
+                  <div class="mt-6 grid grid-cols-5 gap-x-6 gap-y-4">
+                    <.logo_cloud />
                   </div>
                 </div>
               </div>
@@ -334,33 +334,66 @@ defmodule AlgoraWeb.HomeLive do
     ) || 0
   end
 
-  def list_featured_orgs() do
-    [
-      %{
-        name: "ZIO",
-        avatar_url: "https://zio.dev/img/navbar_brand.png",
-        url: "https://zio.dev"
-      },
-      # %{
-      #   name: "Tailcall",
-      #   avatar_url: "https://tailcall.run/icons/companies/taicall.svg",
-      #   url: "https://tailcall.run"
-      # },
-      %{
-        name: "Cal.com",
-        avatar_url: "https://cal.com/logo-white.svg",
-        url: "https://cal.com"
-      },
-      %{
-        name: "Qdrant",
-        avatar_url: "https://qdrant.tech/img/logo.png",
-        url: "https://qdrant.tech"
-      }
-      # %{
-      #   name: "Maybe",
-      #   avatar_url: "https://maybe.co/assets/logo-1c6733d1.svg",
-      #   url: "https://maybe.co"
-      # }
-    ]
+  def logo_cloud(assigns) do
+    assigns =
+      assigns
+      |> assign(
+        :orgs,
+        [
+          %{
+            name: "ZIO",
+            url: "https://zio.dev",
+            args: %{
+              src: ~p"/images/wordmarks/zio.png",
+              class: "mt-4 aspect-[67/20] max-h-10 brightness-0 invert"
+            }
+          },
+          %{
+            name: "Tailcall",
+            url: "https://tailcall.run",
+            component: &Wordmarks.tailcall/1,
+            args: %{class: "max-h-12", fill: "#fff"}
+          },
+          %{
+            name: "Cal.com",
+            url: "https://cal.com",
+            component: &Wordmarks.calcom/1
+          },
+          %{
+            name: "Qdrant",
+            url: "https://qdrant.tech",
+            component: &Wordmarks.qdrant/1,
+            args: %{class: "max-h-9"}
+          },
+          %{
+            name: "Golem Cloud",
+            url: "https://www.golem.cloud",
+            component: &Wordmarks.golemcloud/1,
+            args: %{class: "max-h-9"}
+          }
+        ]
+        |> Enum.map(fn org ->
+          org
+          |> Map.put_new(:args, %{})
+          |> update_in([:args, :class], &classes(["max-h-6 w-full object-contain", &1]))
+          |> put_in([:args, :alt], org.name)
+        end)
+      )
+
+    ~H"""
+    <%= for org <- @orgs do %>
+      <div class="flex items-center justify-center">
+        <%= if org[:component] do %>
+          <%= component(
+            org.component,
+            org.args,
+            {__ENV__.module, __ENV__.function, __ENV__.file, __ENV__.line}
+          ) %>
+        <% else %>
+          <img {org.args} />
+        <% end %>
+      </div>
+    <% end %>
+    """
   end
 end

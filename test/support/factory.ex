@@ -218,7 +218,7 @@ defmodule Algora.Factory do
     factory_name
     |> build(attributes)
     |> Repo.insert!(
-      on_conflict: {:replace_all_except, [:id]},
+      on_conflict: {:replace_all_except, [:id, :display_name]},
       conflict_target: conflict_target,
       returning: true
     )

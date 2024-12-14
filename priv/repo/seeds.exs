@@ -193,7 +193,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
   )
 end
 
-num_cycles = 3
+num_cycles = 20
 
 # Create the contract template
 _contract_template =
@@ -426,4 +426,94 @@ for {reviewer, rating, content} <- reviews do
       reviewee_id: carver.id
     }
   )
+end
+
+big_head =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "bighead@example.com",
+      name: "Nelson Bighetti",
+      handle: "bighead",
+      bio: "Former Hooli executive. Accidental tech success. Stanford President.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
+      tech_stack: ["Python", "Management"],
+      country: "IT"
+    }
+  )
+
+jian_yang =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "jianyang@example.com",
+      name: "Jian Yang",
+      handle: "jianyang",
+      bio: "App developer. Creator of SeeFood and Smokation.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
+      tech_stack: ["Mobile Development", "AI/ML"],
+      country: "HK"
+    }
+  )
+
+john =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "john@example.com",
+      name: "John Stafford",
+      handle: "john",
+      bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
+      tech_stack: ["Infrastructure", "Networking", "Hardware"],
+      country: "GB"
+    }
+  )
+
+aly =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "aly@example.com",
+      name: "Aly Dutta",
+      handle: "aly",
+      bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",
+      tech_stack: ["Java", "Distributed Systems", "Kubernetes"],
+      country: "IN"
+    }
+  )
+
+for user <- [aly, big_head, jian_yang, john] do
+  debit_id = Nanoid.generate()
+  credit_id = Nanoid.generate()
+  amount = Money.new!(Enum.random(1..10) * 10_000, :USD)
+
+  Repo.transact(fn ->
+    insert!(:transaction, %{
+      id: debit_id,
+      linked_transaction_id: credit_id,
+      type: :debit,
+      status: :succeeded,
+      net_amount: amount,
+      user_id: pied_piper.id,
+      succeeded_at: days_from_now(0)
+    })
+
+    insert!(:transaction, %{
+      id: credit_id,
+      linked_transaction_id: debit_id,
+      type: :credit,
+      status: :succeeded,
+      net_amount: amount,
+      user_id: user.id,
+      succeeded_at: days_from_now(0)
+    })
+
+    {:ok, :ok}
+  end)
 end

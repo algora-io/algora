@@ -8,7 +8,7 @@ defmodule AlgoraWeb.ChatLive do
     current_user = socket.assigns.current_user
 
     # Get all matching devs for the sidebar
-    matching_devs = Users.list_matching_devs(limit: 20, skills: ["Elixir", "Phoenix"])
+    matching_devs = Users.list_developers(limit: 20, skills: ["Elixir", "Phoenix"])
 
     # In mount function, create static chat histories
     chat_histories = [

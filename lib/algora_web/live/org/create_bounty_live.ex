@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
 
   def mount(_params, _session, socket) do
     recent_bounties = Bounties.list_bounties(limit: 10)
-    matching_devs = Users.list_matching_devs(org_id: socket.assigns.current_org.id, limit: 5)
+    matching_devs = Users.list_developers(org_id: socket.assigns.current_org.id, limit: 5)
 
     changeset = %BountyForm{} |> BountyForm.changeset(%{})
 
@@ -485,7 +485,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
-    dev = Users.get_user_with_stats(dev_id)
+    {:ok, dev} = Users.fetch_developer(dev_id)
 
     {:noreply,
      socket

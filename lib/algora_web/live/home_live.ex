@@ -8,7 +8,7 @@ defmodule AlgoraWeb.HomeLive do
 
     {:ok,
      socket
-     |> assign(:featured_devs, Users.list_featured_devs())
+     |> assign(:featured_devs, Users.list_featured_developers(country_code))
      |> assign(:featured_orgs, list_featured_orgs())
      |> assign(:stats, fetch_stats())}
   end
@@ -267,12 +267,12 @@ defmodule AlgoraWeb.HomeLive do
         class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
       />
       <div class="font-display mt-1 p-3 bg-card/50 backdrop-blur-sm rounded-xl rounded-t-none text-sm ring-1 ring-border">
-        <div class="font-semibold text-foreground"><%= @dev.name %> <%= @dev.flag %></div>
+        <div class="font-semibold text-foreground"><%= @dev.display_name %> <%= @dev.flag %></div>
         <div class="mt-1 text-sm">
           <div class="p-px -ml-1 text-sm flex flex-wrap gap-1 h-6 overflow-hidden">
-            <%= for skill <- @dev.skills do %>
+            <%= for tech <- @dev.tech_stack do %>
               <span class="text-muted-foreground rounded-xl px-2 py-0.5 text-xs ring-1 ring-border bg-muted/50">
-                <%= skill %>
+                <%= tech %>
               </span>
             <% end %>
           </div>
@@ -280,7 +280,7 @@ defmodule AlgoraWeb.HomeLive do
         <div class="mt-1 text-muted-foreground text-xs">
           <span class="font-medium">Total Earned:</span>
           <span class="font-bold text-sm text-foreground">
-            <%= Money.to_string!(@dev.amount) %>
+            <%= Money.to_string!(@dev.total_earned) %>
           </span>
         </div>
       </div>

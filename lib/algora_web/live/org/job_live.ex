@@ -87,7 +87,7 @@ defmodule AlgoraWeb.Org.JobLive do
     ]
 
     matching_devs =
-      Users.list_matching_devs(
+      Users.list_developers(
         limit: 5,
         country: job.country,
         skills: job.tech_stack

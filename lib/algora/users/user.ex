@@ -1,7 +1,9 @@
 defmodule Algora.Users.User do
   use Algora.Model
 
-  alias Algora.Users.{User, Identity}
+  alias Algora.MoneyUtils
+  alias Algora.Users.User
+  alias Algora.Users.Identity
   alias Algora.Workspace.Installation
 
   @type t() :: %__MODULE__{}
@@ -34,6 +36,14 @@ defmodule Algora.Users.User do
     field :activated, :boolean, default: false
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
+
+    field :total_earned, Money.Ecto.Composite.Type, virtual: true, no_fraction_if_integer: true
+    field :completed_bounties_count, :integer, virtual: true
+    field :contributed_projects_count, :integer, virtual: true
+
+    ## TODO: remove temporary fields
+    field :message, :string, virtual: true
+    field :flag, :string, virtual: true
 
     field :need_avatar, :boolean, default: false
 
@@ -71,6 +81,15 @@ defmodule Algora.Users.User do
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
 
     timestamps()
+  end
+
+  def after_load({:ok, struct}), do: {:ok, after_load(struct)}
+  def after_load({:error, _} = result), do: result
+  def after_load(nil), do: nil
+
+  def after_load(struct) do
+    [:total_earned]
+    |> Enum.reduce(struct, &MoneyUtils.ensure_money_field(&2, &1))
   end
 
   def org_registration_changeset(params) do

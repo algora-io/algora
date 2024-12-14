@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Project.ViewLive do
       total_steps: 5
     }
 
-    matching_devs = Users.list_matching_devs(country: "US", limit: 6, skills: project.skills)
+    matching_devs = Users.list_developers(country: "US", limit: 6, skills: project.skills)
 
     {:ok,
      socket

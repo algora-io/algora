@@ -19,7 +19,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
      |> assign(:recent_bounties, Bounties.list_bounties(limit: 10))
      |> assign(
        :matching_devs,
-       Users.list_matching_devs(org_id: socket.assigns.current_org.id, limit: 5)
+       Users.list_developers(org_id: socket.assigns.current_org.id, limit: 5)
      )
      |> assign(:selected_dev, nil)
      |> assign(:show_dev_drawer, false)
@@ -676,7 +676,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
-    dev = Users.get_user_with_stats(dev_id)
+    {:ok, dev} = Users.fetch_developer(dev_id)
 
     {:noreply,
      socket

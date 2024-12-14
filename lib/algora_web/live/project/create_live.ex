@@ -330,6 +330,6 @@ defmodule AlgoraWeb.Project.CreateLive do
   defp next_step_label(4), do: "Review"
 
   defp get_matching_devs(project) do
-    Users.list_matching_devs(limit: 5, country: project.country, skills: project.skills)
+    Users.list_developers(limit: 5, country: project.country, skills: project.skills)
   end
 end

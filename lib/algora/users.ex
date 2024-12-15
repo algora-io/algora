@@ -30,13 +30,7 @@ defmodule Algora.Users do
 
       {:country, country}, query ->
         from([b] in query,
-          order_by: [
-            fragment(
-              "CASE WHEN UPPER(?) = ? THEN 0 ELSE 1 END",
-              b.country,
-              ^String.upcase(country)
-            )
-          ]
+          order_by: [fragment("CASE WHEN ? = ? THEN 0 ELSE 1 END", b.country, ^country)]
         )
 
       {:tech_stack, tech_stack}, query ->

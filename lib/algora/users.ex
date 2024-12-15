@@ -55,12 +55,12 @@ defmodule Algora.Users do
     end)
   end
 
-  @spec list_developers(criteria :: criteria()) :: [map()]
-  def list_developers(criteria \\ []) do
+  @spec list_developers_with(base_query :: Ecto.Query.t(), criteria :: criteria()) :: [map()]
+  def list_developers_with(base_query, criteria \\ []) do
     criteria = Keyword.merge([limit: 10], criteria)
 
     base_users =
-      User
+      base_query
       |> where([u], u.type == :individual)
       |> select([b], b.id)
 
@@ -114,16 +114,20 @@ defmodule Algora.Users do
     |> Repo.all()
     |> Enum.map(&User.after_load/1)
     |> Enum.map(fn user ->
-      %{
-        user
-        | flag: get_flag(user),
-          message: """
-          Hey 👋
+      Map.merge(user, %{
+        flag: get_flag(user),
+        message: """
+        Hey 👋
 
-          I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
-          """
-      }
+        I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
+        """
+      })
     end)
+  end
+
+  def list_developers(criteria \\ []) do
+    base_query()
+    |> list_developers_with(criteria)
   end
 
   def fetch_developer(id) do

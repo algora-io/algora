@@ -2,6 +2,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Reviews
   alias Algora.Users
   alias AlgoraWeb.Org.Forms.JobForm
 
@@ -746,7 +747,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.to_string!(@user.hourly_rate) %>/hr
+                  <%= Money.to_string!(@user.hourly_rate_max) %>/hr
                 </div>
               </div>
 
@@ -760,32 +761,36 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             </div>
           </div>
           <div class="max-w-xs w-full rounded-lg bg-card p-4 text-sm border border-border">
-            <div class="flex items-center gap-1 mb-2">
-              <%= for i <- 1..5 do %>
-                <.icon
-                  name="tabler-star-filled"
-                  class={"w-4 h-4 #{if i <= @user.review.stars, do: "text-warning", else: "text-muted-foreground/25"}"}
-                />
-              <% end %>
-            </div>
-            <p class="text-sm mb-2"><%= @user.review.comment %></p>
-            <div class="flex items-center gap-3">
-              <.avatar class="h-8 w-8">
-                <.avatar_image
-                  src={@user.review.reviewer.avatar_url}
-                  alt={@user.review.reviewer.name}
-                />
-                <.avatar_fallback>
-                  <%= String.first(@user.review.reviewer.name) %>
-                </.avatar_fallback>
-              </.avatar>
-              <div class="flex flex-col">
-                <p class="text-sm font-medium"><%= @user.review.reviewer.name %></p>
-                <p class="text-xs text-muted-foreground">
-                  <%= @user.review.reviewer.role %> at <%= @user.review.reviewer.company %>
-                </p>
+            <%= if @user.review do %>
+              <div class="flex items-center gap-1 mb-2">
+                <%= for i <- 1..5 do %>
+                  <.icon
+                    name="tabler-star-filled"
+                    class={"w-4 h-4 #{if i <= @user.review.rating, do: "text-warning", else: "text-muted-foreground/25"}"}
+                  />
+                <% end %>
               </div>
-            </div>
+              <p class="text-sm mb-2"><%= @user.review.content %></p>
+              <div class="flex items-center gap-3">
+                <.avatar class="h-8 w-8">
+                  <.avatar_image
+                    src={@user.review.reviewer.avatar_url}
+                    alt={@user.review.reviewer.display_name}
+                  />
+                  <.avatar_fallback>
+                    <%= String.first(@user.review.reviewer.display_name) %>
+                  </.avatar_fallback>
+                </.avatar>
+                <div class="flex flex-col">
+                  <p class="text-sm font-medium"><%= @user.review.reviewer.display_name %></p>
+                  <p class="text-xs text-muted-foreground">
+                    <%= @user.review.organization.display_name %>
+                  </p>
+                </div>
+              </div>
+            <% else %>
+              <p class="text-muted-foreground text-center">No reviews yet</p>
+            <% end %>
           </div>
         </div>
       </td>
@@ -794,58 +799,14 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   end
 
   defp fetch_matching_devs(tech_stack) do
-    Users.list_developers(tech_stack: tech_stack, limit: 3)
-    |> Enum.zip(fetch_reviews())
-    |> Enum.map(fn {user, data} -> Map.merge(user, data) end)
-  end
+    developers =
+      Users.list_developers(
+        handles: ["carver", "jianyang", "aly", "john", "bighead"],
+        tech_stack: tech_stack,
+        limit: 3
+      )
 
-  defp fetch_reviews() do
-    [
-      %{
-        hourly_rate: Money.new!(100, :USD),
-        hours_per_week: 30,
-        review: %{
-          stars: 5,
-          comment:
-            "Exceptional problem-solving skills and great communication throughout the project.",
-          reviewer: %{
-            name: "John A De Goes",
-            role: "CEO",
-            company: "Golem Cloud",
-            avatar_url:
-              "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
-          }
-        }
-      },
-      %{
-        hourly_rate: Money.new!(120, :USD),
-        hours_per_week: 20,
-        review: %{
-          stars: 4,
-          comment:
-            "Delivered high-quality work ahead of schedule. Would definitely work with again.",
-          reviewer: %{
-            name: "Michael Torres",
-            role: "CTO",
-            company: "StartupXYZ",
-            avatar_url: "/images/avatars/michael-torres.jpg"
-          }
-        }
-      },
-      %{
-        hourly_rate: Money.new!(150, :USD),
-        hours_per_week: 10,
-        review: %{
-          stars: 5,
-          comment: "Outstanding technical expertise and professional attitude.",
-          reviewer: %{
-            name: "Emily Watson",
-            role: "Product Director",
-            company: "DevLabs",
-            avatar_url: "/images/avatars/emily-watson.jpg"
-          }
-        }
-      }
-    ]
+    reviews = developers |> Enum.map(& &1.id) |> Reviews.get_top_reviews_for_users()
+    developers |> Enum.map(fn dev -> Map.merge(dev, %{review: Map.get(reviews, dev.id)}) end)
   end
 end

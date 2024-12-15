@@ -183,6 +183,7 @@ defmodule Algora.Users do
   def list_developers(criteria \\ []) do
     criteria = Keyword.merge([limit: 10], criteria)
     country = Keyword.get(criteria, :country)
+    tech_stack = Keyword.get(criteria, :tech_stack)
 
     base_users =
       User
@@ -224,6 +225,7 @@ defmodule Algora.Users do
     |> join(:left, [u], b in subquery(bounties_query), as: :bounties, on: b.user_id == u.id)
     |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
     |> order_by_country(country)
+    |> order_by_tech_stack(tech_stack)
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
     |> select_merge([u, earnings: e, bounties: b, projects: p], %{
       id: u.id,
@@ -282,6 +284,20 @@ defmodule Algora.Users do
     )
   end
 
+  defp order_by_tech_stack(query, nil), do: query
+
+  defp order_by_tech_stack(query, tech_stack) when is_list(tech_stack) do
+    query
+    |> order_by(
+      [u],
+      fragment(
+        "array_length(ARRAY(SELECT UNNEST(?::text[]) INTERSECT SELECT UNNEST(?::text[])), 1) DESC NULLS LAST",
+        u.tech_stack,
+        ^tech_stack
+      )
+    )
+  end
+
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
@@ -297,6 +313,9 @@ defmodule Algora.Users do
         from([b] in query, limit: ^limit)
 
       {:country, _country}, query ->
+        query
+
+      {:tech_stack, _tech_stack}, query ->
         query
 
       _, query ->

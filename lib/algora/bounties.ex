@@ -155,20 +155,4 @@ defmodule Algora.Bounties do
       reviews_count: 4
     }
   end
-
-  def fetch_recent_bounties(org_id \\ nil) do
-    Bounty.open()
-    |> Bounty.filter_by_org_id(org_id)
-    |> Bounty.order_by_most_recent()
-    |> Bounty.limit(4)
-    |> Repo.all()
-    |> Enum.map(fn bounty ->
-      %{
-        title: bounty.title,
-        amount: bounty.amount,
-        issue_number: bounty.issue_number,
-        inserted_at: bounty.inserted_at
-      }
-    end)
-  end
 end

@@ -47,19 +47,19 @@ defmodule Algora.Reviews do
       organization: %{
         id: o.id,
         handle: o.handle,
-        display_name: o.display_name,
+        name: o.name,
         avatar_url: o.avatar_url
       },
       reviewer: %{
         id: rr.id,
         handle: rr.handle,
-        display_name: rr.display_name,
+        name: rr.name,
         avatar_url: rr.avatar_url
       },
       reviewee: %{
         id: re.id,
         handle: re.handle,
-        display_name: re.display_name,
+        name: re.name,
         avatar_url: re.avatar_url
       }
     })

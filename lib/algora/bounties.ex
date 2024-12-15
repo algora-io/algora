@@ -77,7 +77,7 @@ defmodule Algora.Bounties do
       amount: b.amount,
       owner: %{
         id: o.id,
-        display_name: o.display_name,
+        name: o.name,
         handle: o.handle,
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack

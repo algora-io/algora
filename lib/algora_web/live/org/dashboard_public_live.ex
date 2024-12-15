@@ -13,7 +13,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
     socket =
       socket
       |> assign(:org, org)
-      |> assign(:page_title, org.display_name)
+      |> assign(:page_title, org.name)
       |> assign(:open_bounties, open_bounties)
       |> assign(:completed_bounties, completed_bounties)
       |> assign(:top_earners, top_earners)

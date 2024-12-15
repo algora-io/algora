@@ -298,7 +298,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
             <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-              <%= @bounty.owner.display_name %>
+              <%= @bounty.owner.name %>
             </.link>
             <.icon name="tabler-chevron-right" class="h-4 w-4" />
             <.link href={@bounty.ticket.url} class="hover:underline">
@@ -318,9 +318,9 @@ defmodule AlgoraWeb.User.DashboardLive do
         <div class="flex items-center gap-4">
           <.link href={~p"/org/#{@bounty.owner.handle}"}>
             <.avatar class="h-14 w-14 rounded-xl">
-              <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.display_name} />
+              <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
               <.avatar_fallback>
-                <%= String.first(@bounty.owner.display_name) %>
+                <%= String.first(@bounty.owner.name) %>
               </.avatar_fallback>
             </.avatar>
           </.link>
@@ -328,7 +328,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1 text-sm text-muted-foreground">
               <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-                <%= @bounty.owner.display_name %>
+                <%= @bounty.owner.name %>
               </.link>
               <.icon name="tabler-chevron-right" class="h-4 w-4" />
               <.link href={@bounty.ticket.url} class="hover:underline">

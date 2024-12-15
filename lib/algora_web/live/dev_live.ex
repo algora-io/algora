@@ -783,7 +783,7 @@ defmodule AlgoraWeb.DevLive do
                             <div class="text-right shrink-0">
                               <div class="text-sm text-muted-foreground">Earned</div>
                               <div class="font-medium">
-                                <%= Money.to_string!(dev.amount) %>
+                                <%= Money.to_string!(dev.total_earned) %>
                               </div>
                             </div>
                           </div>

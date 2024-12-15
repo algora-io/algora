@@ -137,7 +137,9 @@ defmodule AlgoraWeb.Project.ViewLive do
                             </div>
                             <div class="text-right">
                               <div class="text-gray-400 text-sm">Earned</div>
-                              <div class="font-semibold"><%= Money.to_string!(dev.amount) %></div>
+                              <div class="font-semibold">
+                                <%= Money.to_string!(dev.total_earned) %>
+                              </div>
                             </div>
                           </div>
                           <div class="mt-2 flex flex-wrap gap-2">

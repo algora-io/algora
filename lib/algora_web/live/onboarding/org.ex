@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     {:ok,
      socket
-     |> assign(:step, 3)
+     |> assign(:step, 1)
      |> assign(:total_steps, 3)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                         <div class="flex flex-col items-end">
                           <div class="text-muted-foreground">Earned</div>
                           <div class="font-semibold text-success font-display">
-                            <%= Money.to_string!(dev.amount) %>
+                            <%= Money.to_string!(dev.total_earned) %>
                           </div>
                         </div>
                       </div>

@@ -235,7 +235,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                         </div>
                         <div class="flex items-center gap-1">
                           <.icon name="tabler-cash" class="w-4 h-4" />
-                          <span><%= Money.to_string!(dev.amount) %></span>
+                          <span><%= Money.to_string!(dev.total_earned) %></span>
                         </div>
                       </div>
                     </div>
@@ -287,7 +287,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                     <div class="p-4 rounded-lg bg-card border border-border">
                       <div class="flex items-center gap-2 mb-2">
                         <div class="text-2xl font-bold font-display">
-                          <%= Money.to_string!(@selected_dev.amount) %>
+                          <%= Money.to_string!(@selected_dev.total_earned) %>
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Total Earnings</div>

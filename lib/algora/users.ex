@@ -37,7 +37,7 @@ defmodule Algora.Users do
         from([b] in query,
           order_by: [
             fragment(
-              "array_length(ARRAY(SELECT UNNEST(?::text[]) INTERSECT SELECT UNNEST(?::text[])), 1) DESC NULLS LAST",
+              "array_length(ARRAY(SELECT UNNEST(?::citext[]) INTERSECT SELECT UNNEST(?::citext[])), 1) DESC NULLS LAST",
               b.tech_stack,
               ^tech_stack
             )

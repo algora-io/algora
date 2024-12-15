@@ -21,7 +21,7 @@ defmodule Algora.Repo.Migrations.CreateUsers do
       add :timezone, :string
       add :stargazers_count, :integer, null: false, default: 0
       add :domain, :string
-      add :tech_stack, {:array, :string}, null: false, default: "{}"
+      add :tech_stack, {:array, :citext}, null: false, default: "{}"
       add :featured, :boolean, null: false, default: false
       add :priority, :integer, null: false, default: 0
       add :fee_pct, :integer, null: false, default: 19

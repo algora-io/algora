@@ -93,7 +93,7 @@ defmodule AlgoraWeb.Org.JobLive do
         sort_by_tech_stack: job.tech_stack
       )
 
-    bounties = Bounties.list_bounties(%{limit: 8})
+    bounties = Bounties.list_bounties(limit: 8)
 
     {:ok,
      assign(socket,

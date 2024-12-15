@@ -26,28 +26,31 @@ defmodule Algora.Bounties do
   def base_query, do: Bounty
 
   @type criteria :: %{
-          optional(:owner_id) => integer(),
           optional(:limit) => non_neg_integer(),
+          optional(:owner_id) => integer(),
           optional(:status) => :open | :paid,
-          optional(:tech_stack) => [String.t()],
-          optional(:sort_by) => :amount | :date
+          optional(:tech_stack) => [String.t()]
         }
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
-      {:status, status}, query ->
-        from([b] in query, where: b.status == ^status)
+      {:limit, limit}, query ->
+        from([b] in query, limit: ^limit)
 
       {:owner_id, owner_id}, query ->
         from([b] in query, where: b.owner_id == ^owner_id)
 
-      {:order, :amount}, query ->
-        from([b] in query, order_by: [desc: b.amount, desc: b.inserted_at, desc: b.id])
+      {:status, status}, query ->
+        from([b] in query, where: b.status == ^status)
 
-      {:order, :date}, query ->
-        from([b] in query, order_by: [desc: b.inserted_at, desc: b.id])
-
-      {:limit, limit}, query ->
-        from([b] in query, limit: ^limit)
+      {:tech_stack, tech_stack}, query ->
+        from([b] in query,
+          where:
+            fragment(
+              "EXISTS (SELECT 1 FROM UNNEST(?::citext[]) t1 WHERE t1 = ANY(?::citext[]))",
+              b.tech_stack,
+              ^tech_stack
+            )
+        )
 
       _, query ->
         query
@@ -58,10 +61,7 @@ defmodule Algora.Bounties do
   def list_bounties_with(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 
-    base_bounties =
-      base_query
-      |> apply_criteria(criteria)
-      |> select([b], b.id)
+    base_bounties = base_query |> select([b], b.id)
 
     from(b in Bounty)
     |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
@@ -69,6 +69,8 @@ defmodule Algora.Bounties do
     |> join(:inner, [b], o in assoc(b, :owner), as: :o)
     |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
+    |> apply_criteria(criteria)
+    |> order_by([b], desc: b.amount, desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,
       inserted_at: b.inserted_at,

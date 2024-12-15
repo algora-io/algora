@@ -10,12 +10,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     }
 
     bounties =
-      Bounties.list_bounties(
-        status: :completed,
-        limit: 50,
-        solver_country: "US",
-        sort_by: :amount
-      )
+      Bounties.list_bounties(status: :paid, limit: 50, solver_country: "US")
       |> Enum.uniq_by(& &1.solver.id)
 
     {:ok,

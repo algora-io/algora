@@ -98,6 +98,7 @@ defmodule Algora.Users do
     |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
     |> apply_criteria(criteria)
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
+    |> order_by([u], desc: u.id)
     |> select([u, earnings: e, bounties: b, projects: p], %{
       id: u.id,
       handle: u.handle,

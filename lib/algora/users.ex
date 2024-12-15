@@ -28,11 +28,27 @@ defmodule Algora.Users do
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
 
-      {:country, _country}, query ->
-        query
+      {:country, country}, query ->
+        from([b] in query,
+          order_by: [
+            fragment(
+              "CASE WHEN UPPER(?) = ? THEN 0 ELSE 1 END",
+              b.country,
+              ^String.upcase(country)
+            )
+          ]
+        )
 
-      {:tech_stack, _tech_stack}, query ->
-        query
+      {:tech_stack, tech_stack}, query ->
+        from([b] in query,
+          order_by: [
+            fragment(
+              "array_length(ARRAY(SELECT UNNEST(?::text[]) INTERSECT SELECT UNNEST(?::text[])), 1) DESC NULLS LAST",
+              b.tech_stack,
+              ^tech_stack
+            )
+          ]
+        )
 
       _, query ->
         query
@@ -42,13 +58,10 @@ defmodule Algora.Users do
   @spec list_developers(criteria :: criteria()) :: [map()]
   def list_developers(criteria \\ []) do
     criteria = Keyword.merge([limit: 10], criteria)
-    country = Keyword.get(criteria, :country)
-    tech_stack = Keyword.get(criteria, :tech_stack)
 
     base_users =
       User
       |> where([u], u.type == :individual)
-      |> apply_criteria(criteria)
       |> select([b], b.id)
 
     earnings_query =
@@ -84,8 +97,7 @@ defmodule Algora.Users do
     |> join(:left, [u], e in subquery(earnings_query), as: :earnings, on: e.user_id == u.id)
     |> join(:left, [u], b in subquery(bounties_query), as: :bounties, on: b.user_id == u.id)
     |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
-    |> order_by_country(country)
-    |> order_by_tech_stack(tech_stack)
+    |> apply_criteria(criteria)
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
     |> select([u, earnings: e, bounties: b, projects: p], %{
       id: u.id,
@@ -133,34 +145,6 @@ defmodule Algora.Users do
   # HACK: eventually fetch dynamically
   def list_featured_developers(_country \\ nil) do
     list_developers(handles: ["carver", "jianyang", "aly", "john", "bighead"])
-  end
-
-  defp order_by_country(query, nil), do: query
-
-  defp order_by_country(query, country) do
-    query
-    |> order_by(
-      [u],
-      fragment(
-        "CASE WHEN UPPER(?) = ? THEN 0 ELSE 1 END",
-        u.country,
-        ^String.upcase(country)
-      )
-    )
-  end
-
-  defp order_by_tech_stack(query, nil), do: query
-
-  defp order_by_tech_stack(query, tech_stack) when is_list(tech_stack) do
-    query
-    |> order_by(
-      [u],
-      fragment(
-        "array_length(ARRAY(SELECT UNNEST(?::text[]) INTERSECT SELECT UNNEST(?::text[])), 1) DESC NULLS LAST",
-        u.tech_stack,
-        ^tech_stack
-      )
-    )
   end
 
   def list_orgs(opts) do

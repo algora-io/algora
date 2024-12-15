@@ -116,7 +116,7 @@ defmodule Algora.Users.User do
       params = %{
         "handle" => info["login"],
         "email" => primary_email,
-        "name" => get_change(identity_changeset, :provider_name),
+        "display_name" => get_change(identity_changeset, :provider_name),
         "bio" => info["bio"],
         "location" => info["location"],
         "avatar_url" => info["avatar_url"],
@@ -132,7 +132,7 @@ defmodule Algora.Users.User do
       |> cast(params, [
         :handle,
         :email,
-        :name,
+        :display_name,
         :bio,
         :location,
         :avatar_url,
@@ -144,7 +144,7 @@ defmodule Algora.Users.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:email, :name, :handle])
+      |> validate_required([:email, :display_name, :handle])
       |> validate_handle()
       |> validate_email()
       |> put_assoc(:identities, [identity_changeset])
@@ -164,7 +164,7 @@ defmodule Algora.Users.User do
       params = %{
         "handle" => info["login"],
         "email" => primary_email,
-        "name" => get_change(identity_changeset, :provider_name),
+        "display_name" => get_change(identity_changeset, :provider_name),
         "bio" => info["bio"],
         "location" => info["location"],
         "avatar_url" => info["avatar_url"],
@@ -180,7 +180,7 @@ defmodule Algora.Users.User do
       |> cast(params, [
         :handle,
         :email,
-        :name,
+        :display_name,
         :bio,
         :location,
         :avatar_url,
@@ -192,7 +192,7 @@ defmodule Algora.Users.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:email, :name, :handle])
+      |> validate_required([:email, :display_name, :handle])
       |> validate_handle()
       |> validate_email()
     else
@@ -211,8 +211,8 @@ defmodule Algora.Users.User do
 
   def settings_changeset(%User{} = user, params) do
     user
-    |> cast(params, [:handle, :name, :last_context, :need_avatar])
-    |> validate_required([:handle, :name])
+    |> cast(params, [:handle, :display_name, :last_context, :need_avatar])
+    |> validate_required([:handle, :display_name])
     |> validate_handle()
   end
 
@@ -237,7 +237,7 @@ defmodule Algora.Users.User do
       provider_id: to_string(meta["id"]),
       provider_login: meta["login"],
       type: type_from_provider(:github, meta["type"]),
-      name: meta["name"],
+      display_name: meta["name"],
       bio: meta["bio"],
       location: meta["location"],
       avatar_url: meta["avatar_url"],
@@ -252,7 +252,7 @@ defmodule Algora.Users.User do
         :provider_id,
         :provider_login,
         :type,
-        :name,
+        :display_name,
         :bio,
         :location,
         :avatar_url,

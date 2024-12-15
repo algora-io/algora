@@ -802,7 +802,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
     developers =
       Users.list_developers(
         handles: ["carver", "jianyang", "aly", "john", "bighead"],
-        tech_stack: tech_stack,
+        sort_by_tech_stack: tech_stack,
         limit: 3
       )
 

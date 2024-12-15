@@ -66,8 +66,8 @@ defmodule AlgoraWeb.DevLive do
     # matching_devs =
     #   Users.list_developers(
     #     limit: 5,
-    #     country: project.country,
-    #     tech_stack: project.tech_stack
+    #     sort_by_country: project.country,
+    #     sort_by_tech_stack: project.tech_stack
     #   )
 
     # bounties = Bounties.list_bounties(%{limit: 8})

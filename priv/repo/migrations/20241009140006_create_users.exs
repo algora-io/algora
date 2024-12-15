@@ -9,7 +9,7 @@ defmodule Algora.Repo.Migrations.CreateUsers do
       add :provider_meta, :map
 
       add :email, :citext
-      add :name, :string
+      add :display_name, :string
       add :handle, :citext
       add :avatar_url, :string
       add :external_homepage_url, :string
@@ -54,8 +54,8 @@ defmodule Algora.Repo.Migrations.CreateUsers do
     end
 
     execute(
-      "ALTER TABLE users ADD COLUMN display_name VARCHAR GENERATED ALWAYS AS (COALESCE(name, handle)) STORED",
-      "ALTER TABLE users DROP COLUMN display_name"
+      "ALTER TABLE users ADD COLUMN name VARCHAR GENERATED ALWAYS AS (COALESCE(display_name, handle)) STORED",
+      "ALTER TABLE users DROP COLUMN name"
     )
 
     create unique_index(:users, [:email])

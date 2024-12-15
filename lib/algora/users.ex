@@ -102,7 +102,7 @@ defmodule Algora.Users do
     |> select([u, earnings: e, bounties: b, projects: p], %{
       id: u.id,
       handle: u.handle,
-      display_name: u.display_name,
+      name: u.name,
       avatar_url: u.avatar_url,
       bio: u.bio,
       country: u.country,

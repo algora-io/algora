@@ -775,16 +775,16 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <.avatar class="h-8 w-8">
                   <.avatar_image
                     src={@user.review.reviewer.avatar_url}
-                    alt={@user.review.reviewer.display_name}
+                    alt={@user.review.reviewer.name}
                   />
                   <.avatar_fallback>
-                    <%= String.first(@user.review.reviewer.display_name) %>
+                    <%= String.first(@user.review.reviewer.name) %>
                   </.avatar_fallback>
                 </.avatar>
                 <div class="flex flex-col">
-                  <p class="text-sm font-medium"><%= @user.review.reviewer.display_name %></p>
+                  <p class="text-sm font-medium"><%= @user.review.reviewer.name %></p>
                   <p class="text-xs text-muted-foreground">
-                    <%= @user.review.organization.display_name %>
+                    <%= @user.review.organization.name %>
                   </p>
                 </div>
               </div>

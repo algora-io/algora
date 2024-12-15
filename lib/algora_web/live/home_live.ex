@@ -278,7 +278,7 @@ defmodule AlgoraWeb.HomeLive do
         class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
       />
       <div class="font-display mt-1 p-3 bg-card/50 backdrop-blur-sm rounded-xl rounded-t-none text-sm ring-1 ring-border">
-        <div class="font-semibold text-foreground"><%= @dev.display_name %> <%= @dev.flag %></div>
+        <div class="font-semibold text-foreground"><%= @dev.name %> <%= @dev.flag %></div>
         <div class="mt-1 text-sm">
           <div class="p-px -ml-1 text-sm flex flex-wrap gap-1 h-6 overflow-hidden">
             <%= for tech <- @dev.tech_stack do %>

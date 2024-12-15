@@ -46,8 +46,6 @@ defmodule AlgoraWeb.Router do
       live "/dashboard", User.DashboardLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index
-
-      live "/@/:handle", User.ProfileLive, :index
     end
 
     live_session :org,
@@ -74,6 +72,8 @@ defmodule AlgoraWeb.Router do
 
     live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/auth/login", SignInLive, :index
+
+      live "/@/:handle", User.ProfileLive, :index
     end
 
     live "/orgs/new", Org.CreateLive

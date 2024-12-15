@@ -11,13 +11,21 @@ defmodule Algora.Users do
   def base_query, do: User
 
   @type criteria :: %{
+          optional(:id) => String.t(),
           optional(:limit) => non_neg_integer(),
-          optional(:country) => String.t()
+          optional(:handle) => String.t(),
+          optional(:handles) => [String.t()],
+          optional(:sort_by_country) => String.t(),
+          optional(:sort_by_tech_stack) => [String.t()]
         }
+
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([b] in query, where: b.id == ^id)
+
+      {:limit, limit}, query ->
+        from([b] in query, limit: ^limit)
 
       {:handle, handle}, query ->
         from([b] in query, where: b.handle == ^handle)
@@ -25,15 +33,12 @@ defmodule Algora.Users do
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)
 
-      {:limit, limit}, query ->
-        from([b] in query, limit: ^limit)
-
-      {:country, country}, query ->
+      {:sort_by_country, country}, query ->
         from([b] in query,
           order_by: [fragment("CASE WHEN ? = ? THEN 0 ELSE 1 END", b.country, ^country)]
         )
 
-      {:tech_stack, tech_stack}, query ->
+      {:sort_by_tech_stack, tech_stack}, query ->
         from([b] in query,
           order_by: [
             fragment(

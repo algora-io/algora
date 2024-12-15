@@ -350,6 +350,10 @@ defmodule AlgoraWeb.Job.CreateLive do
   defp next_step_label(4), do: "Description"
 
   defp get_matching_devs(job) do
-    Users.list_developers(limit: 5, country: job.country, tech_stack: job.tech_stack)
+    Users.list_developers(
+      limit: 5,
+      sort_by_country: job.country,
+      sort_by_tech_stack: job.tech_stack
+    )
   end
 end

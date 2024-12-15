@@ -24,13 +24,13 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="flex flex-col md:flex-row gap-6">
           <div class="flex-shrink-0">
             <.avatar class="h-12 w-12 md:h-16 md:w-16">
-              <.avatar_image src={@user.avatar_url} alt={@user.name} />
+              <.avatar_image src={@user.avatar_url} alt={@user.display_name} />
             </.avatar>
           </div>
 
           <div class="flex-1 space-y-4">
             <div>
-              <h1 class="text-2xl font-bold"><%= @user.name %></h1>
+              <h1 class="text-2xl font-bold"><%= @user.display_name %></h1>
               <p class="text-muted-foreground">@<%= @user.handle %></p>
             </div>
 
@@ -185,14 +185,19 @@ defmodule AlgoraWeb.User.ProfileLive do
                   <p class="text-sm mb-2"><%= review.content %></p>
                   <div class="flex items-center gap-3">
                     <.avatar class="h-8 w-8">
-                      <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
+                      <.avatar_image
+                        src={review.reviewer.avatar_url}
+                        alt={review.reviewer.display_name}
+                      />
                       <.avatar_fallback>
-                        <%= String.first(review.reviewer.name) %>
+                        <%= String.first(review.reviewer.display_name) %>
                       </.avatar_fallback>
                     </.avatar>
                     <div class="flex flex-col">
-                      <p class="text-sm font-medium"><%= review.reviewer.name %></p>
-                      <p class="text-xs text-muted-foreground"><%= review.organization.name %></p>
+                      <p class="text-sm font-medium"><%= review.reviewer.display_name %></p>
+                      <p class="text-xs text-muted-foreground">
+                        <%= review.organization.display_name %>
+                      </p>
                     </div>
                   </div>
                 </div>

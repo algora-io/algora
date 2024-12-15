@@ -23,6 +23,8 @@ defmodule Algora.Bounties do
     |> Repo.insert()
   end
 
+  def base_query, do: Bounty
+
   @type criteria :: %{
           optional(:owner_id) => integer(),
           optional(:limit) => non_neg_integer(),
@@ -30,6 +32,27 @@ defmodule Algora.Bounties do
           optional(:tech_stack) => [String.t()],
           optional(:sort_by) => :amount | :date
         }
+  defp apply_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {:status, status}, query ->
+        from([b] in query, where: b.status == ^status)
+
+      {:owner_id, owner_id}, query ->
+        from([b] in query, where: b.owner_id == ^owner_id)
+
+      {:order, :amount}, query ->
+        from([b] in query, order_by: [desc: b.amount, desc: b.inserted_at, desc: b.id])
+
+      {:order, :date}, query ->
+        from([b] in query, order_by: [desc: b.inserted_at, desc: b.id])
+
+      {:limit, limit}, query ->
+        from([b] in query, limit: ^limit)
+
+      _, query ->
+        query
+    end)
+  end
 
   @spec list_bounties_with(base_query :: Ecto.Query.t(), criteria :: criteria()) :: [map()]
   def list_bounties_with(base_query, criteria \\ []) do
@@ -51,44 +74,45 @@ defmodule Algora.Bounties do
       inserted_at: b.inserted_at,
       amount: b.amount,
       owner: %{
+        id: o.id,
         display_name: o.display_name,
         handle: o.handle,
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack
       },
       ticket: %{
+        id: t.id,
         title: t.title,
         number: t.number,
         url: t.url
       },
       repository: %{
+        id: r.id,
         name: r.name,
-        owner: %{login: ro.provider_login}
+        owner: %{
+          id: ro.id,
+          login: ro.provider_login
+        }
       }
     })
     |> Repo.all()
   end
 
-  defp apply_criteria(query, criteria) do
-    Enum.reduce(criteria, query, fn
-      {:status, status}, query ->
-        from([b] in query, where: b.status == ^status)
+  def awarded_to_user(user_id) do
+    from b in Bounty,
+      join: t in Transaction,
+      on: t.bounty_id == b.id,
+      where: t.user_id == ^user_id and t.type == :credit and t.status == :succeeded
+  end
 
-      {:owner_id, owner_id}, query ->
-        from([b] in query, where: b.owner_id == ^owner_id)
+  def list_bounties_awarded_to_user(user_id, criteria \\ []) do
+    awarded_to_user(user_id)
+    |> list_bounties_with(criteria)
+  end
 
-      {:order, :amount}, query ->
-        from([b] in query, order_by: [desc: b.amount, desc: b.inserted_at, desc: b.id])
-
-      {:order, :date}, query ->
-        from([b] in query, order_by: [desc: b.inserted_at, desc: b.id])
-
-      {:limit, limit}, query ->
-        from([b] in query, limit: ^limit)
-
-      _, query ->
-        query
-    end)
+  def list_bounties(criteria \\ []) do
+    base_query()
+    |> list_bounties_with(criteria)
   end
 
   def fetch_stats(org_id \\ nil) do
@@ -144,27 +168,5 @@ defmodule Algora.Bounties do
         inserted_at: bounty.inserted_at
       }
     end)
-  end
-
-  def base_query, do: Bounty
-
-  def awarded_to_user(user_id) do
-    from b in Bounty,
-      join: t in Transaction,
-      on: t.bounty_id == b.id,
-      where:
-        t.user_id == ^user_id and
-          t.type == :credit and
-          t.status == :succeeded
-  end
-
-  def list_bounties_awarded_to_user(user_id, criteria \\ []) do
-    awarded_to_user(user_id)
-    |> list_bounties_with(criteria)
-  end
-
-  def list_bounties(criteria \\ []) do
-    base_query()
-    |> list_bounties_with(criteria)
   end
 end

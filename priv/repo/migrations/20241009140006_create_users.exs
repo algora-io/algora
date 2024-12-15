@@ -31,6 +31,10 @@ defmodule Algora.Repo.Migrations.CreateUsers do
       add :manual_assignment, :boolean, null: false, default: false
       add :bounty_mode, :string, null: false, default: "community"
 
+      add :hourly_rate_min, :money_with_currency
+      add :hourly_rate_max, :money_with_currency
+      add :hours_per_week, :integer
+
       add :website_url, :string
       add :twitter_url, :string
       add :github_url, :string

@@ -417,32 +417,6 @@ for {repo_name, issues} <- repos do
   end
 end
 
-reviews = [
-  {richard, Algora.Reviews.Review.max_rating() - 1,
-   "His cloud architecture is... unconventional, but it works. Like, really works. Our servers haven't crashed in weeks. Just wish he'd document things better."},
-  {gilfoyle, Algora.Reviews.Review.max_rating(),
-   "Finally, someone who understands that true system architecture requires embracing chaos. His security implementations are adequately paranoid. Satan would approve."},
-  {dinesh, Algora.Reviews.Review.max_rating() - 2,
-   "The infrastructure is faster, I'll give him that. But his code comments are borderline offensive and he keeps calling my frontend 'cute'. Still better than our previous setup."},
-  {jared, Algora.Reviews.Review.max_rating() - 1,
-   "Very efficient contractor! While his methods are somewhat anxiety-inducing, our uptime metrics have improved by 287%. Would recommend (with appropriate warnings)."}
-]
-
-for {reviewer, rating, content} <- reviews do
-  insert!(
-    :review,
-    %{
-      rating: rating,
-      content: content,
-      visibility: :public,
-      contract_id: initial_contract.id,
-      organization_id: pied_piper.id,
-      reviewer_id: reviewer.id,
-      reviewee_id: carver.id
-    }
-  )
-end
-
 big_head =
   upsert!(
     :user,
@@ -543,4 +517,38 @@ for user <- [aly, big_head, jian_yang, john] do
 
     {:ok, :ok}
   end)
+end
+
+reviews = [
+  {richard, carver, -1,
+   "His cloud architecture is... unconventional, but it works. Like, really works. Our servers haven't crashed in weeks. Just wish he'd document things better."},
+  {gilfoyle, carver, 0,
+   "Finally, someone who understands that true system architecture requires embracing chaos. His security implementations are adequately paranoid. Satan would approve."},
+  {dinesh, carver, -2,
+   "The infrastructure is faster, I'll give him that. But his code comments are borderline offensive and he keeps calling my frontend 'cute'. Still better than our previous setup."},
+  {jared, carver, -1,
+   "Very efficient contractor! While his methods are somewhat anxiety-inducing, our uptime metrics have improved by 287%. Would recommend (with appropriate warnings)."},
+  {richard, aly, -1,
+   "Aly's expertise in distributed systems helped us optimize our entire backend. Their Java implementations were surprisingly elegant."},
+  {gilfoyle, big_head, -2,
+   "Big Head somehow managed to solve our most complex scaling issues by complete accident. I'm still not sure if he knows what he did."},
+  {dinesh, jian_yang, -1,
+   "Jian Yang's machine learning optimizations were impressive, even though half his comments were in Chinese. The SeeFood integration works flawlessly."},
+  {jared, john, 0,
+   "John's datacenter expertise saved us thousands in operational costs. His documentation is immaculate and his Perl scripts, while archaic, are incredibly efficient."}
+]
+
+for {reviewer, reviewee, rating_delta, content} <- reviews do
+  insert!(
+    :review,
+    %{
+      rating: Algora.Reviews.Review.max_rating() + rating_delta,
+      content: content,
+      visibility: :public,
+      contract_id: initial_contract.id,
+      organization_id: pied_piper.id,
+      reviewer_id: reviewer.id,
+      reviewee_id: reviewee.id
+    }
+  )
 end

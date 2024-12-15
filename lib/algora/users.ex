@@ -8,9 +8,159 @@ defmodule Algora.Users do
   alias Algora.Users.Identity
   alias Algora.Payments.Transaction
 
+  def base_query, do: User
+
+  @type criteria :: %{
+          optional(:limit) => non_neg_integer(),
+          optional(:country) => String.t()
+        }
+  defp apply_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {:id, id}, query ->
+        from([b] in query, where: b.id == ^id)
+
+      {:handle, handle}, query ->
+        from([b] in query, where: b.handle == ^handle)
+
+      {:handles, handles}, query ->
+        from([b] in query, where: b.handle in ^handles)
+
+      {:limit, limit}, query ->
+        from([b] in query, limit: ^limit)
+
+      {:country, _country}, query ->
+        query
+
+      {:tech_stack, _tech_stack}, query ->
+        query
+
+      _, query ->
+        query
+    end)
+  end
+
+  @spec list_developers(criteria :: criteria()) :: [map()]
+  def list_developers(criteria \\ []) do
+    criteria = Keyword.merge([limit: 10], criteria)
+    country = Keyword.get(criteria, :country)
+    tech_stack = Keyword.get(criteria, :tech_stack)
+
+    base_users =
+      User
+      |> where([u], u.type == :individual)
+      |> apply_criteria(criteria)
+      |> select([b], b.id)
+
+    earnings_query =
+      from t in Transaction,
+        where: t.type == :credit and t.status == :succeeded,
+        group_by: t.user_id,
+        select: %{
+          user_id: t.user_id,
+          total_earned: sum(t.net_amount)
+        }
+
+    bounties_query =
+      from t in Transaction,
+        where: t.type == :credit and t.status == :succeeded and not is_nil(t.bounty_id),
+        group_by: t.user_id,
+        select: %{
+          user_id: t.user_id,
+          bounties_count: count(fragment("DISTINCT ?", t.bounty_id))
+        }
+
+    projects_query =
+      from t in Transaction,
+        join: lt in assoc(t, :linked_transaction),
+        where: t.type == :credit and t.status == :succeeded and lt.type == :debit,
+        group_by: t.user_id,
+        select: %{
+          user_id: t.user_id,
+          projects_count: count(fragment("DISTINCT ?", lt.user_id))
+        }
+
+    User
+    |> join(:inner, [u], b in subquery(base_users), as: :base, on: u.id == b.id)
+    |> join(:left, [u], e in subquery(earnings_query), as: :earnings, on: e.user_id == u.id)
+    |> join(:left, [u], b in subquery(bounties_query), as: :bounties, on: b.user_id == u.id)
+    |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
+    |> order_by_country(country)
+    |> order_by_tech_stack(tech_stack)
+    |> order_by([earnings: e], desc_nulls_last: e.total_earned)
+    |> select([u, earnings: e, bounties: b, projects: p], %{
+      id: u.id,
+      handle: u.handle,
+      display_name: u.display_name,
+      avatar_url: u.avatar_url,
+      bio: u.bio,
+      country: u.country,
+      tech_stack: u.tech_stack,
+      total_earned: Algora.SQL.money_or_zero(e.total_earned),
+      completed_bounties_count: coalesce(b.bounties_count, 0),
+      contributed_projects_count: coalesce(p.projects_count, 0)
+    })
+    |> Repo.all()
+    |> Enum.map(&User.after_load/1)
+    |> Enum.map(fn user ->
+      %{
+        user
+        | flag: get_flag(user),
+          message: """
+          Hey 👋
+
+          I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
+          """
+      }
+    end)
+  end
+
+  def fetch_developer(id) do
+    case list_developers(id: id, limit: 1) do
+      [developer] -> {:ok, developer}
+      _ -> {:error, :not_found}
+    end
+  end
+
+  def fetch_developer_by(criteria) do
+    criteria = Keyword.put(criteria, :limit, 1)
+
+    case list_developers(criteria) do
+      [developer] -> {:ok, developer}
+      _ -> {:error, :not_found}
+    end
+  end
+
   # HACK: eventually fetch dynamically
   def list_featured_developers(_country \\ nil) do
     list_developers(handles: ["carver", "jianyang", "aly", "john", "bighead"])
+  end
+
+  defp order_by_country(query, nil), do: query
+
+  defp order_by_country(query, country) do
+    query
+    |> order_by(
+      [u],
+      fragment(
+        "CASE WHEN UPPER(?) = ? THEN 0 ELSE 1 END",
+        u.country,
+        ^String.upcase(country)
+      )
+    )
+  end
+
+  defp order_by_tech_stack(query, nil), do: query
+
+  defp order_by_tech_stack(query, tech_stack) when is_list(tech_stack) do
+    query
+    |> order_by(
+      [u],
+      fragment(
+        "array_length(ARRAY(SELECT UNNEST(?::text[]) INTERSECT SELECT UNNEST(?::text[])), 1) DESC NULLS LAST",
+        u.tech_stack,
+        ^tech_stack
+      )
+    )
   end
 
   def list_orgs(opts) do
@@ -173,153 +323,4 @@ defmodule Algora.Users do
   end
 
   defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
-
-  @type criteria :: %{
-          optional(:limit) => non_neg_integer(),
-          optional(:country) => String.t()
-        }
-
-  @spec list_developers(criteria :: criteria()) :: [map()]
-  def list_developers(criteria \\ []) do
-    criteria = Keyword.merge([limit: 10], criteria)
-    country = Keyword.get(criteria, :country)
-    tech_stack = Keyword.get(criteria, :tech_stack)
-
-    base_users =
-      User
-      |> where([u], u.type == :individual)
-      |> apply_criteria(criteria)
-      |> select([b], b.id)
-
-    earnings_query =
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded,
-        group_by: t.user_id,
-        select: %{
-          user_id: t.user_id,
-          total_earned: sum(t.net_amount)
-        }
-
-    bounties_query =
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded and not is_nil(t.bounty_id),
-        group_by: t.user_id,
-        select: %{
-          user_id: t.user_id,
-          bounties_count: count(fragment("DISTINCT ?", t.bounty_id))
-        }
-
-    projects_query =
-      from t in Transaction,
-        join: lt in assoc(t, :linked_transaction),
-        where: t.type == :credit and t.status == :succeeded and lt.type == :debit,
-        group_by: t.user_id,
-        select: %{
-          user_id: t.user_id,
-          projects_count: count(fragment("DISTINCT ?", lt.user_id))
-        }
-
-    User
-    |> join(:inner, [u], b in subquery(base_users), as: :base, on: u.id == b.id)
-    |> join(:left, [u], e in subquery(earnings_query), as: :earnings, on: e.user_id == u.id)
-    |> join(:left, [u], b in subquery(bounties_query), as: :bounties, on: b.user_id == u.id)
-    |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
-    |> order_by_country(country)
-    |> order_by_tech_stack(tech_stack)
-    |> order_by([earnings: e], desc_nulls_last: e.total_earned)
-    |> select_merge([u, earnings: e, bounties: b, projects: p], %{
-      id: u.id,
-      display_name: u.display_name,
-      handle: u.handle,
-      country: u.country,
-      tech_stack: fragment("ARRAY(SELECT unnest(?) LIMIT 6)", u.tech_stack),
-      total_earned: Algora.SQL.money_or_zero(e.total_earned),
-      completed_bounties_count: coalesce(b.bounties_count, 0),
-      contributed_projects_count: coalesce(p.projects_count, 0),
-      avatar_url: u.avatar_url,
-      bio: u.bio
-    })
-    |> Repo.all()
-    |> Enum.map(&User.after_load/1)
-    |> Enum.map(fn user ->
-      %{
-        user
-        | flag: get_flag(user),
-          message: """
-          Hey 👋
-
-          I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
-          """
-      }
-    end)
-  end
-
-  def fetch_developer(id) do
-    case list_developers(id: id, limit: 1) do
-      [developer] -> {:ok, developer}
-      _ -> {:error, :not_found}
-    end
-  end
-
-  def fetch_developer_by(criteria) do
-    criteria = Keyword.put(criteria, :limit, 1)
-
-    case list_developers(criteria) do
-      [developer] -> {:ok, developer}
-      _ -> {:error, :not_found}
-    end
-  end
-
-  defp order_by_country(query, nil), do: query
-
-  defp order_by_country(query, country) do
-    query
-    |> order_by(
-      [u],
-      fragment(
-        "CASE WHEN UPPER(?) = ? THEN 0 ELSE 1 END",
-        u.country,
-        ^String.upcase(country)
-      )
-    )
-  end
-
-  defp order_by_tech_stack(query, nil), do: query
-
-  defp order_by_tech_stack(query, tech_stack) when is_list(tech_stack) do
-    query
-    |> order_by(
-      [u],
-      fragment(
-        "array_length(ARRAY(SELECT UNNEST(?::text[]) INTERSECT SELECT UNNEST(?::text[])), 1) DESC NULLS LAST",
-        u.tech_stack,
-        ^tech_stack
-      )
-    )
-  end
-
-  defp apply_criteria(query, criteria) do
-    Enum.reduce(criteria, query, fn
-      {:id, id}, query ->
-        from([b] in query, where: b.id == ^id)
-
-      {:handle, handle}, query ->
-        from([b] in query, where: b.handle == ^handle)
-
-      {:handles, handles}, query ->
-        from([b] in query, where: b.handle in ^handles)
-
-      {:limit, limit}, query ->
-        from([b] in query, limit: ^limit)
-
-      {:country, _country}, query ->
-        query
-
-      {:tech_stack, _tech_stack}, query ->
-        query
-
-      _, query ->
-        query
-    end)
-  end
 end

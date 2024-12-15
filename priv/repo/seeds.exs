@@ -70,7 +70,7 @@ richard =
     [:email],
     %{
       email: "richard@example.com",
-      name: "Richard Hendricks",
+      display_name: "Richard Hendricks",
       handle: "richard",
       bio: "CEO of Pied Piper. Creator of the middle-out compression algorithm.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/richard.jpg",
@@ -87,7 +87,7 @@ dinesh =
     [:email],
     %{
       email: "dinesh@example.com",
-      name: "Dinesh Chugtai",
+      display_name: "Dinesh Chugtai",
       handle: "dinesh",
       bio: "Lead Frontend Engineer at Pied Piper. Java bad, Python good.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/dinesh.png",
@@ -104,7 +104,7 @@ gilfoyle =
     [:email],
     %{
       email: "gilfoyle@example.com",
-      name: "Bertram Gilfoyle",
+      display_name: "Bertram Gilfoyle",
       handle: "gilfoyle",
       bio: "Systems Architect. Security. DevOps. Satanist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/gilfoyle.jpg",
@@ -121,7 +121,7 @@ jared =
     [:email],
     %{
       email: "jared@example.com",
-      name: "Jared Dunn",
+      display_name: "Jared Dunn",
       handle: "jared",
       bio: "COO of Pied Piper. Former Hooli executive. Excel wizard.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jared.png",
@@ -138,7 +138,7 @@ carver =
     [:email],
     %{
       email: "carver@example.com",
-      name: "Kevin 'The Carver'",
+      display_name: "Kevin 'The Carver'",
       handle: "carver",
       bio:
         "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
@@ -423,7 +423,7 @@ big_head =
     [:email],
     %{
       email: "bighead@example.com",
-      name: "Nelson Bighetti",
+      display_name: "Nelson Bighetti",
       handle: "bighead",
       bio: "Former Hooli executive. Accidental tech success. Stanford President.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
@@ -441,7 +441,7 @@ jian_yang =
     [:email],
     %{
       email: "jianyang@example.com",
-      name: "Jian Yang",
+      display_name: "Jian Yang",
       handle: "jianyang",
       bio: "App developer. Creator of SeeFood and Smokation.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
@@ -459,7 +459,7 @@ john =
     [:email],
     %{
       email: "john@example.com",
-      name: "John Stafford",
+      display_name: "John Stafford",
       handle: "john",
       bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
@@ -477,7 +477,7 @@ aly =
     [:email],
     %{
       email: "aly@example.com",
-      name: "Aly Dutta",
+      display_name: "Aly Dutta",
       handle: "aly",
       bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",

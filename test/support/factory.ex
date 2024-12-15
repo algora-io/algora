@@ -14,7 +14,7 @@ defmodule Algora.Factory do
       id: Nanoid.generate(),
       type: :individual,
       email: "erich@example.com",
-      name: "Erlich Bachman",
+      display_name: "Erlich Bachman",
       handle: "erich",
       bio: "Founder of Aviato, Incubator extraordinaire",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/erich.jpg",
@@ -38,7 +38,7 @@ defmodule Algora.Factory do
       id: Nanoid.generate(),
       type: :organization,
       email: "piedpiper@example.com",
-      name: "Pied Piper",
+      display_name: "Pied Piper",
       handle: "piedpiper",
       bio:
         "Making the world a better place through constructing elegant hierarchies for maximum code re-use and extensibility",

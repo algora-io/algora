@@ -70,7 +70,7 @@ defmodule AlgoraWeb.DevLive do
     #     sort_by_tech_stack: project.tech_stack
     #   )
 
-    # bounties = Bounties.list_bounties(%{limit: 8})
+    # bounties = Bounties.list_bounties(limit: 8)
 
     {:ok,
      assign(socket,

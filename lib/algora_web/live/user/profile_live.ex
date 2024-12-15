@@ -11,8 +11,8 @@ defmodule AlgoraWeb.User.ProfileLive do
     {:ok,
      socket
      |> assign(:user, user)
-     |> assign(:page_title, "#{handle}")
-     |> assign(:completed_bounties, Bounties.list_bounties(limit: 10, status: :paid))
+     |> assign(:page_title, "#{user.display_name}")
+     |> assign(:completed_bounties, Bounties.list_bounties_awarded_to_user(user.id, limit: 10))
      |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))}
   end
 
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= Money.to_string!(@user.amount) %>
+              <%= Money.to_string!(@user.total_earned) %>
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Total Earnings</div>
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= @user.bounties %>
+              <%= @user.completed_bounties_count %>
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Bounties Solved</div>
@@ -76,7 +76,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= @user.projects %>
+              <%= @user.contributed_projects_count %>
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Projects Contributed</div>

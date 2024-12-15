@@ -11,7 +11,7 @@ defmodule Algora.Repo.Migrations.CreateTickets do
       add :title, :string
       add :description, :text
       add :number, :integer
-      add :url, :string
+      add :url, :string, null: false
 
       add :repository_id, references(:repositories, on_delete: :delete_all)
 

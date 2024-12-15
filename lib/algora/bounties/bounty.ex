@@ -26,15 +26,41 @@ defmodule Algora.Bounties.Bounty do
     |> validate_number(:amount, greater_than: 0)
   end
 
-  def url(bounty),
-    do:
-      "https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"
+  def url(%{
+        repository: %{name: name, owner: %{login: login}},
+        ticket: %{provider: "github", number: number}
+      }) do
+    "https://github.com/#{login}/#{name}/issues/#{number}"
+  end
 
-  def path(bounty),
-    do: "#{bounty.ticket.repo}##{bounty.ticket.number}"
+  def url(%{ticket: %{url: url}}) do
+    url
+  end
 
-  def full_path(bounty),
-    do: "#{bounty.ticket.owner}/#{bounty.ticket.repo}##{bounty.ticket.number}"
+  def path(%{repository: %{name: name}, ticket: %{number: number}}) do
+    "#{name}##{number}"
+  end
+
+  def path(%{ticket: %{provider: "github", url: url}}) do
+    url
+    |> URI.parse()
+    |> then(& &1.path)
+    |> String.replace(~r/^\/[^\/]+\//, "")
+    |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
+  end
+
+  def full_path(%{
+        repository: %{name: name, owner: %{login: login}},
+        ticket: %{number: number}
+      }) do
+    "#{login}/#{name}##{number}"
+  end
+
+  def full_path(%{ticket: %{provider: "github", url: url}}) do
+    URI.parse(url)
+    |> then(& &1.path)
+    |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
+  end
 
   def open(query \\ Bounty) do
     from b in query,

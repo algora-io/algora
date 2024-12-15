@@ -240,10 +240,6 @@ defmodule Algora.Users do
     |> Repo.all()
     |> Enum.map(&User.after_load/1)
     |> Enum.map(fn user ->
-      IO.inspect(%{total_earned: user.total_earned, handle: user.handle})
-      user
-    end)
-    |> Enum.map(fn user ->
       %{
         user
         | flag: get_flag(user),
@@ -290,6 +286,9 @@ defmodule Algora.Users do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([b] in query, where: b.id == ^id)
+
+      {:handle, handle}, query ->
+        from([b] in query, where: b.handle == ^handle)
 
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)

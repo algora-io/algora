@@ -2,11 +2,11 @@ defmodule Algora.Bounties do
   import Ecto.Query
 
   alias Algora.Bounties.Bounty
-  alias Algora.Payments.Transaction
   alias Algora.Bounties.Claim
-  alias Algora.Repo
-  alias Algora.Users.User
   alias Algora.Organizations.Member
+  alias Algora.Repo
+  alias Algora.Payments.Transaction
+  alias Algora.Users.User
 
   @spec create_bounty(
           creator :: User.t(),
@@ -28,55 +28,42 @@ defmodule Algora.Bounties do
           optional(:limit) => non_neg_integer(),
           optional(:status) => :open | :paid,
           optional(:tech_stack) => [String.t()],
-          optional(:solver_country) => String.t(),
           optional(:sort_by) => :amount | :date
         }
 
-  @spec list_bounties(criteria :: criteria()) :: [map()]
-  def list_bounties(criteria \\ []) do
+  @spec list_bounties_with(base_query :: Ecto.Query.t(), criteria :: criteria()) :: [map()]
+  def list_bounties_with(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 
     base_bounties =
-      Bounty
+      base_query
       |> apply_criteria(criteria)
       |> select([b], b.id)
 
     from(b in Bounty)
     |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
-    |> join(:inner, [b], t in assoc(b, :ticket), as: :ticket)
-    |> join(:inner, [b], o in assoc(b, :owner), as: :owner)
-    |> join(:left, [ticket: t], r in assoc(t, :repository), as: :repo)
-    |> join(:left, [repo: r], u in assoc(r, :user), as: :user)
-    |> join(:left, [b], tr in Transaction,
-      on: tr.bounty_id == b.id and not is_nil(tr.succeeded_at),
-      as: :transaction
-    )
-    |> join(:left, [transaction: tr], solver in User,
-      on: solver.id == tr.user_id,
-      as: :solver
-    )
-    |> select([b, owner: o, ticket: t, user: u, repo: r, solver: solver], %{
+    |> join(:inner, [b], t in assoc(b, :ticket), as: :t)
+    |> join(:inner, [b], o in assoc(b, :owner), as: :o)
+    |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
+    |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
+    |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,
       inserted_at: b.inserted_at,
       amount: b.amount,
-      tech_stack: o.tech_stack,
       owner: %{
-        name: coalesce(o.name, o.handle),
+        display_name: o.display_name,
         handle: o.handle,
-        avatar_url: o.avatar_url
-      },
-      solver: %{
-        id: solver.id,
-        name: coalesce(solver.name, solver.handle),
-        handle: solver.handle,
-        avatar_url: solver.avatar_url,
-        country: solver.country
+        avatar_url: o.avatar_url,
+        tech_stack: o.tech_stack
       },
       ticket: %{
         title: t.title,
-        owner: coalesce(u.provider_login, o.handle),
-        repo: coalesce(r.name, o.handle),
-        number: t.number
+        number: t.number,
+        url: t.url
+      },
+      repository: %{
+        name: r.name,
+        owner: %{login: ro.provider_login}
       }
     })
     |> Repo.all()
@@ -89,9 +76,6 @@ defmodule Algora.Bounties do
 
       {:owner_id, owner_id}, query ->
         from([b] in query, where: b.owner_id == ^owner_id)
-
-      {:solver_country, country}, query ->
-        from([b, solver: solver] in query, where: solver.country == ^country)
 
       {:order, :amount}, query ->
         from([b] in query, order_by: [desc: b.amount, desc: b.inserted_at, desc: b.id])
@@ -160,5 +144,27 @@ defmodule Algora.Bounties do
         inserted_at: bounty.inserted_at
       }
     end)
+  end
+
+  def base_query, do: Bounty
+
+  def awarded_to_user(user_id) do
+    from b in Bounty,
+      join: t in Transaction,
+      on: t.bounty_id == b.id,
+      where:
+        t.user_id == ^user_id and
+          t.type == :credit and
+          t.status == :succeeded
+  end
+
+  def list_bounties_awarded_to_user(user_id, criteria \\ []) do
+    awarded_to_user(user_id)
+    |> list_bounties_with(criteria)
+  end
+
+  def list_bounties(criteria \\ []) do
+    base_query()
+    |> list_bounties_with(criteria)
   end
 end

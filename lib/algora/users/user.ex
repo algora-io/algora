@@ -5,6 +5,7 @@ defmodule Algora.Users.User do
   alias Algora.Users.User
   alias Algora.Users.Identity
   alias Algora.Workspace.Installation
+  alias Money.Ecto.Composite.Type, as: MoneyType
 
   @type t() :: %__MODULE__{}
 
@@ -37,7 +38,11 @@ defmodule Algora.Users.User do
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
 
-    field :total_earned, Money.Ecto.Composite.Type, virtual: true, no_fraction_if_integer: true
+    field :hourly_rate_min, MoneyType, no_fraction_if_integer: true
+    field :hourly_rate_max, MoneyType, no_fraction_if_integer: true
+    field :hours_per_week, :integer
+
+    field :total_earned, MoneyType, no_fraction_if_integer: true, virtual: true
     field :completed_bounties_count, :integer, virtual: true
     field :contributed_projects_count, :integer, virtual: true
 

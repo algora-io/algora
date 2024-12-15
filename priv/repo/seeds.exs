@@ -74,7 +74,10 @@ richard =
       handle: "richard",
       bio: "CEO of Pied Piper. Creator of the middle-out compression algorithm.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/richard.jpg",
-      tech_stack: ["Python", "C++"]
+      tech_stack: ["Python", "C++"],
+      hourly_rate_min: Money.new!(200, :USD),
+      hourly_rate_max: Money.new!(300, :USD),
+      hours_per_week: 40
     }
   )
 
@@ -88,7 +91,10 @@ dinesh =
       handle: "dinesh",
       bio: "Lead Frontend Engineer at Pied Piper. Java bad, Python good.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/dinesh.png",
-      tech_stack: ["Python", "JavaScript"]
+      tech_stack: ["Python", "JavaScript"],
+      hourly_rate_min: Money.new!(150, :USD),
+      hourly_rate_max: Money.new!(200, :USD),
+      hours_per_week: 35
     }
   )
 
@@ -102,7 +108,10 @@ gilfoyle =
       handle: "gilfoyle",
       bio: "Systems Architect. Security. DevOps. Satanist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/gilfoyle.jpg",
-      tech_stack: ["Python", "Rust", "Go", "Terraform"]
+      tech_stack: ["Python", "Rust", "Go", "Terraform"],
+      hourly_rate_min: Money.new!(180, :USD),
+      hourly_rate_max: Money.new!(250, :USD),
+      hours_per_week: 40
     }
   )
 
@@ -116,7 +125,10 @@ jared =
       handle: "jared",
       bio: "COO of Pied Piper. Former Hooli executive. Excel wizard.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jared.png",
-      tech_stack: ["Python", "SQL"]
+      tech_stack: ["Python", "SQL"],
+      hourly_rate_min: Money.new!(175, :USD),
+      hourly_rate_max: Money.new!(225, :USD),
+      hours_per_week: 45
     }
   )
 
@@ -131,7 +143,10 @@ carver =
       bio:
         "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/carver.jpg",
-      tech_stack: ["Python", "Go", "Rust", "Terraform"]
+      tech_stack: ["Python", "Go", "Rust", "Terraform"],
+      hourly_rate_min: Money.new!(200, :USD),
+      hourly_rate_max: Money.new!(300, :USD),
+      hours_per_week: 30
     }
   )
 
@@ -439,7 +454,10 @@ big_head =
       bio: "Former Hooli executive. Accidental tech success. Stanford President.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
       tech_stack: ["Python", "JavaScript"],
-      country: "IT"
+      country: "IT",
+      hourly_rate_min: Money.new!(150, :USD),
+      hourly_rate_max: Money.new!(200, :USD),
+      hours_per_week: 25
     }
   )
 
@@ -454,7 +472,10 @@ jian_yang =
       bio: "App developer. Creator of SeeFood and Smokation.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
       tech_stack: ["Swift", "Python", "TensorFlow"],
-      country: "HK"
+      country: "HK",
+      hourly_rate_min: Money.new!(125, :USD),
+      hourly_rate_max: Money.new!(175, :USD),
+      hours_per_week: 35
     }
   )
 
@@ -469,7 +490,10 @@ john =
       bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
       tech_stack: ["Perl", "Terraform", "C++", "C"],
-      country: "GB"
+      country: "GB",
+      hourly_rate_min: Money.new!(140, :USD),
+      hourly_rate_max: Money.new!(190, :USD),
+      hours_per_week: 40
     }
   )
 
@@ -484,7 +508,10 @@ aly =
       bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",
       tech_stack: ["Java", "Kotlin", "Go"],
-      country: "IN"
+      country: "IN",
+      hourly_rate_min: Money.new!(160, :USD),
+      hourly_rate_max: Money.new!(220, :USD),
+      hours_per_week: 35
     }
   )
 

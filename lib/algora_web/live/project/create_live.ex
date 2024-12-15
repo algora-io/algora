@@ -87,7 +87,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                     <div class="flex flex-col items-end ml-2">
                       <div class="text-gray-300 text-sm">Earned</div>
                       <div class="text-white font-semibold text-base sm:text-lg font-display">
-                        <%= Money.to_string!(dev.amount) %>
+                        <%= Money.to_string!(dev.total_earned) %>
                       </div>
                     </div>
                   </div>

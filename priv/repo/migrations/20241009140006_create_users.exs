@@ -57,7 +57,7 @@ defmodule Algora.Repo.Migrations.CreateUsers do
     execute("ALTER TABLE users DROP COLUMN name;")
 
     execute(
-      "ALTER TABLE users ADD COLUMN name VARCHAR GENERATED ALWAYS AS (COALESCE(display_name, handle)) STORED;"
+      "ALTER TABLE users ADD COLUMN name VARCHAR GENERATED ALWAYS AS (COALESCE(NULLIF(TRIM(display_name), ''), handle)) STORED;"
     )
 
     create unique_index(:users, [:email])

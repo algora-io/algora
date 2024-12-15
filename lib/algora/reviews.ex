@@ -39,7 +39,30 @@ defmodule Algora.Reviews do
     |> join(:inner, [r], o in assoc(r, :organization), as: :o)
     |> join(:inner, [r], rr in assoc(r, :reviewer), as: :rr)
     |> join(:inner, [r], re in assoc(r, :reviewee), as: :re)
-    |> preload([o: o, rr: rr, re: re], organization: o, reviewer: rr, reviewee: re)
+    |> select([r, o: o, rr: rr, re: re], %{
+      id: r.id,
+      inserted_at: r.inserted_at,
+      rating: r.rating,
+      content: r.content,
+      organization: %{
+        id: o.id,
+        handle: o.handle,
+        display_name: o.display_name,
+        avatar_url: o.avatar_url
+      },
+      reviewer: %{
+        id: rr.id,
+        handle: rr.handle,
+        display_name: rr.display_name,
+        avatar_url: rr.avatar_url
+      },
+      reviewee: %{
+        id: re.id,
+        handle: re.handle,
+        display_name: re.display_name,
+        avatar_url: re.avatar_url
+      }
+    })
     |> Repo.all()
   end
 

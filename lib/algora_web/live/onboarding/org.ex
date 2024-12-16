@@ -13,13 +13,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     @primary_key false
     embedded_schema do
-      field :tech_stack, {:array, :string}, default: []
+      field :tech_stack, {:array, :string}
+    end
+
+    def init() do
+      to_form(TechStackForm.changeset(%TechStackForm{}, %{tech_stack: []}))
     end
 
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:tech_stack])
-      |> validate_required([:tech_stack])
       |> validate_length(:tech_stack, min: 1, message: "Please select at least one technology")
     end
   end
@@ -32,6 +35,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     embedded_schema do
       field :email, :string
       field :domain, :string
+    end
+
+    def init() do
+      to_form(VerificationForm.changeset(%VerificationForm{}, %{}))
     end
 
     def changeset(form, attrs) do
@@ -55,7 +62,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :hourly_rate_max, :integer
       field :hours_per_week, :integer
       field :hiring_status, :string
-      field :company_types, {:array, :string}, default: []
+      field :company_types, {:array, :string}
+    end
+
+    def init() do
+      to_form(PreferencesForm.changeset(%PreferencesForm{}, %{company_types: []}))
     end
 
     def changeset(form, attrs) do
@@ -98,9 +109,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     {:ok,
      socket
-     |> assign(:tech_stack_form, to_form(TechStackForm.changeset(%TechStackForm{}, %{})))
-     |> assign(:verification_form, to_form(VerificationForm.changeset(%VerificationForm{}, %{})))
-     |> assign(:preferences_form, to_form(PreferencesForm.changeset(%PreferencesForm{}, %{})))
+     |> assign(:tech_stack_form, TechStackForm.init())
+     |> assign(:verification_form, VerificationForm.init())
+     |> assign(:preferences_form, PreferencesForm.init())
      |> assign(:step, Enum.at(steps, 0))
      |> assign(:steps, steps)
      |> assign(:code_sent?, false)
@@ -164,12 +175,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_event("submit_tech_stack", _params, socket) do
-    changeset = socket.assigns.tech_stack_form.source
+    changeset =
+      socket.assigns.tech_stack_form.source
+      |> Map.put(:action, :validate)
 
-    if changeset.valid? do
-      {:noreply, assign(socket, step: :verification)}
-    else
-      {:noreply, socket}
+    case changeset do
+      %{valid?: true} ->
+        {:noreply, assign(socket, step: :verification)}
+
+      %{valid?: false} ->
+        {:noreply, assign(socket, tech_stack_form: to_form(changeset))}
     end
   end
 
@@ -272,6 +287,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               phx-keydown="add_tech"
               class="w-full bg-background border-input"
             />
+            <.error :for={msg <- @tech_stack_form[:tech_stack].errors}>
+              <%= translate_error(msg) %>
+            </.error>
           </div>
 
           <div class="flex flex-wrap gap-3 mt-4">
@@ -289,12 +307,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               </div>
             <% end %>
           </div>
-
-          <%= if @tech_stack_form.source.errors[:tech_stack] do %>
-            <p class="mt-2 text-sm text-destructive">
-              <%= translate_error(@tech_stack_form.source.errors[:tech_stack]) %>
-            </p>
-          <% end %>
         </div>
 
         <div class="flex justify-end">
@@ -321,7 +333,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           icon="tabler-mail"
           type="text"
           placeholder="you@company.com"
-          class="w-full bg-background border-input pl-10"
+          class="w-full bg-background border-input"
           data-domain-target
           phx-hook="DeriveDomain"
           autocomplete="email"
@@ -333,7 +345,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           helptext="We will add your teammates to your organization if they sign up with a verified email address from this domain"
           type="text"
           placeholder="company.com"
-          class="w-full bg-background border-input pl-10"
+          class="w-full bg-background border-input"
           data-domain-source
         />
         <p class="mt-4 text-sm text-muted-foreground/75">

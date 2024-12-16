@@ -667,8 +667,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   defp get_matching_devs(context) do
     Users.list_developers(
       limit: 5,
-      sort_by_country: context.country,
       sort_by_tech_stack: context.tech_stack,
+      sort_by_country: context.country,
       min_earnings: Money.new!(200, "USD")
     )
   end

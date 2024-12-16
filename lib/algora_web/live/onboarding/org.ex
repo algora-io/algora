@@ -56,6 +56,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
         <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
           <%= sidebar_content(assigns) %>
+          <!-- HACK: preload images to avoid layout shift -->
+          <div class="fixed opacity-0">
+            <%= sidebar_content(%{assigns | step: :verification}) %>
+          </div>
         </div>
       </div>
     </div>

@@ -8,7 +8,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     steps = [:tech_stack, :verification, :preferences]
 
     context = %{
-      country: socket.assigns.current_country,
       tech_stack: [],
       intentions: [],
       email: "",
@@ -28,7 +27,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
      |> assign(:context, context)
-     |> assign(:matching_devs, get_matching_devs(context))}
+     |> assign(:matching_devs, get_matching_devs(socket))}
   end
 
   def render(assigns) do
@@ -595,7 +594,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     socket =
       if byte_size(tech) > 0 and not tech_exists? do
         updated_context = update_in(socket.assigns.context, [:tech_stack], &(&1 ++ [tech]))
-        matching_devs = get_matching_devs(updated_context)
+        matching_devs = get_matching_devs(socket)
 
         socket
         |> assign(:context, updated_context)
@@ -626,7 +625,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     IO.puts("========================")
 
     updated_context = update_context_field(socket.assigns.context, "email", email, params)
-    matching_devs = get_matching_devs(updated_context)
+    matching_devs = get_matching_devs(socket)
 
     {:noreply,
      socket
@@ -655,7 +654,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def handle_event("update_context", %{"field" => field, "value" => value} = params, socket) do
     updated_context = update_context_field(socket.assigns.context, field, value, params)
-    matching_devs = get_matching_devs(updated_context)
+    matching_devs = get_matching_devs(socket)
     {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
   end
 
@@ -683,11 +682,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  defp get_matching_devs(context) do
+  defp get_matching_devs(socket) do
     Users.list_developers(
       limit: 5,
-      sort_by_tech_stack: context.tech_stack,
-      sort_by_country: context.country,
+      sort_by_tech_stack: socket.assigns.context.tech_stack,
+      sort_by_country: socket.assigns.current_country,
       min_earnings: Money.new!(200, "USD")
     )
   end

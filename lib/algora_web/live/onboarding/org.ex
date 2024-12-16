@@ -127,55 +127,19 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, assign(socket, :step, prev_step)}
   end
 
-  def handle_event("add_tech", %{"key" => key, "value" => tech}, socket)
-      when key in ["Enter", ","] do
-    tech = String.trim(tech)
-    current_tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
-
-    tech_exists? =
-      Enum.any?(current_tech_stack, fn t -> String.downcase(t) == String.downcase(tech) end)
-
-    if byte_size(tech) > 0 and not tech_exists? do
-      updated_tech_stack = current_tech_stack ++ [tech]
-
-      changeset =
-        %TechStackForm{}
-        |> TechStackForm.changeset(%{tech_stack: updated_tech_stack})
-
-      {:noreply,
-       socket
-       |> assign(:tech_stack_form, to_form(changeset))
-       |> assign_matching_devs()
-       |> push_event("clear-input", %{selector: "#tech-input"})}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_event("add_tech", _params, socket), do: {:noreply, socket}
-
-  def handle_event("remove_tech", %{"tech" => tech}, socket) do
-    current_tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
-    updated_tech_stack = List.delete(current_tech_stack, tech)
-
+  def handle_event("submit_tech_stack", %{"tech_stack_form" => params}, socket) do
     changeset =
       %TechStackForm{}
-      |> TechStackForm.changeset(%{tech_stack: updated_tech_stack})
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack_form, to_form(changeset))
-     |> assign_matching_devs()}
-  end
-
-  def handle_event("submit_tech_stack", _params, socket) do
-    changeset =
-      socket.assigns.tech_stack_form.source
+      |> TechStackForm.changeset(%{tech_stack: Jason.decode!(params["tech_stack"])})
       |> Map.put(:action, :validate)
 
     case changeset do
       %{valid?: true} ->
-        {:noreply, assign(socket, step: :verification)}
+        {:noreply,
+         socket
+         |> assign(:tech_stack_form, to_form(changeset))
+         |> assign_matching_devs()
+         |> assign(step: :verification)}
 
       %{valid?: false} ->
         {:noreply, assign(socket, tech_stack_form: to_form(changeset))}
@@ -270,36 +234,30 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </h2>
           <p class="text-muted-foreground">Select the technologies you work with</p>
 
-          <div class="mt-4">
+          <div class="mt-4" phx-hook="TechStack" id="tech-stack-form">
             <.input
               type="text"
               name="tech_input"
               id="tech-input"
               value=""
               placeholder="Elixir, Phoenix, PostgreSQL, etc."
-              phx-hook="ClearInput"
-              phx-keydown="add_tech"
               class="w-full bg-background border-input"
             />
-            <.error :for={msg <- @tech_stack_form[:tech_stack].errors}>
-              <%= translate_error(msg) %>
-            </.error>
-          </div>
 
-          <div class="flex flex-wrap gap-3 mt-4">
-            <%= for tech <- get_field(@tech_stack_form.source, :tech_stack) do %>
-              <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
-                <%= tech %>
-                <button
-                  type="button"
-                  phx-click="remove_tech"
-                  phx-value-tech={tech}
-                  class="ml-2 text-success hover:text-success/80"
-                >
-                  ×
-                </button>
-              </div>
-            <% end %>
+            <%!-- Hidden input to store tech stack --%>
+            <.input
+              field={@tech_stack_form[:tech_stack]}
+              type="hidden"
+              data-tech-stack-input
+              value={Jason.encode!(get_field(@tech_stack_form.source, :tech_stack))}
+            />
+
+            <div
+              class="flex flex-wrap gap-3 mt-4 [&>div]:bg-success/10 [&>div]:text-success [&>div]:rounded-lg [&>div]:px-3 [&>div]:py-1.5 [&>div]:text-sm [&>div]:font-semibold [&>div]:flex [&>div]:items-center [&_button]:ml-2 [&_button]:text-success [&_button:hover]:text-success/80"
+              data-tech-stack-container
+            >
+              <%!-- Tech stack items will be rendered here by the hook --%>
+            </div>
           </div>
         </div>
 

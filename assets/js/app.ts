@@ -444,6 +444,75 @@ const Hooks = {
       });
     },
   },
+  TechStack: {
+    mounted() {
+      this.techStack = new Set();
+      this.input = this.el.querySelector("input");
+      this.hiddenInput = this.el.querySelector("[data-tech-stack-input]");
+
+      // Initialize from existing value if any
+      const initialValue = this.hiddenInput.value;
+      if (initialValue) {
+        JSON.parse(initialValue).forEach((tech) =>
+          this.techStack.add(tech.toLowerCase())
+        );
+        this.renderTechStack();
+      }
+
+      this.input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault();
+          this.addTech();
+        }
+      });
+    },
+
+    updated() {
+      this.renderTechStack();
+    },
+
+    addTech() {
+      const tech = this.input.value.trim();
+      if (tech && !this.techStack.has(tech.toLowerCase())) {
+        this.techStack.add(tech.toLowerCase());
+        this.renderTechStack();
+        this.updateHiddenInput();
+        this.input.value = "";
+      }
+    },
+
+    removeTech(tech) {
+      this.techStack.delete(tech.toLowerCase());
+      this.renderTechStack();
+      this.updateHiddenInput();
+    },
+
+    updateHiddenInput() {
+      // Update hidden input with current tech stack for form submission
+      this.hiddenInput.value = JSON.stringify(Array.from(this.techStack));
+    },
+
+    renderTechStack() {
+      const container = this.el.querySelector("[data-tech-stack-container]");
+      container.innerHTML = Array.from(this.techStack)
+        .map(
+          (tech) => `
+          <div>
+            ${tech}
+            <button type="button" data-tech="${tech}">×</button>
+          </div>
+        `
+        )
+        .join("");
+
+      container.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          this.removeTech(btn.dataset.tech);
+        });
+      });
+    },
+  },
+
   EmojiPicker: {
     mounted() {
       const button = this.el;

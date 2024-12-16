@@ -25,7 +25,8 @@ defmodule AlgoraWeb.Project.ViewLive do
       Users.list_developers(
         limit: 6,
         sort_by_country: project.country,
-        sort_by_tech_stack: project.tech_stack
+        sort_by_tech_stack: project.tech_stack,
+        min_earnings: Money.new!(200, "USD")
       )
 
     {:ok,

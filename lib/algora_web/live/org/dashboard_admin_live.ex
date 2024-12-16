@@ -801,9 +801,9 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   defp fetch_matching_devs(tech_stack) do
     developers =
       Users.list_developers(
-        handles: ["carver", "jianyang", "aly", "john", "bighead"],
         sort_by_tech_stack: tech_stack,
-        limit: 3
+        limit: 3,
+        min_earnings: Money.new!(200, "USD")
       )
 
     reviews = developers |> Enum.map(& &1.id) |> Reviews.get_top_reviews_for_users()

@@ -4,13 +4,17 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   def mount(_params, _session, socket) do
     context = %{
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: [],
       intentions: []
     }
 
     bounties =
-      Bounties.list_bounties(status: :paid, limit: 50, solver_country: "US")
+      Bounties.list_bounties(
+        status: :paid,
+        limit: 50,
+        solver_country: socket.assigns.current_country
+      )
       |> Enum.uniq_by(& &1.solver.id)
 
     {:ok,

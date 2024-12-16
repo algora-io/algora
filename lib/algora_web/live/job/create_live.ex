@@ -4,7 +4,7 @@ defmodule AlgoraWeb.Job.CreateLive do
 
   def mount(_params, session, socket) do
     job = %{
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: ["Elixir"],
       title: "",
       scope: %{size: nil, duration: nil, experience: nil},

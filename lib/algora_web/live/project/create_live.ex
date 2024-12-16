@@ -4,7 +4,7 @@ defmodule AlgoraWeb.Project.CreateLive do
 
   def mount(_params, session, socket) do
     project = %{
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: ["Elixir"],
       title: "",
       visibility: :public

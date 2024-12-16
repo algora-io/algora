@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Org.CreateLive do
       name: "",
       handle: "",
       email_domain: "",
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: ["Elixir"]
     }
 

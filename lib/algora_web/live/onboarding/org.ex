@@ -98,10 +98,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         :hiring_status,
         :company_types
       ])
-      |> validate_required([:hourly_rate_min, :hourly_rate_max, :hours_per_week, :hiring_status])
+      |> validate_required([:hourly_rate_min], message: "Please enter a minimum hourly rate")
+      |> validate_required([:hourly_rate_max], message: "Please enter a maximum hourly rate")
+      |> validate_required([:hours_per_week], message: "Please enter a number of hours per week")
+      |> validate_required([:hiring_status], message: "Please select a hiring status")
       |> validate_number(:hourly_rate_min, greater_than: 0)
       |> validate_number(:hourly_rate_max, greater_than: 0)
-      |> validate_number(:hours_per_week, greater_than: 0, less_than_or_equal_to: 168)
+      |> validate_number(:hours_per_week, greater_than: 0)
       |> validate_inclusion(:hiring_status, ["yes", "no"])
       |> validate_length(:company_types,
         min: 1,
@@ -412,45 +415,44 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             </p>
             <div class="flex items-center gap-4">
               <div class="flex-1">
-                <label class="block text-sm font-medium mb-2">Min</label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <span class="text-muted-foreground">$</span>
-                  </div>
-                  <.input
-                    field={@preferences_form[:hourly_rate_min]}
-                    type="number"
-                    placeholder="0"
-                    class="w-full pl-8 bg-background border-input"
-                  />
-                </div>
+                <.input
+                  field={@preferences_form[:hourly_rate_min]}
+                  icon="tabler-currency-dollar"
+                  label="Min"
+                  placeholder="0"
+                  class="w-full bg-background border-input"
+                  hide_errors
+                />
               </div>
               <div class="flex-1">
-                <label class="block text-sm font-medium mb-2">Max</label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <span class="text-muted-foreground">$</span>
-                  </div>
-                  <.input
-                    field={@preferences_form[:hourly_rate_max]}
-                    type="number"
-                    placeholder="0"
-                    class="w-full pl-8 bg-background border-input"
-                  />
-                </div>
+                <.input
+                  field={@preferences_form[:hourly_rate_max]}
+                  icon="tabler-currency-dollar"
+                  label="Max"
+                  placeholder="0"
+                  class="w-full bg-background border-input"
+                  hide_errors
+                />
               </div>
               <div class="flex-1">
-                <label class="block text-sm font-medium mb-2">Total hours per week</label>
-                <div class="relative">
-                  <.input
-                    field={@preferences_form[:hours_per_week]}
-                    type="number"
-                    placeholder="40"
-                    class="w-full bg-background border-input"
-                  />
-                </div>
+                <.input
+                  field={@preferences_form[:hours_per_week]}
+                  icon="tabler-clock"
+                  label="Hours per week"
+                  placeholder="40"
+                  class="w-full bg-background border-input"
+                  hide_errors
+                />
               </div>
             </div>
+            <.error :for={
+              msg <-
+                [:hourly_rate_min, :hourly_rate_max, :hours_per_week]
+                |> Enum.flat_map(&@preferences_form[&1].errors)
+                |> Enum.map(&translate_error(&1))
+            }>
+              <%= msg %>
+            </.error>
           </div>
 
           <div>

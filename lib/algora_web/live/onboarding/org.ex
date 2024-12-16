@@ -26,9 +26,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      |> assign(:step, Enum.at(steps, 0))
      |> assign(:steps, steps)
      |> assign(:code_sent?, false)
+     |> assign(:code_valid?, nil)
      |> assign(:context, context)
-     |> assign(:matching_devs, get_matching_devs(context))
-     |> assign(:code_valid, nil)}
+     |> assign(:matching_devs, get_matching_devs(context))}
   end
 
   def render(assigns) do
@@ -267,10 +267,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <.input
             type="text"
             name="tech_input"
+            id="tech-input"
             value=""
             placeholder="Elixir, Phoenix, PostgreSQL, etc."
-            phx-keydown="handle_tech_input"
-            phx-debounce="200"
+            phx-hook="ClearInput"
+            phx-keydown="add_tech"
             class="w-full bg-background border-input"
           />
         </div>
@@ -378,7 +379,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           />
         </div>
 
-        <%= if @code_valid == false do %>
+        <%= if @code_valid? == false do %>
           <p class="text-destructive">Please enter a valid verification code</p>
         <% end %>
       </div>
@@ -585,10 +586,29 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, socket}
   end
 
-  def handle_event("add_tech", %{"tech" => tech}, socket) do
-    updated_tech_stack = [tech | socket.assigns.context.tech_stack] |> Enum.uniq()
-    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
-    {:noreply, assign(socket, context: updated_context)}
+  def handle_event("add_tech", %{"key" => key, "value" => tech}, socket)
+      when key in ["Enter", ","] do
+    %{tech_stack: tech_stack} = socket.assigns.context
+    tech = String.trim(tech)
+    tech_exists? = Enum.any?(tech_stack, fn t -> String.downcase(t) == String.downcase(tech) end)
+
+    socket =
+      if byte_size(tech) > 0 and not tech_exists? do
+        updated_context = update_in(socket.assigns.context, [:tech_stack], &(&1 ++ [tech]))
+        matching_devs = get_matching_devs(updated_context)
+
+        socket
+        |> assign(:context, updated_context)
+        |> assign(:matching_devs, matching_devs)
+      else
+        socket
+      end
+
+    {:noreply, socket |> push_event("clear-input", %{selector: "#tech-input"})}
+  end
+
+  def handle_event("add_tech", _params, socket) do
+    {:noreply, socket}
   end
 
   def handle_event("remove_tech", %{"tech" => tech}, socket) do
@@ -626,10 +646,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       {:noreply, socket |> redirect(to: AlgoraWeb.UserAuth.login_path(email, token))}
     else
       {:ok, _different_email} ->
-        {:noreply, assign(socket, code_valid: false)}
+        {:noreply, assign(socket, code_valid?: false)}
 
       {:error, _reason} ->
-        {:noreply, assign(socket, code_valid: false)}
+        {:noreply, assign(socket, code_valid?: false)}
     end
   end
 
@@ -649,19 +669,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     updated_context = Map.put(socket.assigns.context, :intentions, updated_intentions)
     {:noreply, assign(socket, context: updated_context)}
-  end
-
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
-      when byte_size(tech) > 0 do
-    updated_tech_stack = [String.trim(tech) | socket.assigns.context.tech_stack] |> Enum.uniq()
-    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
-    matching_devs = get_matching_devs(updated_context)
-
-    {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
-  end
-
-  def handle_event("handle_tech_input", _params, socket) do
-    {:noreply, socket}
   end
 
   def handle_event("toggle_company_type", %{"type" => type}, socket) do

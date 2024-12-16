@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Project.ViewLive do
     project = %{
       id: id,
       title: "Build Real-time Chat Application",
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
       budget: %{type: :hourly, from: Money.new!(50, :USD), to: Money.new!(75, :USD)},
       description: "Looking for an experienced developer to build a real-time chat system...",

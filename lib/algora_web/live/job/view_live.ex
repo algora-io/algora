@@ -6,7 +6,7 @@ defmodule AlgoraWeb.Job.ViewLive do
     job = %{
       id: id,
       title: "Senior Elixir Developer",
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"],
       scope: %{size: "medium", duration: "medium", experience: "intermediate"},
       budget: %{type: :hourly, from: 50, to: 75},

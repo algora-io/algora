@@ -6,7 +6,7 @@ defmodule AlgoraWeb.DevLive do
       title: "Looking for an Elixir developer to build a real-time chat application",
       description: "Build a real-time chat application using Phoenix and LiveView.",
       tech_stack: ["Elixir", "Phoenix", "PostgreSQL", "TailwindCSS"],
-      country: "US"
+      country: socket.assigns.current_country
     }
 
     nav_items = [

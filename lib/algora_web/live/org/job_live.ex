@@ -29,7 +29,7 @@ defmodule AlgoraWeb.Org.JobLive do
       We offer competitive compensation, flexible remote work, and the opportunity to work on challenging technical problems at scale.
       """,
       tech_stack: ["Elixir", "Phoenix", "PostgreSQL", "TailwindCSS", "FFmpeg"],
-      country: "US"
+      country: socket.assigns.current_country
     }
 
     nav_items = [

@@ -50,207 +50,214 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             </div>
 
             <div class="mb-4">
-              <%= render_step(assigns) %>
+              <%= main_content(assigns) %>
             </div>
 
             <div class="flex justify-between">
-              <%= case @step do %>
-                <% 1 -> %>
-                  <.button phx-click="next_step" class="ml-auto">
-                    Next
-                  </.button>
-                <% 2 -> %>
-                  <.button phx-click="prev_step" variant="secondary">
-                    Previous
-                  </.button>
-                  <.button phx-click="next_step" variant="default">
-                    Next
-                  </.button>
-                <% 3 -> %>
-                  <.button phx-click="prev_step" variant="secondary">
-                    Previous
-                  </.button>
-                  <.button phx-click="next_step" variant="default">
-                    Meet developers
-                  </.button>
-                <% _ -> %>
-                  <div></div>
-              <% end %>
+              <%= actions(assigns) %>
             </div>
           </div>
         </div>
         <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
-          <div class={
-            classes(
-              hidden: @step != 2,
-              block: @step == 2
-            )
-          }>
-            <h2 class="text-lg font-semibold uppercase mb-6">
-              You're in good company
-            </h2>
-            <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/cal"
-              >
-                <Wordmarks.calcom class="col-auto w-[10rem] mt-3" alt="Cal.com" />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/qdrant"
-              >
-                <Wordmarks.qdrant class="col-auto w-[11rem]" alt="Qdrant" />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/remotion"
-              >
-                <img
-                  src="https://algora.io/banners/remotion.png"
-                  alt="Remotion"
-                  class="saturate-0 col-auto w-full"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/zio"
-              >
-                <img
-                  src="https://algora.io/banners/zio.png"
-                  alt="ZIO"
-                  class="invert brightness-0 col-auto w-[10rem]"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/triggerdotdev"
-              >
-                <img
-                  src="https://algora.io/banners/triggerdotdev.png"
-                  alt="Trigger.dev"
-                  class="saturate-0 col-auto w-full"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/tembo"
-              >
-                <img
-                  src="https://algora.io/banners/tembo.png"
-                  alt="Tembo"
-                  class="saturate-0 col-auto w-[13rem]"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/maybe-finance"
-              >
-                <img
-                  src="https://algora.io/banners/maybe.png"
-                  alt="Maybe"
-                  class="saturate-0 col-auto w-full"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/golemcloud"
-              >
-                <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/aidenybai"
-              >
-                <img
-                  src="https://algora.io/banners/million.png"
-                  alt="Million"
-                  class="saturate-0 col-auto w-44"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/tailcallhq"
-              >
-                <Wordmarks.tailcall class="col-auto w-[10rem]" fill="white" alt="Tailcall" />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/highlight"
-              >
-                <img
-                  src="https://algora.io/banners/highlight.png"
-                  alt="Highlight"
-                  class="saturate-0 col-auto w-44"
-                />
-              </a>
-              <a
-                class="relative flex items-center justify-center"
-                href="https://console.algora.io/org/dittofeed"
-              >
-                <img
-                  src="https://algora.io/banners/dittofeed.png"
-                  alt="Dittofeed"
-                  class="invert brightness-0 col-auto w-40"
-                />
-              </a>
-            </div>
-          </div>
-          <div
-            div
-            class={
-              classes(
-                hidden: @step == 2,
-                block: @step != 2
-              )
-            }
-          >
-            <h2 class="text-lg font-semibold uppercase mb-4">
-              Matching Developers
-            </h2>
-            <%= if @matching_devs == [] do %>
-              <p class="text-muted-foreground">Add tech stack to see matching developers</p>
-            <% else %>
-              <%= for dev <- @matching_devs do %>
-                <div class="mb-6 bg-card p-4 rounded-lg border border-border">
-                  <div class="flex mb-2 gap-3">
-                    <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
-                    <div class="flex-grow">
-                      <div class="flex justify-between">
-                        <div>
-                          <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                          <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
-                        </div>
-                        <div class="flex flex-col items-end">
-                          <div class="text-muted-foreground">Earned</div>
-                          <div class="font-semibold text-success font-display">
-                            <%= Money.to_string!(dev.total_earned) %>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="pt-3 text-sm">
-                        <div class="-ml-1 text-sm flex flex-wrap gap-3">
-                          <%= for tech <- dev.tech_stack do %>
-                            <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
-                              <%= tech %>
-                            </span>
-                          <% end %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
+          <%= sidebar_content(assigns) %>
         </div>
       </div>
     </div>
     """
   end
 
-  def render_step(%{step: 1} = assigns) do
+  defp actions(%{step: 1} = assigns) do
+    ~H"""
+    <.button phx-click="next_step" class="ml-auto">
+      Next
+    </.button>
+    """
+  end
+
+  defp actions(%{step: 2} = assigns) do
+    ~H"""
+    <.button phx-click="prev_step" variant="secondary">
+      Previous
+    </.button>
+    <.button phx-click="next_step" variant="default">
+      Next
+    </.button>
+    """
+  end
+
+  defp actions(%{step: 3} = assigns) do
+    ~H"""
+    <.button phx-click="prev_step" variant="secondary">
+      Previous
+    </.button>
+    <.button phx-click="next_step" variant="default">
+      Meet developers
+    </.button>
+    """
+  end
+
+  defp actions(assigns) do
+    ~H"""
+    <div></div>
+    """
+  end
+
+  defp sidebar_content(%{step: 2} = assigns) do
+    ~H"""
+    <div>
+      <h2 class="text-lg font-semibold uppercase mb-6">
+        You're in good company
+      </h2>
+      <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
+        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
+          <Wordmarks.calcom class="col-auto w-[10rem] mt-3" alt="Cal.com" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/qdrant"
+        >
+          <Wordmarks.qdrant class="col-auto w-[11rem]" alt="Qdrant" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/remotion"
+        >
+          <img
+            src="https://algora.io/banners/remotion.png"
+            alt="Remotion"
+            class="saturate-0 col-auto w-full"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
+          <img
+            src="https://algora.io/banners/zio.png"
+            alt="ZIO"
+            class="invert brightness-0 col-auto w-[10rem]"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/triggerdotdev"
+        >
+          <img
+            src="https://algora.io/banners/triggerdotdev.png"
+            alt="Trigger.dev"
+            class="saturate-0 col-auto w-full"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/tembo"
+        >
+          <img
+            src="https://algora.io/banners/tembo.png"
+            alt="Tembo"
+            class="saturate-0 col-auto w-[13rem]"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/maybe-finance"
+        >
+          <img
+            src="https://algora.io/banners/maybe.png"
+            alt="Maybe"
+            class="saturate-0 col-auto w-full"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/golemcloud"
+        >
+          <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/aidenybai"
+        >
+          <img
+            src="https://algora.io/banners/million.png"
+            alt="Million"
+            class="saturate-0 col-auto w-44"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/tailcallhq"
+        >
+          <Wordmarks.tailcall class="col-auto w-[10rem]" fill="white" alt="Tailcall" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/highlight"
+        >
+          <img
+            src="https://algora.io/banners/highlight.png"
+            alt="Highlight"
+            class="saturate-0 col-auto w-44"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/dittofeed"
+        >
+          <img
+            src="https://algora.io/banners/dittofeed.png"
+            alt="Dittofeed"
+            class="invert brightness-0 col-auto w-40"
+          />
+        </a>
+      </div>
+    </div>
+    """
+  end
+
+  defp sidebar_content(assigns) do
+    ~H"""
+    <div>
+      <h2 class="text-lg font-semibold uppercase mb-4">
+        Matching Developers
+      </h2>
+      <%= if @matching_devs == [] do %>
+        <p class="text-muted-foreground">Add tech stack to see matching developers</p>
+      <% else %>
+        <%= for dev <- @matching_devs do %>
+          <div class="mb-6 bg-card p-4 rounded-lg border border-border">
+            <div class="flex mb-2 gap-3">
+              <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
+              <div class="flex-grow">
+                <div class="flex justify-between">
+                  <div>
+                    <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                    <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <div class="text-muted-foreground">Earned</div>
+                    <div class="font-semibold text-success font-display">
+                      <%= Money.to_string!(dev.total_earned) %>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-3 text-sm">
+                  <div class="-ml-1 text-sm flex flex-wrap gap-3">
+                    <%= for tech <- dev.tech_stack do %>
+                      <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
+                        <%= tech %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    """
+  end
+
+  defp main_content(%{step: 1} = assigns) do
     ~H"""
     <div>
       <div>
@@ -290,7 +297,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  def render_step(%{step: 2} = assigns) do
+  defp main_content(%{step: 2} = assigns) do
     ~H"""
     <div class="space-y-4">
       <h2 class="text-4xl font-semibold mb-3">
@@ -350,39 +357,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  def render_step(%{step: 2, code_sent?: true} = assigns) do
-    ~H"""
-    <div class="space-y-8">
-      <div>
-        <h2 class="text-4xl font-semibold mb-3">
-          Verify your email
-        </h2>
-        <p class="text-muted-foreground">
-          We've sent a code to <%= @context.email %>
-        </p>
-
-        <div class="mt-6">
-          <label class="block text-sm font-medium mb-2">Verification Code</label>
-          <.input
-            type="text"
-            name="verification_code"
-            phx-blur="update_context"
-            phx-value-field="verification_code"
-            value={@context.verification_code}
-            placeholder="Enter verification code"
-            class="w-full bg-background border-input text-center text-2xl tracking-widest"
-          />
-        </div>
-
-        <%= if @code_valid == false do %>
-          <p class="text-destructive">Please enter a valid verification code</p>
-        <% end %>
-      </div>
-    </div>
-    """
-  end
-
-  def render_step(%{step: 3} = assigns) do
+  defp main_content(%{step: 3} = assigns) do
     ~H"""
     <div class="space-y-6">
       <div>
@@ -534,6 +509,38 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <% end %>
           </div>
         </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp main_content(%{step: 3, code_sent?: true} = assigns) do
+    ~H"""
+    <div class="space-y-8">
+      <div>
+        <h2 class="text-4xl font-semibold mb-3">
+          Verify your email
+        </h2>
+        <p class="text-muted-foreground">
+          We've sent a code to <%= @context.email %>
+        </p>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium mb-2">Verification Code</label>
+          <.input
+            type="text"
+            name="verification_code"
+            phx-blur="update_context"
+            phx-value-field="verification_code"
+            value={@context.verification_code}
+            placeholder="Enter verification code"
+            class="w-full bg-background border-input text-center text-2xl tracking-widest"
+          />
+        </div>
+
+        <%= if @code_valid == false do %>
+          <p class="text-destructive">Please enter a valid verification code</p>
+        <% end %>
       </div>
     </div>
     """

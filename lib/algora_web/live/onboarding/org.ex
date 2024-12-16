@@ -27,7 +27,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
-  defmodule VerificationForm do
+  defmodule EmailForm do
     use Ecto.Schema
     import Ecto.Changeset
 
@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
 
     def init() do
-      to_form(VerificationForm.changeset(%VerificationForm{}, %{}))
+      to_form(EmailForm.changeset(%EmailForm{}, %{}))
     end
 
     def changeset(form, attrs) do
@@ -49,6 +49,26 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_format(:domain, ~r/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/,
         message: "must be a valid domain"
       )
+    end
+  end
+
+  defmodule VerificationForm do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :code, :string
+    end
+
+    def init() do
+      to_form(VerificationForm.changeset(%VerificationForm{}, %{}))
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:code])
+      |> validate_required([:code])
     end
   end
 
@@ -105,11 +125,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   # === LIFECYCLE === #
 
   def mount(_params, _session, socket) do
-    steps = [:tech_stack, :verification, :preferences]
+    steps = [:tech_stack, :email, :preferences]
 
     {:ok,
      socket
      |> assign(:tech_stack_form, TechStackForm.init())
+     |> assign(:email_form, EmailForm.init())
      |> assign(:verification_form, VerificationForm.init())
      |> assign(:preferences_form, PreferencesForm.init())
      |> assign(:step, Enum.at(steps, 0))
@@ -139,35 +160,35 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
          socket
          |> assign(:tech_stack_form, to_form(changeset))
          |> assign_matching_devs()
-         |> assign(step: :verification)}
+         |> assign(step: :email)}
 
       %{valid?: false} ->
         {:noreply, assign(socket, tech_stack_form: to_form(changeset))}
     end
   end
 
-  def handle_event("submit_verification", %{"verification_form" => params}, socket) do
+  def handle_event("submit_email", %{"email_form" => params}, socket) do
     changeset =
-      %VerificationForm{}
-      |> VerificationForm.changeset(params)
+      %EmailForm{}
+      |> EmailForm.changeset(params)
       |> Map.put(:action, :validate)
 
     case changeset do
       %{valid?: true} = changeset ->
         email = get_field(changeset, :email)
-        verification_token = AlgoraWeb.UserAuth.generate_login_code(email)
+        login_code = AlgoraWeb.UserAuth.generate_login_code(email)
 
         # TODO: Send email
-        Logger.info("Verification token for #{email}: #{verification_token}")
+        Logger.info("Login code for #{email}: #{login_code}")
 
         {:noreply,
          socket
-         |> assign(:verification_form, to_form(changeset))
+         |> assign(:email_form, to_form(changeset))
          |> assign(:code_sent?, true)
          |> assign_matching_devs()}
 
       %{valid?: false} = changeset ->
-        {:noreply, assign(socket, :verification_form, to_form(changeset))}
+        {:noreply, assign(socket, :email_form, to_form(changeset))}
     end
   end
 
@@ -187,17 +208,35 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
-  def handle_event("verify_code", %{"code" => code}, socket) do
-    email = get_field(socket.assigns.verification_form.source, :email)
+  def handle_event("verify_code", %{"verification_form" => params}, socket) do
+    changeset =
+      %VerificationForm{}
+      |> VerificationForm.changeset(params)
+      |> Map.put(:action, :validate)
 
-    with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(code) do
-      {:noreply, socket |> redirect(to: AlgoraWeb.UserAuth.login_path(email, code))}
-    else
-      {:ok, _different_email} ->
-        {:noreply, assign(socket, code_valid?: false)}
+    case changeset do
+      %{valid?: true} = changeset ->
+        code = get_field(changeset, :code)
+        email = get_field(socket.assigns.email_form.source, :email)
 
-      {:error, _reason} ->
-        {:noreply, assign(socket, code_valid?: false)}
+        with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(code) do
+          {:noreply, socket |> assign(step: :preferences)}
+        else
+          {:ok, _different_email} ->
+            {:noreply,
+             socket
+             |> assign(:verification_form, to_form(changeset))
+             |> assign(:code_valid?, false)}
+
+          {:error, _reason} ->
+            {:noreply,
+             socket
+             |> assign(:verification_form, to_form(changeset))
+             |> assign(:code_valid?, false)}
+        end
+
+      %{valid?: false} = changeset ->
+        {:noreply, assign(socket, :verification_form, to_form(changeset))}
     end
   end
 
@@ -232,7 +271,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <h2 class="text-4xl font-semibold mb-3">
             What is your tech stack?
           </h2>
-          <p class="text-muted-foreground">Select the technologies you work with</p>
+          <p class="text-muted-foreground">
+            Enter a comma-separated list of technologies you work with
+          </p>
 
           <div class="mt-4" phx-hook="TechStack" id="tech-stack-form">
             <.input
@@ -271,16 +312,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp main_content(%{step: :verification, code_sent?: false} = assigns) do
+  defp main_content(%{step: :email, code_sent?: false} = assigns) do
     ~H"""
     <div class="space-y-4">
       <h2 class="text-4xl font-semibold mb-3">
         Join Algora with your team
       </h2>
 
-      <.form for={@verification_form} phx-submit="submit_verification" class="space-y-6">
+      <.form for={@email_form} phx-submit="submit_email" class="space-y-6">
         <.input
-          field={@verification_form[:email]}
+          field={@email_form[:email]}
           label="Work Email"
           icon="tabler-mail"
           type="text"
@@ -291,7 +332,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           autocomplete="email"
         />
         <.input
-          field={@verification_form[:domain]}
+          field={@email_form[:domain]}
           icon="tabler-at"
           label="Company Domain"
           helptext="We will add your teammates to your organization if they sign up with a verified email address from this domain"
@@ -319,7 +360,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp main_content(%{step: :verification, code_sent?: true} = assigns) do
+  defp main_content(%{step: :email, code_sent?: true} = assigns) do
     ~H"""
     <div class="space-y-8">
       <div>
@@ -327,18 +368,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           Verify your email
         </h2>
         <p class="text-muted-foreground">
-          We've sent a code to <%= get_field(@verification_form.source, :email) %>
+          We've sent a code to <%= get_field(@email_form.source, :email) %>
         </p>
 
         <div class="mt-6">
-          <.form for={:verify} phx-submit="verify_code">
+          <.form for={@verification_form} phx-submit="verify_code">
             <label class="block text-sm font-medium mb-2">Verification Code</label>
             <.input
+              field={@verification_form[:code]}
               type="text"
-              name="code"
               placeholder="Enter verification code"
               class="w-full bg-background border-input text-center text-2xl tracking-widest"
-              autocomplete="one-time-code"
             />
 
             <%= if @code_valid? == false do %>
@@ -539,7 +579,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <%= sidebar_content(assigns) %>
           <!-- HACK: preload images to avoid layout shift -->
           <div class="fixed opacity-0">
-            <%= sidebar_content(%{assigns | step: :verification}) %>
+            <%= sidebar_content(%{assigns | step: :email}) %>
           </div>
         </div>
       </div>
@@ -547,7 +587,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp sidebar_content(%{step: :verification} = assigns) do
+  defp sidebar_content(%{step: :email} = assigns) do
     ~H"""
     <div>
       <h2 class="text-lg font-semibold uppercase mb-6">

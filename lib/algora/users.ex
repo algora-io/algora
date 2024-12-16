@@ -15,6 +15,7 @@ defmodule Algora.Users do
           optional(:limit) => non_neg_integer(),
           optional(:handle) => String.t(),
           optional(:handles) => [String.t()],
+          optional(:min_earnings) => non_neg_integer(),
           optional(:sort_by_country) => String.t(),
           optional(:sort_by_tech_stack) => [String.t()]
         }
@@ -32,6 +33,17 @@ defmodule Algora.Users do
 
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)
+
+      {:min_earnings, min_amount}, query ->
+        from([b, earnings: e] in query,
+          where:
+            fragment(
+              "?::money_with_currency >= (?, ?)::money_with_currency",
+              e.total_earned,
+              ^to_string(min_amount.currency),
+              ^min_amount.amount
+            )
+        )
 
       {:sort_by_country, country}, query ->
         from([b] in query,

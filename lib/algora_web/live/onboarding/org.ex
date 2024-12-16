@@ -3,6 +3,29 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   use AlgoraWeb, :live_view
   alias Algora.Users
   alias AlgoraWeb.Components.Wordmarks
+  import Ecto.Changeset
+
+  defmodule VerificationForm do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :email, :string
+      field :domain, :string
+    end
+
+    @doc false
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:email, :domain])
+      |> validate_required([:email])
+      |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must be a valid email address")
+      |> validate_format(:domain, ~r/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/,
+        message: "must be a valid domain"
+      )
+    end
+  end
 
   def mount(_params, _session, socket) do
     steps = [:tech_stack, :verification, :preferences]
@@ -11,15 +34,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      socket
      |> assign(:tech_stack, [])
      |> assign(:intentions, [])
-     |> assign(:email, "")
-     |> assign(:domain, "")
-     |> assign(:verification_code, "")
+     |> assign(:verification_form, to_form(VerificationForm.changeset(%VerificationForm{}, %{})))
+     |> assign(:verification_code, nil)
      |> assign(:company_types, [])
      |> assign(:hiring_status, nil)
      |> assign(:hourly_rate_min, nil)
      |> assign(:hourly_rate_max, nil)
      |> assign(:hours_per_week, nil)
-     |> assign(:step, Enum.at(steps, 0))
+     |> assign(:step, Enum.at(steps, 1))
      |> assign(:steps, steps)
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
@@ -301,55 +323,43 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         Join Algora with your team
       </h2>
 
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium mb-2">Work Email</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <.icon name="tabler-mail" class="w-5 h-5 text-muted-foreground" />
-            </div>
-            <.input
-              type="email"
-              name="email"
-              phx-blur="set_field"
-              phx-value-field="email"
-              value={@email}
-              placeholder="you@company.com"
-              class="w-full bg-background border-input pl-10"
-              data-domain-target
-              phx-hook="DeriveDomain"
-            />
-          </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Company Domain</label>
-          <p class="mt-1 text-sm text-muted-foreground">
-            We will add your teammates to your organization if they sign up with a verified email address from this domain
-          </p>
-          <div class="mt-2 relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <.icon name="tabler-at" class="w-5 h-5 text-muted-foreground" />
-            </div>
+      <.form for={@verification_form} phx-submit="submit_verification" class="space-y-6">
+        <.input
+          field={@verification_form[:email]}
+          label="Work Email"
+          icon="tabler-mail"
+          type="text"
+          placeholder="you@company.com"
+          class="w-full bg-background border-input pl-10"
+          data-domain-target
+          phx-hook="DeriveDomain"
+          autocomplete="email"
+        />
+        <.input
+          field={@verification_form[:domain]}
+          icon="tabler-at"
+          label="Company Domain"
+          helptext="We will add your teammates to your organization if they sign up with a verified email address from this domain"
+          type="text"
+          placeholder="company.com"
+          class="w-full bg-background border-input pl-10"
+          data-domain-source
+        />
+        <p class="mt-4 text-sm text-muted-foreground/75">
+          By continuing, you agree to Algora's
+          <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
+          and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
+        </p>
 
-            <.input
-              type="text"
-              name="domain"
-              phx-change="set_field"
-              phx-value-field="domain"
-              value={@domain}
-              placeholder="company.com"
-              class="w-full bg-background border-input pl-10"
-              data-domain-source
-            />
-          </div>
-
-          <p class="mt-4 text-sm text-muted-foreground/75">
-            By continuing, you agree to Algora's
-            <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
-            and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
-          </p>
+        <div class="flex justify-between">
+          <.button type="button" phx-click="prev_step" variant="secondary">
+            Previous
+          </.button>
+          <.button type="submit" variant="default">
+            Next
+          </.button>
         </div>
-      </div>
+      </.form>
     </div>
     """
   end
@@ -362,7 +372,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           Verify your email
         </h2>
         <p class="text-muted-foreground">
-          We've sent a code to <%= @email %>
+          We've sent a code to <%= get_field(@verification_form.source, :email) %>
         </p>
 
         <div class="mt-6">
@@ -372,7 +382,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             name="verification_code"
             phx-blur="set_field"
             phx-value-field="verification_code"
-            value={@verification_code}
+            value=""
             placeholder="Enter verification code"
             class="w-full bg-background border-input text-center text-2xl tracking-widest"
           />
@@ -603,23 +613,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     {:noreply, assign(socket, tech_stack: updated_tech_stack)}
   end
 
-  def handle_event("set_field", %{"field" => "email", "value" => email} = params, socket) do
-    verification_token = AlgoraWeb.UserAuth.generate_login_code(email)
-
-    # TODO: Send email
-    IO.puts("========================")
-    IO.puts(AlgoraWeb.UserAuth.login_email(email, verification_token))
-    IO.puts("========================")
-
-    {:noreply,
-     socket
-     |> assign(:code_sent?, true)
-     |> assign_field("email", email, params)
-     |> assign_matching_devs()}
-  end
-
   def handle_event("set_field", %{"field" => "verification_code", "value" => token}, socket) do
-    email = socket.assigns.email
+    email = get_field(socket.assigns.verification_form.source, :email)
 
     with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(token) do
       {:noreply, socket |> redirect(to: AlgoraWeb.UserAuth.login_path(email, token))}
@@ -659,6 +654,34 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         else: [type | current_types]
 
     {:noreply, assign(socket, company_types: updated_types)}
+  end
+
+  def handle_event("submit_verification", %{"verification_form" => params}, socket) do
+    changeset =
+      %VerificationForm{}
+      |> VerificationForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    case changeset do
+      %{valid?: true} = changeset ->
+        email = get_field(changeset, :email)
+        verification_token = AlgoraWeb.UserAuth.generate_login_code(email)
+
+        # TODO: Send email
+        IO.puts("========================")
+        IO.puts(AlgoraWeb.UserAuth.login_email(email, verification_token))
+        IO.puts("========================")
+
+        {:noreply,
+         socket
+         |> assign(:verification_form, to_form(changeset))
+         |> assign(:verification_code, verification_token)
+         |> assign(:code_sent?, true)
+         |> assign_matching_devs()}
+
+      %{valid?: false} = changeset ->
+        {:noreply, assign(socket, :verification_form, to_form(changeset))}
+    end
   end
 
   defp assign_matching_devs(socket) do

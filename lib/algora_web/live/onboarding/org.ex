@@ -7,27 +7,23 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def mount(_params, _session, socket) do
     steps = [:tech_stack, :verification, :preferences]
 
-    context = %{
-      tech_stack: [],
-      intentions: [],
-      email: "",
-      domain: "",
-      verification_code: "",
-      company_types: [],
-      hiring_status: nil,
-      hourly_rate_min: nil,
-      hourly_rate_max: nil,
-      hours_per_week: nil
-    }
-
     {:ok,
      socket
+     |> assign(:tech_stack, [])
+     |> assign(:intentions, [])
+     |> assign(:email, "")
+     |> assign(:domain, "")
+     |> assign(:verification_code, "")
+     |> assign(:company_types, [])
+     |> assign(:hiring_status, nil)
+     |> assign(:hourly_rate_min, nil)
+     |> assign(:hourly_rate_max, nil)
+     |> assign(:hours_per_week, nil)
      |> assign(:step, Enum.at(steps, 0))
      |> assign(:steps, steps)
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
-     |> assign(:context, context)
-     |> assign(:matching_devs, get_matching_devs(socket))}
+     |> assign_matching_devs()}
   end
 
   def render(assigns) do
@@ -276,7 +272,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
 
         <div class="flex flex-wrap gap-3 mt-4">
-          <%= for tech <- @context.tech_stack do %>
+          <%= for tech <- @tech_stack do %>
             <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
               <%= tech %>
               <button
@@ -311,9 +307,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <.input
               type="email"
               name="email"
-              phx-blur="update_context"
+              phx-blur="set_field"
               phx-value-field="email"
-              value={@context.email}
+              value={@email}
               placeholder="you@company.com"
               class="w-full bg-background border-input pl-10"
               data-domain-target
@@ -334,9 +330,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <.input
               type="text"
               name="domain"
-              phx-change="update_context"
+              phx-change="set_field"
               phx-value-field="domain"
-              value={@context.domain}
+              value={@domain}
               placeholder="company.com"
               class="w-full bg-background border-input pl-10"
               data-domain-source
@@ -362,7 +358,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           Verify your email
         </h2>
         <p class="text-muted-foreground">
-          We've sent a code to <%= @context.email %>
+          We've sent a code to <%= @email %>
         </p>
 
         <div class="mt-6">
@@ -370,9 +366,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <.input
             type="text"
             name="verification_code"
-            phx-blur="update_context"
+            phx-blur="set_field"
             phx-value-field="verification_code"
-            value={@context.verification_code}
+            value={@verification_code}
             placeholder="Enter verification code"
             class="w-full bg-background border-input text-center text-2xl tracking-widest"
           />
@@ -413,10 +409,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </div>
                 <.input
                   name="hourly_rate_min"
-                  value={@context.hourly_rate_min}
+                  value={@hourly_rate_min}
                   placeholder="0"
                   class="w-full pl-8 bg-background border-input"
-                  phx-blur="update_context"
+                  phx-blur="set_field"
                   phx-value-field="hourly_rate_min"
                 />
               </div>
@@ -429,10 +425,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </div>
                 <.input
                   name="hourly_rate_max"
-                  value={@context.hourly_rate_max}
+                  value={@hourly_rate_max}
                   placeholder="0"
                   class="w-full pl-8 bg-background border-input"
-                  phx-blur="update_context"
+                  phx-blur="set_field"
                   phx-value-field="hourly_rate_max"
                 />
               </div>
@@ -442,10 +438,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               <div class="relative">
                 <.input
                   name="hours_per_week"
-                  value={@context.hours_per_week}
+                  value={@hours_per_week}
                   placeholder="40"
                   class="w-full bg-background border-input"
-                  phx-blur="update_context"
+                  phx-blur="set_field"
                   phx-value-field="hours_per_week"
                 />
               </div>
@@ -463,15 +459,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               <label class={[
                 "relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
                 "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
-                @context.hiring_status == value && "border-primary bg-primary/10",
-                @context.hiring_status != value && "border-border"
+                @hiring_status == value && "border-primary bg-primary/10",
+                @hiring_status != value && "border-border"
               ]}>
                 <input
                   type="radio"
                   name="hiring_status"
                   value={value}
-                  checked={@context.hiring_status == value}
-                  phx-click="update_context"
+                  checked={@hiring_status == value}
+                  phx-click="set_field"
                   phx-value-field="hiring_status"
                   phx-value-value={value}
                   class="sr-only"
@@ -483,7 +479,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     class={
                       classes([
                         "size-5 text-primary",
-                        @context.hiring_status != value && "invisible"
+                        @hiring_status != value && "invisible"
                       ])
                     }
                   />
@@ -510,14 +506,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               <label class={[
                 "relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
                 "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
-                type in (@context.company_types || []) && "border-primary bg-primary/10",
-                type not in (@context.company_types || []) && "border-border"
+                type in (@company_types || []) && "border-primary bg-primary/10",
+                type not in (@company_types || []) && "border-border"
               ]}>
                 <input
                   type="checkbox"
                   name="company_type"
                   value={type}
-                  checked={type in (@context.company_types || [])}
+                  checked={type in (@company_types || [])}
                   phx-click="toggle_company_type"
                   phx-value-type={type}
                   class="sr-only"
@@ -529,7 +525,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     class={
                       classes([
                         "size-5 text-primary",
-                        type not in (@context.company_types || []) && "invisible"
+                        type not in (@company_types || []) && "invisible"
                       ])
                     }
                   />
@@ -543,25 +539,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp update_context_field(context, "tech_stack", _value, %{"tech" => tech}) do
-    tech_stack =
-      if tech in context.tech_stack,
-        do: List.delete(context.tech_stack, tech),
-        else: [tech | context.tech_stack]
-
-    %{context | tech_stack: tech_stack}
+  defp assign_field(socket, "email" = _field, value, _params) do
+    socket
+    |> assign(:email, value)
+    |> assign(:domain, value |> String.split("@") |> List.last())
   end
 
-  defp update_context_field(context, "email" = _field, value, _params) do
-    domain = value |> String.split("@") |> List.last()
-
-    context
-    |> Map.put(:email, value)
-    |> Map.put(:domain, domain)
-  end
-
-  defp update_context_field(context, field, value, _params) do
-    Map.put(context, String.to_atom(field), value)
+  defp assign_field(socket, field, value, _params) do
+    socket
+    |> assign(String.to_atom(field), value)
   end
 
   def handle_event("next_step", _, %{assigns: %{step: :tech_stack}} = socket) do
@@ -587,18 +573,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def handle_event("add_tech", %{"key" => key, "value" => tech}, socket)
       when key in ["Enter", ","] do
-    %{tech_stack: tech_stack} = socket.assigns.context
     tech = String.trim(tech)
-    tech_exists? = Enum.any?(tech_stack, fn t -> String.downcase(t) == String.downcase(tech) end)
+
+    tech_exists? =
+      Enum.any?(socket.assigns.tech_stack, fn t -> String.downcase(t) == String.downcase(tech) end)
 
     socket =
       if byte_size(tech) > 0 and not tech_exists? do
-        updated_context = update_in(socket.assigns.context, [:tech_stack], &(&1 ++ [tech]))
-        matching_devs = get_matching_devs(socket)
-
         socket
-        |> assign(:context, updated_context)
-        |> assign(:matching_devs, matching_devs)
+        |> assign(:tech_stack, socket.assigns.tech_stack ++ [tech])
+        |> assign_matching_devs()
       else
         socket
       end
@@ -611,12 +595,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_event("remove_tech", %{"tech" => tech}, socket) do
-    updated_tech_stack = List.delete(socket.assigns.context.tech_stack, tech)
-    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
-    {:noreply, assign(socket, context: updated_context)}
+    updated_tech_stack = List.delete(socket.assigns.tech_stack, tech)
+    {:noreply, assign(socket, tech_stack: updated_tech_stack)}
   end
 
-  def handle_event("update_context", %{"field" => "email", "value" => email} = params, socket) do
+  def handle_event("set_field", %{"field" => "email", "value" => email} = params, socket) do
     verification_token = AlgoraWeb.UserAuth.generate_login_code(email)
 
     # TODO: Send email
@@ -624,22 +607,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     IO.puts(AlgoraWeb.UserAuth.login_email(email, verification_token))
     IO.puts("========================")
 
-    updated_context = update_context_field(socket.assigns.context, "email", email, params)
-    matching_devs = get_matching_devs(socket)
-
     {:noreply,
      socket
      |> assign(:code_sent?, true)
-     |> assign(:context, updated_context)
-     |> assign(:matching_devs, matching_devs)}
+     |> assign_field("email", email, params)
+     |> assign_matching_devs()}
   end
 
-  def handle_event(
-        "update_context",
-        %{"field" => "verification_code", "value" => token} = _params,
-        socket
-      ) do
-    email = socket.assigns.context.email
+  def handle_event("set_field", %{"field" => "verification_code", "value" => token}, socket) do
+    email = socket.assigns.email
 
     with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(token) do
       {:noreply, socket |> redirect(to: AlgoraWeb.UserAuth.login_path(email, token))}
@@ -652,42 +628,44 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
-  def handle_event("update_context", %{"field" => field, "value" => value} = params, socket) do
-    updated_context = update_context_field(socket.assigns.context, field, value, params)
-    matching_devs = get_matching_devs(socket)
-    {:noreply, assign(socket, context: updated_context, matching_devs: matching_devs)}
+  def handle_event("set_field", %{"field" => field, "value" => value} = params, socket) do
+    {:noreply,
+     socket
+     |> assign_field(field, value, params)
+     |> assign_matching_devs()}
   end
 
   def handle_event("toggle_intention", %{"intention" => intention}, socket) do
     updated_intentions =
-      if intention in socket.assigns.context.intentions do
-        List.delete(socket.assigns.context.intentions, intention)
+      if intention in socket.assigns.intentions do
+        List.delete(socket.assigns.intentions, intention)
       else
-        [intention | socket.assigns.context.intentions]
+        [intention | socket.assigns.intentions]
       end
 
-    updated_context = Map.put(socket.assigns.context, :intentions, updated_intentions)
-    {:noreply, assign(socket, context: updated_context)}
+    {:noreply, assign(socket, intentions: updated_intentions)}
   end
 
   def handle_event("toggle_company_type", %{"type" => type}, socket) do
-    current_types = socket.assigns.context.company_types || []
+    current_types = socket.assigns.company_types || []
 
     updated_types =
       if type in current_types,
         do: List.delete(current_types, type),
         else: [type | current_types]
 
-    updated_context = Map.put(socket.assigns.context, :company_types, updated_types)
-    {:noreply, assign(socket, context: updated_context)}
+    {:noreply, assign(socket, company_types: updated_types)}
   end
 
-  defp get_matching_devs(socket) do
-    Users.list_developers(
-      limit: 5,
-      sort_by_tech_stack: socket.assigns.context.tech_stack,
-      sort_by_country: socket.assigns.current_country,
-      min_earnings: Money.new!(200, "USD")
-    )
+  defp assign_matching_devs(socket) do
+    matching_devs =
+      Users.list_developers(
+        limit: 5,
+        sort_by_tech_stack: socket.assigns.tech_stack,
+        sort_by_country: socket.assigns.current_country,
+        min_earnings: Money.new!(200, "USD")
+      )
+
+    assign(socket, :matching_devs, matching_devs)
   end
 end

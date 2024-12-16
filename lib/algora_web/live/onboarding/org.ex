@@ -121,12 +121,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   # === EVENT HANDLERS === #
 
-  def handle_event("next_step", _, socket) do
-    current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
-    next_step = Enum.at(socket.assigns.steps, current_step_index + 1)
-    {:noreply, assign(socket, :step, next_step)}
-  end
-
   def handle_event("prev_step", _, socket) do
     current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
     prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)

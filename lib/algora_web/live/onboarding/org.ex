@@ -5,6 +5,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias AlgoraWeb.Components.Wordmarks
 
   def mount(_params, _session, socket) do
+    steps = [:tech_stack, :verification, :preferences]
+
     context = %{
       country: socket.assigns.current_country,
       tech_stack: [],
@@ -12,7 +14,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       email: "",
       domain: "",
       verification_code: "",
-      code_sent?: false,
       company_types: [],
       hiring_status: nil,
       hourly_rate_min: nil,
@@ -22,8 +23,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     {:ok,
      socket
-     |> assign(:step, 1)
-     |> assign(:total_steps, 3)
+     |> assign(:step, Enum.at(steps, 0))
+     |> assign(:steps, steps)
+     |> assign(:code_sent?, false)
      |> assign(:context, context)
      |> assign(:matching_devs, get_matching_devs(context))
      |> assign(:code_valid, nil)}
@@ -37,14 +39,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <div class="max-w-3xl mx-auto">
             <div class="flex items-center gap-4 text-lg mb-4">
               <span class="text-muted-foreground">
-                <%= min(@step, @total_steps) %> / <%= @total_steps %>
+                <%= Enum.find_index(@steps, &(&1 == @step)) + 1 %> / <%= length(@steps) %>
               </span>
               <h1 class="text-lg font-semibold uppercase">
-                <%= case @step do %>
-                  <% 3 -> %>
-                    Last step
-                  <% _ -> %>
-                    Get started
+                <%= if @step == Enum.at(@steps, -1) do %>
+                  Last step
+                <% else %>
+                  Get started
                 <% end %>
               </h1>
             </div>
@@ -66,7 +67,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp actions(%{step: 1} = assigns) do
+  defp actions(%{step: :tech_stack} = assigns) do
     ~H"""
     <.button phx-click="next_step" class="ml-auto">
       Next
@@ -74,7 +75,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp actions(%{step: 2} = assigns) do
+  defp actions(%{step: :verification} = assigns) do
     ~H"""
     <.button phx-click="prev_step" variant="secondary">
       Previous
@@ -85,7 +86,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp actions(%{step: 3} = assigns) do
+  defp actions(%{step: :preferences} = assigns) do
     ~H"""
     <.button phx-click="prev_step" variant="secondary">
       Previous
@@ -102,7 +103,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp sidebar_content(%{step: 2} = assigns) do
+  defp sidebar_content(%{step: :verification} = assigns) do
     ~H"""
     <div>
       <h2 class="text-lg font-semibold uppercase mb-6">
@@ -218,46 +219,42 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <h2 class="text-lg font-semibold uppercase mb-4">
         Matching Developers
       </h2>
-      <%= if @matching_devs == [] do %>
-        <p class="text-muted-foreground">Add tech stack to see matching developers</p>
-      <% else %>
-        <%= for dev <- @matching_devs do %>
-          <div class="mb-6 bg-card p-4 rounded-lg border border-border">
-            <div class="flex mb-2 gap-3">
-              <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
-              <div class="flex-grow">
-                <div class="flex justify-between">
-                  <div>
-                    <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                    <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
-                  </div>
-                  <div class="flex flex-col items-end">
-                    <div class="text-muted-foreground">Earned</div>
-                    <div class="font-semibold text-success font-display">
-                      <%= Money.to_string!(dev.total_earned) %>
-                    </div>
+      <%= for dev <- @matching_devs do %>
+        <div class="mb-6 bg-card p-4 rounded-lg border border-border">
+          <div class="flex mb-2 gap-3">
+            <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
+            <div class="flex-grow">
+              <div class="flex justify-between">
+                <div>
+                  <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
+                  <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
+                </div>
+                <div class="flex flex-col items-end">
+                  <div class="text-muted-foreground">Earned</div>
+                  <div class="font-semibold text-success font-display">
+                    <%= Money.to_string!(dev.total_earned) %>
                   </div>
                 </div>
+              </div>
 
-                <div class="pt-3 text-sm">
-                  <div class="-ml-1 text-sm flex flex-wrap gap-3">
-                    <%= for tech <- dev.tech_stack do %>
-                      <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
-                        <%= tech %>
-                      </span>
-                    <% end %>
-                  </div>
+              <div class="pt-3 text-sm">
+                <div class="-ml-1 text-sm flex flex-wrap gap-3">
+                  <%= for tech <- dev.tech_stack do %>
+                    <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
+                      <%= tech %>
+                    </span>
+                  <% end %>
                 </div>
               </div>
             </div>
           </div>
-        <% end %>
+        </div>
       <% end %>
     </div>
     """
   end
 
-  defp main_content(%{step: 1} = assigns) do
+  defp main_content(%{step: :tech_stack} = assigns) do
     ~H"""
     <div>
       <div>
@@ -297,7 +294,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp main_content(%{step: 2} = assigns) do
+  defp main_content(%{step: :verification, code_sent?: false} = assigns) do
     ~H"""
     <div class="space-y-4">
       <h2 class="text-4xl font-semibold mb-3">
@@ -357,7 +354,39 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp main_content(%{step: 3} = assigns) do
+  defp main_content(%{step: :verification, code_sent?: true} = assigns) do
+    ~H"""
+    <div class="space-y-8">
+      <div>
+        <h2 class="text-4xl font-semibold mb-3">
+          Verify your email
+        </h2>
+        <p class="text-muted-foreground">
+          We've sent a code to <%= @context.email %>
+        </p>
+
+        <div class="mt-6">
+          <label class="block text-sm font-medium mb-2">Verification Code</label>
+          <.input
+            type="text"
+            name="verification_code"
+            phx-blur="update_context"
+            phx-value-field="verification_code"
+            value={@context.verification_code}
+            placeholder="Enter verification code"
+            class="w-full bg-background border-input text-center text-2xl tracking-widest"
+          />
+        </div>
+
+        <%= if @code_valid == false do %>
+          <p class="text-destructive">Please enter a valid verification code</p>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  defp main_content(%{step: :preferences} = assigns) do
     ~H"""
     <div class="space-y-6">
       <div>
@@ -514,38 +543,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     """
   end
 
-  defp main_content(%{step: 3, code_sent?: true} = assigns) do
-    ~H"""
-    <div class="space-y-8">
-      <div>
-        <h2 class="text-4xl font-semibold mb-3">
-          Verify your email
-        </h2>
-        <p class="text-muted-foreground">
-          We've sent a code to <%= @context.email %>
-        </p>
-
-        <div class="mt-6">
-          <label class="block text-sm font-medium mb-2">Verification Code</label>
-          <.input
-            type="text"
-            name="verification_code"
-            phx-blur="update_context"
-            phx-value-field="verification_code"
-            value={@context.verification_code}
-            placeholder="Enter verification code"
-            class="w-full bg-background border-input text-center text-2xl tracking-widest"
-          />
-        </div>
-
-        <%= if @code_valid == false do %>
-          <p class="text-destructive">Please enter a valid verification code</p>
-        <% end %>
-      </div>
-    </div>
-    """
-  end
-
   defp update_context_field(context, "tech_stack", _value, %{"tech" => tech}) do
     tech_stack =
       if tech in context.tech_stack,
@@ -567,12 +564,20 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     Map.put(context, String.to_atom(field), value)
   end
 
-  def handle_event("next_step", _, socket) do
-    {:noreply, assign(socket, step: socket.assigns.step + 1)}
+  def handle_event("next_step", _, %{assigns: %{step: :tech_stack}} = socket) do
+    {:noreply, assign(socket, step: :verification)}
   end
 
-  def handle_event("prev_step", _, socket) do
-    {:noreply, assign(socket, step: socket.assigns.step - 1)}
+  def handle_event("next_step", _, %{assigns: %{step: :verification}} = socket) do
+    {:noreply, assign(socket, step: :preferences)}
+  end
+
+  def handle_event("prev_step", _, %{assigns: %{step: :verification}} = socket) do
+    {:noreply, assign(socket, step: :tech_stack)}
+  end
+
+  def handle_event("prev_step", _, %{assigns: %{step: :preferences}} = socket) do
+    {:noreply, assign(socket, step: :verification)}
   end
 
   def handle_event("submit", _, socket) do

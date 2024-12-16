@@ -2,12 +2,14 @@ defmodule AlgoraWeb.Router do
   use AlgoraWeb, :router
 
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
+  import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :fetch_current_user
+    plug :fetch_current_country
     plug :put_root_layout, {AlgoraWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
@@ -88,12 +90,14 @@ defmodule AlgoraWeb.Router do
 
     live "/leaderboard", LeaderboardLive
 
-    live "/onboarding/org", Onboarding.OrgLive
-    live "/onboarding/dev", Onboarding.DevLive
-    live "/companies", CompaniesLive, :index
-    live "/developers", DevelopersLive, :index
-
-    live "/pricing", PricingLive
+    live_session :onboarding,
+      on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
+      live "/onboarding/org", Onboarding.OrgLive
+      live "/onboarding/dev", Onboarding.DevLive
+      live "/companies", CompaniesLive, :index
+      live "/developers", DevelopersLive, :index
+      live "/pricing", PricingLive
+    end
 
     live "/trotw", TROTWLive
 

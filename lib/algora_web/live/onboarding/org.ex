@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def mount(_params, _session, socket) do
     context = %{
-      country: "US",
+      country: socket.assigns.current_country,
       tech_stack: [],
       intentions: [],
       email: "",

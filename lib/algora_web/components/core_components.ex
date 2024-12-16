@@ -675,6 +675,8 @@ defmodule AlgoraWeb.CoreComponents do
   attr :id, :any, default: nil
   attr :name, :any
   attr :label, :string, default: nil
+  attr :helptext, :string, default: nil
+  attr :icon, :string, default: nil
   attr :value, :any
   attr :class, :string, default: nil
 
@@ -797,22 +799,29 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label :if={@label} for={@id} class="mb-2"><%= @label %></.label>
-      <input
-        type={@type}
-        name={@name}
-        id={@id || @name}
-        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-        class={[
-          "bg-background block w-full rounded-lg border-input py-[7px] px-[11px]",
-          "text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5",
-          "border-input focus:border-ring focus:ring-ring/5",
-          @errors != [] &&
-            "border-destructive focus:border-destructive focus:ring-destructive/10 placeholder-destructive-foreground/50",
-          @class
-        ]}
-        {@rest}
-      />
+      <p :if={@helptext} class="mb-2 -mt-2 text-sm text-muted-foreground"><%= @helptext %></p>
+      <div class="relative">
+        <div :if={@icon} class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <.icon name={@icon} class="w-5 h-5 text-muted-foreground" />
+        </div>
+        <input
+          type={@type}
+          name={@name}
+          id={@id || @name}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          class={[
+            "bg-background block w-full rounded-lg border-input py-[7px] px-[11px]",
+            "text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
+            "phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5",
+            "border-input focus:border-ring focus:ring-ring/5",
+            @errors != [] &&
+              "border-destructive focus:border-destructive focus:ring-destructive/10 placeholder-destructive-foreground/50",
+            @icon && "pl-10",
+            @class
+          ]}
+          {@rest}
+        />
+      </div>
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """

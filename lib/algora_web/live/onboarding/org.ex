@@ -2,6 +2,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   require Logger
   use AlgoraWeb, :live_view
   alias Algora.Users
+  alias AlgoraWeb.Components.Wordmarks
 
   def mount(_params, _session, socket) do
     context = %{
@@ -88,26 +89,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <h2 class="text-lg font-semibold uppercase mb-6">
               You're in good company
             </h2>
-            <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16 saturate-0">
+            <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/cal"
               >
-                <img
-                  src="https://algora.io/banners/calcom.png"
-                  alt="Cal.com"
-                  class="col-auto w-[10rem] mt-3"
-                />
+                <Wordmarks.calcom class="col-auto w-[10rem] mt-3" alt="Cal.com" />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/qdrant"
               >
-                <img
-                  src="https://algora.io/banners/qdrant.png"
-                  alt="Qdrant"
-                  class="col-auto w-[11rem]"
-                />
+                <Wordmarks.qdrant class="col-auto w-[11rem]" alt="Qdrant" />
               </a>
               <a
                 class="relative flex items-center justify-center"
@@ -116,14 +109,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 <img
                   src="https://algora.io/banners/remotion.png"
                   alt="Remotion"
-                  class="col-auto w-full"
+                  class="saturate-0 col-auto w-full"
                 />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/zio"
               >
-                <img src="https://algora.io/banners/zio.png" alt="ZIO" class="col-auto w-[13rem]" />
+                <img
+                  src="https://algora.io/banners/zio.png"
+                  alt="ZIO"
+                  class="invert brightness-0 col-auto w-[10rem]"
+                />
               </a>
               <a
                 class="relative flex items-center justify-center"
@@ -132,42 +129,50 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 <img
                   src="https://algora.io/banners/triggerdotdev.png"
                   alt="Trigger.dev"
-                  class="col-auto w-full"
+                  class="saturate-0 col-auto w-full"
                 />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/tembo"
               >
-                <img src="https://algora.io/banners/tembo.png" alt="Tembo" class="col-auto w-[13rem]" />
+                <img
+                  src="https://algora.io/banners/tembo.png"
+                  alt="Tembo"
+                  class="saturate-0 col-auto w-[13rem]"
+                />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/maybe-finance"
               >
-                <img src="https://algora.io/banners/maybe.png" alt="Maybe" class="col-auto w-full" />
+                <img
+                  src="https://algora.io/banners/maybe.png"
+                  alt="Maybe"
+                  class="saturate-0 col-auto w-full"
+                />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/golemcloud"
               >
-                <img
-                  src="https://algora.io/banners/golem.png"
-                  alt="Golem Cloud"
-                  class="col-auto w-full"
-                />
+                <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/aidenybai"
               >
-                <img src="https://algora.io/banners/million.png" alt="Million" class="col-auto w-36" />
+                <img
+                  src="https://algora.io/banners/million.png"
+                  alt="Million"
+                  class="saturate-0 col-auto w-44"
+                />
               </a>
               <a
                 class="relative flex items-center justify-center"
                 href="https://console.algora.io/org/tailcallhq"
               >
-                <AlgoraWeb.Components.Wordmarks.tailcall class="col-auto w-[13rem]" />
+                <Wordmarks.tailcall class="col-auto w-[10rem]" fill="white" alt="Tailcall" />
               </a>
               <a
                 class="relative flex items-center justify-center"
@@ -176,7 +181,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 <img
                   src="https://algora.io/banners/highlight.png"
                   alt="Highlight"
-                  class="col-auto w-44"
+                  class="saturate-0 col-auto w-44"
                 />
               </a>
               <a
@@ -186,7 +191,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 <img
                   src="https://algora.io/banners/dittofeed.png"
                   alt="Dittofeed"
-                  class="col-auto w-40"
+                  class="invert brightness-0 col-auto w-40"
                 />
               </a>
             </div>

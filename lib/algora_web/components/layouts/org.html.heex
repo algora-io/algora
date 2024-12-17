@@ -207,7 +207,11 @@
               </div>
             </:link>
             <:link
-              :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
+              :for={
+                org <-
+                  Algora.Organizations.get_user_orgs(@current_user)
+                  |> Enum.reject(&(&1.id == @current_org.id))
+              }
               href={~p"/set_context/#{org.handle}"}
             >
               <div class="flex items-center whitespace-nowrap">

@@ -81,8 +81,21 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :hourly_rate_min, :integer
       field :hourly_rate_max, :integer
       field :hours_per_week, :integer
-      field :hiring_status, :string
+      field :hiring, :boolean
       field :company_types, {:array, :string}
+    end
+
+    def hiring_options() do
+      [{"Yes", "true"}, {"No", "false"}]
+    end
+
+    def company_types_options() do
+      [
+        {"Open source company", "open_source"},
+        {"Closed source company", "closed_source"},
+        {"Agency / consultancy / studio", "agency"},
+        {"Non-profit / FOSS", "nonprofit"}
+      ]
     end
 
     def init() do
@@ -95,17 +108,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         :hourly_rate_min,
         :hourly_rate_max,
         :hours_per_week,
-        :hiring_status,
+        :hiring,
         :company_types
       ])
       |> validate_required([:hourly_rate_min], message: "Please enter a minimum hourly rate")
       |> validate_required([:hourly_rate_max], message: "Please enter a maximum hourly rate")
       |> validate_required([:hours_per_week], message: "Please enter a number of hours per week")
-      |> validate_required([:hiring_status], message: "Please select a hiring status")
+      |> validate_required([:hiring], message: "Please select a hiring status")
       |> validate_number(:hourly_rate_min, greater_than: 0)
       |> validate_number(:hourly_rate_max, greater_than: 0)
       |> validate_number(:hours_per_week, greater_than: 0)
-      |> validate_inclusion(:hiring_status, ["yes", "no"])
+      |> validate_inclusion(:hiring, ["true", "false"])
       |> validate_length(:company_types,
         min: 1,
         message: "Please select at least one company type"
@@ -461,31 +474,25 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               We will match you with developers who are looking for full-time work
             </p>
             <div class="grid grid-cols-2 gap-4">
-              <%= for {value, label} <- [{"yes", "Yes"}, {"no", "No"}] do %>
+              <%= for {label, value} <- PreferencesForm.hiring_options() do %>
                 <label class={[
-                  "relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                  "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
                   "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
-                  get_field(@preferences_form.source, :hiring_status) == value &&
-                    "border-primary bg-primary/10",
-                  get_field(@preferences_form.source, :hiring_status) != value && "border-border"
+                  "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
                 ]}>
-                  <.input
-                    field={@preferences_form[:hiring_status]}
-                    type="radio"
-                    value={value}
-                    class="sr-only"
-                  />
+                  <div class="sr-only">
+                    <.input
+                      field={@preferences_form[:hiring]}
+                      type="radio"
+                      value={value}
+                      checked={to_string(get_field(@preferences_form.source, :hiring)) == value}
+                    />
+                  </div>
                   <span class="flex flex-1 items-center justify-between">
                     <span class="text-sm font-medium"><%= label %></span>
                     <.icon
                       name="tabler-check"
-                      class={
-                        classes([
-                          "size-5 text-primary",
-                          get_field(@preferences_form.source, :hiring_status) != value &&
-                            "invisible"
-                        ])
-                      }
+                      class="size-5 text-primary invisible group-has-[:checked]:visible"
                     />
                   </span>
                 </label>
@@ -501,37 +508,26 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               Select all that apply
             </p>
             <div class="grid grid-cols-2 gap-4">
-              <%= for {type, label} <- [
-                    {"opensource", "Open source company"},
-                    {"closedsource", "Closed source company"},
-                    {"agency", "Agency / consultancy / studio"},
-                    {"nonprofit", "Non-profit / FOSS"}
-                  ] do %>
+              <%= for {label, value} <- PreferencesForm.company_types_options() do %>
                 <label class={[
-                  "relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                  "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
                   "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
-                  type in (get_field(@preferences_form.source, :company_types) || []) &&
-                    "border-primary bg-primary/10",
-                  type not in (get_field(@preferences_form.source, :company_types) || []) &&
-                    "border-border"
+                  "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
                 ]}>
-                  <.input
-                    field={@preferences_form[:company_types]}
-                    type="checkbox"
-                    value={type}
-                    class="sr-only"
-                  />
+                  <div class="sr-only">
+                    <.input
+                      field={@preferences_form[:company_types]}
+                      type="checkbox"
+                      value={value}
+                      checked={value in (get_field(@preferences_form.source, :company_types) || [])}
+                      multiple
+                    />
+                  </div>
                   <span class="flex flex-1 items-center justify-between">
                     <span class="text-sm font-medium"><%= label %></span>
                     <.icon
                       name="tabler-check"
-                      class={
-                        classes([
-                          "size-5 text-primary",
-                          type not in (get_field(@preferences_form.source, :company_types) || []) &&
-                            "invisible"
-                        ])
-                      }
+                      class="size-5 text-primary invisible group-has-[:checked]:visible"
                     />
                   </span>
                 </label>

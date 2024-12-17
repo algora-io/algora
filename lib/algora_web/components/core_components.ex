@@ -700,6 +700,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
     errors = if(assigns.hide_errors, do: [], else: Enum.map(field.errors, &translate_error(&1)))
+
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
     |> assign(:errors, errors)
@@ -715,12 +716,12 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <label class="flex items-center gap-4 text-sm leading-6 text-gray-300">
-        <input type="hidden" name={@name} value="false" />
+        <%!-- <input type="hidden" name={@name} value="false" /> --%>
         <input
           type="checkbox"
           id={@id || @name}
           name={@name}
-          value="true"
+          value={@value}
           checked={@checked}
           class="rounded border-input text-primary focus:ring-ring"
           {@rest}
@@ -1176,6 +1177,16 @@ defmodule AlgoraWeb.CoreComponents do
         <.icon name="tabler-dots-vertical" class="size-5 mb-1 text-primary inline" />
         and select "Add to home screen" to install.
       </div>
+    </div>
+    """
+  end
+
+  attr :data, :any, required: true
+
+  def debug(assigns) do
+    ~H"""
+    <div class="mb-4">
+      <pre class="bg-muted/50 rounded-lg p-4 text-sm font-mono overflow-auto"><%= Jason.encode!(@data, pretty: true) %></pre>
     </div>
     """
   end

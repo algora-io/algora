@@ -118,10 +118,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_number(:hourly_rate_min, greater_than: 0)
       |> validate_number(:hourly_rate_max, greater_than: 0)
       |> validate_number(:hours_per_week, greater_than: 0)
-      |> validate_inclusion(:hiring, ["true", "false"])
       |> validate_length(:company_types,
         min: 1,
         message: "Please select at least one company type"
+      )
+      |> validate_subset(
+        :company_types,
+        PreferencesForm.company_types_options() |> Enum.map(&elem(&1, 1))
       )
       |> validate_rate_range()
     end
@@ -224,7 +227,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
-  def handle_event("verify_code", %{"verification_form" => params}, socket) do
+  def handle_event("submit_verification", %{"verification_form" => params}, socket) do
     changeset =
       %VerificationForm{}
       |> VerificationForm.changeset(params)
@@ -236,7 +239,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         email = get_field(socket.assigns.email_form.source, :email)
 
         with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(code) do
-          {:noreply, socket |> assign(step: :preferences)}
+          {:noreply,
+           socket
+           |> assign(:verification_form, to_form(changeset))
+           |> assign(step: :preferences)}
         else
           {:ok, _different_email} ->
             {:noreply,
@@ -388,7 +394,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </p>
 
         <div class="mt-6">
-          <.form for={@verification_form} phx-submit="verify_code">
+          <.form for={@verification_form} phx-submit="submit_verification">
             <label class="block text-sm font-medium mb-2">Verification Code</label>
             <.input
               field={@verification_form[:code]}
@@ -400,6 +406,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <%= if @code_valid? == false do %>
               <p class="mt-2 text-sm text-destructive">Invalid verification code</p>
             <% end %>
+
+            <div class="flex justify-end">
+              <.button type="submit">
+                Next <.icon name="tabler-arrow-right" class="ml-2 size-4" />
+              </.button>
+            </div>
           </.form>
         </div>
       </div>

@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   alias Algora.Reviews
   alias Algora.Users
   alias AlgoraWeb.Org.Forms.JobForm
-
+  alias Algora.Contracts
   def middle_rate(%{min: min, max: max}), do: Money.div!(Money.add!(min, max), 2)
 
   def mount(_params, _session, socket) do
@@ -13,13 +13,11 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
     hourly_rate = %{min: Money.new!(50, :USD), max: Money.new!(100, :USD)}
     hours_per_week = 20
 
-    contract_template = %{
-      hourly_rate: hourly_rate,
-      expected_hours: hours_per_week,
-      ticket: %{title: socket.assigns.current_org.og_title},
-      owner: socket.assigns.current_org,
-      tech_stack: tech_stack
-    }
+    contracts =
+      Contracts.list_contracts(
+        client_id: socket.assigns.current_org.id,
+        available?: true
+      )
 
     job_form =
       %JobForm{}
@@ -36,7 +34,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       |> assign(:weekly_amount, Money.mult!(middle_rate(hourly_rate), hours_per_week))
       |> assign(:selected_dev, nil)
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
-      |> assign(:contract_template, contract_template)
+      |> assign(:contracts, contracts)
       |> assign(:achievements, fetch_achievements())
       |> assign(:show_begin_collaboration_drawer, false)
       |> assign(:job_form, job_form)
@@ -66,7 +64,9 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           <div class="relative w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
-                <.contract_template contract={@contract_template} />
+                <%= for contract <- @contracts do %>
+                  <.contract contract={contract} />
+                <% end %>
                 <%= for user <- @matching_devs do %>
                   <.matching_dev user={user} />
                 <% end %>
@@ -633,37 +633,42 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
     """
   end
 
-  def contract_template(assigns) do
+  def contract(assigns) do
     ~H"""
     <tr class="border-b transition-colors">
       <td class="py-4 align-middle">
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-4">
-            <.link href={~p"/org/#{@contract.owner.handle}"}>
+            <.link href={~p"/org/#{@contract.client.handle}"}>
               <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
-                <.avatar_image src={@contract.owner.og_image_url} alt={@contract.owner.name} />
+                <.avatar_image src={@contract.client.og_image_url} alt={@contract.client.name} />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
               </.avatar>
             </.link>
 
             <div class="flex flex-col gap-1">
               <div class="flex items-center gap-1 text-base text-foreground">
-                <.link href={~p"/org/#{@contract.owner.handle}"} class="font-semibold hover:underline">
-                  <%= @contract.ticket.title %>
+                <.link
+                  href={~p"/org/#{@contract.client.handle}"}
+                  class="font-semibold hover:underline"
+                >
+                  <%= @contract.client.og_title %>
                 </.link>
               </div>
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  $<%= @contract.hourly_rate.min %> - $<%= @contract.hourly_rate.max %>/hr
+                  <%= Money.to_string!(@contract.client.hourly_rate_min) %> - <%= Money.to_string!(
+                    @contract.client.hourly_rate_max
+                  ) %>/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
-                  · <%= @contract.expected_hours %> hours/week
+                  · <%= @contract.hours_per_week %> hours/week
                 </span>
               </div>
 
               <div class="mt-1 flex flex-wrap gap-2">
-                <%= for tag <- @contract.tech_stack do %>
+                <%= for tag <- @contract.client.tech_stack do %>
                   <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
                     <%= tag %>
                   </div>

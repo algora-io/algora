@@ -378,7 +378,7 @@ defmodule AlgoraWeb.User.DashboardLive do
                   href={~p"/org/#{@contract.client.handle}"}
                   class="font-semibold hover:underline"
                 >
-                  <%= @contract.client.name %>: Hourly Contract
+                  <%= @contract.client.og_title %>
                 </.link>
               </div>
 

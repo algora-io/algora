@@ -542,6 +542,12 @@ defmodule Algora.Contracts do
     |> list_contract_chain()
   end
 
+  def list_contracts(criteria \\ []) do
+    criteria
+    |> list_contract_chain()
+  end
+
+  # TODO: rename
   def list_contract_chain(criteria \\ []) do
     criteria = Keyword.merge([order: :desc, limit: 50], criteria)
 
@@ -612,6 +618,9 @@ defmodule Algora.Contracts do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([c] in query, where: c.id == ^id)
+
+      {:client_id, client_id}, query ->
+        from([c] in query, where: c.client_id == ^client_id)
 
       {:original_contract_id, original_contract_id}, query ->
         from([c] in query, where: c.original_contract_id == ^original_contract_id)

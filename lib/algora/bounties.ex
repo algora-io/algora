@@ -43,11 +43,11 @@ defmodule Algora.Bounties do
         from([b] in query, where: b.status == ^status)
 
       {:tech_stack, tech_stack}, query ->
-        from([b] in query,
+        from([b, o: o] in query,
           where:
             fragment(
               "EXISTS (SELECT 1 FROM UNNEST(?::citext[]) t1 WHERE t1 = ANY(?::citext[]))",
-              b.tech_stack,
+              o.tech_stack,
               ^tech_stack
             )
         )

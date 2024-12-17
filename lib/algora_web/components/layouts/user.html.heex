@@ -369,6 +369,14 @@
                 </div>
               </div>
             </:link>
+            <:link href={~p"/auth/logout"} method="delete">
+              <div class="flex items-center whitespace-nowrap">
+                <div class="h-8 w-8 flex items-center justify-center mr-3">
+                  <.icon name="tabler-logout" class="h-5 w-5" />
+                </div>
+                <div class="font-semibold">Logout</div>
+              </div>
+            </:link>
           </.dropdown2>
         </div>
       <% else %>

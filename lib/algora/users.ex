@@ -121,7 +121,10 @@ defmodule Algora.Users do
       tech_stack: u.tech_stack,
       total_earned: Algora.SQL.money_or_zero(e.total_earned),
       completed_bounties_count: coalesce(b.bounties_count, 0),
-      contributed_projects_count: coalesce(p.projects_count, 0)
+      contributed_projects_count: coalesce(p.projects_count, 0),
+      hourly_rate_min: u.hourly_rate_min,
+      hourly_rate_max: u.hourly_rate_max,
+      hours_per_week: u.hours_per_week
     })
     |> Repo.all()
     |> Enum.map(&User.after_load/1)

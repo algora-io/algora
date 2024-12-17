@@ -252,15 +252,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         # TODO: use context functions instead of Factory
         # TODO: generate nicer handles or let the user choose
 
-        user =
-          Factory.upsert!(:user, [:email], %{
-            email: email,
-            display_name: user_handle,
-            avatar_url: "https://algora.io/placeholder-avatar.png",
-            handle: user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
-            tech_stack: tech_stack
-          })
-
         org =
           Factory.upsert!(:organization, [:email], %{
             # TODO: unset email
@@ -276,6 +267,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
             hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
             hours_per_week: preferences.hours_per_week
+          })
+
+        user =
+          Factory.upsert!(:user, [:email], %{
+            email: email,
+            display_name: user_handle,
+            avatar_url: "https://algora.io/placeholder-avatar.png",
+            handle: user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
+            tech_stack: tech_stack,
+            last_context: org.handle
           })
 
         _member =

@@ -44,11 +44,13 @@ github_id =
     _ -> "123456789"
   end
 
+pied_piper = upsert!(:organization, [:email])
+
 erich =
   upsert!(
     :user,
     [:provider, :provider_id],
-    %{provider_id: github_id}
+    %{provider_id: github_id, last_context: pied_piper.handle}
   )
 
 upsert!(
@@ -149,8 +151,6 @@ carver =
       hours_per_week: 30
     }
   )
-
-pied_piper = upsert!(:organization, [:email])
 
 for user <- [erich, richard, dinesh, gilfoyle, jared] do
   upsert!(

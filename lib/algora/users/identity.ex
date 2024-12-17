@@ -1,5 +1,5 @@
 defmodule Algora.Users.Identity do
-  use Algora.Model
+  use Algora.Schema
 
   alias Algora.Users.{Identity, User}
 

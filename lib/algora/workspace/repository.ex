@@ -1,5 +1,5 @@
 defmodule Algora.Workspace.Repository do
-  use Algora.Model
+  use Algora.Schema
 
   alias Algora.Workspace.Repository
 

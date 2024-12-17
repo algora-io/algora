@@ -1,5 +1,5 @@
 defmodule Algora.Chat.Message do
-  use Algora.Model
+  use Algora.Schema
 
   schema "messages" do
     field :content, :string

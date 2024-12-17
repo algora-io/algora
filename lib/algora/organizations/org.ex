@@ -1,5 +1,5 @@
 defmodule Algora.Organizations.Org do
-  use Algora.Model
+  use Algora.Schema
 
   alias Algora.Users.User
 

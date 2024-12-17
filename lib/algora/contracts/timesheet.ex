@@ -1,5 +1,5 @@
 defmodule Algora.Contracts.Timesheet do
-  use Algora.Model
+  use Algora.Schema
 
   @type t() :: %__MODULE__{}
 

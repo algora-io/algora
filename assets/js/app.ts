@@ -446,16 +446,17 @@ const Hooks = {
   },
   TechStack: {
     mounted() {
-      this.techStack = new Set();
+      // Store original casing in a Map where key is lowercase and value is original case
+      this.techStackMap = new Map();
       this.input = this.el.querySelector("input");
       this.hiddenInput = this.el.querySelector("[data-tech-stack-input]");
 
       // Initialize from existing value if any
       const initialValue = this.hiddenInput.value;
       if (initialValue) {
-        JSON.parse(initialValue).forEach((tech) =>
-          this.techStack.add(tech.toLowerCase())
-        );
+        JSON.parse(initialValue).forEach((tech) => {
+          this.techStackMap.set(tech.toLowerCase(), tech);
+        });
         this.renderTechStack();
       }
 
@@ -467,34 +468,33 @@ const Hooks = {
       });
     },
 
-    updated() {
-      this.renderTechStack();
-    },
-
     addTech() {
       const tech = this.input.value.trim();
-      if (tech && !this.techStack.has(tech.toLowerCase())) {
-        this.techStack.add(tech.toLowerCase());
+      const techLower = tech.toLowerCase();
+      if (tech && !this.techStackMap.has(techLower)) {
+        this.techStackMap.set(techLower, tech);
         this.renderTechStack();
         this.updateHiddenInput();
-        this.input.value = "";
       }
+      this.input.value = "";
     },
 
     removeTech(tech) {
-      this.techStack.delete(tech.toLowerCase());
+      this.techStackMap.delete(tech.toLowerCase());
       this.renderTechStack();
       this.updateHiddenInput();
     },
 
     updateHiddenInput() {
-      // Update hidden input with current tech stack for form submission
-      this.hiddenInput.value = JSON.stringify(Array.from(this.techStack));
+      // Store original casing in the hidden input
+      this.hiddenInput.value = JSON.stringify(
+        Array.from(this.techStackMap.values())
+      );
     },
 
     renderTechStack() {
       const container = this.el.querySelector("[data-tech-stack-container]");
-      container.innerHTML = Array.from(this.techStack)
+      container.innerHTML = Array.from(this.techStackMap.values())
         .map(
           (tech) => `
           <div>

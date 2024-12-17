@@ -1,5 +1,5 @@
 defmodule Algora.Chat.Thread do
-  use Algora.Model
+  use Algora.Schema
 
   schema "threads" do
     field :title, :string

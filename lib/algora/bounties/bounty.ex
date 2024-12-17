@@ -1,5 +1,5 @@
 defmodule Algora.Bounties.Bounty do
-  use Algora.Model
+  use Algora.Schema
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
   @type t() :: %__MODULE__{}

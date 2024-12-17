@@ -1,5 +1,5 @@
 defmodule Algora.Payments.PaymentMethod do
-  use Algora.Model
+  use Algora.Schema
 
   schema "payment_methods" do
     field :provider, :string

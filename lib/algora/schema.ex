@@ -1,4 +1,4 @@
-defmodule Algora.Model do
+defmodule Algora.Schema do
   defmacro __using__(_) do
     quote do
       use Ecto.Schema

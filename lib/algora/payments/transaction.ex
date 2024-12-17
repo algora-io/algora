@@ -1,5 +1,5 @@
 defmodule Algora.Payments.Transaction do
-  use Algora.Model
+  use Algora.Schema
   alias Money.Ecto.Composite.Type, as: MoneyType
 
   @type t() :: %__MODULE__{}

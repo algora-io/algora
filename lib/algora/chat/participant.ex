@@ -1,5 +1,5 @@
 defmodule Algora.Chat.Participant do
-  use Algora.Model
+  use Algora.Schema
 
   schema "chat_participants" do
     field :last_read_at, :utc_datetime_usec

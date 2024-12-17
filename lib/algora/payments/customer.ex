@@ -1,5 +1,5 @@
 defmodule Algora.Payments.Customer do
-  use Algora.Model
+  use Algora.Schema
 
   @type t() :: %__MODULE__{}
 

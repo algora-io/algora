@@ -1,5 +1,5 @@
 defmodule Algora.Workspace.Ticket do
-  use Algora.Model
+  use Algora.Schema
 
   alias Algora.Workspace.Ticket
 

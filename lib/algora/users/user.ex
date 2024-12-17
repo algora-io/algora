@@ -1,5 +1,5 @@
 defmodule Algora.Users.User do
-  use Algora.Model
+  use Algora.Schema
 
   alias Algora.MoneyUtils
   alias Algora.Users.User

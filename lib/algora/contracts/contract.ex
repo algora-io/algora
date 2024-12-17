@@ -1,5 +1,5 @@
 defmodule Algora.Contracts.Contract do
-  use Algora.Model
+  use Algora.Schema
   alias Money.Ecto.Composite.Type, as: MoneyType
   alias Algora.MoneyUtils
 

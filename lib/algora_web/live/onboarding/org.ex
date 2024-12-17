@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias Algora.Users
   alias AlgoraWeb.Components.Wordmarks
   import Ecto.Changeset
+  alias Algora.Factory
 
   # === SCHEMAS === #
 
@@ -219,8 +220,85 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     case changeset do
       %{valid?: true} ->
-        # TODO: Handle successful completion
-        {:noreply, socket}
+        # Get all the form data
+        email = get_field(socket.assigns.email_form.source, :email)
+        domain = get_field(socket.assigns.email_form.source, :domain)
+        tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
+        login_code = get_field(socket.assigns.verification_form.source, :code)
+        preferences = changeset.changes
+
+        user_handle =
+          email
+          |> String.split("@")
+          |> List.first()
+          |> String.replace(~r/[^a-zA-Z0-9]/, "")
+          |> String.downcase()
+
+        org_name =
+          domain
+          |> String.split(".")
+          |> List.first()
+          |> String.capitalize()
+
+        org_handle =
+          domain
+          |> String.split(".")
+          |> List.first()
+          |> String.downcase()
+
+        # TODO: call async and handle errors
+        {:ok, metadata} = Algora.Crawler.fetch_metadata("https://#{domain}")
+
+        # TODO: use context functions instead of Factory
+        # TODO: generate nicer handles or let the user choose
+
+        user =
+          Factory.upsert!(:user, [:email], %{
+            email: email,
+            display_name: user_handle,
+            avatar_url: "https://algora.io/placeholder-avatar.png",
+            handle: user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
+            tech_stack: tech_stack
+          })
+
+        org =
+          Factory.upsert!(:organization, [:email], %{
+            # TODO: unset email
+            email: "admin@#{domain}",
+            display_name: org_name,
+            bio: metadata.description,
+            avatar_url: metadata.logo,
+            handle: org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
+            domain: domain,
+            og_title: metadata.title,
+            og_image_url: metadata.og_image,
+            tech_stack: tech_stack,
+            hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
+            hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
+            hours_per_week: preferences.hours_per_week
+          })
+
+        _member =
+          Factory.upsert!(:member, [:user_id, :org_id], %{
+            user_id: user.id,
+            org_id: org.id,
+            role: :admin
+          })
+
+        _contract =
+          Factory.insert!(
+            :contract,
+            %{
+              client_id: org.id,
+              hourly_rate: Money.new!(preferences.hourly_rate_max, :USD),
+              hours_per_week: preferences.hours_per_week
+            }
+          )
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Welcome to Algora!")
+         |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))}
 
       %{valid?: false} ->
         {:noreply, assign(socket, preferences_form: to_form(changeset))}

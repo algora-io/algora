@@ -1181,13 +1181,12 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  attr :class, :string, default: nil
   attr :data, :any, required: true
 
   def debug(assigns) do
     ~H"""
-    <div class="mb-4">
-      <pre class="bg-muted/50 rounded-lg p-4 text-sm font-mono overflow-auto"><%= Jason.encode!(@data, pretty: true) %></pre>
-    </div>
+      <pre class={classes(["bg-muted/50 rounded-lg p-4 text-sm font-mono overflow-auto", @class])}><%= Jason.encode!(@data, pretty: true) %></pre>
     """
   end
 

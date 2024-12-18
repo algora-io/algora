@@ -247,7 +247,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           |> String.downcase()
 
         # TODO: call async and handle errors
-        {:ok, metadata} = Algora.Crawler.fetch_metadata("https://#{domain}")
+        metadata = Algora.Crawler.fetch_user_metadata(email)
 
         # TODO: use context functions instead of Factory
         # TODO: generate nicer handles or let the user choose
@@ -257,23 +257,30 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             # TODO: unset email
             email: "admin@#{domain}",
             display_name: org_name,
-            bio: metadata.description,
-            avatar_url: metadata.logo,
+            bio: get_in(metadata, [:org, :description]),
+            avatar_url: get_in(metadata, [:org, :logo]),
             handle: org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
             domain: domain,
-            og_title: metadata.title,
-            og_image_url: metadata.og_image,
+            og_title: get_in(metadata, [:org, :title]),
+            og_image_url: get_in(metadata, [:org, :og_image]),
             tech_stack: tech_stack,
             hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
             hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
-            hours_per_week: preferences.hours_per_week
+            hours_per_week: preferences.hours_per_week,
+            twitter_url: get_in(metadata, [:org, :socials, :twitter]),
+            github_url: get_in(metadata, [:org, :socials, :github]),
+            youtube_url: get_in(metadata, [:org, :socials, :youtube]),
+            twitch_url: get_in(metadata, [:org, :socials, :twitch]),
+            discord_url: get_in(metadata, [:org, :socials, :discord]),
+            slack_url: get_in(metadata, [:org, :socials, :slack]),
+            linkedin_url: get_in(metadata, [:org, :socials, :linkedin])
           })
 
         user =
           Factory.upsert!(:user, [:email], %{
             email: email,
             display_name: user_handle,
-            avatar_url: "https://algora.io/placeholder-avatar.png",
+            avatar_url: get_in(metadata, [:avatar_url]),
             handle: user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
             tech_stack: tech_stack,
             last_context: org.handle

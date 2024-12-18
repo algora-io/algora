@@ -40,7 +40,7 @@ defmodule Algora.Crawler do
   end
 
   defp handle_response(
-         %Finch.Response{status: status, headers: headers, body: body},
+         %Finch.Response{status: status, headers: headers, body: _body},
          url,
          redirect_count
        )
@@ -85,15 +85,13 @@ defmodule Algora.Crawler do
       html_tree
       |> Floki.find(~s|meta[property="og:title"]|)
       |> get_content_or_nil()
+      |> maybe_trim()
 
     html_title =
       html_tree
       |> Floki.find("title")
       |> Floki.text()
-      |> case do
-        "" -> nil
-        text -> text
-      end
+      |> maybe_trim()
 
     meta_title || html_title
   end
@@ -110,6 +108,7 @@ defmodule Algora.Crawler do
       html_tree
       |> Floki.find(selector)
       |> get_content_or_nil()
+      |> maybe_trim()
     end)
   end
 
@@ -136,7 +135,9 @@ defmodule Algora.Crawler do
     logo_url =
       case icons_with_sizes do
         # If we found icons with sizes, use the largest one
-        [{element, _} | _] -> get_logo_url([element])
+        [{element, _} | _] ->
+          get_logo_url([element])
+
         # Otherwise try the logo selectors
         [] ->
           Enum.find_value(logo_selectors, fn selector ->
@@ -153,6 +154,7 @@ defmodule Algora.Crawler do
   end
 
   defp get_size_in_pixels(nil), do: 0
+
   defp get_size_in_pixels(sizes) do
     sizes
     |> String.split(" ")
@@ -201,5 +203,14 @@ defmodule Algora.Crawler do
       _ ->
         url
     end
+  end
+
+  defp maybe_trim(nil), do: nil
+
+  defp maybe_trim(string) do
+    string
+    |> String.trim()
+    |> String.split()
+    |> Enum.join(" ")
   end
 end

@@ -389,6 +389,6 @@ defmodule Algora.Crawler do
         "s" => Integer.to_string(size)
       })
 
-    "https://www.gravatar.com/avatar/#{hash}?#{query}"
+    "https://www.gravatar.com/avatar/#{hash}?#{query}&d=identicon"
   end
 end

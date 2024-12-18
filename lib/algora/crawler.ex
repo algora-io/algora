@@ -14,14 +14,30 @@ defmodule Algora.Crawler do
         {:ok, body} ->
           case Floki.parse_document(body) do
             {:ok, html_tree} ->
-              {:ok,
-               %{
-                 og_image: find_og_image(html_tree),
-                 logo: find_logo(html_tree, url),
-                 title: find_title(html_tree),
-                 description: find_description(html_tree),
-                 socials: find_social_links(html_tree)
-               }}
+              metadata = %{
+                og_image_url: find_og_image(html_tree),
+                favicon_url: find_logo(html_tree, url),
+                og_title: find_title(html_tree),
+                og_description: find_description(html_tree),
+                socials: find_social_links(html_tree)
+              }
+
+              # Enhance metadata with GitHub info if available
+              metadata =
+                case get_github_info(metadata.socials[:github]) do
+                  {:ok, github_info} -> Map.merge(metadata, github_info)
+                  _ -> metadata
+                end
+
+              metadata
+              |> update_in([:socials, :twitter], fn twitter_url ->
+                case get_in(metadata, [:twitter_username]) do
+                  nil -> twitter_url
+                  username -> "https://x.com/#{username}"
+                end
+              end)
+              |> Map.delete(:twitter_username)
+              |> then(&{:ok, &1})
 
             error ->
               Logger.error("Failed to parse HTML from #{url}: #{inspect(error)}")
@@ -390,5 +406,56 @@ defmodule Algora.Crawler do
       })
 
     "https://www.gravatar.com/avatar/#{hash}?#{query}&d=identicon"
+  end
+
+  defp get_github_info(nil), do: {:error, :no_github_url}
+
+  defp get_github_info(github_url) do
+    case extract_github_handle(github_url) do
+      nil ->
+        {:error, :invalid_github_url}
+
+      handle ->
+        request =
+          Finch.build(:get, "https://api.github.com/users/#{handle}", [
+            {"User-Agent", @user_agent}
+          ])
+
+        case Finch.request(request, Algora.Finch) do
+          {:ok, %Finch.Response{status: 200, body: body}} ->
+            case Jason.decode(body) do
+              {:ok, data} ->
+                {:ok,
+                 %{
+                   email: data["email"],
+                   avatar_url: data["avatar_url"],
+                   bio: data["bio"],
+                   handle: data["login"],
+                   website_url: data["blog"],
+                   display_name: data["name"],
+                   twitter_username: data["twitter_username"]
+                 }}
+
+              _ ->
+                {:error, :json_decode_failed}
+            end
+
+          _ ->
+            {:error, :github_api_failed}
+        end
+    end
+  end
+
+  defp extract_github_handle(url) do
+    case URI.parse(url) do
+      %URI{host: "github.com", path: path} when is_binary(path) ->
+        path
+        |> String.trim("/")
+        |> String.split("/")
+        |> List.first()
+
+      _ ->
+        nil
+    end
   end
 end

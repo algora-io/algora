@@ -227,6 +227,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         login_code = get_field(socket.assigns.verification_form.source, :code)
         preferences = changeset.changes
 
+        # TODO: call async and handle errors
+        metadata = Algora.Crawler.fetch_user_metadata(email)
+
         user_handle =
           email
           |> String.split("@")
@@ -235,19 +238,28 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           |> String.downcase()
 
         org_name =
-          domain
-          |> String.split(".")
-          |> List.first()
-          |> String.capitalize()
+          case get_in(metadata, [:org, :display_name]) do
+            nil ->
+              domain
+              |> String.split(".")
+              |> List.first()
+              |> String.capitalize()
+
+            name ->
+              name
+          end
 
         org_handle =
-          domain
-          |> String.split(".")
-          |> List.first()
-          |> String.downcase()
+          case get_in(metadata, [:org, :handle]) do
+            nil ->
+              domain
+              |> String.split(".")
+              |> List.first()
+              |> String.downcase()
 
-        # TODO: call async and handle errors
-        metadata = Algora.Crawler.fetch_user_metadata(email)
+            handle ->
+              handle
+          end
 
         # TODO: use context functions instead of Factory
         # TODO: generate nicer handles or let the user choose
@@ -257,16 +269,21 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             # TODO: unset email
             email: "admin@#{domain}",
             display_name: org_name,
-            bio: get_in(metadata, [:org, :description]),
-            avatar_url: get_in(metadata, [:org, :logo]),
+            bio:
+              get_in(metadata, [:org, :bio]) ||
+                get_in(metadata, [:org, :og_description]) ||
+                get_in(metadata, [:org, :og_title]),
+            avatar_url:
+              get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
             handle: org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
             domain: domain,
-            og_title: get_in(metadata, [:org, :title]),
-            og_image_url: get_in(metadata, [:org, :og_image]),
+            og_title: get_in(metadata, [:org, :og_title]),
+            og_image_url: get_in(metadata, [:org, :og_image_url]),
             tech_stack: tech_stack,
             hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
             hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
             hours_per_week: preferences.hours_per_week,
+            website_url: get_in(metadata, [:org, :website_url]),
             twitter_url: get_in(metadata, [:org, :socials, :twitter]),
             github_url: get_in(metadata, [:org, :socials, :github]),
             youtube_url: get_in(metadata, [:org, :socials, :youtube]),

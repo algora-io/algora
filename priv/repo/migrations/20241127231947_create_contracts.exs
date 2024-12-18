@@ -5,7 +5,9 @@ defmodule Algora.Repo.Migrations.CreateContracts do
     create table(:contracts) do
       add :status, :string, null: false
       add :sequence_number, :integer, null: false, default: 1
-      add :hourly_rate, :money_with_currency, null: false
+      add :hourly_rate, :money_with_currency
+      add :hourly_rate_min, :money_with_currency
+      add :hourly_rate_max, :money_with_currency
       add :hours_per_week, :integer, null: false
       add :start_date, :utc_datetime_usec, null: false
       add :end_date, :utc_datetime_usec

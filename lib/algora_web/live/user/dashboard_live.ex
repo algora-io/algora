@@ -17,7 +17,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         :bounties,
         Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
       )
-      |> assign(:contracts, Algora.Contracts.list_available_contracts(limit: 10))
+      |> assign(:contracts, Algora.Contracts.list_contracts(open?: true, limit: 10))
       |> assign(:achievements, fetch_achievements())
 
     {:ok, socket}
@@ -378,10 +378,12 @@ defmodule AlgoraWeb.User.DashboardLive do
                   href={~p"/org/#{@contract.client.handle}"}
                   class="font-semibold hover:underline"
                 >
-                  <%= @contract.client.og_title %>
+                  <%= @contract.client.og_title || @contract.client.name %>
                 </.link>
               </div>
-
+              <div class="text-muted-foreground line-clamp-2">
+                <%= @contract.client.bio %>
+              </div>
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
                   <%= Money.to_string!(@contract.hourly_rate) %>/hr

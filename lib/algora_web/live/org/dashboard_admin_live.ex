@@ -13,11 +13,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
     hourly_rate = %{min: Money.new!(50, :USD), max: Money.new!(100, :USD)}
     hours_per_week = 20
 
-    contracts =
-      Contracts.list_contracts(
-        client_id: socket.assigns.current_org.id,
-        available?: true
-      )
+    {:ok, contract} =
+      Contracts.fetch_contract(client_id: socket.assigns.current_org.id, open?: true)
 
     job_form =
       %JobForm{}
@@ -34,7 +31,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       |> assign(:weekly_amount, Money.mult!(middle_rate(hourly_rate), hours_per_week))
       |> assign(:selected_dev, nil)
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
-      |> assign(:contracts, contracts)
+      |> assign(:contract, contract)
       |> assign(:achievements, fetch_achievements())
       |> assign(:show_begin_collaboration_drawer, false)
       |> assign(:job_form, job_form)
@@ -64,9 +61,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           <div class="relative w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
-                <%= for contract <- @contracts do %>
-                  <.contract contract={contract} />
-                <% end %>
+                <.contract contract={@contract} />
                 <%= for user <- @matching_devs do %>
                   <.matching_dev user={user} />
                 <% end %>
@@ -225,44 +220,24 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         />
       </div>
       <div class="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <label for="hourly-rate-min" class="text-sm font-medium">Min hourly rate (USD)</label>
-          <div class="mt-2 relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-display">
-              $
-            </span>
-            <.input
-              type="number"
-              min="0"
-              id="hourly-rate-min"
-              name="hourly-rate-min"
-              value={@hourly_rate.min}
-              phx-keydown="handle_hourly_rate_min"
-              phx-debounce="200"
-              phx-hook="ClearInput"
-              class="w-full bg-background border-input font-display ps-6"
-            />
-          </div>
-        </div>
-        <div>
-          <label for="hourly-rate-max" class="text-sm font-medium">Max hourly rate (USD)</label>
-          <div class="mt-2 relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-display">
-              $
-            </span>
-            <.input
-              type="number"
-              min="0"
-              id="hourly-rate-max"
-              name="hourly-rate-max"
-              value={@hourly_rate.max}
-              phx-keydown="handle_hourly_rate_max"
-              phx-debounce="200"
-              phx-hook="ClearInput"
-              class="w-full bg-background border-input font-display ps-6"
-            />
-          </div>
-        </div>
+        <.input
+          name="hourly-rate-min"
+          value={@contract.hourly_rate.amount}
+          phx-keydown="handle_hourly_rate_min"
+          phx-debounce="200"
+          class="w-full bg-background border-input font-display"
+          icon="tabler-currency-dollar"
+          label="Min hourly rate (USD)"
+        />
+        <.input
+          name="hourly-rate-max"
+          value={@contract.hourly_rate.amount}
+          phx-keydown="handle_hourly_rate_max"
+          phx-debounce="200"
+          class="w-full bg-background border-input font-display"
+          icon="tabler-currency-dollar"
+          label="Max hourly rate (USD)"
+        />
       </div>
       <!-- Tech Stack Section -->
       <div class="mt-4">
@@ -641,7 +616,11 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           <div class="flex items-center gap-4">
             <.link href={~p"/org/#{@contract.client.handle}"}>
               <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
-                <.avatar_image src={@contract.client.og_image_url} alt={@contract.client.name} />
+                <.avatar_image
+                  src={@contract.client.og_image_url || @contract.client.avatar_url}
+                  alt={@contract.client.name}
+                  class="object-cover"
+                />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
               </.avatar>
             </.link>
@@ -652,14 +631,17 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   href={~p"/org/#{@contract.client.handle}"}
                   class="font-semibold hover:underline"
                 >
-                  <%= @contract.client.og_title %>
+                  <%= @contract.client.og_title || @contract.client.name %>
                 </.link>
+              </div>
+              <div class="text-muted-foreground line-clamp-2">
+                <%= @contract.client.bio %>
               </div>
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.to_string!(@contract.client.hourly_rate_min) %> - <%= Money.to_string!(
-                    @contract.client.hourly_rate_max
+                  <%= Money.to_string!(@contract.hourly_rate_min) %> - <%= Money.to_string!(
+                    @contract.hourly_rate_max
                   ) %>/hr
                 </div>
                 <span class="text-sm text-muted-foreground">

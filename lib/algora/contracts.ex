@@ -512,34 +512,20 @@ defmodule Algora.Contracts do
     Money.mult!(contract.hourly_rate, contract.timesheet.hours_worked)
   end
 
-  def fetch_contract!(id) do
-    {:ok, contract} = fetch_contract(id)
-    contract
+  def fetch_contract(criteria) when is_list(criteria) do
+    case list_contract_chain(criteria) do
+      [contract] -> {:ok, contract}
+      [] -> {:error, :not_found}
+      _ -> {:error, :multiple_contracts}
+    end
   end
 
   def fetch_contract(id) do
-    case list_contract_chain(id: id, limit: 1) do
-      [contract] -> {:ok, contract}
-      _ -> {:error, :not_found}
-    end
-  end
-
-  def fetch_last_contract!(id) do
-    {:ok, contract} = fetch_last_contract(id)
-    contract
+    fetch_contract(id: id)
   end
 
   def fetch_last_contract(id) do
-    case list_contract_chain(original_contract_id: id, limit: 1, order: :desc) do
-      [contract] -> {:ok, contract}
-      _ -> {:error, :not_found}
-    end
-  end
-
-  def list_available_contracts(criteria \\ []) do
-    criteria
-    |> Keyword.merge(available?: true)
-    |> list_contract_chain()
+    fetch_contract(original_contract_id: id, limit: 1, order: :desc)
   end
 
   def list_contracts(criteria \\ []) do
@@ -625,7 +611,7 @@ defmodule Algora.Contracts do
       {:original_contract_id, original_contract_id}, query ->
         from([c] in query, where: c.original_contract_id == ^original_contract_id)
 
-      {:available?, true}, query ->
+      {:open?, true}, query ->
         from([c] in query, where: is_nil(c.contractor_id))
 
       {:original?, true}, query ->

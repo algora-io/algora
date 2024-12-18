@@ -314,8 +314,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           Factory.insert!(
             :contract,
             %{
+              status: :draft,
               client_id: org.id,
-              hourly_rate: Money.new!(preferences.hourly_rate_max, :USD),
+              hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
+              hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
               hours_per_week: preferences.hours_per_week
             }
           )

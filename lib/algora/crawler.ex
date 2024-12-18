@@ -3,8 +3,10 @@ defmodule Algora.Crawler do
 
   @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
   @max_redirects 5
+  @max_retries 3
+  @retry_delay :timer.seconds(1)
 
-  def fetch_site_metadata(url, redirect_count \\ 0) do
+  def fetch_site_metadata(url, redirect_count \\ 0, retry_count \\ 0) do
     request = Finch.build(:get, url, [{"User-Agent", @user_agent}])
 
     with {:ok, response} <- Finch.request(request, Algora.Finch) do
@@ -27,7 +29,7 @@ defmodule Algora.Crawler do
           end
 
         {:redirect, new_url} ->
-          fetch_site_metadata(new_url, redirect_count + 1)
+          fetch_site_metadata(new_url, redirect_count + 1, retry_count)
 
         {:error, reason} ->
           Logger.error("Failed to fetch metadata from #{url}: #{inspect(reason)}")
@@ -36,7 +38,13 @@ defmodule Algora.Crawler do
     else
       error ->
         Logger.error("Failed to fetch metadata from #{url}: #{inspect(error)}")
-        {:error, :request_failed}
+
+        if retry_count < @max_retries do
+          Process.sleep(@retry_delay)
+          fetch_site_metadata(url, redirect_count, retry_count + 1)
+        else
+          {:error, :request_failed}
+        end
     end
   end
 
@@ -300,14 +308,36 @@ defmodule Algora.Crawler do
     Enum.find_value(selectors, fn selector ->
       elements = Floki.find(html_tree, selector)
 
-      case platform do
-        :twitter ->
-          handle_twitter_url(elements)
+      url =
+        case platform do
+          :twitter ->
+            handle_twitter_url(elements)
 
-        _ ->
-          get_href_or_nil(elements)
+          _ ->
+            get_href_or_nil(elements)
+        end
+
+      case url do
+        nil -> nil
+        url -> follow_redirect(url)
       end
     end)
+  end
+
+  defp follow_redirect(url) do
+    request = Finch.build(:head, url, [{"User-Agent", @user_agent}])
+
+    case Finch.request(request, Algora.Finch) do
+      {:ok, %Finch.Response{status: status, headers: headers}}
+      when status in [301, 302, 303, 307, 308] ->
+        case List.keyfind(headers, "location", 0) do
+          {_, location} -> location
+          nil -> url
+        end
+
+      _ ->
+        url
+    end
   end
 
   defp handle_twitter_url([]), do: nil

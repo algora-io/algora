@@ -231,70 +231,102 @@ defmodule Algora.Crawler do
 
   defp find_social_links(html_tree) do
     %{
-      twitter: find_twitter_url(html_tree),
-      discord: find_discord_url(html_tree),
-      github: find_github_url(html_tree)
+      twitter: find_social_url(html_tree, :twitter),
+      discord: find_social_url(html_tree, :discord),
+      github: find_social_url(html_tree, :github),
+      instagram: find_social_url(html_tree, :instagram),
+      youtube: find_social_url(html_tree, :youtube),
+      producthunt: find_social_url(html_tree, :producthunt),
+      hackernews: find_social_url(html_tree, :hackernews),
+      slack: find_social_url(html_tree, :slack),
+      linkedin: find_social_url(html_tree, :linkedin)
     }
     |> Enum.reject(fn {_k, v} -> is_nil(v) end)
     |> Enum.into(%{})
   end
 
-  defp find_twitter_url(html_tree) do
-    twitter_selectors = [
+  @social_selectors %{
+    twitter: [
       ~s|meta[name="twitter:url"]|,
       ~s|meta[name="twitter:site"]|,
       ~s|a[href*="twitter.com"]|,
       ~s|a[href*="x.com"]|,
       ~s|a[aria-label*="Twitter" i], a:has([aria-label*="Twitter" i])|
-    ]
-
-    Enum.find_value(twitter_selectors, fn selector ->
-      case Floki.find(html_tree, selector) do
-        [] ->
-          nil
-
-        [element | _] ->
-          content = get_content_or_nil([element])
-          href = get_href_or_nil([element])
-
-          cond do
-            content && String.starts_with?(content, "@") ->
-              "https://twitter.com/#{String.trim_leading(content, "@")}"
-
-            href ->
-              href
-          end
-      end
-    end)
-  end
-
-  defp find_discord_url(html_tree) do
-    discord_selectors = [
+    ],
+    discord: [
       ~s|a[href*="discord.gg"]|,
       ~s|a[href*="discord.com/invite"]|,
       ~s|a[aria-label*="Discord" i], a:has([aria-label*="Discord" i])|,
       ~s|a[href*="discord"]|
-    ]
-
-    Enum.find_value(discord_selectors, fn selector ->
-      html_tree
-      |> Floki.find(selector)
-      |> get_href_or_nil()
-    end)
-  end
-
-  defp find_github_url(html_tree) do
-    github_selectors = [
+    ],
+    github: [
       ~s|a[href*="github.com"]|,
       ~s|a[aria-label*="GitHub" i], a:has([aria-label*="GitHub" i])|,
       ~s|a[href*="github"]|
+    ],
+    instagram: [
+      ~s|a[href*="instagram.com"]|,
+      ~s|a[aria-label*="Instagram" i], a:has([aria-label*="Instagram" i])|
+    ],
+    youtube: [
+      ~s|a[href*="youtube.com"]|,
+      ~s|a[href*="youtu.be"]|,
+      ~s|a[aria-label*="YouTube" i], a:has([aria-label*="YouTube" i])|
+    ],
+    producthunt: [
+      ~s|a[href*="producthunt.com"]|,
+      ~s|a[aria-label*="Product Hunt" i], a:has([aria-label*="Product Hunt" i])|,
+      ~s|a[aria-label*="ProductHunt" i], a:has([aria-label*="ProductHunt" i])|
+    ],
+    hackernews: [
+      ~s|a[href*="news.ycombinator.com"]|,
+      ~s|a[href*="ycombinator.com"]|,
+      ~s|a[aria-label*="Hacker News" i], a:has([aria-label*="Hacker News" i])|,
+      ~s|a[aria-label*="HackerNews" i], a:has([aria-label*="HackerNews" i])|
+    ],
+    slack: [
+      ~s|a[href*="slack.com/join"]|,
+      ~s|a[href*="slack.com/shared_invite"]|,
+      ~s|a[aria-label*="Slack" i], a:has([aria-label*="Slack" i])|
+    ],
+    linkedin: [
+      ~s|a[href*="linkedin.com"]|,
+      ~s|a[aria-label*="LinkedIn" i], a:has([aria-label*="LinkedIn" i])|
     ]
+  }
 
-    Enum.find_value(github_selectors, fn selector ->
-      html_tree
-      |> Floki.find(selector)
-      |> get_href_or_nil()
+  defp find_social_url(html_tree, platform) do
+    selectors = @social_selectors[platform]
+
+    Enum.find_value(selectors, fn selector ->
+      elements = Floki.find(html_tree, selector)
+
+      case platform do
+        :twitter ->
+          handle_twitter_url(elements)
+
+        _ ->
+          get_href_or_nil(elements)
+      end
     end)
+  end
+
+  defp handle_twitter_url([]), do: nil
+
+  defp handle_twitter_url([element | _]) do
+    content = get_content_or_nil([element])
+    href = get_href_or_nil([element])
+
+    cond do
+      content && String.starts_with?(content, "@") ->
+        "https://twitter.com/#{String.trim_leading(content, "@")}"
+
+      href ->
+        href
+
+      true ->
+        nil
+    end
   end
 
   defp get_href_or_nil([]), do: nil

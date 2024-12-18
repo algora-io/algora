@@ -46,11 +46,10 @@ defmodule Algora.Crawler do
 
     case fetch_site_metadata("https://#{domain}") do
       {:ok, metadata} ->
-        {:ok, Map.put(metadata, :gravatar_url, gravatar_url)}
+        {:ok, %{avatar_url: gravatar_url, org: metadata}}
 
-      {:error, reason} ->
-        # Still return gravatar even if site metadata fails
-        {:ok, %{gravatar_url: gravatar_url}}
+      {:error, _reason} ->
+        {:ok, %{avatar_url: gravatar_url, org: nil}}
     end
   end
 

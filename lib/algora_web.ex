@@ -89,6 +89,9 @@ defmodule AlgoraWeb do
       import AlgoraWeb.CoreComponents
       use Gettext, backend: AlgoraWeb.Gettext
 
+      # Enable rendering Svelte components
+      import LiveSvelte
+
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 

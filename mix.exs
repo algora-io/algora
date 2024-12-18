@@ -42,7 +42,6 @@ defmodule Algora.MixProject do
       {:phoenix_live_view, "~> 0.20.2"},
       {:floki, ">= 0.30.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:tabler_icons,
        github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
@@ -66,7 +65,8 @@ defmodule Algora.MixProject do
       {:number, "~> 1.0.1"},
       {:mox, "~> 1.0", only: :test},
       {:tzdata, "~> 1.1"},
-      {:stripity_stripe, "~> 2.0"}
+      {:stripity_stripe, "~> 2.0"},
+      {:live_svelte, "~> 0.14.1"}
     ]
   end
 
@@ -89,11 +89,11 @@ defmodule Algora.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "test.reset": ["cmd MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind algora", "esbuild algora"],
+      "assets.setup": ["tailwind.install --if-missing"],
+      "assets.build": ["tailwind algora", "cmd --cd assets pnpm install"],
       "assets.deploy": [
         "tailwind algora --minify",
-        "esbuild algora --minify",
+        "cmd --cd assets node build.js --deploy",
         "phx.digest"
       ]
     ]

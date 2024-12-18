@@ -241,9 +241,11 @@ defmodule Algora.Crawler do
 
   defp find_twitter_url(html_tree) do
     twitter_selectors = [
+      ~s|meta[name="twitter:url"]|,
       ~s|meta[name="twitter:site"]|,
       ~s|a[href*="twitter.com"]|,
-      ~s|a[href*="x.com"]|
+      ~s|a[href*="x.com"]|,
+      ~s|a[aria-label*="Twitter" i], a:has([aria-label*="Twitter" i])|
     ]
 
     Enum.find_value(twitter_selectors, fn selector ->
@@ -259,11 +261,8 @@ defmodule Algora.Crawler do
             content && String.starts_with?(content, "@") ->
               "https://twitter.com/#{String.trim_leading(content, "@")}"
 
-            href && (String.contains?(href, "twitter.com") || String.contains?(href, "x.com")) ->
+            href ->
               href
-
-            true ->
-              nil
           end
       end
     end)
@@ -272,7 +271,9 @@ defmodule Algora.Crawler do
   defp find_discord_url(html_tree) do
     discord_selectors = [
       ~s|a[href*="discord.gg"]|,
-      ~s|a[href*="discord.com/invite"]|
+      ~s|a[href*="discord.com/invite"]|,
+      ~s|a[aria-label*="Discord" i], a:has([aria-label*="Discord" i])|,
+      ~s|a[href*="discord"]|
     ]
 
     Enum.find_value(discord_selectors, fn selector ->
@@ -284,7 +285,9 @@ defmodule Algora.Crawler do
 
   defp find_github_url(html_tree) do
     github_selectors = [
-      ~s|a[href*="github.com"]|
+      ~s|a[href*="github.com"]|,
+      ~s|a[aria-label*="GitHub" i], a:has([aria-label*="GitHub" i])|,
+      ~s|a[href*="github"]|
     ]
 
     Enum.find_value(github_selectors, fn selector ->

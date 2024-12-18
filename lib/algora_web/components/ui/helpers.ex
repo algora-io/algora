@@ -9,7 +9,10 @@ defmodule AlgoraWeb.ComponentHelpers do
     assigns
     |> assign(field: nil, id: assigns[:id] || field.id)
     |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
-    |> assign(:name, assigns[:name] || if(assigns[:multiple], do: field.name <> "[]", else: field.name))
+    |> assign(
+      :name,
+      assigns[:name] || if(assigns[:multiple], do: field.name <> "[]", else: field.name)
+    )
     |> assign(:value, assigns[:value] || field.value)
     |> prepare_assign()
   end
@@ -70,7 +73,9 @@ defmodule AlgoraWeb.ComponentHelpers do
 
   @spec side_variant(String.t(), String.t()) :: String.t()
   def side_variant(side, align \\ "center") do
-    Enum.map_join(%{side: side, align: align(align, side)}, " ", fn {key, value} -> @variants[key][value] end)
+    Enum.map_join(%{side: side, align: align(align, side)}, " ", fn {key, value} ->
+      @variants[key][value]
+    end)
   end
 
   # decide align class based on side

@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "verbatimModuleSyntax": true,
+        "types": ["node"],
+        "baseUrl": ".",
+        "paths": {
+            "$lib": ["svelte"],
+            "$lib/*": ["svelte/*"]
+        }
+    }
+}

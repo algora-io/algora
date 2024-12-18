@@ -1186,7 +1186,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def debug(assigns) do
     ~H"""
-      <pre class={classes(["bg-muted/50 rounded-lg p-4 text-sm font-mono overflow-auto", @class])}><%= Jason.encode!(@data, pretty: true) %></pre>
+    <pre class={classes(["bg-muted/50 rounded-lg p-4 text-sm font-mono overflow-auto", @class])}><%= Jason.encode!(@data, pretty: true) %></pre>
     """
   end
 

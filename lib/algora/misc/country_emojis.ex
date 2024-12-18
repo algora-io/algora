@@ -257,7 +257,7 @@ defmodule Algora.Misc.CountryEmojis do
     "YT" => "🇾🇹",
     "ZA" => "🇿🇦",
     "ZM" => "🇿🇲",
-    "ZW" => "🇿🇼",
+    "ZW" => "🇿🇼"
   }
 
   def get(country_code, default) do

@@ -54,10 +54,10 @@ defmodule Algora.Crawler do
 
     case fetch_site_metadata("https://#{domain}") do
       {:ok, metadata} ->
-        {:ok, %{avatar_url: gravatar_url, org: metadata}}
+        %{avatar_url: gravatar_url, org: metadata}
 
       {:error, _reason} ->
-        {:ok, %{avatar_url: gravatar_url, org: nil}}
+        %{avatar_url: gravatar_url, org: nil}
     end
   end
 

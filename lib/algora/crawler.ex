@@ -4,7 +4,7 @@ defmodule Algora.Crawler do
   @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
   @max_redirects 5
 
-  def fetch_metadata(url, redirect_count \\ 0) do
+  def fetch_site_metadata(url, redirect_count \\ 0) do
     request = Finch.build(:get, url, [{"User-Agent", @user_agent}])
 
     with {:ok, response} <- Finch.request(request, Algora.Finch) do
@@ -27,7 +27,7 @@ defmodule Algora.Crawler do
           end
 
         {:redirect, new_url} ->
-          fetch_metadata(new_url, redirect_count + 1)
+          fetch_site_metadata(new_url, redirect_count + 1)
 
         {:error, reason} ->
           Logger.error("Failed to fetch metadata from #{url}: #{inspect(reason)}")
@@ -37,6 +37,20 @@ defmodule Algora.Crawler do
       error ->
         Logger.error("Failed to fetch metadata from #{url}: #{inspect(error)}")
         {:error, :request_failed}
+    end
+  end
+
+  def fetch_user_metadata(email, opts \\ []) do
+    domain = get_email_domain(email)
+    gravatar_url = get_gravatar_url(email, opts)
+
+    case fetch_site_metadata("https://#{domain}") do
+      {:ok, metadata} ->
+        {:ok, Map.put(metadata, :gravatar_url, gravatar_url)}
+
+      {:error, reason} ->
+        # Still return gravatar even if site metadata fails
+        {:ok, %{gravatar_url: gravatar_url}}
     end
   end
 
@@ -285,5 +299,32 @@ defmodule Algora.Crawler do
   defp get_href_or_nil([element | _]) do
     Floki.attribute(element, "href")
     |> List.first()
+  end
+
+  defp get_email_domain(email) do
+    [_, domain] = String.split(email, "@")
+    domain
+  end
+
+  defp get_gravatar_url(email, opts) do
+    default = Keyword.get(opts, :default, "")
+    size = Keyword.get(opts, :size, 460)
+
+    email
+    |> String.trim()
+    |> String.downcase()
+    |> (&:crypto.hash(:sha256, &1)).()
+    |> Base.encode16(case: :lower)
+    |> build_gravatar_url(default, size)
+  end
+
+  defp build_gravatar_url(hash, default, size) do
+    query =
+      URI.encode_query(%{
+        "d" => default,
+        "s" => Integer.to_string(size)
+      })
+
+    "https://www.gravatar.com/avatar/#{hash}?#{query}"
   end
 end

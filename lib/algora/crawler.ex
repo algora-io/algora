@@ -17,7 +17,8 @@ defmodule Algora.Crawler do
                  og_image: find_og_image(html_tree),
                  logo: find_logo(html_tree, url),
                  title: find_title(html_tree),
-                 description: find_description(html_tree)
+                 description: find_description(html_tree),
+                 socials: find_social_links(html_tree)
                }}
 
             error ->
@@ -212,5 +213,77 @@ defmodule Algora.Crawler do
     |> String.trim()
     |> String.split()
     |> Enum.join(" ")
+  end
+
+  defp find_social_links(html_tree) do
+    %{
+      twitter: find_twitter_url(html_tree),
+      discord: find_discord_url(html_tree),
+      github: find_github_url(html_tree)
+    }
+    |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+    |> Enum.into(%{})
+  end
+
+  defp find_twitter_url(html_tree) do
+    twitter_selectors = [
+      ~s|meta[name="twitter:site"]|,
+      ~s|a[href*="twitter.com"]|,
+      ~s|a[href*="x.com"]|
+    ]
+
+    Enum.find_value(twitter_selectors, fn selector ->
+      case Floki.find(html_tree, selector) do
+        [] ->
+          nil
+
+        [element | _] ->
+          content = get_content_or_nil([element])
+          href = get_href_or_nil([element])
+
+          cond do
+            content && String.starts_with?(content, "@") ->
+              "https://twitter.com/#{String.trim_leading(content, "@")}"
+
+            href && (String.contains?(href, "twitter.com") || String.contains?(href, "x.com")) ->
+              href
+
+            true ->
+              nil
+          end
+      end
+    end)
+  end
+
+  defp find_discord_url(html_tree) do
+    discord_selectors = [
+      ~s|a[href*="discord.gg"]|,
+      ~s|a[href*="discord.com/invite"]|
+    ]
+
+    Enum.find_value(discord_selectors, fn selector ->
+      html_tree
+      |> Floki.find(selector)
+      |> get_href_or_nil()
+    end)
+  end
+
+  defp find_github_url(html_tree) do
+    github_selectors = [
+      ~s|a[href*="github.com"]|
+    ]
+
+    Enum.find_value(github_selectors, fn selector ->
+      html_tree
+      |> Floki.find(selector)
+      |> get_href_or_nil()
+    end)
+  end
+
+  defp get_href_or_nil([]), do: nil
+
+  defp get_href_or_nil([element | _]) do
+    Floki.attribute(element, "href")
+    |> List.first()
   end
 end

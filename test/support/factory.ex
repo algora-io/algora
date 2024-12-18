@@ -115,6 +115,8 @@ defmodule Algora.Factory do
       id: id,
       original_contract_id: id,
       status: :active,
+      hourly_rate_min: Money.new!(50, :USD),
+      hourly_rate_max: Money.new!(100, :USD),
       hourly_rate: Money.new!(75, :USD),
       hours_per_week: 40,
       sequence_number: 1,

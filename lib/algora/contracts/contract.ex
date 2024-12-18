@@ -7,6 +7,8 @@ defmodule Algora.Contracts.Contract do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1
     field :hourly_rate, MoneyType, no_fraction_if_integer: true
+    field :hourly_rate_min, MoneyType, no_fraction_if_integer: true
+    field :hourly_rate_max, MoneyType, no_fraction_if_integer: true
     field :hours_per_week, :integer
     field :start_date, :utc_datetime_usec
     field :end_date, :utc_datetime_usec

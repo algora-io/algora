@@ -6,6 +6,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   alias Algora.Users
   alias AlgoraWeb.Org.Forms.JobForm
   alias Algora.Contracts
+  alias Algora.Payments
+  alias Algora.FeeTier
   def middle_rate(%{min: min, max: max}), do: Money.div!(Money.add!(min, max), 2)
 
   def mount(_params, _session, socket) do
@@ -32,7 +34,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       |> assign(:selected_dev, nil)
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
       |> assign(:contract, contract)
-      |> assign(:achievements, fetch_achievements())
+      |> assign(:achievements, fetch_achievements(socket))
       |> assign(:show_begin_collaboration_drawer, false)
       |> assign(:job_form, job_form)
 
@@ -434,15 +436,59 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
     """
   end
 
-  defp fetch_achievements() do
-    [
-      %{status: :completed, name: "Personalize Algora"},
-      %{status: :current, name: "Begin collaboration"},
-      %{status: :upcoming, name: "Complete first contract"},
-      %{status: :upcoming, name: "Unlock lower fees with a developer"},
-      %{status: :upcoming, name: "Refer a friend"}
+  defp fetch_achievements(socket) do
+    achievements = [
+      {&personalize_status/1, "Personalize Algora"},
+      {&begin_collaboration_status/1, "Begin collaboration"},
+      {&complete_first_contract_status/1, "Complete first contract"},
+      {&unlock_lower_fees_status/1, "Unlock lower fees with a developer"},
+      {&refer_a_friend/1, "Refer a friend"}
     ]
+
+    {result, _} =
+      Enum.reduce_while(achievements, {[], false}, fn {status_fn, name}, {acc, found_current} ->
+        status = status_fn.(socket.assigns.current_org)
+
+        result =
+          cond do
+            found_current -> {acc ++ [%{status: status, name: name}], found_current}
+            status == :completed -> {acc ++ [%{status: status, name: name}], false}
+            true -> {acc ++ [%{status: :current, name: name}], true}
+          end
+
+        {:cont, result}
+      end)
+
+    result
   end
+
+  defp personalize_status(_socket), do: :completed
+
+  defp begin_collaboration_status(org) do
+    case Contracts.list_contracts(client_id: org.id, active_or_paid?: true, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp complete_first_contract_status(org) do
+    case Contracts.list_contracts(client_id: org.id, status: :paid, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp unlock_lower_fees_status(org) do
+    {_contractor_id, max_amount} = Payments.get_max_paid_to_single_contractor(org.id)
+
+    case FeeTier.first_threshold_met?(max_amount) do
+      false -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  # TODO: implement referrals
+  defp refer_a_friend(_socket), do: :upcoming
 
   def achievement(%{achievement: %{status: :completed}} = assigns) do
     ~H"""

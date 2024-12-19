@@ -47,7 +47,7 @@ defmodule AlgoraWeb.Components.UI.Menu do
       ]}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -70,7 +70,7 @@ defmodule AlgoraWeb.Components.UI.Menu do
       {%{"data-disabled" => @disabled}}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -83,7 +83,7 @@ defmodule AlgoraWeb.Components.UI.Menu do
   def menu_label(assigns) do
     ~H"""
     <div class={classes(["px-2 py-1.5 text-sm font-semibold", @inset && "pl-8", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -94,7 +94,7 @@ defmodule AlgoraWeb.Components.UI.Menu do
   def menu_separator(assigns) do
     ~H"""
     <div role="separator" class={classes(["-mx-1 my-1 h-px bg-muted", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -106,7 +106,7 @@ defmodule AlgoraWeb.Components.UI.Menu do
   def menu_shortcut(assigns) do
     ~H"""
     <span class={classes(["ml-auto text-xs tracking-widest opacity-60", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </span>
     """
   end
@@ -117,7 +117,7 @@ defmodule AlgoraWeb.Components.UI.Menu do
 
   def menu_group(assigns) do
     ~H"""
-    <div class={classes([@class])} role="group" {@rest}><%= render_slot(@inner_block) %></div>
+    <div class={classes([@class])} role="group" {@rest}>{render_slot(@inner_block)}</div>
     """
   end
 end

@@ -51,7 +51,7 @@
               <%= for section <- @nav do %>
                 <li>
                   <div class="text-xs font-semibold leading-6 text-gray-400">
-                    <%= section.title %>
+                    {section.title}
                   </div>
                   <ul role="list" class="-mx-2 mt-2 space-y-1">
                     <%= for item <- section.items do %>
@@ -60,7 +60,7 @@
                           navigate={item.href}
                           class={"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 #{if @active_tab == item.tab, do: "bg-accent text-accent-foreground", else: "text-muted-foreground hover:text-foreground hover:bg-accent"}"}
                         >
-                          <.icon name={item.icon} /> <%= item.label %>
+                          <.icon name={item.icon} /> {item.label}
                         </.link>
                       </li>
                     <% end %>
@@ -93,7 +93,7 @@
                       title={item.label}
                     >
                       <.icon name={item.icon} class="h-6 w-6 shrink-0" />
-                      <span class="sr-only"><%= item.label %></span>
+                      <span class="sr-only">{item.label}</span>
                     </.link>
                   </li>
                 <% end %>
@@ -175,7 +175,7 @@
             <AlgoraWeb.Components.Logos.github class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
             <span class="hidden xl:block">Star</span>
             <span class="font-semibold text-gray-300">
-              <%= Algora.Stargazer.count() %>
+              {Algora.Stargazer.count()}
             </span>
           </div>
         </div>
@@ -191,7 +191,7 @@
         <div>
           <.dropdown2 id="dashboard-dropdown">
             <:img src={@current_org.avatar_url} alt={@current_org.handle} />
-            <:title><%= @current_org.name %></:title>
+            <:title>{@current_org.name}</:title>
 
             <:link href={~p"/set_context/personal"}>
               <div class="flex items-center whitespace-nowrap">
@@ -201,8 +201,8 @@
                   class="w-8 h-8 rounded-full mr-3"
                 />
                 <div>
-                  <div class="font-semibold"><%= @current_user.name %></div>
-                  <div class="text-sm text-gray-500">@<%= @current_user.handle %></div>
+                  <div class="font-semibold">{@current_user.name}</div>
+                  <div class="text-sm text-gray-500">@{@current_user.handle}</div>
                 </div>
               </div>
             </:link>
@@ -217,8 +217,8 @@
               <div class="flex items-center whitespace-nowrap">
                 <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
                 <div>
-                  <div class="font-semibold"><%= org.name %></div>
-                  <div class="text-sm text-gray-500">@<%= org.handle %></div>
+                  <div class="font-semibold">{org.name}</div>
+                  <div class="text-sm text-gray-500">@{org.handle}</div>
                 </div>
               </div>
             </:link>
@@ -243,7 +243,7 @@
     </div>
 
     <div class="relative">
-      <%= @inner_content %>
+      {@inner_content}
     </div>
   </div>
 </div>

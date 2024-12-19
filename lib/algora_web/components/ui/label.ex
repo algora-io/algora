@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Components.UI.Label do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </label>
     """
   end

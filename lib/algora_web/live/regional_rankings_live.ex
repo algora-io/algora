@@ -26,10 +26,10 @@ defmodule AlgoraWeb.RegionalRankingsLive do
             <.card_header>
               <div class="flex justify-between items-center">
                 <h3 class="text-lg font-semibold">
-                  Week of <%= Calendar.strftime(
+                  Week of {Calendar.strftime(
                     DateTime.from_naive!(week_start, "Etc/UTC"),
                     "%B %d, %Y"
-                  ) %>
+                  )}
                 </h3>
               </div>
             </.card_header>
@@ -39,25 +39,25 @@ defmodule AlgoraWeb.RegionalRankingsLive do
                   <div class="flex flex-col space-y-4 p-4 rounded-lg bg-card border">
                     <div class="flex justify-between items-center">
                       <div class="text-sm font-medium text-muted-foreground">
-                        #1 <%= region %>
+                        #1 {region}
                       </div>
                       <div class="text-sm font-medium text-success">
-                        <%= Money.to_string!(user.total_earned) %>
+                        {Money.to_string!(user.total_earned)}
                       </div>
                     </div>
                     <div class="flex items-center space-x-4">
                       <.avatar class="h-12 w-12">
                         <.avatar_image src={user.avatar_url} alt={user.name} />
                         <.avatar_fallback>
-                          <%= String.first(user.name || "") %>
+                          {String.first(user.name || "")}
                         </.avatar_fallback>
                       </.avatar>
                       <div class="space-y-1">
                         <div class="text-sm font-medium leading-none">
-                          <%= user.name %>
+                          {user.name}
                         </div>
                         <div class="text-sm text-muted-foreground">
-                          @<%= user.handle %>
+                          @{user.handle}
                         </div>
                       </div>
                     </div>

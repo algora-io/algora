@@ -34,7 +34,7 @@ defmodule AlgoraWeb.Components.UI.HoverCard do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -57,7 +57,7 @@ defmodule AlgoraWeb.Components.UI.HoverCard do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -88,7 +88,7 @@ defmodule AlgoraWeb.Components.UI.HoverCard do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

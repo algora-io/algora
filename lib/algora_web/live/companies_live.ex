@@ -157,9 +157,9 @@ defmodule AlgoraWeb.CompaniesLive do
             <dl class="mx-auto mt-16 grid max-w-4xl grid-cols-2 gap-8 text-center lg:grid-cols-4">
               <%= for stat <- @stats do %>
                 <div class="mx-auto flex max-w-xs flex-col gap-y-2">
-                  <dt class="text-base leading-7 text-gray-400"><%= stat.label %></dt>
+                  <dt class="text-base leading-7 text-gray-400">{stat.label}</dt>
                   <dd class="order-first text-3xl font-semibold tracking-tight text-white font-display">
-                    <%= stat.value %>
+                    {stat.value}
                   </dd>
                 </div>
               <% end %>
@@ -217,10 +217,10 @@ defmodule AlgoraWeb.CompaniesLive do
                   <div class="flex flex-col">
                     <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
                       <.icon name={feature.icon} class="h-5 w-5 flex-none text-indigo-400" />
-                      <%= feature.name %>
+                      {feature.name}
                     </dt>
                     <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-300">
-                      <p class="flex-auto"><%= feature.description %></p>
+                      <p class="flex-auto">{feature.description}</p>
                     </dd>
                   </div>
                 <% end %>
@@ -246,12 +246,12 @@ defmodule AlgoraWeb.CompaniesLive do
                   <div class="flex flex-col">
                     <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
                       <div class="rounded-full bg-indigo-400 w-8 h-8 flex items-center justify-center text-black font-bold">
-                        <%= i + 1 %>
+                        {i + 1}
                       </div>
-                      <%= step.name %>
+                      {step.name}
                     </dt>
                     <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-300">
-                      <p class="flex-auto"><%= step.description %></p>
+                      <p class="flex-auto">{step.description}</p>
                     </dd>
                   </div>
                 <% end %>
@@ -276,21 +276,21 @@ defmodule AlgoraWeb.CompaniesLive do
                 <div class="flex flex-col justify-between rounded-3xl bg-white/5 p-8 ring-1 ring-white/10 xl:p-10">
                   <div>
                     <div class="flex items-center justify-between gap-x-4">
-                      <h3 class="text-lg font-semibold leading-8 text-white"><%= plan.name %></h3>
+                      <h3 class="text-lg font-semibold leading-8 text-white">{plan.name}</h3>
                       <%= if plan.popular do %>
                         <p class="rounded-full bg-indigo-500 px-2.5 py-1 text-xs font-semibold leading-5 text-white">
                           Most popular
                         </p>
                       <% end %>
                     </div>
-                    <p class="mt-6 text-base leading-7 text-gray-300"><%= plan.description %></p>
+                    <p class="mt-6 text-base leading-7 text-gray-300">{plan.description}</p>
                     <p class="mt-8 flex items-baseline gap-x-1">
                       <span class="text-4xl font-bold tracking-tight text-white">
-                        <%= plan.price %>
+                        {plan.price}
                       </span>
                       <%= if plan.period do %>
                         <span class="text-sm font-semibold leading-6 text-gray-300">
-                          /<%= plan.period %>
+                          /{plan.period}
                         </span>
                       <% end %>
                     </p>
@@ -298,7 +298,7 @@ defmodule AlgoraWeb.CompaniesLive do
                       <%= for feature <- plan.features do %>
                         <li class="flex gap-x-3">
                           <.icon name="tabler-check" class="h-5 w-5 flex-none text-indigo-400" />
-                          <%= feature %>
+                          {feature}
                         </li>
                       <% end %>
                     </ul>
@@ -344,14 +344,14 @@ defmodule AlgoraWeb.CompaniesLive do
                         </div>
                         <div class="text-center lg:text-left mt-8">
                           <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white">
-                            <%= testimonial.name %>
+                            {testimonial.name}
                           </h3>
-                          <p class="text-lg leading-6 text-gray-400 mt-2"><%= testimonial.role %></p>
-                          <p class="text-md leading-6 text-indigo-400"><%= testimonial.company %></p>
+                          <p class="text-lg leading-6 text-gray-400 mt-2">{testimonial.role}</p>
+                          <p class="text-md leading-6 text-indigo-400">{testimonial.company}</p>
                         </div>
                         <figure class="mt-8">
                           <blockquote class="text-xl leading-8 text-gray-300 italic">
-                            <p>"<%= testimonial.quote %>"</p>
+                            <p>"{testimonial.quote}"</p>
                           </blockquote>
                         </figure>
                       </div>
@@ -362,7 +362,7 @@ defmodule AlgoraWeb.CompaniesLive do
                           </h4>
                           <div class="text-gray-300 text-lg leading-relaxed mb-8">
                             <%= for paragraph <- testimonial.description do %>
-                              <p class="mb-4"><%= paragraph %></p>
+                              <p class="mb-4">{paragraph}</p>
                             <% end %>
                           </div>
                           <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">
@@ -372,10 +372,10 @@ defmodule AlgoraWeb.CompaniesLive do
                             <%= for {label, value} <- testimonial.results do %>
                               <div>
                                 <dt class="text-sm font-medium leading-6 text-gray-300">
-                                  <%= label %>
+                                  {label}
                                 </dt>
                                 <dd class="mt-1 text-2xl font-semibold tracking-tight text-white">
-                                  <%= value %>
+                                  {value}
                                 </dd>
                               </div>
                             <% end %>
@@ -388,19 +388,19 @@ defmodule AlgoraWeb.CompaniesLive do
                           <img class="h-32 w-32 rounded-full" src={testimonial.avatar} alt="" />
                           <div class="text-center lg:text-left">
                             <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white">
-                              <%= testimonial.name %>
+                              {testimonial.name}
                             </h3>
                             <p class="text-lg leading-6 text-gray-400 mt-2">
-                              <%= testimonial.role %>
+                              {testimonial.role}
                             </p>
                             <p class="text-md leading-6 text-indigo-400">
-                              <%= testimonial.company %>
+                              {testimonial.company}
                             </p>
                           </div>
                         </div>
                         <figure class="mt-12">
                           <blockquote class="text-xl leading-8 text-gray-300 italic">
-                            <p>"<%= testimonial.quote %>"</p>
+                            <p>"{testimonial.quote}"</p>
                           </blockquote>
                         </figure>
                       </div>
@@ -411,7 +411,7 @@ defmodule AlgoraWeb.CompaniesLive do
                           </h4>
                           <div class="text-gray-300 text-lg leading-relaxed mb-8">
                             <%= for paragraph <- testimonial.description do %>
-                              <p class="mb-4"><%= paragraph %></p>
+                              <p class="mb-4">{paragraph}</p>
                             <% end %>
                           </div>
                           <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">
@@ -421,10 +421,10 @@ defmodule AlgoraWeb.CompaniesLive do
                             <%= for {label, value} <- testimonial.results do %>
                               <div>
                                 <dt class="text-sm font-medium leading-6 text-gray-300">
-                                  <%= label %>
+                                  {label}
                                 </dt>
                                 <dd class="mt-1 text-2xl font-semibold tracking-tight text-white">
-                                  <%= value %>
+                                  {value}
                                 </dd>
                               </div>
                             <% end %>
@@ -449,11 +449,11 @@ defmodule AlgoraWeb.CompaniesLive do
                 <div class="pt-6">
                   <dt>
                     <h3 class="text-base font-semibold leading-7 text-white">
-                      <%= faq.question %>
+                      {faq.question}
                     </h3>
                   </dt>
                   <dd class="mt-2 text-base leading-7 text-gray-300">
-                    <%= faq.answer %>
+                    {faq.answer}
                   </dd>
                 </div>
               <% end %>
@@ -486,7 +486,7 @@ defmodule AlgoraWeb.CompaniesLive do
                   </div>
 
                   <div class="flex flex-wrap items-center gap-y-1 overflow-hidden text-sm leading-6 text-gray-300">
-                    <time datetime={case_study.date} class="mr-8"><%= case_study.date %></time>
+                    <time datetime={case_study.date} class="mr-8">{case_study.date}</time>
                     <div class="-ml-4 flex items-center gap-x-4">
                       <svg viewBox="0 0 2 2" class="-ml-0.5 h-0.5 w-0.5 flex-none fill-white/50">
                         <circle cx="1" cy="1" r="1" />
@@ -497,14 +497,14 @@ defmodule AlgoraWeb.CompaniesLive do
                           alt=""
                           class="h-6 w-6 flex-none rounded-full bg-white/10"
                         />
-                        <%= case_study.author %>
+                        {case_study.author}
                       </div>
                     </div>
                   </div>
                   <h3 class="mt-3 text-lg font-semibold leading-6 text-white">
                     <a href={case_study.href}>
                       <span class="absolute inset-0"></span>
-                      <%= case_study.title %>
+                      {case_study.title}
                     </a>
                   </h3>
                 </article>

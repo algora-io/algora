@@ -52,16 +52,16 @@ defmodule AlgoraWeb.Job.ViewLive do
             <div class="flex justify-between items-start gap-8">
               <div class="flex-1">
                 <h1 class="text-2xl font-display font-semibold mb-4">
-                  <%= @job.title %>
+                  {@job.title}
                 </h1>
                 <div class="flex items-center gap-4 text-gray-400 text-sm">
                   <div class="flex items-center gap-1">
                     <.icon name="tabler-clock" class="w-4 h-4" />
-                    Posted <%= Calendar.strftime(@job.posted_at, "%B %d, %Y") %>
+                    Posted {Calendar.strftime(@job.posted_at, "%B %d, %Y")}
                   </div>
                   <div class="flex items-center gap-1">
                     <.icon name="tabler-world" class="w-4 h-4" />
-                    <%= @job.country %>
+                    {@job.country}
                   </div>
                 </div>
               </div>
@@ -69,13 +69,13 @@ defmodule AlgoraWeb.Job.ViewLive do
                 <div class="text-indigo-400 font-medium text-xl">
                   <%= case @job.budget.type do %>
                     <% :hourly -> %>
-                      $<%= @job.budget.from %>-<%= @job.budget.to %>/hour
+                      ${@job.budget.from}-{@job.budget.to}/hour
                     <% :fixed -> %>
-                      <%= Money.to_string!(@job.budget.from) %>-<%= Money.to_string!(@job.budget.to) %>
+                      {Money.to_string!(@job.budget.from)}-{Money.to_string!(@job.budget.to)}
                   <% end %>
                 </div>
                 <div class="text-sm text-gray-400">
-                  <%= String.capitalize("#{@job.budget.type}") %> Rate
+                  {String.capitalize("#{@job.budget.type}")} Rate
                 </div>
               </div>
             </div>
@@ -89,7 +89,7 @@ defmodule AlgoraWeb.Job.ViewLive do
                 <h2 class="text-lg font-semibold mb-4">Job Details</h2>
                 <div class="prose prose-invert max-w-none">
                   <div class="whitespace-pre-line text-gray-300">
-                    <%= @job.description %>
+                    {@job.description}
                   </div>
                 </div>
               </div>
@@ -100,7 +100,7 @@ defmodule AlgoraWeb.Job.ViewLive do
                 <div class="flex flex-wrap gap-2">
                   <%= for tech <- @job.tech_stack do %>
                     <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                      <%= tech %>
+                      {tech}
                     </span>
                   <% end %>
                 </div>
@@ -122,21 +122,21 @@ defmodule AlgoraWeb.Job.ViewLive do
                     <div class="text-gray-400">Experience Level</div>
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-chart-bar" class="w-4 h-4" />
-                      <%= String.capitalize(@job.scope.experience) %>
+                      {String.capitalize(@job.scope.experience)}
                     </div>
                   </div>
                   <div class="flex items-center justify-between text-sm">
                     <div class="text-gray-400">Job Length</div>
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-clock" class="w-4 h-4" />
-                      <%= String.capitalize(@job.scope.duration) %> term
+                      {String.capitalize(@job.scope.duration)} term
                     </div>
                   </div>
                   <div class="flex items-center justify-between text-sm">
                     <div class="text-gray-400">Job Size</div>
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-layout-grid" class="w-4 h-4" />
-                      <%= String.capitalize(@job.scope.size) %> size
+                      {String.capitalize(@job.scope.size)} size
                     </div>
                   </div>
                 </div>
@@ -148,21 +148,21 @@ defmodule AlgoraWeb.Job.ViewLive do
                 <div class="flex items-center gap-3 mb-4">
                   <img src={@job.client.avatar_url} class="w-12 h-12 rounded-full" />
                   <div>
-                    <div class="font-medium"><%= @job.client.name %></div>
+                    <div class="font-medium">{@job.client.name}</div>
                     <div class="text-sm text-gray-400">
-                      <%= @job.client.jobs_posted %> jobs posted
+                      {@job.client.jobs_posted} jobs posted
                     </div>
                   </div>
                 </div>
                 <div class="space-y-4 text-sm">
                   <div class="flex items-center justify-between">
                     <div class="text-gray-400">Member Since</div>
-                    <div><%= Calendar.strftime(@job.client.member_since, "%B %Y") %></div>
+                    <div>{Calendar.strftime(@job.client.member_since, "%B %Y")}</div>
                   </div>
                   <div class="flex items-center justify-between">
                     <div class="text-gray-400">Last Active</div>
                     <div>
-                      <%= Calendar.strftime(@job.client.last_active, "%B %d, %Y") %>
+                      {Calendar.strftime(@job.client.last_active, "%B %d, %Y")}
                     </div>
                   </div>
                 </div>

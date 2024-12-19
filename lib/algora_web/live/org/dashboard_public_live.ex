@@ -57,8 +57,8 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
 
           <div class="flex-1 space-y-2">
             <div>
-              <h1 class="text-2xl font-bold"><%= @org.name %></h1>
-              <p class="mt-1 text-muted-foreground"><%= @org.bio %></p>
+              <h1 class="text-2xl font-bold">{@org.name}</h1>
+              <p class="mt-1 text-muted-foreground">{@org.bio}</p>
             </div>
 
             <div class="flex gap-4">
@@ -162,19 +162,19 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           <%= for {earner, idx} <- Enum.with_index(@top_earners) do %>
             <div class="flex items-center gap-4 p-4 border-b last:border-0">
               <div class="flex-shrink-0 w-8 text-center font-mono text-muted-foreground">
-                #<%= idx + 1 %>
+                #{idx + 1}
               </div>
               <.link href={~p"/@/#{earner.handle}"} class="flex items-center gap-3 flex-1">
                 <.avatar class="h-8 w-8">
                   <.avatar_image src={earner.avatar_url} alt={earner.name} />
                 </.avatar>
                 <div>
-                  <div class="font-medium"><%= earner.name %> <%= earner.flag %></div>
-                  <div class="text-sm text-muted-foreground">@<%= earner.handle %></div>
+                  <div class="font-medium">{earner.name} {earner.flag}</div>
+                  <div class="text-sm text-muted-foreground">@{earner.handle}</div>
                 </div>
               </.link>
               <div class="flex-shrink-0 font-display text-success font-medium">
-                <%= Money.to_string!(earner.amount) %>
+                {Money.to_string!(earner.amount)}
               </div>
             </div>
           <% end %>
@@ -190,20 +190,20 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
       <td class="p-4 py-0 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            <%= Money.to_string!(@bounty.amount) %>
+            {Money.to_string!(@bounty.amount)}
           </div>
 
           <.link
             href={Bounty.url(@bounty)}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
-            <%= @bounty.ticket.title %>
+            {@bounty.ticket.title}
           </.link>
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
             <.icon name="tabler-chevron-right" class="h-4 w-4" />
             <.link href={Bounty.url(@bounty)} class="hover:underline">
-              <%= Bounty.path(@bounty) %>
+              {Bounty.path(@bounty)}
             </.link>
           </div>
         </div>

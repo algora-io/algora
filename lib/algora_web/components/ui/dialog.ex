@@ -82,7 +82,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
               ])
             }
           >
-            <%= render_slot(@inner_block) %>
+            {render_slot(@inner_block)}
 
             <button
               type="button"
@@ -115,7 +115,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
   def dialog_header(assigns) do
     ~H"""
     <div class={classes(["flex flex-col space-y-1.5 text-center sm:text-left", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -126,7 +126,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
   def dialog_title(assigns) do
     ~H"""
     <h3 class={classes(["text-lg font-semibold leading-none tracking-tight", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </h3>
     """
   end
@@ -137,7 +137,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
   def dialog_description(assigns) do
     ~H"""
     <p class={classes(["text-sm text-muted-foreground", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -148,7 +148,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
   def dialog_footer(assigns) do
     ~H"""
     <div class={classes(["flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -180,7 +180,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
         @class
       ])
     }>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

@@ -33,13 +33,13 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           <div class="max-w-3xl mx-auto">
             <div class="flex items-center gap-4 text-lg mb-6">
               <span class="text-muted-foreground">
-                <%= @step %> / <%= @total_steps %>
+                {@step} / {@total_steps}
               </span>
               <h1 class="text-lg font-semibold uppercase">Get started</h1>
             </div>
 
             <div class="mb-4">
-              <%= render_step(assigns) %>
+              {render_step(assigns)}
             </div>
 
             <div class="flex justify-between">
@@ -80,16 +80,16 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                 <div class="flex gap-4">
                   <div class="flex-1">
                     <div class="font-mono text-2xl font-extrabold text-success mb-2">
-                      <%= Money.to_string!(bounty.amount) %>
+                      {Money.to_string!(bounty.amount)}
                     </div>
                     <div class="text-sm text-muted-foreground mb-1">
-                      <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %>#<%= bounty.ticket.number %>
+                      {bounty.ticket.owner}/{bounty.ticket.repo}#{bounty.ticket.number}
                     </div>
                     <div class="font-medium">
-                      <%= bounty.ticket.title %>
+                      {bounty.ticket.title}
                     </div>
                     <div class="text-xs text-muted-foreground mt-2">
-                      <%= Algora.Util.time_ago(bounty.inserted_at) %>
+                      {Algora.Util.time_ago(bounty.inserted_at)}
                     </div>
                   </div>
 
@@ -103,9 +103,9 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                       alt={bounty.solver.name}
                     />
                     <div class="text-sm font-medium text-center">
-                      <%= bounty.solver.name %>
+                      {bounty.solver.name}
                       <span class="ml-1">
-                        <%= Algora.Misc.CountryEmojis.get(bounty.solver.country, "🌎") %>
+                        {Algora.Misc.CountryEmojis.get(bounty.solver.country, "🌎")}
                       </span>
                     </div>
                   </div>
@@ -143,7 +143,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for tech <- @context.tech_stack do %>
             <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
-              <%= tech %>
+              {tech}
               <button
                 phx-click="remove_tech"
                 phx-value-tech={tech}
@@ -179,10 +179,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
               <div class="flex-1">
                 <div class="flex items-center gap-2">
                   <.icon name={icon} class="w-5 h-5 text-muted-foreground" />
-                  <span class="font-medium"><%= label %></span>
+                  <span class="font-medium">{label}</span>
                 </div>
                 <p class="text-sm text-muted-foreground mt-0.5">
-                  <%= description %>
+                  {description}
                 </p>
               </div>
             </label>

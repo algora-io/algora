@@ -28,7 +28,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
           <div class="grid grid-cols-2 gap-8">
             <form phx-submit="release_payment" class="space-y-6">
               <.form_item>
-                <.form_label>Feedback for <%= @contract.contractor.name %></.form_label>
+                <.form_label>Feedback for {@contract.contractor.name}</.form_label>
                 <.form_control>
                   <.input
                     type="textarea"
@@ -54,12 +54,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                   <dl class="space-y-4">
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Payout amount (<%= @contract.timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
+                        Payout amount ({@contract.timesheet.hours_worked} hours x {MoneyUtils.fmt_precise!(
                           @contract.hourly_rate
-                        ) %>/hr)
+                        )}/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract)) %>
+                        {MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract))}
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -67,19 +67,19 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= MoneyUtils.fmt_precise!(Contract.balance(@contract)) %>
+                        -{MoneyUtils.fmt_precise!(Contract.balance(@contract))}
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(
+                        {MoneyUtils.fmt_precise!(
                           Money.sub!(
                             Contracts.calculate_transfer_amount(@contract),
                             Contract.balance(@contract)
                           )
-                        ) %>
+                        )}
                       </dd>
                     </div>
                   </dl>

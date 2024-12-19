@@ -51,7 +51,7 @@
               <%= for section <- @nav do %>
                 <li>
                   <div class="hidden text-xs font-semibold leading-6 text-gray-400">
-                    <%= section.title %>
+                    {section.title}
                   </div>
                   <ul role="list" class="-mx-2 mt-2 space-y-1">
                     <%= for item <- section.items do %>
@@ -66,7 +66,7 @@
                             }"
                           }
                         >
-                          <.icon name={item.icon} /> <%= item.label %>
+                          <.icon name={item.icon} /> {item.label}
                         </.link>
                       </li>
                     <% end %>
@@ -339,7 +339,7 @@
             <AlgoraWeb.Components.Logos.github class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
             <span class="hidden xl:block">Star</span>
             <span class="font-semibold text-gray-300">
-              <%= Algora.Stargazer.count() %>
+              {Algora.Stargazer.count()}
             </span>
           </div>
         </div>
@@ -355,7 +355,7 @@
         <div>
           <.dropdown2 id="dashboard-dropdown">
             <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-            <:title><%= @current_user.name %></:title>
+            <:title>{@current_user.name}</:title>
 
             <:link
               :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
@@ -364,8 +364,8 @@
               <div class="flex items-center">
                 <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
                 <div class="truncate">
-                  <div class="truncate font-semibold"><%= org.name %></div>
-                  <div class="truncate text-sm text-gray-500">@<%= org.handle %></div>
+                  <div class="truncate font-semibold">{org.name}</div>
+                  <div class="truncate text-sm text-gray-500">@{org.handle}</div>
                 </div>
               </div>
             </:link>
@@ -390,7 +390,7 @@
     </div>
 
     <div class="relative">
-      <%= @inner_content %>
+      {@inner_content}
     </div>
   </div>
 </div>

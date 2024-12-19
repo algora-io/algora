@@ -34,7 +34,7 @@ defmodule AlgoraWeb.Components.UI.Popover do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Components.UI.Popover do
       phx-click={toggle_target(@target)}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -104,7 +104,7 @@ defmodule AlgoraWeb.Components.UI.Popover do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

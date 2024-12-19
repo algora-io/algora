@@ -425,7 +425,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           />
 
           <.error :for={msg <- @tech_stack_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
-            <%= msg %>
+            {msg}
           </.error>
         </div>
 
@@ -495,7 +495,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           Verify your email
         </h2>
         <p class="text-muted-foreground">
-          We've sent a code to <%= get_field(@email_form.source, :email) %>
+          We've sent a code to {get_field(@email_form.source, :email)}
         </p>
 
         <div class="mt-6">
@@ -581,7 +581,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 |> Enum.flat_map(&@preferences_form[&1].errors)
                 |> Enum.map(&translate_error(&1))
             }>
-              <%= msg %>
+              {msg}
             </.error>
           </div>
 
@@ -606,7 +606,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     />
                   </div>
                   <span class="flex flex-1 items-center justify-between">
-                    <span class="text-sm font-medium"><%= label %></span>
+                    <span class="text-sm font-medium">{label}</span>
                     <.icon
                       name="tabler-check"
                       class="size-5 text-primary invisible group-has-[:checked]:visible"
@@ -641,7 +641,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     />
                   </div>
                   <span class="flex flex-1 items-center justify-between">
-                    <span class="text-sm font-medium"><%= label %></span>
+                    <span class="text-sm font-medium">{label}</span>
                     <.icon
                       name="tabler-check"
                       class="size-5 text-primary invisible group-has-[:checked]:visible"
@@ -674,7 +674,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <div class="max-w-3xl mx-auto">
             <div class="flex items-center gap-4 text-lg mb-4">
               <span class="text-muted-foreground">
-                <%= Enum.find_index(@steps, &(&1 == @step)) + 1 %> / <%= length(@steps) %>
+                {Enum.find_index(@steps, &(&1 == @step)) + 1} / {length(@steps)}
               </span>
               <h1 class="text-lg font-semibold uppercase">
                 <%= if @step == Enum.at(@steps, -1) do %>
@@ -686,15 +686,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             </div>
 
             <div class="mb-4">
-              <%= main_content(assigns) %>
+              {main_content(assigns)}
             </div>
           </div>
         </div>
         <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
-          <%= sidebar_content(assigns) %>
+          {sidebar_content(assigns)}
           <!-- HACK: preload images to avoid layout shift -->
           <div class="fixed opacity-0">
-            <%= sidebar_content(%{assigns | step: :email}) %>
+            {sidebar_content(%{assigns | step: :email})}
           </div>
         </div>
       </div>
@@ -826,13 +826,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <div class="flex-grow">
               <div class="flex justify-between">
                 <div>
-                  <div class="font-semibold"><%= dev.name %> <%= dev.flag %></div>
-                  <div class="text-sm text-muted-foreground">@<%= dev.handle %></div>
+                  <div class="font-semibold">{dev.name} {dev.flag}</div>
+                  <div class="text-sm text-muted-foreground">@{dev.handle}</div>
                 </div>
                 <div class="flex flex-col items-end">
                   <div class="text-muted-foreground">Earned</div>
                   <div class="font-semibold text-success font-display">
-                    <%= Money.to_string!(dev.total_earned) %>
+                    {Money.to_string!(dev.total_earned)}
                   </div>
                 </div>
               </div>
@@ -841,7 +841,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 <div class="-ml-1 text-sm flex flex-wrap gap-3">
                   <%= for tech <- dev.tech_stack do %>
                     <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
-                      <%= tech %>
+                      {tech}
                     </span>
                   <% end %>
                 </div>

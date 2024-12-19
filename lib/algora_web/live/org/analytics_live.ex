@@ -89,24 +89,24 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
-                      <%= bounty.ticket.title %>
+                      {bounty.ticket.title}
                     </h2>
                   </div>
                   <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
-                      <span class="truncate">tv#<%= bounty.ticket.number %></span>
+                      <span class="truncate">tv#{bounty.ticket.number}</span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
                         <circle cx="1" cy="1" r="1"></circle>
                       </svg>
                     </div>
                     <p class="whitespace-nowrap">
-                      <%= Algora.Util.time_ago(bounty.inserted_at) %>
+                      {Algora.Util.time_ago(bounty.inserted_at)}
                     </p>
                   </div>
                 </div>
                 <div class="pl-6">
                   <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-emerald-400/5 text-emerald-400 ring-emerald-400/30">
-                    <%= Money.to_string!(bounty.amount) %>
+                    {Money.to_string!(bounty.amount)}
                   </div>
                 </div>
               </.link>
@@ -149,10 +149,10 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                           </span>
                           <div class="space-y-0.5">
                             <p class="text-sm text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white">
-                              <%= activity_text(activity) %>
+                              {activity_text(activity)}
                             </p>
                             <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
-                              <time><%= activity.days_ago %> days ago</time>
+                              <time>{activity.days_ago} days ago</time>
                             </div>
                           </div>
                         </div>

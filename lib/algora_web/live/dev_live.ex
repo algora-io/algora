@@ -107,11 +107,11 @@ defmodule AlgoraWeb.DevLive do
                   class={"flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:text-foreground md:h-8 md:w-8 #{if item.active, do: "bg-accent text-accent-foreground", else: "text-muted-foreground"}"}
                 >
                   <.icon name={item.icon} class="h-5 w-5" />
-                  <span class="sr-only"><%= item.label %></span>
+                  <span class="sr-only">{item.label}</span>
                 </a>
               </tooltip_trigger>
               <div class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95">
-                <%= item.label %>
+                {item.label}
               </div>
             </div>
           <% end %>
@@ -125,11 +125,11 @@ defmodule AlgoraWeb.DevLive do
                   class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                 >
                   <.icon name={item.icon} class="h-5 w-5" />
-                  <span class="sr-only"><%= item.label %></span>
+                  <span class="sr-only">{item.label}</span>
                 </a>
               </tooltip_trigger>
               <div class="absolute hidden px-3 py-1.5 ml-2 rounded-md bg-popover text-popover-foreground whitespace-nowrap overflow-hidden shadow-md z-50 left-full top-1/2 text-sm w-auto -translate-y-1/2 animate-in border data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 fade-in-0 group-hover/tooltip:block slide-in-from-top-1/2 tooltip-content zoom-in-95">
-                <%= item.label %>
+                {item.label}
               </div>
             </div>
           <% end %>
@@ -363,7 +363,7 @@ defmodule AlgoraWeb.DevLive do
                   data-phx-id="m36-phx-GAPTpMFHc9kS4XZh"
                 >
                 </a>
-                <a href="#" data-phx-id="m37-phx-GAPTpMFHc9kS4XZh"><%= @current_org.name %></a>
+                <a href="#" data-phx-id="m37-phx-GAPTpMFHc9kS4XZh">{@current_org.name}</a>
               </li>
               <li
                 role="presentation"
@@ -418,7 +418,7 @@ defmodule AlgoraWeb.DevLive do
                   class="text-foreground font-normal"
                   data-phx-id="m44-phx-GAPTpMFHc9kS4XZh"
                 >
-                  <%= @project.title %>
+                  {@project.title}
                 </span>
               </li>
             </ol>
@@ -477,7 +477,7 @@ defmodule AlgoraWeb.DevLive do
                       <div role="separator" class="-mx-1 my-1 bg-muted h-px"></div>
                     <% end %>
                     <div class="relative flex px-2 py-1.5 rounded-sm select-none cursor-default transition-colors outline-none items-center text-sm hover:bg-accent focus:bg-accent focus:text-accent-foreground data-[disabled]:opacity-50 data-[disabled]:pointer-events-none">
-                      <%= item.label %>
+                      {item.label}
                     </div>
                   <% end %>
                 </div>
@@ -496,13 +496,13 @@ defmodule AlgoraWeb.DevLive do
                   <div class="flex justify-between items-start gap-4">
                     <div class="flex-1">
                       <h3 class="tracking-tight font-semibold leading-none text-2xl mb-4">
-                        <%= @project.title %>
+                        {@project.title}
                       </h3>
 
                       <div class="flex flex-wrap gap-2 mb-4">
                         <%= for tech <- @project.tech_stack do %>
                           <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                            <%= tech %>
+                            {tech}
                           </span>
                         <% end %>
                       </div>
@@ -512,14 +512,14 @@ defmodule AlgoraWeb.DevLive do
                           <.icon name="tabler-clock" class="w-4 h-4" /> Posted March 15, 2024
                         </div>
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-world" class="w-4 h-4" /> <%= @project.country %>
+                          <.icon name="tabler-world" class="w-4 h-4" /> {@project.country}
                         </div>
                       </div>
                     </div>
                     <%= if @project[:hourly_rate] do %>
                       <div class="text-right">
                         <div class="text-primary font-semibold font-display text-3xl">
-                          <%= Money.to_string!(@project.hourly_rate) %>/hour
+                          {Money.to_string!(@project.hourly_rate)}/hour
                         </div>
                         <div class="text-sm text-muted-foreground">
                           Hourly Rate
@@ -700,31 +700,31 @@ defmodule AlgoraWeb.DevLive do
                           <%= for bounty <- @bounties do %>
                             <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
                               <td class="p-4 align-middle">
-                                <div class="font-medium"><%= bounty.ticket.title %></div>
+                                <div class="font-medium">{bounty.ticket.title}</div>
                                 <div class="hidden text-sm text-muted-foreground md:inline">
-                                  <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %> #<%= bounty.ticket.number %>
+                                  {bounty.ticket.owner}/{bounty.ticket.repo} #{bounty.ticket.number}
                                 </div>
                               </td>
                               <td class="hidden p-4 align-middle sm:table-cell">
                                 <div class="flex items-center gap-2">
                                   <img src={bounty.owner.avatar_url} class="h-6 w-6 rounded-full" />
-                                  <%= bounty.owner.name %>
+                                  {bounty.owner.name}
                                 </div>
                               </td>
                               <td class="hidden p-4 align-middle sm:table-cell">
                                 <div class="flex flex-wrap gap-1">
                                   <%= for tech <- bounty.tech_stack || [] do %>
                                     <div class="inline-flex px-2.5 py-0.5 rounded-full border-transparent bg-secondary text-secondary-foreground text-xs">
-                                      <%= tech %>
+                                      {tech}
                                     </div>
                                   <% end %>
                                 </div>
                               </td>
                               <td class="hidden p-4 align-middle md:table-cell">
-                                <%= Calendar.strftime(bounty.inserted_at, "%Y-%m-%d") %>
+                                {Calendar.strftime(bounty.inserted_at, "%Y-%m-%d")}
                               </td>
                               <td class="p-4 text-right align-middle">
-                                <%= Money.to_string!(bounty.amount) %>
+                                {Money.to_string!(bounty.amount)}
                               </td>
                             </tr>
                           <% end %>
@@ -774,16 +774,16 @@ defmodule AlgoraWeb.DevLive do
                           <div class="flex justify-between items-start gap-2">
                             <div class="truncate">
                               <div class="font-medium truncate">
-                                <%= dev.name %> <%= dev.flag %>
+                                {dev.name} {dev.flag}
                               </div>
                               <div class="text-sm text-muted-foreground truncate">
-                                @<%= dev.handle %>
+                                @{dev.handle}
                               </div>
                             </div>
                             <div class="text-right shrink-0">
                               <div class="text-sm text-muted-foreground">Earned</div>
                               <div class="font-medium">
-                                <%= Money.to_string!(dev.total_earned) %>
+                                {Money.to_string!(dev.total_earned)}
                               </div>
                             </div>
                           </div>
@@ -791,7 +791,7 @@ defmodule AlgoraWeb.DevLive do
                           <div class="mt-2 flex flex-wrap gap-1">
                             <%= for tech <- dev.tech_stack do %>
                               <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                <%= tech %>
+                                {tech}
                               </span>
                             <% end %>
                           </div>

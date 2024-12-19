@@ -127,13 +127,13 @@ defmodule AlgoraWeb.Org.JobLive do
                   <div class="flex justify-between items-start gap-4">
                     <div class="flex-1">
                       <h3 class="tracking-tight font-semibold leading-none text-2xl mb-4">
-                        <%= @job.title %>
+                        {@job.title}
                       </h3>
 
                       <div class="flex flex-wrap gap-2 mb-4">
                         <%= for tech <- @job.tech_stack do %>
                           <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                            <%= tech %>
+                            {tech}
                           </span>
                         <% end %>
                       </div>
@@ -143,14 +143,14 @@ defmodule AlgoraWeb.Org.JobLive do
                           <.icon name="tabler-clock" class="w-4 h-4" /> Posted March 15, 2024
                         </div>
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-world" class="w-4 h-4" /> <%= @job.country %>
+                          <.icon name="tabler-world" class="w-4 h-4" /> {@job.country}
                         </div>
                       </div>
                     </div>
                     <%= if @job[:hourly_rate] do %>
                       <div class="text-right">
                         <div class="text-primary font-semibold font-display text-3xl">
-                          <%= Money.to_string!(@job.hourly_rate) %>/hour
+                          {Money.to_string!(@job.hourly_rate)}/hour
                         </div>
                         <div class="text-sm text-muted-foreground">
                           Hourly Rate
@@ -163,16 +163,16 @@ defmodule AlgoraWeb.Org.JobLive do
                   <div class="prose prose-invert max-w-none">
                     <div class="text-foreground-muted">
                       <%= if @show_full_description do %>
-                        <%= @job.description %>
+                        {@job.description}
                       <% else %>
-                        <%= String.split(@job.description, "\n") |> Enum.take(3) |> Enum.join("\n") %>...
+                        {String.split(@job.description, "\n") |> Enum.take(3) |> Enum.join("\n")}...
                       <% end %>
 
                       <button
                         phx-click="toggle_description"
                         class="mt-2 text-primary hover:text-primary/80 text-sm font-medium"
                       >
-                        <%= if @show_full_description, do: "Show less", else: "See more" %>
+                        {if @show_full_description, do: "Show less", else: "See more"}
                       </button>
                     </div>
                   </div>
@@ -244,14 +244,14 @@ defmodule AlgoraWeb.Org.JobLive do
                               <td class="p-4 py-0 align-middle">
                                 <div class="flex items-center gap-4">
                                   <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-                                    <%= Money.to_string!(bounty.amount) %>
+                                    {Money.to_string!(bounty.amount)}
                                   </div>
 
                                   <.link
                                     href={Bounty.url(bounty)}
                                     class="truncate text-sm text-foreground hover:underline max-w-[400px]"
                                   >
-                                    <%= bounty.ticket.title %>
+                                    {bounty.ticket.title}
                                   </.link>
 
                                   <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
@@ -259,11 +259,11 @@ defmodule AlgoraWeb.Org.JobLive do
                                       href={~p"/org/#{bounty.owner.handle}"}
                                       class="font-semibold hover:underline"
                                     >
-                                      <%= bounty.owner.name %>
+                                      {bounty.owner.name}
                                     </.link>
                                     <.icon name="tabler-chevron-right" class="h-4 w-4" />
                                     <.link href={Bounty.url(bounty)} class="hover:underline">
-                                      <%= Bounty.path(bounty) %>
+                                      {Bounty.path(bounty)}
                                     </.link>
                                   </div>
                                 </div>
@@ -316,16 +316,16 @@ defmodule AlgoraWeb.Org.JobLive do
                           <div class="flex justify-between items-start gap-2">
                             <div class="truncate">
                               <div class="font-medium truncate">
-                                <%= dev.name %> <%= dev.flag %>
+                                {dev.name} {dev.flag}
                               </div>
                               <div class="text-sm text-muted-foreground truncate">
-                                @<%= dev.handle %>
+                                @{dev.handle}
                               </div>
                             </div>
                             <div class="text-right shrink-0">
                               <div class="text-sm text-muted-foreground">Earned</div>
                               <div class="font-medium">
-                                <%= Money.to_string!(dev.total_earned) %>
+                                {Money.to_string!(dev.total_earned)}
                               </div>
                             </div>
                           </div>
@@ -333,7 +333,7 @@ defmodule AlgoraWeb.Org.JobLive do
                           <div class="mt-2 flex flex-wrap gap-1">
                             <%= for tech <- dev.tech_stack do %>
                               <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                <%= tech %>
+                                {tech}
                               </span>
                             <% end %>
                           </div>

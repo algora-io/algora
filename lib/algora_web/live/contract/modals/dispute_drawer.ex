@@ -60,16 +60,16 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">Disputed Amount</dt>
                       <dd class="font-semibold">
-                        <%= Money.to_string!(@contract.amount_debited) %>
+                        {Money.to_string!(@contract.amount_debited)}
                       </dd>
                     </div>
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">Contract Period</dt>
                       <dd class="font-semibold">
-                        <%= Calendar.strftime(@contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                        {Calendar.strftime(@contract.start_date, "%b %d")} - {Calendar.strftime(
                           @contract.end_date,
                           "%b %d, %Y"
-                        ) %>
+                        )}
                       </dd>
                     </div>
                   </dl>

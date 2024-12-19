@@ -54,7 +54,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
                     <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-indigo-200">
-                      <%= @open_count %>
+                      {@open_count}
                     </span>
                   </div>
                 </button>
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
                     <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-gray-400 group-hover:text-indigo-200">
-                      <%= @completed_count %>
+                      {@completed_count}
                     </span>
                   </div>
                 </button>
@@ -118,7 +118,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           <div class="flex items-start justify-between">
                             <div class="font-mono text-2xl cursor-pointer">
                               <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
-                                $<%= bounty.amount %>
+                                ${bounty.amount}
                               </div>
                             </div>
                           </div>
@@ -130,16 +130,16 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             <div class="flex items-center gap-4">
                               <div class="truncate">
                                 <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
-                                  <%= bounty.ticket.owner %>/<%= bounty.ticket.repo %>#<%= bounty.ticket.number %>
+                                  {bounty.ticket.owner}/{bounty.ticket.repo}#{bounty.ticket.number}
                                 </p>
                               </div>
                             </div>
                             <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
-                              <%= bounty.ticket.title %>
+                              {bounty.ticket.title}
                             </p>
                           </.link>
                           <p class="flex items-center gap-1.5 text-xs text-gray-400">
-                            <%= Algora.Util.time_ago(bounty.inserted_at) %>
+                            {Algora.Util.time_ago(bounty.inserted_at)}
                           </p>
                         </div>
                       </div>
@@ -164,9 +164,9 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                         <div class="flex items-center gap-0.5">
                           <div class="whitespace-nowrap text-sm font-medium text-gray-300 group-hover:text-gray-100">
-                            <%= length(@claims) %> <%= if length(@claims) == 1,
+                            {length(@claims)} {if length(@claims) == 1,
                               do: "claim",
-                              else: "claims" %>
+                              else: "claims"}
                           </div>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -216,10 +216,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           </div>
                           <div>
                             <div class="text-sm font-medium text-gray-200">
-                              <%= claim.user.username %>
+                              {claim.user.username}
                             </div>
                             <div class="text-xs text-gray-400">
-                              <%= Algora.Util.time_ago(claim.inserted_at) %>
+                              {Algora.Util.time_ago(claim.inserted_at)}
                             </div>
                           </div>
                         </div>

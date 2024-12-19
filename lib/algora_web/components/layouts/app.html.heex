@@ -1,6 +1,6 @@
 <main>
-  <p class="alert alert-info" role="alert"><%= Phoenix.Flash.get(@flash, :info) %></p>
-  <p class="alert alert-note" role="alert"><%= Phoenix.Flash.get(@flash, :note) %></p>
-  <p class="alert alert-danger" role="alert"><%= Phoenix.Flash.get(@flash, :error) %></p>
-  <%= @inner_content %>
+  <p class="alert alert-info" role="alert">{Phoenix.Flash.get(@flash, :info)}</p>
+  <p class="alert alert-note" role="alert">{Phoenix.Flash.get(@flash, :note)}</p>
+  <p class="alert alert-danger" role="alert">{Phoenix.Flash.get(@flash, :error)}</p>
+  {@inner_content}
 </main>

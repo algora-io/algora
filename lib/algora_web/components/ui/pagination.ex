@@ -49,7 +49,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
       {@rest}
       }
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </nav>
     """
   end
@@ -73,7 +73,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
       {@rest}
       }
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </ul>
     """
   end
@@ -96,7 +96,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </li>
     """
   end
@@ -133,7 +133,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end

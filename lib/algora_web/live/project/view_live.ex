@@ -44,13 +44,13 @@ defmodule AlgoraWeb.Project.ViewLive do
           <div class="flex justify-between items-start gap-8">
             <div class="flex-1">
               <h1 class="text-2xl font-display font-semibold mb-4">
-                <%= @project.title %>
+                {@project.title}
               </h1>
 
               <div class="flex flex-wrap gap-2 mb-4">
                 <%= for tech <- @project.tech_stack do %>
                   <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                    <%= tech %>
+                    {tech}
                   </span>
                 <% end %>
               </div>
@@ -58,11 +58,11 @@ defmodule AlgoraWeb.Project.ViewLive do
               <div class="flex items-center gap-4 text-gray-400 text-sm">
                 <div class="flex items-center gap-1">
                   <.icon name="tabler-clock" class="w-4 h-4" />
-                  Posted <%= Calendar.strftime(@project.posted_at, "%B %d, %Y") %>
+                  Posted {Calendar.strftime(@project.posted_at, "%B %d, %Y")}
                 </div>
                 <div class="flex items-center gap-1">
                   <.icon name="tabler-world" class="w-4 h-4" />
-                  <%= @project.country %>
+                  {@project.country}
                 </div>
               </div>
             </div>
@@ -70,15 +70,13 @@ defmodule AlgoraWeb.Project.ViewLive do
               <div class="text-emerald-400 font-semibold font-display text-3xl">
                 <%= case @project.budget.type do %>
                   <% :hourly -> %>
-                    $<%= @project.budget.from %>-<%= @project.budget.to %>/hour
+                    ${@project.budget.from}-{@project.budget.to}/hour
                   <% :fixed -> %>
-                    <%= Money.to_string!(@project.budget.from) %>-<%= Money.to_string!(
-                      @project.budget.to
-                    ) %>
+                    {Money.to_string!(@project.budget.from)}-{Money.to_string!(@project.budget.to)}
                 <% end %>
               </div>
               <div class="text-sm text-gray-400">
-                <%= String.capitalize("#{@project.budget.type}") %> Rate
+                {String.capitalize("#{@project.budget.type}")} Rate
               </div>
             </div>
           </div>
@@ -113,7 +111,7 @@ defmodule AlgoraWeb.Project.ViewLive do
                   <.card_title>Project Description</.card_title>
                 </.card_header>
                 <.card_content>
-                  <p class="text-gray-400"><%= @project.description %></p>
+                  <p class="text-gray-400">{@project.description}</p>
                 </.card_content>
               </.card>
 
@@ -133,20 +131,20 @@ defmodule AlgoraWeb.Project.ViewLive do
                         <div class="flex-1 min-w-0">
                           <div class="flex justify-between">
                             <div class="truncate">
-                              <div class="font-semibold text-lg"><%= dev.name %> <%= dev.flag %></div>
-                              <div class="text-sm text-gray-400">@<%= dev.handle %></div>
+                              <div class="font-semibold text-lg">{dev.name} {dev.flag}</div>
+                              <div class="text-sm text-gray-400">@{dev.handle}</div>
                             </div>
                             <div class="text-right">
                               <div class="text-gray-400 text-sm">Earned</div>
                               <div class="font-semibold">
-                                <%= Money.to_string!(dev.total_earned) %>
+                                {Money.to_string!(dev.total_earned)}
                               </div>
                             </div>
                           </div>
                           <div class="mt-2 flex flex-wrap gap-2">
                             <%= for tech <- dev.tech_stack do %>
                               <span class="text-white rounded-xl px-2 py-0.5 text-xs ring-1 ring-white/20">
-                                <%= tech %>
+                                {tech}
                               </span>
                             <% end %>
                           </div>

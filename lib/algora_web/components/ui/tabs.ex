@@ -39,7 +39,7 @@ defmodule AlgoraWeb.Components.UI.Tabs do
 
     ~H"""
     <div class={@class} id={@id} {@rest} phx-mounted={show_tab(@id, @default)}>
-      <%= render_slot(@inner_block, @builder) %>
+      {render_slot(@inner_block, @builder)}
     </div>
     """
   end
@@ -59,7 +59,7 @@ defmodule AlgoraWeb.Components.UI.Tabs do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -84,7 +84,7 @@ defmodule AlgoraWeb.Components.UI.Tabs do
       phx-click={show_tab(@builder.id, @value)}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </button>
     """
   end
@@ -107,7 +107,7 @@ defmodule AlgoraWeb.Components.UI.Tabs do
       value={@value}
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

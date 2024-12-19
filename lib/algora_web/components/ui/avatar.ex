@@ -8,7 +8,7 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   def avatar(assigns) do
     ~H"""
     <div class={classes(["relative h-10 w-10 shrink-0 overflow-hidden rounded-full", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -40,7 +40,7 @@ defmodule AlgoraWeb.Components.UI.Avatar do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </span>
     """
   end

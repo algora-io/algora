@@ -25,13 +25,13 @@ defmodule AlgoraWeb.User.InstallationsLive do
                   </div>
                   <div>
                     <div class="text-xl font-semibold tracking-tight text-gray-100">
-                      <%= installation.provider_login %>
+                      {installation.provider_login}
                     </div>
                     <div>
                       <div class="text-sm text-gray-300">
                         Installed on
                         <span class="font-semibold text-gray-200">
-                          <%= installation.repository_selection %> repositories
+                          {installation.repository_selection} repositories
                         </span>
                       </div>
                     </div>
@@ -68,8 +68,8 @@ defmodule AlgoraWeb.User.InstallationsLive do
                       aria-labelledby="headlessui-listbox-label-:r0: headlessui-listbox-button-:r1:"
                     >
                       <span class="block truncate dark:text-white">
-                        <%= (installation.connected_user && installation.connected_user.handle) ||
-                          "None" %>
+                        {(installation.connected_user && installation.connected_user.handle) ||
+                          "None"}
                       </span>
                       <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <svg

@@ -158,6 +158,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      |> assign(:steps, steps)
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
+     |> assign(:timezone, nil)
      |> assign_matching_devs()}
   end
 
@@ -301,7 +302,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             avatar_url: get_in(metadata, [:avatar_url]),
             handle: user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
             tech_stack: tech_stack,
-            last_context: org.handle
+            last_context: org.handle,
+            timezone: socket.assigns.timezone
           })
 
         _member =
@@ -375,6 +377,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      socket
      |> assign(:tech_stack_form, to_form(changeset))
      |> assign_matching_devs()}
+  end
+
+  def handle_event("timezone_changed", %{"timezone" => timezone}, socket) do
+    {:noreply, assign(socket, :timezone, timezone)}
   end
 
   # === PRIVATE HELPERS === #
@@ -693,6 +699,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
       </div>
     </div>
+    <.Timezone socket={@socket} />
     """
   end
 

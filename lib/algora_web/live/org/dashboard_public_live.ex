@@ -174,7 +174,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
                 </div>
               </.link>
               <div class="flex-shrink-0 font-display text-success font-medium">
-                {Money.to_string!(earner.amount)}
+                {Money.to_string!(earner.total_earned)}
               </div>
             </div>
           <% end %>

@@ -22,22 +22,22 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.client.avatar_url} />
                   <.avatar_fallback>
-                    <%= String.slice(@contract.client.name, 0, 2) %>
+                    {String.slice(@contract.client.name, 0, 2)}
                   </.avatar_fallback>
                 </.avatar>
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.contractor.avatar_url} />
                   <.avatar_fallback>
-                    <%= String.slice(@contract.contractor.name, 0, 2) %>
+                    {String.slice(@contract.contractor.name, 0, 2)}
                   </.avatar_fallback>
                 </.avatar>
               </div>
               <div>
                 <h1 class="text-2xl font-semibold">
-                  Contract with <%= @contract.contractor.name %>
+                  Contract with {@contract.contractor.name}
                 </h1>
                 <p class="text-sm text-muted-foreground">
-                  Started <%= Calendar.strftime(@contract.start_date, "%b %d, %Y") %>
+                  Started {Calendar.strftime(@contract.start_date, "%b %d, %Y")}
                 </p>
               </div>
             </div>
@@ -51,7 +51,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Hourly rate</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(@contract.hourly_rate) %>/hr
+                  {Money.to_string!(@contract.hourly_rate)}/hr
                 </div>
               </.card_content>
             </.card>
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Hours per week</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= @contract.hours_per_week %>
+                  {@contract.hours_per_week}
                 </div>
               </.card_content>
             </.card>
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">In escrow</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(Contract.balance(@contract)) %>
+                  {Money.to_string!(Contract.balance(@contract))}
                 </div>
               </.card_content>
             </.card>
@@ -76,7 +76,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.card_content class="pt-6">
                 <div class="text-sm text-muted-foreground mb-2">Total paid</div>
                 <div class="text-2xl font-semibold font-display">
-                  <%= Money.to_string!(@contract.total_credited) %>
+                  {Money.to_string!(@contract.total_credited)}
                 </div>
               </.card_content>
             </.card>
@@ -118,10 +118,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                   Waiting for timesheet submission
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                                  {Calendar.strftime(contract.start_date, "%b %d")} - {Calendar.strftime(
                                     contract.end_date,
                                     "%b %d, %Y"
-                                  ) %>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -138,20 +138,20 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                               <div>
                                 <div class="font-medium">
-                                  Ready to release payment for <%= contract.timesheet.hours_worked %> hours
+                                  Ready to release payment for {contract.timesheet.hours_worked} hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                                  {Calendar.strftime(contract.start_date, "%b %d")} - {Calendar.strftime(
                                     contract.end_date,
                                     "%b %d, %Y"
-                                  ) %>
+                                  )}
                                 </div>
                               </div>
                             </div>
                             <div class="flex items-center gap-2">
                               <div class="text-right mr-4">
                                 <div class="font-medium font-display">
-                                  <%= Money.to_string!(Contracts.calculate_transfer_amount(contract)) %>
+                                  {Money.to_string!(Contracts.calculate_transfer_amount(contract))}
                                 </div>
                                 <div class="text-sm text-muted-foreground">
                                   Ready to Release
@@ -195,19 +195,19 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                               <div>
                                 <div class="font-medium">
-                                  Payment for <%= contract.timesheet.hours_worked %> hours
+                                  Payment for {contract.timesheet.hours_worked} hours
                                 </div>
                                 <div class="text-sm text-muted-foreground">
-                                  <%= Calendar.strftime(contract.start_date, "%b %d") %> - <%= Calendar.strftime(
+                                  {Calendar.strftime(contract.start_date, "%b %d")} - {Calendar.strftime(
                                     contract.end_date,
                                     "%b %d, %Y"
-                                  ) %>
+                                  )}
                                 </div>
                               </div>
                             </div>
                             <div class="text-right">
                               <div class="font-medium font-display">
-                                <%= Money.to_string!(contract.amount_credited) %>
+                                {Money.to_string!(contract.amount_credited)}
                               </div>
                               <div class="text-sm text-muted-foreground">Paid</div>
                             </div>
@@ -239,16 +239,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar_image src={@contract.client.avatar_url} />
                       </.avatar>
                       <div>
-                        <div class="font-medium text-lg"><%= @contract.client.name %></div>
+                        <div class="font-medium text-lg">{@contract.client.name}</div>
                         <div class="text-sm text-muted-foreground">
-                          @<%= @contract.client.handle %>
+                          @{@contract.client.handle}
                         </div>
                       </div>
                     </div>
                     <div class="pt-6 flex flex-wrap gap-2">
                       <%= for tech <- @contract.client.tech_stack do %>
                         <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                          <%= tech %>
+                          {tech}
                         </span>
                       <% end %>
                     </div>
@@ -257,7 +257,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar class="h-9 w-9 ring-2 ring-background">
                           <.avatar_image src={member.avatar_url} />
                           <.avatar_fallback>
-                            <%= String.slice(member.name, 0, 2) %>
+                            {String.slice(member.name, 0, 2)}
                           </.avatar_fallback>
                         </.avatar>
                       <% end %>
@@ -275,28 +275,28 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar_image src={@contract.contractor.avatar_url} />
                       </.avatar>
                       <div>
-                        <div class="font-medium text-lg"><%= @contract.contractor.name %></div>
+                        <div class="font-medium text-lg">{@contract.contractor.name}</div>
                         <div class="text-sm text-muted-foreground">
-                          @<%= @contract.contractor.handle %>
+                          @{@contract.contractor.handle}
                         </div>
                       </div>
                     </div>
                     <div class="pt-6 flex flex-wrap gap-2">
                       <%= for tech <- @contract.contractor.tech_stack do %>
                         <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                          <%= tech %>
+                          {tech}
                         </span>
                       <% end %>
                     </div>
                     <div class="pt-6 space-y-2">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-map-pin" class="w-4 h-4" />
-                        <%= @contract.contractor.location %>
+                        {@contract.contractor.location}
                       </div>
                       <%= if @contract.contractor.timezone do %>
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
                           <.icon name="tabler-clock" class="w-4 h-4" />
-                          <%= Algora.Time.friendly_timezone(@contract.contractor.timezone) %>
+                          {Algora.Time.friendly_timezone(@contract.contractor.timezone)}
                         </div>
                       <% end %>
                     </div>
@@ -330,14 +330,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.avatar>
                 <.avatar_image src={@contract.contractor.avatar_url} alt="Developer avatar" />
                 <.avatar_fallback>
-                  <%= String.slice(@contract.contractor.name, 0, 2) %>
+                  {String.slice(@contract.contractor.name, 0, 2)}
                 </.avatar_fallback>
               </.avatar>
               <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
               </div>
             </div>
             <div>
-              <h2 class="text-lg font-semibold"><%= @contract.contractor.name %></h2>
+              <h2 class="text-lg font-semibold">{@contract.contractor.name}</h2>
               <p class="text-xs text-muted-foreground">Active now</p>
             </div>
           </div>
@@ -361,7 +361,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, Date) do %>
               <div class="flex items-center justify-center">
                 <div class="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">
-                  <%= date %>
+                  {date}
                 </div>
               </div>
 
@@ -371,16 +371,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={message.sender.avatar_url} />
                       <.avatar_fallback>
-                        <%= String.slice(message.sender.name, 0, 2) %>
+                        {String.slice(message.sender.name, 0, 2)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
-                      <%= message.content %>
+                      {message.content}
                       <div class="text-[10px] mt-1 text-muted-foreground">
-                        <%= message.inserted_at
+                        {message.inserted_at
                         |> DateTime.to_time()
                         |> Time.to_string()
-                        |> String.slice(0..4) %>
+                        |> String.slice(0..4)}
                       </div>
                     </div>
                   </div>
@@ -540,10 +540,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
       </div>
       <div class="flex-1">
         <div class="font-medium">
-          <%= @activity.description %>
+          {@activity.description}
         </div>
         <div class="text-sm text-muted-foreground">
-          <%= Calendar.strftime(@activity.date, "%b %d, %Y, %H:%M:%S") %>
+          {Calendar.strftime(@activity.date, "%b %d, %Y, %H:%M:%S")}
         </div>
       </div>
     </div>

@@ -186,7 +186,7 @@ defmodule AlgoraWeb.PricingLive do
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 pb-2">
             <h3 class="text-foreground text-2xl font-normal uppercase flex items-center gap-4 font-display">
-              <%= @plan.name %>
+              {@plan.name}
             </h3>
             <%= if @plan.popular do %>
               <span class="bg-foreground-light text-background rounded-md py-0.5 px-2 text-[13px] leading-4">
@@ -196,7 +196,7 @@ defmodule AlgoraWeb.PricingLive do
           </div>
         </div>
         <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
-          <%= @plan.description %>
+          {@plan.description}
         </p>
         <button
           phx-click="select_plan"
@@ -208,7 +208,7 @@ defmodule AlgoraWeb.PricingLive do
               "bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
           ]}
         >
-          <%= @plan.cta_text %>
+          {@plan.cta_text}
         </button>
         <div class="text-foreground flex items-baseline text-5xl font-normal lg:text-4xl xl:text-4xl border-b border-default lg:min-h-[175px] py-8 lg:pb-0 lg:pt-10">
           <div class="flex flex-col gap-1">
@@ -216,7 +216,7 @@ defmodule AlgoraWeb.PricingLive do
               <div>
                 <p class="text-foreground-lighter ml-1 text-[13px] leading-4 font-normal">From</p>
                 <div class="flex items-end">
-                  <p class="mt-2 pb-1 font-display text-5xl">$<%= @plan.price %></p>
+                  <p class="mt-2 pb-1 font-display text-5xl">${@plan.price}</p>
                   <p class="text-foreground-lighter mb-1.5 ml-1 text-[13px] leading-4">/ month</p>
                 </div>
               </div>
@@ -230,9 +230,9 @@ defmodule AlgoraWeb.PricingLive do
       </div>
       <div class="border-default flex rounded-bl-[4px] rounded-br-[4px] flex-1 flex-col px-8 xl:px-4 2xl:px-8 py-6">
         <p class="text-foreground-lighter text-[13px] mt-2 mb-4">
-          <%= if @plan.previous_tier,
+          {if @plan.previous_tier,
             do: "Everything in the #{@plan.previous_tier} Plan, plus:",
-            else: "Get started with:" %>
+            else: "Get started with:"}
         </p>
         <ul class="text-[13px] flex-1 text-foreground-lighter">
           <%= for feature <- @plan.features do %>
@@ -241,10 +241,10 @@ defmodule AlgoraWeb.PricingLive do
                 <div class="flex w-6">
                   <.icon name="tabler-check" class="h-4 w-4 text-primary" />
                 </div>
-                <span class="text-foreground mb-0"><%= feature.name %></span>
+                <span class="text-foreground mb-0">{feature.name}</span>
               </div>
               <%= if feature.detail do %>
-                <p class="ml-6 text-foreground-lighter"><%= feature.detail %></p>
+                <p class="ml-6 text-foreground-lighter">{feature.detail}</p>
               <% end %>
             </li>
           <% end %>
@@ -253,7 +253,7 @@ defmodule AlgoraWeb.PricingLive do
           <div class="flex flex-col gap-6 mt-auto prose">
             <div class="space-y-2 mt-12">
               <p class="text-[13px] leading-5 text-foreground-lighter whitespace-pre-wrap mb-0">
-                <%= @plan.footnote %>
+                {@plan.footnote}
               </p>
             </div>
           </div>
@@ -280,11 +280,11 @@ defmodule AlgoraWeb.PricingLive do
             @selected_option == option.name && "border-primary"
           ]}>
             <button phx-click="select_compute" phx-value-option={option.name} class="w-full text-left">
-              <h3 class="text-xl font-semibold text-foreground mb-2"><%= option.name %></h3>
+              <h3 class="text-xl font-semibold text-foreground mb-2">{option.name}</h3>
               <div class="space-y-2 text-sm text-muted-foreground">
-                <p>CPU: <%= option.cpu %></p>
-                <p>Memory: <%= option.memory %></p>
-                <p class="text-lg font-semibold text-foreground">$<%= option.price %>/month</p>
+                <p>CPU: {option.cpu}</p>
+                <p>Memory: {option.memory}</p>
+                <p class="text-lg font-semibold text-foreground">${option.price}/month</p>
               </div>
             </button>
           </div>
@@ -306,7 +306,7 @@ defmodule AlgoraWeb.PricingLive do
               <th class="text-left p-4 text-muted-foreground">Features</th>
               <%= for plan <- @plans do %>
                 <th class="p-4 text-center text-muted-foreground">
-                  <%= plan.name %>
+                  {plan.name}
                 </th>
               <% end %>
             </tr>
@@ -314,7 +314,7 @@ defmodule AlgoraWeb.PricingLive do
           <tbody>
             <%= for feature <- get_comparison_features() do %>
               <tr class="border-b">
-                <td class="p-4 text-foreground"><%= feature.name %></td>
+                <td class="p-4 text-foreground">{feature.name}</td>
                 <%= for plan <- @plans do %>
                   <td class="p-4 text-center">
                     <%= if has_feature?(plan, feature) do %>
@@ -348,7 +348,7 @@ defmodule AlgoraWeb.PricingLive do
               phx-value-id={item.id}
               class="w-full flex justify-between items-center p-4 text-left"
             >
-              <span class="text-foreground font-medium"><%= item.question %></span>
+              <span class="text-foreground font-medium">{item.question}</span>
               <.icon
                 name="tabler-chevron-down"
                 class={
@@ -361,7 +361,7 @@ defmodule AlgoraWeb.PricingLive do
             </button>
             <%= if @active_faq == item.id do %>
               <div class="p-4 pt-0 text-muted-foreground">
-                <%= item.answer %>
+                {item.answer}
               </div>
             <% end %>
           </div>
@@ -453,27 +453,25 @@ defmodule AlgoraWeb.PricingLive do
                 <div class="flex justify-between">
                   <span class="text-muted-foreground font-medium">Base Monthly Cost</span>
                   <span class="font-display">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_cost)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_cost))}
                   </span>
                 </div>
                 <div class="pt-2 flex justify-between">
                   <span class="text-muted-foreground">Overhead (35%)</span>
                   <span class="font-display text-muted-foreground">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead))}
                   </span>
                 </div>
                 <div class="pt-2 mt-[4.5rem] flex justify-between border-t">
                   <span class="text-muted-foreground font-medium">Total Monthly Cost</span>
                   <span class="font-display text-muted-foreground">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total))}
                   </span>
                 </div>
                 <div class="pt-2 flex justify-between font-medium">
                   <span>Total Yearly Cost</span>
                   <span class="font-display">
-                    $<%= Number.Delimit.number_to_delimited(
-                      trunc(@roi_estimate.traditional_total * 12)
-                    ) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total * 12))}
                   </span>
                 </div>
               </div>
@@ -485,15 +483,15 @@ defmodule AlgoraWeb.PricingLive do
                 <div class="flex justify-between">
                   <span class="text-muted-foreground font-medium">Base Monthly Cost</span>
                   <span class="font-display">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_cost)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_cost))}
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-muted-foreground">
-                    Platform Fee (<%= trunc(@roi_estimate.platform_fee * 100) %>%)
+                    Platform Fee ({trunc(@roi_estimate.platform_fee * 100)}%)
                   </span>
                   <span class="font-display text-muted-foreground">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_fee)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_fee))}
                   </span>
                 </div>
                 <div class="flex justify-between">
@@ -507,19 +505,19 @@ defmodule AlgoraWeb.PricingLive do
                 <div class="flex justify-between">
                   <span class="text-muted-foreground">Monthly Subscription</span>
                   <span class="font-display text-muted-foreground">
-                    $<%= Number.Delimit.number_to_delimited(@roi_estimate.monthly_subscription) %>
+                    ${Number.Delimit.number_to_delimited(@roi_estimate.monthly_subscription)}
                   </span>
                 </div>
                 <div class="flex justify-between border-t pt-2">
                   <span class="text-muted-foreground font-medium">Total Monthly Cost</span>
                   <span class="font-display text-muted-foreground">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total))}
                   </span>
                 </div>
                 <div class="flex justify-between font-medium">
                   <span>Total Yearly Cost</span>
                   <span class="font-display">
-                    $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total * 12)) %>
+                    ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total * 12))}
                   </span>
                 </div>
               </div>
@@ -530,7 +528,7 @@ defmodule AlgoraWeb.PricingLive do
             <div class="flex justify-between items-center">
               <span class="text-lg font-medium text-card-foreground">Estimated Yearly Savings</span>
               <span class="text-2xl font-bold text-success font-display">
-                $<%= Number.Delimit.number_to_delimited(trunc(@roi_estimate.savings)) %>
+                ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.savings))}
               </span>
             </div>
             <p class="mt-2 text-sm text-muted-foreground">
@@ -720,12 +718,12 @@ defmodule AlgoraWeb.PricingLive do
                       alt=""
                     />
                     <div>
-                      <div class="font-semibold text-popover-foreground"><%= testimonial.name %></div>
-                      <div class="text-muted-foreground"><%= testimonial.role %></div>
+                      <div class="font-semibold text-popover-foreground">{testimonial.name}</div>
+                      <div class="text-muted-foreground">{testimonial.role}</div>
                     </div>
                   </div>
                   <blockquote class="mt-6 text-muted-foreground">
-                    <%= testimonial.quote %>
+                    {testimonial.quote}
                   </blockquote>
                 </div>
               <% end %>
@@ -745,7 +743,7 @@ defmodule AlgoraWeb.PricingLive do
                   phx-value-id={item.id}
                   class="w-full flex justify-between items-center p-4 text-left"
                 >
-                  <span class="text-foreground font-medium"><%= item.question %></span>
+                  <span class="text-foreground font-medium">{item.question}</span>
                   <.icon
                     name="tabler-chevron-down"
                     class={
@@ -758,7 +756,7 @@ defmodule AlgoraWeb.PricingLive do
                 </button>
                 <%= if @active_faq == item.id do %>
                   <div class="p-4 pt-0 text-muted-foreground">
-                    <%= item.answer %>
+                    {item.answer}
                   </div>
                 <% end %>
               </div>

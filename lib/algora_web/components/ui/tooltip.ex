@@ -30,7 +30,7 @@ defmodule AlgoraWeb.Components.UI.Tooltip do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -42,7 +42,7 @@ defmodule AlgoraWeb.Components.UI.Tooltip do
 
   def tooltip_trigger(assigns) do
     ~H"""
-    <%= render_slot(@inner_block) %>
+    {render_slot(@inner_block)}
     """
   end
 
@@ -71,7 +71,7 @@ defmodule AlgoraWeb.Components.UI.Tooltip do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

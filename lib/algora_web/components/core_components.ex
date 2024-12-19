@@ -45,7 +45,7 @@ defmodule AlgoraWeb.CoreComponents do
         </div>
         <div class="ml-3">
           <p class="text-sm font-medium text-red-100" role="alert">
-            <%= render_slot(@inner_block) %>
+            {render_slot(@inner_block)}
           </p>
         </div>
       </div>
@@ -76,7 +76,9 @@ defmodule AlgoraWeb.CoreComponents do
       aria-label="Algora TV"
       class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
     >
-      <AlgoraWeb.Components.Wordmarks.algora class={classes(["fill-current", @class || "w-20 h-auto"])} />
+      <AlgoraWeb.Components.Wordmarks.algora class={
+        classes(["fill-current", @class || "w-20 h-auto"])
+      } />
     </.link>
     """
   end
@@ -142,9 +144,9 @@ defmodule AlgoraWeb.CoreComponents do
               <% end %>
               <span class="flex-1 flex flex-col min-w-0">
                 <span class="text-gray-50 text-sm font-medium truncate">
-                  <%= render_slot(@title) %>
+                  {render_slot(@title)}
                 </span>
-                <span class="text-gray-400 text-sm truncate"><%= render_slot(@subtitle) %></span>
+                <span class="text-gray-400 text-sm truncate">{render_slot(@subtitle)}</span>
               </span>
             </span>
             <.icon
@@ -169,7 +171,7 @@ defmodule AlgoraWeb.CoreComponents do
               class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
               {link}
             >
-              <%= render_slot(link) %>
+              {render_slot(link)}
             </.link>
           <% end %>
         </div>
@@ -240,9 +242,9 @@ defmodule AlgoraWeb.CoreComponents do
               <% end %>
               <span class="flex-1 flex flex-col min-w-0">
                 <span class="text-gray-50 text-sm font-medium truncate">
-                  <%= render_slot(@title) %>
+                  {render_slot(@title)}
                 </span>
-                <span class="text-gray-400 text-sm truncate"><%= render_slot(@subtitle) %></span>
+                <span class="text-gray-400 text-sm truncate">{render_slot(@subtitle)}</span>
               </span>
             </span>
             <.icon
@@ -267,7 +269,7 @@ defmodule AlgoraWeb.CoreComponents do
               class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
               {link}
             >
-              <%= render_slot(link) %>
+              {render_slot(link)}
             </.link>
           <% end %>
         </div>
@@ -280,7 +282,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <.dropdown2 id="dashboard-dropdown">
       <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-      <:title><%= @current_user.name %></:title>
+      <:title>{@current_user.name}</:title>
 
       <:link
         :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
@@ -289,8 +291,8 @@ defmodule AlgoraWeb.CoreComponents do
         <div class="flex items-center">
           <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
           <div class="truncate">
-            <div class="truncate font-semibold"><%= org.name %></div>
-            <div class="truncate text-sm text-gray-500">@<%= org.handle %></div>
+            <div class="truncate font-semibold">{org.name}</div>
+            <div class="truncate text-sm text-gray-500">@{org.handle}</div>
           </div>
         </div>
       </:link>
@@ -362,7 +364,7 @@ defmodule AlgoraWeb.CoreComponents do
               class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-700 focus:ring-indigo-400"
               {link}
             >
-              <%= render_slot(link) %>
+              {render_slot(link)}
             </.link>
           <% end %>
         </div>
@@ -493,17 +495,17 @@ defmodule AlgoraWeb.CoreComponents do
               <div id={"#{@id}-content"}>
                 <header :if={@title != []}>
                   <h1 id={"#{@id}-title"} class="text-lg font-semibold leading-8 text-foreground">
-                    <%= render_slot(@title) %>
+                    {render_slot(@title)}
                   </h1>
                   <p
                     :if={@subtitle != []}
                     id={"#{@id}-description"}
                     class="mt-2 text-sm leading-6 text-muted-foreground"
                   >
-                    <%= render_slot(@subtitle) %>
+                    {render_slot(@subtitle)}
                   </p>
                 </header>
-                <%= render_slot(@inner_block) %>
+                {render_slot(@inner_block)}
                 <div :if={@confirm != [] or @cancel != []} class="ml-6 mb-4 flex items-center gap-5">
                   <.button
                     :for={confirm <- @confirm}
@@ -512,14 +514,14 @@ defmodule AlgoraWeb.CoreComponents do
                     phx-disable-with
                     class="py-2 px-3"
                   >
-                    <%= render_slot(confirm) %>
+                    {render_slot(confirm)}
                   </.button>
                   <.link
                     :for={cancel <- @cancel}
                     phx-click={hide_modal(@on_cancel, @id)}
                     class="text-sm font-semibold leading-6 text-foreground hover:text-foreground/80"
                   >
-                    <%= render_slot(cancel) %>
+                    {render_slot(cancel)}
                   </.link>
                 </div>
               </div>
@@ -572,8 +574,8 @@ defmodule AlgoraWeb.CoreComponents do
             <.icon :if={@kind == :note} name="tabler-info-circle-filled" class="w-6 h-6" />
             <.icon :if={@kind == :error} name="tabler-exclamation-circle-filled" class="w-6 h-6" />
             <div>
-              <div><%= body %></div>
-              <.link navigate={href} class="underline"><%= action_body %></.link>
+              <div>{body}</div>
+              <.link navigate={href} class="underline">{action_body}</.link>
             </div>
           </div>
         <% body -> %>
@@ -581,7 +583,7 @@ defmodule AlgoraWeb.CoreComponents do
             <.icon :if={@kind == :info} name="tabler-circle-check-filled" class="w-6 h-6" />
             <.icon :if={@kind == :note} name="tabler-info-circle-filled" class="w-6 h-6" />
             <.icon :if={@kind == :error} name="tabler-exclamation-circle-filled" class="w-6 h-6" />
-            <%= body %>
+            {body}
           </p>
       <% end %>
       <button
@@ -651,9 +653,9 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
       <div class="space-y-8">
-        <%= render_slot(@inner_block, f) %>
+        {render_slot(@inner_block, f)}
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
-          <%= render_slot(action, f) %>
+          {render_slot(action, f)}
         </div>
       </div>
     </.form>
@@ -729,9 +731,9 @@ defmodule AlgoraWeb.CoreComponents do
           class="rounded border-input text-primary focus:ring-ring"
           {@rest}
         />
-        <%= @label %>
+        {@label}
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -752,10 +754,10 @@ defmodule AlgoraWeb.CoreComponents do
           class="rounded-full border-input text-primary focus:ring-ring sr-only peer"
           {@rest}
         />
-        <%= @label %>
-        <%= render_slot(@inner_block) %>
+        {@label}
+        {render_slot(@inner_block)}
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -763,7 +765,7 @@ defmodule AlgoraWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}>{@label}</.label>
       <select
         id={@id}
         name={@name}
@@ -771,10 +773,10 @@ defmodule AlgoraWeb.CoreComponents do
         multiple={@multiple}
         {@rest}
       >
-        <option :if={@prompt} value=""><%= @prompt %></option>
-        <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
+        <option :if={@prompt} value="">{@prompt}</option>
+        {Phoenix.HTML.Form.options_for_select(@options, @value)}
       </select>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -782,7 +784,7 @@ defmodule AlgoraWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}><%= @label %></.label>
+      <.label for={@id}>{@label}</.label>
       <textarea
         id={@id || @name}
         name={@name}
@@ -795,7 +797,7 @@ defmodule AlgoraWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -803,8 +805,8 @@ defmodule AlgoraWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div>
-      <.label :if={@label} for={@id} class="mb-2"><%= @label %></.label>
-      <p :if={@helptext} class="mb-2 -mt-2 text-sm text-muted-foreground"><%= @helptext %></p>
+      <.label :if={@label} for={@id} class="mb-2">{@label}</.label>
+      <p :if={@helptext} class="mb-2 -mt-2 text-sm text-muted-foreground">{@helptext}</p>
       <div class="relative">
         <div :if={@icon} class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <.icon name={@icon} class="w-5 h-5 text-muted-foreground" />
@@ -826,7 +828,7 @@ defmodule AlgoraWeb.CoreComponents do
           {@rest}
         />
       </div>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -841,7 +843,7 @@ defmodule AlgoraWeb.CoreComponents do
   def label(assigns) do
     ~H"""
     <label for={@for} class={["block text-sm font-semibold leading-6 text-foreground", @class]}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </label>
     """
   end
@@ -855,7 +857,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <p class="mt-3 flex gap-3 text-sm leading-6 text-destructive">
       <.icon name="tabler-exclamation-circle" class="mt-0.5 w-5 h-5 flex-none" />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -875,13 +877,13 @@ defmodule AlgoraWeb.CoreComponents do
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]} {@rest}>
       <div>
         <h1 class="text-lg font-semibold leading-8 text-foreground focus:outline-none">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="text-sm leading-6 text-muted-foreground">
-          <%= render_slot(@subtitle) %>
+          {render_slot(@subtitle)}
         </p>
       </div>
-      <div class="flex-none"><%= render_slot(@actions) %></div>
+      <div class="flex-none">{render_slot(@actions)}</div>
     </header>
     """
   end
@@ -932,9 +934,9 @@ defmodule AlgoraWeb.CoreComponents do
                 col[:align] == "right" && "text-right"
               ]}
             >
-              <%= col[:label] %>
+              {col[:label]}
             </th>
-            <th class="relative p-0 pb-4"><span class="sr-only"><%= gettext("Actions") %></span></th>
+            <th class="relative p-0 pb-4"><span class="sr-only">{gettext("Actions")}</span></th>
           </tr>
         </thead>
         <tbody
@@ -950,7 +952,7 @@ defmodule AlgoraWeb.CoreComponents do
             >
               <div class={["block py-4 pr-4", i == 0 && "pl-4"]}>
                 <span class={["relative", i == 0 && "font-semibold text-gray-50"]}>
-                  <%= render_slot(col, @row_item.(row)) %>
+                  {render_slot(col, @row_item.(row))}
                 </span>
               </div>
             </td>
@@ -960,7 +962,7 @@ defmodule AlgoraWeb.CoreComponents do
                   :for={action <- @action}
                   class="relative ml-4 font-semibold leading-6 text-gray-50 hover:text-gray-200"
                 >
-                  <%= render_slot(action, @row_item.(row)) %>
+                  {render_slot(action, @row_item.(row))}
                 </span>
               </div>
             </td>
@@ -991,9 +993,9 @@ defmodule AlgoraWeb.CoreComponents do
       <dl class="-my-4 divide-y divide-border">
         <div :for={item <- @item} class="flex gap-4 py-4 sm:gap-8">
           <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-foreground">
-            <%= item.title %>
+            {item.title}
           </dt>
-          <dd class="text-sm leading-6 text-muted-foreground"><%= render_slot(item) %></dd>
+          <dd class="text-sm leading-6 text-muted-foreground">{render_slot(item)}</dd>
         </div>
       </dl>
     </div>
@@ -1018,7 +1020,7 @@ defmodule AlgoraWeb.CoreComponents do
         class="text-sm font-semibold leading-6 text-foreground hover:text-foreground/80"
       >
         <.icon name="tabler-arrow-left" class="w-3 h-3" />
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </.link>
     </div>
     """

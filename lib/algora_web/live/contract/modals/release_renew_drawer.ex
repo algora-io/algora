@@ -26,7 +26,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
             <div class="space-y-8">
               <.form_item>
                 <.form_label class="text-lg font-semibold mb-6">
-                  How was your experience working with <%= @contract.contractor.name %>?
+                  How was your experience working with {@contract.contractor.name}?
                 </.form_label>
                 <.form_control>
                   <.input
@@ -50,12 +50,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                   <dl class="space-y-4">
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Payout amount (<%= @contract.timesheet.hours_worked %> hours x <%= MoneyUtils.fmt_precise!(
+                        Payout amount ({@contract.timesheet.hours_worked} hours x {MoneyUtils.fmt_precise!(
                           @contract.hourly_rate
-                        ) %>/hr)
+                        )}/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract)) %>
+                        {MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract))}
                       </dd>
                     </div>
                     <div class="flex justify-between">
@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         Escrow balance
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        -<%= MoneyUtils.fmt_precise!(Contract.balance(@contract)) %>
+                        -{MoneyUtils.fmt_precise!(Contract.balance(@contract))}
                       </dd>
                     </div>
                     <div class="h-5"></div>
@@ -71,12 +71,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(
+                        {MoneyUtils.fmt_precise!(
                           Money.sub!(
                             Contracts.calculate_transfer_amount(@contract),
                             Contract.balance(@contract)
                           )
-                        ) %>
+                        )}
                       </dd>
                     </div>
                   </dl>
@@ -90,7 +90,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                   <div class="space-y-4">
                     <div class="flex justify-between text-lg font-medium font-display">
                       <%= for tier <- @fee_data.fee_tiers do %>
-                        <span><%= Util.format_pct(tier.fee) %></span>
+                        <span>{Util.format_pct(tier.fee)}</span>
                       <% end %>
                     </div>
 
@@ -133,7 +133,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                               do: "left: #{Util.format_pct(tier.progress)}"
                           }
                         >
-                          <%= Money.to_string!(tier.threshold) %>
+                          {Money.to_string!(tier.threshold)}
                         </div>
                       <% end %>
                     </div>
@@ -142,13 +142,13 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                   <div class="text-base text-muted-foreground">
                     Current fee:
                     <span class="font-semibold font-display">
-                      <%= Util.format_pct(@fee_data.current_fee) %>
+                      {Util.format_pct(@fee_data.current_fee)}
                     </span>
                   </div>
                   <div class="text-base text-muted-foreground">
                     Total paid to date:
                     <span class="font-semibold font-display">
-                      <%= MoneyUtils.fmt_precise!(@fee_data.total_paid) %>
+                      {MoneyUtils.fmt_precise!(@fee_data.total_paid)}
                     </span>
                   </div>
                 </div>
@@ -161,44 +161,44 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                   <dl class="space-y-4">
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Renewal amount (<%= @contract.hours_per_week %> hours x <%= MoneyUtils.fmt_precise!(
+                        Renewal amount ({@contract.hours_per_week} hours x {MoneyUtils.fmt_precise!(
                           @contract.hourly_rate
-                        ) %>/hr)
+                        )}/hr)
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(Contract.balance(@contract)) %>
+                        {MoneyUtils.fmt_precise!(Contract.balance(@contract))}
                       </dd>
                     </div>
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Algora fees (<%= Util.format_pct(@fee_data.current_fee) %>)
+                        Algora fees ({Util.format_pct(@fee_data.current_fee)})
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(
+                        {MoneyUtils.fmt_precise!(
                           Money.mult!(Contract.balance(@contract), @fee_data.current_fee)
-                        ) %>
+                        )}
                       </dd>
                     </div>
                     <div class="flex justify-between">
                       <dt class="text-muted-foreground">
-                        Transaction fees (<%= Util.format_pct(@fee_data.transaction_fee) %>)
+                        Transaction fees ({Util.format_pct(@fee_data.transaction_fee)})
                       </dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(
+                        {MoneyUtils.fmt_precise!(
                           Money.mult!(Contract.balance(@contract), @fee_data.transaction_fee)
-                        ) %>
+                        )}
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
                       <dd class="font-semibold font-display tabular-nums">
-                        <%= MoneyUtils.fmt_precise!(
+                        {MoneyUtils.fmt_precise!(
                           Money.mult!(
                             Contract.balance(@contract),
                             Decimal.add(1, @fee_data.total_fee)
                           )
-                        ) %>
+                        )}
                       </dd>
                     </div>
                   </dl>

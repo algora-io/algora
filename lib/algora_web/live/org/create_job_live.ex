@@ -275,12 +275,12 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       </span>
                       <div class="flex flex-col">
                         <div class="flex items-center gap-2">
-                          <span class="font-medium"><%= dev.name %></span>
+                          <span class="font-medium">{dev.name}</span>
                           <%= if dev.flag do %>
-                            <span><%= dev.flag %></span>
+                            <span>{dev.flag}</span>
                           <% end %>
                         </div>
-                        <span class="text-sm text-muted-foreground">@<%= dev.handle %></span>
+                        <span class="text-sm text-muted-foreground">@{dev.handle}</span>
                       </div>
                     </div>
                   </td>
@@ -289,23 +289,23 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       <div class="-ml-2.5 flex flex-wrap gap-1">
                         <%= for tech <- Enum.take(dev.tech_stack, 3) do %>
                           <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
-                            <%= tech %>
+                            {tech}
                           </span>
                         <% end %>
                         <%= if length(dev.tech_stack) > 3 do %>
                           <span class="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs text-muted-foreground">
-                            +<%= length(dev.tech_stack) - 3 %> more
+                            +{length(dev.tech_stack) - 3} more
                           </span>
                         <% end %>
                       </div>
                       <div class="flex items-center gap-4 text-sm text-muted-foreground">
                         <div class="flex items-center gap-1">
                           <.icon name="tabler-diamond" class="w-4 h-4" />
-                          <span><%= dev.bounties %> bounties</span>
+                          <span>{dev.bounties} bounties</span>
                         </div>
                         <div class="flex items-center gap-1">
                           <.icon name="tabler-cash" class="w-4 h-4" />
-                          <span><%= Money.to_string!(dev.total_earned) %></span>
+                          <span>{Money.to_string!(dev.total_earned)}</span>
                         </div>
                       </div>
                     </div>
@@ -347,15 +347,15 @@ defmodule AlgoraWeb.Org.CreateJobLive do
             <img src={@selected_dev.avatar_url} alt="" class="w-20 h-20 rounded-full" />
             <div>
               <h4 class="text-xl font-semibold">
-                <%= @selected_dev.name %> <%= @selected_dev.flag %>
+                {@selected_dev.name} {@selected_dev.flag}
               </h4>
               <div class="text-sm text-muted-foreground">
-                @<%= @selected_dev.handle %>
+                @{@selected_dev.handle}
               </div>
               <div class="-ml-1 mt-2 flex flex-wrap gap-2">
                 <%= for tech <- @selected_dev.tech_stack do %>
                   <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                    <%= tech %>
+                    {tech}
                   </span>
                 <% end %>
               </div>
@@ -372,7 +372,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     <div class="p-4 rounded-lg bg-card border border-border">
                       <div class="flex items-center gap-2 mb-2">
                         <div class="text-2xl font-bold font-display">
-                          <%= Money.to_string!(@selected_dev.total_earned) %>
+                          {Money.to_string!(@selected_dev.total_earned)}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Total Earnings</div>
@@ -380,7 +380,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     <div class="p-4 rounded-lg bg-card border border-border">
                       <div class="flex items-center gap-2 mb-2">
                         <div class="text-2xl font-bold font-display">
-                          <%= @selected_dev.bounties %>
+                          {@selected_dev.bounties}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Bounties Solved</div>
@@ -388,7 +388,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     <div class="p-4 rounded-lg bg-card border border-border">
                       <div class="flex items-center gap-2 mb-2">
                         <div class="text-2xl font-bold font-display">
-                          <%= @selected_dev.projects %>
+                          {@selected_dev.projects}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Projects Contributed</div>
@@ -402,15 +402,15 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-message" class="w-4 h-4" />
                         <span>
-                          <%= @selected_dev.handle %> wrote to you <%= Algora.Util.time_ago(
+                          {@selected_dev.handle} wrote to you {Algora.Util.time_ago(
                             DateTime.utc_now()
                             |> DateTime.add(-3, :day)
-                          ) %>
+                          )}
                         </span>
                       </div>
                     </div>
                     <div class="px-4 leading-5 text-base whitespace-pre-line min-h-[12rem]">
-                      <%= @selected_dev.message %>
+                      {@selected_dev.message}
                     </div>
                   </div>
                 </div>
@@ -433,8 +433,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                           />
                         <% end %>
                       </div>
-                      <p class="text-sm mb-2"><%= review.comment %></p>
-                      <p class="text-xs text-muted-foreground">— <%= review.company %></p>
+                      <p class="text-sm mb-2">{review.comment}</p>
+                      <p class="text-xs text-muted-foreground">— {review.company}</p>
                     </div>
                   <% end %>
                 </div>
@@ -521,14 +521,14 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       Job posting
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.new!(599, :USD)) %>
+                      {Money.to_string!(Money.new!(599, :USD))}
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.new!(599, :USD)) %>
+                      {Money.to_string!(Money.new!(599, :USD))}
                     </dd>
                   </div>
                 </dl>
@@ -582,24 +582,24 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
-                      <%= bounty.ticket.title %>
+                      {bounty.ticket.title}
                     </h2>
                   </div>
                   <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
-                      <span class="truncate">tv#<%= bounty.ticket.number %></span>
+                      <span class="truncate">tv#{bounty.ticket.number}</span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
                         <circle cx="1" cy="1" r="1"></circle>
                       </svg>
                     </div>
                     <p class="whitespace-nowrap">
-                      <%= Algora.Util.time_ago(bounty.inserted_at) %>
+                      {Algora.Util.time_ago(bounty.inserted_at)}
                     </p>
                   </div>
                 </div>
                 <div class="pl-6">
                   <div class="flex-none rounded-lg px-3 py-1 font-display tabular-nums text-lg font-extrabold ring-1 ring-inset bg-success/5 text-success ring-success/30">
-                    <%= Money.to_string!(bounty.amount) %>
+                    {Money.to_string!(bounty.amount)}
                   </div>
                 </div>
               </.link>

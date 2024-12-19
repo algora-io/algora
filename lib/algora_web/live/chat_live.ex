@@ -264,19 +264,19 @@ defmodule AlgoraWeb.ChatLive do
                 <div class="relative">
                   <.avatar class="h-12 w-12">
                     <.avatar_image src={thread.user.avatar_url} />
-                    <.avatar_fallback><%= String.slice(thread.user.name, 0, 2) %></.avatar_fallback>
+                    <.avatar_fallback>{String.slice(thread.user.name, 0, 2)}</.avatar_fallback>
                   </.avatar>
                   <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
                   </div>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between">
-                    <span class="font-medium"><%= thread.user.name %></span>
-                    <span class="text-xs text-muted-foreground"><%= thread.timestamp %></span>
+                    <span class="font-medium">{thread.user.name}</span>
+                    <span class="text-xs text-muted-foreground">{thread.timestamp}</span>
                   </div>
                   <div class="flex items-center gap-2">
                     <p class="text-sm text-muted-foreground truncate">
-                      <%= thread.last_message %>
+                      {thread.last_message}
                     </p>
                     <%= if thread.unread do %>
                       <div class="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
@@ -295,13 +295,13 @@ defmodule AlgoraWeb.ChatLive do
             <div class="relative">
               <.avatar>
                 <.avatar_image src={@other_user.avatar_url} alt="User avatar" />
-                <.avatar_fallback><%= String.slice(@other_user.name, 0, 2) %></.avatar_fallback>
+                <.avatar_fallback>{String.slice(@other_user.name, 0, 2)}</.avatar_fallback>
               </.avatar>
               <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
               </div>
             </div>
             <div>
-              <h2 class="text-lg font-semibold"><%= @other_user.name %></h2>
+              <h2 class="text-lg font-semibold">{@other_user.name}</h2>
               <p class="text-xs text-muted-foreground">Active now</p>
             </div>
           </div>
@@ -327,7 +327,7 @@ defmodule AlgoraWeb.ChatLive do
               <!-- Date separator -->
               <div class="flex items-center justify-center">
                 <div class="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">
-                  <%= date %>
+                  {date}
                 </div>
               </div>
 
@@ -336,13 +336,13 @@ defmodule AlgoraWeb.ChatLive do
                   <.avatar class="h-8 w-8">
                     <.avatar_image src={message.avatar_url} />
                     <.avatar_fallback>
-                      <%= String.slice(message.sender.name, 0, 2) %>
+                      {String.slice(message.sender.name, 0, 2)}
                     </.avatar_fallback>
                   </.avatar>
                   <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
-                    <%= message.content %>
+                    {message.content}
                     <div class="text-[10px] mt-1 text-muted-foreground">
-                      <%= message.sent_at %>
+                      {message.sent_at}
                     </div>
                   </div>
                 </div>
@@ -386,22 +386,22 @@ defmodule AlgoraWeb.ChatLive do
             <div class="flex flex-col items-center text-center">
               <.avatar class="h-20 w-20">
                 <.avatar_image src={@other_user.avatar_url} />
-                <.avatar_fallback><%= String.slice(@other_user.name, 0, 2) %></.avatar_fallback>
+                <.avatar_fallback>{String.slice(@other_user.name, 0, 2)}</.avatar_fallback>
               </.avatar>
               <h3 class="mt-4 text-lg font-semibold">
-                <%= @other_user.name %> <%= @other_user.flag %>
+                {@other_user.name} {@other_user.flag}
               </h3>
-              <p class="text-sm text-muted-foreground">@<%= @other_user.handle %></p>
+              <p class="text-sm text-muted-foreground">@{@other_user.handle}</p>
 
               <div class="-mx-1 mt-3 flex flex-wrap gap-1 justify-center">
                 <%= for tech <- Enum.take(@other_user.tech_stack || [], 3) do %>
                   <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                    <%= tech %>
+                    {tech}
                   </span>
                 <% end %>
                 <%= if length(@other_user.tech_stack || []) > 3 do %>
                   <span class="text-xs text-muted-foreground">
-                    +<%= length(@other_user.tech_stack) - 3 %> more
+                    +{length(@other_user.tech_stack) - 3} more
                   </span>
                 <% end %>
               </div>
@@ -410,19 +410,19 @@ defmodule AlgoraWeb.ChatLive do
             <div class="space-y-3">
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <.icon name="tabler-map-pin" class="w-4 h-4" />
-                <%= @other_user.location %>
+                {@other_user.location}
               </div>
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <.icon name="tabler-clock" class="w-4 h-4" />
-                <%= @other_user.timezone %>
+                {@other_user.timezone}
               </div>
               <div class="flex items-center gap-2 text-sm">
                 <.icon name="tabler-circle-check" class="w-4 h-4 text-success" />
-                <span class="text-success"><%= @other_user.availability %></span>
+                <span class="text-success">{@other_user.availability}</span>
               </div>
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <.icon name="tabler-currency-dollar" class="w-4 h-4" />
-                <%= @other_user.rate %>
+                {@other_user.rate}
               </div>
             </div>
             <!-- Social Links -->
@@ -435,7 +435,7 @@ defmodule AlgoraWeb.ChatLive do
                   class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <.icon name={social.icon} class="w-4 h-4" />
-                  <%= social.name %>
+                  {social.name}
                 </a>
               <% end %>
             </div>

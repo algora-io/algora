@@ -200,9 +200,9 @@ defmodule AlgoraWeb.HomeLive do
                 <dl class="mt-16 grid grid-cols-2 gap-8 lg:grid-cols-4">
                   <%= for stat <- @stats do %>
                     <div class="flex flex-col gap-y-2">
-                      <dt class="text-sm leading-6 text-muted-foreground"><%= stat.label %></dt>
+                      <dt class="text-sm leading-6 text-muted-foreground">{stat.label}</dt>
                       <dd class="text-3xl font-semibold tracking-tight text-foreground font-display">
-                        <%= stat.value %>
+                        {stat.value}
                       </dd>
                     </div>
                   <% end %>
@@ -258,7 +258,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <div class="mt-8 md:order-1 md:mt-0">
                 <p class="text-center text-xs leading-5 text-muted-foreground">
-                  &copy; <%= DateTime.utc_now().year %> Algora. All rights reserved.
+                  &copy; {DateTime.utc_now().year} Algora. All rights reserved.
                 </p>
               </div>
             </div>
@@ -278,12 +278,12 @@ defmodule AlgoraWeb.HomeLive do
         class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
       />
       <div class="font-display mt-1 p-3 bg-card/50 backdrop-blur-sm rounded-xl rounded-t-none text-sm ring-1 ring-border">
-        <div class="font-semibold text-foreground"><%= @dev.name %> <%= @dev.flag %></div>
+        <div class="font-semibold text-foreground">{@dev.name} {@dev.flag}</div>
         <div class="mt-1 text-sm">
           <div class="p-px -ml-1 text-sm flex flex-wrap gap-1 h-6 overflow-hidden">
             <%= for tech <- @dev.tech_stack do %>
               <span class="text-muted-foreground rounded-xl px-2 py-0.5 text-xs ring-1 ring-border bg-muted/50">
-                <%= tech %>
+                {tech}
               </span>
             <% end %>
           </div>
@@ -291,7 +291,7 @@ defmodule AlgoraWeb.HomeLive do
         <div class="mt-1 text-muted-foreground text-xs">
           <span class="font-medium">Total Earned:</span>
           <span class="font-bold text-sm text-foreground">
-            <%= Money.to_string!(@dev.total_earned) %>
+            {Money.to_string!(@dev.total_earned)}
           </span>
         </div>
       </div>
@@ -384,11 +384,11 @@ defmodule AlgoraWeb.HomeLive do
     <%= for org <- @orgs do %>
       <div class="flex items-center justify-center">
         <%= if org[:component] do %>
-          <%= component(
+          {component(
             org.component,
             org.args,
             {__ENV__.module, __ENV__.function, __ENV__.file, __ENV__.line}
-          ) %>
+          )}
         <% else %>
           <img {org.args} />
         <% end %>

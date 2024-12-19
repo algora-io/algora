@@ -64,14 +64,14 @@ defmodule AlgoraWeb.Components.UI.DataTable do
         <thead>
           <tr>
             <th :for={col <- @col} class={get_alignment_class(col)}>
-              <%= col.label %>
+              {col.label}
             </th>
           </tr>
         </thead>
         <tbody>
           <tr :for={row <- @rows}>
             <td :for={col <- @col} class={get_alignment_class(col)}>
-              <%= render_slot(col, row) %>
+              {render_slot(col, row)}
             </td>
           </tr>
         </tbody>
@@ -92,7 +92,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
   def table_header(assigns) do
     ~H"""
     <thead class={classes(["[&_tr]:border-b", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </thead>
     """
   end
@@ -112,7 +112,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </tr>
     """
   end
@@ -132,7 +132,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </th>
     """
   end
@@ -144,7 +144,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
   def table_body(assigns) do
     ~H"""
     <tbody class={classes(["[&_tr:last-child]:border-0", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </tbody>
     """
   end
@@ -156,7 +156,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
   def table_cell(assigns) do
     ~H"""
     <td class={classes(["p-4 align-middle [&:has([role=checkbox])]:pr-0", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </td>
     """
   end
@@ -179,7 +179,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -191,7 +191,7 @@ defmodule AlgoraWeb.Components.UI.DataTable do
   def table_caption(assigns) do
     ~H"""
     <caption class={classes(["mt-4 text-sm text-muted-foreground", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </caption>
     """
   end

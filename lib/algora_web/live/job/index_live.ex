@@ -78,17 +78,17 @@ defmodule AlgoraWeb.Job.IndexLive do
                 <div>
                   <h2 class="text-xl font-semibold text-white mb-2">
                     <.link navigate={~p"/jobs/#{job.id}"} class="hover:text-indigo-400 transition">
-                      <%= job.title %>
+                      {job.title}
                     </.link>
                   </h2>
                   <div class="flex items-center gap-4 text-gray-400 text-sm">
                     <div class="flex items-center gap-1">
                       <.icon name="tabler-clock" class="w-4 h-4" />
-                      <%= Calendar.strftime(job.posted_at, "%B %d, %Y") %>
+                      {Calendar.strftime(job.posted_at, "%B %d, %Y")}
                     </div>
                     <div class="flex items-center gap-1">
                       <.icon name="tabler-world" class="w-4 h-4" />
-                      <%= job.country %>
+                      {job.country}
                     </div>
                   </div>
                 </div>
@@ -96,25 +96,25 @@ defmodule AlgoraWeb.Job.IndexLive do
                   <div class="text-indigo-400 font-medium">
                     <%= case job.budget.type do %>
                       <% :hourly -> %>
-                        $<%= job.budget.from %>-<%= job.budget.to %>/hour
+                        ${job.budget.from}-{job.budget.to}/hour
                       <% :fixed -> %>
-                        <%= Money.to_string!(job.budget.from) %>-<%= Money.to_string!(job.budget.to) %>
+                        {Money.to_string!(job.budget.from)}-{Money.to_string!(job.budget.to)}
                     <% end %>
                   </div>
                   <div class="text-sm text-gray-400">
-                    <%= String.capitalize("#{job.budget.type}") %> Rate
+                    {String.capitalize("#{job.budget.type}")} Rate
                   </div>
                 </div>
               </div>
 
               <p class="text-gray-300 mb-4 line-clamp-2">
-                <%= job.description %>
+                {job.description}
               </p>
 
               <div class="flex flex-wrap gap-2 mb-4">
                 <%= for tech <- job.tech_stack do %>
                   <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                    <%= tech %>
+                    {tech}
                   </span>
                 <% end %>
               </div>
@@ -123,9 +123,9 @@ defmodule AlgoraWeb.Job.IndexLive do
                 <div class="flex items-center gap-3">
                   <img src={job.client.avatar_url} class="w-10 h-10 rounded-full" />
                   <div>
-                    <div class="font-medium"><%= job.client.name %></div>
+                    <div class="font-medium">{job.client.name}</div>
                     <div class="text-sm text-gray-400">
-                      <%= job.client.jobs_posted %> jobs posted
+                      {job.client.jobs_posted} jobs posted
                     </div>
                   </div>
                 </div>
@@ -143,9 +143,9 @@ defmodule AlgoraWeb.Job.IndexLive do
                           <div class="absolute w-[40%] z-30 -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px">
                           </div>
                           <div class="font-bold text-white relative z-30 text-base">
-                            <%= applicant.name %>
+                            {applicant.name}
                           </div>
-                          <div class="text-white text-xs"><%= applicant.designation %></div>
+                          <div class="text-white text-xs">{applicant.designation}</div>
                         </div>
                         <img
                           src={applicant.image}
@@ -159,15 +159,15 @@ defmodule AlgoraWeb.Job.IndexLive do
                   <div class="flex items-center gap-3 text-sm">
                     <div class="flex items-center gap-2 text-gray-400">
                       <.icon name="tabler-chart-bar" class="w-4 h-4" />
-                      <%= String.capitalize(job.scope.experience) %>
+                      {String.capitalize(job.scope.experience)}
                     </div>
                     <div class="flex items-center gap-2 text-gray-400">
                       <.icon name="tabler-clock" class="w-4 h-4" />
-                      <%= String.capitalize(job.scope.duration) %> term
+                      {String.capitalize(job.scope.duration)} term
                     </div>
                     <div class="flex items-center gap-2 text-gray-400">
                       <.icon name="tabler-layout-grid" class="w-4 h-4" />
-                      <%= String.capitalize(job.scope.size) %> size
+                      {String.capitalize(job.scope.size)} size
                     </div>
                   </div>
                 </div>

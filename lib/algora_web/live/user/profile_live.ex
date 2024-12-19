@@ -30,16 +30,16 @@ defmodule AlgoraWeb.User.ProfileLive do
 
           <div class="flex-1 space-y-4">
             <div>
-              <h1 class="text-2xl font-bold"><%= @user.name %></h1>
-              <p class="text-muted-foreground">@<%= @user.handle %></p>
+              <h1 class="text-2xl font-bold">{@user.name}</h1>
+              <p class="text-muted-foreground">@{@user.handle}</p>
             </div>
 
-            <p class="text-foreground max-w-2xl"><%= @user.bio %></p>
+            <p class="text-foreground max-w-2xl">{@user.bio}</p>
 
             <div class="flex flex-wrap gap-4">
               <%= for tech <- @user.tech_stack do %>
                 <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
-                  <%= tech %>
+                  {tech}
                 </span>
               <% end %>
             </div>
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= Money.to_string!(@user.total_earned) %>
+              {Money.to_string!(@user.total_earned)}
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Total Earnings</div>
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= @user.completed_bounties_count %>
+              {@user.completed_bounties_count}
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Bounties Solved</div>
@@ -76,7 +76,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="p-6 rounded-lg bg-card border border-border">
           <div class="flex items-center gap-2 mb-2">
             <div class="text-2xl font-bold font-display">
-              <%= @user.contributed_projects_count %>
+              {@user.contributed_projects_count}
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Projects Contributed</div>
@@ -123,14 +123,14 @@ defmodule AlgoraWeb.User.ProfileLive do
                                 href={~p"/org/#{bounty.owner.handle}"}
                                 class="font-semibold hover:underline"
                               >
-                                <%= bounty.owner.name %>
+                                {bounty.owner.name}
                               </.link>
                               <.icon name="tabler-chevron-right" class="h-4 w-4" />
                               <.link
                                 href={"https://github.com/#{bounty.repository.owner.login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
                                 class="hover:underline"
                               >
-                                <%= bounty.repository.name %>#<%= bounty.ticket.number %>
+                                {bounty.repository.name}#{bounty.ticket.number}
                               </.link>
                             </div>
 
@@ -139,10 +139,10 @@ defmodule AlgoraWeb.User.ProfileLive do
                               class="group flex items-center gap-2"
                             >
                               <div class="font-display text-xl font-semibold text-success">
-                                <%= Money.to_string!(bounty.amount) %>
+                                {Money.to_string!(bounty.amount)}
                               </div>
                               <div class="text-foreground group-hover:underline line-clamp-1">
-                                <%= bounty.ticket.title %>
+                                {bounty.ticket.title}
                               </div>
                             </.link>
                           </div>
@@ -182,18 +182,18 @@ defmodule AlgoraWeb.User.ProfileLive do
                       />
                     <% end %>
                   </div>
-                  <p class="text-sm mb-2"><%= review.content %></p>
+                  <p class="text-sm mb-2">{review.content}</p>
                   <div class="flex items-center gap-3">
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
                       <.avatar_fallback>
-                        <%= String.first(review.reviewer.name) %>
+                        {String.first(review.reviewer.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="flex flex-col">
-                      <p class="text-sm font-medium"><%= review.reviewer.name %></p>
+                      <p class="text-sm font-medium">{review.reviewer.name}</p>
                       <p class="text-xs text-muted-foreground">
-                        <%= review.organization.name %>
+                        {review.organization.name}
                       </p>
                     </div>
                   </div>

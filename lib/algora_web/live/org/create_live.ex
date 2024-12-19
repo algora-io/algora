@@ -96,13 +96,13 @@ defmodule AlgoraWeb.Org.CreateLive do
                 <div class="flex-grow">
                   <div class="flex justify-between">
                     <div>
-                      <div class="font-semibold"><%= org.name %> <%= org.flag %></div>
-                      <div class="text-sm text-gray-400">@<%= org.handle %></div>
+                      <div class="font-semibold">{org.name} {org.flag}</div>
+                      <div class="text-sm text-gray-400">@{org.handle}</div>
                     </div>
                     <div class="flex flex-col items-end">
                       <div class="text-gray-300">Awarded</div>
                       <div class="text-white font-semibold">
-                        <%= Money.to_string!(org.amount) %>
+                        {Money.to_string!(org.amount)}
                       </div>
                     </div>
                   </div>
@@ -111,7 +111,7 @@ defmodule AlgoraWeb.Org.CreateLive do
                     <div class="-ml-1 text-sm flex flex-wrap gap-1">
                       <%= for tech_stack <- org.tech_stack do %>
                         <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
-                          <%= tech_stack %>
+                          {tech_stack}
                         </span>
                       <% end %>
                     </div>

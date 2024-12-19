@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Components.UI.Button do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </button>
     """
   end

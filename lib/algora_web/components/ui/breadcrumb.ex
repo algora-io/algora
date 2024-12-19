@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
       {@rest}
       }
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </nav>
     """
   end
@@ -65,7 +65,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
       {@rest}
       }
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </ol>
     """
   end
@@ -88,7 +88,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </li>
     """
   end
@@ -111,7 +111,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </.link>
     """
   end
@@ -137,7 +137,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </span>
     """
   end

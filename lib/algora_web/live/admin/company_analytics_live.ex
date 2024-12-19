@@ -25,7 +25,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
             phx-click="select_period"
             phx-value-period={period}
           >
-            <%= period %>
+            {period}
           </.button>
         </div>
       </div>
@@ -94,27 +94,27 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
                           <.avatar_image src={company.avatar_url} />
                         </.avatar>
                         <div>
-                          <div class="font-medium"><%= company.name %></div>
-                          <div class="text-sm text-muted-foreground">@<%= company.handle %></div>
+                          <div class="font-medium">{company.name}</div>
+                          <div class="text-sm text-muted-foreground">@{company.handle}</div>
                         </div>
                       </div>
                     </td>
                     <td class="p-4 text-sm">
-                      <%= Calendar.strftime(company.joined_at, "%b %d, %Y") %>
+                      {Calendar.strftime(company.joined_at, "%b %d, %Y")}
                     </td>
                     <td class="p-4">
                       <.badge variant={status_color(company.status)}>
-                        <%= company.status %>
+                        {company.status}
                       </.badge>
                     </td>
                     <td class="p-4 text-sm">
-                      <%= company.total_contracts %>
+                      {company.total_contracts}
                     </td>
                     <td class="p-4 text-sm">
-                      <%= company.success_rate %>%
+                      {company.success_rate}%
                     </td>
                     <td class="p-4 text-sm text-muted-foreground">
-                      <%= Calendar.strftime(company.last_active_at, "%b %d, %Y") %>
+                      {Calendar.strftime(company.last_active_at, "%b %d, %Y")}
                     </td>
                   </tr>
                 <% end %>

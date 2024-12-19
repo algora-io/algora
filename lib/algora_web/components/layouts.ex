@@ -67,8 +67,8 @@ defmodule AlgoraWeb.Layouts do
     ~H"""
     <.dropdown id={@id}>
       <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-      <:title><%= @current_user.name %></:title>
-      <:subtitle>@<%= @current_user.handle %></:subtitle>
+      <:title>{@current_user.name}</:title>
+      <:subtitle>@{@current_user.handle}</:subtitle>
       <:link navigate={~p"/user/settings"}>Settings</:link>
       <:link href={~p"/auth/logout"} method={:delete}>Sign out</:link>
     </.dropdown>

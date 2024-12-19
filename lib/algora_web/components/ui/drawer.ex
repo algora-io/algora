@@ -56,7 +56,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
           <AlgoraWeb.CoreComponents.icon name="tabler-x" class="w-5 h-5" />
         </button>
         <div class="flex flex-col relative h-full p-6">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </div>
       </div>
     </div>
@@ -78,7 +78,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
       }
       {@rest}
     >
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -90,7 +90,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
   def drawer_content(assigns) do
     ~H"""
     <div class={classes(["overflow-y-auto", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -102,7 +102,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
   def drawer_footer(assigns) do
     ~H"""
     <div class={classes(["mt-auto", @class])} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end

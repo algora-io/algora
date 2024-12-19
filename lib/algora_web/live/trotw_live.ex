@@ -32,19 +32,19 @@ defmodule AlgoraWeb.TROTWLive do
             <%= for {region, medals} <- Enum.sort_by(@medals, fn {_, m} -> m.total end, :desc) do %>
               <div class="flex flex-col space-y-4 p-4 rounded-lg border bg-card">
                 <div class="flex justify-between items-center">
-                  <div class="text-xl font-medium font-display"><%= region %></div>
+                  <div class="text-xl font-medium font-display">{region}</div>
                   <div class="flex gap-6 items-center">
                     <span class="flex items-center gap-1">
                       <span class="text-2xl">🥇</span>
-                      <span class="text-xl font-semibold"><%= medals.gold %></span>
+                      <span class="text-xl font-semibold">{medals.gold}</span>
                     </span>
                     <span class="flex items-center gap-1">
                       <span class="text-2xl">🥈</span>
-                      <span class="text-xl font-semibold"><%= medals.silver %></span>
+                      <span class="text-xl font-semibold">{medals.silver}</span>
                     </span>
                     <span class="flex items-center gap-1">
                       <span class="text-2xl">🥉</span>
-                      <span class="text-xl font-semibold"><%= medals.bronze %></span>
+                      <span class="text-xl font-semibold">{medals.bronze}</span>
                     </span>
                   </div>
                 </div>
@@ -60,10 +60,10 @@ defmodule AlgoraWeb.TROTWLive do
             <.card_header>
               <div class="flex justify-between items-center">
                 <h3 class="text-lg font-semibold">
-                  Week of <%= Calendar.strftime(
+                  Week of {Calendar.strftime(
                     DateTime.from_naive!(week_start, "Etc/UTC"),
                     "%B %d, %Y"
-                  ) %>
+                  )}
                 </h3>
               </div>
             </.card_header>
@@ -81,16 +81,16 @@ defmodule AlgoraWeb.TROTWLive do
                     <div class="flex justify-between items-center">
                       <div class="text-xl font-display font-medium">
                         <span class="font-display font-bold text-4xl">
-                          <%= case index do
+                          {case index do
                             1 -> "🥇"
                             2 -> "🥈"
                             3 -> "🥉"
-                          end %>
+                          end}
                         </span>
-                        <%= region %>
+                        {region}
                       </div>
                       <div class="font-display text-2xl font-semibold text-success">
-                        <%= Money.to_string!(total_earned) %>
+                        {Money.to_string!(total_earned)}
                       </div>
                     </div>
 
@@ -108,9 +108,9 @@ defmodule AlgoraWeb.TROTWLive do
                           </.tooltip_trigger>
                           <.tooltip_content>
                             <div class="flex flex-col items-center gap-1">
-                              <span class="font-medium">@<%= earner.handle %></span>
+                              <span class="font-medium">@{earner.handle}</span>
                               <span class="text-sm font-display text-muted-foreground">
-                                <%= Money.to_string!(earner.total_earned) %>
+                                {Money.to_string!(earner.total_earned)}
                               </span>
                             </div>
                           </.tooltip_content>

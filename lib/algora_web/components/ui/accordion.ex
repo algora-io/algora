@@ -39,7 +39,7 @@ defmodule AlgoraWeb.Components.UI.Accordion do
   def accordion(assigns) do
     ~H"""
     <div class={classes(["", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -50,7 +50,7 @@ defmodule AlgoraWeb.Components.UI.Accordion do
   def accordion_item(assigns) do
     ~H"""
     <div class={classes(["border-b", @class])}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -69,7 +69,7 @@ defmodule AlgoraWeb.Components.UI.Accordion do
         ])
       }>
         <p class="font-medium">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </p>
 
         <svg
@@ -99,7 +99,7 @@ defmodule AlgoraWeb.Components.UI.Accordion do
     <div class="text-sm overflow-hidden grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 peer-open/accordion:grid-rows-[1fr]">
       <div class="overflow-hidden">
         <div class={classes(["pb-4 pt-0", @class])}>
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </div>
       </div>
     </div>

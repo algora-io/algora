@@ -7,7 +7,7 @@
     <meta name="csrf-token" content={get_csrf_token()} />
 
     <.live_title suffix={assigns[:page_title] && " | #{Algora.config([:title])}"}>
-      <%= assigns[:page_title] || Algora.config([:title]) %>
+      {assigns[:page_title] || Algora.config([:title])}
     </.live_title>
 
     <%= if assigns[:page_title] do %>
@@ -63,6 +63,6 @@
     />
   </head>
   <body class="dark">
-    <%= @inner_content %>
+    {@inner_content}
   </body>
 </html>

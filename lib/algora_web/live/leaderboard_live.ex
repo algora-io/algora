@@ -36,14 +36,14 @@ defmodule AlgoraWeb.LeaderboardLive do
             <.card_header>
               <div class="flex justify-between items-center">
                 <h3 class="text-2xl font-semibold text-gray-100">
-                  <%= CountryEmojis.get(country, "🌍") %>
-                  <%= if country, do: country, else: "Unknown Location" %>
+                  {CountryEmojis.get(country, "🌍")}
+                  {if country, do: country, else: "Unknown Location"}
                 </h3>
                 <span class="font-display text-3xl font-semibold text-emerald-300">
-                  <%= users
+                  {users
                   |> Enum.map(& &1.total_earned)
                   |> Enum.reduce(Money.zero(:USD), &Money.add!/2)
-                  |> Money.to_string!() %>
+                  |> Money.to_string!()}
                 </span>
               </div>
             </.card_header>
@@ -60,24 +60,24 @@ defmodule AlgoraWeb.LeaderboardLive do
                   <.avatar class="h-24 w-24">
                     <.avatar_image src={user.avatar_url} alt={user.name} />
                     <.avatar_fallback class="text-lg">
-                      <%= String.first(user.name || "") %>
+                      {String.first(user.name || "")}
                     </.avatar_fallback>
                   </.avatar>
                   <div>
-                    <div class="text-2xl font-semibold text-gray-100"><%= user.name %></div>
-                    <div class="text-lg text-gray-300 font-medium">@<%= user.provider_login %></div>
-                    <div class="text-lg text-indigo-400 font-mono font-medium"><%= user.id %></div>
+                    <div class="text-2xl font-semibold text-gray-100">{user.name}</div>
+                    <div class="text-lg text-gray-300 font-medium">@{user.provider_login}</div>
+                    <div class="text-lg text-indigo-400 font-mono font-medium">{user.id}</div>
                   </div>
                 </div>
               </:col>
               <:col :let={user} label="Earnings" align="right">
                 <span class="font-display text-3xl font-semibold text-emerald-300">
-                  <%= Money.to_string!(user.total_earned) %>
+                  {Money.to_string!(user.total_earned)}
                 </span>
               </:col>
               <:col :let={user} label="Bounties" align="right">
                 <span class="font-display text-3xl text-cyan-300 font-semibold">
-                  <%= user.transaction_count %>
+                  {user.transaction_count}
                 </span>
               </:col>
             </.data_table>

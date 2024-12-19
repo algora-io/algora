@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Components.UI.ScrollArea do
       {@rest}
     >
       <div class="-mr-3" style="min-width: 100%;">
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </div>
     </div>
     """

@@ -25,11 +25,11 @@ defmodule AlgoraWeb.Project.CreateLive do
       <div class="flex-grow px-4 sm:px-8 py-8 sm:py-16 bg-gray-950/25">
         <div class="max-w-3xl mx-auto">
           <div class="flex items-center gap-4 text-lg mb-6 font-display">
-            <span class="text-gray-300"><%= @step %> / <%= @total_steps %></span>
+            <span class="text-gray-300">{@step} / {@total_steps}</span>
             <h1 class="text-lg text-gray-200 font-semibold uppercase">Create Your Project</h1>
           </div>
           <div class="mb-8">
-            <%= render_step(assigns) %>
+            {render_step(assigns)}
           </div>
           <div class="flex justify-between">
             <%= if @step > 1 do %>
@@ -47,7 +47,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 phx-click="next_step"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
               >
-                Next: <%= next_step_label(@step) %>
+                Next: {next_step_label(@step)}
               </button>
             <% else %>
               <button
@@ -80,14 +80,14 @@ defmodule AlgoraWeb.Project.CreateLive do
                   <div class="flex justify-between">
                     <div class="min-w-0">
                       <div class="font-semibold text-base sm:text-lg font-display truncate">
-                        <%= dev.name %> <%= dev.flag %>
+                        {dev.name} {dev.flag}
                       </div>
-                      <div class="text-sm text-gray-400 truncate">@<%= dev.handle %></div>
+                      <div class="text-sm text-gray-400 truncate">@{dev.handle}</div>
                     </div>
                     <div class="flex flex-col items-end ml-2">
                       <div class="text-gray-300 text-sm">Earned</div>
                       <div class="text-white font-semibold text-base sm:text-lg font-display">
-                        <%= Money.to_string!(dev.total_earned) %>
+                        {Money.to_string!(dev.total_earned)}
                       </div>
                     </div>
                   </div>
@@ -96,7 +96,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                     <div class="p-1 overflow-x-auto flex gap-2 scrollbar-thin pb-4">
                       <%= for tech <- dev.tech_stack do %>
                         <span class="text-white rounded-xl px-2 py-0.5 text-xs sm:text-sm ring-1 ring-white/40 whitespace-nowrap">
-                          <%= tech %>
+                          {tech}
                         </span>
                       <% end %>
                     </div>
@@ -129,7 +129,7 @@ defmodule AlgoraWeb.Project.CreateLive do
       <div class="flex flex-wrap gap-3">
         <%= for tech <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
           <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
-            <%= tech %>
+            {tech}
             <button
               phx-click="remove_tech"
               phx-value-tech={tech}

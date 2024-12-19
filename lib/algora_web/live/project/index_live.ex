@@ -81,17 +81,17 @@ defmodule AlgoraWeb.Project.IndexLive do
                       navigate={~p"/projects/#{project.id}"}
                       class="hover:text-indigo-400 transition"
                     >
-                      <%= project.title %>
+                      {project.title}
                     </.link>
                   </h2>
                   <div class="flex items-center gap-4 text-gray-400 text-sm">
                     <div class="flex items-center gap-1">
                       <.icon name="tabler-clock" class="w-4 h-4" />
-                      <%= Calendar.strftime(project.posted_at, "%B %d, %Y") %>
+                      {Calendar.strftime(project.posted_at, "%B %d, %Y")}
                     </div>
                     <div class="flex items-center gap-1">
                       <.icon name="tabler-world" class="w-4 h-4" />
-                      <%= project.country %>
+                      {project.country}
                     </div>
                   </div>
                 </div>
@@ -99,27 +99,25 @@ defmodule AlgoraWeb.Project.IndexLive do
                   <div class="text-indigo-400 font-medium">
                     <%= case project.budget.type do %>
                       <% :hourly -> %>
-                        $<%= project.budget.from %>-<%= project.budget.to %>/hour
+                        ${project.budget.from}-{project.budget.to}/hour
                       <% :fixed -> %>
-                        <%= Money.to_string!(project.budget.from) %>-<%= Money.to_string!(
-                          project.budget.to
-                        ) %>
+                        {Money.to_string!(project.budget.from)}-{Money.to_string!(project.budget.to)}
                     <% end %>
                   </div>
                   <div class="text-sm text-gray-400">
-                    <%= String.capitalize("#{project.budget.type}") %> Rate
+                    {String.capitalize("#{project.budget.type}")} Rate
                   </div>
                 </div>
               </div>
 
               <p class="text-gray-300 mb-4 line-clamp-2">
-                <%= project.description %>
+                {project.description}
               </p>
 
               <div class="flex flex-wrap gap-2 mb-4">
                 <%= for tech <- project.tech_stack do %>
                   <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
-                    <%= tech %>
+                    {tech}
                   </span>
                 <% end %>
               </div>
@@ -128,9 +126,9 @@ defmodule AlgoraWeb.Project.IndexLive do
                 <div class="flex items-center gap-3">
                   <img src={project.client.avatar_url} class="w-10 h-10 rounded-full" />
                   <div>
-                    <div class="font-medium"><%= project.client.name %></div>
+                    <div class="font-medium">{project.client.name}</div>
                     <div class="text-sm text-gray-400">
-                      <%= project.client.projects_posted %> projects posted
+                      {project.client.projects_posted} projects posted
                     </div>
                   </div>
                 </div>
@@ -148,9 +146,9 @@ defmodule AlgoraWeb.Project.IndexLive do
                           <div class="absolute w-[40%] z-30 -bottom-px bg-gradient-to-r from-transparent via-emerald-500 to-transparent h-px">
                           </div>
                           <div class="font-bold text-white relative z-30 text-base">
-                            <%= applicant.name %>
+                            {applicant.name}
                           </div>
-                          <div class="text-white text-xs"><%= applicant.designation %></div>
+                          <div class="text-white text-xs">{applicant.designation}</div>
                         </div>
                         <img
                           src={applicant.image}
@@ -164,15 +162,15 @@ defmodule AlgoraWeb.Project.IndexLive do
                   <div class="flex items-center gap-3 text-sm">
                     <div class="flex items-center gap-2 text-gray-400">
                       <.icon name="tabler-chart-bar" class="w-4 h-4" />
-                      <%= String.capitalize(project.scope.experience) %>
+                      {String.capitalize(project.scope.experience)}
                     </div>
                     <div class="flex items-center gap-2 text-gray-400">
                       <.icon name="tabler-clock" class="w-4 h-4" />
-                      <%= String.capitalize(project.scope.duration) %> term
+                      {String.capitalize(project.scope.duration)} term
                     </div>
                     <div class="flex items-center gap-2 text-gray-400">
                       <.icon name="tabler-layout-grid" class="w-4 h-4" />
-                      <%= String.capitalize(project.scope.size) %> size
+                      {String.capitalize(project.scope.size)} size
                     </div>
                   </div>
                 </div>

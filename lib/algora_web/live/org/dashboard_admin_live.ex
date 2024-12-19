@@ -256,7 +256,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <div class="flex flex-wrap gap-3 mt-4">
           <%= for tech <- @tech_stack do %>
             <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
-              <%= tech %>
+              {tech}
               <button
                 phx-click="remove_tech"
                 phx-value-tech={tech}
@@ -335,7 +335,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         <span class="text-sm text-muted-foreground">
                           Once accepted,
                           <span class="font-semibold text-foreground">
-                            <%= Money.to_string!(Money.mult!(@hourly_rate, @hours_per_week)) %>
+                            {Money.to_string!(Money.mult!(@hourly_rate, @hours_per_week))}
                           </span>
                           will be held securely
                         </span>
@@ -371,12 +371,12 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Weekly amount (<%= @hours_per_week %> hours x <%= Money.to_string!(
+                      Weekly amount ({@hours_per_week} hours x {Money.to_string!(
                         middle_rate(@hourly_rate)
-                      ) %>/hr)
+                      )}/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(@weekly_amount) %>
+                      {Money.to_string!(@weekly_amount)}
                     </dd>
                   </div>
                   <div class="flex justify-between">
@@ -384,20 +384,20 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                       Algora fees (19%)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.19"))) %>
+                      {Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.19")))}
                     </dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">Transaction fees (4%)</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.04"))) %>
+                      {Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.04")))}
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      <%= Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("1.23"))) %>
+                      {Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("1.23")))}
                     </dd>
                   </div>
                 </dl>
@@ -406,12 +406,12 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   <p>
                     Actual charges may vary (up to
                     <span class="font-semibold">
-                      <%= Money.to_string!(
+                      {Money.to_string!(
                         Money.mult!(
                           Money.mult!(@hourly_rate.max, @hours_per_week),
                           Decimal.new("1.23")
                         )
-                      ) %>
+                      )}
                     </span>
                     including fees).
                   </p>
@@ -451,7 +451,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <.icon name="tabler-circle-check-filled" class="h-5 w-5" />
       </div>
       <span class="text-sm font-medium text-success group-hover:text-muted">
-        <%= @achievement.name %>
+        {@achievement.name}
       </span>
     </.link>
     """
@@ -464,7 +464,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <div class="h-2 w-2 rounded-full bg-muted-foreground group-hover:bg-muted"></div>
       </div>
       <span class="text-sm font-medium text-muted-foreground group-hover:text-muted">
-        <%= @achievement.name %>
+        {@achievement.name}
       </span>
     </.link>
     """
@@ -478,7 +478,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <span class="relative block h-2 w-2 rounded-full bg-success"></span>
       </span>
       <span class="ml-3 text-sm font-medium text-muted-foreground group-hover:text-muted">
-        <%= @achievement.name %>
+        {@achievement.name}
       </span>
     </.link>
     """
@@ -583,23 +583,23 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       <td class="py-1 px-4 align-middle">
         <div class="flex items-center gap-4">
           <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            <%= Money.to_string!(@bounty.amount) %>
+            {Money.to_string!(@bounty.amount)}
           </div>
 
           <.link
             href={Bounty.url(@bounty)}
             class="truncate text-sm text-foreground hover:underline max-w-[400px]"
           >
-            <%= @bounty.ticket.title %>
+            {@bounty.ticket.title}
           </.link>
 
           <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
             <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-              <%= @bounty.owner.name %>
+              {@bounty.owner.name}
             </.link>
             <.icon name="tabler-chevron-right" class="h-4 w-4" />
             <.link href={Bounty.url(@bounty)} class="hover:underline">
-              <%= Bounty.path(@bounty) %>
+              {Bounty.path(@bounty)}
             </.link>
           </div>
         </div>
@@ -631,28 +631,28 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   href={~p"/org/#{@contract.client.handle}"}
                   class="font-semibold hover:underline"
                 >
-                  <%= @contract.client.og_title || @contract.client.name %>
+                  {@contract.client.og_title || @contract.client.name}
                 </.link>
               </div>
               <div class="text-muted-foreground line-clamp-2">
-                <%= @contract.client.bio %>
+                {@contract.client.bio}
               </div>
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.to_string!(@contract.hourly_rate_min) %> - <%= Money.to_string!(
+                  {Money.to_string!(@contract.hourly_rate_min)} - {Money.to_string!(
                     @contract.hourly_rate_max
-                  ) %>/hr
+                  )}/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
-                  · <%= @contract.hours_per_week %> hours/week
+                  · {@contract.hours_per_week} hours/week
                 </span>
               </div>
 
               <div class="mt-1 flex flex-wrap gap-2">
                 <%= for tag <- @contract.client.tech_stack do %>
                   <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
-                    <%= tag %>
+                    {tag}
                   </div>
                 <% end %>
               </div>
@@ -673,7 +673,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             <.avatar class="h-14 w-14 rounded-xl">
               <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
               <.avatar_fallback>
-                <%= String.first(@bounty.owner.name) %>
+                {String.first(@bounty.owner.name)}
               </.avatar_fallback>
             </.avatar>
           </.link>
@@ -681,27 +681,27 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1 text-sm text-muted-foreground">
               <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-                <%= @bounty.owner.name %>
+                {@bounty.owner.name}
               </.link>
               <.icon name="tabler-chevron-right" class="h-4 w-4" />
               <.link href={Bounty.url(@bounty)} class="hover:underline">
-                <%= Bounty.path(@bounty) %>
+                {Bounty.path(@bounty)}
               </.link>
             </div>
 
             <.link href={Bounty.url(@bounty)} class="group flex items-center gap-2">
               <div class="font-display text-xl font-semibold text-success">
-                <%= Money.to_string!(@bounty.amount) %>
+                {Money.to_string!(@bounty.amount)}
               </div>
               <div class="text-foreground group-hover:underline line-clamp-1">
-                <%= @bounty.ticket.title %>
+                {@bounty.ticket.title}
               </div>
             </.link>
 
             <div class="flex flex-wrap gap-2">
               <%= for tag <- @bounty.tech_stack do %>
                 <span class="text-sm text-muted-foreground">
-                  #<%= tag %>
+                  #{tag}
                 </span>
               <% end %>
             </div>
@@ -728,20 +728,20 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             <div class="flex flex-col gap-1">
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link href={~p"/org/#{@user.handle}"} class="font-semibold hover:underline">
-                  <%= @user.name %>
+                  {@user.name}
                 </.link>
               </div>
 
               <div class="group flex items-center gap-2">
                 <div class="font-display text-xl font-semibold text-success">
-                  <%= Money.to_string!(@user.hourly_rate_max) %>/hr
+                  {Money.to_string!(@user.hourly_rate_max)}/hr
                 </div>
               </div>
 
               <div class="mt-1 flex flex-wrap gap-2">
                 <%= for tech <- @user.tech_stack do %>
                   <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
-                    <%= tech %>
+                    {tech}
                   </div>
                 <% end %>
               </div>
@@ -757,7 +757,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   />
                 <% end %>
               </div>
-              <p class="text-sm mb-2"><%= @user.review.content %></p>
+              <p class="text-sm mb-2">{@user.review.content}</p>
               <div class="flex items-center gap-3">
                 <.avatar class="h-8 w-8">
                   <.avatar_image
@@ -765,13 +765,13 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                     alt={@user.review.reviewer.name}
                   />
                   <.avatar_fallback>
-                    <%= String.first(@user.review.reviewer.name) %>
+                    {String.first(@user.review.reviewer.name)}
                   </.avatar_fallback>
                 </.avatar>
                 <div class="flex flex-col">
-                  <p class="text-sm font-medium"><%= @user.review.reviewer.name %></p>
+                  <p class="text-sm font-medium">{@user.review.reviewer.name}</p>
                   <p class="text-xs text-muted-foreground">
-                    <%= @user.review.organization.name %>
+                    {@user.review.organization.name}
                   </p>
                 </div>
               </div>

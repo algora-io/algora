@@ -365,7 +365,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 </div>
               </div>
 
-              <div class="flex flex-col-reverse gap-6">
+              <div class="flex flex-col gap-6">
                 <%= for message <- Enum.sort_by(messages, & &1.inserted_at, Date) do %>
                   <div class="flex gap-3 group">
                     <.avatar class="h-8 w-8">

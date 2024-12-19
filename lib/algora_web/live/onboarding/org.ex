@@ -1,11 +1,12 @@
 defmodule AlgoraWeb.Onboarding.OrgLive do
-  require Logger
   use AlgoraWeb, :live_view
-  alias Algora.Users
-  alias AlgoraWeb.Components.Wordmarks
-  import Ecto.Changeset
-  alias Algora.Factory
   use LiveSvelte.Components
+  require Logger
+  import Ecto.Changeset
+  alias Phoenix.LiveView.AsyncResult
+  alias AlgoraWeb.Components.Wordmarks
+  alias Algora.Users
+  alias Algora.Factory
 
   # === SCHEMAS === #
 
@@ -159,6 +160,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
      |> assign(:timezone, nil)
+     |> assign(:user_metadata, AsyncResult.loading())
      |> assign_matching_devs()}
   end
 
@@ -198,6 +200,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case changeset do
       %{valid?: true} = changeset ->
         email = get_field(changeset, :email)
+
         login_code = AlgoraWeb.UserAuth.generate_login_code(email)
 
         # TODO: Send email
@@ -207,7 +210,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
          socket
          |> assign(:email_form, to_form(changeset))
          |> assign(:code_sent?, true)
-         |> assign_matching_devs()}
+         |> assign_matching_devs()
+         |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
+         |> assign(:user_metadata, AsyncResult.loading())}
 
       %{valid?: false} = changeset ->
         {:noreply, assign(socket, :email_form, to_form(changeset))}
@@ -229,15 +234,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         login_code = get_field(socket.assigns.verification_form.source, :code)
         preferences = changeset.changes
 
-        # TODO: call async and handle errors
-        metadata = Algora.Crawler.fetch_user_metadata(email)
-
-        user_handle =
-          email
-          |> String.split("@")
-          |> List.first()
-          |> String.replace(~r/[^a-zA-Z0-9]/, "")
-          |> String.downcase()
+        metadata =
+          case socket.assigns.user_metadata do
+            %AsyncResult{ok?: true, result: metadata} -> metadata
+            _ -> %{}
+          end
 
         org_name =
           case get_in(metadata, [:org, :display_name]) do
@@ -262,6 +263,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             handle ->
               handle
           end
+
+        user_handle =
+          email
+          |> String.split("@")
+          |> List.first()
+          |> String.replace(~r/[^a-zA-Z0-9]/, "")
+          |> String.downcase()
 
         # TODO: use context functions instead of Factory
         # TODO: generate nicer handles or let the user choose
@@ -852,5 +860,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <% end %>
     </div>
     """
+  end
+
+  def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
+    {:noreply,
+     assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+  end
+
+  def handle_async(:fetch_metadata, {:exit, reason}, socket) do
+    {:noreply,
+     assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 end

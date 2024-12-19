@@ -208,7 +208,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
   )
 end
 
-num_cycles = 20
+num_cycles = 5
 
 # Create the contract template
 _contract_template =
@@ -228,8 +228,8 @@ initial_contract =
     %{
       contractor_id: carver.id,
       client_id: pied_piper.id,
-      start_date: days_from_now(-num_cycles * 7),
-      end_date: days_from_now(-(num_cycles - 1) * 7)
+      start_date: days_from_now(-(num_cycles + 1) * 7),
+      end_date: days_from_now(-num_cycles * 7)
     }
   )
 
@@ -239,19 +239,26 @@ initial_contract =
 {:ok, _txs} = Algora.Contracts.prepay_contract(initial_contract)
 
 # Iterate over the cycles to create timesheets and release & renew contracts
-Enum.reduce_while(1..num_cycles, initial_contract, fn sequence_number, contract ->
-  insert!(:timesheet, %{
-    contract_id: contract.id,
-    hours_worked: Enum.random(35..45),
-    inserted_at: days_from_now(-((num_cycles - sequence_number + 1) * 7) + 7)
-  })
+last_contract =
+  Enum.reduce_while(1..num_cycles, initial_contract, fn _i, contract ->
+    insert!(:timesheet, %{
+      contract_id: contract.id,
+      hours_worked: Enum.random(35..45),
+      inserted_at: contract.end_date
+    })
 
-  {:ok, contract} = Algora.Contracts.fetch_contract(contract.id)
+    {:ok, contract} = Algora.Contracts.fetch_contract(contract.id)
 
-  {:ok, {_txs, new_contract}} = Algora.Contracts.release_and_renew_contract(contract)
+    {:ok, {_txs, new_contract}} = Algora.Contracts.release_and_renew_contract(contract)
 
-  {:cont, new_contract}
-end)
+    {:cont, new_contract}
+  end)
+
+insert!(:timesheet, %{
+  contract_id: last_contract.id,
+  hours_worked: Enum.random(35..45),
+  inserted_at: last_contract.end_date
+})
 
 thread = insert!(:thread, %{title: "#{pied_piper.name} x #{carver.name}"})
 

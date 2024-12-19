@@ -394,9 +394,16 @@ defmodule Algora.Crawler do
     email
     |> String.trim()
     |> String.downcase()
+    |> remove_plus_suffix()
     |> (&:crypto.hash(:sha256, &1)).()
     |> Base.encode16(case: :lower)
     |> build_gravatar_url(default, size)
+  end
+
+  defp remove_plus_suffix(email) do
+    [local_part, domain] = String.split(email, "@")
+    base_local_part = String.split(local_part, "+") |> List.first()
+    base_local_part <> "@" <> domain
   end
 
   defp build_gravatar_url(hash, default, size) do

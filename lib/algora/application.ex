@@ -17,7 +17,8 @@ defmodule Algora.Application do
       {Finch, name: Algora.Finch},
       Algora.Stargazer,
       # Start to serve requests, typically the last entry
-      AlgoraWeb.Endpoint
+      AlgoraWeb.Endpoint,
+      TwMerge.Cache
     ]
 
     children =

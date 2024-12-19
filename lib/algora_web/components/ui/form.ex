@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Components.UI.Form do
   @moduledoc false
   use AlgoraWeb.Component
+  alias AlgoraWeb.Components.UI.Label
 
   @doc """
   Implement of form component. SaladUI doesn't define its own form, but it provides a set of form-related components to help you build your own form.
@@ -71,7 +72,7 @@ defmodule AlgoraWeb.Components.UI.Form do
       end
 
     ~H"""
-    <SaladUI.Label.label
+    <Label.label
       class={
         classes([
           @error && "text-destructive",
@@ -81,7 +82,7 @@ defmodule AlgoraWeb.Components.UI.Form do
       {@rest}
     >
       <%= render_slot(@inner_block) %>
-    </SaladUI.Label.label>
+    </Label.label>
     """
   end
 

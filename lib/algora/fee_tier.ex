@@ -90,4 +90,8 @@ defmodule Algora.FeeTier do
   def threshold_met?(total_paid, tier) do
     Money.compare!(total_paid, tier.threshold) != :lt
   end
+
+  def first_threshold_met?(total_paid) do
+    threshold_met?(total_paid, Enum.at(@tiers, 1))
+  end
 end

@@ -614,8 +614,14 @@ defmodule Algora.Contracts do
       {:open?, true}, query ->
         from([c] in query, where: is_nil(c.contractor_id))
 
+      {:active_or_paid?, true}, query ->
+        from([c] in query, where: c.status in [:active, :paid])
+
       {:original?, true}, query ->
         from([c] in query, where: c.id == c.original_contract_id)
+
+      {:status, status}, query ->
+        from([c] in query, where: c.status == ^status)
 
       {:after, sequence_number}, query ->
         from([c] in query, where: c.sequence_number > ^sequence_number)

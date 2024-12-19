@@ -66,10 +66,32 @@ defmodule Algora.Payments do
     |> where([lt: lt], lt.type == :credit)
     |> where([t], t.status == :succeeded)
     |> select([t], sum(t.net_amount))
+    |> limit(1)
     |> Repo.one()
     |> case do
       nil -> Money.zero(:USD)
       amount -> amount
+    end
+  end
+
+  def get_max_paid_to_single_contractor(client_id) do
+    Transaction
+    |> join(:inner, [t], lt in Transaction,
+      as: :lt,
+      on: t.linked_transaction_id == lt.id
+    )
+    |> where([t], t.user_id == ^client_id)
+    |> where([t], t.type == :debit)
+    |> where([lt: lt], lt.type == :credit)
+    |> where([t], t.status == :succeeded)
+    |> group_by([lt: lt], lt.user_id)
+    |> select([t, lt: lt], {lt.user_id, sum(t.net_amount)})
+    |> order_by([t], desc: sum(t.net_amount))
+    |> limit(1)
+    |> Repo.one()
+    |> case do
+      nil -> {nil, Money.zero(:USD)}
+      {user_id, amount} -> {user_id, amount}
     end
   end
 end

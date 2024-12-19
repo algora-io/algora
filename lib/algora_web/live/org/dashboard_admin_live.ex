@@ -225,7 +225,6 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <.input
           name="hourly-rate-min"
           value={@contract.hourly_rate_min.amount}
-          phx-keydown="handle_hourly_rate_min"
           phx-debounce="200"
           class="w-full bg-background border-input font-display"
           icon="tabler-currency-dollar"
@@ -234,7 +233,6 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <.input
           name="hourly-rate-max"
           value={@contract.hourly_rate_max.amount}
-          phx-keydown="handle_hourly_rate_max"
           phx-debounce="200"
           class="w-full bg-background border-input font-display"
           icon="tabler-currency-dollar"
@@ -574,30 +572,6 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
   def handle_event("close_drawer", _, socket) do
     {:noreply, socket |> assign(:show_begin_collaboration_drawer, false)}
-  end
-
-  def handle_event("handle_hourly_rate_min", %{"value" => value}, socket) do
-    case Integer.parse(value) do
-      {min_rate, _} when min_rate >= 0 ->
-        current_max = socket.assigns.hourly_rate.max
-        new_rate = %{min: min_rate, max: max(min_rate, current_max)}
-        {:noreply, assign(socket, :hourly_rate, new_rate)}
-
-      _ ->
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("handle_hourly_rate_max", %{"value" => value}, socket) do
-    case Integer.parse(value) do
-      {max_rate, _} when max_rate >= 0 ->
-        current_min = socket.assigns.hourly_rate.min
-        new_rate = %{min: min(max_rate, current_min), max: max_rate}
-        {:noreply, assign(socket, :hourly_rate, new_rate)}
-
-      _ ->
-        {:noreply, socket}
-    end
   end
 
   def handle_event("validate_job", %{"job_form" => params}, socket) do

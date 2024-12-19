@@ -699,11 +699,14 @@ defmodule AlgoraWeb.CoreComponents do
   slot :inner_block
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
-    errors = if(assigns.hide_errors, do: [], else: Enum.map(field.errors, &translate_error(&1)))
+    errors =
+      if Phoenix.Component.used_input?(field) and not assigns.hide_errors,
+        do: field.errors,
+        else: []
 
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
-    |> assign(:errors, errors)
+    |> assign(:errors, Enum.map(errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> field.value end)
     |> input()
@@ -714,7 +717,7 @@ defmodule AlgoraWeb.CoreComponents do
       assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
 
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div>
       <label class="flex items-center gap-4 text-sm leading-6 text-gray-300">
         <%!-- <input type="hidden" name={@name} value="false" /> --%>
         <input
@@ -738,7 +741,7 @@ defmodule AlgoraWeb.CoreComponents do
       assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("radio", value) end)
 
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div>
       <label class="flex items-center gap-4 text-sm leading-6 text-gray-300">
         <input
           type="radio"
@@ -759,7 +762,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div>
       <.label for={@id}><%= @label %></.label>
       <select
         id={@id}
@@ -778,7 +781,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div>
       <.label for={@id}><%= @label %></.label>
       <textarea
         id={@id || @name}
@@ -786,7 +789,6 @@ defmodule AlgoraWeb.CoreComponents do
         class={[
           "bg-background mt-2 block min-h-[6rem] w-full rounded-lg border-input py-[7px] px-[11px]",
           "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5",
           "border-input focus:border-ring focus:ring-ring/5",
           @errors != [] && "border-destructive focus:border-destructive focus:ring-destructive/10",
           @class
@@ -800,7 +802,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(assigns) do
     ~H"""
-    <div phx-feedback-for={@name}>
+    <div>
       <.label :if={@label} for={@id} class="mb-2"><%= @label %></.label>
       <p :if={@helptext} class="mb-2 -mt-2 text-sm text-muted-foreground"><%= @helptext %></p>
       <div class="relative">
@@ -815,7 +817,6 @@ defmodule AlgoraWeb.CoreComponents do
           class={[
             "bg-background block w-full rounded-lg border-input py-[7px] px-[11px]",
             "text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-            "phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5",
             "border-input focus:border-ring focus:ring-ring/5",
             @errors != [] &&
               "border-destructive focus:border-destructive focus:ring-destructive/10 placeholder-destructive-foreground/50",
@@ -852,7 +853,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="phx-no-feedback:hidden mt-3 flex gap-3 text-sm leading-6 text-destructive">
+    <p class="mt-3 flex gap-3 text-sm leading-6 text-destructive">
       <.icon name="tabler-exclamation-circle" class="mt-0.5 w-5 h-5 flex-none" />
       <%= render_slot(@inner_block) %>
     </p>

@@ -313,10 +313,35 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         Begin Collaboration
       </.drawer_header>
       <.drawer_content class="space-y-6">
-        <div class="grid grid-cols-5 gap-6">
-          <div class="col-span-3 rounded-lg ring-1 ring-border aspect-video w-full h-full bg-card">
+        <div class="gap-6 flex">
+          <div class="relative w-full">
+            <div class="space-y-4">
+              <video
+                src="/videos/contract-to-hire.mp4"
+                class="w-full rounded-lg ring-1 ring-border aspect-video bg-card"
+                controls
+              />
+
+              <figure class="flex gap-3 items-start">
+                <img
+                  src="https://avatars.githubusercontent.com/u/1195435?v=4"
+                  alt="Chris Griffing"
+                  class="w-12 h-12 rounded-full"
+                />
+                <figcaption class="flex-1">
+                  <blockquote class="text-muted-foreground">
+                    "The interview was that easy because I had 1 week as a contractor to knock out a project for them. If I didn't knock that out, then I wouldn't get the job. They didn't need to extend an offer. So contract-to-hire
+                    <em>can</em>
+                    actually be that easy."
+                  </blockquote>
+                  <cite class="mt-2 font-medium block">
+                    - Chris Griffing
+                  </cite>
+                </figcaption>
+              </figure>
+            </div>
           </div>
-          <div class="col-span-2 space-y-6">
+          <div class="space-y-6 shrink-0">
             <.card>
               <.card_header>
                 <.card_title>How it works</.card_title>
@@ -348,7 +373,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                           <span class="font-semibold text-foreground">
                             {Money.to_string!(@weekly_amount_mid)}
                           </span>
-                          will be held securely
+                          will be charged and held securely
                         </span>
                       <% else %>
                         <span class="text-sm text-muted-foreground">

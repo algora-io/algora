@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias AlgoraWeb.Components.Wordmarks
   import Ecto.Changeset
   alias Algora.Factory
+  use LiveSvelte.Components
 
   # === SCHEMAS === #
 
@@ -367,6 +368,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
+  def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
+    changeset = %TechStackForm{} |> TechStackForm.changeset(%{tech_stack: tech_stack})
+
+    {:noreply,
+     socket
+     |> assign(:tech_stack_form, to_form(changeset))
+     |> assign_matching_devs()}
+  end
+
   # === PRIVATE HELPERS === #
 
   defp assign_matching_devs(socket) do
@@ -402,31 +412,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             Enter a comma-separated list of technologies you work with
           </p>
 
-          <div class="mt-4" phx-hook="TechStack" id="tech-stack-form">
-            <.input
-              type="text"
-              name="tech_input"
-              id="tech-input"
-              value=""
-              placeholder="Elixir, Phoenix, PostgreSQL, etc."
-              class="w-full bg-background border-input"
-            />
+          <.TechStack
+            class="mt-4"
+            props={%{tech_stack: get_field(@tech_stack_form.source, :tech_stack) || []}}
+            socket={@socket}
+          />
 
-            <%!-- Hidden input to store tech stack --%>
-            <.input
-              field={@tech_stack_form[:tech_stack]}
-              type="hidden"
-              data-tech-stack-input
-              value={Jason.encode!(get_field(@tech_stack_form.source, :tech_stack))}
-            />
-
-            <div
-              class="flex flex-wrap gap-3 mt-4 [&>div]:bg-success/10 [&>div]:text-success [&>div]:rounded-lg [&>div]:px-3 [&>div]:py-1.5 [&>div]:text-sm [&>div]:font-semibold [&>div]:flex [&>div]:items-center [&_button]:ml-2 [&_button]:text-success [&_button:hover]:text-success/80"
-              data-tech-stack-container
-            >
-              <%!-- Tech stack items will be rendered here by the hook --%>
-            </div>
-          </div>
+          <.error :for={msg <- @tech_stack_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
+            <%= msg %>
+          </.error>
         </div>
 
         <div class="flex justify-end">

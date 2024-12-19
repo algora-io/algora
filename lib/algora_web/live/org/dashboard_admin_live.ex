@@ -2,18 +2,16 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Contracts
+  alias Algora.FeeTier
+  alias Algora.Payments
   alias Algora.Reviews
   alias Algora.Users
+  alias Algora.Util
   alias AlgoraWeb.Org.Forms.JobForm
-  alias Algora.Contracts
-  alias Algora.Payments
-  alias Algora.FeeTier
-  def middle_rate(%{min: min, max: max}), do: Money.div!(Money.add!(min, max), 2)
 
   def mount(_params, _session, socket) do
     %{tech_stack: tech_stack} = socket.assigns.current_org
-    hourly_rate = %{min: Money.new!(50, :USD), max: Money.new!(100, :USD)}
-    hours_per_week = 20
 
     {:ok, contract} =
       Contracts.fetch_contract(client_id: socket.assigns.current_org.id, open?: true)
@@ -23,14 +21,27 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       |> JobForm.changeset(%{work_type: "remote"})
       |> to_form(as: :job_form)
 
+    hourly_rate_mid =
+      contract.hourly_rate_min
+      |> Money.add!(contract.hourly_rate_max)
+      |> Money.div!(2)
+
+    weekly_amount_mid = Money.mult!(hourly_rate_mid, contract.hours_per_week)
+
+    platform_fee_pct = hd(FeeTier.all()).fee
+    transaction_fee_pct = Payments.get_transaction_fee_pct()
+    total_fee_pct = Decimal.add(platform_fee_pct, transaction_fee_pct)
+
     socket =
       socket
       |> assign(:tech_stack, tech_stack)
       |> assign(:view_mode, "compact")
       |> assign(:looking_to_collaborate, true)
-      |> assign(:hourly_rate, hourly_rate)
-      |> assign(:hours_per_week, hours_per_week)
-      |> assign(:weekly_amount, Money.mult!(middle_rate(hourly_rate), hours_per_week))
+      |> assign(:hourly_rate_mid, hourly_rate_mid)
+      |> assign(:weekly_amount_mid, weekly_amount_mid)
+      |> assign(:platform_fee_pct, platform_fee_pct)
+      |> assign(:transaction_fee_pct, transaction_fee_pct)
+      |> assign(:total_fee_pct, total_fee_pct)
       |> assign(:selected_dev, nil)
       |> assign(:matching_devs, fetch_matching_devs(tech_stack))
       |> assign(:contract, contract)
@@ -335,7 +346,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         <span class="text-sm text-muted-foreground">
                           Once accepted,
                           <span class="font-semibold text-foreground">
-                            {Money.to_string!(Money.mult!(@hourly_rate, @hours_per_week))}
+                            {Money.to_string!(@weekly_amount_mid)}
                           </span>
                           will be held securely
                         </span>
@@ -371,33 +382,37 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <dl class="space-y-4">
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Weekly amount ({@hours_per_week} hours x {Money.to_string!(
-                        middle_rate(@hourly_rate)
+                      Weekly amount ({@contract.hours_per_week} hours x {Money.to_string!(
+                        @hourly_rate_mid
                       )}/hr)
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      {Money.to_string!(@weekly_amount)}
+                      {Money.to_string!(@weekly_amount_mid)}
                     </dd>
                   </div>
                   <div class="flex justify-between">
                     <dt class="text-muted-foreground">
-                      Algora fees (19%)
+                      Algora fees ({Util.format_pct(@platform_fee_pct)})
                     </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      {Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.19")))}
+                      {Money.to_string!(Money.mult!(@weekly_amount_mid, @platform_fee_pct))}
                     </dd>
                   </div>
                   <div class="flex justify-between">
-                    <dt class="text-muted-foreground">Transaction fees (4%)</dt>
+                    <dt class="text-muted-foreground">
+                      Transaction fees ({Util.format_pct(@transaction_fee_pct)})
+                    </dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      {Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("0.04")))}
+                      {Money.to_string!(Money.mult!(@weekly_amount_mid, @transaction_fee_pct))}
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
                     <dd class="font-semibold font-display tabular-nums">
-                      {Money.to_string!(Money.mult!(@weekly_amount, Decimal.new("1.23")))}
+                      {@weekly_amount_mid
+                      |> Money.mult!(Decimal.add(1, @total_fee_pct))
+                      |> Money.to_string!()}
                     </dd>
                   </div>
                 </dl>
@@ -406,12 +421,10 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   <p>
                     Actual charges may vary (up to
                     <span class="font-semibold">
-                      {Money.to_string!(
-                        Money.mult!(
-                          Money.mult!(@hourly_rate.max, @hours_per_week),
-                          Decimal.new("1.23")
-                        )
-                      )}
+                      {@contract.hourly_rate_max
+                      |> Money.mult!(@contract.hours_per_week)
+                      |> Money.mult!(@total_fee_pct)
+                      |> Money.to_string!()}
                     </span>
                     including fees).
                   </p>

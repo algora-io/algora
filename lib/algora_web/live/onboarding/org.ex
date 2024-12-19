@@ -268,6 +268,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           email
           |> String.split("@")
           |> List.first()
+          |> String.split("+")
+          |> List.first()
           |> String.replace(~r/[^a-zA-Z0-9]/, "")
           |> String.downcase()
 

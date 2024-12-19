@@ -2,12 +2,13 @@ defmodule Algora.Crawler do
   require Logger
 
   @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+  @headers [{"User-Agent", @user_agent}]
   @max_redirects 5
   @max_retries 3
   @retry_delay :timer.seconds(1)
 
   def fetch_site_metadata(url, redirect_count \\ 0, retry_count \\ 0) do
-    request = Finch.build(:get, url, [{"User-Agent", @user_agent}])
+    request = Finch.build(:get, url, @headers)
 
     with {:ok, response} <- Finch.request(request, Algora.Finch) do
       case handle_response(response, url, redirect_count) do
@@ -15,10 +16,10 @@ defmodule Algora.Crawler do
           case Floki.parse_document(body) do
             {:ok, html_tree} ->
               metadata = %{
-                og_image_url: find_og_image(html_tree),
-                favicon_url: find_logo(html_tree, url),
                 og_title: find_title(html_tree),
                 og_description: find_description(html_tree),
+                og_image_url: find_og_image(html_tree),
+                favicon_url: find_logo(html_tree, url),
                 socials: find_social_links(html_tree)
               }
 
@@ -341,7 +342,7 @@ defmodule Algora.Crawler do
   end
 
   defp follow_redirect(url) do
-    request = Finch.build(:head, url, [{"User-Agent", @user_agent}])
+    request = Finch.build(:head, url, @headers)
 
     case Finch.request(request, Algora.Finch) do
       {:ok, %Finch.Response{status: status, headers: headers}}
@@ -416,10 +417,7 @@ defmodule Algora.Crawler do
         {:error, :invalid_github_url}
 
       handle ->
-        request =
-          Finch.build(:get, "https://api.github.com/users/#{handle}", [
-            {"User-Agent", @user_agent}
-          ])
+        request = Finch.build(:get, "https://api.github.com/users/#{handle}", @headers)
 
         case Finch.request(request, Algora.Finch) do
           {:ok, %Finch.Response{status: 200, body: body}} ->

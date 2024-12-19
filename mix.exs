@@ -60,7 +60,7 @@ defmodule Algora.MixProject do
       {:ex_cldr, "~> 2.0"},
       {:ex_money, "~> 5.12"},
       {:ex_money_sql, "~> 1.0"},
-      {:salad_ui, "~> 0.11.0", only: [:dev]},
+      {:salad_ui, "~> 0.14.0", only: [:dev]},
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
       {:mox, "~> 1.0", only: :test},

@@ -222,7 +222,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       <div class="mt-4 grid grid-cols-2 gap-4">
         <.input
           name="hourly-rate-min"
-          value={@contract.hourly_rate.amount}
+          value={@contract.hourly_rate_min.amount}
           phx-keydown="handle_hourly_rate_min"
           phx-debounce="200"
           class="w-full bg-background border-input font-display"
@@ -231,7 +231,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         />
         <.input
           name="hourly-rate-max"
-          value={@contract.hourly_rate.amount}
+          value={@contract.hourly_rate_max.amount}
           phx-keydown="handle_hourly_rate_max"
           phx-debounce="200"
           class="w-full bg-background border-input font-display"

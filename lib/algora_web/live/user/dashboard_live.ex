@@ -405,7 +405,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
           <div class="flex flex-col items-end gap-3">
             <div class="text-right">
-              <div class="text-sm text-muted-foreground">Total contract value</div>
+              <div class="text-sm text-muted-foreground whitespace-nowrap">Total contract value</div>
               <div class="font-display text-lg font-semibold text-foreground">
                 {Money.to_string!(Money.mult!(@contract.hourly_rate, @contract.hours_per_week))} / wk
               </div>

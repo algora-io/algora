@@ -30,11 +30,14 @@ config :algora, Algora.Repo,
 
 # Configure event store
 config :algora, Algora.EventStore,
-  serializer: Commanded.Serialization.JsonSerializer,
+  column_data_type: "jsonb",
+  serializer: EventStore.JsonbSerializer,
+  types: EventStore.PostgresTypes,
   url: System.get_env("EVENT_STORE_DATABASE_URL"),
   pool_size: 10,
   queue_target: 50,
-  queue_interval: 1_000
+  queue_interval: 1_000,
+  schema: "console"
 
 config :algora, :event_stores, [Algora.EventStore]
 # For development, we disable any cache and enable

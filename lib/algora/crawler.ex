@@ -6,16 +6,19 @@ defmodule Algora.Crawler do
   @max_redirects 5
   @max_retries 3
   @retry_delay :timer.seconds(1)
-  @blacklisted_domains :code.priv_dir(:algora)
-  |> Path.join("domain_blacklist.txt")
-  |> File.read!()
-  |> String.split("\n")
 
-  def is_blacklisted?(domain), do:
-    Enum.member?(@blacklisted_domains, domain)
+  def blacklisted_domains do
+    :code.priv_dir(:algora)
+    |> Path.join("domain_blacklist.txt")
+    |> File.read!()
+    |> String.split("\n")
+  end
+
+  def is_blacklisted?(domain), do: Enum.member?(blacklisted_domains(), domain)
 
   def fetch_site_metadata(nil), do: {:error, :blacklisted_domain}
   def fetch_site_metadata(domain), do: fetch_site_metadata(domain, 0, 0)
+
   def fetch_site_metadata(domain, redirect_count, retry_count) do
     url = "https://#{domain}"
     request = Finch.build(:get, url, @headers)

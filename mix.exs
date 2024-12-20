@@ -79,6 +79,7 @@ defmodule Algora.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      compile: ["domain_blacklist"],
       "ecto.setup": [
         "ecto.create",
         "ecto.migrate",

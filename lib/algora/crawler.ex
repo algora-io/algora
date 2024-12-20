@@ -7,7 +7,20 @@ defmodule Algora.Crawler do
   @max_retries 3
   @retry_delay :timer.seconds(1)
 
-  def fetch_site_metadata(url, redirect_count \\ 0, retry_count \\ 0) do
+  def blacklisted_domains do
+    :code.priv_dir(:algora)
+    |> Path.join("domain_blacklist.txt")
+    |> File.read!()
+    |> String.split("\n")
+  end
+
+  def is_blacklisted?(domain), do: Enum.member?(blacklisted_domains(), domain)
+
+  def fetch_site_metadata(nil), do: {:error, :blacklisted_domain}
+  def fetch_site_metadata(domain), do: fetch_site_metadata(domain, 0, 0)
+
+  def fetch_site_metadata(domain, redirect_count, retry_count) do
+    url = "https://#{domain}"
     request = Finch.build(:get, url, @headers)
 
     with {:ok, response} <- Finch.request(request, Algora.Finch) do
@@ -69,7 +82,7 @@ defmodule Algora.Crawler do
     domain = get_email_domain(email)
     gravatar_url = get_gravatar_url(email, opts)
 
-    case fetch_site_metadata("https://#{domain}") do
+    case fetch_site_metadata(domain) do
       {:ok, metadata} ->
         %{avatar_url: gravatar_url, org: metadata}
 
@@ -384,7 +397,7 @@ defmodule Algora.Crawler do
 
   defp get_email_domain(email) do
     [_, domain] = String.split(email, "@")
-    domain
+    if not is_blacklisted?(domain), do: domain
   end
 
   defp get_gravatar_url(email, opts) do

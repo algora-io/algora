@@ -44,6 +44,29 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       to_form(EmailForm.changeset(%EmailForm{}, %{}))
     end
 
+    def validate_domain_not_blacklisted(changeset) do
+      domain = get_field(changeset, :domain)
+      if not is_nil(domain) and Algora.Crawler.is_blacklisted?(domain) do
+        add_error(changeset, :domain, "You can only use a company domain")
+      else
+        changeset
+      end
+    end
+
+    def validate_email_is_company_domain(changeset) do
+      domain = get_field(changeset, :domain)
+      email = get_field(changeset, :email)
+      if is_nil(email) or is_nil(domain) do
+        changeset
+      else
+        case String.split(email, "@") do
+          [_, ^domain] -> changeset
+          [_, _not_email_domain] ->
+            add_error(changeset, :email, "Your email address must match your company domain")
+        end
+      end
+    end
+
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:email, :domain])
@@ -52,6 +75,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_format(:domain, ~r/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/,
         message: "must be a valid domain"
       )
+      |> validate_domain_not_blacklisted()
+      |> validate_email_is_company_domain()
     end
   end
 

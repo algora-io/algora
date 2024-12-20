@@ -28,6 +28,15 @@ config :algora, Algora.Repo,
   migration_primary_key: [type: :string],
   migration_timestamps: [type: :utc_datetime_usec]
 
+# Configure event store
+config :algora, Algora.EventStore,
+  serializer: Commanded.Serialization.JsonSerializer,
+  url: System.get_env("EVENT_STORE_DATABASE_URL"),
+  pool_size: 10,
+  queue_target: 50,
+  queue_interval: 1_000
+
+config :algora, :event_stores, [Algora.EventStore]
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

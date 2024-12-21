@@ -17,10 +17,10 @@ defmodule Algora.Crawler do
   def is_blacklisted?(domain), do: Enum.member?(blacklisted_domains(), domain)
 
   def fetch_site_metadata(nil), do: {:error, :blacklisted_domain}
-  def fetch_site_metadata(domain), do: fetch_site_metadata(domain, 0, 0)
+  def fetch_site_metadata(domain), do:
+    fetch_site_metadata("https://#{domain}", 0, 0)
 
-  def fetch_site_metadata(domain, redirect_count, retry_count) do
-    url = "https://#{domain}"
+  def fetch_site_metadata(url, redirect_count, retry_count) do
     request = Finch.build(:get, url, @headers)
 
     with {:ok, response} <- Finch.request(request, Algora.Finch) do

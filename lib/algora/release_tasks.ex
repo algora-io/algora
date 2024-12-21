@@ -5,7 +5,7 @@ defmodule Algora.ReleaseTasks do
 
     :ok = Application.load(:algora)
 
-    config = Algora.EventStore.config()
+    config = AlgoraEvent.Store.config()
 
     :ok = EventStore.Tasks.Create.exec(config, [])
     :ok = EventStore.Tasks.Init.exec(config, [])

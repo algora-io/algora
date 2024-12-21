@@ -68,7 +68,9 @@ defmodule Algora.MixProject do
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},
       {:eventstore, "~> 1.4"},
-      {:commanded, "~> 1.4"}
+      {:commanded, "~> 1.4"},
+      {:commanded_eventstore_adapter, "~> 1.4"},
+      {:timex, "~> 3.7"}
     ]
   end
 
@@ -80,7 +82,7 @@ defmodule Algora.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ecto.setup", "event_store.setup", "assets.setup", "assets.build"],
       compile: ["domain_blacklist"],
       "ecto.setup": [
         "ecto.create",
@@ -90,8 +92,10 @@ defmodule Algora.MixProject do
       ],
       "ecto.seed": ["run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "event_store.reset": ["event_store.drop", "event_store.setup"],
+      "event_store.setup": ["event_store.create", "event_store.init"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "test.reset": ["cmd MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate"],
+      "test.reset": ["cmd MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate, event_store.drop, event_store.create, event_store.init"],
       "assets.setup": ["tailwind.install --if-missing"],
       "assets.build": ["tailwind algora", "cmd --cd assets pnpm install"],
       "assets.deploy": [

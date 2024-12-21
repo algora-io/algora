@@ -1,4 +1,4 @@
- defmodule Algora.EventStore do
+ defmodule AlgoraEvent.Store do
    use EventStore, otp_app: :algora, schema: "console"
 
    def init(config) do

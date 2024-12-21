@@ -11,7 +11,7 @@ defmodule Algora.Application do
       {NodeJS.Supervisor, [path: LiveSvelte.SSR.NodeJS.server_path(), pool_size: 4]},
       AlgoraWeb.Telemetry,
       Algora.Repo,
-      Algora.EventStore,
+      AlgoraEvent.Supervisor,
       {DNSCluster, query: Application.get_env(:algora, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Algora.PubSub},
       # Start the Finch HTTP client for sending emails

@@ -1,0 +1,2 @@
+defmodule AlgoraEvent do
+end

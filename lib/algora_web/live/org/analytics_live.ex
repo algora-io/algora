@@ -7,13 +7,22 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
     org_id = socket.assigns.current_org.id
     stats = Bounties.fetch_stats(org_id)
     recent_bounties = Bounties.list_bounties(owner_id: org_id, limit: 10)
-    recent_activities = fetch_recent_activities()
+
+   # playing around with event system
+    socket = case AlgoraEvent.Company.latest_events_for_company(org_id, -1, 4) do
+      {:ok, recent_activities} ->
+        if connected?(socket), do: AlgoraEvent.Company.visit!(org_id, socket.assigns.current_user.handle)
+        AlgoraEvent.Company.subscribe(org_id)
+        socket |> assign(:recent_activities, recent_activities)
+      {:error, :stream_not_found} ->
+        AlgoraEvent.Company.create!(org_id)
+        socket
+    end
 
     {:ok,
      socket
      |> assign(:stats, stats)
-     |> assign(:recent_bounties, recent_bounties)
-     |> assign(:recent_activities, recent_activities)}
+     |> assign(:recent_bounties, recent_bounties)}
   end
 
   def render(assigns) do
@@ -136,23 +145,24 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                     aria-hidden="true"
                   >
                   </span>
-                  <.link class="group inline-flex" rel="noopener" href={activity.url}>
+                  <.link class="group inline-flex" rel="noopener" href={activity.data.url}>
                     <div class="relative flex space-x-3">
                       <div class="flex min-w-0 flex-1 justify-between space-x-4">
                         <div class="flex items-center gap-4">
                           <span class="relative flex shrink-0 overflow-hidden rounded-full h-10 w-10">
                             <img
                               class="aspect-square h-full w-full"
-                              alt={activity.user}
-                              src={"https://github.com/#{activity.user}.png"}
+                              alt={activity.data.user}
+                              src={"https://github.com/#{activity.data.user}.png"}
                             />
                           </span>
                           <div class="space-y-0.5">
                             <p class="text-sm text-gray-500 transition-colors dark:text-gray-200 dark:group-hover:text-white">
                               {activity_text(activity)}
+                              <p>Event #{activity.event_number}</p>
                             </p>
                             <div class="whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
-                              <time>{activity.days_ago} days ago</time>
+                              <time>{Timex.from_now(activity.created_at)}</time>
                             </div>
                           </div>
                         </div>
@@ -169,6 +179,11 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
     """
   end
 
+  def handle_info({:events, events}, socket) do
+    activities = Enum.reverse(events) ++ socket.assigns.recent_activities
+    {:noreply, socket |> assign(:recent_activities, Enum.take(activities, 4))}
+  end
+
   defp activity_text(%{type: :bounty_awarded, user: user, amount: amount}) do
     Phoenix.HTML.raw(
       "<strong class='font-bold'>Algora</strong> awarded <strong class='font-bold'>#{user}</strong> a <strong class='font-bold'>#{Money.to_string!(amount)}</strong> bounty"
@@ -181,7 +196,19 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
     )
   end
 
-  defp fetch_recent_activities do
+  defp activity_text(%{event_type: "Elixir.AlgoraEvent.Company.Events.Created", data: data}) do
+    Phoenix.HTML.raw(
+      "<strong class='font-bold'>#{data.user}</strong> was created!"
+    )
+  end
+
+  defp activity_text(%{event_type: "Elixir.AlgoraEvent.Company.Events.Visited", data: data}) do
+    Phoenix.HTML.raw(
+      "<strong class='font-bold'>#{data.user}</strong> visited your profile"
+    )
+  end
+
+  defp fetch_recent_activities(org_id) do
     [
       %{
         url: "https://github.com/algora-io/tv/issues/105",

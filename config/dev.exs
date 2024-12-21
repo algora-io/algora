@@ -29,7 +29,7 @@ config :algora, Algora.Repo,
   migration_timestamps: [type: :utc_datetime_usec]
 
 # Configure event store
-config :algora, Algora.EventStore,
+config :algora, AlgoraEvent.Store,
   column_data_type: "jsonb",
   serializer: EventStore.JsonbSerializer,
   types: EventStore.PostgresTypes,
@@ -39,7 +39,8 @@ config :algora, Algora.EventStore,
   queue_interval: 1_000,
   schema: "console"
 
-config :algora, :event_stores, [Algora.EventStore]
+config :algora, :event_stores, [AlgoraEvent.Store]
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

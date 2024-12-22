@@ -15,7 +15,17 @@ alias Algora.Users.{User, Identity}
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity])
 
 defmodule Helpers do
-  def r(), do: IEx.Helpers.recompile()
+  require Logger
+
+  def r() do
+    try do
+      IEx.Helpers.recompile()
+    rescue
+      e -> Logger.warning("Warning: #{inspect(e)}")
+    end
+
+    r(Algora.Github.Command)
+  end
 end
 
 import Helpers

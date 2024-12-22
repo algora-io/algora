@@ -6,15 +6,15 @@ defmodule Algora.Crawler do
   @max_redirects 5
   @max_retries 3
   @retry_delay :timer.seconds(1)
+  @blacklist_filename "domain_blacklist.txt"
 
-  def blacklisted_domains do
+  def is_blacklisted?(domain) do
     :code.priv_dir(:algora)
-    |> Path.join("domain_blacklist.txt")
-    |> File.read!()
-    |> String.split("\n")
+    |> Path.join(@blacklist_filename)
+    |> File.stream!()
+    |> Stream.map(&String.trim/1)
+    |> Enum.member?(domain)
   end
-
-  def is_blacklisted?(domain), do: Enum.member?(blacklisted_domains(), domain)
 
   def fetch_site_metadata(nil), do: {:error, :blacklisted_domain}
   def fetch_site_metadata(domain), do:

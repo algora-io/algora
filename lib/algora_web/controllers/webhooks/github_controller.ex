@@ -55,9 +55,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
-  defp execute_command({"bounty", args}, author, params) do
+  defp execute_command({:bounty, args}, author, params) do
+    amount = Keyword.get(args, :amount)
+
     with {:ok, "admin"} <- get_permissions(author, params) do
-      case extract_amount(args) do
+      case amount do
         nil ->
           {:ok, :open_to_bids}
 
@@ -102,80 +104,34 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({"tip", args}, _author, _params) when not is_nil(args) do
-    amount = Regex.run(~r/\$(\d+)/, args)
-    recipient = Regex.run(~r/@(\w+)/, args)
+  defp execute_command({:tip, args}, _author, _params) when not is_nil(args) do
+    amount = Keyword.get(args, :amount)
+    recipient = Keyword.get(args, :username)
 
-    case {amount, recipient} do
-      {[_, amount], [_, recipient]} -> Logger.info("Tip $#{amount} to @#{recipient}")
-      {[_, amount], nil} -> Logger.info("Tip $#{amount} to unspecified recipient")
-      {nil, [_, recipient]} -> Logger.info("Tip (no amount) to @#{recipient}")
-      _ -> Logger.info("Invalid tip format")
-    end
+    Logger.info("Tip #{amount} to #{recipient}")
   end
 
-  defp execute_command({"approve", _}, _author, _params), do: Logger.info("Approve command")
+  defp execute_command({:claim, args}, _author, _params) when not is_nil(args) do
+    owner = Keyword.get(args, :owner)
+    repo = Keyword.get(args, :repo)
+    number = Keyword.get(args, :number)
 
-  defp execute_command({"split", args}, _author, _params) when not is_nil(args) do
-    case Regex.run(~r/@(\w+)\s+%(\d+)/, args) do
-      [_, author, percentage] -> Logger.info("Split #{percentage}% with @#{author}")
-      nil -> Logger.info("Invalid split format")
-    end
+    Logger.info("Claim #{owner}/#{repo}##{number}")
   end
 
-  defp execute_command({"claim", args}, _author, _params) when not is_nil(args) do
-    cond do
-      String.starts_with?(args, "http") ->
-        case Regex.run(~r{github\.com/([^/]+)/([^/]+)/(?:issues|pulls)/(\d+)}, args) do
-          [_, owner, repo, number] -> Logger.info("Claim #{owner}/#{repo}##{number}")
-          nil -> Logger.info("Invalid claim URL format")
-        end
-
-      String.match?(args, ~r{^[^/]+/[^/]+#\d+$}) ->
-        [owner_repo, number] = String.split(args, "#")
-        Logger.info("Claim #{owner_repo}##{number}")
-
-      String.match?(args, ~r{^#\d+$}) ->
-        number = String.replace(args, "#", "")
-        Logger.info("Claim issue/PR ##{number}")
-
-      true ->
-        Logger.info("Invalid claim format")
-    end
-  end
-
-  defp execute_command({command, _}, _author, _params),
-    do: Logger.info("Unhandled command: #{command}")
+  defp execute_command({command, _} = args, _author, _params),
+    do: Logger.info("Unhandled command: #{command} #{inspect(args)}")
 
   def process_commands(body, author, params) when is_binary(body) do
-    body |> extract_commands() |> Enum.map(&execute_command(&1, author, params))
+    with {:ok, commands} <- Algora.Github.Command.parse(body) do
+      Enum.map(commands, &execute_command(&1, author, params))
+    else
+      # TODO: handle errors
+      {:error, error} -> Logger.error("Error parsing commands: #{inspect(error)}")
+    end
   end
 
   def process_commands(_body, _author, _params), do: nil
-
-  def extract_commands(body, regex \\ ~r{\B/(\w+)(?:\s+([^/\n]+))?}) do
-    regex
-    |> Regex.scan(body, capture: :all_but_first)
-    |> Enum.map(fn
-      [command] -> {command, nil}
-      [command, args] -> {command, String.trim(args)}
-    end)
-  end
-
-  # Helper function to extract amount from various formats
-  defp extract_amount(nil), do: nil
-
-  defp extract_amount(args) do
-    # Remove commas before parsing and handle optional $ and decimal places
-    case Regex.run(~r/(\d+(?:,\d{3})*(?:\.\d+)?)\$?/, args) do
-      [_, amount] ->
-        {amount, _} = amount |> String.replace(",", "") |> Float.parse()
-        trunc(amount)
-
-      nil ->
-        nil
-    end
-  end
 
   defp get_author("issues", params), do: params["issue"]["user"]
   defp get_author("issue_comment", params), do: params["comment"]["user"]

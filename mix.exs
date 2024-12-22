@@ -66,7 +66,8 @@ defmodule Algora.MixProject do
       {:mox, "~> 1.0", only: :test},
       {:tzdata, "~> 1.1"},
       {:stripity_stripe, "~> 2.0"},
-      {:live_svelte, "~> 0.14.1"}
+      {:live_svelte, "~> 0.14.1"},
+      {:nimble_parsec, "~> 1.4"}
     ]
   end
 

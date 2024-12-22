@@ -477,7 +477,7 @@ defmodule Algora.Contracts do
   defp update_transaction_status(transaction, record, status) do
     transaction
     |> change(%{
-      provider_id: record.id,
+      provider_id: record[:id],
       provider_meta: Util.normalize_struct(record),
       status: status,
       succeeded_at: if(status == :succeeded, do: DateTime.utc_now(), else: nil)

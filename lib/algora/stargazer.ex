@@ -27,7 +27,7 @@ defmodule Algora.Stargazer do
   defp fetch_count() do
     with {:ok, %Finch.Response{status: 200, body: body}} <-
            :get
-           |> Finch.build(AlgoraWeb.Constants.get(:github_url))
+           |> Finch.build(AlgoraWeb.Constants.get(:github_repo_url))
            |> Finch.request(Algora.Finch),
          {:ok, %{"stargazers_count" => count}} <- Jason.decode(body) do
       count

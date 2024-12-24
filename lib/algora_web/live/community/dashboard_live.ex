@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.Community.DashboardLive do
   use AlgoraWeb, :live_view
+  import Ecto.Changeset
   alias Algora.Bounties
+  alias Algora.Parser
 
   defmodule BountyForm do
     use Ecto.Schema
@@ -9,6 +11,12 @@ defmodule AlgoraWeb.Community.DashboardLive do
     embedded_schema do
       field :url, :string
       field :amount, :integer
+
+      embeds_one :ticket_ref, TicketRef, primary_key: false do
+        field :owner, :string
+        field :repo, :string
+        field :number, :integer
+      end
     end
 
     def changeset(form, attrs \\ %{}) do
@@ -16,6 +24,17 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> cast(attrs, [:url, :amount])
       |> validate_required([:url, :amount])
       |> validate_number(:amount, greater_than: 0)
+      |> validate_and_parse_github_url()
+    end
+
+    defp validate_and_parse_github_url(changeset) do
+      with url when not is_nil(url) <- get_change(changeset, :url),
+           {:ok, [ticket_ref: ticket_ref], "", _, _, _} <- Parser.full_ticket_ref(url) do
+        changeset |> put_embed(:ticket_ref, ticket_ref)
+      else
+        {:error, error, _, _, _, _} -> add_error(changeset, :url, error)
+        _ -> changeset
+      end
     end
   end
 

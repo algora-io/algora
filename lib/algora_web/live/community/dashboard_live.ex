@@ -1,19 +1,40 @@
 defmodule AlgoraWeb.Community.DashboardLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
-  alias Algora.Bounties.Bounty
+
+  defmodule AlgoraWeb.Community.DashboardLive.BountyForm do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :url, :string
+      field :amount, :integer
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> cast(attrs, [:url, :amount])
+      |> validate_required([:url, :amount])
+    end
+  end
 
   def mount(_params, _session, socket) do
-    tech_stack = ["Swift"]
+    tech_stack = "Swift"
+
+    form =
+      %AlgoraWeb.Community.DashboardLive.BountyForm{}
+      |> AlgoraWeb.Community.DashboardLive.BountyForm.changeset(%{url: "", amount: 0})
+      |> to_form(as: :bounty_form)
+
+    tickets = Bounties.TicketView.list(status: :open, tech_stack: [tech_stack], limit: 20)
 
     socket =
       socket
-      |> assign(:tech_stack, tech_stack)
+      |> assign(:form, form)
+      |> assign(:experts, list_experts())
+      |> assign(:tech_stack, [tech_stack])
       |> assign(:hours_per_week, 40)
-      |> assign(
-        :bounties,
-        Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
-      )
+      |> assign(:tickets, tickets)
       |> assign(:achievements, fetch_achievements())
       |> assign(:looking_to_collaborate, true)
 
@@ -23,30 +44,179 @@ defmodule AlgoraWeb.Community.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="flex-1 lg:pr-96 bg-background text-foreground">
-      <!-- Regular Bounties Section -->
-      <div class="relative h-full max-w-4xl mx-auto p-6">
-        <div class="flex justify-between px-6">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">Swift bounties</h2>
-            <p class="text-sm text-muted-foreground">
-              Bounties for Swift developers
-            </p>
-          </div>
-        </div>
-        <div class="px-6 pt-3 -ml-4">
-          <div class="relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for bounty <- @bounties do %>
-                  <.compact_view bounty={bounty} />
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <.section>
+        {create_bounty(assigns)}
+      </.section>
+
+      <.section
+        title="Active bounties"
+        subtitle={"View all bounties pooled from the #{@tech_stack} community"}
+      >
+        {bounties(assigns)}
+      </.section>
+
+      <.section
+        :if={@experts != []}
+        title={"#{@tech_stack} experts"}
+        subtitle={"View all #{@tech_stack} experts on Algora"}
+      >
+        {experts(assigns)}
+      </.section>
     </div>
-    <!-- Sidebar -->
+    {sidebar(assigns)}
+    """
+  end
+
+  defp create_bounty(assigns) do
+    ~H"""
+    <.card>
+      <.card_header>
+        <div class="flex items-center gap-2">
+          <.icon name="tabler-diamond" class="h-8 w-8" />
+          <h2 class="text-2xl font-semibold">Create new bounty</h2>
+        </div>
+      </.card_header>
+      <.card_content>
+        <.simple_form for={@form} phx-change="validate" phx-submit="create_job" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
+            <.input
+              label="URL"
+              type="text"
+              field={@form[:title]}
+              placeholder="https://github.com/swift-lang/swift/issues/1337"
+            />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@form[:min_compensation]} />
+          </div>
+        </.simple_form>
+      </.card_content>
+    </.card>
+    """
+  end
+
+  defp bounties(assigns) do
+    ~H"""
+    <div class="-mt-4 -ml-4 relative w-full overflow-auto">
+      <table class="w-full caption-bottom text-sm">
+        <tbody>
+          <%= for ticket <- @tickets do %>
+            <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+              <td class="p-4 py-0 align-middle">
+                <div class="flex items-center gap-4">
+                  <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+                    {Money.to_string!(ticket.total_bounty_amount)}
+                  </div>
+
+                  <.link
+                    href={ticket.url}
+                    class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+                  >
+                    {ticket.title}
+                  </.link>
+
+                  <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+                    <.link
+                      :if={ticket.repository.owner.login}
+                      href={~p"/org/#{ticket.repository.owner.login}"}
+                      class="font-semibold hover:underline"
+                    >
+                      {ticket.repository.owner.login}
+                    </.link>
+                    <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                    <.link href={ticket.url} class="hover:underline">
+                      {ticket.repository.name}#{ticket.number}
+                    </.link>
+                  </div>
+
+                  <div class="flex -space-x-2">
+                    <%= for bounty <- Enum.take(ticket.top_bounties, 3) do %>
+                      <img
+                        src={bounty.owner.avatar_url}
+                        alt={bounty.owner.handle}
+                        class="h-8 w-8 rounded-full ring-2 ring-background"
+                      />
+                    <% end %>
+                    <%= if ticket.bounty_count > 3 do %>
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-background">
+                        +{ticket.bounty_count - 3}
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  defp experts(assigns) do
+    ~H"""
+    <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
+      <%= for expert <- @experts do %>
+        <li>
+          <a href={"https://github.com/#{expert["github_handle"]}"} target="_blank" rel="noopener">
+            <div class="group/card relative h-full rounded-xl border border-white/10 bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 transition-all hover:border-white/15 bg-purple-200/[5%] hover:bg-purple-200/[7.5%]">
+              <div class="pointer-events-none">
+                <div class="absolute inset-0 z-0 opacity-0 transition-opacity [mask-image:linear-gradient(black,transparent)] group-hover/card:opacity-100">
+                </div>
+                <div
+                  class="absolute inset-0 z-10 bg-gradient-to-br via-white/[2%] opacity-0 transition-opacity group-hover/card:opacity-100"
+                  style="mask-image: radial-gradient(240px at 476px 41.4px, white, transparent);"
+                >
+                </div>
+                <div
+                  class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition-opacity group-hover/card:opacity-100"
+                  style="mask-image: radial-gradient(240px at 476px 41.4px, white, transparent);"
+                >
+                </div>
+              </div>
+              <div class="relative flex flex-col items-center overflow-hidden px-5 py-6">
+                <span class="relative shrink-0 overflow-hidden flex h-16 w-16 items-center justify-center rounded-full sm:h-24 sm:w-24">
+                  <img
+                    class="aspect-square h-full w-full"
+                    alt={expert["name"]}
+                    src={expert["avatar_url"]}
+                  />
+                </span>
+                <div class="pt-2 flex flex-col items-center gap-2 text-center">
+                  <div>
+                    <span class="block text-lg font-semibold text-white sm:text-xl">
+                      {expert["name"]}
+                    </span>
+
+                    <div class="pt-1 flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-xs text-gray-300 sm:text-sm">
+                      <div :if={expert["twitter_handle"]} class="flex items-center gap-1">
+                        <.icon name="tabler-brand-twitter" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">{expert["twitter_handle"]}</span>
+                      </div>
+                      <div :if={expert["location"]} class="flex items-center gap-1">
+                        <.icon name="tabler-map-pin" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">{expert["location"]}</span>
+                      </div>
+                      <div :if={expert["company"]} class="flex items-center gap-1">
+                        <.icon name="tabler-building" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">{expert["company"]}</span>
+                      </div>
+                    </div>
+
+                    <span class="pt-2 text-xs text-gray-300 sm:text-sm line-clamp-3">
+                      {expert["bio"]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a>
+        </li>
+      <% end %>
+    </ul>
+    """
+  end
+
+  defp sidebar(assigns) do
+    ~H"""
     <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8 scrollbar-thin">
       <!-- Availability Section -->
       <div class="flex items-center justify-between">
@@ -96,16 +266,16 @@ defmodule AlgoraWeb.Community.DashboardLive do
           phx-keydown="handle_tech_input"
           phx-debounce="200"
           phx-hook="ClearInput"
-          class="mt-2 w-full bg-background border-input"
+          class="hidden mt-2 w-full bg-background border-input"
         />
-        <div class="flex flex-wrap gap-3 mt-4">
+        <div class="flex flex-wrap gap-3 mt-2">
           <%= for tech <- @tech_stack do %>
             <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
               {tech}
               <button
                 phx-click="remove_tech"
                 phx-value-tech={tech}
-                class="ml-1 text-foreground hover:text-foreground/80"
+                class="hidden ml-1 text-foreground hover:text-foreground/80"
               >
                 ×
               </button>
@@ -135,14 +305,24 @@ defmodule AlgoraWeb.Community.DashboardLive do
     """
   end
 
-  defp fetch_achievements() do
-    [
-      %{status: :completed, name: "Personalize Algora"},
-      %{status: :current, name: "Create first bounty"},
-      %{status: :upcoming, name: "Reward first bounty"},
-      %{status: :upcoming, name: "Start contract with a developer"},
-      %{status: :upcoming, name: "Complete first contract"}
-    ]
+  attr :title, :string, default: nil
+  attr :subtitle, :string, default: nil
+  slot :inner_block
+
+  defp section(assigns) do
+    ~H"""
+    <div class="relative h-full max-w-5xl mx-auto p-6">
+      <div :if={@title} class="flex justify-between px-6">
+        <div class="flex flex-col space-y-1.5">
+          <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
+          <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>
+        </div>
+      </div>
+      <div class="px-6 pt-6">
+        {render_slot(@inner_block)}
+      </div>
+    </div>
+    """
   end
 
   def achievement(%{achievement: %{status: :completed}} = assigns) do
@@ -185,67 +365,27 @@ defmodule AlgoraWeb.Community.DashboardLive do
     """
   end
 
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
-      when byte_size(tech) > 0 do
-    tech_stack = [String.trim(tech) | socket.assigns.tech_stack] |> Enum.uniq()
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))
-     |> push_event("clear-input", %{selector: "[phx-keydown='handle_tech_input']"})}
+  # TODO: implement this
+  defp fetch_achievements() do
+    [
+      %{status: :completed, name: "Personalize Algora"},
+      %{status: :current, name: "Create first bounty"},
+      %{status: :upcoming, name: "Reward first bounty"},
+      %{status: :upcoming, name: "Start contract with a developer"},
+      %{status: :upcoming, name: "Complete first contract"}
+    ]
   end
 
-  def handle_event("handle_tech_input", _params, socket) do
-    {:noreply, socket}
-  end
+  # TODO: implement this
+  defp list_experts() do
+    experts_file = :code.priv_dir(:algora) |> Path.join("dev/swift_experts.json")
 
-  def handle_event("remove_tech", %{"tech" => tech}, socket) do
-    tech_stack = List.delete(socket.assigns.tech_stack, tech)
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
-  end
-
-  def handle_event("view_mode", %{"value" => mode}, socket) do
-    {:noreply, assign(socket, :view_mode, mode)}
-  end
-
-  def handle_event("accept_contract", %{"org" => _org_handle}, socket) do
-    # TODO: Implement contract acceptance logic
-    {:noreply, socket}
-  end
-
-  def compact_view(assigns) do
-    ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10 h-10">
-      <td class="p-4 py-0 align-middle">
-        <div class="flex items-center gap-4">
-          <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-            {Money.to_string!(@bounty.amount)}
-          </div>
-
-          <.link
-            href={@bounty.ticket.url}
-            class="truncate text-sm text-foreground hover:underline max-w-[400px]"
-          >
-            {@bounty.ticket.title}
-          </.link>
-
-          <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
-            <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
-              {@bounty.owner.name}
-            </.link>
-            <.icon name="tabler-chevron-right" class="h-4 w-4" />
-            <.link href={@bounty.ticket.url} class="hover:underline">
-              {Bounty.path(@bounty)}
-            </.link>
-          </div>
-        </div>
-      </td>
-    </tr>
-    """
+    with true <- File.exists?(experts_file),
+         {:ok, contents} <- File.read(experts_file),
+         {:ok, experts} <- Jason.decode(contents) do
+      experts
+    else
+      _ -> []
+    end
   end
 end

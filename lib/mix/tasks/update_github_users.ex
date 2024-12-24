@@ -19,18 +19,19 @@ defmodule Mix.Tasks.UpdateGithubUsers do
       experts
       |> Task.async_stream(
         fn expert ->
-          handle = expert["github_handle"]
+          id = expert["github_id"]
 
-          case Github.get_user_by_username(Admin.token!(), handle) do
+          case Github.get_user(Admin.token!(), id) do
             {:ok, user} ->
               expert
+              |> Map.put("github_handle", user["login"])
               |> maybe_update("bio", user["bio"])
               |> maybe_update("location", user["location"])
               |> maybe_update("company", user["company"])
               |> maybe_update("name", user["name"])
 
             {:error, reason} ->
-              Logger.warning("Failed to fetch user #{handle}: #{inspect(reason)}")
+              Logger.warning("Failed to fetch user #{id}: #{inspect(reason)}")
               expert
           end
         end,

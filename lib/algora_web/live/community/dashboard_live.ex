@@ -199,7 +199,9 @@ defmodule AlgoraWeb.Community.DashboardLive do
                       </div>
                       <div :if={expert["company"]} class="flex items-center gap-1">
                         <.icon name="tabler-building" class="h-4 w-4" />
-                        <span class="whitespace-nowrap">{expert["company"]}</span>
+                        <span class="whitespace-nowrap">
+                          {expert["company"] |> String.trim_leading("@")}
+                        </span>
                       </div>
                     </div>
 

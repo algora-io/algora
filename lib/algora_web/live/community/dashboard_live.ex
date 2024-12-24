@@ -2,7 +2,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
   use AlgoraWeb, :live_view
   alias Algora.Bounties
 
-  defmodule AlgoraWeb.Community.DashboardLive.BountyForm do
+  defmodule BountyForm do
     use Ecto.Schema
     import Ecto.Changeset
 
@@ -15,12 +15,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
       form
       |> cast(attrs, [:url, :amount])
       |> validate_required([:url, :amount])
-    end
-
-    def init() do
-      %AlgoraWeb.Community.DashboardLive.BountyForm{}
-      |> AlgoraWeb.Community.DashboardLive.BountyForm.changeset(%{url: "", amount: 0})
-      |> to_form(as: :bounty_form)
+      |> validate_number(:amount, greater_than: 0)
     end
   end
 
@@ -31,7 +26,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
     socket =
       socket
-      |> assign(:form, AlgoraWeb.Community.DashboardLive.BountyForm.init())
+      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
       |> assign(:experts, list_experts())
       |> assign(:tech_stack, [tech_stack])
       |> assign(:hours_per_week, 40)
@@ -76,15 +71,23 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </div>
       </.card_header>
       <.card_content>
-        <.simple_form for={@form} phx-change="validate" phx-submit="create_job" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
-            <.input
-              label="URL"
-              type="text"
-              field={@form[:title]}
-              placeholder="https://github.com/swift-lang/swift/issues/1337"
-            />
-            <.input label="Amount" icon="tabler-currency-dollar" field={@form[:min_compensation]} />
+        <.simple_form for={@bounty_form} phx-submit="create_bounty">
+          <div class="flex flex-col gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
+              <.input
+                label="URL"
+                field={@bounty_form[:url]}
+                placeholder="https://github.com/swift-lang/swift/issues/1337"
+              />
+              <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+            </div>
+            <div class="flex items-end justify-between gap-4">
+              <p class="text-sm text-muted-foreground">
+                <span class="font-semibold">Tip:</span> You can also create bounties directly on
+                GitHub by commenting <code class="px-1 py-0.5">/bounty $100</code> on any issue.
+              </p>
+              <.button>Create bounty</.button>
+            </div>
           </div>
         </.simple_form>
       </.card_content>
@@ -296,6 +299,22 @@ defmodule AlgoraWeb.Community.DashboardLive do
       </span>
     </.link>
     """
+  end
+
+  def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
+    changeset =
+      %BountyForm{}
+      |> BountyForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    if changeset.valid? do
+      {:noreply,
+       socket
+       |> assign(:bounty_form, to_form(changeset))
+       |> put_flash(:info, "Bounty created")}
+    else
+      {:noreply, assign(socket, bounty_form: to_form(changeset))}
+    end
   end
 
   # TODO: implement this

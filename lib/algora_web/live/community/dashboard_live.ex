@@ -2,7 +2,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
   use AlgoraWeb, :live_view
   import Ecto.Changeset
   alias Algora.Bounties
-  alias Algora.Parser
+  alias Algora.Extensions.Ecto.Validations
 
   defmodule BountyForm do
     use Ecto.Schema
@@ -10,7 +10,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
     embedded_schema do
       field :url, :string
-      field :amount, Money.Ecto.Composite.Type
+      field :amount, Algora.Extensions.Ecto.USD
 
       embeds_one :ticket_ref, TicketRef, primary_key: false do
         field :owner, :string
@@ -19,50 +19,12 @@ defmodule AlgoraWeb.Community.DashboardLive do
       end
     end
 
-    def cast_money(changeset, params, fields) when is_list(fields) do
-      Enum.reduce(fields, changeset, fn field, acc ->
-        cast_money(acc, params, field)
-      end)
-    end
-
-    def cast_money(changeset, params, field) do
-      field_name = to_string(field)
-
-      with %{^field_name => amount} when is_binary(amount) <- params,
-           money = %Money{} <- Money.new(:USD, amount |> String.trim()) do
-        put_change(changeset, field, money)
-      else
-        _ -> add_error(changeset, field, "invalid amount")
-      end
-    end
-
     def changeset(form, attrs \\ %{}) do
       form
-      |> cast(attrs, [:url])
-      |> cast_money(attrs, [:amount])
-      |> validate_required([:url])
-      |> validate_money_positive(:amount)
-      |> validate_and_parse_github_url()
-    end
-
-    defp validate_and_parse_github_url(changeset) do
-      with url when not is_nil(url) <- get_change(changeset, :url),
-           {:ok, [ticket_ref: ticket_ref], "", _, _, _} <- Parser.full_ticket_ref(url) do
-        changeset |> put_embed(:ticket_ref, ticket_ref)
-      else
-        {:error, error, _, _, _, _} -> add_error(changeset, :url, error)
-        _ -> changeset
-      end
-    end
-
-    defp validate_money_positive(changeset, field) do
-      with amount when not is_nil(amount) <- get_change(changeset, field),
-           true <- Money.positive?(amount) do
-        changeset |> put_change(field, amount)
-      else
-        false -> add_error(changeset, field, "must be positive")
-        _ -> changeset
-      end
+      |> cast(attrs, [:url, :amount])
+      |> validate_required([:url, :amount])
+      |> Validations.validate_money_positive(:amount)
+      |> Validations.validate_ticket_ref(:url, :ticket_ref)
     end
   end
 

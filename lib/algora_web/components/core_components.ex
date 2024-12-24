@@ -685,7 +685,7 @@ defmodule AlgoraWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file hidden month number password
-               range radio search select tel text textarea time url week)
+               range radio search select tel text textarea time url week money)
 
   attr :field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -706,11 +706,19 @@ defmodule AlgoraWeb.CoreComponents do
         do: field.errors,
         else: []
 
+    value =
+      with %Money{} <- field.value,
+           {:ok, value} <- Money.to_string(field.value) do
+        value |> String.trim("$")
+      else
+        _ -> field.value
+      end
+
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
     |> assign(:errors, Enum.map(errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
-    |> assign_new(:value, fn -> field.value end)
+    |> assign_new(:value, fn -> value end)
     |> input()
   end
 

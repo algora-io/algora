@@ -16,28 +16,28 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> cast(attrs, [:url, :amount])
       |> validate_required([:url, :amount])
     end
+
+    def init() do
+      %AlgoraWeb.Community.DashboardLive.BountyForm{}
+      |> AlgoraWeb.Community.DashboardLive.BountyForm.changeset(%{url: "", amount: 0})
+      |> to_form(as: :bounty_form)
+    end
   end
 
   def mount(_params, _session, socket) do
     tech_stack = "Swift"
 
-    form =
-      %AlgoraWeb.Community.DashboardLive.BountyForm{}
-      |> AlgoraWeb.Community.DashboardLive.BountyForm.changeset(%{url: "", amount: 0})
-      |> to_form(as: :bounty_form)
-
     tickets = Bounties.TicketView.list(status: :open, tech_stack: [tech_stack], limit: 20)
 
     socket =
       socket
-      |> assign(:form, form)
+      |> assign(:form, AlgoraWeb.Community.DashboardLive.BountyForm.init())
       |> assign(:experts, list_experts())
       |> assign(:tech_stack, [tech_stack])
       |> assign(:hours_per_week, 40)
       |> assign(:tickets, tickets)
-      |> assign(:achievements, fetch_achievements())
 
-    {:ok, socket}
+    {:ok, socket |> assign(:achievements, fetch_achievements(socket))}
   end
 
   def render(assigns) do
@@ -48,7 +48,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
       </.section>
 
       <.section
-        title="Active bounties"
+        title="Open bounties"
         subtitle={"View all bounties pooled from the #{@tech_stack} community"}
       >
         {bounties(assigns)}
@@ -94,7 +94,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
   defp bounties(assigns) do
     ~H"""
-    <div class="-mt-4 -ml-4 relative w-full overflow-auto">
+    <div class="-mt-2 -ml-4 relative w-full overflow-auto">
       <table class="w-full caption-bottom text-sm">
         <tbody>
           <%= for ticket <- @tickets do %>
@@ -299,13 +299,13 @@ defmodule AlgoraWeb.Community.DashboardLive do
   end
 
   # TODO: implement this
-  defp fetch_achievements() do
+  defp fetch_achievements(socket) do
     [
       %{status: :completed, name: "Personalize Algora"},
-      %{status: :current, name: "Create first bounty"},
-      %{status: :upcoming, name: "Reward first bounty"},
-      %{status: :upcoming, name: "Start contract with a developer"},
-      %{status: :upcoming, name: "Complete first contract"}
+      %{status: :current, name: "Create a bounty"},
+      %{status: :upcoming, name: "Reward a bounty"},
+      %{status: :upcoming, name: "Contract a #{socket.assigns.tech_stack} developer"},
+      %{status: :upcoming, name: "Complete a contract"}
     ]
   end
 

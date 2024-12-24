@@ -36,7 +36,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> assign(:hours_per_week, 40)
       |> assign(:tickets, tickets)
       |> assign(:achievements, fetch_achievements())
-      |> assign(:looking_to_collaborate, true)
 
     {:ok, socket}
   end
@@ -218,73 +217,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
   defp sidebar(assigns) do
     ~H"""
     <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8 scrollbar-thin">
-      <!-- Availability Section -->
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <label for="available" class="text-sm font-medium">I'm looking to collaborate</label>
-          <.tooltip>
-            <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
-            <.tooltip_content side="bottom" class="max-w-xs text-sm">
-              When enabled, developers will be able to see your hourly rate and contact you.
-            </.tooltip_content>
-          </.tooltip>
-        </div>
-        <.switch
-          id="available"
-          name="available"
-          value={@looking_to_collaborate}
-          phx-click="toggle_availability"
-        />
-      </div>
-      <div class="mt-4 grid grid-cols-2 gap-4">
-        <.input
-          name="hourly-rate-min"
-          value=""
-          phx-debounce="200"
-          class="w-full bg-background border-input font-display"
-          icon="tabler-currency-dollar"
-          label="Min hourly rate (USD)"
-        />
-        <.input
-          name="hourly-rate-max"
-          value=""
-          phx-debounce="200"
-          class="w-full bg-background border-input font-display"
-          icon="tabler-currency-dollar"
-          label="Max hourly rate (USD)"
-        />
-      </div>
-      <!-- Tech Stack Section -->
-      <div class="mt-4">
-        <label for="tech-input" class="text-sm font-medium">Tech stack</label>
-        <.input
-          id="tech-input"
-          name="tech-input"
-          value=""
-          type="text"
-          placeholder="Elixir, Phoenix, PostgreSQL, etc."
-          phx-keydown="handle_tech_input"
-          phx-debounce="200"
-          phx-hook="ClearInput"
-          class="hidden mt-2 w-full bg-background border-input"
-        />
-        <div class="flex flex-wrap gap-3 mt-2">
-          <%= for tech <- @tech_stack do %>
-            <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
-              {tech}
-              <button
-                phx-click="remove_tech"
-                phx-value-tech={tech}
-                class="hidden ml-1 text-foreground hover:text-foreground/80"
-              >
-                ×
-              </button>
-            </div>
-          <% end %>
-        </div>
-      </div>
-      <!-- Achievements Section -->
-      <div class="mt-8 flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Getting started</h2>
       </div>
       <nav class="pt-6">

@@ -59,7 +59,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <.link
       navigate="/"
-      aria-label="Algora TV"
+      aria-label="Algora"
       class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
     >
       <AlgoraWeb.Components.Logos.algora class={["fill-current", @class || "w-20 h-auto"]} />
@@ -73,7 +73,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <.link
       navigate="/"
-      aria-label="Algora TV"
+      aria-label="Algora"
       class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
     >
       <AlgoraWeb.Components.Wordmarks.algora class={

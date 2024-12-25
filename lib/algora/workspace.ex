@@ -9,231 +9,71 @@ defmodule Algora.Workspace do
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
-  @upsert_options [
-    on_conflict: {:replace_all_except, [:id, :inserted_at]},
-    conflict_target: [:provider, :provider_id]
-  ]
-
   @type ticket_type :: :issue | :pull_request
 
-  @spec upsert_ticket(
-          :github,
-          %{
-            token: Github.token(),
-            owner: String.t(),
-            repo: String.t(),
-            number: integer(),
-            meta: map()
-          }
-        ) ::
-          {:ok, Ticket.t()} | {:error, atom()}
-  def upsert_ticket(:github, %{
-        token: token,
-        owner: owner,
-        repo: repo,
-        meta: meta
-      }) do
-    with {:ok, repo} <- fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
-      Ticket.github_changeset(repo, meta)
-      |> Repo.insert(@upsert_options)
-    end
-  end
-
-  @spec upsert_repository(:github, %{token: Github.token(), owner: String.t(), meta: map()}) ::
-          {:ok, Repository.t()} | {:error, atom()}
-  def upsert_repository(:github, %{token: token, owner: owner, meta: meta}) do
-    with {:ok, user} <- fetch_user(:github, %{token: token, id: meta["owner"]["id"]}),
-         {:ok, repo} <- Repository.github_changeset(user, meta) |> Repo.insert(@upsert_options) do
-      {:ok, repo}
-    else
-      {:error, error} ->
-        Logger.error("Failed to upsert repository #{owner}/#{meta["name"]}: #{inspect(error)}")
-        {:error, error}
-    end
-  end
-
-  @spec upsert_user(:github, %{meta: map()}) :: {:ok, User.t()} | {:error, atom()}
-  def upsert_user(:github, %{meta: meta}) do
-    with {:ok, user} <- User.github_changeset(meta) |> Repo.insert(@upsert_options) do
-      {:ok, user}
-    else
-      error ->
-        Logger.error("Failed to upsert user #{meta["login"]}: #{inspect(error)}")
-        {:error, error}
-    end
-  end
-
-  @spec fetch_ticket(:github, %{
-          token: Github.token(),
-          url: String.t()
-        }) :: {:ok, Ticket.t()} | {:error, atom()}
-  def fetch_ticket(:github, %{token: token, url: url}) do
-    case parse_url(url) do
-      {:ok, %{owner: owner, repo: repo, number: number}} ->
-        fetch_ticket(:github, %{token: token, owner: owner, repo: repo, number: number})
-
-      {:error, error} ->
-        {:error, error}
-    end
-  end
-
-  @spec fetch_ticket(:github, %{
-          token: Github.token(),
-          owner: String.t(),
-          repo: String.t(),
-          number: integer()
-        }) :: {:ok, Ticket.t()} | {:error, atom()}
-  def fetch_ticket(:github, %{token: token, owner: owner, repo: repo, number: number}) do
-    query =
-      from t in Ticket,
+  def ensure_ticket(token, owner, repo, number) do
+    ticket_query =
+      from(t in Ticket,
         join: r in assoc(t, :repository),
         join: u in assoc(r, :user),
-        where:
-          t.provider == "github" and
-            u.provider_login == ^owner and
-            r.name == ^repo and
-            t.number == ^number
+        where: t.provider == "github",
+        where: t.number == ^number,
+        where: r.name == ^repo,
+        where: u.provider_login == ^owner,
+        preload: [repository: {r, user: u}]
+      )
 
-    case Repo.one(query) do
-      nil ->
-        case Github.get_issue(token, owner, repo, number) do
-          {:ok, meta} ->
-            upsert_ticket(:github, %{
-              token: token,
-              owner: owner,
-              repo: repo,
-              number: number,
-              meta: meta
-            })
-
-          {:error, error} ->
-            {:error, error}
-        end
-
-      ticket ->
-        {:ok, ticket}
+    case Repo.one(ticket_query) do
+      %Ticket{} = ticket -> {:ok, ticket}
+      nil -> create_ticket_from_github(token, owner, repo, number)
     end
   end
 
-  @spec fetch_user(:github, %{token: Github.token(), id: String.t()}) ::
-          {:ok, User.t()} | {:error, atom()}
-  def fetch_user(:github, %{token: token, id: id}) do
-    query =
-      from u in User,
-        where: u.provider == "github" and u.provider_id == ^to_string(id),
-        # TODO: handle multiple users with the same provider_id
-        limit: 1
-
-    case Repo.one(query) do
-      nil ->
-        case Github.get_user(token, id) do
-          {:ok, meta} -> upsert_user(:github, %{meta: meta})
-          {:error, error} -> {:error, error}
-        end
-
-      user ->
-        {:ok, user}
+  def create_ticket_from_github(token, owner, repo, number) do
+    with {:ok, issue} <- Github.get_issue(token, owner, repo, number),
+         {:ok, repository} <- ensure_repository(token, owner, repo) do
+      issue
+      |> Ticket.github_changeset(repository)
+      |> Repo.insert()
     end
   end
 
-  @spec fetch_user(:github, %{token: Github.token(), login: String.t()}) ::
-          {:ok, User.t()} | {:error, atom()}
-  def fetch_user(:github, %{token: token, login: login}) do
-    query =
-      from u in User,
-        where: u.provider == "github" and u.provider_login == ^login,
-        # TODO: handle multiple users with the same provider_login
-        limit: 1
-
-    case Repo.one(query) do
-      nil ->
-        case Github.get_user_by_username(token, login) do
-          {:ok, meta} -> upsert_user(:github, %{meta: meta})
-          {:error, error} -> {:error, error}
-        end
-
-      user ->
-        {:ok, user}
-    end
-  end
-
-  @spec fetch_repository(:github, %{token: Github.token(), owner: String.t(), repo: String.t()}) ::
-          {:ok, Repository.t()} | {:error, atom()}
-  def fetch_repository(:github, %{token: token, owner: owner, repo: repo}) do
-    query =
-      from r in Repository,
+  def ensure_repository(token, owner, repo) do
+    repository_query =
+      from(r in Repository,
         join: u in assoc(r, :user),
-        where: r.provider == "github" and r.name == ^repo and u.provider_login == ^owner
+        where: r.provider == "github",
+        where: r.name == ^repo,
+        where: u.provider_login == ^owner
+      )
 
-    case Repo.one(query) do
-      nil ->
-        case Github.get_repository(token, owner, repo) do
-          {:ok, meta} -> upsert_repository(:github, %{token: token, owner: owner, meta: meta})
-          {:error, error} -> {:error, error}
-        end
-
-      repo ->
-        {:ok, repo}
+    case Repo.one(repository_query) do
+      %Repository{} = repository -> {:ok, repository}
+      nil -> create_repository_from_github(token, owner, repo)
     end
   end
 
-  @spec fetch_repository(:github, %{token: Github.token(), id: String.t()}) ::
-          {:ok, Repository.t()} | {:error, atom()}
-  def fetch_repository(:github, %{token: token, id: id}) do
-    query =
-      from r in Repository,
-        join: u in assoc(r, :user),
-        where: r.provider == "github" and r.provider_id == ^to_string(id)
-
-    case Repo.one(query) do
-      nil ->
-        case Github.get_repository(token, id) do
-          {:ok, meta} ->
-            upsert_repository(:github, %{token: token, owner: meta["owner"]["login"], meta: meta})
-
-          {:error, error} ->
-            {:error, error}
-        end
-
-      repo ->
-        {:ok, repo}
+  def create_repository_from_github(token, owner, repo) do
+    with {:ok, repository} <- Github.get_repository(token, owner, repo),
+         {:ok, user} <- ensure_user(token, owner) do
+      repository
+      |> Repository.github_changeset(user)
+      |> Repo.insert()
     end
   end
 
-  defp parse_url(url) do
-    cond do
-      issue_params = parse_url(:github, :issue, url) ->
-        {:ok, issue_params |> Map.put(:type, :issue)}
-
-      pr_params = parse_url(:github, :pull_request, url) ->
-        {:ok, pr_params |> Map.put(:type, :pull_request)}
-
-      true ->
-        :error
+  def ensure_user(token, owner) do
+    case Repo.get_by(User, provider: "github", provider_login: owner) do
+      %User{} = user -> {:ok, user}
+      nil -> create_user_from_github(token, owner)
     end
   end
 
-  defp parse_url(:github, :issue, url) do
-    regex =
-      ~r|https?://(?:www\.)?github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/issues/(?<number>\d+)|
-
-    parse_with_regex(regex, url)
-  end
-
-  defp parse_url(:github, :pull_request, url) do
-    regex =
-      ~r|https?://(?:www\.)?github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/pull/(?<number>\d+)|
-
-    parse_with_regex(regex, url)
-  end
-
-  defp parse_with_regex(regex, url) do
-    case Regex.named_captures(regex, url) do
-      %{"owner" => owner, "repo" => repo, "number" => number} ->
-        %{owner: owner, repo: repo, number: String.to_integer(number)}
-
-      nil ->
-        nil
+  def create_user_from_github(token, owner) do
+    with {:ok, user_data} <- Github.get_user_by_username(token, owner) do
+      user_data
+      |> User.github_changeset()
+      |> Repo.insert()
     end
   end
 

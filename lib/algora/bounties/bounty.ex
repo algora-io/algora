@@ -20,10 +20,13 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id])
+    |> cast(attrs, [:amount, :ticket, :owner, :creator])
     |> generate_id()
-    |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
-    |> validate_number(:amount, greater_than: 0)
+    |> validate_required([:amount, :ticket, :owner, :creator])
+    |> foreign_key_constraint(:ticket)
+    |> foreign_key_constraint(:owner)
+    |> foreign_key_constraint(:creator)
+    |> Algora.Extensions.Ecto.Validations.validate_money_positive(:amount)
   end
 
   def url(%{

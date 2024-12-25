@@ -4,23 +4,31 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Organizations.Member
-  alias Algora.Repo
   alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Users
   alias Algora.Users.User
+  alias Algora.Workspace
 
-  @spec create_bounty(
-          creator :: User.t(),
-          owner :: User.t(),
-          params :: map()
-        ) ::
+  @spec create_bounty(%{
+          creator: User.t(),
+          owner: User.t(),
+          amount: integer(),
+          ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+        }) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  def create_bounty(creator, owner, params) do
-    %Bounty{
-      creator_id: creator.id,
-      owner_id: owner.id
-    }
-    |> Bounty.create_changeset(params)
-    |> Repo.insert()
+  def create_bounty(%{
+        creator: creator,
+        owner: owner,
+        amount: amount,
+        ticket_ref: %{owner: repo_owner, repo: repo_name, number: number}
+      }) do
+    with {:ok, token} <- Users.get_access_token(creator),
+         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
+      %Bounty{}
+      |> Bounty.changeset(%{amount: amount, ticket: ticket, owner: owner, creator: creator})
+      |> Repo.insert()
+    end
   end
 
   def base_query, do: Bounty

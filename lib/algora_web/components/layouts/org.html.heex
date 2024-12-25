@@ -59,113 +59,116 @@
     </div>
   </div>
 
-  <div class="xl:pl-16">
+  <div class="lg:pl-16">
     <div
       id="navbar"
       phx-hook="NavBar"
-      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-end gap-x-6 border-b border-border/5 px-4 shadow-sm sm:px-6 lg:px-8"
+      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 border-b border-border px-4 shadow-sm sm:px-6 lg:px-8"
     >
-      <.link
-        class="group outline-none w-fit"
-        target="_blank"
-        rel="noopener"
-        href={AlgoraWeb.Constants.get(:youtube_url)}
-      >
-        <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
-          <div class="justify-center flex w-full items-center gap-x-1">
-            <AlgoraWeb.Components.Logos.youtube class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
-          </div>
-        </div>
-      </.link>
-      <.link
-        class="group outline-none w-fit"
-        rel="noopener"
-        target="_blank"
-        href={AlgoraWeb.Constants.get(:discord_url)}
-      >
-        <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
-          <div class="justify-center flex w-full items-center gap-x-1">
-            <AlgoraWeb.Components.Logos.discord class="h-7 w-7" />
-          </div>
-        </div>
-      </.link>
-      <.link
-        :if={Algora.Stargazer.count()}
-        class="group outline-none w-fit"
-        target="_blank"
-        rel="noopener"
-        href={AlgoraWeb.Constants.get(:github_url)}
-      >
-        <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap p-2 lg:flex">
-          <div class="justify-center flex w-full items-center gap-x-1">
-            <AlgoraWeb.Components.Logos.github class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
-            <span class="hidden xl:block">Star</span>
-            <span class="font-semibold text-gray-300">
-              {Algora.Stargazer.count()}
-            </span>
-          </div>
-        </div>
-      </.link>
-      <.link
-        class="px-4 py-2 lg:flex hidden whitespace-nowrap"
-        target="_blank"
-        href={AlgoraWeb.Constants.get(:docs_url)}
-      >
-        <span class="relative font-semibold text-sm">Docs</span>
-      </.link>
-      <%= if @current_user do %>
-        <div>
-          <.dropdown2 id="dashboard-dropdown">
-            <:img src={@current_org.avatar_url} alt={@current_org.handle} />
-            <:title>{@current_org.name}</:title>
-
-            <:link href={~p"/set_context/personal"}>
-              <div class="flex items-center whitespace-nowrap">
-                <img
-                  src={@current_user.avatar_url}
-                  alt={@current_user.name}
-                  class="w-8 h-8 rounded-full mr-3"
-                />
-                <div>
-                  <div class="font-semibold">{@current_user.name}</div>
-                  <div class="text-sm text-gray-500">@{@current_user.handle}</div>
-                </div>
-              </div>
-            </:link>
-            <:link
-              :for={
-                org <-
-                  Algora.Organizations.get_user_orgs(@current_user)
-                  |> Enum.reject(&(&1.id == @current_org.id))
-              }
-              href={~p"/set_context/#{org.handle}"}
-            >
-              <div class="flex items-center whitespace-nowrap">
-                <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
-                <div>
-                  <div class="font-semibold">{org.name}</div>
-                  <div class="text-sm text-gray-500">@{org.handle}</div>
-                </div>
-              </div>
-            </:link>
-            <:link href={~p"/auth/logout"} method="delete">
-              <div class="flex items-center whitespace-nowrap">
-                <div class="h-8 w-8 flex items-center justify-center mr-3">
-                  <.icon name="tabler-logout" class="h-5 w-5" />
-                </div>
-                <div class="font-semibold">Logout</div>
-              </div>
-            </:link>
-          </.dropdown2>
-        </div>
-      <% else %>
+      <.wordmark class="h-8 w-auto text-white lg:hidden" />
+      <div class="flex items-center gap-x-6">
         <.link
-          navigate="/auth/login"
-          class="rounded-lg bg-gray-50 hover:bg-gray-200 py-1 px-2 text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80"
+          class="group outline-none w-fit"
+          target="_blank"
+          rel="noopener"
+          href={AlgoraWeb.Constants.get(:youtube_url)}
         >
-          <span class="relative font-semibold text-sm">Login</span>
+          <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
+            <div class="justify-center flex w-full items-center gap-x-1">
+              <AlgoraWeb.Components.Logos.youtube class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
+            </div>
+          </div>
         </.link>
-      <% end %>
+        <.link
+          class="group outline-none w-fit"
+          rel="noopener"
+          target="_blank"
+          href={AlgoraWeb.Constants.get(:discord_url)}
+        >
+          <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
+            <div class="justify-center flex w-full items-center gap-x-1">
+              <AlgoraWeb.Components.Logos.discord class="h-7 w-7" />
+            </div>
+          </div>
+        </.link>
+        <.link
+          :if={Algora.Stargazer.count()}
+          class="group outline-none w-fit"
+          target="_blank"
+          rel="noopener"
+          href={AlgoraWeb.Constants.get(:github_url)}
+        >
+          <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap p-2 lg:flex">
+            <div class="justify-center flex w-full items-center gap-x-1">
+              <AlgoraWeb.Components.Logos.github class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
+              <span class="hidden xl:block">Star</span>
+              <span class="font-semibold text-gray-300">
+                {Algora.Stargazer.count()}
+              </span>
+            </div>
+          </div>
+        </.link>
+        <.link
+          class="px-4 py-2 lg:flex hidden whitespace-nowrap"
+          target="_blank"
+          href={AlgoraWeb.Constants.get(:docs_url)}
+        >
+          <span class="relative font-semibold text-sm">Docs</span>
+        </.link>
+        <%= if @current_user do %>
+          <div>
+            <.dropdown2 id="dashboard-dropdown">
+              <:img src={@current_org.avatar_url} alt={@current_org.handle} />
+              <:title>{@current_org.name}</:title>
+
+              <:link href={~p"/set_context/personal"}>
+                <div class="flex items-center whitespace-nowrap">
+                  <img
+                    src={@current_user.avatar_url}
+                    alt={@current_user.name}
+                    class="w-8 h-8 rounded-full mr-3"
+                  />
+                  <div>
+                    <div class="font-semibold">{@current_user.name}</div>
+                    <div class="text-sm text-gray-500">@{@current_user.handle}</div>
+                  </div>
+                </div>
+              </:link>
+              <:link
+                :for={
+                  org <-
+                    Algora.Organizations.get_user_orgs(@current_user)
+                    |> Enum.reject(&(&1.id == @current_org.id))
+                }
+                href={~p"/set_context/#{org.handle}"}
+              >
+                <div class="flex items-center whitespace-nowrap">
+                  <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
+                  <div>
+                    <div class="font-semibold">{org.name}</div>
+                    <div class="text-sm text-gray-500">@{org.handle}</div>
+                  </div>
+                </div>
+              </:link>
+              <:link href={~p"/auth/logout"} method="delete">
+                <div class="flex items-center whitespace-nowrap">
+                  <div class="h-8 w-8 flex items-center justify-center mr-3">
+                    <.icon name="tabler-logout" class="h-5 w-5" />
+                  </div>
+                  <div class="font-semibold">Logout</div>
+                </div>
+              </:link>
+            </.dropdown2>
+          </div>
+        <% else %>
+          <.link
+            navigate="/auth/login"
+            class="rounded-lg bg-gray-50 hover:bg-gray-200 py-1 px-2 text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80"
+          >
+            <span class="relative font-semibold text-sm">Login</span>
+          </.link>
+        <% end %>
+      </div>
     </div>
 
     <div class="relative">

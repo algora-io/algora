@@ -825,6 +825,7 @@ defmodule AlgoraWeb.CoreComponents do
             @icon && "pl-10",
             @class
           ]}
+          autocomplete="off"
           {@rest}
         />
       </div>

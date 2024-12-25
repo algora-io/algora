@@ -9,6 +9,30 @@ defmodule Algora.Bounties do
   alias Algora.Users
   alias Algora.Users.User
   alias Algora.Workspace
+  alias Algora.Workspace.Ticket
+
+  @spec create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
+          {:ok, Bounty.t()} | {:error, atom()}
+  def create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
+    changeset =
+      Bounty.changeset(%Bounty{}, %{
+        amount: amount,
+        ticket_id: ticket.id,
+        owner_id: owner.id,
+        creator_id: creator.id
+      })
+
+    case Repo.insert(changeset) do
+      {:ok, bounty} ->
+        {:ok, bounty}
+
+      {:error, %{errors: [ticket_id: {_, [constraint: :unique]}]}} ->
+        {:error, :already_exists}
+
+      {:error, _changeset} ->
+        {:error, :internal_server_error}
+    end
+  end
 
   @spec create_bounty(%{
           creator: User.t(),
@@ -24,23 +48,10 @@ defmodule Algora.Bounties do
         ticket_ref: %{owner: repo_owner, repo: repo_name, number: number}
       }) do
     with {:ok, token} <- Users.get_access_token(creator),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
-         {:ok, bounty} <-
-           %Bounty{}
-           |> Bounty.changeset(%{
-             amount: amount,
-             ticket_id: ticket.id,
-             owner_id: owner.id,
-             creator_id: creator.id
-           })
-           |> Repo.insert() do
-      {:ok, bounty}
+         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
+      create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
     else
-      {:error, %{errors: [ticket_id: {_, [constraint: :unique]}]}} ->
-        {:error, :already_exists}
-
-      {:error, changeset} ->
-        {:error, changeset}
+      {:error, _reason} = error -> error
     end
   end
 

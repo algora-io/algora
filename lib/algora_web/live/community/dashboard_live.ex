@@ -327,7 +327,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
        |> put_flash(:info, "Bounty created")}
     else
       %{valid?: false} ->
-        {:noreply, assign(socket, bounty_form: to_form(changeset))}
+        {:noreply, socket |> assign(:bounty_form, to_form(changeset))}
 
       {:error, :bounty_already_exists} ->
         {:noreply,

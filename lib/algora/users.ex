@@ -254,7 +254,7 @@ defmodule Algora.Users do
       )
 
     case Repo.one(query) do
-      {nil, nil} -> create_user(info, primary_email, emails, token)
+      nil -> create_user(info, primary_email, emails, token)
       {user, nil} -> update_user(user, info, primary_email, emails, token)
       {user, _identity} -> update_github_token(user, token)
     end

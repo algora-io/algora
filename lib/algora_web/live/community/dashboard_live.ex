@@ -86,12 +86,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
                 field={@bounty_form[:url]}
                 placeholder="https://github.com/swift-lang/swift/issues/1337"
               />
-              <.input
-                type="money"
-                label="Amount"
-                icon="tabler-currency-dollar"
-                field={@bounty_form[:amount]}
-              />
+              <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
             </div>
             <div class="flex items-end justify-between gap-4">
               <p class="text-sm text-muted-foreground">

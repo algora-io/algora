@@ -246,11 +246,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
           <% end %>
         </ol>
       </nav>
-      <div class="pt-8 opacity-0">
-        <.link href="https://algora.io/challenges/golem">
-          <img src={~p"/images/golem-challenge.png"} alt="Golem Challenge" class="aspect-video block" />
-        </.link>
-      </div>
     </aside>
     """
   end

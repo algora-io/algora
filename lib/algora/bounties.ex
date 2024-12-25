@@ -24,15 +24,23 @@ defmodule Algora.Bounties do
         ticket_ref: %{owner: repo_owner, repo: repo_name, number: number}
       }) do
     with {:ok, token} <- Users.get_access_token(creator),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
-      %Bounty{}
-      |> Bounty.changeset(%{
-        amount: amount,
-        ticket_id: ticket.id,
-        owner_id: owner.id,
-        creator_id: creator.id
-      })
-      |> Repo.insert()
+         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
+         {:ok, bounty} <-
+           %Bounty{}
+           |> Bounty.changeset(%{
+             amount: amount,
+             ticket_id: ticket.id,
+             owner_id: owner.id,
+             creator_id: creator.id
+           })
+           |> Repo.insert() do
+      {:ok, bounty}
+    else
+      {:error, %{errors: [ticket_id: {_, [constraint: :unique]}]}} ->
+        {:error, :already_exists}
+
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 

@@ -329,8 +329,12 @@ defmodule AlgoraWeb.Community.DashboardLive do
       %{valid?: false} ->
         {:noreply, assign(socket, bounty_form: to_form(changeset))}
 
-      {:error, reason} ->
-        {:noreply, socket |> put_flash(:error, "Failed to create bounty: #{reason}")}
+      {:error, :bounty_already_exists} ->
+        {:noreply,
+         socket |> put_flash(:error, "You have already created a bounty for this ticket")}
+
+      {:error, _reason} ->
+        {:noreply, socket |> put_flash(:error, "Something went wrong")}
     end
   end
 

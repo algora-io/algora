@@ -25,8 +25,13 @@ defmodule AlgoraWeb.UserAuth do
             Users.get_user!(user_id)
           end)
 
-        %Users.User{} = new_socket.assigns.current_user
-        {:cont, new_socket}
+        case new_socket.assigns.current_user do
+          %Users.User{} ->
+            {:cont, new_socket}
+
+          nil ->
+            {:halt, redirect_require_login(socket)}
+        end
 
       %{} ->
         {:halt, redirect_require_login(socket)}

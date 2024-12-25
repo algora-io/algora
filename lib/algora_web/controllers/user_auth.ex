@@ -171,12 +171,15 @@ defmodule AlgoraWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  def signed_in_path(conn) do
-    case get_session(conn, :last_context) do
-      nil -> ~p"/dashboard"
-      "personal" -> ~p"/dashboard"
-      org_handle -> ~p"/org/#{org_handle}"
-    end
+  def signed_in_path(_conn) do
+    # TODO: dynamically determine the path based on the user's context
+    ~p"/home"
+
+    # case get_session(conn, :last_context) do
+    #   nil -> ~p"/dashboard"
+    #   "personal" -> ~p"/dashboard"
+    #   org_handle -> ~p"/org/#{org_handle}"
+    # end
   end
 
   defp login_code_ttl, do: 3600

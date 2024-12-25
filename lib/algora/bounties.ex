@@ -26,7 +26,7 @@ defmodule Algora.Bounties do
       {:ok, bounty} ->
         {:ok, bounty}
 
-      {:error, %{errors: [ticket_id: {_, [constraint: :unique]}]}} ->
+      {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
         {:error, :already_exists}
 
       {:error, _changeset} ->

@@ -6,9 +6,11 @@ defmodule Algora.Extensions.Ecto.USD do
 
   @impl true
   def cast(string) when is_binary(string) do
-    case Money.new(:USD, String.trim(string)) do
+    string = string |> String.replace("$", "") |> String.trim()
+
+    case Money.new(:USD, string) do
       money = %Money{} -> {:ok, money}
-      _ -> :error
+      {:error, _reason} -> :error
     end
   end
 

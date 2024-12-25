@@ -13,7 +13,7 @@ defmodule Algora.Bounties do
   @spec create_bounty(%{
           creator: User.t(),
           owner: User.t(),
-          amount: integer(),
+          amount: Money.t(),
           ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
         }) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -26,7 +26,12 @@ defmodule Algora.Bounties do
     with {:ok, token} <- Users.get_access_token(creator),
          {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
       %Bounty{}
-      |> Bounty.changeset(%{amount: amount, ticket: ticket, owner: owner, creator: creator})
+      |> Bounty.changeset(%{
+        amount: amount,
+        ticket_id: ticket.id,
+        owner_id: owner.id,
+        creator_id: creator.id
+      })
       |> Repo.insert()
     end
   end

@@ -16,6 +16,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
         field :owner, :string
         field :repo, :string
         field :number, :integer
+        field :type, :string
       end
     end
 
@@ -31,17 +32,14 @@ defmodule AlgoraWeb.Community.DashboardLive do
   def mount(_params, _session, socket) do
     tech_stack = "Swift"
 
-    tickets = Bounties.TicketView.list(status: :open, tech_stack: [tech_stack], limit: 20)
-
-    socket =
-      socket
-      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-      |> assign(:experts, list_experts())
-      |> assign(:tech_stack, [tech_stack])
-      |> assign(:hours_per_week, 40)
-      |> assign(:tickets, tickets)
-
-    {:ok, socket |> assign(:achievements, fetch_achievements(socket))}
+    {:ok,
+     socket
+     |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:experts, list_experts())
+     |> assign(:tech_stack, [tech_stack])
+     |> assign(:hours_per_week, 40)
+     |> assign_tickets()
+     |> assign_achievements()}
   end
 
   def render(assigns) do
@@ -323,25 +321,47 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> BountyForm.changeset(params)
       |> Map.put(:action, :validate)
 
-    if changeset.valid? do
+    with %{valid?: true} <- changeset,
+         {:ok, _} <-
+           Bounties.create_bounty(%{
+             creator: socket.assigns.current_user,
+             owner: socket.assigns.current_user,
+             amount: get_field(changeset, :amount),
+             ticket_ref: get_field(changeset, :ticket_ref)
+           }) do
       {:noreply,
        socket
        |> assign(:bounty_form, to_form(changeset))
+       |> assign_tickets()
+       |> assign_achievements()
        |> put_flash(:info, "Bounty created")}
     else
-      {:noreply, assign(socket, bounty_form: to_form(changeset))}
+      %{valid?: false} ->
+        {:noreply, assign(socket, bounty_form: to_form(changeset))}
+
+      {:error, reason} ->
+        {:noreply, socket |> put_flash(:error, "Failed to create bounty: #{reason}")}
     end
   end
 
+  defp assign_tickets(socket) do
+    socket
+    |> assign(
+      :tickets,
+      Bounties.TicketView.list(status: :open, tech_stack: [socket.assigns.tech_stack], limit: 20)
+    )
+  end
+
   # TODO: implement this
-  defp fetch_achievements(socket) do
-    [
+  defp assign_achievements(socket) do
+    socket
+    |> assign(:achievements, [
       %{status: :completed, name: "Personalize Algora"},
       %{status: :current, name: "Create a bounty"},
       %{status: :upcoming, name: "Reward a bounty"},
       %{status: :upcoming, name: "Contract a #{socket.assigns.tech_stack} developer"},
       %{status: :upcoming, name: "Complete a contract"}
-    ]
+    ])
   end
 
   # TODO: implement this

@@ -89,4 +89,30 @@ defmodule Algora.Contracts.Contract do
     |> foreign_key_constraint(:contractor_id)
     |> generate_id()
   end
+
+  def draft_changeset(contract, attrs) do
+    contract
+    |> cast(attrs, [
+      :status,
+      :sequence_number,
+      :hourly_rate_min,
+      :hourly_rate_max,
+      :hours_per_week,
+      :start_date,
+      :end_date,
+      :original_contract_id,
+      :client_id,
+    ])
+    |> validate_required([
+      :status,
+      :hourly_rate_min,
+      :hourly_rate_max,
+      :hours_per_week,
+      :start_date,
+      :client_id,
+    ])
+    |> validate_number(:hours_per_week, greater_than: 0)
+    |> foreign_key_constraint(:client_id)
+    |> generate_id()
+  end
 end

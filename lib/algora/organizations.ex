@@ -1,9 +1,11 @@
 defmodule Algora.Organizations do
   import Ecto.Query
 
-  alias Algora.Users.User
+  alias Ecto.Multi
   alias Algora.Organizations.Org
   alias Algora.Organizations.Member
+  alias Algora.Users.User
+  alias Algora.Contracts.Contract
   alias Algora.Repo
 
   def create_organization(params) do
@@ -22,6 +24,38 @@ defmodule Algora.Organizations do
     %Member{}
     |> Member.changeset(%{role: role, org_id: org.id, user_id: user.id})
     |> Repo.insert()
+  end
+
+  def onboard_organization(params) do
+    org_changeset =
+      %User{type: :organization}
+      |> Org.changeset(params.organization)
+
+    user_changeset =
+      %User{type: :individual}
+      |> User.org_registration_changeset(params.user)
+
+    Multi.new()
+    |> Multi.insert(:org, org_changeset)
+    |> Multi.insert(:user, user_changeset)
+    |> Multi.merge(fn %{user: user, org: org} ->
+      member_changeset =
+        Member.changeset(
+          %Member{},
+          Map.merge(params.member, %{user: user, org: org})
+        )
+
+      contract_changeset =
+        Contract.draft_changeset(
+          %Contract{},
+          Map.put(params.contract, :client_id, org.id)
+        )
+
+      Multi.new()
+      |> Multi.insert(:member, member_changeset)
+      |> Multi.insert(:contract, contract_changeset)
+    end)
+    |> Repo.transaction()
   end
 
   def get_org_by(fields), do: Repo.get_by(User, fields)

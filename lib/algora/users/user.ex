@@ -147,6 +147,8 @@ defmodule Algora.Users.User do
       |> validate_required([:email, :display_name, :handle])
       |> validate_handle()
       |> validate_email()
+      |> unique_constraint(:email)
+      |> unique_constraint(:handle)
       |> put_assoc(:identities, [identity_changeset])
     else
       %User{}

@@ -7,7 +7,6 @@ defmodule Algora.Organizations.Org do
     org
     |> cast(params, [
       :handle,
-      :name,
       :domain,
       :bio,
       :avatar_url,
@@ -24,7 +23,7 @@ defmodule Algora.Organizations.Org do
       :bounty_mode
     ])
     |> generate_id()
-    |> validate_required([:type, :handle, :name])
+    |> validate_required([:type, :handle])
     |> User.validate_handle()
   end
 end

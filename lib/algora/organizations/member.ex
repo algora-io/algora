@@ -12,10 +12,12 @@ defmodule Algora.Organizations.Member do
     timestamps()
   end
 
-  def changeset(member, attrs) do
+  def changeset(member, params) do
     member
-    |> cast(attrs, [:role, :org_id, :user_id])
-    |> validate_required([:role, :org_id, :user_id])
+    |> cast(params, [:role])
+    |> put_assoc(:org, params.org)
+    |> put_assoc(:user, params.user)
+    |> validate_required([:role, :org, :user])
     |> generate_id()
   end
 

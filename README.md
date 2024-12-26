@@ -38,11 +38,9 @@ To get a local copy up and running, follow these steps.
 
 ### Prerequisites
 
-- Elixir and Erlang/OTP
-  - We recommend using [asdf](https://github.com/asdf-vm/asdf) to install [Elixir](https://github.com/asdf-vm/asdf-elixir) and [Erlang/OTP](https://github.com/asdf-vm/asdf-erlang).
-  - Keep in mind that each Elixir version supports [specific Erlang/OTP versions](https://hexdocs.pm/elixir/compatibility-and-deprecations.html#between-elixir-and-erlang-otp).
-  - Make sure you have at least **Elixir 1.12** installed to run Algora Console.
 - PostgreSQL
+- [asdf](https://github.com/asdf-vm/asdf) (optional) - install Elixir and Erlang/OTP
+- [direnv](https://github.com/direnv/direnv) (optional) - load environment variables
 
 ### Setting up the project
 
@@ -52,7 +50,13 @@ To get a local copy up and running, follow these steps.
    git clone https://github.com/algora-io/console.git; cd console
    ```
 
-2. Fetch dependencies
+2. Install Elixir and Erlang/OTP
+
+   ```sh
+   asdf install
+   ```
+
+3. Fetch dependencies
 
    ```sh
    mix deps.get
@@ -60,13 +64,13 @@ To get a local copy up and running, follow these steps.
 
    **Note:** If you're using an Apple machine with an ARM-based chip, you need to install the Rust compiler and run `mix compile.rambo`
 
-3. Initialize your `.env` file
+4. Initialize your `.env` file
 
    ```sh
    cp .env.example .env
    ```
 
-4. Create your database
+5. Create your database
 
    ```sh
    sudo -u postgres psql
@@ -77,23 +81,35 @@ To get a local copy up and running, follow these steps.
    ALTER USER algora WITH CREATEDB;
    ```
 
-5. Paste your connection string into your `.env` file
+6. Paste your connection string into your `.env` file
 
    ```env
    DATABASE_URL="postgresql://algora:password@localhost:5432/console"
    ```
 
-6. Run migrations and seed your database
+7. Allow direnv to load the `.env` file
 
    ```sh
-   env $(cat .env | xargs -L 1) mix ecto.setup
+   direnv allow .env
    ```
 
-7. Start your development server
+8. Run migrations and seed your database
 
    ```sh
-   env $(cat .env | xargs -L 1) iex -S mix phx.server
+   mix ecto.setup
    ```
+
+9. Start your development server
+
+   ```sh
+   iex -S mix phx.server
+   ```
+
+10. (Optional) Watch for file changes and auto-recompile in a separate terminal
+
+    ```sh
+    find lib/ | entr mix compile
+    ```
 
 ### Setting up external services
 
@@ -108,7 +124,7 @@ GitHub is used for authenticating users.
 - Homepage URL: http://localhost:4000
 - Authorization callback URL: http://localhost:4000/callbacks/github/oauth
 
-Once you have obtained your client ID and secret, add them to your `.env` file.
+Once you have obtained your client ID and secret, add them to your `.env` file and run `direnv allow .env`
 
 ```env
 GITHUB_CLIENT_ID=""

@@ -6,7 +6,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias Phoenix.LiveView.AsyncResult
   alias AlgoraWeb.Components.Wordmarks
   alias Algora.Users
-  alias Algora.Factory
 
   # === SCHEMAS === #
 
@@ -169,19 +168,79 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
+  @steps [:tech_stack, :email, :preferences]
+
   # === LIFECYCLE === #
 
-  def mount(_params, _session, socket) do
-    steps = [:tech_stack, :email, :preferences]
+  def mount(_params, %{
+    "onboarding_email" => email,
+    "onboarding_domain" => domain,
+    "onboarding_tech_stack" => tech_stack,
+    "onboarding_token" => login_code
+  }, socket) do
+    if Users.get_user_by_email(email) do
+      # user already exists, so onboarding is complete
+      # allow user to login with token until expiry
+      {:ok,
+       socket
+       |> put_flash(:info, "Welcome back to Algora!")
+       |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))
+      }
+    else
+      tech_stack_form =
+        %TechStackForm{}
+        |> TechStackForm.changeset(%{tech_stack: String.split(tech_stack, ",")})
+        |> to_form()
 
+      email_form =
+        %EmailForm{}
+        |> EmailForm.changeset(%{email: email, domain: domain})
+        |> to_form()
+
+      verificaiton_form =
+        %VerificationForm{}
+        |> VerificationForm.changeset(%{code: login_code})
+        |> to_form()
+
+      case AlgoraWeb.UserAuth.verify_login_code(login_code) do
+        {:ok, %{email: ^email}} ->
+          {:ok,
+           socket
+           |> assign(:tech_stack_form, tech_stack_form)
+           |> assign(:email_form, email_form)
+           |> assign(:verification_form, verificaiton_form)
+           |> assign(:preferences_form, PreferencesForm.init())
+           |> assign(:step, Enum.at(@steps, 2))
+           |> assign(:steps, @steps)
+           |> assign(:code_sent?, true)
+           |> assign(:code_valid?, true)
+           |> assign(:timezone, nil)
+           |> assign(:user_metadata, AsyncResult.loading())
+           |> assign_matching_devs()}
+        {:ok, _no_match} ->
+          {:ok,
+            socket
+            |> put_flash(:error, "Invalid onboarding token")
+            |> redirect(to: "/")}
+        {:error, _invalid} ->
+          {:ok,
+            socket
+            |> put_flash(:error, "Invalid auth token")
+            |> redirect(to: "/")}
+      end
+
+    end
+  end
+
+  def mount(_params, _session, socket) do
     {:ok,
      socket
      |> assign(:tech_stack_form, TechStackForm.init())
      |> assign(:email_form, EmailForm.init())
      |> assign(:verification_form, VerificationForm.init())
      |> assign(:preferences_form, PreferencesForm.init())
-     |> assign(:step, Enum.at(steps, 0))
-     |> assign(:steps, steps)
+     |> assign(:step, Enum.at(@steps, 0))
+     |> assign(:steps, @steps)
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
      |> assign(:timezone, nil)
@@ -225,11 +284,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case changeset do
       %{valid?: true} = changeset ->
         email = get_field(changeset, :email)
-
-        login_code = AlgoraWeb.UserAuth.generate_login_code(email)
+        domain = get_field(changeset, :domain)
+        tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
+        login_code = AlgoraWeb.UserAuth.generate_login_code(email, domain, tech_stack)
 
         # TODO: Send email
         Logger.info("Login code for #{email}: #{login_code}")
+
+        Logger.info(AlgoraWeb.UserAuth.login_email(email, login_code))
 
         {:noreply,
          socket
@@ -298,11 +360,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           |> String.replace(~r/[^a-zA-Z0-9]/, "")
           |> String.downcase()
 
-        # TODO: use context functions instead of Factory
         # TODO: generate nicer handles or let the user choose
 
-        org =
-          Factory.upsert!(:organization, [:email], %{
+        org_unique_handle = org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
+        user_unique_handle = user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
+        org_params =
+          %{
             # TODO: unset email
             email: "admin@#{domain}",
             display_name: org_name,
@@ -312,7 +375,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 get_in(metadata, [:org, :og_title]),
             avatar_url:
               get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
-            handle: org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
+            handle: org_unique_handle,
             domain: domain,
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
@@ -328,42 +391,55 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             discord_url: get_in(metadata, [:org, :socials, :discord]),
             slack_url: get_in(metadata, [:org, :socials, :slack]),
             linkedin_url: get_in(metadata, [:org, :socials, :linkedin])
-          })
+          }
 
-        user =
-          Factory.upsert!(:user, [:email], %{
+        user_params =
+          %{
             email: email,
             display_name: user_handle,
             avatar_url: get_in(metadata, [:avatar_url]),
-            handle: user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4),
+            handle: user_unique_handle,
             tech_stack: tech_stack,
-            last_context: org.handle,
+            last_context: org_unique_handle,
             timezone: socket.assigns.timezone
-          })
+          }
 
-        _member =
-          Factory.upsert!(:member, [:user_id, :org_id], %{
-            user_id: user.id,
-            org_id: org.id,
+        member_params =
+          %{
             role: :admin
-          })
+          }
 
-        _contract =
-          Factory.insert!(
-            :contract,
-            %{
-              status: :draft,
-              client_id: org.id,
-              hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
-              hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
-              hours_per_week: preferences.hours_per_week
-            }
-          )
+        contract_params =
+          %{
+            start_date: DateTime.utc_now(),
+            status: :draft,
+            hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
+            hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
+            hours_per_week: preferences.hours_per_week
+          }
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Welcome to Algora!")
-         |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))}
+        params =
+          %{
+            organization: org_params,
+            user: user_params,
+            member: member_params,
+            contract: contract_params
+          }
+
+        socket = case Algora.Organizations.onboard_organization(params) do
+          {:ok, %{org: org}} ->
+            socket
+            |> put_flash(:info, "Welcome to Algora!")
+            |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, ~p"/org/#{org.handle}"))
+          {:error, name, changeset, _created} ->
+            # TODO try to recover
+            Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
+            socket
+            |> put_flash(:error, "Something went wrong. Please try again.")
+            |> redirect(to: "/")
+        end
+
+        {:noreply, socket}
 
       %{valid?: false} ->
         {:noreply, assign(socket, preferences_form: to_form(changeset))}
@@ -381,7 +457,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         code = get_field(changeset, :code)
         email = get_field(socket.assigns.email_form.source, :email)
 
-        with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(code) do
+        with {:ok, %{email: ^email}} <- AlgoraWeb.UserAuth.verify_login_code(code) do
           {:noreply,
            socket
            |> assign(:verification_form, to_form(changeset))

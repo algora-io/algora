@@ -43,9 +43,29 @@ defmodule AlgoraWeb.OAuthCallbackController do
     redirect(conn, to: "/")
   end
 
+  def new(conn, %{"provider" => "email", "email" => email, "token" => token, "return_to" => "/onboarding/org"}) do
+    with {:ok, %{email: ^email} = login_token} <- AlgoraWeb.UserAuth.verify_login_code(token) do
+
+      conn
+      |> put_session(:onboarding_email, login_token.email)
+      |> put_session(:onboarding_domain, login_token.domain)
+      |> put_session(:onboarding_tech_stack, Enum.join(login_token.tech_stack, ","))
+      |> put_session(:onboarding_token, token)
+      |> redirect(to: "/onboarding/org")
+    else
+      {:error, reason} ->
+        Logger.debug("invalid email auth token #{inspect(reason)}")
+
+        conn
+        |> put_flash(:error, "Invalid token")
+        |> redirect(to: "/")
+    end
+  end
+
   def new(conn, %{"provider" => "email", "email" => email, "token" => token} = params) do
-    with {:ok, ^email} <- AlgoraWeb.UserAuth.verify_login_code(token),
+    with {:ok, %{email: ^email}} <- AlgoraWeb.UserAuth.verify_login_code(token),
          {:ok, user} <- get_or_register_user(email) do
+
       conn =
         if params["return_to"] do
           conn |> put_session(:user_return_to, params["return_to"])

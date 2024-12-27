@@ -209,6 +209,8 @@ defmodule Algora.Users.User do
     |> cast(params, [
       :email,
       :display_name,
+      :website_url,
+      :location,
       :bio,
       :avatar_url,
       :handle,

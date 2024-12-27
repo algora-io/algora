@@ -70,7 +70,10 @@ defmodule Algora.Github.Command do
           {:ok, []}
 
         {:ok, parsed, _, _, _, _} ->
-          {:ok, parsed |> Enum.reject(&is_nil/1)}
+          {:ok,
+           parsed
+           |> Enum.reject(&is_nil/1)
+           |> Enum.into(%{})}
 
         {:error, reason, _, _, _, _} ->
           {:error, reason}

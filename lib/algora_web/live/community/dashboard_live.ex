@@ -29,6 +29,23 @@ defmodule AlgoraWeb.Community.DashboardLive do
     end
   end
 
+  defmodule TipForm do
+    use Ecto.Schema
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :github_handle, :string
+      field :amount, Algora.Extensions.Ecto.USD
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> cast(attrs, [:github_handle, :amount])
+      |> validate_required([:github_handle, :amount])
+      |> Validations.validate_money_positive(:amount)
+    end
+  end
+
   def mount(_params, _session, socket) do
     tech_stack = "Swift"
 
@@ -39,6 +56,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
     {:ok,
      socket
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:experts, list_experts())
      |> assign(:tech_stack, [tech_stack])
      |> assign(:hours_per_week, 40)
@@ -54,7 +72,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
     ~H"""
     <div class="flex-1 lg:pr-96 bg-background text-foreground">
       <.section>
-        {create_bounty(assigns)}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {create_bounty(assigns)}
+          {create_tip(assigns)}
+        </div>
       </.section>
 
       <.section
@@ -88,20 +109,50 @@ defmodule AlgoraWeb.Community.DashboardLive do
       <.card_content>
         <.simple_form for={@bounty_form} phx-submit="create_bounty">
           <div class="flex flex-col gap-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
-              <.input
-                label="URL"
-                field={@bounty_form[:url]}
-                placeholder="https://github.com/swift-lang/swift/issues/1337"
-              />
-              <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
-            </div>
-            <div class="flex items-end justify-between gap-4">
-              <p class="text-sm text-muted-foreground">
-                <span class="font-semibold">Tip:</span> You can also create bounties directly on
-                GitHub by commenting <code class="px-1 py-0.5">/bounty $100</code> on any issue.
-              </p>
+            <.input
+              label="URL"
+              field={@bounty_form[:url]}
+              placeholder="https://github.com/swift-lang/swift/issues/1337"
+            />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+            <p class="text-sm text-muted-foreground">
+              <span class="font-semibold">Tip:</span>
+              You can also create bounties directly on
+              GitHub by commenting <code class="px-1 py-0.5 text-success">/bounty $100</code>
+              on any issue.
+            </p>
+            <div class="flex justify-end gap-4">
               <.button>Create bounty</.button>
+            </div>
+          </div>
+        </.simple_form>
+      </.card_content>
+    </.card>
+    """
+  end
+
+  defp create_tip(assigns) do
+    ~H"""
+    <.card>
+      <.card_header>
+        <div class="flex items-center gap-2">
+          <.icon name="tabler-gift" class="h-8 w-8" />
+          <h2 class="text-2xl font-semibold">Create new tip</h2>
+        </div>
+      </.card_header>
+      <.card_content>
+        <.simple_form for={@tip_form} phx-submit="create_tip">
+          <div class="flex flex-col gap-6">
+            <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+            <p class="text-sm text-muted-foreground">
+              <span class="font-semibold">Tip:</span>
+              You can also create tips directly on
+              GitHub by commenting <code class="px-1 py-0.5 text-success">/tip $100 @username</code>
+              on any pull request.
+            </p>
+            <div class="flex justify-end gap-4">
+              <.button>Create tip</.button>
             </div>
           </div>
         </.simple_form>
@@ -339,6 +390,27 @@ defmodule AlgoraWeb.Community.DashboardLive do
       {:error, :already_exists} ->
         {:noreply,
          socket |> put_flash(:note, "You have already created a bounty for this ticket")}
+
+      {:error, _reason} ->
+        {:noreply, socket |> put_flash(:error, "Something went wrong")}
+    end
+  end
+
+  def handle_event("create_tip", %{"tip_form" => params}, socket) do
+    changeset =
+      %TipForm{}
+      |> TipForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    with %{valid?: true} <- changeset do
+      # TODO: implement
+      {:noreply,
+       socket
+       |> assign(:tip_form, to_form(changeset))
+       |> assign_achievements()}
+    else
+      %{valid?: false} ->
+        {:noreply, socket |> assign(:tip_form, to_form(changeset))}
 
       {:error, _reason} ->
         {:noreply, socket |> put_flash(:error, "Something went wrong")}

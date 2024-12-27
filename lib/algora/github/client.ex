@@ -12,8 +12,7 @@ defmodule Algora.Github.Client do
     headers = [{"Content-Type", "application/json"} | headers]
     request = Finch.build(method, url, headers, body)
 
-    with :error <- read_from_cache(cache_path),
-         {:ok, response} <- Finch.request(request, Algora.Finch),
+    with {:ok, response} <- Finch.request(request, Algora.Finch),
          {:ok, body} <- handle_response(response) do
       write_to_cache(cache_path, body)
       {:ok, body}

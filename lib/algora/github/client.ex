@@ -70,6 +70,8 @@ defmodule Algora.Github.Client do
     )
   end
 
+  defp build_query(opts), do: if(opts == [], do: "", else: "?" <> URI.encode_query(opts))
+
   @impl true
   def get_issue(access_token, owner, repo, number) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}")
@@ -151,5 +153,10 @@ defmodule Algora.Github.Client do
   @impl true
   def create_issue_comment(access_token, owner, repo, number, body) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/comments", "POST", body)
+  end
+
+  @impl true
+  def list_repository_events(access_token, owner, repo, opts \\ []) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/events#{build_query(opts)}")
   end
 end

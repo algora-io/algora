@@ -28,11 +28,11 @@ defmodule Algora.Github.Poller do
        repo_name: repo_name,
        backfill_limit: backfill_limit,
        cursor: nil
-     }, {:continue, :initialize}}
+     }, {:continue, :setup}}
   end
 
   @impl true
-  def handle_continue(:initialize, state) do
+  def handle_continue(:setup, state) do
     {:ok, cursor} = get_or_create_cursor(state.repo_owner, state.repo_name)
     schedule_poll()
 

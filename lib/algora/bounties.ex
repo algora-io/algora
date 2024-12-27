@@ -11,6 +11,14 @@ defmodule Algora.Bounties do
   alias Algora.Workspace
   alias Algora.Workspace.Ticket
 
+  def broadcast! do
+    Phoenix.PubSub.broadcast!(Algora.PubSub, "bounties:all", :bounties_updated)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
+  end
+
   @spec create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
           {:ok, Bounty.t()} | {:error, atom()}
   def create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
@@ -24,6 +32,7 @@ defmodule Algora.Bounties do
 
     case Repo.insert(changeset) do
       {:ok, bounty} ->
+        broadcast!()
         {:ok, bounty}
 
       {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->

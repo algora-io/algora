@@ -32,6 +32,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
   def mount(_params, _session, socket) do
     tech_stack = "Swift"
 
+    if connected?(socket) do
+      Bounties.subscribe()
+    end
+
     {:ok,
      socket
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -40,6 +44,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
      |> assign(:hours_per_week, 40)
      |> assign_tickets()
      |> assign_achievements()}
+  end
+
+  def handle_info(:bounties_updated, socket) do
+    {:noreply, assign_tickets(socket)}
   end
 
   def render(assigns) do
@@ -322,7 +330,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
       {:noreply,
        socket
        |> assign(:bounty_form, to_form(changeset))
-       |> assign_tickets()
        |> assign_achievements()
        |> put_flash(:info, "Bounty created")}
     else

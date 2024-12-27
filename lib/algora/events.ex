@@ -19,7 +19,7 @@ defmodule Algora.Events do
     |> Repo.update()
   end
 
-  def list_active_pollers do
-    Repo.all(from p in EventPoller, select: {p.repo_owner, p.repo_name})
+  def list_pollers do
+    Repo.all(from(p in EventPoller))
   end
 end

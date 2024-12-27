@@ -49,6 +49,7 @@ defmodule Algora.Github.Poller do
 
     with {:ok, event_poller} <- get_or_create_poller(state.repo_owner, state.repo_name),
          {:ok, events} <- collect_new_events(token, event_poller, state),
+         Logger.debug("Processing #{length(events)} events"),
          {:ok, _} <- process_batch(events, event_poller) do
       {:ok, nil}
     end
@@ -150,6 +151,10 @@ defmodule Algora.Github.Poller do
   end
 
   defp process_event(event) do
+    {:ok, created_at, _} = DateTime.from_iso8601(event["created_at"])
+    latency = DateTime.utc_now() |> DateTime.diff(created_at, :second)
+    Logger.info("Latency: #{latency}s")
+
     body = extract_body(event)
 
     case Command.parse(body) do

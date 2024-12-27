@@ -20,7 +20,7 @@ defmodule Algora.Workspace.Repository do
     timestamps()
   end
 
-  def github_changeset(user, meta) do
+  def github_changeset(meta, user) do
     params = %{
       provider_id: to_string(meta["id"]),
       name: meta["name"],

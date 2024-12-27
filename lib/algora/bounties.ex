@@ -4,23 +4,64 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Organizations.Member
-  alias Algora.Repo
   alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Users
   alias Algora.Users.User
+  alias Algora.Workspace
+  alias Algora.Workspace.Ticket
 
-  @spec create_bounty(
-          creator :: User.t(),
-          owner :: User.t(),
-          params :: map()
-        ) ::
+  def broadcast! do
+    Phoenix.PubSub.broadcast!(Algora.PubSub, "bounties:all", :bounties_updated)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
+  end
+
+  @spec create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  def create_bounty(creator, owner, params) do
-    %Bounty{
-      creator_id: creator.id,
-      owner_id: owner.id
-    }
-    |> Bounty.create_changeset(params)
-    |> Repo.insert()
+  def create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
+    changeset =
+      Bounty.changeset(%Bounty{}, %{
+        amount: amount,
+        ticket_id: ticket.id,
+        owner_id: owner.id,
+        creator_id: creator.id
+      })
+
+    case Repo.insert(changeset) do
+      {:ok, bounty} ->
+        broadcast!()
+        {:ok, bounty}
+
+      {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
+        {:error, :already_exists}
+
+      {:error, _changeset} ->
+        {:error, :internal_server_error}
+    end
+  end
+
+  @spec create_bounty(%{
+          creator: User.t(),
+          owner: User.t(),
+          amount: Money.t(),
+          ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+        }) ::
+          {:ok, Bounty.t()} | {:error, atom()}
+  def create_bounty(%{
+        creator: creator,
+        owner: owner,
+        amount: amount,
+        ticket_ref: %{owner: repo_owner, repo: repo_name, number: number}
+      }) do
+    with {:ok, token} <- Users.get_access_token(creator),
+         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
+      create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
+    else
+      {:error, _reason} = error -> error
+    end
   end
 
   def base_query, do: Bounty

@@ -9,6 +9,22 @@ defmodule Algora.Admin do
 
   def token!(), do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 
+  def read!(path) do
+    {:ok, data} = read(path)
+    data
+  end
+
+  def read(path) do
+    with {:ok, content} <- File.read(Path.join(:code.priv_dir(:algora), path)),
+         {:ok, data} <- Jason.decode(content) do
+      {:ok, data}
+    else
+      error ->
+        Logger.error("Failed to read #{path}: #{inspect(error)}")
+        error
+    end
+  end
+
   def backfill_repos!() do
     query =
       from(t in Algora.Workspace.Ticket,

@@ -216,7 +216,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
            |> assign(:code_valid?, true)
            |> assign(:timezone, nil)
            |> assign(:user_metadata, AsyncResult.loading())
-           |> assign_matching_devs()}
+           |> assign_matching_devs()
+           |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
+           |> assign(:user_metadata, AsyncResult.loading())}
         {:ok, _no_match} ->
           {:ok,
             socket

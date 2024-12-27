@@ -80,7 +80,8 @@ defmodule AlgoraWeb.Router do
 
     live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/auth/login", SignInLive, :index
-
+      live "/payment/success", Payment.SuccessLive, :index
+      live "/payment/canceled", Payment.CanceledLive, :index
       live "/@/:handle", User.ProfileLive, :index
     end
 

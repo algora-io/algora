@@ -16,9 +16,8 @@ defmodule Algora.Payments do
       billing_address_collection: "required",
       line_items: build_line_items(recipient, amount),
       invoice_creation: %{enabled: true},
-      # TODO: implement these pages
-      success_url: "http://localhost:4000/payment/success",
-      cancel_url: "http://localhost:4000/payment/canceled"
+      success_url: "#{AlgoraWeb.Endpoint.url()}payment/success",
+      cancel_url: "#{AlgoraWeb.Endpoint.url()}payment/canceled"
     }
 
     Stripe.Session.create(params)

@@ -22,22 +22,29 @@ defmodule Algora.Github.Poller do
     repo_name = Keyword.fetch!(opts, :repo_name)
     backfill_limit = Keyword.get(opts, :backfill_limit, 1)
 
-    schedule_poll()
-
     {:ok,
      %{
        repo_owner: repo_owner,
        repo_name: repo_name,
-       backfill_limit: backfill_limit
-     }}
+       backfill_limit: backfill_limit,
+       poller: nil
+     }, {:continue, :initialize}}
+  end
+
+  @impl true
+  def handle_continue(:initialize, state) do
+    {:ok, poller} = get_or_create_poller(state.repo_owner, state.repo_name)
+    schedule_poll()
+
+    {:noreply, %{state | poller: poller}}
   end
 
   @impl true
   def handle_info(:poll, state) do
     token = Github.TokenPool.get_token()
-    poll(token, state)
+    {:ok, new_state} = poll(token, state)
     schedule_poll()
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   defp schedule_poll do
@@ -47,21 +54,20 @@ defmodule Algora.Github.Poller do
   def poll(token, state) do
     Logger.debug("Polling #{state.repo_owner}/#{state.repo_name} events")
 
-    with {:ok, event_poller} <- get_or_create_poller(state.repo_owner, state.repo_name),
-         {:ok, events} <- collect_new_events(token, event_poller, state),
+    with {:ok, events} <- collect_new_events(token, state),
          Logger.debug("Processing #{length(events)} events"),
-         {:ok, _} <- process_batch(events, event_poller) do
-      {:ok, nil}
+         {:ok, updated_poller} <- process_batch(events, state.poller) do
+      {:ok, %{state | poller: updated_poller}}
     end
   end
 
-  defp filter_new_events(events, acc, event_poller, state) do
+  defp filter_new_events(events, acc, state) do
     {new_events, _total_count, has_more?} =
       Enum.reduce_while(
         events,
         {[], length(acc), true},
         fn event, {page_acc, total_count, _} ->
-          case should_continue_processing?(event, event_poller, state, total_count) do
+          case should_continue_processing?(event, state, total_count) do
             true -> {:cont, {[event | page_acc], total_count + 1, true}}
             false -> {:halt, {page_acc, total_count, false}}
           end
@@ -71,24 +77,24 @@ defmodule Algora.Github.Poller do
     {Enum.reverse(new_events), has_more?}
   end
 
-  defp should_continue_processing?(event, event_poller, state, total_count) do
+  defp should_continue_processing?(event, state, total_count) do
     cond do
-      event["id"] == event_poller.last_event_id -> false
-      event_poller.last_event_id != nil -> true
+      event["id"] == state.poller.last_event_id -> false
+      state.poller.last_event_id != nil -> true
       state.backfill_limit == :infinity -> true
       total_count + 1 > state.backfill_limit -> false
       true -> true
     end
   end
 
-  defp collect_new_events(token, event_poller, state, page \\ 1, acc \\ []) do
-    case fetch_events(token, event_poller, page) do
+  defp collect_new_events(token, state, page \\ 1, acc \\ []) do
+    case fetch_events(token, state, page) do
       {:ok, events} ->
-        {new_events, has_more?} = filter_new_events(events, acc, event_poller, state)
+        {new_events, has_more?} = filter_new_events(events, acc, state)
         acc = acc ++ new_events
 
         if has_more? do
-          collect_new_events(token, event_poller, state, page + 1, acc)
+          collect_new_events(token, state, page + 1, acc)
         else
           {:ok, acc}
         end
@@ -99,13 +105,13 @@ defmodule Algora.Github.Poller do
     end
   end
 
-  defp process_batch([], _event_poller), do: {:ok, nil}
+  defp process_batch([], event_poller), do: {:ok, event_poller}
 
   defp process_batch(events, event_poller) do
     Repo.transact(fn ->
       with :ok <- process_events(events),
-           {:ok, _} <- update_last_polled(event_poller, List.first(events)) do
-        {:ok, nil}
+           {:ok, updated_poller} <- update_last_polled(event_poller, List.first(events)) do
+        {:ok, updated_poller}
       end
     end)
   end
@@ -119,11 +125,11 @@ defmodule Algora.Github.Poller do
     end)
   end
 
-  defp fetch_events(token, event_poller, page) do
+  defp fetch_events(token, state, page) do
     Github.list_repository_events(
       token,
-      event_poller.repo_owner,
-      event_poller.repo_name,
+      state.repo_owner,
+      state.repo_name,
       per_page: @per_page,
       page: page
     )

@@ -36,6 +36,10 @@ defmodule Algora.Github.TokenPool do
   @impl true
   def handle_info(:refresh_tokens, state) do
     {:noreply,
-     %{state | tokens: Users.get_random_access_tokens(@total_tokens), current_token_index: 0}}
+     if length(state.tokens) < @total_tokens do
+       state
+     else
+       %{state | tokens: Users.get_random_access_tokens(@total_tokens), current_token_index: 0}
+     end}
   end
 end

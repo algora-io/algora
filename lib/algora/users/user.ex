@@ -206,9 +206,30 @@ defmodule Algora.Users.User do
 
   def org_registration_changeset(org, params) do
     org
-    |> cast(params, [:handle, :email, :website_url, :location, :bio])
+    |> cast(params, [
+      :email,
+      :display_name,
+      :bio,
+      :avatar_url,
+      :handle,
+      :domain,
+      :og_title,
+      :og_image_url,
+      :tech_stack,
+      :hourly_rate_min,
+      :hourly_rate_max,
+      :hours_per_week,
+      :website_url,
+      :twitter_url,
+      :github_url,
+      :youtube_url,
+      :twitch_url,
+      :discord_url,
+      :slack_url,
+      :linkedin_url,
+    ])
     |> generate_id()
-    |> validate_required([:handle, :email])
+    |> validate_required([:type, :handle, :email, :display_name])
   end
 
   def settings_changeset(%User{} = user, params) do

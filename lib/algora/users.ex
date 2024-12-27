@@ -248,7 +248,7 @@ defmodule Algora.Users do
     query =
       from(u in User,
         left_join: i in Identity,
-        on: i.provider == "github" and u.provider_id == ^to_string(info["id"]),
+        on: i.provider == "github" and i.provider_id == ^to_string(info["id"]),
         where: u.provider == "github" and u.provider_id == ^to_string(info["id"]),
         select: {u, i}
       )

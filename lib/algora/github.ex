@@ -80,4 +80,8 @@ defmodule Algora.Github do
   @impl true
   def create_issue_comment(token, owner, repo, number, body),
     do: client().create_issue_comment(token, owner, repo, number, body)
+
+  @impl true
+  def list_repository_events(token, owner, repo, opts \\ []),
+    do: client().list_repository_events(token, owner, repo, opts)
 end

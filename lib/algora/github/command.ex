@@ -118,6 +118,8 @@ defmodule Algora.Github.Command do
   defparsec(:parse_raw, command_sequence)
   defparsec(:money, amount)
 
+  def parse(nil), do: {:ok, []}
+
   def parse(input) when is_binary(input) do
     try do
       case parse_raw(input) do

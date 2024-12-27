@@ -312,6 +312,15 @@ defmodule Algora.Users do
     end
   end
 
+  def get_random_access_tokens(n) when is_integer(n) and n > 0 do
+    Identity
+    |> where([i], i.provider == "github" and not is_nil(i.provider_token))
+    |> order_by(fragment("RANDOM()"))
+    |> limit(^n)
+    |> select([i], i.provider_token)
+    |> Repo.all()
+  end
+
   defp update_github_token(%User{} = user, new_token) do
     identity =
       Repo.one!(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github"))

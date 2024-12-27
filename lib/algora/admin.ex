@@ -49,8 +49,7 @@ defmodule Algora.Admin do
   def backfill_repo(url) do
     with %URI{host: "api.github.com", path: "/repos/" <> path} <- URI.parse(url),
          [owner, repo] <- String.split(path, "/", trim: true),
-         {:ok, repo} <- Github.get_repository(token!(), owner, repo),
-         {:ok, repo} <- Workspace.fetch_repository(:github, %{token: token!(), id: repo["id"]}),
+         {:ok, repo} <- Workspace.ensure_repository(token!(), owner, repo),
          :ok <- update_tickets(url, repo.id) do
       {:ok, repo}
     else

@@ -23,7 +23,7 @@ defmodule Algora.Workspace.Ticket do
     timestamps()
   end
 
-  def github_changeset(repo, meta) do
+  def github_changeset(meta, repo) do
     params = %{
       provider_id: to_string(meta["id"]),
       title: meta["title"],

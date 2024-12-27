@@ -15,5 +15,6 @@ defmodule Algora.Repo.Migrations.CreateBounties do
     create index(:bounties, [:ticket_id])
     create index(:bounties, [:owner_id])
     create index(:bounties, [:creator_id])
+    create unique_index(:bounties, [:ticket_id, :owner_id])
   end
 end

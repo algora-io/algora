@@ -26,6 +26,10 @@ config :algora, AlgoraWeb.Endpoint,
   pubsub_server: Algora.PubSub,
   live_view: [signing_salt: "lTPawhId"]
 
+config :algora, Oban,
+  repo: Algora.Repo,
+  queues: [command_workers: 1]
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

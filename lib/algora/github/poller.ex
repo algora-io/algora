@@ -15,6 +15,14 @@ defmodule Algora.Github.Poller do
     GenServer.start_link(__MODULE__, opts)
   end
 
+  def pause(pid) do
+    GenServer.cast(pid, :pause)
+  end
+
+  def resume(pid) do
+    GenServer.cast(pid, :resume)
+  end
+
   # Server callbacks
   @impl true
   def init(opts) do
@@ -27,7 +35,8 @@ defmodule Algora.Github.Poller do
        repo_owner: repo_owner,
        repo_name: repo_name,
        backfill_limit: backfill_limit,
-       cursor: nil
+       cursor: nil,
+       paused: Mix.env() == :dev
      }, {:continue, :setup}}
   end
 
@@ -40,11 +49,27 @@ defmodule Algora.Github.Poller do
   end
 
   @impl true
+  def handle_info(:poll, %{paused: true} = state) do
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_info(:poll, state) do
     token = Github.TokenPool.get_token()
     {:ok, new_state} = poll(token, state)
     schedule_poll()
     {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_cast(:pause, state) do
+    {:noreply, %{state | paused: true}}
+  end
+
+  @impl true
+  def handle_cast(:resume, state) do
+    schedule_poll()
+    {:noreply, %{state | paused: false}}
   end
 
   defp schedule_poll do

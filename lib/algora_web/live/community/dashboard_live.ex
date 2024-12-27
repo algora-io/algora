@@ -349,7 +349,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
     socket
     |> assign(
       :tickets,
-      Bounties.TicketView.list(status: :open, tech_stack: [socket.assigns.tech_stack], limit: 20)
+      Bounties.TicketView.list(status: :open, tech_stack: [socket.assigns.tech_stack], limit: 100)
     )
   end
 

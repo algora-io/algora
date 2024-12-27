@@ -16,16 +16,11 @@ defmodule Algora.Github.Poller do
     GenServer.start_link(__MODULE__, opts)
   end
 
-  def get_token(supervisor) do
-    GenServer.call(supervisor, :get_token)
-  end
-
   # Server callbacks
   @impl true
   def init(opts) do
     repo_owner = Keyword.fetch!(opts, :repo_owner)
     repo_name = Keyword.fetch!(opts, :repo_name)
-    supervisor = Keyword.fetch!(opts, :supervisor)
     backfill_limit = Keyword.get(opts, :backfill_limit, @default_backfill_limit)
 
     schedule_poll()
@@ -34,15 +29,14 @@ defmodule Algora.Github.Poller do
      %{
        repo_owner: repo_owner,
        repo_name: repo_name,
-       supervisor: supervisor,
        backfill_limit: backfill_limit
      }}
   end
 
   @impl true
   def handle_info(:poll, state) do
-    token = get_token(state.supervisor)
-    poll(token, state.repo_owner, state.repo_name, backfill_limit: state.backfill_limit)
+    token = Github.TokenPool.get_token()
+    poll(token, state)
     schedule_poll()
     {:noreply, state}
   end
@@ -51,18 +45,18 @@ defmodule Algora.Github.Poller do
     Process.send_after(self(), :poll, @poll_interval)
   end
 
-  def poll(token, repo_owner, repo_name, opts \\ []) do
-    Logger.debug("Polling #{repo_owner}/#{repo_name} events")
-    backfill_limit = Keyword.get(opts, :backfill_limit, @default_backfill_limit)
+  def poll(token, state) do
+    Logger.debug("Polling #{state.repo_owner}/#{state.repo_name} events")
 
-    with {:ok, event_poller} <- get_or_create_poller(repo_owner, repo_name),
-         {:ok, events} <- collect_new_events(token, event_poller, backfill_limit),
+    with {:ok, event_poller} <- get_or_create_poller(state.repo_owner, state.repo_name),
+         {:ok, events} <- collect_new_events(token, event_poller, state),
+         dbg("Processing #{events.length} events"),
          {:ok, _} <- process_batch(events, event_poller) do
       {:ok, nil}
     end
   end
 
-  defp collect_new_events(token, event_poller, backfill_limit, page \\ 1, acc \\ []) do
+  defp collect_new_events(token, event_poller, state, page \\ 1, acc \\ []) do
     case fetch_events(token, event_poller, page) do
       {:ok, events} ->
         {new_events, _total_count, has_more} =
@@ -77,9 +71,9 @@ defmodule Algora.Github.Poller do
                   # Keep going if we're not in backfill mode
                   event_poller.last_event_id != nil -> true
                   # No limit for infinite backfill
-                  backfill_limit == :infinity -> true
+                  state.backfill_limit == :infinity -> true
                   # Respect backfill limit during initial load
-                  total_count + 1 > backfill_limit -> false
+                  total_count + 1 > state.backfill_limit -> false
                   # Otherwise continue
                   true -> true
                 end
@@ -95,7 +89,7 @@ defmodule Algora.Github.Poller do
         acc = acc ++ Enum.reverse(new_events)
 
         if has_more do
-          collect_new_events(token, event_poller, backfill_limit, page + 1, acc)
+          collect_new_events(token, event_poller, state, page + 1, acc)
         else
           {:ok, acc}
         end

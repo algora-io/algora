@@ -16,6 +16,7 @@ defmodule Algora.Application do
       {Phoenix.PubSub, name: Algora.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Algora.Finch},
+      Algora.Github.TokenPool,
       Algora.Github.PollerSupervisor,
       Algora.Stargazer,
       # Start to serve requests, typically the last entry

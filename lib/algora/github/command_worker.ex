@@ -9,6 +9,8 @@ defmodule Algora.Github.CommandWorker do
       |> Base.decode64!()
       |> :erlang.binary_to_term()
 
+    dbg(command)
+
     # TODO: run command
     :ok
   end

@@ -35,4 +35,16 @@ defmodule Algora.Github.PollerSupervisor do
 
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
+
+  def pause_all do
+    __MODULE__
+    |> DynamicSupervisor.which_children()
+    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.pause(pid) end)
+  end
+
+  def resume_all do
+    __MODULE__
+    |> DynamicSupervisor.which_children()
+    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.resume(pid) end)
+  end
 end

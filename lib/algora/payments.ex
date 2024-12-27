@@ -3,10 +3,66 @@ defmodule Algora.Payments do
 
   import Ecto.Query
 
-  alias Algora.Repo
+  alias Algora.MoneyUtils
   alias Algora.Payments.Customer
-  alias Algora.Payments.Transaction
   alias Algora.Payments.PaymentMethod
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Util
+
+  def create_stripe_session(recipient, amount) do
+    params = %{
+      mode: "payment",
+      billing_address_collection: "required",
+      line_items: build_line_items(recipient, amount),
+      invoice_creation: %{enabled: true},
+      # TODO: implement these pages
+      success_url: "http://localhost:4000/payment/success",
+      cancel_url: "http://localhost:4000/payment/canceled"
+    }
+
+    Stripe.Session.create(params)
+  end
+
+  defp build_line_items(recipient, amount) do
+    currency = to_string(amount.currency)
+
+    # TODO: implement sliding scale
+    platform_fee_pct = Decimal.new("0.19")
+    transaction_fee_pct = get_transaction_fee_pct()
+
+    [
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(amount),
+          currency: currency,
+          product_data: %{
+            name: "Payment to @#{recipient.provider_login}",
+            # TODO:
+            # description: nil,
+            images: [recipient.avatar_url]
+          }
+        },
+        quantity: 1
+      },
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, platform_fee_pct)),
+          currency: currency,
+          product_data: %{name: "Algora service fee (#{Util.format_pct(platform_fee_pct)})"}
+        },
+        quantity: 1
+      },
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, transaction_fee_pct)),
+          currency: currency,
+          product_data: %{name: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})"}
+        },
+        quantity: 1
+      }
+    ]
+  end
 
   def get_transaction_fee_pct(), do: Decimal.new("0.04")
 

@@ -3,7 +3,9 @@ defmodule Algora.Bounties do
 
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Tip
   alias Algora.Organizations.Member
+  alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Users
@@ -19,7 +21,12 @@ defmodule Algora.Bounties do
     Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
   end
 
-  @spec create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
+  @spec create_bounty(%{
+          creator: User.t(),
+          owner: User.t(),
+          amount: Money.t(),
+          ticket: Ticket.t()
+        }) ::
           {:ok, Bounty.t()} | {:error, atom()}
   def create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
     changeset =
@@ -59,6 +66,36 @@ defmodule Algora.Bounties do
     with {:ok, token} <- Users.get_access_token(creator),
          {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
       create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
+    else
+      {:error, _reason} = error -> error
+    end
+  end
+
+  @spec create_tip(%{
+          creator: User.t(),
+          owner: User.t(),
+          recipient: User.t(),
+          amount: Money.t()
+        }) ::
+          {:ok, Tip.t()} | {:error, atom()}
+  def create_tip(%{
+        creator: creator,
+        owner: owner,
+        recipient: recipient,
+        amount: amount
+      }) do
+    changeset =
+      Tip.changeset(%Tip{}, %{
+        amount: amount,
+        owner_id: owner.id,
+        creator_id: creator.id,
+        recipient_id: recipient.id
+      })
+
+    with {:ok, token} <- Users.get_access_token(creator),
+         {:ok, tip} <- Repo.insert(changeset),
+         {:ok, session} <- Payments.create_stripe_session(recipient, amount) do
+      {:ok, %{tip: tip, checkout_url: session.url}}
     else
       {:error, _reason} = error -> error
     end

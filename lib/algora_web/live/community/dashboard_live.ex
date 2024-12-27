@@ -1,8 +1,12 @@
 defmodule AlgoraWeb.Community.DashboardLive do
   use AlgoraWeb, :live_view
+
   import Ecto.Changeset
+
   alias Algora.Bounties
   alias Algora.Extensions.Ecto.Validations
+  alias Algora.Users
+  alias Algora.Workspace
 
   defmodule BountyForm do
     use Ecto.Schema
@@ -380,7 +384,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
            }) do
       {:noreply,
        socket
-       |> assign(:bounty_form, to_form(changeset))
        |> assign_achievements()
        |> put_flash(:info, "Bounty created")}
     else
@@ -402,12 +405,19 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> TipForm.changeset(params)
       |> Map.put(:action, :validate)
 
-    with %{valid?: true} <- changeset do
-      # TODO: implement
+    with %{valid?: true} <- changeset,
+         {:ok, token} <- Users.get_access_token(socket.assigns.current_user),
+         {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
+         {:ok, %{checkout_url: checkout_url}} <-
+           Bounties.create_tip(%{
+             creator: socket.assigns.current_user,
+             owner: socket.assigns.current_user,
+             recipient: recipient,
+             amount: get_field(changeset, :amount)
+           }) do
       {:noreply,
        socket
-       |> assign(:tip_form, to_form(changeset))
-       |> assign_achievements()}
+       |> redirect(external: checkout_url)}
     else
       %{valid?: false} ->
         {:noreply, socket |> assign(:tip_form, to_form(changeset))}

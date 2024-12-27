@@ -182,16 +182,37 @@ defmodule AlgoraWeb.UserAuth do
   defp login_code_ttl, do: 3600
   defp login_code_salt, do: "algora-login-code"
 
-  def generate_login_code(email) do
-    Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), email, max_age: login_code_ttl())
+  def generate_login_code(email, domain \\ nil, tech_stack) do
+    payload = "#{email}:#{domain || ""}:#{Enum.join(tech_stack, ":")}"
+    Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
   end
 
   def verify_login_code(code) do
-    Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl())
+    case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
+      {:ok, payload} ->
+        with [email, domain | tech_stack] <- String.split(payload, ":") do
+          {:ok, %{
+            email: email,
+            domain: domain || nil,
+            tech_stack: tech_stack || [],
+            token: code
+          }}
+        else
+          [email] ->
+            {:ok, %{email: email, token: code}}
+          _other ->
+            {:error, "invalid token payload"}
+        end
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   def login_path(email, token),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
+
+  def login_path(email, token, return_to),
+    do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"
 
   def login_email(email, token) do
     name = email |> String.split("@") |> List.first() |> String.capitalize()
@@ -211,7 +232,7 @@ defmodule AlgoraWeb.UserAuth do
 
     Or copy and paste this URL into your browser:
 
-    #{AlgoraWeb.Endpoint.url()}/#{login_path(email, token)}
+    #{AlgoraWeb.Endpoint.url()}/#{login_path(email, token, ~p"/onboarding/org")}
 
     If you didn't request this link, you can safely ignore this email.
 

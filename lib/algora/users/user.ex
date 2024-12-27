@@ -147,6 +147,8 @@ defmodule Algora.Users.User do
       |> validate_required([:email, :display_name, :handle])
       |> validate_handle()
       |> validate_email()
+      |> unique_constraint(:email)
+      |> unique_constraint(:handle)
       |> put_assoc(:identities, [identity_changeset])
     else
       %User{}
@@ -204,9 +206,22 @@ defmodule Algora.Users.User do
 
   def org_registration_changeset(org, params) do
     org
-    |> cast(params, [:handle, :email, :website_url, :location, :bio])
+    |> cast(params, [
+      :email,
+      :display_name,
+      :website_url,
+      :location,
+      :bio,
+      :avatar_url,
+      :handle,
+      :domain,
+      :tech_stack,
+      :hourly_rate_min,
+      :hourly_rate_max,
+    ])
     |> generate_id()
-    |> validate_required([:handle, :email])
+    |> validate_required([:type, :handle, :email, :display_name])
+    |> validate_email()
   end
 
   def settings_changeset(%User{} = user, params) do

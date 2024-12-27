@@ -261,7 +261,7 @@ defmodule Algora.Users do
   end
 
   def register_org(params) do
-    %User{} |> User.org_registration_changeset(params) |> Repo.insert()
+    User.org_registration_changeset(params) |> Repo.insert()
   end
 
   def create_user(info, primary_email, emails, token) do

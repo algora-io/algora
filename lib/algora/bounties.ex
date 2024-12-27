@@ -77,7 +77,7 @@ defmodule Algora.Bounties do
           recipient: User.t(),
           amount: Money.t()
         }) ::
-          {:ok, Tip.t()} | {:error, atom()}
+          {:ok, %{tip: Tip.t(), checkout_url: String.t()}} | {:error, atom()}
   def create_tip(%{
         creator: creator,
         owner: owner,

@@ -5,6 +5,7 @@ defmodule Algora.Github.Poller do
   alias Algora.Events
   alias Algora.Github
   alias Algora.Github.Command
+  alias Algora.Repo
 
   @per_page 10
   @poll_interval :timer.seconds(1)
@@ -48,46 +49,64 @@ defmodule Algora.Github.Poller do
   end
 
   def poll(token, repo_owner, repo_name) do
-    Logger.info("Polling #{repo_owner}/#{repo_name} events")
+    Logger.debug("Polling #{repo_owner}/#{repo_name} events")
 
-    {:ok, event_poller} = get_or_create_poller(repo_owner, repo_name)
-
-    events_to_process = collect_new_events(token, event_poller)
-
-    if events_to_process != [] do
-      Algora.Repo.transact(fn ->
-        process_events(events_to_process)
-        update_last_polled(event_poller, List.first(events_to_process))
-        {:ok, nil}
-      end)
-    else
+    with {:ok, event_poller} <- get_or_create_poller(repo_owner, repo_name),
+         {:ok, events} <- collect_new_events(token, event_poller),
+         {:ok, _} <- process_batch(events, event_poller) do
       {:ok, nil}
     end
   end
 
   defp collect_new_events(token, event_poller, page \\ 1, acc \\ []) do
-    {:ok, events} =
-      Github.list_repository_events(token, event_poller.repo_owner, event_poller.repo_name,
-        per_page: @per_page,
-        page: page
-      )
+    case fetch_events(token, event_poller, page) do
+      {:ok, events} ->
+        {new_events, old_events} =
+          Enum.split_while(events, fn event -> event["id"] != event_poller.last_event_id end)
 
-    {new_events, old_events} =
-      Enum.split_while(events, fn event -> event["id"] != event_poller.last_event_id end)
+        acc = acc ++ new_events
 
-    acc = acc ++ new_events
+        cond do
+          event_poller.last_event_id == nil -> {:ok, acc |> Enum.take(1)}
+          old_events != [] -> {:ok, acc}
+          length(events) < @per_page -> {:ok, acc}
+          true -> collect_new_events(token, event_poller, page + 1, acc)
+        end
 
-    cond do
-      event_poller.last_event_id == nil -> acc |> Enum.take(1)
-      old_events != [] -> acc
-      length(events) < @per_page -> acc
-      true -> collect_new_events(token, event_poller, page + 1, acc)
+      {:error, reason} = error ->
+        Logger.error("Failed to fetch repository events: #{inspect(reason)}")
+        error
     end
   end
 
+  defp process_batch([], _event_poller), do: {:ok, nil}
+
+  defp process_batch(events, event_poller) do
+    Repo.transact(fn ->
+      with :ok <- process_events(events),
+           {:ok, _} <- update_last_polled(event_poller, List.first(events)) do
+        {:ok, nil}
+      end
+    end)
+  end
+
   defp process_events(events) do
-    Enum.each(events, &process_event/1)
-    {:ok, nil}
+    Enum.reduce_while(events, :ok, fn event, _acc ->
+      case process_event(event) do
+        {:ok, _} -> {:cont, :ok}
+        error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp fetch_events(token, event_poller, page) do
+    Github.list_repository_events(
+      token,
+      event_poller.repo_owner,
+      event_poller.repo_name,
+      per_page: @per_page,
+      page: page
+    )
   end
 
   defp get_or_create_poller(repo_owner, repo_name) do
@@ -111,8 +130,6 @@ defmodule Algora.Github.Poller do
     })
   end
 
-  defp update_last_polled(_event_poller, _), do: :ok
-
   defp process_event(event) do
     body = extract_body(event)
 
@@ -126,13 +143,13 @@ defmodule Algora.Github.Poller do
             |> Base.encode64()
 
           %{event: event, command: encoded_command}
-          |> Algora.Github.CommandWorker.new()
+          |> Github.CommandWorker.new()
           |> Oban.insert()
         end)
 
       {:error, _} ->
         Logger.error("Failed to parse commands from event: #{inspect(event)}")
-        :ok
+        {:ok, nil}
     end
   end
 
@@ -150,5 +167,5 @@ defmodule Algora.Github.Poller do
     body
   end
 
-  defp extract_body(%{"type" => type}), do: nil
+  defp extract_body(_event), do: nil
 end

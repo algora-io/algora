@@ -9,7 +9,6 @@ defmodule Algora.Github.Poller do
 
   @per_page 10
   @poll_interval :timer.seconds(1)
-  @default_backfill_limit 1
 
   # Client API
   def start_link(opts) do
@@ -21,7 +20,7 @@ defmodule Algora.Github.Poller do
   def init(opts) do
     repo_owner = Keyword.fetch!(opts, :repo_owner)
     repo_name = Keyword.fetch!(opts, :repo_name)
-    backfill_limit = Keyword.get(opts, :backfill_limit, @default_backfill_limit)
+    backfill_limit = Keyword.get(opts, :backfill_limit, 1)
 
     schedule_poll()
 
@@ -50,45 +49,44 @@ defmodule Algora.Github.Poller do
 
     with {:ok, event_poller} <- get_or_create_poller(state.repo_owner, state.repo_name),
          {:ok, events} <- collect_new_events(token, event_poller, state),
-         dbg("Processing #{events.length} events"),
          {:ok, _} <- process_batch(events, event_poller) do
       {:ok, nil}
+    end
+  end
+
+  defp filter_new_events(events, acc, event_poller, state) do
+    {new_events, _total_count, has_more?} =
+      Enum.reduce_while(
+        events,
+        {[], length(acc), true},
+        fn event, {page_acc, total_count, _} ->
+          case should_continue_processing?(event, event_poller, state, total_count) do
+            true -> {:cont, {[event | page_acc], total_count + 1, true}}
+            false -> {:halt, {page_acc, total_count, false}}
+          end
+        end
+      )
+
+    {Enum.reverse(new_events), has_more?}
+  end
+
+  defp should_continue_processing?(event, event_poller, state, total_count) do
+    cond do
+      event["id"] == event_poller.last_event_id -> false
+      event_poller.last_event_id != nil -> true
+      state.backfill_limit == :infinity -> true
+      total_count + 1 > state.backfill_limit -> false
+      true -> true
     end
   end
 
   defp collect_new_events(token, event_poller, state, page \\ 1, acc \\ []) do
     case fetch_events(token, event_poller, page) do
       {:ok, events} ->
-        {new_events, _total_count, has_more} =
-          Enum.reduce_while(
-            events,
-            {[], length(acc), true},
-            fn event, {page_acc, total_count, _} ->
-              has_more =
-                cond do
-                  # Stop when we hit last processed event
-                  event["id"] == event_poller.last_event_id -> false
-                  # Keep going if we're not in backfill mode
-                  event_poller.last_event_id != nil -> true
-                  # No limit for infinite backfill
-                  state.backfill_limit == :infinity -> true
-                  # Respect backfill limit during initial load
-                  total_count + 1 > state.backfill_limit -> false
-                  # Otherwise continue
-                  true -> true
-                end
+        {new_events, has_more?} = filter_new_events(events, acc, event_poller, state)
+        acc = acc ++ new_events
 
-              if has_more do
-                {:cont, {[event | page_acc], total_count + 1, true}}
-              else
-                {:halt, {page_acc, total_count, false}}
-              end
-            end
-          )
-
-        acc = acc ++ Enum.reverse(new_events)
-
-        if has_more do
+        if has_more? do
           collect_new_events(token, event_poller, state, page + 1, acc)
         else
           {:ok, acc}

@@ -152,7 +152,9 @@ carver =
     }
   )
 
-for user <- [erich, richard, dinesh, gilfoyle, jared] do
+pied_piper_members = [erich, richard, dinesh, gilfoyle, jared]
+
+for user <- pied_piper_members do
   upsert!(
     :member,
     [:user_id, :org_id],
@@ -377,6 +379,22 @@ for {repo_name, issues} <- repos do
         amount: amount,
         status: if(paid, do: :paid, else: :open)
       })
+
+    if not claimed do
+      pied_piper_members
+      |> Enum.take_random(Enum.random(0..(length(pied_piper_members) - 1)))
+      |> Enum.each(fn member ->
+        amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
+
+        insert!(:bounty, %{
+          ticket_id: ticket.id,
+          owner_id: member.id,
+          creator_id: member.id,
+          amount: amount,
+          status: :open
+        })
+      end)
+    end
 
     if claimed do
       claim =

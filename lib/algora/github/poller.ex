@@ -52,10 +52,8 @@ defmodule Algora.Github.Poller do
   end
 
   def poll(token, state) do
-    Logger.debug("Polling #{state.repo_owner}/#{state.repo_name} events")
-
     with {:ok, events} <- collect_new_events(token, state),
-         Logger.debug("Processing #{length(events)} events"),
+         if(length(events) > 0, do: Logger.debug("Processing #{length(events)} events")),
          {:ok, updated_cursor} <- process_batch(events, state.cursor) do
       {:ok, %{state | cursor: updated_cursor}}
     end
@@ -156,13 +154,14 @@ defmodule Algora.Github.Poller do
     })
   end
 
-  defp process_event(event) do
+  def process_event(event) do
     {:ok, created_at, _} = DateTime.from_iso8601(event["created_at"])
     latency = DateTime.utc_now() |> DateTime.diff(created_at, :second)
     Logger.info("Latency: #{latency}s")
 
     body = extract_body(event)
 
+    # TODO: ensure each command succeeds
     case Command.parse(body) do
       {:ok, commands} ->
         commands
@@ -171,6 +170,8 @@ defmodule Algora.Github.Poller do
             command
             |> :erlang.term_to_binary()
             |> Base.encode64()
+
+          dbg(command)
 
           %{event: event, command: encoded_command}
           |> Github.CommandWorker.new()
@@ -185,15 +186,23 @@ defmodule Algora.Github.Poller do
 
   defp extract_body(%{
          "type" => "IssueCommentEvent",
-         "payload" => %{"comment" => %{"body" => body}}
-       }) do
+         "payload" => %{
+           "action" => action,
+           "comment" => %{"body" => body}
+         }
+       })
+       when action in ["created", "edited"] do
     body
   end
 
   defp extract_body(%{
          "type" => "IssuesEvent",
-         "payload" => %{"issue" => %{"body" => body}}
-       }) do
+         "payload" => %{
+           "action" => action,
+           "issue" => %{"body" => body}
+         }
+       })
+       when action in ["opened", "edited"] do
     body
   end
 

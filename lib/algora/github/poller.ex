@@ -9,6 +9,7 @@ defmodule Algora.Github.Poller do
 
   @per_page 10
   @poll_interval :timer.seconds(1)
+  @default_backfill_limit 1
 
   # Client API
   def start_link(opts) do
@@ -25,6 +26,7 @@ defmodule Algora.Github.Poller do
     repo_owner = Keyword.fetch!(opts, :repo_owner)
     repo_name = Keyword.fetch!(opts, :repo_name)
     supervisor = Keyword.fetch!(opts, :supervisor)
+    backfill_limit = Keyword.get(opts, :backfill_limit, @default_backfill_limit)
 
     schedule_poll()
 
@@ -32,14 +34,15 @@ defmodule Algora.Github.Poller do
      %{
        repo_owner: repo_owner,
        repo_name: repo_name,
-       supervisor: supervisor
+       supervisor: supervisor,
+       backfill_limit: backfill_limit
      }}
   end
 
   @impl true
   def handle_info(:poll, state) do
     token = get_token(state.supervisor)
-    poll(token, state.repo_owner, state.repo_name)
+    poll(token, state.repo_owner, state.repo_name, backfill_limit: state.backfill_limit)
     schedule_poll()
     {:noreply, state}
   end
@@ -48,29 +51,53 @@ defmodule Algora.Github.Poller do
     Process.send_after(self(), :poll, @poll_interval)
   end
 
-  def poll(token, repo_owner, repo_name) do
+  def poll(token, repo_owner, repo_name, opts \\ []) do
     Logger.debug("Polling #{repo_owner}/#{repo_name} events")
+    backfill_limit = Keyword.get(opts, :backfill_limit, @default_backfill_limit)
 
     with {:ok, event_poller} <- get_or_create_poller(repo_owner, repo_name),
-         {:ok, events} <- collect_new_events(token, event_poller),
+         {:ok, events} <- collect_new_events(token, event_poller, backfill_limit),
          {:ok, _} <- process_batch(events, event_poller) do
       {:ok, nil}
     end
   end
 
-  defp collect_new_events(token, event_poller, page \\ 1, acc \\ []) do
+  defp collect_new_events(token, event_poller, backfill_limit, page \\ 1, acc \\ []) do
     case fetch_events(token, event_poller, page) do
       {:ok, events} ->
-        {new_events, old_events} =
-          Enum.split_while(events, fn event -> event["id"] != event_poller.last_event_id end)
+        {new_events, _total_count, has_more} =
+          Enum.reduce_while(
+            events,
+            {[], length(acc), true},
+            fn event, {page_acc, total_count, _} ->
+              has_more =
+                cond do
+                  # Stop when we hit last processed event
+                  event["id"] == event_poller.last_event_id -> false
+                  # Keep going if we're not in backfill mode
+                  event_poller.last_event_id != nil -> true
+                  # No limit for infinite backfill
+                  backfill_limit == :infinity -> true
+                  # Respect backfill limit during initial load
+                  total_count + 1 > backfill_limit -> false
+                  # Otherwise continue
+                  true -> true
+                end
 
-        acc = acc ++ new_events
+              if has_more do
+                {:cont, {[event | page_acc], total_count + 1, true}}
+              else
+                {:halt, {page_acc, total_count, false}}
+              end
+            end
+          )
 
-        cond do
-          event_poller.last_event_id == nil -> {:ok, acc |> Enum.take(1)}
-          old_events != [] -> {:ok, acc}
-          length(events) < @per_page -> {:ok, acc}
-          true -> collect_new_events(token, event_poller, page + 1, acc)
+        acc = acc ++ Enum.reverse(new_events)
+
+        if has_more do
+          collect_new_events(token, event_poller, backfill_limit, page + 1, acc)
+        else
+          {:ok, acc}
         end
 
       {:error, reason} = error ->

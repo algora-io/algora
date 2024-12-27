@@ -10,57 +10,18 @@ defmodule Algora.Payments do
   alias Algora.Repo
   alias Algora.Util
 
-  def create_stripe_session(recipient, amount) do
+  def create_stripe_session(line_items, metadata) do
     params = %{
       mode: "payment",
       billing_address_collection: "required",
-      line_items: build_line_items(recipient, amount),
+      line_items: line_items,
       invoice_creation: %{enabled: true},
-      success_url: "#{AlgoraWeb.Endpoint.url()}payment/success",
-      cancel_url: "#{AlgoraWeb.Endpoint.url()}payment/canceled"
+      success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
+      cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
+      metadata: metadata
     }
 
     Stripe.Session.create(params)
-  end
-
-  defp build_line_items(recipient, amount) do
-    currency = to_string(amount.currency)
-
-    # TODO: implement sliding scale
-    platform_fee_pct = Decimal.new("0.19")
-    transaction_fee_pct = get_transaction_fee_pct()
-
-    [
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(amount),
-          currency: currency,
-          product_data: %{
-            name: "Payment to @#{recipient.provider_login}",
-            # TODO:
-            # description: nil,
-            images: [recipient.avatar_url]
-          }
-        },
-        quantity: 1
-      },
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, platform_fee_pct)),
-          currency: currency,
-          product_data: %{name: "Algora service fee (#{Util.format_pct(platform_fee_pct)})"}
-        },
-        quantity: 1
-      },
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, transaction_fee_pct)),
-          currency: currency,
-          product_data: %{name: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})"}
-        },
-        quantity: 1
-      }
-    ]
   end
 
   def get_transaction_fee_pct(), do: Decimal.new("0.04")

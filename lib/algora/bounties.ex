@@ -1,15 +1,20 @@
 defmodule Algora.Bounties do
+  import Ecto.Changeset
   import Ecto.Query
+  import Algora.Validators
 
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Tip
+  alias Algora.FeeTier
+  alias Algora.MoneyUtils
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Users
   alias Algora.Users.User
+  alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Ticket
 
@@ -77,7 +82,7 @@ defmodule Algora.Bounties do
           recipient: User.t(),
           amount: Money.t()
         }) ::
-          {:ok, %{tip: Tip.t(), checkout_url: String.t()}} | {:error, atom()}
+          {:ok, String.t()} | {:error, atom()}
   def create_tip(%{
         creator: creator,
         owner: owner,
@@ -92,13 +97,175 @@ defmodule Algora.Bounties do
         recipient_id: recipient.id
       })
 
-    with {:ok, token} <- Users.get_access_token(creator),
-         {:ok, tip} <- Repo.insert(changeset),
-         {:ok, session} <- Payments.create_stripe_session(recipient, amount) do
-      {:ok, %{tip: tip, checkout_url: session.url}}
-    else
-      {:error, _reason} = error -> error
-    end
+    # Initialize transaction IDs
+    charge_id = Nanoid.generate()
+    debit_id = Nanoid.generate()
+    credit_id = Nanoid.generate()
+
+    # Calculate fees
+    currency = to_string(amount.currency)
+    total_paid = Payments.get_total_paid(owner.id, recipient.id)
+    platform_fee_pct = FeeTier.calculate_fee_percentage(total_paid)
+    transaction_fee_pct = Payments.get_transaction_fee_pct()
+
+    platform_fee = Money.mult!(amount, platform_fee_pct)
+    transaction_fee = Money.mult!(amount, transaction_fee_pct)
+    total_fee = Money.add!(platform_fee, transaction_fee)
+    gross_amount = Money.add!(amount, total_fee)
+
+    line_items = [
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(amount),
+          currency: currency,
+          product_data: %{
+            name: "Payment to @#{recipient.provider_login}",
+            # TODO:
+            # description: nil,
+            images: [recipient.avatar_url]
+          }
+        },
+        quantity: 1
+      },
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, platform_fee_pct)),
+          currency: currency,
+          product_data: %{name: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})"}
+        },
+        quantity: 1
+      },
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, transaction_fee_pct)),
+          currency: currency,
+          product_data: %{name: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})"}
+        },
+        quantity: 1
+      }
+    ]
+
+    Repo.transact(fn ->
+      with {:ok, tip} <- Repo.insert(changeset),
+           {:ok, charge} <-
+             initialize_charge(%{
+               id: charge_id,
+               tip: tip,
+               user_id: creator.id,
+               gross_amount: gross_amount,
+               net_amount: amount,
+               total_fee: total_fee,
+               line_items: line_items
+             }),
+           {:ok, debit} <-
+             initialize_debit(%{
+               id: debit_id,
+               tip: tip,
+               amount: amount,
+               user_id: creator.id,
+               linked_transaction_id: credit_id
+             }),
+           {:ok, credit} <-
+             initialize_credit(%{
+               id: credit_id,
+               tip: tip,
+               amount: amount,
+               user_id: recipient.id,
+               linked_transaction_id: debit_id
+             }),
+           {:ok, session} <-
+             Payments.create_stripe_session(line_items, %{
+               charge_id: charge.id,
+               debit_id: debit.id,
+               credit_id: credit.id
+             }) do
+        {:ok, session.url}
+      end
+    end)
+  end
+
+  defp initialize_charge(%{
+         id: id,
+         tip: tip,
+         user_id: user_id,
+         gross_amount: gross_amount,
+         net_amount: net_amount,
+         total_fee: total_fee,
+         line_items: line_items
+       }) do
+    %Transaction{}
+    |> change(%{
+      id: id,
+      provider: "stripe",
+      type: :charge,
+      status: :initialized,
+      tip_id: tip.id,
+      user_id: user_id,
+      gross_amount: gross_amount,
+      net_amount: net_amount,
+      total_fee: total_fee,
+      line_items: line_items
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> validate_positive(:total_fee)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
+  defp initialize_debit(%{
+         id: id,
+         tip: tip,
+         amount: amount,
+         user_id: user_id,
+         linked_transaction_id: linked_transaction_id
+       }) do
+    %Transaction{}
+    |> change(%{
+      id: id,
+      provider: "stripe",
+      type: :debit,
+      status: :initialized,
+      tip_id: tip.id,
+      user_id: user_id,
+      gross_amount: amount,
+      net_amount: amount,
+      total_fee: Money.zero(:USD),
+      linked_transaction_id: linked_transaction_id
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
+  defp initialize_credit(%{
+         id: id,
+         tip: tip,
+         amount: amount,
+         user_id: user_id,
+         linked_transaction_id: linked_transaction_id
+       }) do
+    %Transaction{}
+    |> change(%{
+      id: id,
+      provider: "stripe",
+      type: :credit,
+      status: :initialized,
+      tip_id: tip.id,
+      user_id: user_id,
+      gross_amount: amount,
+      net_amount: amount,
+      total_fee: Money.zero(:USD),
+      linked_transaction_id: linked_transaction_id
+    })
+    |> validate_positive(:gross_amount)
+    |> validate_positive(:net_amount)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
   end
 
   def base_query, do: Bounty

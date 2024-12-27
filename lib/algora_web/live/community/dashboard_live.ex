@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.Community.DashboardLive do
   use AlgoraWeb, :live_view
 
+  require Logger
+
   import Ecto.Changeset
 
   alias Algora.Bounties
@@ -408,7 +410,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
     with %{valid?: true} <- changeset,
          {:ok, token} <- Users.get_access_token(socket.assigns.current_user),
          {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
-         {:ok, %{checkout_url: checkout_url}} <-
+         {:ok, checkout_url} <-
            Bounties.create_tip(%{
              creator: socket.assigns.current_user,
              owner: socket.assigns.current_user,
@@ -422,7 +424,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
       %{valid?: false} ->
         {:noreply, socket |> assign(:tip_form, to_form(changeset))}
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Failed to create tip: #{inspect(reason)}")
         {:noreply, socket |> put_flash(:error, "Something went wrong")}
     end
   end

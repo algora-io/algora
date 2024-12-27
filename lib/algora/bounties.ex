@@ -175,9 +175,13 @@ defmodule Algora.Bounties do
              }),
            {:ok, session} <-
              Payments.create_stripe_session(line_items, %{
-               charge_id: charge.id,
-               debit_id: debit.id,
-               credit_id: credit.id
+               # Mandatory for some countries like India
+               description: "Tip payment for OSS contributions",
+               metadata: %{
+                 charge_id: charge.id,
+                 debit_id: debit.id,
+                 credit_id: credit.id
+               }
              }) do
         {:ok, session.url}
       end

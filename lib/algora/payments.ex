@@ -10,7 +10,7 @@ defmodule Algora.Payments do
   alias Algora.Repo
   alias Algora.Util
 
-  def create_stripe_session(line_items, metadata) do
+  def create_stripe_session(line_items, payment_intent_data) do
     params = %{
       mode: "payment",
       billing_address_collection: "required",
@@ -18,7 +18,7 @@ defmodule Algora.Payments do
       invoice_creation: %{enabled: true},
       success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
       cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
-      metadata: metadata
+      payment_intent_data: payment_intent_data
     }
 
     Stripe.Session.create(params)

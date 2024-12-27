@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
   require Logger
 
   import Ecto.Changeset
+  import AlgoraWeb.Components.Experts
 
   alias Algora.Bounties
   alias Algora.Extensions.Ecto.Validations
@@ -96,7 +97,9 @@ defmodule AlgoraWeb.Community.DashboardLive do
         title={"#{@tech_stack} experts"}
         subtitle={"View all #{@tech_stack} experts on Algora"}
       >
-        {experts(assigns)}
+        <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
+          <.experts experts={@experts} />
+        </ul>
       </.section>
     </div>
     {sidebar(assigns)}
@@ -225,72 +228,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
     """
   end
 
-  defp experts(assigns) do
-    ~H"""
-    <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
-      <%= for expert <- @experts do %>
-        <li>
-          <a href={"https://github.com/#{expert["github_handle"]}"} target="_blank" rel="noopener">
-            <div class="group/card relative h-full rounded-xl border border-white/10 bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 transition-all hover:border-white/15 bg-purple-200/[5%] hover:bg-purple-200/[7.5%]">
-              <div class="pointer-events-none">
-                <div class="absolute inset-0 z-0 opacity-0 transition-opacity [mask-image:linear-gradient(black,transparent)] group-hover/card:opacity-100">
-                </div>
-                <div
-                  class="absolute inset-0 z-10 bg-gradient-to-br via-white/[2%] opacity-0 transition-opacity group-hover/card:opacity-100"
-                  style="mask-image: radial-gradient(240px at 476px 41.4px, white, transparent);"
-                >
-                </div>
-                <div
-                  class="absolute inset-0 z-10 opacity-0 mix-blend-overlay transition-opacity group-hover/card:opacity-100"
-                  style="mask-image: radial-gradient(240px at 476px 41.4px, white, transparent);"
-                >
-                </div>
-              </div>
-              <div class="relative flex flex-col items-center overflow-hidden px-5 py-6">
-                <span class="relative shrink-0 overflow-hidden flex h-16 w-16 items-center justify-center rounded-full sm:h-24 sm:w-24">
-                  <img
-                    class="aspect-square h-full w-full"
-                    alt={expert["name"]}
-                    src={expert["avatar_url"]}
-                  />
-                </span>
-                <div class="pt-2 flex flex-col items-center gap-2 text-center">
-                  <div>
-                    <span class="block text-lg font-semibold text-white sm:text-xl">
-                      {expert["name"]}
-                    </span>
-
-                    <div class="pt-1 flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-xs text-gray-300 sm:text-sm">
-                      <div :if={expert["twitter_handle"]} class="flex items-center gap-1">
-                        <.icon name="tabler-brand-twitter" class="h-4 w-4" />
-                        <span class="whitespace-nowrap">{expert["twitter_handle"]}</span>
-                      </div>
-                      <div :if={expert["location"]} class="flex items-center gap-1">
-                        <.icon name="tabler-map-pin" class="h-4 w-4" />
-                        <span class="whitespace-nowrap">{expert["location"]}</span>
-                      </div>
-                      <div :if={expert["company"]} class="flex items-center gap-1">
-                        <.icon name="tabler-building" class="h-4 w-4" />
-                        <span class="whitespace-nowrap">
-                          {expert["company"] |> String.trim_leading("@")}
-                        </span>
-                      </div>
-                    </div>
-
-                    <span class="pt-2 text-xs text-gray-300 sm:text-sm line-clamp-3">
-                      {expert["bio"]}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a>
-        </li>
-      <% end %>
-    </ul>
-    """
-  end
-
   defp sidebar(assigns) do
     ~H"""
     <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8 scrollbar-thin">
@@ -307,26 +244,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </ol>
       </nav>
     </aside>
-    """
-  end
-
-  attr :title, :string, default: nil
-  attr :subtitle, :string, default: nil
-  slot :inner_block
-
-  defp section(assigns) do
-    ~H"""
-    <div class="relative h-full max-w-5xl mx-auto p-6">
-      <div :if={@title} class="flex justify-between px-6">
-        <div class="flex flex-col space-y-1.5">
-          <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
-          <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>
-        </div>
-      </div>
-      <div class="px-6 pt-6">
-        {render_slot(@inner_block)}
-      </div>
-    </div>
     """
   end
 
@@ -448,18 +365,5 @@ defmodule AlgoraWeb.Community.DashboardLive do
       %{status: :upcoming, name: "Contract a #{socket.assigns.tech_stack} developer"},
       %{status: :upcoming, name: "Complete a contract"}
     ])
-  end
-
-  # TODO: implement this
-  defp list_experts() do
-    experts_file = :code.priv_dir(:algora) |> Path.join("dev/swift_experts.json")
-
-    with true <- File.exists?(experts_file),
-         {:ok, contents} <- File.read(experts_file),
-         {:ok, experts} <- Jason.decode(contents) do
-      experts
-    else
-      _ -> []
-    end
   end
 end

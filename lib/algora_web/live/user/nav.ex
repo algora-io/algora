@@ -21,6 +21,7 @@ defmodule AlgoraWeb.User.Nav do
         {User.SettingsLive, _} -> :settings
         {User.TransactionsLive, _} -> :transactions
         {User.InstallationsLive, _} -> :installations
+        {AlgoraWeb.ExpertsLive, _} -> :experts
         {_, _} -> nil
       end
 

@@ -17,6 +17,15 @@
         </li>
         <li>
           <.link
+            navigate={~p"/experts"}
+            class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :experts, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
+          >
+            <.icon name="tabler-star" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Experts</span>
+          </.link>
+        </li>
+        <li>
+          <.link
             navigate={~p"/user/transactions"}
             class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :transactions, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
           >

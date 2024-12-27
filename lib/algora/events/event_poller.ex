@@ -1,0 +1,23 @@
+defmodule Algora.Events.EventPoller do
+  use Algora.Schema
+  import Ecto.Changeset
+
+  schema "event_pollers" do
+    field :provider, :string
+    field :repo_owner, :string
+    field :repo_name, :string
+    field :last_event_id, :string
+    field :last_polled_at, :utc_datetime_usec
+
+    timestamps()
+  end
+
+  @doc false
+  def changeset(event_poller, attrs) do
+    event_poller
+    |> cast(attrs, [:provider, :repo_owner, :repo_name, :last_event_id, :last_polled_at])
+    |> generate_id()
+    |> validate_required([:provider, :repo_owner, :repo_name])
+    |> unique_constraint([:provider, :repo_owner, :repo_name])
+  end
+end

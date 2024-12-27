@@ -97,12 +97,23 @@ defmodule Algora.Users.User do
     |> Enum.reduce(struct, &MoneyUtils.ensure_money_field(&2, &1))
   end
 
-  def org_registration_changeset(params) do
-    %User{}
-    |> cast(params, [:email])
+  def org_registration_changeset(org, params) do
+    org
+    |> cast(params, [
+      :email,
+      :display_name,
+      :bio,
+      :avatar_url,
+      :handle,
+      :domain,
+      :og_title,
+      :og_image_url,
+      :tech_stack,
+      :hourly_rate_min,
+      :hourly_rate_max,
+    ])
     |> generate_id()
-    |> validate_required([:email])
-    |> validate_email()
+    |> validate_required([:type, :handle, :email, :display_name])
   end
 
   @doc """
@@ -202,34 +213,6 @@ defmodule Algora.Users.User do
       |> change()
       |> Map.put(:valid?, false)
     end
-  end
-
-  def org_registration_changeset(org, params) do
-    org
-    |> cast(params, [
-      :email,
-      :display_name,
-      :bio,
-      :avatar_url,
-      :handle,
-      :domain,
-      :og_title,
-      :og_image_url,
-      :tech_stack,
-      :hourly_rate_min,
-      :hourly_rate_max,
-      :hours_per_week,
-      :website_url,
-      :twitter_url,
-      :github_url,
-      :youtube_url,
-      :twitch_url,
-      :discord_url,
-      :slack_url,
-      :linkedin_url,
-    ])
-    |> generate_id()
-    |> validate_required([:type, :handle, :email, :display_name])
   end
 
   def settings_changeset(%User{} = user, params) do

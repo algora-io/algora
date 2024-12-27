@@ -27,16 +27,16 @@ defmodule Algora.Github.Poller do
        repo_owner: repo_owner,
        repo_name: repo_name,
        backfill_limit: backfill_limit,
-       poller: nil
+       cursor: nil
      }, {:continue, :initialize}}
   end
 
   @impl true
   def handle_continue(:initialize, state) do
-    {:ok, poller} = get_or_create_poller(state.repo_owner, state.repo_name)
+    {:ok, cursor} = get_or_create_cursor(state.repo_owner, state.repo_name)
     schedule_poll()
 
-    {:noreply, %{state | poller: poller}}
+    {:noreply, %{state | cursor: cursor}}
   end
 
   @impl true
@@ -56,8 +56,8 @@ defmodule Algora.Github.Poller do
 
     with {:ok, events} <- collect_new_events(token, state),
          Logger.debug("Processing #{length(events)} events"),
-         {:ok, updated_poller} <- process_batch(events, state.poller) do
-      {:ok, %{state | poller: updated_poller}}
+         {:ok, updated_cursor} <- process_batch(events, state.cursor) do
+      {:ok, %{state | cursor: updated_cursor}}
     end
   end
 
@@ -79,8 +79,8 @@ defmodule Algora.Github.Poller do
 
   defp should_continue_processing?(event, state, total_count) do
     cond do
-      event["id"] == state.poller.last_event_id -> false
-      state.poller.last_event_id != nil -> true
+      event["id"] == state.cursor.last_event_id -> false
+      state.cursor.last_event_id != nil -> true
       state.backfill_limit == :infinity -> true
       total_count + 1 > state.backfill_limit -> false
       true -> true
@@ -105,13 +105,13 @@ defmodule Algora.Github.Poller do
     end
   end
 
-  defp process_batch([], event_poller), do: {:ok, event_poller}
+  defp process_batch([], event_cursor), do: {:ok, event_cursor}
 
-  defp process_batch(events, event_poller) do
+  defp process_batch(events, event_cursor) do
     Repo.transact(fn ->
       with :ok <- process_events(events),
-           {:ok, updated_poller} <- update_last_polled(event_poller, List.first(events)) do
-        {:ok, updated_poller}
+           {:ok, updated_cursor} <- update_last_polled(event_cursor, List.first(events)) do
+        {:ok, updated_cursor}
       end
     end)
   end
@@ -135,22 +135,22 @@ defmodule Algora.Github.Poller do
     )
   end
 
-  defp get_or_create_poller(repo_owner, repo_name) do
-    case Events.get_event_poller("github", repo_owner, repo_name) do
+  defp get_or_create_cursor(repo_owner, repo_name) do
+    case Events.get_event_cursor("github", repo_owner, repo_name) do
       nil ->
-        Events.create_event_poller(%{
+        Events.create_event_cursor(%{
           provider: "github",
           repo_owner: repo_owner,
           repo_name: repo_name
         })
 
-      event_poller ->
-        {:ok, event_poller}
+      event_cursor ->
+        {:ok, event_cursor}
     end
   end
 
-  defp update_last_polled(event_poller, %{"id" => event_id}) when not is_nil(event_id) do
-    Events.update_event_poller(event_poller, %{
+  defp update_last_polled(event_cursor, %{"id" => event_id}) when not is_nil(event_id) do
+    Events.update_event_cursor(event_cursor, %{
       last_event_id: event_id,
       last_polled_at: DateTime.utc_now()
     })

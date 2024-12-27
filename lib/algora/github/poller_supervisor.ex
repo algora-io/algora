@@ -15,9 +15,9 @@ defmodule Algora.Github.PollerSupervisor do
   end
 
   def start_children do
-    Events.list_pollers()
+    Events.list_cursors()
     |> Task.async_stream(
-      fn poller -> add_repo(poller.repo_owner, poller.repo_name) end,
+      fn cursor -> add_repo(cursor.repo_owner, cursor.repo_name) end,
       max_concurrency: 100,
       ordered: false
     )

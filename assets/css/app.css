@@ -195,8 +195,8 @@ input:-webkit-autofill:active {
     --destructive-foreground: 255 0% 90%;
     --success: 161 93.5% 30.4%;
     --success-foreground: 0 0% 100%;
-    --info: 217 10% 85%;
-    --info-foreground: 255 0% 35%;
+    --warning: 217 10% 85%;
+    --warning-foreground: 255 0% 35%;
     --border: 255 20% 50%;
     --input: 255 20% 18%;
     --ring: 161 93.5% 30.4%;
@@ -217,12 +217,12 @@ input:-webkit-autofill:active {
     --muted-foreground: 255 0% 60%;
     --accent: 217 10% 15%;
     --accent-foreground: 255 0% 90%;
-    --destructive: 0 50% 30%;
-    --destructive-foreground: 255 0% 90%;
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 0 0% 100%;
     --success: 158 64% 52%;
     --success-foreground: 0 0% 100%;
-    --info: 217 10% 15%;
-    --info-foreground: 255 0% 60%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 0 0% 100%;
     --border: 255 20% 18%;
     --input: 255 20% 18%;
     --ring: 161 93.5% 30.4%;

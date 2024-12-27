@@ -311,7 +311,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
       {:error, :already_exists} ->
         {:noreply,
-         socket |> put_flash(:note, "You have already created a bounty for this ticket")}
+         socket |> put_flash(:warning, "You have already created a bounty for this ticket")}
 
       {:error, _reason} ->
         {:noreply, socket |> put_flash(:error, "Something went wrong")}

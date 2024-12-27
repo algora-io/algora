@@ -380,7 +380,7 @@ defmodule AlgoraWeb.User.DashboardLive do
                 {@contract.client.bio}
               </div>
               <div class="group flex items-center gap-2">
-                <div class="font-display text-xl font-semibold text-success">
+                <div :if={@contract.status != :draft} class="font-display text-xl font-semibold text-success">
                   {Money.to_string!(@contract.hourly_rate)}/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
@@ -401,7 +401,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           <div class="flex flex-col items-end gap-3">
             <div class="text-right">
               <div class="text-sm text-muted-foreground whitespace-nowrap">Total contract value</div>
-              <div class="font-display text-lg font-semibold text-foreground">
+              <div :if={@contract.status != :draft}  class="font-display text-lg font-semibold text-foreground">
                 {Money.to_string!(Money.mult!(@contract.hourly_rate, @contract.hours_per_week))} / wk
               </div>
             </div>

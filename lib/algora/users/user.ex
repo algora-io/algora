@@ -205,8 +205,6 @@ defmodule Algora.Users.User do
       :avatar_url,
       :handle,
       :domain,
-      :og_title,
-      :og_image_url,
       :tech_stack,
       :hourly_rate_min,
       :hourly_rate_max,

@@ -110,4 +110,12 @@ defmodule Algora.Payments do
       {user_id, amount} -> {user_id, amount}
     end
   end
+
+  def list_transactions(criteria \\ []) do
+    Transaction
+    |> where([t], ^Enum.to_list(criteria))
+    |> preload(linked_transaction: :user)
+    |> order_by([t], desc: t.inserted_at)
+    |> Repo.all()
+  end
 end

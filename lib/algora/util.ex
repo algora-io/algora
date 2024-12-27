@@ -24,6 +24,14 @@ defmodule Algora.Util do
     end
   end
 
+  def timestamp(date, nil) do
+    date |> Calendar.strftime("%Y-%m-%d %I:%M %p UTC")
+  end
+
+  def timestamp(date, timezone) do
+    date |> DateTime.shift_zone!(timezone) |> Calendar.strftime("%Y-%m-%d %I:%M %p")
+  end
+
   def format_pct(percentage) do
     percentage
     |> Decimal.mult(100)

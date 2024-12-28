@@ -180,28 +180,30 @@ defmodule Algora.Github.Poller.Events do
     })
   end
 
-  def process_event(event) do
-    {:ok, created_at, _} = DateTime.from_iso8601(event["created_at"])
-    latency = DateTime.utc_now() |> DateTime.diff(created_at, :second)
-    Logger.info("Latency: #{latency}s")
+  defp process_event(%{"updated_at" => updated_at} = event) do
+    with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
+         body = extract_body(event),
+         {:ok, commands} <- Command.parse(body) do
+      Logger.info("Latency: #{DateTime.diff(DateTime.utc_now(), updated_at, :second)}s")
 
-    body = extract_body(event)
-
-    # TODO: ensure each command succeeds
-    case Command.parse(body) do
-      {:ok, commands} ->
-        commands
-        |> Enum.each(fn command ->
-          dbg(command)
-
+      Enum.reduce_while(commands, :ok, fn command, _acc ->
+        res =
           %{event: event, command: Util.term_to_base64(command)}
           |> Github.Poller.EventConsumer.new()
           |> Oban.insert()
-        end)
 
-      {:error, _} ->
-        Logger.error("Failed to parse commands from event: #{inspect(event)}")
-        {:ok, nil}
+        case res do
+          {:ok, _job} -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    else
+      {:error, reason} ->
+        Logger.error(
+          "Failed to parse commands from event: #{inspect(event)}. Reason: #{inspect(reason)}"
+        )
+
+        :ok
     end
   end
 

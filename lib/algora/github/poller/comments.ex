@@ -148,22 +148,16 @@ defmodule Algora.Github.Poller.Comments do
     end
   end
 
-  def process_comment(
-        %{"updated_at" => updated_at, "body" => body, "html_url" => html_url} = comment
-      ) do
-    {:ok, updated_at, _} = DateTime.from_iso8601(updated_at)
-    {:ok, [ticket_ref: ticket_ref], _, _, _, _} = Parser.full_ticket_ref(html_url)
+  defp process_comment(
+         %{"updated_at" => updated_at, "body" => body, "html_url" => html_url} = comment
+       ) do
+    with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
+         {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(html_url),
+         {:ok, commands} <- Command.parse(body) do
+      Logger.info("Latency: #{DateTime.diff(DateTime.utc_now(), updated_at, :second)}s")
 
-    latency = DateTime.utc_now() |> DateTime.diff(updated_at, :second)
-    Logger.info("Latency: #{latency}s")
-
-    # TODO: ensure each command succeeds
-    case Command.parse(body) do
-      {:ok, commands} ->
-        commands
-        |> Enum.each(fn command ->
-          dbg(command)
-
+      Enum.reduce_while(commands, :ok, fn command, _acc ->
+        res =
           %{
             comment: comment,
             command: Util.term_to_base64(command),
@@ -171,11 +165,19 @@ defmodule Algora.Github.Poller.Comments do
           }
           |> Github.Poller.CommentConsumer.new()
           |> Oban.insert()
-        end)
 
-      {:error, _} ->
-        Logger.error("Failed to parse commands from comment: #{inspect(comment)}")
-        {:ok, nil}
+        case res do
+          {:ok, _job} -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    else
+      {:error, reason} ->
+        Logger.error(
+          "Failed to parse commands from comment: #{inspect(comment)}. Reason: #{inspect(reason)}"
+        )
+
+        :ok
     end
   end
 end

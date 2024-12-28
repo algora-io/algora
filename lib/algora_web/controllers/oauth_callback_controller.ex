@@ -43,9 +43,13 @@ defmodule AlgoraWeb.OAuthCallbackController do
     redirect(conn, to: "/")
   end
 
-  def new(conn, %{"provider" => "email", "email" => email, "token" => token, "return_to" => "/onboarding/org"}) do
+  def new(conn, %{
+        "provider" => "email",
+        "email" => email,
+        "token" => token,
+        "return_to" => "/onboarding/org"
+      }) do
     with {:ok, %{email: ^email} = login_token} <- AlgoraWeb.UserAuth.verify_login_code(token) do
-
       conn
       |> put_session(:onboarding_email, login_token.email)
       |> put_session(:onboarding_domain, login_token.domain)
@@ -65,7 +69,6 @@ defmodule AlgoraWeb.OAuthCallbackController do
   def new(conn, %{"provider" => "email", "email" => email, "token" => token} = params) do
     with {:ok, %{email: ^email}} <- AlgoraWeb.UserAuth.verify_login_code(token),
          {:ok, user} <- get_or_register_user(email) do
-
       conn =
         if params["return_to"] do
           conn |> put_session(:user_return_to, params["return_to"])

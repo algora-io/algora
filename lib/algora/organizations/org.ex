@@ -34,7 +34,7 @@ defmodule Algora.Organizations.Org do
       :twitch_url,
       :discord_url,
       :slack_url,
-      :linkedin_url,
+      :linkedin_url
     ])
     |> generate_id()
     |> validate_required([:type, :handle, :display_name])

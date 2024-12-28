@@ -101,7 +101,7 @@ defmodule Algora.Contracts.Contract do
       :start_date,
       :end_date,
       :original_contract_id,
-      :client_id,
+      :client_id
     ])
     |> validate_required([
       :status,
@@ -109,7 +109,7 @@ defmodule Algora.Contracts.Contract do
       :hourly_rate_max,
       :hours_per_week,
       :start_date,
-      :client_id,
+      :client_id
     ])
     |> validate_number(:hours_per_week, greater_than: 0)
     |> foreign_key_constraint(:client_id)

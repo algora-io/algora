@@ -11,16 +11,20 @@ defmodule Mix.Tasks.DomainBlacklist do
 
     Finch.start_link(name: :blacklist)
     path = Path.join(:code.priv_dir(:algora), "domain_blacklist.txt")
-    {{y,m,d}, _time} = :calendar.local_time
+    {{y, m, d}, _time} = :calendar.local_time()
+
     case File.stat(path) do
-      {:ok, %{mtime: {{my,mm,md} = mdate, _mtime}}} when my < y or mm < m or md + 7 < d ->
+      {:ok, %{mtime: {{my, mm, md} = mdate, _mtime}}} when my < y or mm < m or md + 7 < d ->
         Logger.info("Updating domain blacklist, last update #{inspect(mdate)}")
         update!(path)
+
       {:ok, _state} ->
         :ok
+
       {:error, :enoent} ->
         Logger.info("Downloading domain blacklist")
         update!(path)
+
       {:error, reason} ->
         Logger.error("Error when stating domain blacklist #{reason}")
     end
@@ -31,6 +35,7 @@ defmodule Mix.Tasks.DomainBlacklist do
       {:ok, resp} ->
         File.write(path, resp.body)
         Logger.info("Wrote domain blacklist to #{inspect(path)}")
+
       {:error, reason} ->
         Logger.error("Failed to update blacklist #{inspect(reason)}")
     end

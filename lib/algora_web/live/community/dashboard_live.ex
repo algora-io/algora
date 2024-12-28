@@ -76,10 +76,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
      |> assign_achievements()}
   end
 
-  def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
-  end
-
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
@@ -91,15 +87,16 @@ defmodule AlgoraWeb.Community.DashboardLive do
           </div>
         </.section>
 
-        <.section
-          title="Open bounties"
-          subtitle={"Bounties pooled from the #{@tech_stack} community"}
-          link={~p"/bounties"}
-        >
+        <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
           <.bounties tickets={@tickets} />
         </.section>
 
-        <.section :if={@experts != []} title={"#{@tech_stack} experts"} link={~p"/experts"}>
+        <.section
+          :if={@experts != []}
+          title="Experts"
+          subtitle="Meet the experts on Algora"
+          link={~p"/experts"}
+        >
           <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
             <.experts experts={@experts} />
           </ul>
@@ -253,9 +250,17 @@ defmodule AlgoraWeb.Community.DashboardLive do
     end
   end
 
+  def handle_info(:bounties_updated, socket) do
+    {:noreply, assign_tickets(socket)}
+  end
+
   defp assign_tickets(socket) do
     tickets =
-      Bounties.TicketView.list(status: :open, tech_stack: [socket.assigns.tech_stack], limit: 100) ++
+      Bounties.TicketView.list(
+        status: :open,
+        tech_stack: socket.assigns.current_user.tech_stack,
+        limit: 100
+      ) ++
         Bounties.TicketView.sample_tickets()
 
     socket |> assign(:tickets, tickets |> Enum.take(6))

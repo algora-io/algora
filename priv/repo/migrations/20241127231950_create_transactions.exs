@@ -29,6 +29,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :original_contract_id, references(:contracts)
       add :timesheet_id, references(:timesheets)
       add :bounty_id, references(:bounties)
+      add :tip_id, references(:tips)
       # add :claim_id, references(:claims)
       add :linked_transaction_id, references(:transactions)
 
@@ -54,6 +55,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
     create index(:transactions, [:original_contract_id])
     create index(:transactions, [:timesheet_id])
     create index(:transactions, [:bounty_id])
+    create index(:transactions, [:tip_id])
     # create index(:transactions, [:claim_id])
     create index(:transactions, [:linked_transaction_id])
     create index(:transactions, [:provider_id])

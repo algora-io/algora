@@ -27,7 +27,9 @@ if config_env() == :prod do
     app_handle: System.fetch_env!("GITHUB_APP_HANDLE"),
     app_id: System.fetch_env!("GITHUB_APP_ID"),
     webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
-    private_key: System.fetch_env!("GITHUB_PRIVATE_KEY")
+    private_key: System.fetch_env!("GITHUB_PRIVATE_KEY"),
+    pat: System.fetch_env!("GITHUB_PAT"),
+    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true"
 
   config :stripity_stripe,
     api_key: System.fetch_env!("STRIPE_SECRET_KEY")

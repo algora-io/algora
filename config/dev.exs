@@ -6,7 +6,9 @@ config :algora, :github,
   app_handle: System.get_env("GITHUB_APP_HANDLE"),
   app_id: System.get_env("GITHUB_APP_ID"),
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
-  private_key: System.get_env("GITHUB_PRIVATE_KEY")
+  private_key: System.get_env("GITHUB_PRIVATE_KEY"),
+  pat: System.get_env("GITHUB_PAT"),
+  pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true"
 
 config :stripity_stripe,
   api_key: System.get_env("STRIPE_SECRET_KEY"),

@@ -1,9 +1,4 @@
 defmodule Algora.SQL do
-  import Ecto.Query
-  import Ecto.Changeset
-
-  alias Algora.Repo
-
   @moduledoc """
   SQL helper functions and macros for common database operations.
   """

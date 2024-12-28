@@ -33,7 +33,7 @@ defmodule AlgoraWeb.LayoutComponent do
 
   def render(assigns) do
     ~H"""
-    <div class={unless @show, do: "hidden"}>
+    <div class={if !@show, do: "hidden"}>
       <%= if @show do %>
         <.modal show id={@id} on_cancel={@show.on_cancel} on_confirm={@show.on_confirm}>
           <:title>{@show.title}</:title>

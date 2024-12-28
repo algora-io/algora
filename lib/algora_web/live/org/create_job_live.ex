@@ -124,7 +124,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
           <fieldset class="space-y-4">
             <legend class="text-sm font-medium">Work Type</legend>
             <div class="grid grid-cols-2 gap-4">
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:work_type].value == "remote", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:work_type].value == "remote", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
                 <.input
                   type="radio"
                   name="job_form[work_type]"
@@ -142,7 +142,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 </span>
               </label>
 
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:work_type].value == "in_person", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:work_type].value == "in_person", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
                 <.input
                   type="radio"
                   name="job_form[work_type]"

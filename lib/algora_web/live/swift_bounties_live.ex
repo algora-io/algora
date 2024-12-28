@@ -5,7 +5,6 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   import AlgoraWeb.Components.Footer
 
   alias Algora.Bounties
-  alias AlgoraWeb.Components.Logos
 
   def mount(_params, _session, socket) do
     if connected?(socket) do

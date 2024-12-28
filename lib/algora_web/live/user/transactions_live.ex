@@ -2,8 +2,6 @@ defmodule AlgoraWeb.User.TransactionsLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
   alias Algora.Payments
-  alias Algora.Payments.Transaction
-  alias Algora.Users
   alias Algora.Util
 
   def mount(_params, _session, socket) do

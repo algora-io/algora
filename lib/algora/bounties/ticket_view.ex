@@ -119,6 +119,7 @@ defmodule Algora.Bounties.TicketView do
   def sample_tickets do
     [
       %{
+        id: "https://github.com/tuist/tuist/issues/6456",
         total_bounty_amount: Money.new(300, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/6456",
         title: "Generate Objective C resources for internal targets",
@@ -139,6 +140,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/tuist/tuist/issues/6048",
         total_bounty_amount: Money.new(300, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/6048",
         title: "Support for `.xcstrings` catalog",
@@ -159,6 +161,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/tuist/tuist/issues/5920",
         total_bounty_amount: Money.new(200, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/5920",
         title: "Add support for building, running, and testing multi-platform targets",
@@ -179,6 +182,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/Cap-go/capacitor-updater/issues/411",
         total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
         url: "https://github.com/Cap-go/capacitor-updater/issues/411",
         title: "bug: Allow setup when apply update like in code push",
@@ -199,6 +203,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/tuist/tuist/issues/268",
         total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/268",
         title: "Add support for customizing project groups",
@@ -219,6 +224,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/tuist/tuist/issues/5912",
         total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/5912",
         title: "Autogenerate Test targets from Package.swift dependencies",
@@ -239,6 +245,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/tuist/tuist/issues/5925",
         total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/5925",
         title: "TargetScript output files are ignored if the files don't exist at generate time",
@@ -259,6 +266,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/tuist/tuist/issues/5552",
         total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
         url: "https://github.com/tuist/tuist/issues/5552",
         title: "Remove annoying warning \"No files found at:\" for glob path",
@@ -279,6 +287,7 @@ defmodule Algora.Bounties.TicketView do
         ]
       },
       %{
+        id: "https://github.com/Cap-go/capgo/issues/229",
         total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
         url: "https://github.com/Cap-go/capgo/issues/229",
         title: "Find a better way to block google play test device",

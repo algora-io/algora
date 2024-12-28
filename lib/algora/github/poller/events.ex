@@ -6,6 +6,7 @@ defmodule Algora.Github.Poller.Events do
   alias Algora.Github
   alias Algora.Github.Command
   alias Algora.Repo
+  alias Algora.Util
 
   @per_page 10
   @poll_interval :timer.seconds(1)
@@ -191,14 +192,9 @@ defmodule Algora.Github.Poller.Events do
       {:ok, commands} ->
         commands
         |> Enum.each(fn command ->
-          encoded_command =
-            command
-            |> :erlang.term_to_binary()
-            |> Base.encode64()
-
           dbg(command)
 
-          %{event: event, command: encoded_command}
+          %{event: event, command: Util.term_to_base64(command)}
           |> Github.Poller.EventConsumer.new()
           |> Oban.insert()
         end)

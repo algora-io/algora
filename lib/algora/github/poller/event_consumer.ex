@@ -6,11 +6,8 @@ defmodule Algora.Github.Poller.EventConsumer do
   alias Algora.Github
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"event" => event, "command" => command} = _args}) do
-    command =
-      command
-      |> Base.decode64!()
-      |> :erlang.binary_to_term()
+  def perform(%Oban.Job{args: %{"event" => event, "command" => encoded_command} = _args}) do
+    command = Util.base64_to_term!(encoded_command)
 
     run_command(command, event)
   end

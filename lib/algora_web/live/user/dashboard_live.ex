@@ -1,24 +1,26 @@
 defmodule AlgoraWeb.User.DashboardLive do
   use AlgoraWeb, :live_view
+
+  import AlgoraWeb.Components.Achievement
+  import AlgoraWeb.Components.Bounties
+
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
 
   def mount(_params, _session, socket) do
-    tech_stack = ["Rust", "Elixir"]
+    if connected?(socket) do
+      Bounties.subscribe()
+    end
 
     socket =
       socket
-      |> assign(:tech_stack, tech_stack)
       |> assign(:view_mode, "compact")
       |> assign(:available_to_work, true)
       |> assign(:hourly_rate, Money.new!(50, :USD))
       |> assign(:hours_per_week, 40)
-      |> assign(
-        :bounties,
-        Bounties.list_bounties(status: :open, tech_stack: tech_stack, limit: 20)
-      )
       |> assign(:contracts, Algora.Contracts.list_contracts(open?: true, limit: 10))
       |> assign(:achievements, fetch_achievements())
+      |> assign_tickets()
 
     {:ok, socket}
   end
@@ -51,38 +53,11 @@ defmodule AlgoraWeb.User.DashboardLive do
         </div>
       <% end %>
       <!-- Regular Bounties Section -->
+
       <div class="relative h-full max-w-4xl mx-auto p-6">
-        <div class="flex justify-between px-6">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">Bounties for you</h2>
-            <p class="text-sm text-muted-foreground">Based on your tech stack</p>
-          </div>
-          <.toggle_group :let={builder} type="single" value={@view_mode}>
-            <.toggle_group_item builder={builder} value="default" class="gap-2" phx-click="view_mode">
-              <.icon name="tabler-layout-list" class="h-4 w-4" />
-              <span class="sr-only">Default view</span>
-            </.toggle_group_item>
-            <.toggle_group_item builder={builder} value="compact" class="gap-2" phx-click="view_mode">
-              <.icon name="tabler-baseline-density-medium" class="h-4 w-4" />
-              <span class="sr-only">Compact view</span>
-            </.toggle_group_item>
-          </.toggle_group>
-        </div>
-        <div class="px-6 pt-3 -ml-4">
-          <div class="relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for bounty <- @bounties do %>
-                  <%= if @view_mode == "compact" do %>
-                    <.compact_view bounty={bounty} />
-                  <% else %>
-                    <.default_view bounty={bounty} />
-                  <% end %>
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
+          <.bounties tickets={@tickets} />
+        </.section>
       </div>
     </div>
     <!-- Sidebar -->
@@ -155,7 +130,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           class="mt-2 w-full bg-background border-input"
         />
         <div class="flex flex-wrap gap-3 mt-4">
-          <%= for tech <- @tech_stack do %>
+          <%= for tech <- @current_user.tech_stack do %>
             <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
               {tech}
               <button
@@ -202,46 +177,6 @@ defmodule AlgoraWeb.User.DashboardLive do
     ]
   end
 
-  def achievement(%{achievement: %{status: :completed}} = assigns) do
-    ~H"""
-    <.link href="#" class="group flex items-center gap-3">
-      <div class="flex h-5 w-5 items-center justify-center text-success">
-        <.icon name="tabler-circle-check-filled" class="h-5 w-5" />
-      </div>
-      <span class="text-sm font-medium text-success group-hover:text-muted">
-        {@achievement.name}
-      </span>
-    </.link>
-    """
-  end
-
-  def achievement(%{achievement: %{status: :upcoming}} = assigns) do
-    ~H"""
-    <.link href="#" class="group flex items-center gap-3">
-      <div class="flex h-5 w-5 items-center justify-center">
-        <div class="h-2 w-2 rounded-full bg-muted-foreground group-hover:bg-muted"></div>
-      </div>
-      <span class="text-sm font-medium text-muted-foreground group-hover:text-muted">
-        {@achievement.name}
-      </span>
-    </.link>
-    """
-  end
-
-  def achievement(%{achievement: %{status: :current}} = assigns) do
-    ~H"""
-    <.link href="#" class="flex items-start" aria-current="step">
-      <span class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center" aria-hidden="true">
-        <span class="absolute h-5 w-5 rounded-full bg-success/25 animate-pulse"></span>
-        <span class="relative block h-2 w-2 rounded-full bg-success"></span>
-      </span>
-      <span class="ml-3 text-sm font-medium text-muted-foreground group-hover:text-muted">
-        {@achievement.name}
-      </span>
-    </.link>
-    """
-  end
-
   def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
       when byte_size(tech) > 0 do
     tech_stack = [String.trim(tech) | socket.assigns.tech_stack] |> Enum.uniq()
@@ -273,6 +208,22 @@ defmodule AlgoraWeb.User.DashboardLive do
   def handle_event("accept_contract", %{"org" => _org_handle}, socket) do
     # TODO: Implement contract acceptance logic
     {:noreply, socket}
+  end
+
+  def handle_info(:bounties_updated, socket) do
+    {:noreply, assign_tickets(socket)}
+  end
+
+  defp assign_tickets(socket) do
+    tickets =
+      Bounties.TicketView.list(
+        status: :open,
+        tech_stack: socket.assigns.current_user.tech_stack,
+        limit: 100
+      ) ++
+        Bounties.TicketView.sample_tickets()
+
+    socket |> assign(:tickets, tickets |> Enum.take(6))
   end
 
   def compact_view(assigns) do
@@ -380,7 +331,10 @@ defmodule AlgoraWeb.User.DashboardLive do
                 {@contract.client.bio}
               </div>
               <div class="group flex items-center gap-2">
-                <div :if={@contract.status != :draft} class="font-display text-xl font-semibold text-success">
+                <div
+                  :if={@contract.status != :draft}
+                  class="font-display text-xl font-semibold text-success"
+                >
                   {Money.to_string!(@contract.hourly_rate)}/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
@@ -401,7 +355,10 @@ defmodule AlgoraWeb.User.DashboardLive do
           <div class="flex flex-col items-end gap-3">
             <div class="text-right">
               <div class="text-sm text-muted-foreground whitespace-nowrap">Total contract value</div>
-              <div :if={@contract.status != :draft}  class="font-display text-lg font-semibold text-foreground">
+              <div
+                :if={@contract.status != :draft}
+                class="font-display text-lg font-semibold text-foreground"
+              >
                 {Money.to_string!(Money.mult!(@contract.hourly_rate, @contract.hours_per_week))} / wk
               </div>
             </div>

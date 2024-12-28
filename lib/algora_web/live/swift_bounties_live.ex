@@ -111,19 +111,33 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     </div>
 
     <div class="container max-w-7xl mx-auto px-6 space-y-12">
-      <.card class="bg-background/50">
-        <.card_header class="flex justify-between">
-          <.card_title>Active Bounties</.card_title>
-        </.card_header>
-        <.card_content>
-          <.bounties tickets={@tickets} />
-          <div class="pt-4 justify-center hidden">
-            <.button variant="ghost" phx-click="load_more">
-              <.icon name="tabler-arrow-down" class="w-4 h-4 mr-2" /> Load More
-            </.button>
-          </div>
-        </.card_content>
-      </.card>
+      <%= if Enum.empty?(@tickets) do %>
+        <.card class="text-center bg-background/50">
+          <.card_header>
+            <div class="mx-auto rounded-full bg-muted p-4 mb-2">
+              <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+            </div>
+            <.card_title>No bounties yet</.card_title>
+            <.card_description>
+              Open bounties will appear here once created
+            </.card_description>
+          </.card_header>
+        </.card>
+      <% else %>
+        <.card class="bg-background/50">
+          <.card_header class="flex justify-between">
+            <.card_title>Open Bounties</.card_title>
+          </.card_header>
+          <.card_content>
+            <.bounties tickets={@tickets} />
+            <div class="pt-4 justify-center hidden">
+              <.button variant="ghost" phx-click="load_more">
+                <.icon name="tabler-arrow-down" class="w-4 h-4 mr-2" /> Load More
+              </.button>
+            </div>
+          </.card_content>
+        </.card>
+      <% end %>
     </div>
 
     <div class="relative">
@@ -142,9 +156,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         status: :open,
         tech_stack: ["Swift"],
         limit: 100
-      ) ++
-        Bounties.TicketView.sample_tickets()
+      )
 
-    socket |> assign(:tickets, tickets |> Enum.take(6))
+    socket |> assign(:tickets, tickets)
   end
 end

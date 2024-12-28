@@ -70,7 +70,9 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             The Swift ecosystem needs sustainable funding for "middle ring" infrastructure - projects that are too niche for Apple but too broad for a single company.
           </p>
           <div class="mt-10 flex items-center gap-x-6">
-            <.button size="lg">Create Bounty</.button>
+            <.link navigate={~p"/auth/login"}>
+              <.button size="lg">Get started</.button>
+            </.link>
           </div>
         </div>
         <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
@@ -112,44 +114,46 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
     <div class="py-24 sm:py-32">
       <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
-        <h2 class="text-base/7 font-semibold text-indigo-400">Bounties, tips & contracts</h2>
-        <p class="mt-2 text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-          Everything you need to<br />reward open source contributions
+        <h2 class="text-center text-base/7 font-semibold text-indigo-400">
+          Reward open source contributions
+        </h2>
+        <p class="text-center mt-2 text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          You don't even need to leave GitHub
         </p>
         <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-7 lg:grid-rows-2">
           <div class="flex p-px lg:col-span-4">
-            <div class="overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-t-[2rem] lg:rounded-tl-[2rem]">
+            <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-t-[2rem] lg:rounded-tl-[2rem]">
               <img class="object-cover object-left" src={~p"/images/screenshots/bounty.png"} alt="" />
               <div class="p-10">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Bounties</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                  Fund Open Issues
+                  Fund Issues
                 </p>
-                <p class="mt-2 max-w-lg text-sm/6 text-gray-400">
+                <p class="mt-2 text-sm/6 text-gray-400">
                   Create bounties on any Swift issue to incentivize solutions and attract talented contributors
                 </p>
               </div>
             </div>
           </div>
           <div class="flex p-px lg:col-span-3">
-            <div class="overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tr-[2rem]">
+            <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tr-[2rem]">
               <img class="object-cover" src={~p"/images/screenshots/tip.png"} alt="" />
               <div class="p-10">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Tips</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Show Appreciation
                 </p>
-                <p class="mt-2 max-w-lg text-sm/6 text-gray-400">
+                <p class="mt-2 text-sm/6 text-gray-400">
                   Say thanks with tips to recognize valuable contributions - from helpful issues to merged pull requests
                 </p>
               </div>
             </div>
           </div>
           <div class="flex p-px lg:col-span-2">
-            <div class="overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
+            <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
               <div class="flex object-cover">
-                <div class="flex h-full w-full gap-x-4 p-4 sm:gap-x-6">
-                  <div class="flex flex-col space-y-3 p-4">
+                <div class="flex h-full w-full gap-x-4 p-4 sm:gap-x-6 items-center justify-center">
+                  <div class="flex flex-col space-y-3 px-6 py-12">
                     <div
                       class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
                       style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
@@ -242,22 +246,22 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Pay When Merged
                 </p>
-                <p class="mt-2 max-w-lg text-sm/6 text-gray-400">
+                <p class="mt-2 text-sm/6 text-gray-400">
                   Only pay when work is complete - set up auto-pay to instantly reward contributors when their PRs are merged
                 </p>
               </div>
             </div>
           </div>
           <div class="flex p-px lg:col-span-5">
-            <div class="overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-b-[2rem] lg:rounded-br-[2rem]">
+            <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-b-[2rem] lg:rounded-br-[2rem]">
               <img class="object-cover object-left" src={~p"/images/screenshots/bounties.png"} alt="" />
               <div class="p-10">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Pooling</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Fund Together
                 </p>
-                <p class="mt-2 max-w-lg text-sm/6 text-gray-400">
-                  Companies and individuals can pool their resources together to fund important Swift ecosystem improvements
+                <p class="mt-2 text-sm/6 text-gray-400">
+                  Companies and individuals can pool their money together to fund important Swift ecosystem improvements
                 </p>
               </div>
             </div>

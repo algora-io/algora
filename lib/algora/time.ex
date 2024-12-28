@@ -46,7 +46,7 @@ defmodule Algora.Time do
         zone |> String.split("/") |> List.last() |> String.downcase()
       }
     end)
-    |> Enum.map(fn {zone, _} -> friendly_timezone(zone) end)
-    |> Enum.uniq()
+    |> Enum.map(fn {zone, _} -> {friendly_timezone(zone), zone} end)
+    |> Enum.uniq_by(fn {zone, _} -> zone end)
   end
 end

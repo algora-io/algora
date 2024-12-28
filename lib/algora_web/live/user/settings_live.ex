@@ -6,24 +6,55 @@ defmodule AlgoraWeb.User.SettingsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="max-w-3xl mx-auto pt-2 pb-6 px-4 sm:px-6 space-y-6">
-      <div class="space-y-6 bg-white/5 rounded-lg p-6 ring-1 ring-white/15">
-        <.header>
-          Settings
-          <:subtitle>
-            Update your account details
-          </:subtitle>
-        </.header>
-
-        <.simple_form for={@form} phx-change="validate" phx-submit="save">
-          <.input field={@form[:handle]} label="Handle" />
-          <.input field={@form[:name]} label="Name" />
-          <.input label="Email" name="email" value={@current_user.email} disabled />
-          <:actions>
-            <.button>Save</.button>
-          </:actions>
-        </.simple_form>
+    <div class="container max-w-7xl mx-auto p-6 space-y-6">
+      <div class="space-y-1">
+        <h1 class="text-2xl font-bold">Settings</h1>
+        <p class="text-muted-foreground">Update your settings and preferences</p>
       </div>
+
+      <.card>
+        <.card_header>
+          <.card_title>Account</.card_title>
+        </.card_header>
+        <.card_content>
+          <.simple_form for={@form} phx-change="validate" phx-submit="save">
+            <div class="flex flex-col gap-6">
+              <.input field={@form[:handle]} label="Handle" />
+              <.input
+                label="Email"
+                name="email"
+                value={@current_user.email}
+                disabled
+                class="cursor-not-allowed"
+              />
+              <.button class="ml-auto">Save</.button>
+            </div>
+          </.simple_form>
+        </.card_content>
+      </.card>
+
+      <.card>
+        <.card_header>
+          <.card_title>Public Profile</.card_title>
+        </.card_header>
+        <.card_content>
+          <.simple_form for={@form} phx-change="validate" phx-submit="save">
+            <div class="flex flex-col gap-6">
+              <.input field={@form[:display_name]} label="Name" />
+              <.input field={@form[:bio]} type="textarea" label="Bio" />
+              <.input field={@form[:website_url]} label="Website" />
+              <.input field={@form[:location]} label="Location" />
+              <.input
+                field={@form[:timezone]}
+                label="Timezone"
+                type="select"
+                options={Algora.Time.list_friendly_timezones()}
+              />
+              <.button class="ml-auto">Save</.button>
+            </div>
+          </.simple_form>
+        </.card_content>
+      </.card>
     </div>
     """
   end

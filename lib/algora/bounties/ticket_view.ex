@@ -81,7 +81,8 @@ defmodule Algora.Bounties.TicketView do
       owner: %{
         id: o.id,
         handle: o.handle,
-        avatar_url: o.avatar_url
+        avatar_url: o.avatar_url,
+        provider_login: o.provider_login
       }
     })
     |> order_by([b], [b.ticket_id, desc: b.amount])
@@ -112,5 +113,191 @@ defmodule Algora.Bounties.TicketView do
       _, query ->
         query
     end)
+  end
+
+  # TODO: remove this once we have real data
+  def sample_tickets do
+    [
+      %{
+        total_bounty_amount: Money.new(300, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/6456",
+        title: "Generate Objective C resources for internal targets",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 6456,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(300, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/6048",
+        title: "Support for `.xcstrings` catalog",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 6048,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(200, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/5920",
+        title: "Add support for building, running, and testing multi-platform targets",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 5920,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/Cap-go/capacitor-updater/issues/411",
+        title: "bug: Allow setup when apply update like in code push",
+        repository: %{
+          owner: %{login: "Cap-go"},
+          name: "capacitor-updater"
+        },
+        number: 411,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4",
+              handle: "Cap-go",
+              provider_login: "Cap-go"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/268",
+        title: "Add support for customizing project groups",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 268,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/5912",
+        title: "Autogenerate Test targets from Package.swift dependencies",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 5912,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/5925",
+        title: "TargetScript output files are ignored if the files don't exist at generate time",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 5925,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/tuist/tuist/issues/5552",
+        title: "Remove annoying warning \"No files found at:\" for glob path",
+        repository: %{
+          owner: %{login: "tuist"},
+          name: "tuist"
+        },
+        number: 5552,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
+              handle: "tuist",
+              provider_login: "tuist"
+            }
+          }
+        ]
+      },
+      %{
+        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
+        url: "https://github.com/Cap-go/capgo/issues/229",
+        title: "Find a better way to block google play test device",
+        repository: %{
+          owner: %{login: "Cap-go"},
+          name: "capgo"
+        },
+        number: 229,
+        bounty_count: 1,
+        top_bounties: [
+          %{
+            owner: %{
+              avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4",
+              handle: "Cap-go",
+              provider_login: "Cap-go"
+            }
+          }
+        ]
+      }
+    ]
   end
 end

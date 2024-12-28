@@ -1193,6 +1193,30 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  attr :title, :string, default: nil
+  attr :subtitle, :string, default: nil
+  attr :link, :string, default: nil
+  slot :inner_block
+
+  def section(assigns) do
+    ~H"""
+    <div class="relative h-full">
+      <div :if={@title} class="pb-6 flex items-end justify-between">
+        <div class="flex flex-col space-y-1.5">
+          <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
+          <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>
+        </div>
+        <.button :if={@link} variant="outline">
+          <.link navigate={@link}>
+            View all
+          </.link>
+        </.button>
+      </div>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
   attr :class, :string, default: nil
   attr :data, :any, required: true
 

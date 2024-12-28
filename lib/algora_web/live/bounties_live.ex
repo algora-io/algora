@@ -35,6 +35,6 @@ defmodule AlgoraWeb.BountiesLive do
       ) ++
         Bounties.TicketView.sample_tickets()
 
-    socket |> assign(:tickets, tickets |> Enum.take(6))
+    socket |> assign(:tickets, tickets)
   end
 end

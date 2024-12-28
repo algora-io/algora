@@ -42,6 +42,12 @@ defmodule AlgoraWeb.Router do
       live "/admin/analytics", Admin.CompanyAnalyticsLive
     end
 
+    live_session :community,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
+      live "/home", Community.DashboardLive, :index
+    end
+
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do

@@ -8,6 +8,10 @@ defmodule Algora.Admin do
 
   def token!(), do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 
+  def run(worker) do
+    worker.perform(%Oban.Job{args: read!("dev/job.json")})
+  end
+
   def read!(path) do
     {:ok, data} = read(path)
     data

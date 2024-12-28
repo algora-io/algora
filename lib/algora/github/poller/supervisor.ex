@@ -1,4 +1,4 @@
-defmodule Algora.Github.PollerSupervisor do
+defmodule Algora.Github.Poller.Supervisor do
   use DynamicSupervisor
   require Logger
   alias Algora.Events
@@ -28,7 +28,8 @@ defmodule Algora.Github.PollerSupervisor do
   def add_repo(owner, name, opts \\ []) do
     spec = %{
       id: "#{owner}/#{name}",
-      start: {Algora.Github.Poller, :start_link, [[repo_owner: owner, repo_name: name] ++ opts]},
+      start:
+        {Algora.Github.Poller.Events, :start_link, [[repo_owner: owner, repo_name: name] ++ opts]},
       restart: :permanent
     }
 
@@ -38,12 +39,12 @@ defmodule Algora.Github.PollerSupervisor do
   def pause_all do
     __MODULE__
     |> DynamicSupervisor.which_children()
-    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.pause(pid) end)
+    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Events.pause(pid) end)
   end
 
   def resume_all do
     __MODULE__
     |> DynamicSupervisor.which_children()
-    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.resume(pid) end)
+    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Events.resume(pid) end)
   end
 end

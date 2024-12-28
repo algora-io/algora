@@ -11,6 +11,18 @@ defmodule Algora.Util do
     |> String.replace(["/", "+"], "-")
   end
 
+  def term_to_base64(term) do
+    term
+    |> :erlang.term_to_binary()
+    |> Base.encode64()
+  end
+
+  def base64_to_term!(base64) do
+    base64
+    |> Base.decode64!()
+    |> :erlang.binary_to_term()
+  end
+
   def time_ago(datetime) do
     now = NaiveDateTime.utc_now()
     diff = NaiveDateTime.diff(now, datetime, :second)

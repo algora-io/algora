@@ -1,5 +1,5 @@
-defmodule Algora.Github.CommandWorker do
-  use Oban.Worker, queue: :command_workers
+defmodule Algora.Github.Poller.EventConsumer do
+  use Oban.Worker, queue: :event_consumers
   require Logger
   alias Algora.Bounties
   alias Algora.Workspace

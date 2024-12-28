@@ -56,7 +56,11 @@ defmodule AlgoraWeb.Community.DashboardLive do
   end
 
   def mount(_params, _session, socket) do
-    tech_stack = "Swift"
+    experts =
+      socket.assigns.current_user.tech_stack
+      |> List.first()
+      |> Users.list_experts()
+      |> Enum.take(6)
 
     if connected?(socket) do
       Bounties.subscribe()
@@ -66,9 +70,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
      socket
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-     |> assign(:experts, list_experts(tech_stack) |> Enum.take(6))
-     |> assign(:tech_stack, [tech_stack])
-     |> assign(:hours_per_week, 40)
+     |> assign(:experts, experts)
+     |> assign(:tech_stack, socket.assigns.current_user.tech_stack)
      |> assign_tickets()
      |> assign_achievements()}
   end
@@ -88,7 +91,11 @@ defmodule AlgoraWeb.Community.DashboardLive do
           </div>
         </.section>
 
-        <.section title="Open bounties" subtitle={"Bounties pooled from the #{@tech_stack} community"}>
+        <.section
+          title="Open bounties"
+          subtitle={"Bounties pooled from the #{@tech_stack} community"}
+          link={~p"/bounties"}
+        >
           <.bounties tickets={@tickets} />
         </.section>
 
@@ -247,12 +254,11 @@ defmodule AlgoraWeb.Community.DashboardLive do
   end
 
   defp assign_tickets(socket) do
-    socket
-    |> assign(
-      :tickets,
+    tickets =
       Bounties.TicketView.list(status: :open, tech_stack: [socket.assigns.tech_stack], limit: 100) ++
-        sample_tickets()
-    )
+        Bounties.TicketView.sample_tickets()
+
+    socket |> assign(:tickets, tickets |> Enum.take(6))
   end
 
   # TODO: implement this
@@ -265,191 +271,5 @@ defmodule AlgoraWeb.Community.DashboardLive do
       %{status: :upcoming, name: "Contract a #{socket.assigns.tech_stack} developer"},
       %{status: :upcoming, name: "Complete a contract"}
     ])
-  end
-
-  # TODO: remove this once we have real data
-  def sample_tickets do
-    [
-      %{
-        total_bounty_amount: Money.new(300, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/6456",
-        title: "Generate Objective C resources for internal targets",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 6456,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(300, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/6048",
-        title: "Support for `.xcstrings` catalog",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 6048,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(200, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/5920",
-        title: "Add support for building, running, and testing multi-platform targets",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 5920,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/Cap-go/capacitor-updater/issues/411",
-        title: "bug: Allow setup when apply update like in code push",
-        repository: %{
-          owner: %{login: "Cap-go"},
-          name: "capacitor-updater"
-        },
-        number: 411,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4",
-              handle: "Cap-go",
-              provider_login: "Cap-go"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/268",
-        title: "Add support for customizing project groups",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 268,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/5912",
-        title: "Autogenerate Test targets from Package.swift dependencies",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 5912,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/5925",
-        title: "TargetScript output files are ignored if the files don't exist at generate time",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 5925,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/tuist/tuist/issues/5552",
-        title: "Remove annoying warning \"No files found at:\" for glob path",
-        repository: %{
-          owner: %{login: "tuist"},
-          name: "tuist"
-        },
-        number: 5552,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist",
-              provider_login: "tuist"
-            }
-          }
-        ]
-      },
-      %{
-        total_bounty_amount: Money.new(100, :USD, no_fraction_if_integer: true),
-        url: "https://github.com/Cap-go/capgo/issues/229",
-        title: "Find a better way to block google play test device",
-        repository: %{
-          owner: %{login: "Cap-go"},
-          name: "capgo"
-        },
-        number: 229,
-        bounty_count: 1,
-        top_bounties: [
-          %{
-            owner: %{
-              avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4",
-              handle: "Cap-go",
-              provider_login: "Cap-go"
-            }
-          }
-        ]
-      }
-    ]
   end
 end

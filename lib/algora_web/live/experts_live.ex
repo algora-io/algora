@@ -1,12 +1,11 @@
 defmodule AlgoraWeb.ExpertsLive do
   use AlgoraWeb, :live_view
-
   require Logger
-
   import AlgoraWeb.Components.Experts
+  alias Algora.Users
 
   def mount(_params, _session, socket) do
-    techs = list_techs()
+    techs = Users.list_techs()
     tech = List.first(techs)
 
     {:ok,
@@ -24,7 +23,7 @@ defmodule AlgoraWeb.ExpertsLive do
   end
 
   defp assign_experts(socket) do
-    socket |> assign(:experts, list_experts(socket.assigns.tech))
+    socket |> assign(:experts, Users.list_experts(socket.assigns.tech))
   end
 
   def render(assigns) do

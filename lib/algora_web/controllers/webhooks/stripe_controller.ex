@@ -2,6 +2,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   @behaviour Stripe.WebhookHandler
   require Logger
   alias Algora.Repo
+  alias Algora.Payments
   alias Algora.Payments.Transaction
   import Ecto.Query
 
@@ -20,21 +21,26 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         } = event
       )
       when is_binary(group_id) do
-    Repo.transact(fn ->
-      {count, nil} =
-        from(t in Transaction, where: t.group_id == ^group_id)
-        |> Repo.update_all(set: [status: :succeeded, succeeded_at: DateTime.utc_now()])
+    {:ok, count} =
+      Repo.transact(fn ->
+        {count, _} =
+          from(t in Transaction, where: t.group_id == ^group_id)
+          |> Repo.update_all(set: [status: :succeeded, succeeded_at: DateTime.utc_now()])
 
-      if count == 0 do
-        {:error, :no_transactions_found}
-      else
-        {:ok, nil}
-        # TODO: initiate transfer if possible
+        # TODO: initiate pending transfers if any recipient has a payout account
         # %{transfer_id: transfer_id, user_id: user_id}
         # |> Algora.Workers.InitiateTransfer.new()
         # |> Oban.insert()
-      end
-    end)
+
+        {:ok, count}
+      end)
+
+    if count == 0 do
+      {:error, :no_transactions_found}
+    else
+      Payments.broadcast!()
+      {:ok, nil}
+    end
   end
 
   @impl true

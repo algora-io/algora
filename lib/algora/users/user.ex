@@ -217,7 +217,7 @@ defmodule Algora.Users.User do
       :domain,
       :tech_stack,
       :hourly_rate_min,
-      :hourly_rate_max,
+      :hourly_rate_max
     ])
     |> generate_id()
     |> validate_required([:type, :handle, :email, :display_name])
@@ -226,9 +226,19 @@ defmodule Algora.Users.User do
 
   def settings_changeset(%User{} = user, params) do
     user
-    |> cast(params, [:handle, :display_name, :last_context, :need_avatar])
+    |> cast(params, [
+      :handle,
+      :display_name,
+      :last_context,
+      :need_avatar,
+      :website_url,
+      :bio,
+      :location,
+      :timezone
+    ])
     |> validate_required([:handle, :display_name])
     |> validate_handle()
+    |> validate_timezone()
   end
 
   defp validate_email(changeset) do

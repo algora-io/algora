@@ -29,7 +29,7 @@ defmodule AlgoraWeb.ExpertsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 bg-background text-foreground">
+    <div class="container max-w-7xl mx-auto p-6 space-y-6">
       <.section title="Experts" subtitle="View all experts on Algora">
         <div class="-mt-4 mb-4 flex flex-wrap gap-2">
           <%= for tech <- @techs do %>

@@ -1218,8 +1218,8 @@ defmodule AlgoraWeb.CoreComponents do
 
   def section(assigns) do
     ~H"""
-    <div class="relative h-full max-w-5xl mx-auto p-6">
-      <div :if={@title} class="flex items-end justify-between px-6">
+    <div class="relative h-full">
+      <div :if={@title} class="pb-6 flex items-end justify-between">
         <div class="flex flex-col space-y-1.5">
           <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
           <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>
@@ -1230,9 +1230,7 @@ defmodule AlgoraWeb.CoreComponents do
           </.link>
         </.button>
       </div>
-      <div class="px-6 pt-6">
-        {render_slot(@inner_block)}
-      </div>
+      {render_slot(@inner_block)}
     </div>
     """
   end

@@ -58,13 +58,10 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-6xl mx-auto p-6 space-y-6">
-      <!-- Profile Header -->
-      <div class="rounded-xl border bg-card text-card-foreground p-6">
-        <div class="space-y-1.5">
-          <h1 class="text-2xl font-bold">Your Transactions</h1>
-          <p class="text-muted-foreground">View and manage your transaction history</p>
-        </div>
+    <div class="container max-w-7xl mx-auto p-6 space-y-6">
+      <div class="space-y-1">
+        <h1 class="text-2xl font-bold">Your Transactions</h1>
+        <p class="text-muted-foreground">View and manage your transaction history</p>
       </div>
       
     <!-- Totals Cards -->

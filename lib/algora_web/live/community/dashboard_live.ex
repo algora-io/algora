@@ -78,23 +78,25 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 lg:pr-96 bg-background text-foreground">
-      <.section>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {create_bounty(assigns)}
-          {create_tip(assigns)}
-        </div>
-      </.section>
+    <div class="lg:pr-96">
+      <div class="container max-w-7xl mx-auto p-8 space-y-8">
+        <.section>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {create_bounty(assigns)}
+            {create_tip(assigns)}
+          </div>
+        </.section>
 
-      <.section title="Open bounties" subtitle={"Bounties pooled from the #{@tech_stack} community"}>
-        {bounties(assigns)}
-      </.section>
+        <.section title="Open bounties" subtitle={"Bounties pooled from the #{@tech_stack} community"}>
+          {bounties(assigns)}
+        </.section>
 
-      <.section :if={@experts != []} title={"#{@tech_stack} experts"} link={~p"/experts"}>
-        <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
-          <.experts experts={@experts} />
-        </ul>
-      </.section>
+        <.section :if={@experts != []} title={"#{@tech_stack} experts"} link={~p"/experts"}>
+          <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
+            <.experts experts={@experts} />
+          </ul>
+        </.section>
+      </div>
     </div>
     {sidebar(assigns)}
     """
@@ -104,9 +106,9 @@ defmodule AlgoraWeb.Community.DashboardLive do
     ~H"""
     <.card>
       <.card_header>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
           <.icon name="tabler-diamond" class="h-8 w-8" />
-          <h2 class="text-2xl font-semibold">Create new bounty</h2>
+          <h2 class="text-2xl font-semibold">Post a bounty</h2>
         </div>
       </.card_header>
       <.card_content>
@@ -125,7 +127,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
               on any issue.
             </p>
             <div class="flex justify-end gap-4">
-              <.button>Create bounty</.button>
+              <.button>Submit</.button>
             </div>
           </div>
         </.simple_form>
@@ -138,9 +140,9 @@ defmodule AlgoraWeb.Community.DashboardLive do
     ~H"""
     <.card>
       <.card_header>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
           <.icon name="tabler-gift" class="h-8 w-8" />
-          <h2 class="text-2xl font-semibold">Create new tip</h2>
+          <h2 class="text-2xl font-semibold">Tip a developer</h2>
         </div>
       </.card_header>
       <.card_content>
@@ -155,7 +157,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
               on any pull request.
             </p>
             <div class="flex justify-end gap-4">
-              <.button>Create tip</.button>
+              <.button>Submit</.button>
             </div>
           </div>
         </.simple_form>

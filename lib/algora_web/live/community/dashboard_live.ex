@@ -64,7 +64,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
      socket
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-     |> assign(:experts, list_experts())
+     |> assign(:experts, list_experts(tech_stack))
      |> assign(:tech_stack, [tech_stack])
      |> assign(:hours_per_week, 40)
      |> assign_tickets()

@@ -24,8 +24,8 @@ defmodule AlgoraWeb.Components.Experts do
   end
 
   # TODO: implement this
-  def list_experts() do
-    experts_file = :code.priv_dir(:algora) |> Path.join("dev/swift_experts.json")
+  def list_experts(tech_stack) do
+    experts_file = :code.priv_dir(:algora) |> Path.join("dev/experts/#{tech_stack}.json")
 
     with true <- File.exists?(experts_file),
          {:ok, contents} <- File.read(experts_file),
@@ -34,5 +34,28 @@ defmodule AlgoraWeb.Components.Experts do
     else
       _ -> []
     end
+  end
+
+  def list_techs do
+    tech_order = [
+      "TypeScript",
+      "Rust",
+      "Scala",
+      "C++",
+      "Go",
+      "Python",
+      "Java",
+      "Swift",
+      "PHP",
+      "Elixir",
+      "Haskell",
+      "Ruby"
+    ]
+
+    Path.join(:code.priv_dir(:algora), "dev/experts")
+    |> File.ls!()
+    |> Enum.filter(&String.ends_with?(&1, ".json"))
+    |> Enum.map(&String.trim_trailing(&1, ".json"))
+    |> Enum.sort_by(fn tech -> Enum.find_index(tech_order, &(&1 == tech)) || 999 end)
   end
 end

@@ -28,7 +28,7 @@ config :algora, AlgoraWeb.Endpoint,
 
 config :algora, Oban,
   repo: Algora.Repo,
-  queues: [event_consumers: 1]
+  queues: [event_consumers: 1, comment_consumers: 1]
 
 # Configures the mailer
 #

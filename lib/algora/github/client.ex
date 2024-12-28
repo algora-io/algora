@@ -158,4 +158,9 @@ defmodule Algora.Github.Client do
   def list_repository_events(access_token, owner, repo, opts \\ []) do
     fetch(access_token, "/repos/#{owner}/#{repo}/events#{build_query(opts)}")
   end
+
+  @impl true
+  def list_repository_comments(access_token, owner, repo, opts \\ []) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/comments#{build_query(opts)}")
+  end
 end

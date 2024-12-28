@@ -1,7 +1,7 @@
 defmodule Algora.Github.Poller.Supervisor do
   use DynamicSupervisor
   require Logger
-  alias Algora.Events
+  alias Algora.Comments
 
   # Client API
   def start_link(init_arg) do
@@ -14,7 +14,7 @@ defmodule Algora.Github.Poller.Supervisor do
   end
 
   def start_children do
-    Events.list_cursors()
+    Comments.list_cursors()
     |> Task.async_stream(
       fn cursor -> add_repo(cursor.repo_owner, cursor.repo_name) end,
       max_concurrency: 100,
@@ -29,7 +29,8 @@ defmodule Algora.Github.Poller.Supervisor do
     spec = %{
       id: "#{owner}/#{name}",
       start:
-        {Algora.Github.Poller.Events, :start_link, [[repo_owner: owner, repo_name: name] ++ opts]},
+        {Algora.Github.Poller.Comments, :start_link,
+         [[repo_owner: owner, repo_name: name] ++ opts]},
       restart: :permanent
     }
 
@@ -39,12 +40,12 @@ defmodule Algora.Github.Poller.Supervisor do
   def pause_all do
     __MODULE__
     |> DynamicSupervisor.which_children()
-    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Events.pause(pid) end)
+    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Comments.pause(pid) end)
   end
 
   def resume_all do
     __MODULE__
     |> DynamicSupervisor.which_children()
-    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Events.resume(pid) end)
+    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Comments.resume(pid) end)
   end
 end

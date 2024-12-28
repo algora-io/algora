@@ -38,6 +38,7 @@ defmodule AlgoraWeb.Components.Experts do
 
   def list_techs do
     tech_order = [
+      "Swift",
       "TypeScript",
       "Rust",
       "Scala",
@@ -45,7 +46,6 @@ defmodule AlgoraWeb.Components.Experts do
       "Go",
       "Python",
       "Java",
-      "Swift",
       "PHP",
       "Elixir",
       "Haskell",

@@ -152,7 +152,12 @@ defmodule Algora.Github.Client do
 
   @impl true
   def create_issue_comment(access_token, owner, repo, number, body) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/comments", "POST", body)
+    fetch(
+      access_token,
+      "/repos/#{owner}/#{repo}/issues/#{number}/comments",
+      "POST",
+      %{body: body}
+    )
   end
 
   @impl true

@@ -543,7 +543,7 @@ defmodule AlgoraWeb.CoreComponents do
   """
   attr :id, :string, default: "flash", doc: "the optional id of flash container"
   attr :flash, :map, default: %{}, doc: "the map of flash messages to display"
-  attr :kind, :atom, values: [:info, :note, :error], doc: "used for styling and flash lookup"
+  attr :kind, :atom, values: [:info, :warning, :error], doc: "used for styling and flash lookup"
   attr :autoshow, :boolean, default: true, doc: "whether to auto show the flash on mount"
   attr :close, :boolean, default: true, doc: "whether the flash can be closed"
   attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
@@ -559,20 +559,30 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed hidden top-2 right-2 w-80 sm:w-96 z-50 rounded-lg p-3 shadow-md ring-1",
-        @kind == :info && "bg-success text-success-foreground ring-success fill-success-foreground",
-        @kind == :note && "bg-info text-info-foreground ring-info fill-info-foreground",
+        "fixed hidden bottom-4 right-4 w-80 sm:w-96 z-50 rounded-lg p-3 shadow-md ring-1",
+        @kind == :info &&
+          "bg-emerald-950 text-success-foreground ring ring-success/70 fill-success-foreground",
+        @kind == :warning &&
+          "bg-amber-950 text-warning-foreground ring ring-warning/70 fill-warning-foreground",
         @kind == :error &&
-          "bg-destructive text-destructive-foreground ring-destructive fill-destructive-foreground"
+          "bg-red-950 text-destructive-foreground ring ring-destructive/70 fill-destructive-foreground"
       ]}
       {@rest}
     >
       <%= case msg do %>
         <% %{body: body, action: %{ href: href, body: action_body }} -> %>
           <div class="flex gap-1.5 text-[0.8125rem] font-semibold leading-6">
-            <.icon :if={@kind == :info} name="tabler-circle-check-filled" class="w-6 h-6" />
-            <.icon :if={@kind == :note} name="tabler-info-circle-filled" class="w-6 h-6" />
-            <.icon :if={@kind == :error} name="tabler-exclamation-circle-filled" class="w-6 h-6" />
+            <.icon :if={@kind == :info} name="tabler-circle-check" class="w-6 h-6 text-success" />
+            <.icon
+              :if={@kind == :warning}
+              name="tabler-alert-square-rounded"
+              class="w-6 h-6 text-warning"
+            />
+            <.icon
+              :if={@kind == :error}
+              name="tabler-alert-triangle"
+              class="w-6 h-6 text-destructive"
+            />
             <div>
               <div>{body}</div>
               <.link navigate={href} class="underline">{action_body}</.link>
@@ -580,19 +590,27 @@ defmodule AlgoraWeb.CoreComponents do
           </div>
         <% body -> %>
           <p class="flex items-center gap-1.5 text-[0.8125rem] font-semibold leading-6">
-            <.icon :if={@kind == :info} name="tabler-circle-check-filled" class="w-6 h-6" />
-            <.icon :if={@kind == :note} name="tabler-info-circle-filled" class="w-6 h-6" />
-            <.icon :if={@kind == :error} name="tabler-exclamation-circle-filled" class="w-6 h-6" />
+            <.icon :if={@kind == :info} name="tabler-circle-check" class="w-6 h-6 text-success" />
+            <.icon
+              :if={@kind == :warning}
+              name="tabler-alert-square-rounded"
+              class="w-6 h-6 text-warning"
+            />
+            <.icon
+              :if={@kind == :error}
+              name="tabler-alert-triangle"
+              class="w-6 h-6 text-destructive"
+            />
             {body}
           </p>
       <% end %>
       <button
         :if={@close}
         type="button"
-        class="group absolute top-2 right-1 p-2"
+        class="group absolute w-8 h-8 top-0 bottom-0 right-0 flex items-center justify-center"
         aria-label={gettext("close")}
       >
-        <.icon name="tabler-x" class="w-5 h-5 opacity-40 group-hover:opacity-70" />
+        <.icon name="tabler-x" class="w-4 h-4 opacity-70 group-hover:opacity-100" />
       </button>
     </div>
     """
@@ -610,7 +628,7 @@ defmodule AlgoraWeb.CoreComponents do
   def flash_group(assigns) do
     ~H"""
     <.flash kind={:info} title="Success!" flash={@flash} />
-    <.flash kind={:note} title="Note" flash={@flash} />
+    <.flash kind={:warning} title="Warning!" flash={@flash} />
     <.flash kind={:error} title="Error!" flash={@flash} />
     <.flash
       id="disconnected"
@@ -621,7 +639,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-disconnected={show("#disconnected")}
       phx-connected={hide("#disconnected")}
     >
-      Attempting to reconnect <.icon name="tabler-refresh" class="ml-1 w-3 h-3 animate-spin" />
+      Attempting to reconnect <.icon name="tabler-refresh" class="ml-1 w-4 h-4 animate-spin" />
     </.flash>
     """
   end

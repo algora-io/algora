@@ -3,10 +3,26 @@ defmodule Algora.Payments do
 
   import Ecto.Query
 
-  alias Algora.Repo
+  alias Algora.MoneyUtils
   alias Algora.Payments.Customer
-  alias Algora.Payments.Transaction
   alias Algora.Payments.PaymentMethod
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Util
+
+  def create_stripe_session(line_items, payment_intent_data) do
+    params = %{
+      mode: "payment",
+      billing_address_collection: "required",
+      line_items: line_items,
+      invoice_creation: %{enabled: true},
+      success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
+      cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
+      payment_intent_data: payment_intent_data
+    }
+
+    Stripe.Session.create(params)
+  end
 
   def get_transaction_fee_pct(), do: Decimal.new("0.04")
 
@@ -93,5 +109,13 @@ defmodule Algora.Payments do
       nil -> {nil, Money.zero(:USD)}
       {user_id, amount} -> {user_id, amount}
     end
+  end
+
+  def list_transactions(criteria \\ []) do
+    Transaction
+    |> where([t], ^Enum.to_list(criteria))
+    |> preload(linked_transaction: :user)
+    |> order_by([t], desc: t.inserted_at)
+    |> Repo.all()
   end
 end

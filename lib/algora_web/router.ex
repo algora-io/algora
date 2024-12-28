@@ -111,6 +111,8 @@ defmodule AlgoraWeb.Router do
 
     live "/trotw", TROTWLive
 
+    live "/swift", SwiftBountiesLive
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

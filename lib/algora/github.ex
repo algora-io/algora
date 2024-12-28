@@ -9,6 +9,8 @@ defmodule Algora.Github do
   def app_id, do: Algora.config([:github, :app_id])
   def webhook_secret, do: Algora.config([:github, :webhook_secret])
   def private_key, do: Algora.config([:github, :private_key]) |> String.replace("\\n", "\n")
+  def pat, do: Algora.config([:github, :pat])
+  def pat_enabled, do: Algora.config([:github, :pat_enabled])
 
   def install_url() do
     "https://github.com/apps/#{app_handle()}/installations/new"

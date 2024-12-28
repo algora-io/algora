@@ -199,7 +199,7 @@ defmodule Algora.Github.Poller.Events do
           dbg(command)
 
           %{event: event, command: encoded_command}
-          |> Github.CommandWorker.new()
+          |> Github.Poller.EventConsumer.new()
           |> Oban.insert()
         end)
 

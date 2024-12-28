@@ -5,6 +5,21 @@ defmodule AlgoraWeb.User.TransactionsLive do
   alias Algora.Util
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Payments.subscribe()
+    end
+
+    {:ok,
+     socket
+     |> assign(:page_title, "Your transactions")
+     |> assign_transactions()}
+  end
+
+  def handle_info(:payments_updated, socket) do
+    {:noreply, assign_transactions(socket)}
+  end
+
+  defp assign_transactions(socket) do
     transactions =
       Payments.list_transactions(
         user_id: socket.assigns.current_user.id,
@@ -12,18 +27,11 @@ defmodule AlgoraWeb.User.TransactionsLive do
         status: :succeeded
       )
 
-    {:ok,
-     socket
-     |> assign(:page_title, "Your transactions")
-     |> assign(:transactions, transactions)
-     |> assign_totals(transactions)}
-  end
-
-  defp assign_totals(socket, transactions) do
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)
 
     socket
+    |> assign(:transactions, transactions)
     |> assign(:total_balance, balance)
     |> assign(:total_volume, volume)
   end
@@ -66,21 +74,20 @@ defmodule AlgoraWeb.User.TransactionsLive do
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <.card>
           <.card_header>
-            <.card_title>Total Balance</.card_title>
-            <.card_description>Net balance across all transactions</.card_description>
-          </.card_header>
-          <.card_content>
-            <span class="text-2xl font-bold font-display">{Money.to_string!(@total_balance)}</span>
-          </.card_content>
-        </.card>
-
-        <.card>
-          <.card_header>
             <.card_title>Lifetime Volume</.card_title>
             <.card_description>Total volume of your transactions</.card_description>
           </.card_header>
           <.card_content>
             <span class="text-2xl font-bold font-display">{Money.to_string!(@total_volume)}</span>
+          </.card_content>
+        </.card>
+        <.card>
+          <.card_header>
+            <.card_title>Total Balance</.card_title>
+            <.card_description>Net balance across all transactions</.card_description>
+          </.card_header>
+          <.card_content>
+            <span class="text-2xl font-bold font-display">{Money.to_string!(@total_balance)}</span>
           </.card_content>
         </.card>
       </div>

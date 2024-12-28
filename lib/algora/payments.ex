@@ -8,6 +8,14 @@ defmodule Algora.Payments do
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
+  def broadcast! do
+    Phoenix.PubSub.broadcast!(Algora.PubSub, "payments:all", :payments_updated)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "payments:all")
+  end
+
   def create_stripe_session(line_items, payment_intent_data) do
     params = %{
       mode: "payment",

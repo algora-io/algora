@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
   import AlgoraWeb.Components.Experts
 
   alias Algora.Bounties
+  alias Algora.Contracts
   alias Algora.Extensions.Ecto.Validations
   alias Algora.Users
   alias Algora.Workspace
@@ -265,18 +266,61 @@ defmodule AlgoraWeb.Community.DashboardLive do
     socket |> assign(:tickets, tickets |> Enum.take(6))
   end
 
-  # TODO: implement this
   defp assign_achievements(socket) do
-    socket
-    |> assign(:achievements, [
-      %{status: :completed, name: "Personalize Algora"},
-      %{status: :current, name: "Create a bounty"},
-      %{status: :upcoming, name: "Reward a bounty"},
-      %{
-        status: :upcoming,
-        name: "Contract a #{List.first(socket.assigns.current_user.tech_stack)} developer"
-      },
-      %{status: :upcoming, name: "Complete a contract"}
-    ])
+    tech = List.first(socket.assigns.current_user.tech_stack)
+
+    status_fns = [
+      {&personalize_status/1, "Personalize Algora"},
+      {&create_bounty_status/1, "Create a bounty"},
+      {&reward_bounty_status/1, "Reward a bounty"},
+      {&begin_collaboration_status/1, "Contract a #{tech} developer"},
+      {&complete_first_contract_status/1, "Complete a contract"}
+    ]
+
+    {achievements, _} =
+      Enum.reduce_while(status_fns, {[], false}, fn {status_fn, name}, {acc, found_current} ->
+        status = status_fn.(socket.assigns.current_user)
+
+        result =
+          cond do
+            found_current -> {acc ++ [%{status: status, name: name}], found_current}
+            status == :completed -> {acc ++ [%{status: status, name: name}], false}
+            true -> {acc ++ [%{status: :current, name: name}], true}
+          end
+
+        {:cont, result}
+      end)
+
+    socket |> assign(:achievements, achievements)
+  end
+
+  defp personalize_status(_socket), do: :completed
+
+  defp create_bounty_status(user) do
+    case Bounties.list_bounties(owner_id: user.id, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp reward_bounty_status(user) do
+    case Bounties.list_bounties(owner_id: user.id, status: :paid, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp begin_collaboration_status(user) do
+    case Contracts.list_contracts(client_id: user.id, active_or_paid?: true, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp complete_first_contract_status(user) do
+    case Contracts.list_contracts(client_id: user.id, status: :paid, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
   end
 end

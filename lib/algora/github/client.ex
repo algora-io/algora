@@ -6,13 +6,14 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  def http(host, method, path, headers, body \\ "") do
+  def http(host, method, path, headers, body) do
     cache_path = ".local/github/#{path}.json"
     url = "https://#{host}#{path}"
     headers = [{"Content-Type", "application/json"} | headers]
-    request = Finch.build(method, url, headers, body)
 
-    with {:ok, response} <- Finch.request(request, Algora.Finch),
+    with {:ok, encoded_body} <- Jason.encode(body),
+         request = Finch.build(method, url, headers, encoded_body),
+         {:ok, response} <- Finch.request(request, Algora.Finch),
          {:ok, body} <- handle_response(response) do
       write_to_cache(cache_path, body)
       {:ok, body}
@@ -54,7 +55,7 @@ defmodule Algora.Github.Client do
     File.write!(cache_path, Jason.encode!(data))
   end
 
-  def fetch(access_token, url, method \\ "GET", body \\ "")
+  def fetch(access_token, url, method \\ "GET", body \\ nil)
 
   def fetch(access_token, "https://api.github.com" <> path, method, body),
     do: fetch(access_token, path, method, body)

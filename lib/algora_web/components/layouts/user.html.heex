@@ -9,7 +9,13 @@
         <li>
           <.link
             navigate={~p"/"}
-            class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :dashboard, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              if(@active_tab == :dashboard,
+                do: "bg-gray-800 text-white",
+                else: "text-gray-400 hover:text-white hover:bg-gray-800"
+              )
+            ]}
           >
             <.icon name="tabler-home" class="h-6 w-6 shrink-0" />
             <span class="sr-only">Dashboard</span>
@@ -18,7 +24,13 @@
         <li>
           <.link
             navigate={~p"/bounties"}
-            class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :bounties, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              if(@active_tab == :bounties,
+                do: "bg-gray-800 text-white",
+                else: "text-gray-400 hover:text-white hover:bg-gray-800"
+              )
+            ]}
           >
             <.icon name="tabler-diamond" class="h-6 w-6 shrink-0" />
             <span class="sr-only">Bounties</span>
@@ -27,7 +39,13 @@
         <li>
           <.link
             navigate={~p"/experts"}
-            class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :experts, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              if(@active_tab == :experts,
+                do: "bg-gray-800 text-white",
+                else: "text-gray-400 hover:text-white hover:bg-gray-800"
+              )
+            ]}
           >
             <.icon name="tabler-users" class="h-6 w-6 shrink-0" />
             <span class="sr-only">Experts</span>
@@ -36,7 +54,13 @@
         <li>
           <.link
             navigate={~p"/user/transactions"}
-            class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :transactions, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              if(@active_tab == :transactions,
+                do: "bg-gray-800 text-white",
+                else: "text-gray-400 hover:text-white hover:bg-gray-800"
+              )
+            ]}
           >
             <.icon name="tabler-wallet" class="h-6 w-6 shrink-0" />
             <span class="sr-only">Transactions</span>
@@ -45,7 +69,13 @@
         <li>
           <.link
             navigate={~p"/user/settings"}
-            class={["group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white", if(@active_tab == :settings, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800")]}
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              if(@active_tab == :settings,
+                do: "bg-gray-800 text-white",
+                else: "text-gray-400 hover:text-white hover:bg-gray-800"
+              )
+            ]}
           >
             <.icon name="tabler-settings" class="h-6 w-6 shrink-0" />
             <span class="sr-only">Settings</span>

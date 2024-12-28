@@ -45,6 +45,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     def validate_domain_not_blacklisted(changeset) do
       domain = get_field(changeset, :domain)
+
       if not is_nil(domain) and Algora.Crawler.is_blacklisted?(domain) do
         add_error(changeset, :domain, "You can only use a company domain")
       else
@@ -55,11 +56,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     def validate_email_is_company_domain(changeset) do
       domain = get_field(changeset, :domain)
       email = get_field(changeset, :email)
+
       if is_nil(email) or is_nil(domain) do
         changeset
       else
         case String.split(email, "@") do
-          [_, ^domain] -> changeset
+          [_, ^domain] ->
+            changeset
+
           [_, _not_email_domain] ->
             add_error(changeset, :email, "Your email address must match your company domain")
         end
@@ -172,20 +176,23 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   # === LIFECYCLE === #
 
-  def mount(_params, %{
-    "onboarding_email" => email,
-    "onboarding_domain" => domain,
-    "onboarding_tech_stack" => tech_stack,
-    "onboarding_token" => login_code
-  }, socket) do
+  def mount(
+        _params,
+        %{
+          "onboarding_email" => email,
+          "onboarding_domain" => domain,
+          "onboarding_tech_stack" => tech_stack,
+          "onboarding_token" => login_code
+        },
+        socket
+      ) do
     if Users.get_user_by_email(email) do
       # user already exists, so onboarding is complete
       # allow user to login with token until expiry
       {:ok,
        socket
        |> put_flash(:info, "Welcome back to Algora!")
-       |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))
-      }
+       |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))}
     else
       tech_stack_form =
         %TechStackForm{}
@@ -219,18 +226,19 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
            |> assign_matching_devs()
            |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
            |> assign(:user_metadata, AsyncResult.loading())}
+
         {:ok, _no_match} ->
           {:ok,
-            socket
-            |> put_flash(:error, "Invalid onboarding token")
-            |> redirect(to: "/")}
+           socket
+           |> put_flash(:error, "Invalid onboarding token")
+           |> redirect(to: "/")}
+
         {:error, _invalid} ->
           {:ok,
-            socket
-            |> put_flash(:error, "Invalid auth token")
-            |> redirect(to: "/")}
+           socket
+           |> put_flash(:error, "Invalid auth token")
+           |> redirect(to: "/")}
       end
-
     end
   end
 
@@ -366,6 +374,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         org_unique_handle = org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
         user_unique_handle = user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
+
         org_params =
           %{
             # TODO: unset email
@@ -428,18 +437,25 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             contract: contract_params
           }
 
-        socket = case Algora.Organizations.onboard_organization(params) do
-          {:ok, %{org: org}} ->
-            socket
-            |> put_flash(:info, "Welcome to Algora!")
-            |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, ~p"/org/#{org.handle}"))
-          {:error, name, changeset, _created} ->
-            # TODO try to recover
-            Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
-            socket
-            |> put_flash(:error, "Something went wrong. Please try again.")
-            |> redirect(to: "/")
-        end
+        socket =
+          case Algora.Organizations.onboard_organization(params) do
+            {:ok, %{org: org}} ->
+              socket
+              |> put_flash(:info, "Welcome to Algora!")
+              |> redirect(
+                to: AlgoraWeb.UserAuth.login_path(email, login_code, ~p"/org/#{org.handle}")
+              )
+
+            {:error, name, changeset, _created} ->
+              # TODO try to recover
+              Logger.error(
+                "error onboarding organization: #{inspect(name)} #{inspect(changeset)}"
+              )
+
+              socket
+              |> put_flash(:error, "Something went wrong. Please try again.")
+              |> redirect(to: "/")
+          end
 
         {:noreply, socket}
 

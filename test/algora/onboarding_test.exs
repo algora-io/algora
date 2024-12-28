@@ -8,7 +8,7 @@ defmodule Algora.OnboardingTest do
       handle: "algora-pZW6",
       tech_stack: ["Elixir", "Pheonix"],
       email: "test@example.com",
-      timezone: "America/New_York",
+      timezone: "America/New_York"
     },
     organization: %{
       display_name: "Algora",
@@ -18,7 +18,7 @@ defmodule Algora.OnboardingTest do
       email: "admin@example.com",
       hourly_rate_min: Money.new(:USD, "50"),
       hourly_rate_max: Money.new(:USD, "150"),
-      hours_per_week: 40,
+      hours_per_week: 40
     },
     contract: %{
       start_date: DateTime.utc_now(),
@@ -33,7 +33,8 @@ defmodule Algora.OnboardingTest do
     member: %{role: :admin},
     user: %{
       handle: "dev-9XgZ",
-      avatar_url: "https://www.gravatar.com/avatar/69344de5f380397e2e2363f9a6a71e624b4d9ceecb53b78fab3463e8a1f702a6?d=&s=460&d=identicon",
+      avatar_url:
+        "https://www.gravatar.com/avatar/69344de5f380397e2e2363f9a6a71e624b4d9ceecb53b78fab3463e8a1f702a6?d=&s=460&d=identicon",
       email: "dev@algora.io",
       display_name: "dev",
       last_context: "algora-CEec",
@@ -49,7 +50,8 @@ defmodule Algora.OnboardingTest do
       github_url: nil,
       email: "admin@algora.io",
       display_name: "Algora",
-      bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
+      bio:
+        "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
       tech_stack: ["Elixir", "Pheonix"],
       hourly_rate_min: Money.new(:USD, "50"),
       hourly_rate_max: Money.new(:USD, "150"),
@@ -74,7 +76,7 @@ defmodule Algora.OnboardingTest do
   describe "onboarding" do
     test "create" do
       assert {:ok, %{user: user, org: org, member: member, contract: contract}} =
-        Algora.Organizations.onboard_organization(@params)
+               Algora.Organizations.onboard_organization(@params)
 
       assert member.org_id == org.id
       assert member.user_id == user.id
@@ -89,7 +91,7 @@ defmodule Algora.OnboardingTest do
 
     test "create with crawler" do
       assert {:ok, %{user: user, org: org, member: member, contract: contract}} =
-        Algora.Organizations.onboard_organization(@params_crawler)
+               Algora.Organizations.onboard_organization(@params_crawler)
 
       assert org.avatar_url == "https://console.algora.io/logo-512px.png"
       assert user.avatar_url != org.avatar_url

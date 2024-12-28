@@ -17,8 +17,7 @@ defmodule Algora.Crawler do
   end
 
   def fetch_site_metadata(nil), do: {:error, :blacklisted_domain}
-  def fetch_site_metadata(domain), do:
-    fetch_site_metadata("https://#{domain}", 0, 0)
+  def fetch_site_metadata(domain), do: fetch_site_metadata("https://#{domain}", 0, 0)
 
   def fetch_site_metadata(url, redirect_count, retry_count) do
     request = Finch.build(:get, url, @headers)

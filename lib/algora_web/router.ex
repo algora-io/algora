@@ -113,6 +113,8 @@ defmodule AlgoraWeb.Router do
 
     live "/swift", SwiftBountiesLive
 
+    get "/tip", TipController, :create
+
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index

@@ -22,6 +22,7 @@ defmodule Algora.Repo.Migrations.CreateTransactions do
       add :status, :string, null: false
       add :succeeded_at, :utc_datetime_usec
       add :reversed_at, :utc_datetime_usec
+      add :group_id, :string
 
       # TODO: make this non-nullable
       add :user_id, references(:users)

@@ -101,6 +101,7 @@ defmodule Algora.Bounties do
     charge_id = Nanoid.generate()
     debit_id = Nanoid.generate()
     credit_id = Nanoid.generate()
+    tx_group_id = Nanoid.generate()
 
     # Calculate fees
     currency = to_string(amount.currency)
@@ -155,7 +156,8 @@ defmodule Algora.Bounties do
                gross_amount: gross_amount,
                net_amount: amount,
                total_fee: total_fee,
-               line_items: line_items
+               line_items: line_items,
+               group_id: tx_group_id
              }),
            {:ok, debit} <-
              initialize_debit(%{
@@ -163,7 +165,8 @@ defmodule Algora.Bounties do
                tip: tip,
                amount: amount,
                user_id: creator.id,
-               linked_transaction_id: credit_id
+               linked_transaction_id: credit_id,
+               group_id: tx_group_id
              }),
            {:ok, credit} <-
              initialize_credit(%{
@@ -171,17 +174,14 @@ defmodule Algora.Bounties do
                tip: tip,
                amount: amount,
                user_id: recipient.id,
-               linked_transaction_id: debit_id
+               linked_transaction_id: debit_id,
+               group_id: tx_group_id
              }),
            {:ok, session} <-
              Payments.create_stripe_session(line_items, %{
                # Mandatory for some countries like India
                description: "Tip payment for OSS contributions",
-               metadata: %{
-                 charge_id: charge.id,
-                 debit_id: debit.id,
-                 credit_id: credit.id
-               }
+               metadata: %{version: "2", group_id: tx_group_id}
              }) do
         {:ok, session.url}
       end
@@ -195,7 +195,8 @@ defmodule Algora.Bounties do
          gross_amount: gross_amount,
          net_amount: net_amount,
          total_fee: total_fee,
-         line_items: line_items
+         line_items: line_items,
+         group_id: group_id
        }) do
     %Transaction{}
     |> change(%{
@@ -208,7 +209,8 @@ defmodule Algora.Bounties do
       gross_amount: gross_amount,
       net_amount: net_amount,
       total_fee: total_fee,
-      line_items: line_items
+      line_items: line_items,
+      group_id: group_id
     })
     |> validate_positive(:gross_amount)
     |> validate_positive(:net_amount)
@@ -223,7 +225,8 @@ defmodule Algora.Bounties do
          tip: tip,
          amount: amount,
          user_id: user_id,
-         linked_transaction_id: linked_transaction_id
+         linked_transaction_id: linked_transaction_id,
+         group_id: group_id
        }) do
     %Transaction{}
     |> change(%{
@@ -236,7 +239,8 @@ defmodule Algora.Bounties do
       gross_amount: amount,
       net_amount: amount,
       total_fee: Money.zero(:USD),
-      linked_transaction_id: linked_transaction_id
+      linked_transaction_id: linked_transaction_id,
+      group_id: group_id
     })
     |> validate_positive(:gross_amount)
     |> validate_positive(:net_amount)
@@ -250,7 +254,8 @@ defmodule Algora.Bounties do
          tip: tip,
          amount: amount,
          user_id: user_id,
-         linked_transaction_id: linked_transaction_id
+         linked_transaction_id: linked_transaction_id,
+         group_id: group_id
        }) do
     %Transaction{}
     |> change(%{
@@ -263,7 +268,8 @@ defmodule Algora.Bounties do
       gross_amount: amount,
       net_amount: amount,
       total_fee: Money.zero(:USD),
-      linked_transaction_id: linked_transaction_id
+      linked_transaction_id: linked_transaction_id,
+      group_id: group_id
     })
     |> validate_positive(:gross_amount)
     |> validate_positive(:net_amount)

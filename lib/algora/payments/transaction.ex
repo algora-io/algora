@@ -26,6 +26,9 @@ defmodule Algora.Payments.Transaction do
 
     field :type, Ecto.Enum, values: @transaction_types
     field :status, Ecto.Enum, values: @transaction_statuses
+    field :succeeded_at, :utc_datetime_usec
+    field :reversed_at, :utc_datetime_usec
+    field :group_id, :string
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Algora.Contracts.Contract
@@ -36,8 +39,6 @@ defmodule Algora.Payments.Transaction do
     belongs_to :tip, Algora.Bounties.Tip
     belongs_to :linked_transaction, Algora.Payments.Transaction
 
-    field :succeeded_at, :utc_datetime_usec
-    field :reversed_at, :utc_datetime_usec
     timestamps()
   end
 

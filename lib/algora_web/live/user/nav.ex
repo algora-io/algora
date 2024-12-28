@@ -16,8 +16,13 @@ defmodule AlgoraWeb.User.Nav do
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
+        {AlgoraWeb.Community.DashboardLive, _} -> :dashboard
+        {AlgoraWeb.User.DashboardLive, _} -> :dashboard
         {User.SettingsLive, _} -> :settings
+        {User.TransactionsLive, _} -> :transactions
         {User.InstallationsLive, _} -> :installations
+        {AlgoraWeb.ExpertsLive, _} -> :experts
+        {AlgoraWeb.BountiesLive, _} -> :bounties
         {_, _} -> nil
       end
 

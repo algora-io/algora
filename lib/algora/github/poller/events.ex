@@ -1,4 +1,4 @@
-defmodule Algora.Github.Poller do
+defmodule Algora.Github.Poller.Events do
   use GenServer
   import Ecto.Query, warn: false
   require Logger

@@ -1,4 +1,4 @@
-defmodule Algora.Github.PollerRootSupervisor do
+defmodule Algora.Github.Poller.RootSupervisor do
   use Supervisor
 
   def start_link(init_arg) do
@@ -8,9 +8,9 @@ defmodule Algora.Github.PollerRootSupervisor do
   @impl true
   def init(_init_arg) do
     children = [
-      Algora.Github.PollerSupervisor,
+      Algora.Github.Poller.Supervisor,
       Supervisor.child_spec(
-        {Task, &Algora.Github.PollerSupervisor.start_children/0},
+        {Task, &Algora.Github.Poller.Supervisor.start_children/0},
         restart: :transient
       )
     ]

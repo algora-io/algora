@@ -53,3 +53,4 @@ npm-debug.log
 /.fly
 /xref*
 /priv/domain_blacklist.txt
+/priv/dev

@@ -4,8 +4,9 @@ defmodule AlgoraWeb.Community.DashboardLive do
   require Logger
 
   import Ecto.Changeset
-  import AlgoraWeb.Components.Experts
   import AlgoraWeb.Components.Achievement
+  import AlgoraWeb.Components.Bounties
+  import AlgoraWeb.Components.Experts
 
   alias Algora.Bounties
   alias Algora.Extensions.Ecto.Validations
@@ -88,7 +89,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </.section>
 
         <.section title="Open bounties" subtitle={"Bounties pooled from the #{@tech_stack} community"}>
-          {bounties(assigns)}
+          <.bounties tickets={@tickets} />
         </.section>
 
         <.section :if={@experts != []} title={"#{@tech_stack} experts"} link={~p"/experts"}>
@@ -163,64 +164,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </.simple_form>
       </.card_content>
     </.card>
-    """
-  end
-
-  defp bounties(assigns) do
-    ~H"""
-    <div class="-mt-2 -ml-4 relative w-full overflow-auto">
-      <table class="w-full caption-bottom text-sm">
-        <tbody>
-          <%= for ticket <- @tickets do %>
-            <tr class="border-b transition-colors hover:bg-muted/10 h-10">
-              <td class="p-4 py-0 align-middle">
-                <div class="flex items-center gap-4">
-                  <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
-                    {Money.to_string!(ticket.total_bounty_amount)}
-                  </div>
-
-                  <.link
-                    href={ticket.url}
-                    class="truncate text-sm text-foreground hover:underline max-w-[400px]"
-                  >
-                    {ticket.title}
-                  </.link>
-
-                  <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
-                    <.link
-                      :if={ticket.repository.owner.login}
-                      href={~p"/org/#{ticket.repository.owner.login}"}
-                      class="font-semibold hover:underline"
-                    >
-                      {ticket.repository.owner.login}
-                    </.link>
-                    <.icon name="tabler-chevron-right" class="h-4 w-4" />
-                    <.link href={ticket.url} class="hover:underline">
-                      {ticket.repository.name}#{ticket.number}
-                    </.link>
-                  </div>
-
-                  <div class="flex -space-x-2">
-                    <%= for bounty <- Enum.take(ticket.top_bounties, 3) do %>
-                      <img
-                        src={bounty.owner.avatar_url}
-                        alt={bounty.owner.handle}
-                        class="h-8 w-8 rounded-full ring-2 ring-background"
-                      />
-                    <% end %>
-                    <%= if ticket.bounty_count > 3 do %>
-                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium ring-2 ring-background">
-                        +{ticket.bounty_count - 3}
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
     """
   end
 
@@ -341,7 +284,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -360,7 +304,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -379,7 +324,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -398,7 +344,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4",
-              handle: "Cap-go"
+              handle: "Cap-go",
+              provider_login: "Cap-go"
             }
           }
         ]
@@ -417,7 +364,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -436,7 +384,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -455,7 +404,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -474,7 +424,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/38419084?v=4",
-              handle: "tuist"
+              handle: "tuist",
+              provider_login: "tuist"
             }
           }
         ]
@@ -493,7 +444,8 @@ defmodule AlgoraWeb.Community.DashboardLive do
           %{
             owner: %{
               avatar_url: "https://avatars.githubusercontent.com/u/97002524?s=200&v=4",
-              handle: "Cap-go"
+              handle: "Cap-go",
+              provider_login: "Cap-go"
             }
           }
         ]

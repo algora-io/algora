@@ -81,7 +81,8 @@ defmodule Algora.Bounties.TicketView do
       owner: %{
         id: o.id,
         handle: o.handle,
-        avatar_url: o.avatar_url
+        avatar_url: o.avatar_url,
+        provider_login: o.provider_login
       }
     })
     |> order_by([b], [b.ticket_id, desc: b.amount])

@@ -164,7 +164,7 @@ defmodule AlgoraWeb.Project.CreateLive do
         <fieldset class="mb-8">
           <legend class="text-sm font-medium text-gray-300 mb-2">Discovery</legend>
           <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :public, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
+            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :public, do: "border-indigo-600 ring-2 ring-indigo-600 bg-gray-800", else: "border-gray-700 bg-gray-900"}"}>
               <input
                 type="radio"
                 name="visibility"
@@ -189,7 +189,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 </span>
               </span>
               <svg
-                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :public, do: 'invisible'}"}
+                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :public, do: "invisible"}"}
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
@@ -201,13 +201,13 @@ defmodule AlgoraWeb.Project.CreateLive do
                 />
               </svg>
               <span
-                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :public, do: 'border border-indigo-600', else: 'border-2 border-transparent'}"}
+                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :public, do: "border border-indigo-600", else: "border-2 border-transparent"}"}
                 aria-hidden="true"
               >
               </span>
             </label>
 
-            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :private, do: 'border-indigo-600 ring-2 ring-indigo-600 bg-gray-800', else: 'border-gray-700 bg-gray-900'}"}>
+            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :private, do: "border-indigo-600 ring-2 ring-indigo-600 bg-gray-800", else: "border-gray-700 bg-gray-900"}"}>
               <input
                 type="radio"
                 name="visibility"
@@ -232,7 +232,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 </span>
               </span>
               <svg
-                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :private, do: 'invisible'}"}
+                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :private, do: "invisible"}"}
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
@@ -244,7 +244,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 />
               </svg>
               <span
-                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :private, do: 'border border-indigo-600', else: 'border-2 border-transparent'}"}
+                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :private, do: "border border-indigo-600", else: "border-2 border-transparent"}"}
                 aria-hidden="true"
               >
               </span>

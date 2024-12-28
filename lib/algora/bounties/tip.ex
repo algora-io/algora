@@ -1,7 +1,5 @@
 defmodule Algora.Bounties.Tip do
   use Algora.Schema
-  alias Algora.Bounties.Tip
-  alias Algora.Payments.Transaction
   @type t() :: %__MODULE__{}
 
   schema "tips" do

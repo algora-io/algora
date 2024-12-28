@@ -3,12 +3,10 @@ defmodule Algora.Payments do
 
   import Ecto.Query
 
-  alias Algora.MoneyUtils
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Util
 
   def create_stripe_session(line_items, payment_intent_data) do
     params = %{

@@ -5,7 +5,6 @@ defmodule Algora.Admin do
 
   alias Algora.Repo
   alias Algora.Workspace
-  alias Algora.Github
 
   def token!(), do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 

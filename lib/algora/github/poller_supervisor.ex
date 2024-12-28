@@ -2,7 +2,6 @@ defmodule Algora.Github.PollerSupervisor do
   use DynamicSupervisor
   require Logger
   alias Algora.Events
-  alias Algora.Github.Poller
 
   # Client API
   def start_link(init_arg) do

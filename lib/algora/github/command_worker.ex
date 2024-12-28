@@ -6,7 +6,7 @@ defmodule Algora.Github.CommandWorker do
   alias Algora.Github
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"event" => event, "command" => command} = args}) do
+  def perform(%Oban.Job{args: %{"event" => event, "command" => command} = _args}) do
     command =
       command
       |> Base.decode64!()
@@ -21,7 +21,7 @@ defmodule Algora.Github.CommandWorker do
 
     with {:ok, amount} <- Keyword.fetch(args, :amount),
          {:ok, user} <- Workspace.ensure_user(token, extract_actor(event)),
-         {:ok, bounty} <-
+         {:ok, _bounty} <-
            Bounties.create_bounty(%{
              creator: user,
              owner: user,

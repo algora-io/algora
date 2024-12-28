@@ -80,7 +80,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
           <fieldset class="mb-8">
             <legend class="text-sm font-medium text-foreground mb-2">Share Bounty With</legend>
             <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "private", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "private", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
                 <input
                   type="radio"
                   name="bounty_form[sharing_type]"
@@ -92,7 +92,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                   <span class="flex items-center mb-1">
                     <span class="block text-sm font-medium text-foreground">Private Share</span>
                     <svg
-                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "private", do: 'invisible'}"}
+                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "private", do: "invisible"}"}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -107,7 +107,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                     Share with specific people via email or link
                   </span>
 
-                  <div class={"mt-3 space-y-3 transition-opacity duration-200 #{if @form[:sharing_type].value != "private", do: 'opacity-0 h-0 overflow-hidden', else: 'opacity-100'}"}>
+                  <div class={"mt-3 space-y-3 transition-opacity duration-200 #{if @form[:sharing_type].value != "private", do: "opacity-0 h-0 overflow-hidden", else: "opacity-100"}"}>
                     <div class="relative">
                       <.input
                         type="text"
@@ -137,7 +137,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                 </span>
               </label>
 
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "platform", do: 'border-primary ring-2 ring-primary bg-background', else: 'border-input bg-background/75'}"}>
+              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "platform", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
                 <input
                   type="radio"
                   name="bounty_form[sharing_type]"
@@ -149,7 +149,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                   <span class="flex items-center mb-1">
                     <span class="block text-sm font-medium text-foreground">Platform</span>
                     <svg
-                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "platform", do: 'invisible'}"}
+                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "platform", do: "invisible"}"}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >

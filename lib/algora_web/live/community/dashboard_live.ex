@@ -71,7 +71,6 @@ defmodule AlgoraWeb.Community.DashboardLive do
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:experts, experts)
-     |> assign(:tech_stack, socket.assigns.current_user.tech_stack)
      |> assign_tickets()
      |> assign_achievements()}
   end
@@ -273,7 +272,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
       %{status: :completed, name: "Personalize Algora"},
       %{status: :current, name: "Create a bounty"},
       %{status: :upcoming, name: "Reward a bounty"},
-      %{status: :upcoming, name: "Contract a #{socket.assigns.tech_stack} developer"},
+      %{
+        status: :upcoming,
+        name: "Contract a #{List.first(socket.assigns.current_user.tech_stack)} developer"
+      },
       %{status: :upcoming, name: "Complete a contract"}
     ])
   end

@@ -64,20 +64,20 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           <.wordmark />
           <h1 class="mt-10 text-pretty text-5xl font-semibold tracking-tight text-white sm:text-7xl">
             <.icon name="tabler-brand-swift" class="inline-block h-20 w-20 -mt-2 mr-1" />
-            Swift Bounties
+            Fund Swift Projects Together
           </h1>
-          <p class="mt-8 text-pretty text-lg font-medium text-gray-400 sm:text-xl/8">
-            The Swift ecosystem needs sustainable funding for "middle ring" infrastructure - projects that are too niche for Apple but too broad for a single company.
+          <p class="mt-8 text-pretty text-lg leading-relaxed text-gray-400 sm:text-xl/8">
+            Help grow the Swift ecosystem by funding the packages and tools we all depend on. Whether you're a company or individual developer, join us in supporting the Swift open source community.
           </p>
           <div class="mt-10 flex items-center gap-x-6">
             <.link navigate={~p"/auth/login"}>
-              <.button size="lg">Get started</.button>
+              <.button size="lg">Start Contributing</.button>
             </.link>
           </div>
         </div>
-        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
+        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none xl:ml-32">
           <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-            <.card class="bg-card/25">
+            <.card class="bg-card/25" id="how-it-works">
               <.card_header>
                 <.card_title>How It Works</.card_title>
               </.card_header>
@@ -86,23 +86,46 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                   <div class="space-y-2">
                     <.icon name="tabler-diamond" class="h-8 w-8 text-primary" />
                     <h3 class="font-semibold">Post Bounties</h3>
-                    <p class="text-sm text-muted-foreground">
-                      Anyone can post bounties on any issue in any Swift repository
-                    </p>
+                    <div class="text-sm text-muted-foreground space-y-1">
+                      <div>
+                        Create bounties for Swift issues and pay only when they're solved.
+                      </div>
+                      <div class="space-x-1">
+                        <span>Just comment</span>
+                        <code class="inline-block rounded bg-emerald-950/75 ring-1 ring-success/25 text-success px-1 py-0.5 font-mono text-sm">
+                          /bounty $1000
+                        </code>
+                        <span>in any Swift issue or PR.</span>
+                      </div>
+                    </div>
                   </div>
                   <div class="space-y-2">
                     <.icon name="tabler-users" class="h-8 w-8 text-primary" />
-                    <h3 class="font-semibold">Pool Funds</h3>
-                    <p class="text-sm text-muted-foreground">
-                      Multiple people can contribute to the same bounty
-                    </p>
+                    <h3 class="font-semibold">Pool Resources</h3>
+                    <div class="text-sm text-muted-foreground space-y-1">
+                      <div>
+                        Pool funds with other developers and companies to make bigger impact.
+                      </div>
+                      <div>
+                        We'll collect the funds from all sponsors and pay out to the contributor.
+                      </div>
+                    </div>
                   </div>
                   <div class="space-y-2">
                     <.icon name="tabler-coin" class="h-8 w-8 text-primary" />
-                    <h3 class="font-semibold">Reward Contributors</h3>
-                    <p class="text-sm text-muted-foreground">
-                      Pay only when the issue is resolved
-                    </p>
+                    <h3 class="font-semibold">Send Tips</h3>
+                    <div class="text-sm text-muted-foreground space-y-1">
+                      <div>
+                        Show appreciation for helpful issues and merged pull requests.
+                      </div>
+                      <div class="space-x-1">
+                        <span>Just comment</span>
+                        <code class="inline-block rounded bg-emerald-950/75 ring-1 ring-success/25 text-success px-1 py-0.5 font-mono text-sm">
+                          /tip $500 @username
+                        </code>
+                        <span>in any Swift issue or PR.</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </.card_content>
@@ -114,8 +137,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
     <div class="py-24 sm:py-32">
       <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
-        <h2 class="text-center text-base/7 font-semibold text-indigo-400">
-          Reward open source contributions
+        <h2 class="text-center text-base/7 font-semibold text-success">
+          Reward contributions
         </h2>
         <p class="text-center mt-2 text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl">
           You don't even need to leave GitHub
@@ -272,7 +295,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
     <div class="container max-w-7xl mx-auto px-6 space-y-12">
       <%= if Enum.empty?(@tickets) do %>
-        <.card class="text-center bg-card py-12">
+        <.card class="text-center bg-card py-12 rounded-lg lg:rounded-[2rem]">
           <.card_header>
             <div class="mx-auto rounded-full bg-muted p-4 mb-2">
               <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
@@ -284,7 +307,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           </.card_header>
         </.card>
       <% else %>
-        <.card class="bg-card">
+        <.card class="bg-card rounded-lg lg:rounded-[2rem]">
           <.card_header class="flex justify-between">
             <.card_title>Open Bounties</.card_title>
           </.card_header>

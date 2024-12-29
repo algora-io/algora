@@ -28,13 +28,28 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
-    get "/", RootController, :index
+    if System.get_env("SWIFT_MODE", "false") == "true" do
+      live_session :root,
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+        live "/", SwiftBountiesLive
+      end
+    else
+      get "/", RootController, :index
+
+      live_session :root,
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+        live "/:country_code", HomeLive, :index
+      end
+    end
+
     get "/set_context/:context", ContextController, :set
 
     get "/callbacks/:provider/oauth", OAuthCallbackController, :new
     get "/callbacks/:provider/installation", InstallationCallbackController, :new
     get "/auth/logout", OAuthCallbackController, :sign_out
     delete "/auth/logout", OAuthCallbackController, :sign_out
+
+    get "/tip", TipController, :create
 
     live_session :admin,
       layout: {AlgoraWeb.Layouts, :user},
@@ -51,7 +66,8 @@ defmodule AlgoraWeb.Router do
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/dashboard", User.DashboardLive, :index
+      # live "/dashboard", User.DashboardLive, :index
+      live "/dashboard", Community.DashboardLive, :index
       live "/bounties", BountiesLive, :index
       live "/experts", ExpertsLive, :index
       live "/user/transactions", User.TransactionsLive, :index
@@ -110,15 +126,6 @@ defmodule AlgoraWeb.Router do
     end
 
     live "/trotw", TROTWLive
-
-    live "/swift", SwiftBountiesLive
-
-    get "/tip", TipController, :create
-
-    live_session :root,
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      live "/:country_code", HomeLive, :index
-    end
 
     live "/open-source", OpenSourceLive, :index
   end

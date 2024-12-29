@@ -6,8 +6,25 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  def http(host, method, path, headers, body) do
+  # TODO: move to a separate module and use only for data migration between databases
+  def http_cached(host, method, path, headers, body) do
     cache_path = ".local/github/#{path}.json"
+
+    with :error <- read_from_cache(cache_path),
+         {:ok, response_body} <- do_http_request(host, method, path, headers, body) do
+      write_to_cache(cache_path, response_body)
+      {:ok, response_body}
+    else
+      {:ok, cached_data} -> {:ok, cached_data}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  def http(host, method, path, headers, body) do
+    do_http_request(host, method, path, headers, body)
+  end
+
+  defp do_http_request(host, method, path, headers, body) do
     url = "https://#{host}#{path}"
     headers = [{"Content-Type", "application/json"} | headers]
 
@@ -15,11 +32,7 @@ defmodule Algora.Github.Client do
          request = Finch.build(method, url, headers, encoded_body),
          {:ok, response} <- Finch.request(request, Algora.Finch),
          {:ok, body} <- handle_response(response) do
-      write_to_cache(cache_path, body)
       {:ok, body}
-    else
-      {:ok, cached_data} -> {:ok, cached_data}
-      {:error, reason} -> {:error, reason}
     end
   end
 

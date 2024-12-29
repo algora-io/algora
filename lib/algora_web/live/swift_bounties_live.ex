@@ -83,10 +83,12 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             Help grow the Swift ecosystem by funding the packages and tools we all depend on. Whether you're a company or individual developer, join us in supporting the Swift open source community.
           </p>
           <div class="mt-10 flex items-center gap-x-6">
-            <.link navigate={~p"/auth/login"}>
-              <button class="inline-flex px-8 rounded-md border-white/80 bg-white text-gray-900 transition-colors whitespace-nowrap items-center justify-center font-semibold shadow text-base h-10 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:outline-white-600 disabled:pointer-events-none disabled:opacity-50 hover:border-white hover:bg-white/90 border phx-submit-loading:opacity-75">
-                Start Contributing
-              </button>
+            <.link
+              href={Algora.Github.authorize_url()}
+              rel="noopener"
+              class="inline-flex px-8 rounded-md border-white/80 bg-white text-gray-900 transition-colors whitespace-nowrap items-center justify-center font-semibold shadow text-base h-10 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:outline-white-600 disabled:pointer-events-none disabled:opacity-50 hover:border-white hover:bg-white/90 border phx-submit-loading:opacity-75"
+            >
+              Start Contributing
             </.link>
           </div>
         </div>

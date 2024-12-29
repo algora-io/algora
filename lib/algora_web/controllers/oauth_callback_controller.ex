@@ -6,7 +6,11 @@ defmodule AlgoraWeb.OAuthCallbackController do
   alias Algora.Users
 
   defp welcome_message(user) do
-    "Welcome, #{user.name |> String.split() |> List.first() |> String.capitalize()}!"
+    if user.name do
+      "Welcome, #{user.name |> String.split() |> List.first() |> String.capitalize()}!"
+    else
+      "Welcome, #{user.handle}!"
+    end
   end
 
   def new(conn, %{"provider" => "github", "code" => code, "state" => state} = params) do

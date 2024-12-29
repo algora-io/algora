@@ -5,6 +5,10 @@ defmodule AlgoraWeb.OAuthCallbackController do
   alias Algora.Github
   alias Algora.Users
 
+  defp welcome_message(user) do
+    "Welcome, #{user.name |> String.split() |> List.first() |> String.capitalize()}!"
+  end
+
   def new(conn, %{"provider" => "github", "code" => code, "state" => state} = params) do
     with {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
@@ -17,7 +21,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
         end
 
       conn
-      |> put_flash(:info, "Welcome, #{user.handle}!")
+      |> put_flash(:info, welcome_message(user))
       |> AlgoraWeb.UserAuth.log_in_user(user)
     else
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -77,7 +81,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
         end
 
       conn
-      |> put_flash(:info, "Welcome, #{user.handle}!")
+      |> put_flash(:info, welcome_message(user))
       |> AlgoraWeb.UserAuth.log_in_user(user)
     else
       {:error, %Ecto.Changeset{} = changeset} ->

@@ -11,10 +11,17 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       Bounties.subscribe()
     end
 
-    {:ok,
-     socket
-     |> assign(:page_title, "Swift Bounties")
-     |> assign_tickets()}
+    socket =
+      if socket.assigns[:current_user] do
+        socket
+        |> push_navigate(to: ~p"/home")
+      else
+        socket
+        |> assign(:page_title, "Swift Bounties")
+        |> assign_tickets()
+      end
+
+    {:ok, socket}
   end
 
   def render(assigns) do

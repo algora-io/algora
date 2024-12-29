@@ -5,7 +5,7 @@ defmodule Algora.Repo.Migrations.CreateIdentities do
     create table(:identities) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :provider, :string, null: false
-      add :provider_token, :string, null: false
+      add :provider_token, :text, null: false
       add :provider_email, :string, null: false
       add :provider_login, :string, null: false
       add :provider_id, :string, null: false

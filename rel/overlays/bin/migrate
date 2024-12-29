@@ -1,3 +1,4 @@
 #!/bin/sh
+set -eu
 cd -P -- "$(dirname -- "$0")"
 exec ./algora eval Algora.Release.migrate

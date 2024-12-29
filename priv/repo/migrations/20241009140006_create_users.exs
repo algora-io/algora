@@ -12,7 +12,7 @@ defmodule Algora.Repo.Migrations.CreateUsers do
       add :name, :string
       add :display_name, :string
       add :handle, :citext
-      add :avatar_url, :string
+      add :avatar_url, :text
       add :external_homepage_url, :string
 
       add :type, :string, null: false, default: "individual"

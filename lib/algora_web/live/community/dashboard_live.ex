@@ -88,7 +88,21 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </.section>
 
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
-          <.bounties tickets={@tickets} />
+          <%= if Enum.empty?(@tickets) do %>
+            <.card class="text-center bg-card py-12 rounded-lg lg:rounded-[2rem]">
+              <.card_header>
+                <div class="mx-auto rounded-full bg-muted p-4 mb-2">
+                  <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+                </div>
+                <.card_title>No bounties yet</.card_title>
+                <.card_description>
+                  Open bounties will appear here once created
+                </.card_description>
+              </.card_header>
+            </.card>
+          <% else %>
+            <.bounties tickets={@tickets} />
+          <% end %>
         </.section>
 
         <.section

@@ -7,19 +7,17 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Query
 
   @impl true
-  def handle_event(
-        %Stripe.Event{
-          type: "charge.succeeded",
-          data: %{
-            object: %{
-              metadata: %{
-                "version" => "2",
-                "group_id" => group_id
-              }
+  def handle_event(%Stripe.Event{
+        type: "charge.succeeded",
+        data: %{
+          object: %{
+            metadata: %{
+              "version" => "2",
+              "group_id" => group_id
             }
           }
-        } = event
-      )
+        }
+      })
       when is_binary(group_id) do
     {:ok, count} =
       Repo.transact(fn ->

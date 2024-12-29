@@ -90,7 +90,7 @@ defmodule Algora.OnboardingTest do
     end
 
     test "create with crawler" do
-      assert {:ok, %{user: user, org: org, member: member, contract: contract}} =
+      assert {:ok, %{user: user, org: org, member: _member, contract: _contract}} =
                Algora.Organizations.onboard_organization(@params_crawler)
 
       assert org.avatar_url == "https://console.algora.io/logo-512px.png"

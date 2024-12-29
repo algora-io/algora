@@ -315,7 +315,7 @@ defmodule Algora.ContractsTest do
       fee_data = Contracts.calculate_fee_data(contract)
       assert Money.equal?(fee_data.total_paid, ~M[10000]usd)
       assert Decimal.equal?(fee_data.current_fee, Decimal.new("0.10"))
-      assert fee_data.progress > Decimal.new("0.00")
+      assert Decimal.positive?(fee_data.progress)
     end
   end
 end

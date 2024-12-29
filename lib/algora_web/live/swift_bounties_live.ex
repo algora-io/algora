@@ -59,10 +59,10 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         >
         </div>
       </div>
-      <div class="mx-auto max-w-7xl px-6 pb-12 pt-10 sm:pb-16 lg:flex lg:px-8 lg:py-20">
+      <div class="mx-auto max-w-7xl px-6 pb-12 pt-10 sm:pb-16 lg:flex lg:px-8 lg:py-20 xl:py-24">
         <div class="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:pt-8">
           <.wordmark />
-          <h1 class="mt-10 text-display text-3xl font-semibold tracking-tight text-white sm:text-6xl">
+          <h1 class="mt-10 text-2xl font-semibold font-display tracking-tight text-white sm:text-6xl">
             Fund
             <svg viewBox="0 0 128 128" class="inline-block h-10 w-10 sm:h-16 lg:w-16 -mt-2 ml-2">
               <path
@@ -79,14 +79,17 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             <span class="text-[#ff654e] mr-1">Swift</span>
             Together
           </h1>
-          <p class="mt-8 text-display text-lg leading-relaxed text-gray-400 sm:text-xl/8">
-            Help grow the Swift ecosystem by funding the packages and tools we all depend on. Whether you're a company or individual developer, join us in supporting the Swift open source community.
+          <p class="mt-8 text-lg font-medium leading-relaxed text-gray-300 sm:text-xl/8">
+            Help grow the Swift ecosystem by funding the work we all depend on.
+          </p>
+          <p class="mt-4 text-lg font-medium leading-relaxed text-gray-300 sm:text-xl/8">
+            Anyone can contribute whether you're a company or an individual.
           </p>
           <div class="mt-10 flex items-center gap-x-6">
             <.link
               href={Algora.Github.authorize_url()}
               rel="noopener"
-              class="inline-flex px-8 rounded-md border-white/80 bg-white text-gray-900 transition-colors whitespace-nowrap items-center justify-center font-semibold shadow text-base h-10 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:outline-white-600 disabled:pointer-events-none disabled:opacity-50 hover:border-white hover:bg-white/90 border phx-submit-loading:opacity-75"
+              class="inline-flex px-6 rounded-md border-white/80 bg-white text-gray-900 transition-colors whitespace-nowrap items-center justify-center font-semibold shadow text-lg h-12 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:outline-white-600 disabled:pointer-events-none disabled:opacity-50 hover:border-white hover:bg-white/90 border phx-submit-loading:opacity-75"
             >
               Start Contributing
             </.link>
@@ -94,16 +97,18 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         </div>
         <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none xl:ml-32">
           <div class="max-w-3xl sm:flex-none sm:max-w-5xl lg:max-w-none">
-            <.card class="bg-card/25" id="how-it-works">
-              <.card_header>
+            <.card class="bg-card/25 -mx-3 sm:mx-0" id="how-it-works">
+              <.card_header class="-mx-3 sm:mx-0">
                 <.card_title>How It Works</.card_title>
               </.card_header>
-              <.card_content>
-                <div class="space-y-6">
+              <.card_content class="-mx-3 sm:mx-0">
+                <div class="space-y-10 sm:space-y-6 pt-4 sm:pt-0">
                   <div class="space-y-2">
-                    <.icon name="tabler-diamond" class="h-8 w-8 text-white" />
-                    <h3 class="font-semibold">Post Bounties</h3>
-                    <div class="text-sm text-muted-foreground space-y-2 sm:space-y-1">
+                    <div class="flex items-center gap-2 sm:flex-col sm:items-start">
+                      <.icon name="tabler-diamond" class="h-8 w-8 text-white" />
+                      <h3 class="font-semibold">Post Bounties</h3>
+                    </div>
+                    <div class="text-sm font-medium text-muted-foreground space-y-2 sm:space-y-1">
                       <div>
                         Create bounties for Swift issues and pay only when they're solved.
                       </div>
@@ -117,21 +122,25 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                     </div>
                   </div>
                   <div class="space-y-2">
-                    <.icon name="tabler-users" class="h-8 w-8 text-white" />
-                    <h3 class="font-semibold">Pool Resources</h3>
-                    <div class="text-sm text-muted-foreground space-y-2 sm:space-y-1">
+                    <div class="flex items-center gap-2 sm:flex-col sm:items-start">
+                      <.icon name="tabler-users" class="h-8 w-8 text-white" />
+                      <h3 class="font-semibold">Pool Resources</h3>
+                    </div>
+                    <div class="text-sm font-medium text-muted-foreground space-y-2 sm:space-y-1">
                       <div>
                         Pool funds with other developers and companies to make bigger impact.
                       </div>
                       <div>
-                        We'll collect the funds from all sponsors and pay out to the contributor.
+                        We'll collect the funds from all sponsors and pay out to the contributor(s).
                       </div>
                     </div>
                   </div>
                   <div class="space-y-2">
-                    <.icon name="tabler-coin" class="h-8 w-8 text-white" />
-                    <h3 class="font-semibold">Send Tips</h3>
-                    <div class="text-sm text-muted-foreground space-y-2 sm:space-y-1">
+                    <div class="flex items-center gap-2 sm:flex-col sm:items-start">
+                      <.icon name="tabler-coin" class="h-8 w-8 text-white" />
+                      <h3 class="font-semibold">Send Tips</h3>
+                    </div>
+                    <div class="text-sm font-medium text-muted-foreground space-y-2 sm:space-y-1">
                       <div>
                         Show appreciation for helpful issues and merged pull requests.
                       </div>
@@ -157,7 +166,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         <h2 class="text-center text-base/7 font-semibold text-orange-400">
           Reward contributions
         </h2>
-        <p class="text-center mt-2 text-display text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+        <p class="text-center mt-2 text-3xl font-display font-semibold tracking-tight text-white sm:text-5xl">
           You don't even need to leave GitHub
         </p>
         <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-7">

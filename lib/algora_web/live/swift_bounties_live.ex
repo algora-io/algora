@@ -62,9 +62,11 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       <div class="mx-auto max-w-7xl px-6 pb-12 pt-10 sm:pb-16 lg:flex lg:px-8 lg:py-20">
         <div class="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:pt-8">
           <.wordmark />
-          <h1 class="mt-10 text-pretty text-5xl font-semibold tracking-tight text-white sm:text-7xl">
-            <.icon name="tabler-brand-swift" class="inline-block h-20 w-20 -mt-2 mr-1" />
-            Fund Swift Projects Together
+          <h1 class="mt-10 text-pretty text-3xl font-semibold tracking-tight text-white sm:text-7xl">
+            <.icon
+              name="tabler-brand-swift"
+              class="inline-block h-10 w-10 sm:h-20 lg:w-20 -mt-2 mr-1"
+            /> Fund Swift Projects Together
           </h1>
           <p class="mt-8 text-pretty text-lg leading-relaxed text-gray-400 sm:text-xl/8">
             Help grow the Swift ecosystem by funding the packages and tools we all depend on. Whether you're a company or individual developer, join us in supporting the Swift open source community.
@@ -76,7 +78,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           </div>
         </div>
         <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none xl:ml-32">
-          <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
+          <div class="max-w-3xl sm:flex-none sm:max-w-5xl lg:max-w-none">
             <.card class="bg-card/25" id="how-it-works">
               <.card_header>
                 <.card_title>How It Works</.card_title>
@@ -86,7 +88,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                   <div class="space-y-2">
                     <.icon name="tabler-diamond" class="h-8 w-8 text-primary" />
                     <h3 class="font-semibold">Post Bounties</h3>
-                    <div class="text-sm text-muted-foreground space-y-1">
+                    <div class="text-sm text-muted-foreground space-y-2 sm:space-y-1">
                       <div>
                         Create bounties for Swift issues and pay only when they're solved.
                       </div>
@@ -102,7 +104,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                   <div class="space-y-2">
                     <.icon name="tabler-users" class="h-8 w-8 text-primary" />
                     <h3 class="font-semibold">Pool Resources</h3>
-                    <div class="text-sm text-muted-foreground space-y-1">
+                    <div class="text-sm text-muted-foreground space-y-2 sm:space-y-1">
                       <div>
                         Pool funds with other developers and companies to make bigger impact.
                       </div>
@@ -114,7 +116,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                   <div class="space-y-2">
                     <.icon name="tabler-coin" class="h-8 w-8 text-primary" />
                     <h3 class="font-semibold">Send Tips</h3>
-                    <div class="text-sm text-muted-foreground space-y-1">
+                    <div class="text-sm text-muted-foreground space-y-2 sm:space-y-1">
                       <div>
                         Show appreciation for helpful issues and merged pull requests.
                       </div>
@@ -140,14 +142,14 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         <h2 class="text-center text-base/7 font-semibold text-success">
           Reward contributions
         </h2>
-        <p class="text-center mt-2 text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+        <p class="text-center mt-2 text-pretty text-3xl font-semibold tracking-tight text-white sm:text-5xl">
           You don't even need to leave GitHub
         </p>
-        <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-7 lg:grid-rows-2">
+        <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-7">
           <div class="flex p-px lg:col-span-4">
             <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-t-[2rem] lg:rounded-tl-[2rem]">
               <img class="object-cover object-left" src={~p"/images/screenshots/bounty.png"} alt="" />
-              <div class="p-10">
+              <div class="p-4 sm:p-6">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Bounties</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Fund Issues
@@ -161,22 +163,22 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           <div class="flex p-px lg:col-span-3">
             <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tr-[2rem]">
               <img class="object-cover" src={~p"/images/screenshots/tip.png"} alt="" />
-              <div class="p-10">
+              <div class="p-4 sm:p-6">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Tips</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Show Appreciation
                 </p>
                 <p class="mt-2 text-sm/6 text-gray-400">
-                  Say thanks with tips to recognize valuable contributions - from helpful issues to merged pull requests
+                  Say thanks with tips to recognize valuable contributions
                 </p>
               </div>
             </div>
           </div>
-          <div class="flex p-px lg:col-span-2">
+          <div class="flex p-px lg:col-span-3">
             <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
               <div class="flex object-cover">
-                <div class="flex h-full w-full gap-x-4 p-4 sm:gap-x-6 items-center justify-center">
-                  <div class="flex flex-col space-y-3 px-6 py-12">
+                <div class="flex h-full w-full gap-x-4 p-4 pb-0 sm:gap-x-6 items-center justify-center">
+                  <div class="flex flex-col w-full sm:w-auto space-y-3 sm:py-9">
                     <div
                       class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
                       style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
@@ -264,27 +266,27 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                   </div>
                 </div>
               </div>
-              <div class="p-10">
+              <div class="p-4 sm:p-6">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Payments</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Pay When Merged
                 </p>
                 <p class="mt-2 text-sm/6 text-gray-400">
-                  Only pay when work is complete - set up auto-pay to instantly reward contributors when their PRs are merged
+                  Set up auto-pay to instantly reward contributors as their PRs are merged
                 </p>
               </div>
             </div>
           </div>
-          <div class="flex p-px lg:col-span-5">
+          <div class="flex p-px lg:col-span-4">
             <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-b-[2rem] lg:rounded-br-[2rem]">
               <img class="object-cover object-left" src={~p"/images/screenshots/bounties.png"} alt="" />
-              <div class="p-10">
+              <div class="p-4 sm:p-6">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Pooling</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
                   Fund Together
                 </p>
                 <p class="mt-2 text-sm/6 text-gray-400">
-                  Companies and individuals can pool their money together to fund important Swift ecosystem improvements
+                  Companies and individuals can pool their money together to fund important Swift improvements
                 </p>
               </div>
             </div>

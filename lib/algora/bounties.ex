@@ -148,7 +148,7 @@ defmodule Algora.Bounties do
 
     Repo.transact(fn ->
       with {:ok, tip} <- Repo.insert(changeset),
-           {:ok, charge} <-
+           {:ok, _charge} <-
              initialize_charge(%{
                id: charge_id,
                tip: tip,
@@ -159,7 +159,7 @@ defmodule Algora.Bounties do
                line_items: line_items,
                group_id: tx_group_id
              }),
-           {:ok, debit} <-
+           {:ok, _debit} <-
              initialize_debit(%{
                id: debit_id,
                tip: tip,
@@ -168,7 +168,7 @@ defmodule Algora.Bounties do
                linked_transaction_id: credit_id,
                group_id: tx_group_id
              }),
-           {:ok, credit} <-
+           {:ok, _credit} <-
              initialize_credit(%{
                id: credit_id,
                tip: tip,

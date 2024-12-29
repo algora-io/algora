@@ -2,8 +2,9 @@ defmodule Algora.Github.Poller.EventConsumer do
   use Oban.Worker, queue: :event_consumers
   require Logger
   alias Algora.Bounties
-  alias Algora.Workspace
   alias Algora.Github
+  alias Algora.Util
+  alias Algora.Workspace
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"event" => event, "command" => encoded_command} = _args}) do

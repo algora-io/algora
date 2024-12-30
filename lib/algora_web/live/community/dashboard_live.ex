@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
   alias Algora.Bounties
   alias Algora.Contracts
   alias Algora.Extensions.Ecto.Validations
+  alias Algora.Github
   alias Algora.Users
   alias Algora.Workspace
 
@@ -210,14 +211,43 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> BountyForm.changeset(params)
       |> Map.put(:action, :validate)
 
+    amount = get_field(changeset, :amount)
+    ticket_ref = get_field(changeset, :ticket_ref)
+
     with %{valid?: true} <- changeset,
          {:ok, _} <-
            Bounties.create_bounty(%{
              creator: socket.assigns.current_user,
              owner: socket.assigns.current_user,
-             amount: get_field(changeset, :amount),
-             ticket_ref: get_field(changeset, :ticket_ref)
+             amount: amount,
+             ticket_ref: ticket_ref
            }) do
+      # TODO: post comment in a separate job
+      body = """
+      💎 **#{socket.assigns.current_user.provider_login}** is offering a **#{Money.to_string!(amount, no_fraction_if_integer: true)}** bounty for this issue
+
+      👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining swift.algora.io
+      """
+
+      if Github.pat_enabled() do
+        Github.create_issue_comment(
+          Github.pat(),
+          ticket_ref.owner,
+          ticket_ref.repo,
+          ticket_ref.number,
+          body
+        )
+      else
+        Logger.info("""
+        Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
+               \"\"\"
+               #{body}
+               \"\"\")
+        """)
+
+        :ok
+      end
+
       {:noreply,
        socket
        |> assign_achievements()

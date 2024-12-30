@@ -2,6 +2,7 @@ defmodule Algora.Github.Poller.Supervisor do
   use DynamicSupervisor
   require Logger
   alias Algora.Comments
+  alias Algora.Github.Poller.Comments, as: CommentsPoller
 
   # Client API
   def start_link(init_arg) do
@@ -26,26 +27,54 @@ defmodule Algora.Github.Poller.Supervisor do
   end
 
   def add_repo(owner, name, opts \\ []) do
-    spec = %{
-      id: "#{owner}/#{name}",
-      start:
-        {Algora.Github.Poller.Comments, :start_link,
-         [[repo_owner: owner, repo_name: name] ++ opts]},
-      restart: :permanent
-    }
-
+    spec = {CommentsPoller, [repo_owner: owner, repo_name: name] ++ opts}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
+  def terminate_child(owner, name) do
+    case find_child(owner, name) do
+      {_id, pid, _type, _modules} -> DynamicSupervisor.terminate_child(__MODULE__, pid)
+      nil -> {:error, :not_found}
+    end
+  end
+
+  def remove_repo(owner, name) do
+    with :ok <- terminate_child(owner, name),
+         {:ok, _cursor} <- Comments.delete_comment_cursor("github", owner, name) do
+      :ok
+    end
+  end
+
+  def find_child(owner, name) do
+    which_children()
+    |> Enum.find(fn {_, pid, _, _} -> GenServer.call(pid, :get_repo_info) == {owner, name} end)
+  end
+
+  def pause(owner, name) do
+    find_child(owner, name)
+    |> case do
+      {_, pid, _, _} -> CommentsPoller.pause(pid)
+      nil -> {:error, :not_found}
+    end
+  end
+
+  def resume(owner, name) do
+    find_child(owner, name)
+    |> case do
+      {_, pid, _, _} -> CommentsPoller.resume(pid)
+      nil -> {:error, :not_found}
+    end
+  end
+
   def pause_all do
-    __MODULE__
-    |> DynamicSupervisor.which_children()
-    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Comments.pause(pid) end)
+    which_children() |> Enum.each(fn {_, pid, _, _} -> CommentsPoller.pause(pid) end)
   end
 
   def resume_all do
-    __MODULE__
-    |> DynamicSupervisor.which_children()
-    |> Enum.each(fn {_, pid, _, _} -> Algora.Github.Poller.Comments.resume(pid) end)
+    which_children() |> Enum.each(fn {_, pid, _, _} -> CommentsPoller.resume(pid) end)
+  end
+
+  def which_children do
+    DynamicSupervisor.which_children(__MODULE__)
   end
 end

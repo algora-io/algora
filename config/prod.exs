@@ -15,5 +15,9 @@ config :swoosh, local: false
 
 config :logger, level: String.to_atom(System.get_env("LOG_LEVEL") || "info")
 
+config :algora,
+  swift_mode: true,
+  auto_start_pollers: true
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

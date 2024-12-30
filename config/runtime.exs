@@ -134,4 +134,7 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :algora,
+    auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
 end

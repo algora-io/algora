@@ -28,7 +28,7 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
-    if System.get_env("SWIFT_MODE", "false") == "true" do
+    if Application.compile_env(:algora, :swift_mode) do
       live_session :root,
         on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
         live "/", SwiftBountiesLive

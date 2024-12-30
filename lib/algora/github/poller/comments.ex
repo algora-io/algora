@@ -36,7 +36,7 @@ defmodule Algora.Github.Poller.Comments do
        repo_owner: repo_owner,
        repo_name: repo_name,
        cursor: nil,
-       paused: Mix.env() == :dev
+       paused: not Algora.config([:auto_start_pollers])
      }, {:continue, :setup}}
   end
 

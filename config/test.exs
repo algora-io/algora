@@ -42,3 +42,8 @@ config :algora, :github,
   pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true"
 
 config :algora, :stripe_impl, Algora.StripeMock
+
+config :algora,
+  cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
+  swift_mode: false,
+  auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"

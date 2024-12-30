@@ -71,6 +71,11 @@ defmodule Algora.Github.Poller.Comments do
     {:noreply, %{state | paused: false}}
   end
 
+  @impl true
+  def handle_call(:get_repo_info, _from, state) do
+    {:reply, {state.repo_owner, state.repo_name}, state}
+  end
+
   defp schedule_poll do
     Process.send_after(self(), :poll, @poll_interval)
   end

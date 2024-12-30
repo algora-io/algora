@@ -7,6 +7,13 @@ defmodule Algora.Comments do
     Repo.get_by(CommentCursor, provider: provider, repo_owner: repo_owner, repo_name: repo_name)
   end
 
+  def delete_comment_cursor(provider, repo_owner, repo_name) do
+    case get_comment_cursor(provider, repo_owner, repo_name) do
+      nil -> {:error, :cursor_not_found}
+      cursor -> Repo.delete(cursor)
+    end
+  end
+
   def create_comment_cursor(attrs \\ %{}) do
     %CommentCursor{}
     |> CommentCursor.changeset(attrs)

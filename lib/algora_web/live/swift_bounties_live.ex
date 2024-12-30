@@ -328,7 +328,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
     <div class="container max-w-7xl mx-auto px-6 space-y-12">
       <%= if Enum.empty?(@tickets) do %>
-        <.card class="text-center bg-card py-12 rounded-lg lg:rounded-[2rem]">
+        <.card class="text-center bg-card py-12 rounded-[2rem]">
           <.card_header>
             <div class="mx-auto rounded-full bg-muted p-4 mb-2">
               <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
@@ -340,7 +340,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           </.card_header>
         </.card>
       <% else %>
-        <.card class="bg-card rounded-lg lg:rounded-[2rem]">
+        <.card class="bg-card rounded-[2rem]">
           <.card_header class="flex justify-between">
             <.card_title>Open Bounties</.card_title>
           </.card_header>

@@ -37,7 +37,7 @@ defmodule Algora.Github.Poller.Events do
        repo_name: repo_name,
        backfill_limit: backfill_limit,
        cursor: nil,
-       paused: Mix.env() == :dev
+       paused: not Algora.config([:auto_start_pollers])
      }, {:continue, :setup}}
   end
 

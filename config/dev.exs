@@ -107,4 +107,7 @@ config :swoosh, :api_client, false
 # Path to install SaladUI components
 config :salad_ui, components_path: Path.join(File.cwd!(), "lib/algora_web/components/ui")
 
-config :algora, :cloudflare_tunnel, System.get_env("CLOUDFLARE_TUNNEL")
+config :algora,
+  cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
+  swift_mode: System.get_env("SWIFT_MODE") == "true",
+  auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"

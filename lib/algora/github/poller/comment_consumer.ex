@@ -64,10 +64,11 @@ defmodule Algora.Github.Poller.CommentConsumer do
              amount: amount,
              ticket: ticket
            }) do
+      # TODO: post comment in a separate job
       body = """
       💎 **#{user.provider_login}** is offering a **#{Money.to_string!(amount, no_fraction_if_integer: true)}** bounty for this issue
 
-      👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{number}` in your PR and joining algora.io
+      👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{number}` in your PR and joining swift.algora.io
       """
 
       if Github.pat_enabled() do

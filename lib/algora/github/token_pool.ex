@@ -33,11 +33,15 @@ defmodule Algora.Github.TokenPool do
   @impl true
   def handle_call(:get_token, _from, %{current_token_index: index, tokens: tokens} = state) do
     token = Enum.at(tokens, index)
-    next_index = rem(index + 1, length(tokens))
 
-    if next_index == 0, do: refresh_tokens()
+    if token == nil do
+      {:reply, nil, state}
+    else
+      next_index = rem(index + 1, length(tokens))
+      if next_index == 0, do: refresh_tokens()
 
-    {:reply, token, %{state | current_token_index: next_index}}
+      {:reply, token, %{state | current_token_index: next_index}}
+    end
   end
 
   @impl true

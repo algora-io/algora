@@ -76,10 +76,19 @@ defmodule Algora.Github.Poller.Comments do
   end
 
   def poll(state) do
-    with {:ok, comments} <- fetch_comments(state),
+    with {:ok, token} <- get_token(),
+         {:ok, comments} <- fetch_comments(token, state),
          if(length(comments) > 0, do: Logger.debug("Processing #{length(comments)} comments")),
          {:ok, updated_cursor} <- process_batch(comments, state.cursor) do
       {:ok, %{state | cursor: updated_cursor}}
+    else
+      {:error, :no_token_available} ->
+        Logger.warning("No token available, pausing poller")
+        {:ok, %{state | paused: true}}
+
+      {:error, reason} ->
+        Logger.error("Failed to fetch comments: #{inspect(reason)}")
+        {:ok, state}
     end
   end
 
@@ -103,9 +112,8 @@ defmodule Algora.Github.Poller.Comments do
     end)
   end
 
-  defp fetch_comments(state) do
-    with token = Github.TokenPool.get_token(),
-         {:ok, comments} <-
+  defp fetch_comments(token, state) do
+    with {:ok, comments} <-
            Github.list_repository_comments(
              token,
              state.repo_owner,
@@ -178,6 +186,13 @@ defmodule Algora.Github.Poller.Comments do
         )
 
         :ok
+    end
+  end
+
+  defp get_token do
+    case Github.TokenPool.get_token() do
+      nil -> {:error, :no_token_available}
+      token -> {:ok, token}
     end
   end
 end

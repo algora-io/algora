@@ -20,6 +20,7 @@ defmodule AlgoraWeb.ConnCase do
   using do
     quote do
       use AlgoraWeb, :verified_routes
+
       import AlgoraWeb.ConnCase
       import Phoenix.ConnTest
       import Plug.Conn

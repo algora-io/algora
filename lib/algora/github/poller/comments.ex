@@ -118,6 +118,7 @@ defmodule Algora.Github.Poller.Comments do
   end
 
   defp fetch_comments(token, state) do
+    # TODO: ignore comments from bots and GITHUB_BOT_HANDLE
     with {:ok, comments} <-
            Github.list_repository_comments(
              token,

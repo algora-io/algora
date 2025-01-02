@@ -4,13 +4,13 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
   import AlgoraWeb.Components.Achievement
 
+  alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Contracts
   alias Algora.FeeTier
   alias Algora.Payments
   alias Algora.Reviews
-  alias Algora.Users
   alias Algora.Util
   alias AlgoraWeb.Org.Forms.JobForm
 
@@ -803,7 +803,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
   defp fetch_matching_devs(tech_stack) do
     developers =
-      Users.list_developers(
+      Accounts.list_developers(
         sort_by_tech_stack: tech_stack,
         limit: 3,
         min_earnings: Money.new!(200, "USD")

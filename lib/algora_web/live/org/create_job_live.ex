@@ -2,8 +2,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
   alias Algora.Bounties
-  alias Algora.Users
   alias AlgoraWeb.Org.Forms.JobForm
 
   def mount(_params, _session, socket) do
@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
      |> assign(:recent_bounties, Bounties.list_bounties(limit: 10))
      |> assign(
        :matching_devs,
-       Users.list_developers(org_id: socket.assigns.current_org.id, limit: 5)
+       Accounts.list_developers(org_id: socket.assigns.current_org.id, limit: 5)
      )
      |> assign(:selected_dev, nil)
      |> assign(:show_dev_drawer, false)
@@ -677,7 +677,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
-    {:ok, dev} = Users.fetch_developer(dev_id)
+    {:ok, dev} = Accounts.fetch_developer(dev_id)
 
     {:noreply,
      socket

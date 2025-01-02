@@ -381,7 +381,8 @@ defmodule Algora.Bounties do
     completed_bounties = Repo.aggregate(rewarded_bounties_query, :count, :id)
 
     solvers_count_last_month =
-      where(rewarded_claims_query, [c], c.inserted_at >= fragment("NOW() - INTERVAL '1 month'"))
+      rewarded_claims_query
+      |> where([c], c.inserted_at >= fragment("NOW() - INTERVAL '1 month'"))
       |> Repo.aggregate(
         :count,
         :user_id,

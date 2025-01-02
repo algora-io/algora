@@ -6,10 +6,10 @@ defmodule AlgoraWeb.HomeLive do
   import Phoenix.LiveView.TagEngine
   import Tails, only: [classes: 1]
 
+  alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users
-  alias Algora.Users.User
   alias AlgoraWeb.Components.Wordmarks
 
   @impl true
@@ -25,7 +25,7 @@ defmodule AlgoraWeb.HomeLive do
 
     {:ok,
      socket
-     |> assign(:featured_devs, Users.list_featured_developers(country_code))
+     |> assign(:featured_devs, Accounts.list_featured_developers(country_code))
      |> assign(:stats, stats)}
   end
 

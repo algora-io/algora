@@ -2,7 +2,7 @@ defmodule Algora.Organizations.Org do
   @moduledoc false
   use Algora.Schema
 
-  alias Algora.Users.User
+  alias Algora.Accounts.User
 
   def changeset(org, params) do
     org

@@ -4,10 +4,10 @@ defmodule AlgoraWeb.TROTWLive do
 
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users
 
   def mount(_params, _session, socket) do
     weeks = get_weekly_rankings()
@@ -130,7 +130,7 @@ defmodule AlgoraWeb.TROTWLive do
   defp get_weekly_rankings do
     transactions_query =
       from t in Transaction,
-        join: u in Users.User,
+        join: u in Accounts.User,
         on: t.user_id == u.id,
         where: not is_nil(u.country) and not is_nil(t.succeeded_at),
         group_by: [

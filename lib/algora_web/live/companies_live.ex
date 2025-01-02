@@ -2,13 +2,13 @@ defmodule AlgoraWeb.CompaniesLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  alias Algora.Accounts
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:featured_devs, Users.list_featured_developers())
+     |> assign(:featured_devs, Accounts.list_featured_developers())
      |> assign(:stats, fetch_stats())
      |> assign(:mobile_menu_open, false)
      |> assign(:expanded_faq, nil)

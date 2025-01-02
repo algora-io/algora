@@ -5,10 +5,10 @@ defmodule AlgoraWeb.LeaderboardLive do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Misc.CountryEmojis
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users
 
   def mount(_params, _session, socket) do
     top_earners = get_top_earners()
@@ -17,7 +17,7 @@ defmodule AlgoraWeb.LeaderboardLive do
 
   def handle_event("toggle-need-avatar", %{"user-id" => user_id}, socket) do
     {:ok, _user} =
-      user_id |> Users.get_user!() |> change() |> put_change(:need_avatar, true) |> Repo.update()
+      user_id |> Accounts.get_user!() |> change() |> put_change(:need_avatar, true) |> Repo.update()
 
     # Refresh the data
     top_earners = get_top_earners()
@@ -93,7 +93,7 @@ defmodule AlgoraWeb.LeaderboardLive do
   defp get_top_earners do
     # First get the totals per user
     user_totals =
-      from u in Users.User,
+      from u in Accounts.User,
         join: t in Transaction,
         on: t.user_id == u.id and not is_nil(t.succeeded_at),
         group_by: [u.id, u.name, u.provider_login, u.avatar_url, u.country, u.need_avatar],

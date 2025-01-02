@@ -2,7 +2,7 @@ defmodule Algora.Workspace.Installation do
   @moduledoc false
   use Algora.Schema
 
-  alias Algora.Users.User
+  alias Algora.Accounts.User
 
   @type t() :: %__MODULE__{}
 

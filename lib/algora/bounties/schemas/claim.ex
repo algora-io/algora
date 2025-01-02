@@ -28,7 +28,7 @@ defmodule Algora.Bounties.Claim do
     field :group_id, :string
 
     belongs_to :bounty, Algora.Bounties.Bounty
-    belongs_to :user, Algora.Users.User
+    belongs_to :user, Algora.Accounts.User
     # has_one :transaction, Algora.Payments.Transaction
 
     timestamps()

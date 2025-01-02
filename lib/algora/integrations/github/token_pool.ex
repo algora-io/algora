@@ -2,7 +2,7 @@ defmodule Algora.Github.TokenPool do
   @moduledoc false
   use GenServer
 
-  alias Algora.Users
+  alias Algora.Accounts
 
   require Logger
 
@@ -29,7 +29,7 @@ defmodule Algora.Github.TokenPool do
 
   @impl true
   def handle_continue(:setup, state) do
-    tokens = Users.get_random_access_tokens(@pool_size)
+    tokens = Accounts.get_random_access_tokens(@pool_size)
     {:noreply, %{state | tokens: tokens, current_token_index: 0}}
   end
 
@@ -54,7 +54,7 @@ defmodule Algora.Github.TokenPool do
       if length(state.tokens) < @pool_size do
         state
       else
-        %{state | tokens: Users.get_random_access_tokens(@pool_size), current_token_index: 0}
+        %{state | tokens: Accounts.get_random_access_tokens(@pool_size), current_token_index: 0}
       end
     }
   end

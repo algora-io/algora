@@ -2,7 +2,7 @@ defmodule AlgoraWeb.Job.CreateLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  alias Algora.Accounts
 
   def mount(_params, session, socket) do
     job = %{
@@ -352,7 +352,7 @@ defmodule AlgoraWeb.Job.CreateLive do
   defp next_step_label(4), do: "Description"
 
   defp get_matching_devs(job) do
-    Users.list_developers(
+    Accounts.list_developers(
       limit: 5,
       sort_by_country: job.country,
       sort_by_tech_stack: job.tech_stack,

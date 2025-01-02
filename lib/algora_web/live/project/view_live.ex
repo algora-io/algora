@@ -2,7 +2,7 @@ defmodule AlgoraWeb.Project.ViewLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  alias Algora.Accounts
 
   def mount(%{"id" => id}, _session, socket) do
     # Mock data for a single project
@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Project.ViewLive do
     }
 
     matching_devs =
-      Users.list_developers(
+      Accounts.list_developers(
         limit: 6,
         sort_by_country: project.country,
         sort_by_tech_stack: project.tech_stack,

@@ -2,11 +2,11 @@ defmodule Algora.Organizations do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Contracts.Contract
   alias Algora.Organizations.Member
   alias Algora.Organizations.Org
   alias Algora.Repo
-  alias Algora.Users.User
   alias Ecto.Multi
 
   def create_organization(params) do

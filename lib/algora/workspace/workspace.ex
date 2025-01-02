@@ -2,9 +2,9 @@ defmodule Algora.Workspace do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Repo
-  alias Algora.Users.User
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket

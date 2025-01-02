@@ -1,9 +1,9 @@
-defmodule Algora.Users.Identity do
+defmodule Algora.Accounts.Identity do
   @moduledoc false
   use Algora.Schema
 
-  alias Algora.Users.Identity
-  alias Algora.Users.User
+  alias Algora.Accounts.Identity
+  alias Algora.Accounts.User
 
   @type t() :: %__MODULE__{}
 

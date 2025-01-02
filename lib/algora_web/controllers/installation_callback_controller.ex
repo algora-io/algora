@@ -1,9 +1,9 @@
 defmodule AlgoraWeb.InstallationCallbackController do
   use AlgoraWeb, :controller
 
+  alias Algora.Accounts
   alias Algora.Github
   alias Algora.Organizations
-  alias Algora.Users
   alias Algora.Workspace
 
   require Logger
@@ -61,7 +61,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
   end
 
   defp do_handle_installation(conn, user, installation_id) do
-    with {:ok, access_token} <- Users.get_access_token(user),
+    with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
          {:ok, github_handle} <- extract_github_handle(installation),
          {:ok, account} <- Github.get_user_by_username(access_token, github_handle),

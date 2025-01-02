@@ -3,6 +3,8 @@ defmodule Algora.Bounties do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Tip
@@ -12,8 +14,6 @@ defmodule Algora.Bounties do
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users
-  alias Algora.Users.User
   alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Ticket
@@ -68,7 +68,7 @@ defmodule Algora.Bounties do
         amount: amount,
         ticket_ref: %{owner: repo_owner, repo: repo_name, number: number}
       }) do
-    with {:ok, token} <- Users.get_access_token(creator),
+    with {:ok, token} <- Accounts.get_access_token(creator),
          {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
       create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
     else

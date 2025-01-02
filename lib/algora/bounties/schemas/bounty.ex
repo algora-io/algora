@@ -2,9 +2,9 @@ defmodule Algora.Bounties.Bounty do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
-  alias Algora.Users.User
 
   @type t() :: %__MODULE__{}
 

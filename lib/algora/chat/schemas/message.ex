@@ -6,7 +6,7 @@ defmodule Algora.Chat.Message do
     field :content, :string
 
     belongs_to :thread, Algora.Chat.Thread
-    belongs_to :sender, Algora.Users.User
+    belongs_to :sender, Algora.Accounts.User
 
     timestamps()
   end

@@ -16,7 +16,7 @@ defmodule Algora.Workspace.Repository do
     field :url, :string
 
     has_many :tickets, Algora.Workspace.Ticket
-    belongs_to :user, Algora.Users.User
+    belongs_to :user, Algora.Accounts.User
 
     timestamps()
   end

@@ -20,7 +20,7 @@ defmodule DatabaseMigration do
   - Run the script using: elixir scripts/database_migration.exs
   """
   require Logger
-  alias Algora.Users.User
+  alias Algora.Accounts.User
   alias Algora.Workspace.Ticket
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction

@@ -6,7 +6,7 @@ defmodule Algora.Chat.Participant do
     field :last_read_at, :utc_datetime_usec
 
     belongs_to :thread, Algora.Chat.Thread
-    belongs_to :user, Algora.Users.User
+    belongs_to :user, Algora.Accounts.User
 
     timestamps()
   end

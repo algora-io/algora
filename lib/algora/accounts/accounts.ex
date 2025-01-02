@@ -1,12 +1,12 @@
-defmodule Algora.Users do
+defmodule Algora.Accounts do
   @moduledoc false
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts.Identity
+  alias Algora.Accounts.User
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users.Identity
-  alias Algora.Users.User
 
   require Algora.SQL
 

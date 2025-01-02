@@ -2,9 +2,9 @@ defmodule Algora.Contracts.Contract do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Accounts.User
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
-  alias Algora.Users.User
   alias Money.Ecto.Composite.Type, as: MoneyType
 
   schema "contracts" do

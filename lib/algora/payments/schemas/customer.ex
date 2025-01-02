@@ -13,7 +13,7 @@ defmodule Algora.Payments.Customer do
     field :name, :string
     field :region, Ecto.Enum, values: [:US, :EU]
 
-    belongs_to :user, Algora.Users.User
+    belongs_to :user, Algora.Accounts.User
 
     has_one :default_payment_method, Algora.Payments.PaymentMethod,
       foreign_key: :customer_id,

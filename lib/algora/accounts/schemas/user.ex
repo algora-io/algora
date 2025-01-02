@@ -1,13 +1,13 @@
-defmodule Algora.Users.User do
+defmodule Algora.Accounts.User do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Accounts.Identity
+  alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
-  alias Algora.Users.Identity
-  alias Algora.Users.User
   alias Algora.Workspace.Installation
   alias Money.Ecto.Composite.Type, as: MoneyType
 

@@ -6,7 +6,7 @@ defmodule Algora.Bounties.Bonus do
 
   schema "bonuses" do
     belongs_to :bounty, Algora.Bounties.Bounty
-    belongs_to :user, Algora.Users.User
+    belongs_to :user, Algora.Accounts.User
 
     timestamps()
   end

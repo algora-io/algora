@@ -7,11 +7,11 @@ defmodule AlgoraWeb.Community.DashboardLive do
   import AlgoraWeb.Components.Experts
   import Ecto.Changeset
 
+  alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Contracts
   alias Algora.Github
   alias Algora.Types.USD
-  alias Algora.Users
   alias Algora.Validations
   alias Algora.Workspace
 
@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
     experts =
       socket.assigns.current_user.tech_stack
       |> List.first()
-      |> Users.list_experts()
+      |> Accounts.list_experts()
       |> Enum.take(6)
 
     if connected?(socket) do
@@ -279,7 +279,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
       |> Map.put(:action, :validate)
 
     with %{valid?: true} <- changeset,
-         {:ok, token} <- Users.get_access_token(socket.assigns.current_user),
+         {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
          {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
          {:ok, checkout_url} <-
            Bounties.create_tip(%{

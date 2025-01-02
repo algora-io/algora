@@ -7,7 +7,7 @@ defmodule AlgoraWeb.User.SettingsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-7xl mx-auto p-6 space-y-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <div class="space-y-1">
         <h1 class="text-2xl font-bold">Settings</h1>
         <p class="text-muted-foreground">Update your settings and preferences</p>

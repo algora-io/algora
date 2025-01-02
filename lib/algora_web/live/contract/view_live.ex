@@ -14,10 +14,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
     ~H"""
     <div class="flex">
       <!-- Main Content - Make this scrollable -->
-      <.scroll_area class="flex-1 h-[calc(100vh-64px)]">
-        <div class="max-w-4xl mx-auto p-4">
+      <.scroll_area class="h-[calc(100vh-64px)] flex-1">
+        <div class="mx-auto max-w-4xl p-4">
           <!-- Header -->
-          <div class="flex justify-between items-center">
+          <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
               <div class="flex -space-x-2">
                 <.avatar class="h-12 w-12 ring-2 ring-background">
@@ -47,11 +47,11 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </div>
           </div>
           <!-- Stats Grid -->
-          <div class="grid grid-cols-4 gap-4 mt-8">
+          <div class="mt-8 grid grid-cols-4 gap-4">
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">Hourly rate</div>
-                <div class="text-2xl font-semibold font-display">
+                <div class="mb-2 text-sm text-muted-foreground">Hourly rate</div>
+                <div class="font-display text-2xl font-semibold">
                   {Money.to_string!(@contract.hourly_rate)}/hr
                 </div>
               </.card_content>
@@ -59,24 +59,24 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">Hours per week</div>
-                <div class="text-2xl font-semibold font-display">
+                <div class="mb-2 text-sm text-muted-foreground">Hours per week</div>
+                <div class="font-display text-2xl font-semibold">
                   {@contract.hours_per_week}
                 </div>
               </.card_content>
             </.card>
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">In escrow</div>
-                <div class="text-2xl font-semibold font-display">
+                <div class="mb-2 text-sm text-muted-foreground">In escrow</div>
+                <div class="font-display text-2xl font-semibold">
                   {Money.to_string!(Contract.balance(@contract))}
                 </div>
               </.card_content>
             </.card>
             <.card>
               <.card_content class="pt-6">
-                <div class="text-sm text-muted-foreground mb-2">Total paid</div>
-                <div class="text-2xl font-semibold font-display">
+                <div class="mb-2 text-sm text-muted-foreground">Total paid</div>
+                <div class="font-display text-2xl font-semibold">
                   {Money.to_string!(@contract.total_credited)}
                 </div>
               </.card_content>
@@ -84,15 +84,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
           </div>
           <!-- Tabs -->
           <.tabs :let={builder} id="contract-tabs" default="payments" class="mt-8">
-            <.tabs_list class="w-full flex space-x-1 rounded-lg bg-muted p-1">
+            <.tabs_list class="flex w-full space-x-1 rounded-lg bg-muted p-1">
               <.tabs_trigger builder={builder} value="payments" class="flex-1">
-                <.icon name="tabler-credit-card" class="w-4 h-4 mr-2" /> Payments
+                <.icon name="tabler-credit-card" class="mr-2 h-4 w-4" /> Payments
               </.tabs_trigger>
               <.tabs_trigger builder={builder} value="details" class="flex-1">
-                <.icon name="tabler-file-text" class="w-4 h-4 mr-2" /> Contract Details
+                <.icon name="tabler-file-text" class="mr-2 h-4 w-4" /> Contract Details
               </.tabs_trigger>
               <.tabs_trigger builder={builder} value="activity" class="flex-1">
-                <.icon name="tabler-history" class="w-4 h-4 mr-2" /> Activity
+                <.icon name="tabler-history" class="mr-2 h-4 w-4" /> Activity
               </.tabs_trigger>
             </.tabs_list>
 
@@ -111,8 +111,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <% {:pending_timesheet, contract} -> %>
                           <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                              <div class="h-9 w-9 rounded-full bg-warning/20 flex items-center justify-center">
-                                <.icon name="tabler-clock" class="w-5 h-5 text-warning" />
+                              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-warning/20">
+                                <.icon name="tabler-clock" class="h-5 w-5 text-warning" />
                               </div>
                               <div>
                                 <div class="font-medium">
@@ -127,15 +127,15 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                             </div>
                             <div class="text-right">
-                              <div class="font-medium font-display">Pending</div>
+                              <div class="font-display font-medium">Pending</div>
                               <div class="text-sm text-muted-foreground">Timesheet</div>
                             </div>
                           </div>
                         <% {:pending_release, contract} -> %>
-                          <div class="-mx-4 flex items-center justify-between bg-muted/30 p-4 rounded-lg">
+                          <div class="-mx-4 flex items-center justify-between rounded-lg bg-muted/30 p-4">
                             <div class="flex items-center gap-4">
-                              <div class="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center">
-                                <.icon name="tabler-clock" class="w-5 h-5 text-primary" />
+                              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
+                                <.icon name="tabler-clock" class="h-5 w-5 text-primary" />
                               </div>
                               <div>
                                 <div class="font-medium">
@@ -150,8 +150,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                             </div>
                             <div class="flex items-center gap-2">
-                              <div class="text-right mr-4">
-                                <div class="font-medium font-display">
+                              <div class="mr-4 text-right">
+                                <div class="font-display font-medium">
                                   {Money.to_string!(Contracts.calculate_transfer_amount(contract))}
                                 </div>
                                 <div class="text-sm text-muted-foreground">
@@ -167,12 +167,12 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                 <.dropdown_menu>
                                   <.dropdown_menu_trigger>
                                     <.button variant="ghost" size="icon">
-                                      <.icon name="tabler-dots-vertical" class="w-4 h-4" />
+                                      <.icon name="tabler-dots-vertical" class="h-4 w-4" />
                                     </.button>
                                   </.dropdown_menu_trigger>
                                   <.dropdown_menu_content>
                                     <.dropdown_menu_item phx-click="show_release_modal">
-                                      <.icon name="tabler-arrow-right" class="w-4 h-4 mr-2" />
+                                      <.icon name="tabler-arrow-right" class="mr-2 h-4 w-4" />
                                       Release without renew
                                     </.dropdown_menu_item>
                                     <.dropdown_menu_separator />
@@ -180,7 +180,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                       phx-click="show_dispute_modal"
                                       class="text-destructive"
                                     >
-                                      <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" />
+                                      <.icon name="tabler-alert-triangle" class="mr-2 h-4 w-4" />
                                       Dispute
                                     </.dropdown_menu_item>
                                   </.dropdown_menu_content>
@@ -191,8 +191,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <% {:paid, contract} -> %>
                           <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4">
-                              <div class="h-9 w-9 rounded-full bg-success/20 flex items-center justify-center">
-                                <.icon name="tabler-check" class="w-5 h-5 text-success" />
+                              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-success/20">
+                                <.icon name="tabler-check" class="h-5 w-5 text-success" />
                               </div>
                               <div>
                                 <div class="font-medium">
@@ -207,7 +207,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                               </div>
                             </div>
                             <div class="text-right">
-                              <div class="font-medium font-display">
+                              <div class="font-display font-medium">
                                 {Money.to_string!(contract.amount_credited)}
                               </div>
                               <div class="text-sm text-muted-foreground">Paid</div>
@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <%= if @has_more do %>
                       <div class="flex justify-center">
                         <.button variant="ghost" phx-click="load_more">
-                          <.icon name="tabler-arrow-down" class="w-4 h-4 mr-2" /> Load More
+                          <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
                         </.button>
                       </div>
                     <% end %>
@@ -240,20 +240,20 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar_image src={@contract.client.avatar_url} />
                       </.avatar>
                       <div>
-                        <div class="font-medium text-lg">{@contract.client.name}</div>
+                        <div class="text-lg font-medium">{@contract.client.name}</div>
                         <div class="text-sm text-muted-foreground">
                           @{@contract.client.handle}
                         </div>
                       </div>
                     </div>
-                    <div class="pt-6 flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2 pt-6">
                       <%= for tech <- @contract.client.tech_stack do %>
-                        <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                        <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
                           {tech}
                         </span>
                       <% end %>
                     </div>
-                    <div class="pt-6 flex -space-x-1">
+                    <div class="flex -space-x-1 pt-6">
                       <%= for member <- @org_members do %>
                         <.avatar class="h-9 w-9 ring-2 ring-background">
                           <.avatar_image src={member.avatar_url} />
@@ -276,27 +276,27 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar_image src={@contract.contractor.avatar_url} />
                       </.avatar>
                       <div>
-                        <div class="font-medium text-lg">{@contract.contractor.name}</div>
+                        <div class="text-lg font-medium">{@contract.contractor.name}</div>
                         <div class="text-sm text-muted-foreground">
                           @{@contract.contractor.handle}
                         </div>
                       </div>
                     </div>
-                    <div class="pt-6 flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2 pt-6">
                       <%= for tech <- @contract.contractor.tech_stack do %>
-                        <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                        <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
                           {tech}
                         </span>
                       <% end %>
                     </div>
-                    <div class="pt-6 space-y-2">
+                    <div class="space-y-2 pt-6">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-map-pin" class="w-4 h-4" />
+                        <.icon name="tabler-map-pin" class="h-4 w-4" />
                         {@contract.contractor.location}
                       </div>
                       <%= if @contract.contractor.timezone do %>
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-clock" class="w-4 h-4" />
+                          <.icon name="tabler-clock" class="h-4 w-4" />
                           {Algora.Time.friendly_timezone(@contract.contractor.timezone)}
                         </div>
                       <% end %>
@@ -324,8 +324,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
         </div>
       </.scroll_area>
       <!-- Chat Sidebar - Fixed position -->
-      <div class="h-[calc(100vh-64px)] w-[400px] border-l border-border flex flex-col flex-none">
-        <div class="flex justify-between items-center border-b border-border p-4 flex-none bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div class="h-[calc(100vh-64px)] w-[400px] flex flex-none flex-col border-l border-border">
+        <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div class="flex items-center gap-3">
             <div class="relative">
               <.avatar>
@@ -334,7 +334,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   {String.slice(@contract.contractor.name, 0, 2)}
                 </.avatar_fallback>
               </.avatar>
-              <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
+              <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
               </div>
             </div>
             <div>
@@ -345,7 +345,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
         </div>
 
         <.scroll_area
-          class="flex-1 p-4 flex flex-col-reverse h-full gap-6"
+          class="flex h-full flex-1 flex-col-reverse gap-6 p-4"
           id="messages-container"
           phx-hook="ScrollToBottom"
         >
@@ -361,21 +361,21 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 end)
                 |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, Date) do %>
               <div class="flex items-center justify-center">
-                <div class="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">
+                <div class="rounded-full bg-background px-2 py-1 text-xs text-muted-foreground">
                   {date}
                 </div>
               </div>
 
               <div class="flex flex-col gap-6">
                 <%= for message <- Enum.sort_by(messages, & &1.inserted_at, Date) do %>
-                  <div class="flex gap-3 group">
+                  <div class="group flex gap-3">
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={message.sender.avatar_url} />
                       <.avatar_fallback>
                         {String.slice(message.sender.name, 0, 2)}
                       </.avatar_fallback>
                     </.avatar>
-                    <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
+                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
                       {message.content}
                       <div class="text-[10px] mt-1 text-muted-foreground">
                         {message.inserted_at
@@ -391,9 +391,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
           </div>
         </.scroll_area>
 
-        <div class="mt-auto border-t border-border p-4 flex-none bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <form phx-submit="send_message" class="flex gap-2 items-center">
-            <div class="flex-1 relative">
+        <div class="mt-auto flex-none border-t border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <form phx-submit="send_message" class="flex items-center gap-2">
+            <div class="relative flex-1">
               <.input
                 id="message-input"
                 type="text"
@@ -404,7 +404,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 class="flex-1 pr-24"
                 phx-hook="ClearInput"
               />
-              <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+              <div class="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1">
                 <.button
                   type="button"
                   variant="ghost"
@@ -412,16 +412,16 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   phx-hook="EmojiPicker"
                   id="emoji-trigger"
                 >
-                  <.icon name="tabler-mood-smile" class="w-4 h-4" />
+                  <.icon name="tabler-mood-smile" class="h-4 w-4" />
                 </.button>
               </div>
             </div>
             <.button type="submit" size="icon">
-              <.icon name="tabler-send" class="w-4 h-4" />
+              <.icon name="tabler-send" class="h-4 w-4" />
             </.button>
           </form>
           <!-- Add the emoji picker element (hidden by default) -->
-          <div id="emoji-picker-container" class="hidden absolute bottom-[80px] right-4">
+          <div id="emoji-picker-container" class="bottom-[80px] absolute right-4 hidden">
             <emoji-picker></emoji-picker>
           </div>
         </div>
@@ -534,10 +534,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
     ~H"""
     <div class="flex items-center gap-4">
       <div class={[
-        "h-9 w-9 rounded-full flex items-center justify-center",
+        "flex h-9 w-9 items-center justify-center rounded-full",
         activity_background_class(@activity.type)
       ]}>
-        <.icon name={activity_icon(@activity.type)} class="w-5 h-5" />
+        <.icon name={activity_icon(@activity.type)} class="h-5 w-5" />
       </div>
       <div class="flex-1">
         <div class="font-medium">

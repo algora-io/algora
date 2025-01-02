@@ -74,15 +74,7 @@ defmodule AlgoraWeb.Components.UI.Form do
       end
 
     ~H"""
-    <Label.label
-      class={
-        classes([
-          @error && "text-destructive",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <Label.label class={classes([@error && "text-destructive", @class])} {@rest}>
       {render_slot(@inner_block)}
     </Label.label>
     """
@@ -104,7 +96,7 @@ defmodule AlgoraWeb.Components.UI.Form do
 
   def form_description(assigns) do
     ~H"""
-    <p class={classes(["text-muted-foreground text-sm", @class])} {@rest}>
+    <p class={classes(["text-sm text-muted-foreground", @class])} {@rest}>
       {render_slot(@inner_block)}
     </p>
     """
@@ -125,7 +117,7 @@ defmodule AlgoraWeb.Components.UI.Form do
     ~H"""
     <p
       :if={msg = render_slot(@inner_block) || not Enum.empty?(@errors)}
-      class={classes(["text-destructive text-sm font-medium", @class])}
+      class={classes(["text-sm font-medium text-destructive", @class])}
       {@rest}
     >
       <span :for={msg <- @errors} class="block">{msg}</span>

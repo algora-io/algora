@@ -228,25 +228,25 @@ defmodule AlgoraWeb.ChatLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex h-[calc(100vh-64px)] bg-background">
+    <div class="h-[calc(100vh-64px)] flex bg-background">
       <!-- Chat Threads Sidebar -->
-      <div class="w-80 border-r border-border flex flex-col h-full">
-        <div class="p-4 border-b border-border flex-none">
-          <div class="flex items-center justify-between mb-4">
+      <div class="flex h-full w-80 flex-col border-r border-border">
+        <div class="flex-none border-b border-border p-4">
+          <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold">Messages</h2>
             <div class="flex gap-2">
               <.button variant="ghost" size="icon">
-                <.icon name="tabler-filter" class="w-4 h-4" />
+                <.icon name="tabler-filter" class="h-4 w-4" />
               </.button>
               <.button variant="ghost" size="icon">
-                <.icon name="tabler-edit" class="w-4 h-4" />
+                <.icon name="tabler-edit" class="h-4 w-4" />
               </.button>
             </div>
           </div>
           <div class="relative">
             <.icon
               name="tabler-search"
-              class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+              class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
             />
             <.input
               type="search"
@@ -260,26 +260,26 @@ defmodule AlgoraWeb.ChatLive do
         <.scroll_area class="flex-1">
           <div class="space-y-0.5">
             <%= for thread <- @chat_threads do %>
-              <div class="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+              <div class="flex cursor-pointer items-center gap-3 p-3 transition-colors hover:bg-muted/50">
                 <div class="relative">
                   <.avatar class="h-12 w-12">
                     <.avatar_image src={thread.user.avatar_url} />
                     <.avatar_fallback>{String.slice(thread.user.name, 0, 2)}</.avatar_fallback>
                   </.avatar>
-                  <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
+                  <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
                   </div>
                 </div>
-                <div class="flex-1 min-w-0">
+                <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between">
                     <span class="font-medium">{thread.user.name}</span>
                     <span class="text-xs text-muted-foreground">{thread.timestamp}</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <p class="text-sm text-muted-foreground truncate">
+                    <p class="truncate text-sm text-muted-foreground">
                       {thread.last_message}
                     </p>
                     <%= if thread.unread do %>
-                      <div class="w-2 h-2 rounded-full bg-primary flex-shrink-0"></div>
+                      <div class="h-2 w-2 flex-shrink-0 rounded-full bg-primary"></div>
                     <% end %>
                   </div>
                 </div>
@@ -289,15 +289,15 @@ defmodule AlgoraWeb.ChatLive do
         </.scroll_area>
       </div>
       <!-- Main Chat Area -->
-      <div class="flex-1 flex flex-col h-full">
-        <div class="flex justify-between items-center border-b border-border p-4 flex-none bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div class="flex h-full flex-1 flex-col">
+        <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div class="flex items-center gap-3">
             <div class="relative">
               <.avatar>
                 <.avatar_image src={@other_user.avatar_url} alt="User avatar" />
                 <.avatar_fallback>{String.slice(@other_user.name, 0, 2)}</.avatar_fallback>
               </.avatar>
-              <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-success border-2 border-background">
+              <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
               </div>
             </div>
             <div>
@@ -307,18 +307,18 @@ defmodule AlgoraWeb.ChatLive do
           </div>
           <div class="flex gap-2">
             <.button variant="ghost" size="icon">
-              <.icon name="tabler-phone" class="w-4 h-4" />
+              <.icon name="tabler-phone" class="h-4 w-4" />
             </.button>
             <.button variant="ghost" size="icon">
-              <.icon name="tabler-video" class="w-4 h-4" />
+              <.icon name="tabler-video" class="h-4 w-4" />
             </.button>
             <.button variant="ghost" size="icon">
-              <.icon name="tabler-dots-vertical" class="w-4 h-4" />
+              <.icon name="tabler-dots-vertical" class="h-4 w-4" />
             </.button>
           </div>
         </div>
         <.scroll_area
-          class="flex-1 p-4 flex flex-col-reverse"
+          class="flex flex-1 flex-col-reverse p-4"
           id="messages-container"
           phx-hook="ScrollToBottom"
         >
@@ -326,20 +326,20 @@ defmodule AlgoraWeb.ChatLive do
             <%= for {date, messages} <- Enum.group_by(@messages, & &1.date) do %>
               <!-- Date separator -->
               <div class="flex items-center justify-center">
-                <div class="text-xs text-muted-foreground bg-background px-2 py-1 rounded-full">
+                <div class="rounded-full bg-background px-2 py-1 text-xs text-muted-foreground">
                   {date}
                 </div>
               </div>
 
               <%= for message <- messages do %>
-                <div class="flex gap-3 group">
+                <div class="group flex gap-3">
                   <.avatar class="h-8 w-8">
                     <.avatar_image src={message.avatar_url} />
                     <.avatar_fallback>
                       {String.slice(message.sender.name, 0, 2)}
                     </.avatar_fallback>
                   </.avatar>
-                  <div class="relative max-w-[80%] rounded-2xl p-3 bg-muted rounded-tl-none">
+                  <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
                     {message.content}
                     <div class="text-[10px] mt-1 text-muted-foreground">
                       {message.sent_at}
@@ -350,12 +350,12 @@ defmodule AlgoraWeb.ChatLive do
             <% end %>
           </div>
         </.scroll_area>
-        <div class="border-t border-border p-4 flex-none bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <form phx-submit="send_message" class="flex gap-2 items-center">
+        <div class="flex-none border-t border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <form phx-submit="send_message" class="flex items-center gap-2">
             <.button type="button" variant="ghost" size="icon">
-              <.icon name="tabler-plus" class="w-4 h-4" />
+              <.icon name="tabler-plus" class="h-4 w-4" />
             </.button>
-            <div class="flex-1 relative">
+            <div class="relative flex-1">
               <.input
                 type="text"
                 name="message"
@@ -363,23 +363,23 @@ defmodule AlgoraWeb.ChatLive do
                 placeholder="Type a message..."
                 class="flex-1 pr-24"
               />
-              <div class="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+              <div class="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1">
                 <.button type="button" variant="ghost" size="icon-sm">
-                  <.icon name="tabler-mood-smile" class="w-4 h-4" />
+                  <.icon name="tabler-mood-smile" class="h-4 w-4" />
                 </.button>
                 <.button type="button" variant="ghost" size="icon-sm">
-                  <.icon name="tabler-paperclip" class="w-4 h-4" />
+                  <.icon name="tabler-paperclip" class="h-4 w-4" />
                 </.button>
               </div>
             </div>
             <.button type="submit" size="icon">
-              <.icon name="tabler-send" class="w-4 h-4" />
+              <.icon name="tabler-send" class="h-4 w-4" />
             </.button>
           </form>
         </div>
       </div>
       <!-- Right Sidebar -->
-      <div class="w-80 border-l border-border flex flex-col h-full">
+      <div class="flex h-full w-80 flex-col border-l border-border">
         <div class="p-4">
           <div class="flex flex-col gap-6">
             <!-- User Profile Header -->
@@ -393,9 +393,9 @@ defmodule AlgoraWeb.ChatLive do
               </h3>
               <p class="text-sm text-muted-foreground">@{@other_user.handle}</p>
 
-              <div class="-mx-1 mt-3 flex flex-wrap gap-1 justify-center">
+              <div class="-mx-1 mt-3 flex flex-wrap justify-center gap-1">
                 <%= for tech <- Enum.take(@other_user.tech_stack || [], 3) do %>
-                  <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                  <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
                     {tech}
                   </span>
                 <% end %>
@@ -409,19 +409,19 @@ defmodule AlgoraWeb.ChatLive do
             <!-- User Details -->
             <div class="space-y-3">
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <.icon name="tabler-map-pin" class="w-4 h-4" />
+                <.icon name="tabler-map-pin" class="h-4 w-4" />
                 {@other_user.location}
               </div>
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <.icon name="tabler-clock" class="w-4 h-4" />
+                <.icon name="tabler-clock" class="h-4 w-4" />
                 {@other_user.timezone}
               </div>
               <div class="flex items-center gap-2 text-sm">
-                <.icon name="tabler-circle-check" class="w-4 h-4 text-success" />
+                <.icon name="tabler-circle-check" class="h-4 w-4 text-success" />
                 <span class="text-success">{@other_user.availability}</span>
               </div>
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <.icon name="tabler-currency-dollar" class="w-4 h-4" />
+                <.icon name="tabler-currency-dollar" class="h-4 w-4" />
                 {@other_user.rate}
               </div>
             </div>
@@ -432,9 +432,9 @@ defmodule AlgoraWeb.ChatLive do
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  class="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <.icon name={social.icon} class="w-4 h-4" />
+                  <.icon name={social.icon} class="h-4 w-4" />
                   {social.name}
                 </a>
               <% end %>
@@ -442,9 +442,9 @@ defmodule AlgoraWeb.ChatLive do
           </div>
         </div>
 
-        <div class="p-4 mt-auto text-center">
+        <div class="mt-auto p-4 text-center">
           <.button variant="outline" href={"/devs/#{@other_user.handle}"} class="w-full">
-            View Full Profile <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2" />
+            View Full Profile <.icon name="tabler-arrow-right" class="ml-2 h-4 w-4" />
           </.button>
         </div>
       </div>

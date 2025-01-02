@@ -18,13 +18,13 @@ defmodule AlgoraWeb.BountiesLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-7xl mx-auto p-6 space-y-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <.section title="Bounties" subtitle="Open bounties for you">
         <%= if Enum.empty?(@tickets) do %>
-          <.card class="text-center bg-card py-12 rounded-lg lg:rounded-[2rem]">
+          <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
             <.card_header>
-              <div class="mx-auto rounded-full bg-muted p-4 mb-2">
-                <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+              <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
               </div>
               <.card_title>No bounties yet</.card_title>
               <.card_description>

@@ -13,14 +13,12 @@ defmodule AlgoraWeb.Layouts do
     <div class="space-y-1">
       <.link
         navigate="/"
-        class={
-            "text-gray-200 hover:text-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md #{if @active_tab == :home, do: "bg-gray-800", else: "hover:bg-gray-900"}"
-          }
+        class={"#{if @active_tab == :home, do: "bg-gray-800", else: "hover:bg-gray-900"} group flex items-center rounded-md px-2 py-2 text-sm font-medium text-gray-200 hover:text-gray-50"}
         aria-current={if @active_tab == :home, do: "true", else: "false"}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="text-gray-400 group-hover:text-gray-300 mr-3 flex-shrink-0 h-6 w-6"
+          class="mr-3 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-300"
           width="24"
           height="24"
           viewBox="0 0 24 24"
@@ -36,14 +34,12 @@ defmodule AlgoraWeb.Layouts do
       </.link>
       <.link
         navigate={~p"/user/settings"}
-        class={
-            "text-gray-200 hover:text-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md #{if @active_tab == :settings, do: "bg-gray-800", else: "hover:bg-gray-900"}"
-          }
+        class={"#{if @active_tab == :settings, do: "bg-gray-800", else: "hover:bg-gray-900"} group flex items-center rounded-md px-2 py-2 text-sm font-medium text-gray-200 hover:text-gray-50"}
         aria-current={if @active_tab == :settings, do: "true", else: "false"}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="text-gray-400 group-hover:text-gray-300 mr-3 flex-shrink-0 h-6 w-6"
+          class="mr-3 h-6 w-6 flex-shrink-0 text-gray-400 group-hover:text-gray-300"
           width="24"
           height="24"
           viewBox="0 0 24 24"

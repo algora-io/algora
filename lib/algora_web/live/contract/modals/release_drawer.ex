@@ -59,7 +59,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                           @contract.hourly_rate
                         )}/hr)
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract))}
                       </dd>
                     </div>
@@ -67,14 +67,14 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                       <dt class="text-muted-foreground">
                         Escrow balance
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         -{MoneyUtils.fmt_precise!(Contract.balance(@contract))}
                       </dd>
                     </div>
                     <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(
                           Money.sub!(
                             Contracts.calculate_transfer_amount(@contract),
@@ -87,12 +87,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
                 </.card_content>
               </.card>
 
-              <div class="mt-auto flex gap-4 justify-end">
+              <div class="mt-auto flex justify-end gap-4">
                 <.button variant="outline" type="button" on_cancel="close_drawer">
                   Cancel
                 </.button>
                 <.button phx-click="release" phx-target={@myself} type="submit">
-                  <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release
+                  <.icon name="tabler-check" class="mr-2 h-4 w-4" /> Confirm Release
                 </.button>
               </div>
             </div>

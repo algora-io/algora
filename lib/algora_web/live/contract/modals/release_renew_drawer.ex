@@ -26,7 +26,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
           <div class="grid grid-cols-2 gap-8">
             <div class="space-y-8">
               <.form_item>
-                <.form_label class="text-lg font-semibold mb-6">
+                <.form_label class="mb-6 text-lg font-semibold">
                   How was your experience working with {@contract.contractor.name}?
                 </.form_label>
                 <.form_control>
@@ -55,7 +55,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                           @contract.hourly_rate
                         )}/hr)
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(Contracts.calculate_transfer_amount(@contract))}
                       </dd>
                     </div>
@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dt class="text-muted-foreground">
                         Escrow balance
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         -{MoneyUtils.fmt_precise!(Contract.balance(@contract))}
                       </dd>
                     </div>
@@ -71,7 +71,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                     <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(
                           Money.sub!(
                             Contracts.calculate_transfer_amount(@contract),
@@ -86,10 +86,10 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
             </div>
             <div class="flex flex-col gap-8">
               <div>
-                <h3 class="text-lg font-semibold mb-6">Algora Fee Tier</h3>
+                <h3 class="mb-6 text-lg font-semibold">Algora Fee Tier</h3>
                 <div class="space-y-2">
                   <div class="space-y-4">
-                    <div class="flex justify-between text-lg font-medium font-display">
+                    <div class="font-display flex justify-between text-lg font-medium">
                       <%= for tier <- @fee_data.fee_tiers do %>
                         <span>{Util.format_pct(tier.fee)}</span>
                       <% end %>
@@ -97,14 +97,14 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
 
                     <div class="relative">
                       <!-- Progress bar -->
-                      <div class="h-2 bg-muted/50 rounded-full">
+                      <div class="h-2 rounded-full bg-muted/50">
                         <div
-                          class="h-full bg-primary rounded-full transition-all duration-500"
+                          class="h-full rounded-full bg-primary transition-all duration-500"
                           style={"width: #{Util.format_pct(@fee_data.progress)}"}
                         />
                       </div>
                       <!-- Threshold circles -->
-                      <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between pointer-events-none">
+                      <div class="pointer-events-none absolute top-1/2 flex w-full -translate-y-1/2 justify-between">
                         <%= for tier <- @fee_data.fee_tiers do %>
                           <div class={
                             classes([
@@ -119,12 +119,12 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                         <% end %>
                       </div>
                     </div>
-                    <div class="flex justify-between text-lg font-display font-medium relative">
+                    <div class="font-display relative flex justify-between text-lg font-medium">
                       <%= for {tier, index} <- Enum.with_index(@fee_data.fee_tiers) do %>
                         <div
                           class={
                             classes([
-                              "transform translate-x-1/3",
+                              "translate-x-1/3 transform",
                               index == 0 && "translate-x-0",
                               index == length(@fee_data.fee_tiers) - 1 && "translate-x-0"
                             ])
@@ -142,13 +142,13 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
 
                   <div class="text-base text-muted-foreground">
                     Current fee:
-                    <span class="font-semibold font-display">
+                    <span class="font-display font-semibold">
                       {Util.format_pct(@fee_data.current_fee)}
                     </span>
                   </div>
                   <div class="text-base text-muted-foreground">
                     Total paid to date:
-                    <span class="font-semibold font-display">
+                    <span class="font-display font-semibold">
                       {MoneyUtils.fmt_precise!(@fee_data.total_paid)}
                     </span>
                   </div>
@@ -166,7 +166,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                           @contract.hourly_rate
                         )}/hr)
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(Contract.balance(@contract))}
                       </dd>
                     </div>
@@ -174,7 +174,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dt class="text-muted-foreground">
                         Algora fees ({Util.format_pct(@fee_data.current_fee)})
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(
                           Money.mult!(Contract.balance(@contract), @fee_data.current_fee)
                         )}
@@ -184,7 +184,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                       <dt class="text-muted-foreground">
                         Transaction fees ({Util.format_pct(@fee_data.transaction_fee)})
                       </dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(
                           Money.mult!(Contract.balance(@contract), @fee_data.transaction_fee)
                         )}
@@ -193,7 +193,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                     <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="font-medium">Total Due</dt>
-                      <dd class="font-semibold font-display tabular-nums">
+                      <dd class="font-display font-semibold tabular-nums">
                         {MoneyUtils.fmt_precise!(
                           Money.mult!(
                             Contract.balance(@contract),
@@ -210,7 +210,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                   Cancel
                 </.button>
                 <.button phx-click="release_and_renew" phx-target={@myself} type="button">
-                  <.icon name="tabler-check" class="w-4 h-4 mr-2" /> Confirm Release & Renew
+                  <.icon name="tabler-check" class="mr-2 h-4 w-4" /> Confirm Release & Renew
                 </.button>
               </div>
             </div>

@@ -39,37 +39,37 @@ defmodule AlgoraWeb.Project.ViewLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen text-white p-8">
-      <div class="max-w-6xl mx-auto space-y-8">
+    <div class="min-h-screen p-8 text-white">
+      <div class="mx-auto max-w-6xl space-y-8">
         <%!-- Project Header Card (Keep existing) --%>
         <div class="bg-white/[7.5%] rounded-lg p-6">
-          <div class="flex justify-between items-start gap-8">
+          <div class="flex items-start justify-between gap-8">
             <div class="flex-1">
-              <h1 class="text-2xl font-display font-semibold mb-4">
+              <h1 class="font-display mb-4 text-2xl font-semibold">
                 {@project.title}
               </h1>
 
-              <div class="flex flex-wrap gap-2 mb-4">
+              <div class="mb-4 flex flex-wrap gap-2">
                 <%= for tech <- @project.tech_stack do %>
-                  <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
+                  <span class="rounded-xl px-3 py-1 text-sm text-white ring-1 ring-white/20">
                     {tech}
                   </span>
                 <% end %>
               </div>
 
-              <div class="flex items-center gap-4 text-gray-400 text-sm">
+              <div class="flex items-center gap-4 text-sm text-gray-400">
                 <div class="flex items-center gap-1">
-                  <.icon name="tabler-clock" class="w-4 h-4" />
+                  <.icon name="tabler-clock" class="h-4 w-4" />
                   Posted {Calendar.strftime(@project.posted_at, "%B %d, %Y")}
                 </div>
                 <div class="flex items-center gap-1">
-                  <.icon name="tabler-world" class="w-4 h-4" />
+                  <.icon name="tabler-world" class="h-4 w-4" />
                   {@project.country}
                 </div>
               </div>
             </div>
             <div class="text-right">
-              <div class="text-emerald-400 font-semibold font-display text-3xl">
+              <div class="font-display text-3xl font-semibold text-emerald-400">
                 <%= case @project.budget.type do %>
                   <% :hourly -> %>
                     ${@project.budget.from}-{@project.budget.to}/hour
@@ -86,21 +86,21 @@ defmodule AlgoraWeb.Project.ViewLive do
 
         <%!-- Project Tabs --%>
         <.tabs :let={builder} id="project-tabs" default="overview">
-          <.tabs_list class="w-full flex space-x-1 rounded-lg bg-white/5 p-1">
+          <.tabs_list class="flex w-full space-x-1 rounded-lg bg-white/5 p-1">
             <.tabs_trigger builder={builder} value="overview" class="flex-1">
-              <.icon name="tabler-layout-dashboard" class="w-4 h-4 mr-2" /> Overview
+              <.icon name="tabler-layout-dashboard" class="mr-2 h-4 w-4" /> Overview
             </.tabs_trigger>
             <.tabs_trigger builder={builder} value="invitations" class="flex-1">
-              <.icon name="tabler-users" class="w-4 h-4 mr-2" /> Invitations
+              <.icon name="tabler-users" class="mr-2 h-4 w-4" /> Invitations
             </.tabs_trigger>
             <.tabs_trigger builder={builder} value="documents" class="flex-1">
-              <.icon name="tabler-file" class="w-4 h-4 mr-2" /> Documents
+              <.icon name="tabler-file" class="mr-2 h-4 w-4" /> Documents
             </.tabs_trigger>
             <.tabs_trigger builder={builder} value="bounties" class="flex-1">
-              <.icon name="tabler-dia" class="w-4 h-4 mr-2" /> Bounties
+              <.icon name="tabler-dia" class="mr-2 h-4 w-4" /> Bounties
             </.tabs_trigger>
             <.tabs_trigger builder={builder} value="payments" class="flex-1">
-              <.icon name="tabler-credit-card" class="w-4 h-4 mr-2" /> Payments
+              <.icon name="tabler-credit-card" class="mr-2 h-4 w-4" /> Payments
             </.tabs_trigger>
           </.tabs_list>
 
@@ -119,25 +119,25 @@ defmodule AlgoraWeb.Project.ViewLive do
 
               <%!-- Matching Developers Section (Keep existing) --%>
               <div>
-                <div class="flex justify-between items-center mb-6">
+                <div class="mb-6 flex items-center justify-between">
                   <h2 class="text-xl font-semibold">Best Matches</h2>
                   <.button>
-                    <.icon name="tabler-user-plus" class="w-4 h-4 mr-2" /> Invite Match
+                    <.icon name="tabler-user-plus" class="mr-2 h-4 w-4" /> Invite Match
                   </.button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <%= for dev <- @matching_devs do %>
-                    <div class="bg-white/[7.5%] p-4 rounded-lg">
+                    <div class="bg-white/[7.5%] rounded-lg p-4">
                       <div class="flex gap-4">
-                        <img src={dev.avatar_url} alt={dev.name} class="w-16 h-16 rounded-full" />
-                        <div class="flex-1 min-w-0">
+                        <img src={dev.avatar_url} alt={dev.name} class="h-16 w-16 rounded-full" />
+                        <div class="min-w-0 flex-1">
                           <div class="flex justify-between">
                             <div class="truncate">
-                              <div class="font-semibold text-lg">{dev.name} {dev.flag}</div>
+                              <div class="text-lg font-semibold">{dev.name} {dev.flag}</div>
                               <div class="text-sm text-gray-400">@{dev.handle}</div>
                             </div>
                             <div class="text-right">
-                              <div class="text-gray-400 text-sm">Earned</div>
+                              <div class="text-sm text-gray-400">Earned</div>
                               <div class="font-semibold">
                                 {Money.to_string!(dev.total_earned)}
                               </div>
@@ -145,7 +145,7 @@ defmodule AlgoraWeb.Project.ViewLive do
                           </div>
                           <div class="mt-2 flex flex-wrap gap-2">
                             <%= for tech <- dev.tech_stack do %>
-                              <span class="text-white rounded-xl px-2 py-0.5 text-xs ring-1 ring-white/20">
+                              <span class="rounded-xl px-2 py-0.5 text-xs text-white ring-1 ring-white/20">
                                 {tech}
                               </span>
                             <% end %>
@@ -167,12 +167,12 @@ defmodule AlgoraWeb.Project.ViewLive do
                   <.card_title>Invitations</.card_title>
                 </.card_header>
                 <.card_content>
-                  <div class="text-center py-12">
-                    <.icon name="tabler-users" class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <h3 class="text-lg font-medium mb-2">No invitations yet</h3>
-                    <p class="text-gray-400 mb-4">Start by inviting developers to your project</p>
+                  <div class="py-12 text-center">
+                    <.icon name="tabler-users" class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 class="mb-2 text-lg font-medium">No invitations yet</h3>
+                    <p class="mb-4 text-gray-400">Start by inviting developers to your project</p>
                     <.button>
-                      <.icon name="tabler-user-plus" class="w-4 h-4 mr-2" />
+                      <.icon name="tabler-user-plus" class="mr-2 h-4 w-4" />
                       Discover & Invite Developers
                     </.button>
                   </div>
@@ -189,14 +189,14 @@ defmodule AlgoraWeb.Project.ViewLive do
                   <.card_title>Project Documents</.card_title>
                 </.card_header>
                 <.card_content>
-                  <div class="text-center py-12">
-                    <.icon name="tabler-file-upload" class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <h3 class="text-lg font-medium mb-2">No documents uploaded</h3>
-                    <p class="text-gray-400 mb-4">
+                  <div class="py-12 text-center">
+                    <.icon name="tabler-file-upload" class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 class="mb-2 text-lg font-medium">No documents uploaded</h3>
+                    <p class="mb-4 text-gray-400">
                       Upload NDAs, specifications, or other project documents
                     </p>
                     <.button>
-                      <.icon name="tabler-upload" class="w-4 h-4 mr-2" /> Upload Documents
+                      <.icon name="tabler-upload" class="mr-2 h-4 w-4" /> Upload Documents
                     </.button>
                   </div>
                 </.card_content>
@@ -212,14 +212,14 @@ defmodule AlgoraWeb.Project.ViewLive do
                   <.card_title>Project Bounties</.card_title>
                 </.card_header>
                 <.card_content>
-                  <div class="text-center py-12">
-                    <.icon name="tabler-dia" class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <h3 class="text-lg font-medium mb-2">No bounties created</h3>
-                    <p class="text-gray-400 mb-4">
+                  <div class="py-12 text-center">
+                    <.icon name="tabler-dia" class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 class="mb-2 text-lg font-medium">No bounties created</h3>
+                    <p class="mb-4 text-gray-400">
                       Break down your project into bounties for developers
                     </p>
                     <.button>
-                      <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Create First Bounty
+                      <.icon name="tabler-plus" class="mr-2 h-4 w-4" /> Create First Bounty
                     </.button>
                   </div>
                 </.card_content>
@@ -235,14 +235,14 @@ defmodule AlgoraWeb.Project.ViewLive do
                   <.card_title>Payment Setup</.card_title>
                 </.card_header>
                 <.card_content>
-                  <div class="text-center py-12">
-                    <.icon name="tabler-credit-card" class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <h3 class="text-lg font-medium mb-2">Payment method required</h3>
-                    <p class="text-gray-400 mb-4">
+                  <div class="py-12 text-center">
+                    <.icon name="tabler-credit-card" class="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 class="mb-2 text-lg font-medium">Payment method required</h3>
+                    <p class="mb-4 text-gray-400">
                       Add a payment method to start working with developers
                     </p>
                     <.button>
-                      <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Add Payment Method
+                      <.icon name="tabler-plus" class="mr-2 h-4 w-4" /> Add Payment Method
                     </.button>
                   </div>
                 </.card_content>

@@ -34,7 +34,7 @@ defmodule AlgoraWeb.Components.Achievement do
     ~H"""
     <div class="flex items-start" aria-current="step">
       <span class="relative flex h-5 w-5 flex-shrink-0 items-center justify-center" aria-hidden="true">
-        <span class="absolute h-5 w-5 rounded-full bg-success/25 animate-pulse"></span>
+        <span class="absolute h-5 w-5 animate-pulse rounded-full bg-success/25"></span>
         <span class="relative block h-2 w-2 rounded-full bg-success"></span>
       </span>
       <span class="ml-3 text-sm font-medium text-muted-foreground">

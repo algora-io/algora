@@ -49,10 +49,10 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-6xl mx-auto p-6 space-y-6">
+    <div class="container mx-auto max-w-6xl space-y-6 p-6">
       <!-- Org Header -->
-      <div class="rounded-xl border bg-card text-card-foreground p-6">
-        <div class="flex flex-col md:flex-row gap-6">
+      <div class="rounded-xl border bg-card p-6 text-card-foreground">
+        <div class="flex flex-col gap-6 md:flex-row">
           <div class="flex-shrink-0">
             <.avatar class="h-12 w-12 md:h-16 md:w-16">
               <.avatar_image src={@org.avatar_url} alt={@org.name} />
@@ -70,7 +70,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
                       url = social_link(@org, platform),
                       not is_nil(url) do %>
                 <.link href={url} target="_blank" class="text-muted-foreground hover:text-foreground">
-                  <.icon name={"tabler-#{icon}"} class="w-5 h-5" />
+                  <.icon name={"tabler-#{icon}"} class="h-5 w-5" />
                 </.link>
               <% end %>
             </div>
@@ -78,13 +78,13 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
 
           <div class="flex-shrink-0">
             <.button class="w-full">
-              <.icon name="tabler-briefcase" class="w-4 h-4 mr-2" /> Apply
+              <.icon name="tabler-briefcase" class="mr-2 h-4 w-4" /> Apply
             </.button>
           </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+      <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
         <.stat_card
           title="Open Bounties"
           value={Money.to_string!(@stats.open_bounties_amount)}
@@ -115,9 +115,9 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
         />
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Bounties Section -->
-        <div class="rounded-xl border bg-card p-6 space-y-4">
+        <div class="space-y-4 rounded-xl border bg-card p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">Open Bounties</h2>
             <.link
@@ -127,7 +127,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
               View all
             </.link>
           </div>
-          <div class="-ml-4 relative w-full overflow-auto">
+          <div class="relative -ml-4 w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for bounty <- @open_bounties do %>
@@ -138,7 +138,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           </div>
         </div>
         <!-- Completed Bounties -->
-        <div class="rounded-xl border bg-card p-6 space-y-4">
+        <div class="space-y-4 rounded-xl border bg-card p-6">
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">Completed Bounties</h2>
             <.link
@@ -148,7 +148,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
               View all
             </.link>
           </div>
-          <div class="-ml-4 relative w-full overflow-auto">
+          <div class="relative -ml-4 w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for bounty <- @completed_bounties do %>
@@ -164,11 +164,11 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
         <h2 class="text-lg font-semibold">Top Earners</h2>
         <div class="rounded-xl border bg-card">
           <%= for {earner, idx} <- Enum.with_index(@top_earners) do %>
-            <div class="flex items-center gap-4 p-4 border-b last:border-0">
-              <div class="flex-shrink-0 w-8 text-center font-mono text-muted-foreground">
+            <div class="flex items-center gap-4 border-b p-4 last:border-0">
+              <div class="w-8 flex-shrink-0 text-center font-mono text-muted-foreground">
                 #{idx + 1}
               </div>
-              <.link href={~p"/@/#{earner.handle}"} class="flex items-center gap-3 flex-1">
+              <.link href={~p"/@/#{earner.handle}"} class="flex flex-1 items-center gap-3">
                 <.avatar class="h-8 w-8">
                   <.avatar_image src={earner.avatar_url} alt={earner.name} />
                 </.avatar>
@@ -177,7 +177,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
                   <div class="text-sm text-muted-foreground">@{earner.handle}</div>
                 </div>
               </.link>
-              <div class="flex-shrink-0 font-display text-success font-medium">
+              <div class="font-display flex-shrink-0 font-medium text-success">
                 {Money.to_string!(earner.total_earned)}
               </div>
             </div>
@@ -190,21 +190,21 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
 
   def compact_bounty_view(assigns) do
     ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
       <td class="p-4 py-0 align-middle">
         <div class="flex items-center gap-4">
-          <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
             {Money.to_string!(@bounty.amount)}
           </div>
 
           <.link
             href={Bounty.url(@bounty)}
-            class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
           >
             {@bounty.ticket.title}
           </.link>
 
-          <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+          <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
             <.icon name="tabler-chevron-right" class="h-4 w-4" />
             <.link href={Bounty.url(@bounty)} class="hover:underline">
               {Bounty.path(@bounty)}

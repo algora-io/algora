@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
                 </.form_item>
 
                 <.alert variant="destructive" class="mt-4">
-                  <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" />
+                  <.icon name="tabler-alert-triangle" class="mr-2 h-4 w-4" />
                   Disputes should only be raised for serious issues. Our team will review your case within 24 hours.
                 </.alert>
 
@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
                     Cancel
                   </.button>
                   <.button variant="destructive" type="submit">
-                    <.icon name="tabler-alert-triangle" class="w-4 h-4 mr-2" /> Raise Dispute
+                    <.icon name="tabler-alert-triangle" class="mr-2 h-4 w-4" /> Raise Dispute
                   </.button>
                 </div>
               </form>
@@ -82,7 +82,7 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
                   <.card_title>Dispute Process</.card_title>
                 </.card_header>
                 <.card_content>
-                  <ol class="space-y-4 list-decimal list-inside text-sm text-muted-foreground">
+                  <ol class="list-inside list-decimal space-y-4 text-sm text-muted-foreground">
                     <li>Our team will review your case within 24 hours</li>
                     <li>Both parties will be contacted for additional information</li>
                     <li>Resolution typically occurs within 5 business days</li>

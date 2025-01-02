@@ -26,10 +26,10 @@ defmodule AlgoraWeb.Job.CreateLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-gray-950 text-white sm:flex">
-      <div class="flex-grow p-8 max-w-3xl mx-auto">
-        <div class="flex items-center gap-4 text-lg mb-6 font-display">
+      <div class="mx-auto max-w-3xl flex-grow p-8">
+        <div class="font-display mb-6 flex items-center gap-4 text-lg">
           <span class="text-gray-300">{@step} / 5</span>
-          <h1 class="text-lg text-gray-200 font-semibold uppercase">Create Your Job</h1>
+          <h1 class="text-lg font-semibold uppercase text-gray-200">Create Your Job</h1>
         </div>
         <div class="mb-8">
           {render_step(assigns)}
@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Job.CreateLive do
           <%= if @step > 1 do %>
             <button
               phx-click="prev_step"
-              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              class="rounded bg-gray-600 px-4 py-2 font-bold text-white hover:bg-gray-700"
             >
               Previous
             </button>
@@ -48,31 +48,31 @@ defmodule AlgoraWeb.Job.CreateLive do
           <%= if @step < @total_steps do %>
             <button
               phx-click="next_step"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+              class="rounded bg-indigo-600 px-4 py-2 font-bold text-white hover:bg-indigo-700"
             >
               Next: {next_step_label(@step)}
             </button>
           <% else %>
             <button
               phx-click="submit"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+              class="rounded bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700"
             >
               Submit Job
             </button>
           <% end %>
         </div>
       </div>
-      <div class="font-display sm:w-1/3 border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-8 py-4 overflow-y-auto sm:max-h-screen">
-        <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
+      <div class="font-display from-white/[5%] to-white/[2.5%] overflow-y-auto border-l-2 border-gray-800 bg-gradient-to-b px-8 py-4 sm:max-h-screen sm:w-1/3">
+        <h2 class="font-display mb-4 text-lg font-semibold uppercase text-gray-200">
           Matching Developers
         </h2>
         <%= if @matching_devs == [] do %>
           <p class="text-gray-400">Add tech_stack to see matching developers</p>
         <% else %>
           <%= for dev <- @matching_devs do %>
-            <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
-              <div class="flex mb-2 gap-3">
-                <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full mr-3" />
+            <div class="bg-white/[7.5%] mb-4 rounded-lg p-4">
+              <div class="mb-2 flex gap-3">
+                <img src={dev.avatar_url} alt={dev.name} class="mr-3 h-24 w-24 rounded-full" />
                 <div class="flex-grow">
                   <div class="flex justify-between">
                     <div>
@@ -81,16 +81,16 @@ defmodule AlgoraWeb.Job.CreateLive do
                     </div>
                     <div class="flex flex-col items-end">
                       <div class="text-gray-300">Earned</div>
-                      <div class="text-white font-semibold">
+                      <div class="font-semibold text-white">
                         {Money.to_string!(dev.total_earned)}
                       </div>
                     </div>
                   </div>
 
                   <div class="pt-3 text-sm">
-                    <div class="-ml-1 text-sm flex flex-wrap gap-1">
+                    <div class="-ml-1 flex flex-wrap gap-1 text-sm">
                       <%= for tech <- dev.tech_stack do %>
-                        <span class="text-white rounded-xl px-2 py-0.5 text-sm ring-1 ring-white/20">
+                        <span class="rounded-xl px-2 py-0.5 text-sm text-white ring-1 ring-white/20">
                           {tech}
                         </span>
                       <% end %>
@@ -117,13 +117,13 @@ defmodule AlgoraWeb.Job.CreateLive do
         <input
           type="text"
           placeholder="Desired areas of expertise"
-          class="w-full p-4 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full rounded-lg border border-gray-700 bg-gray-800 p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
       <div class="flex flex-wrap gap-3">
         <%= for tech <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
-          <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
+          <div class="flex items-center rounded-full bg-indigo-900 px-4 py-2 text-sm font-semibold text-indigo-200">
             {tech}
             <button
               phx-click="remove_tech"
@@ -137,7 +137,7 @@ defmodule AlgoraWeb.Job.CreateLive do
       </div>
 
       <div>
-        <h3 class="text-lg font-medium text-gray-400 mb-3">
+        <h3 class="mb-3 text-lg font-medium text-gray-400">
           Popular tech stacks for Software Developers
         </h3>
         <div class="flex flex-wrap gap-3">
@@ -145,7 +145,7 @@ defmodule AlgoraWeb.Job.CreateLive do
             <button
               phx-click="add_tech"
               phx-value-tech={tech}
-              class="bg-gray-800 hover:bg-gray-700 text-white rounded-full px-4 py-2 text-sm font-semibold flex items-center"
+              class="flex items-center rounded-full bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700"
             >
               + {tech}
             </button>
@@ -160,14 +160,14 @@ defmodule AlgoraWeb.Job.CreateLive do
     ~H"""
     <div>
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-300 mb-1">Job Name</label>
+        <label class="mb-1 block text-sm font-medium text-gray-300">Job Name</label>
         <input
           type="text"
           phx-value-field="title"
           phx-blur="update_job"
           value={@job.title}
           placeholder="Enter job name"
-          class="w-full p-2 bg-gray-800 border border-gray-700 rounded text-white"
+          class="w-full rounded border border-gray-700 bg-gray-800 p-2 text-white"
         />
       </div>
     </div>
@@ -177,7 +177,7 @@ defmodule AlgoraWeb.Job.CreateLive do
   def render_step(%{step: 3} = assigns) do
     ~H"""
     <div>
-      <h2 class="text-2xl font-semibold mb-4">Define the job scope</h2>
+      <h2 class="mb-4 text-2xl font-semibold">Define the job scope</h2>
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-300">Job size</label>
@@ -185,7 +185,7 @@ defmodule AlgoraWeb.Job.CreateLive do
             name="scope[size]"
             phx-change="update_job"
             phx-value-field="scope.size"
-            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+            class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
           >
             <option value="">Select size</option>
             <option value="small" selected={@job.scope.size == "small"}>Small</option>
@@ -199,7 +199,7 @@ defmodule AlgoraWeb.Job.CreateLive do
             name="scope[duration]"
             phx-change="update_job"
             phx-value-field="scope.duration"
-            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+            class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
           >
             <option value="">Select duration</option>
             <option value="short" selected={@job.scope.duration == "short"}>Short term</option>
@@ -213,7 +213,7 @@ defmodule AlgoraWeb.Job.CreateLive do
             name="scope[experience]"
             phx-change="update_job"
             phx-value-field="scope.experience"
-            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+            class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
           >
             <option value="">Select experience level</option>
             <option value="entry" selected={@job.scope.experience == "entry"}>Entry</option>
@@ -231,7 +231,7 @@ defmodule AlgoraWeb.Job.CreateLive do
   def render_step(%{step: 4} = assigns) do
     ~H"""
     <div>
-      <h2 class="text-2xl font-semibold mb-4">Set your budget</h2>
+      <h2 class="mb-4 text-2xl font-semibold">Set your budget</h2>
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-300">Budget type</label>
@@ -239,7 +239,7 @@ defmodule AlgoraWeb.Job.CreateLive do
             name="budget[type]"
             phx-change="update_job"
             phx-value-field="budget.type"
-            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+            class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
           >
             <option value="hourly" selected={@job.budget.type == :hourly}>Hourly rate</option>
             <option value="fixed" selected={@job.budget.type == :fixed}>Fixed price</option>
@@ -254,7 +254,7 @@ defmodule AlgoraWeb.Job.CreateLive do
               value={@job.budget.from}
               phx-blur="update_job"
               phx-value-field="budget.from"
-              class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+              class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             />
           </div>
           <div class="flex-1">
@@ -265,7 +265,7 @@ defmodule AlgoraWeb.Job.CreateLive do
               value={@job.budget.to}
               phx-blur="update_job"
               phx-value-field="budget.to"
-              class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+              class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             />
           </div>
         </div>
@@ -277,14 +277,14 @@ defmodule AlgoraWeb.Job.CreateLive do
   def render_step(%{step: 5} = assigns) do
     ~H"""
     <div>
-      <h2 class="text-2xl font-semibold mb-4">Describe your job</h2>
+      <h2 class="mb-4 text-2xl font-semibold">Describe your job</h2>
       <div>
         <textarea
           name="description"
           rows="6"
           phx-blur="update_job"
           phx-value-field="description"
-          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-gray-700 text-white"
+          class="mt-1 block w-full rounded-md border-gray-300 bg-gray-700 py-2 pr-10 pl-3 text-base text-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
           placeholder="Provide a detailed description of your job..."
         ><%= @job.description %></textarea>
       </div>

@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Components.UI.ScrollArea do
       class={
         classes([
           "relative overflow-hidden",
-          "salad-scroll-area rounded-[inherit] h-full w-full overflow-y-auto overflow-x-hidden scrollbar-thin",
+          "salad-scroll-area rounded-[inherit] scrollbar-thin h-full w-full overflow-y-auto overflow-x-hidden",
           @class
         ])
       }

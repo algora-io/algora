@@ -96,9 +96,9 @@ defmodule AlgoraWeb.Components.UI.Accordion do
 
   def accordion_content(assigns) do
     ~H"""
-    <div class="text-sm overflow-hidden grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 peer-open/accordion:grid-rows-[1fr]">
+    <div class="grid-rows-[0fr] transition-[grid-template-rows] grid overflow-hidden text-sm duration-300 peer-open/accordion:grid-rows-[1fr]">
       <div class="overflow-hidden">
-        <div class={classes(["pb-4 pt-0", @class])}>
+        <div class={classes(["pt-0 pb-4", @class])}>
           {render_slot(@inner_block)}
         </div>
       </div>

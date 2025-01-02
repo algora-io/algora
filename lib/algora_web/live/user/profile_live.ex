@@ -20,10 +20,10 @@ defmodule AlgoraWeb.User.ProfileLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-6xl mx-auto p-6 space-y-6">
+    <div class="container mx-auto max-w-6xl space-y-6 p-6">
       <!-- Profile Header -->
-      <div class="rounded-xl border bg-card text-card-foreground p-6">
-        <div class="flex flex-col md:flex-row gap-6">
+      <div class="rounded-xl border bg-card p-6 text-card-foreground">
+        <div class="flex flex-col gap-6 md:flex-row">
           <div class="flex-shrink-0">
             <.avatar class="h-12 w-12 md:h-16 md:w-16">
               <.avatar_image src={@user.avatar_url} alt={@user.name} />
@@ -36,11 +36,11 @@ defmodule AlgoraWeb.User.ProfileLive do
               <p class="text-muted-foreground">@{@user.handle}</p>
             </div>
 
-            <p class="text-foreground max-w-2xl">{@user.bio}</p>
+            <p class="max-w-2xl text-foreground">{@user.bio}</p>
 
             <div class="flex flex-wrap gap-4">
               <%= for tech <- @user.tech_stack do %>
-                <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
                   {tech}
                 </span>
               <% end %>
@@ -49,35 +49,35 @@ defmodule AlgoraWeb.User.ProfileLive do
 
           <div class="flex-shrink-0 space-y-3">
             <.button class="w-full">
-              <.icon name="tabler-currency-dollar" class="w-4 h-4 mr-2" /> Pay
+              <.icon name="tabler-currency-dollar" class="mr-2 h-4 w-4" /> Pay
             </.button>
             <.button class="w-full" variant="outline">
-              <.icon name="tabler-mail" class="w-4 h-4 mr-2" /> Invite
+              <.icon name="tabler-mail" class="mr-2 h-4 w-4" /> Invite
             </.button>
           </div>
         </div>
       </div>
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-lg bg-card border border-border">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="text-2xl font-bold font-display">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div class="rounded-lg border border-border bg-card p-6">
+          <div class="mb-2 flex items-center gap-2">
+            <div class="font-display text-2xl font-bold">
               {Money.to_string!(@user.total_earned)}
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Total Earnings</div>
         </div>
-        <div class="p-6 rounded-lg bg-card border border-border">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="text-2xl font-bold font-display">
+        <div class="rounded-lg border border-border bg-card p-6">
+          <div class="mb-2 flex items-center gap-2">
+            <div class="font-display text-2xl font-bold">
               {@user.completed_bounties_count}
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Bounties Solved</div>
         </div>
-        <div class="p-6 rounded-lg bg-card border border-border">
-          <div class="flex items-center gap-2 mb-2">
-            <div class="text-2xl font-bold font-display">
+        <div class="rounded-lg border border-border bg-card p-6">
+          <div class="mb-2 flex items-center gap-2">
+            <div class="font-display text-2xl font-bold">
               {@user.contributed_projects_count}
             </div>
           </div>
@@ -85,14 +85,14 @@ defmodule AlgoraWeb.User.ProfileLive do
         </div>
       </div>
       <!-- Replace the entire .tabs section with this: -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- Completed Bounties Column -->
         <div class="space-y-4">
           <%= if Enum.empty?(@completed_bounties) do %>
             <.card class="text-center">
               <.card_header>
-                <div class="mx-auto rounded-full bg-muted p-4 mb-2">
-                  <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+                <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                  <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
                 </div>
                 <.card_title>No bounties yet</.card_title>
                 <.card_description>
@@ -102,7 +102,7 @@ defmodule AlgoraWeb.User.ProfileLive do
             </.card>
           <% else %>
             <h2 class="text-lg font-semibold">Completed Bounties</h2>
-            <div class="-ml-4 relative w-full overflow-auto">
+            <div class="relative -ml-4 w-full overflow-auto">
               <table class="w-full caption-bottom text-sm">
                 <tbody>
                   <%= for bounty <- @completed_bounties do %>
@@ -143,7 +143,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                               <div class="font-display text-xl font-semibold text-success">
                                 {Money.to_string!(bounty.amount)}
                               </div>
-                              <div class="text-foreground group-hover:underline line-clamp-1">
+                              <div class="line-clamp-1 text-foreground group-hover:underline">
                                 {bounty.ticket.title}
                               </div>
                             </.link>
@@ -163,8 +163,8 @@ defmodule AlgoraWeb.User.ProfileLive do
             <%= if Enum.empty?(@reviews) do %>
               <.card class="text-center">
                 <.card_header>
-                  <div class="mx-auto rounded-full bg-muted p-4 mb-2">
-                    <.icon name="tabler-message-circle" class="w-8 h-8 text-muted-foreground" />
+                  <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                    <.icon name="tabler-message-circle" class="h-8 w-8 text-muted-foreground" />
                   </div>
                   <.card_title>No reviews yet</.card_title>
                   <.card_description>
@@ -175,16 +175,16 @@ defmodule AlgoraWeb.User.ProfileLive do
             <% else %>
               <h2 class="text-lg font-semibold">Reviews</h2>
               <%= for review <- @reviews do %>
-                <div class="w-full rounded-lg bg-card p-4 text-sm border border-border">
-                  <div class="flex items-center gap-1 mb-2">
+                <div class="w-full rounded-lg border border-border bg-card p-4 text-sm">
+                  <div class="mb-2 flex items-center gap-1">
                     <%= for i <- 1..Review.max_rating() do %>
                       <.icon
                         name="tabler-star-filled"
-                        class={"w-4 h-4 #{if i <= review.rating, do: "text-warning", else: "text-muted-foreground/25"}"}
+                        class={"#{if i <= review.rating, do: "text-warning", else: "text-muted-foreground/25"} h-4 w-4"}
                       />
                     <% end %>
                   </div>
-                  <p class="text-sm mb-2">{review.content}</p>
+                  <p class="mb-2 text-sm">{review.content}</p>
                   <div class="flex items-center gap-3">
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />

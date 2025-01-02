@@ -23,12 +23,12 @@ defmodule AlgoraWeb.Project.CreateLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gradient-to-tl from-indigo-950 to-black text-white flex flex-col sm:flex-row">
-      <div class="flex-grow px-4 sm:px-8 py-8 sm:py-16 bg-gray-950/25">
-        <div class="max-w-3xl mx-auto">
-          <div class="flex items-center gap-4 text-lg mb-6 font-display">
+    <div class="flex min-h-screen flex-col bg-gradient-to-tl from-indigo-950 to-black text-white sm:flex-row">
+      <div class="flex-grow bg-gray-950/25 px-4 py-8 sm:px-8 sm:py-16">
+        <div class="mx-auto max-w-3xl">
+          <div class="font-display mb-6 flex items-center gap-4 text-lg">
             <span class="text-gray-300">{@step} / {@total_steps}</span>
-            <h1 class="text-lg text-gray-200 font-semibold uppercase">Create Your Project</h1>
+            <h1 class="text-lg font-semibold uppercase text-gray-200">Create Your Project</h1>
           </div>
           <div class="mb-8">
             {render_step(assigns)}
@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Project.CreateLive do
             <%= if @step > 1 do %>
               <button
                 phx-click="prev_step"
-                class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                class="rounded bg-gray-600 px-4 py-2 font-bold text-white hover:bg-gray-700"
               >
                 Previous
               </button>
@@ -47,14 +47,14 @@ defmodule AlgoraWeb.Project.CreateLive do
             <%= if @step < @total_steps do %>
               <button
                 phx-click="next_step"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+                class="rounded bg-indigo-600 px-4 py-2 font-bold text-white hover:bg-indigo-700"
               >
                 Next: {next_step_label(@step)}
               </button>
             <% else %>
               <button
                 phx-click="submit"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+                class="rounded bg-indigo-600 px-4 py-2 font-bold text-white hover:bg-indigo-700"
               >
                 Initialize Project
               </button>
@@ -63,41 +63,41 @@ defmodule AlgoraWeb.Project.CreateLive do
         </div>
       </div>
 
-      <div class="font-display w-full sm:w-1/3 border-t-2 sm:border-t-0 sm:border-l-2 border-gray-800 bg-gradient-to-b from-white/[5%] to-white/[2.5%] px-4 sm:px-8 py-4 overflow-y-auto sm:max-h-screen">
-        <h2 class="text-lg text-gray-200 font-display font-semibold uppercase mb-4">
+      <div class="font-display from-white/[5%] to-white/[2.5%] w-full overflow-y-auto border-t-2 border-gray-800 bg-gradient-to-b px-4 py-4 sm:max-h-screen sm:w-1/3 sm:border-t-0 sm:border-l-2 sm:px-8">
+        <h2 class="font-display mb-4 text-lg font-semibold uppercase text-gray-200">
           Matching Developers
         </h2>
         <%= if @matching_devs == [] do %>
           <p class="text-gray-400">Add tech_stack to see matching developers</p>
         <% else %>
           <%= for dev <- @matching_devs do %>
-            <div class="mb-4 bg-white/[7.5%] p-4 rounded-lg">
-              <div class="flex mb-2 gap-3">
+            <div class="bg-white/[7.5%] mb-4 rounded-lg p-4">
+              <div class="mb-2 flex gap-3">
                 <img
                   src={dev.avatar_url}
                   alt={dev.name}
-                  class="w-16 h-16 sm:w-24 sm:h-24 rounded-full mr-3"
+                  class="mr-3 h-16 w-16 rounded-full sm:h-24 sm:w-24"
                 />
-                <div class="flex-grow min-w-0">
+                <div class="min-w-0 flex-grow">
                   <div class="flex justify-between">
                     <div class="min-w-0">
-                      <div class="font-semibold text-base sm:text-lg font-display truncate">
+                      <div class="font-display truncate text-base font-semibold sm:text-lg">
                         {dev.name} {dev.flag}
                       </div>
-                      <div class="text-sm text-gray-400 truncate">@{dev.handle}</div>
+                      <div class="truncate text-sm text-gray-400">@{dev.handle}</div>
                     </div>
-                    <div class="flex flex-col items-end ml-2">
-                      <div class="text-gray-300 text-sm">Earned</div>
-                      <div class="text-white font-semibold text-base sm:text-lg font-display">
+                    <div class="ml-2 flex flex-col items-end">
+                      <div class="text-sm text-gray-300">Earned</div>
+                      <div class="font-display text-base font-semibold text-white sm:text-lg">
                         {Money.to_string!(dev.total_earned)}
                       </div>
                     </div>
                   </div>
 
-                  <div class="-m-1 pt-2 sm:pt-3 text-sm">
-                    <div class="p-1 overflow-x-auto flex gap-2 scrollbar-thin pb-4">
+                  <div class="-m-1 pt-2 text-sm sm:pt-3">
+                    <div class="scrollbar-thin flex gap-2 overflow-x-auto p-1 pb-4">
                       <%= for tech <- dev.tech_stack do %>
-                        <span class="text-white rounded-xl px-2 py-0.5 text-xs sm:text-sm ring-1 ring-white/40 whitespace-nowrap">
+                        <span class="whitespace-nowrap rounded-xl px-2 py-0.5 text-xs text-white ring-1 ring-white/40 sm:text-sm">
                           {tech}
                         </span>
                       <% end %>
@@ -124,13 +124,13 @@ defmodule AlgoraWeb.Project.CreateLive do
         <input
           type="text"
           placeholder="Desired areas of expertise"
-          class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full rounded-sm border border-gray-700 bg-indigo-200/5 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
       <div class="flex flex-wrap gap-3">
         <%= for tech <- ["Elixir", "Phoenix", "Phoenix LiveView", "PostgreSQL"] do %>
-          <div class="bg-indigo-900 text-indigo-200 rounded-full px-4 py-2 text-sm font-semibold flex items-center">
+          <div class="flex items-center rounded-full bg-indigo-900 px-4 py-2 text-sm font-semibold text-indigo-200">
             {tech}
             <button
               phx-click="remove_tech"
@@ -149,24 +149,24 @@ defmodule AlgoraWeb.Project.CreateLive do
   def render_step(%{step: 2} = assigns) do
     ~H"""
     <div>
-      <h2 class="text-2xl font-semibold mb-4">Project Details</h2>
+      <h2 class="mb-4 text-2xl font-semibold">Project Details</h2>
       <div class="space-y-8">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">Title</label>
+          <label class="mb-2 block text-sm font-medium text-gray-300">Title</label>
           <input
             type="text"
             phx-value-field="title"
             phx-blur="update_project"
             value={@project.title}
             placeholder="Looking for an Elixir developer to build and maintain a livestreaming app"
-            class="w-full px-3 py-2 bg-indigo-200/5 border border-gray-700 rounded-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full rounded-sm border border-gray-700 bg-indigo-200/5 px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <fieldset class="mb-8">
-          <legend class="text-sm font-medium text-gray-300 mb-2">Discovery</legend>
+          <legend class="mb-2 text-sm font-medium text-gray-300">Discovery</legend>
           <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :public, do: "border-indigo-600 ring-2 ring-indigo-600 bg-gray-800", else: "border-gray-700 bg-gray-900"}"}>
+            <label class={"#{if @project.visibility == :public, do: "border-indigo-600 bg-gray-800 ring-2 ring-indigo-600", else: "border-gray-700 bg-gray-900"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
               <input
                 type="radio"
                 name="visibility"
@@ -180,7 +180,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 <span class="flex flex-col">
                   <span class="flex items-center gap-2">
                     <span class="block text-sm font-medium text-gray-200">Algora Network</span>
-                    <span class="text-xs text-indigo-400 font-medium">15% platform fee</span>
+                    <span class="text-xs font-medium text-indigo-400">15% platform fee</span>
                   </span>
                   <span class="mt-1 flex items-center text-sm text-gray-400">
                     Open to our vetted developer network
@@ -191,7 +191,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 </span>
               </span>
               <svg
-                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :public, do: "invisible"}"}
+                class={"#{if @project.visibility != :public, do: "invisible"} h-5 w-5 text-indigo-600"}
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
@@ -203,13 +203,13 @@ defmodule AlgoraWeb.Project.CreateLive do
                 />
               </svg>
               <span
-                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :public, do: "border border-indigo-600", else: "border-2 border-transparent"}"}
+                class={"#{if @project.visibility == :public, do: "border border-indigo-600", else: "border-2 border-transparent"} pointer-events-none absolute -inset-px rounded-lg"}
                 aria-hidden="true"
               >
               </span>
             </label>
 
-            <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @project.visibility == :private, do: "border-indigo-600 ring-2 ring-indigo-600 bg-gray-800", else: "border-gray-700 bg-gray-900"}"}>
+            <label class={"#{if @project.visibility == :private, do: "border-indigo-600 bg-gray-800 ring-2 ring-indigo-600", else: "border-gray-700 bg-gray-900"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
               <input
                 type="radio"
                 name="visibility"
@@ -223,7 +223,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 <span class="flex flex-col">
                   <span class="flex items-center gap-2">
                     <span class="block text-sm font-medium text-gray-200">Bring Your Own</span>
-                    <span class="text-xs text-indigo-400 font-medium">5% platform fee</span>
+                    <span class="text-xs font-medium text-indigo-400">5% platform fee</span>
                   </span>
                   <span class="mt-1 flex items-center text-sm text-gray-400">
                     Invite specific developers
@@ -234,7 +234,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 </span>
               </span>
               <svg
-                class={"h-5 w-5 text-indigo-600 #{if @project.visibility != :private, do: "invisible"}"}
+                class={"#{if @project.visibility != :private, do: "invisible"} h-5 w-5 text-indigo-600"}
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
@@ -246,7 +246,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                 />
               </svg>
               <span
-                class={"pointer-events-none absolute -inset-px rounded-lg #{if @project.visibility == :private, do: "border border-indigo-600", else: "border-2 border-transparent"}"}
+                class={"#{if @project.visibility == :private, do: "border border-indigo-600", else: "border-2 border-transparent"} pointer-events-none absolute -inset-px rounded-lg"}
                 aria-hidden="true"
               >
               </span>

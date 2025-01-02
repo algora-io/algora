@@ -30,8 +30,8 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     <div
       class={
         classes([
-          "fixed inset-0 bg-black/90 z-50 transition-all duration-300",
-          "#{if @show, do: "opacity-100", else: "opacity-0 pointer-events-none"}"
+          "fixed inset-0 z-50 bg-black/90 transition-all duration-300",
+          "#{if @show, do: "opacity-100", else: "pointer-events-none opacity-0"}"
         ])
       }
       phx-click={@on_cancel}
@@ -40,7 +40,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     <div
       class={
         classes([
-          "fixed inset-x-0 bottom-0 z-50 rounded-t-xl bg-background border transform transition-transform duration-300 ease-in-out",
+          "fixed inset-x-0 bottom-0 z-50 transform rounded-t-xl border bg-background transition-transform duration-300 ease-in-out",
           "#{if @show, do: "translate-y-0", else: "translate-y-full"}",
           @class
         ])
@@ -51,11 +51,11 @@ defmodule AlgoraWeb.Components.UI.Drawer do
         <button
           phx-click={@on_cancel}
           type="button"
-          class="w-10 h-10 absolute z-50 top-4 right-4 text-muted-foreground hover:text-foreground flex items-center justify-center"
+          class="absolute top-4 right-4 z-50 flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground"
         >
-          <AlgoraWeb.CoreComponents.icon name="tabler-x" class="w-5 h-5" />
+          <AlgoraWeb.CoreComponents.icon name="tabler-x" class="h-5 w-5" />
         </button>
-        <div class="flex flex-col relative h-full p-6">
+        <div class="relative flex h-full flex-col p-6">
           {render_slot(@inner_block)}
         </div>
       </div>
@@ -71,10 +71,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     ~H"""
     <div
       class={
-        classes([
-          "text-base text-muted-foreground uppercase font-display font-semibold pb-4",
-          @class
-        ])
+        classes(["font-display pb-4 text-base font-semibold uppercase text-muted-foreground", @class])
       }
       {@rest}
     >

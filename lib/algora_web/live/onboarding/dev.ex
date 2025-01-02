@@ -27,10 +27,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-card">
-      <div class="flex-1 flex">
+      <div class="flex flex-1">
         <div class="flex-grow px-8 py-16">
-          <div class="max-w-3xl mx-auto">
-            <div class="flex items-center gap-4 text-lg mb-6">
+          <div class="mx-auto max-w-3xl">
+            <div class="mb-6 flex items-center gap-4 text-lg">
               <span class="text-muted-foreground">
                 {@step} / {@total_steps}
               </span>
@@ -60,48 +60,48 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                     rel="noopener"
                     class="inline-flex items-center"
                   >
-                    <.icon name="tabler-brand-github" class="w-5 h-5 mr-2" /> Sign in with GitHub
+                    <.icon name="tabler-brand-github" class="mr-2 h-5 w-5" /> Sign in with GitHub
                   </.link>
                 </.button>
               <% end %>
             </div>
           </div>
         </div>
-        <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
-          <h2 class="text-lg font-semibold uppercase mb-4">
+        <div class="h-screen w-1/3 overflow-y-auto border-l border-border bg-background px-6 py-4">
+          <h2 class="mb-4 text-lg font-semibold uppercase">
             Recently Completed Bounties
           </h2>
           <%= if @bounties == [] do %>
             <p class="text-muted-foreground">No completed bounties available</p>
           <% else %>
             <%= for bounty <- @bounties do %>
-              <div class="mb-4 bg-card p-4 rounded-lg border border-border">
+              <div class="mb-4 rounded-lg border border-border bg-card p-4">
                 <div class="flex gap-4">
                   <div class="flex-1">
-                    <div class="font-mono text-2xl font-extrabold text-success mb-2">
+                    <div class="mb-2 font-mono text-2xl font-extrabold text-success">
                       {Money.to_string!(bounty.amount)}
                     </div>
-                    <div class="text-sm text-muted-foreground mb-1">
+                    <div class="mb-1 text-sm text-muted-foreground">
                       {bounty.ticket.owner}/{bounty.ticket.repo}#{bounty.ticket.number}
                     </div>
                     <div class="font-medium">
                       {bounty.ticket.title}
                     </div>
-                    <div class="text-xs text-muted-foreground mt-2">
+                    <div class="mt-2 text-xs text-muted-foreground">
                       {Algora.Util.time_ago(bounty.inserted_at)}
                     </div>
                   </div>
 
-                  <div class="w-32 flex flex-col items-center border-l border-border pl-4">
-                    <h3 class="text-xs font-medium text-muted-foreground uppercase mb-3">
+                  <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+                    <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
                       Awarded to
                     </h3>
                     <img
                       src={bounty.solver.avatar_url}
-                      class="w-16 h-16 rounded-full mb-2"
+                      class="mb-2 h-16 w-16 rounded-full"
                       alt={bounty.solver.name}
                     />
-                    <div class="text-sm font-medium text-center">
+                    <div class="text-center text-sm font-medium">
                       {bounty.solver.name}
                       <span class="ml-1">
                         {Algora.Misc.CountryEmojis.get(bounty.solver.country, "🌎")}
@@ -122,7 +122,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="text-4xl font-semibold mb-2">
+        <h2 class="mb-2 text-4xl font-semibold">
           What is your tech stack?
         </h2>
         <p class="text-muted-foreground">Select the technologies you work with</p>
@@ -135,13 +135,13 @@ defmodule AlgoraWeb.Onboarding.DevLive do
             placeholder="Elixir, Phoenix, PostgreSQL, etc."
             phx-keydown="handle_tech_input"
             phx-debounce="200"
-            class="w-full bg-background border-input"
+            class="w-full border-input bg-background"
           />
         </div>
 
-        <div class="flex flex-wrap gap-3 mt-4">
+        <div class="mt-4 flex flex-wrap gap-3">
           <%= for tech <- @context.tech_stack do %>
-            <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
+            <div class="flex items-center rounded-lg bg-success/10 px-3 py-1.5 text-sm font-semibold text-success">
               {tech}
               <button
                 phx-click="remove_tech"
@@ -156,18 +156,18 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       </div>
 
       <div class="mt-8">
-        <h2 class="text-4xl font-semibold mb-2">
+        <h2 class="mb-2 text-4xl font-semibold">
           What are you looking to do?
         </h2>
         <p class="text-muted-foreground">Select all that apply</p>
 
-        <div class="-ml-4 mt-2">
+        <div class="mt-2 -ml-4">
           <%= for {intention, label, description, icon} <- [
             {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
             {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
             {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
           ] do %>
-            <label class="p-4 flex items-center gap-3 rounded-lg hover:bg-muted cursor-pointer">
+            <label class="flex cursor-pointer items-center gap-3 rounded-lg p-4 hover:bg-muted">
               <input
                 type="checkbox"
                 phx-click="toggle_intention"
@@ -177,10 +177,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
               />
               <div class="flex-1">
                 <div class="flex items-center gap-2">
-                  <.icon name={icon} class="w-5 h-5 text-muted-foreground" />
+                  <.icon name={icon} class="h-5 w-5 text-muted-foreground" />
                   <span class="font-medium">{label}</span>
                 </div>
-                <p class="text-sm text-muted-foreground mt-0.5">
+                <p class="mt-0.5 text-sm text-muted-foreground">
                   {description}
                 </p>
               </div>
@@ -196,10 +196,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="text-4xl font-semibold mb-2">
+        <h2 class="mb-2 text-4xl font-semibold">
           Connect your GitHub account
         </h2>
-        <p class="text-muted-foreground mb-6">
+        <p class="mb-6 text-muted-foreground">
           Sign in with GitHub to join our developer community and start earning bounties.
         </p>
 

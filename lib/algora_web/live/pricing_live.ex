@@ -185,17 +185,17 @@ defmodule AlgoraWeb.PricingLive do
   def pricing_card(assigns) do
     ~H"""
     <div class={[
-      "flex flex-col border xl:border-r-0 last:border-r bg-surface-75 rounded-xl xl:rounded-none first:rounded-l-xl last:rounded-r-xl",
+      "bg-surface-75 flex flex-col rounded-xl border first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
       @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
     ]}>
-      <div class="px-8 xl:px-4 2xl:px-8 pt-6">
+      <div class="px-8 pt-6 xl:px-4 2xl:px-8">
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 pb-2">
-            <h3 class="text-foreground text-2xl font-normal uppercase flex items-center gap-4 font-display">
+            <h3 class="font-display flex items-center gap-4 text-2xl font-normal uppercase text-foreground">
               {@plan.name}
             </h3>
             <%= if @plan.popular do %>
-              <span class="bg-foreground-light text-background rounded-md py-0.5 px-2 text-[13px] leading-4">
+              <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
                 Most Popular
               </span>
             <% end %>
@@ -208,7 +208,7 @@ defmodule AlgoraWeb.PricingLive do
           phx-click="select_plan"
           phx-value-plan={@plan.name}
           class={[
-            "relative w-full cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-none transition-all outline-0 focus-visible:outline-4 focus-visible:outline-offset-1 border h-[42px] px-4 py-2",
+            "font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1",
             @plan.popular && "mt-8 bg-primary text-primary-foreground hover:bg-primary/90",
             !@plan.popular &&
               "bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
@@ -216,49 +216,49 @@ defmodule AlgoraWeb.PricingLive do
         >
           {@plan.cta_text}
         </button>
-        <div class="text-foreground flex items-baseline text-5xl font-normal lg:text-4xl xl:text-4xl border-b border-default lg:min-h-[175px] py-8 lg:pb-0 lg:pt-10">
+        <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:min-h-[175px] lg:pt-10 lg:pb-0 lg:text-4xl xl:text-4xl">
           <div class="flex flex-col gap-1">
             <%= if @plan.price do %>
               <div>
-                <p class="text-foreground-lighter ml-1 text-[13px] leading-4 font-normal">From</p>
+                <p class="text-foreground-lighter text-[13px] ml-1 font-normal leading-4">From</p>
                 <div class="flex items-end">
-                  <p class="mt-2 pb-1 font-display text-5xl">${@plan.price}</p>
-                  <p class="text-foreground-lighter mb-1.5 ml-1 text-[13px] leading-4">/ month</p>
+                  <p class="font-display mt-2 pb-1 text-5xl">${@plan.price}</p>
+                  <p class="text-foreground-lighter text-[13px] mb-1.5 ml-1 leading-4">/ month</p>
                 </div>
               </div>
             <% else %>
               <div class="mt-4 flex items-end">
-                <p class="mt-2 pb-1 font-display text-4xl">Custom</p>
+                <p class="font-display mt-2 pb-1 text-4xl">Custom</p>
               </div>
             <% end %>
           </div>
         </div>
       </div>
-      <div class="border-default flex rounded-bl-[4px] rounded-br-[4px] flex-1 flex-col px-8 xl:px-4 2xl:px-8 py-6">
+      <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
         <p class="text-foreground-lighter text-[13px] mt-2 mb-4">
           {if @plan.previous_tier,
             do: "Everything in the #{@plan.previous_tier} Plan, plus:",
             else: "Get started with:"}
         </p>
-        <ul class="text-[13px] flex-1 text-foreground-lighter">
+        <ul class="text-[13px] text-foreground-lighter flex-1">
           <%= for feature <- @plan.features do %>
             <li class="flex flex-col py-2 first:mt-0">
               <div class="flex items-center">
                 <div class="flex w-6">
                   <.icon name="tabler-check" class="h-4 w-4 text-primary" />
                 </div>
-                <span class="text-foreground mb-0">{feature.name}</span>
+                <span class="mb-0 text-foreground">{feature.name}</span>
               </div>
               <%= if feature.detail do %>
-                <p class="ml-6 text-foreground-lighter">{feature.detail}</p>
+                <p class="text-foreground-lighter ml-6">{feature.detail}</p>
               <% end %>
             </li>
           <% end %>
         </ul>
         <%= if @plan.footnote do %>
-          <div class="flex flex-col gap-6 mt-auto prose">
-            <div class="space-y-2 mt-12">
-              <p class="text-[13px] leading-5 text-foreground-lighter whitespace-pre-wrap mb-0">
+          <div class="mt-auto flex flex-col gap-6 prose">
+            <div class="mt-12 space-y-2">
+              <p class="text-[13px] text-foreground-lighter mb-0 whitespace-pre-wrap leading-5">
                 {@plan.footnote}
               </p>
             </div>
@@ -273,20 +273,17 @@ defmodule AlgoraWeb.PricingLive do
   def compute_addons(assigns) do
     ~H"""
     <div class="mx-auto max-w-7xl">
-      <div class="text-center mb-16">
-        <h2 class="text-3xl font-bold text-foreground mb-4">Compute Add-ons</h2>
+      <div class="mb-16 text-center">
+        <h2 class="mb-4 text-3xl font-bold text-foreground">Compute Add-ons</h2>
         <p class="text-lg text-muted-foreground">
           Additional compute resources for demanding workloads
         </p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
         <%= for option <- @compute_addons do %>
-          <div class={[
-            "border rounded-lg p-6",
-            @selected_option == option.name && "border-primary"
-          ]}>
+          <div class={["rounded-lg border p-6", @selected_option == option.name && "border-primary"]}>
             <button phx-click="select_compute" phx-value-option={option.name} class="w-full text-left">
-              <h3 class="text-xl font-semibold text-foreground mb-2">{option.name}</h3>
+              <h3 class="mb-2 text-xl font-semibold text-foreground">{option.name}</h3>
               <div class="space-y-2 text-sm text-muted-foreground">
                 <p>CPU: {option.cpu}</p>
                 <p>Memory: {option.memory}</p>
@@ -304,12 +301,12 @@ defmodule AlgoraWeb.PricingLive do
   def plan_comparison_table(assigns) do
     ~H"""
     <div class="container mx-auto py-16">
-      <h2 class="text-3xl font-bold text-center text-foreground mb-12">Compare Plans</h2>
+      <h2 class="mb-12 text-center text-3xl font-bold text-foreground">Compare Plans</h2>
       <div class="overflow-x-auto">
         <table class="w-full border-collapse">
           <thead>
             <tr class="border-b">
-              <th class="text-left p-4 text-muted-foreground">Features</th>
+              <th class="p-4 text-left text-muted-foreground">Features</th>
               <%= for plan <- @plans do %>
                 <th class="p-4 text-center text-muted-foreground">
                   {plan.name}
@@ -324,9 +321,9 @@ defmodule AlgoraWeb.PricingLive do
                 <%= for plan <- @plans do %>
                   <td class="p-4 text-center">
                     <%= if has_feature?(plan, feature) do %>
-                      <.icon name="tabler-check" class="h-5 w-5 text-primary mx-auto" />
+                      <.icon name="tabler-check" class="mx-auto h-5 w-5 text-primary" />
                     <% else %>
-                      <.icon name="tabler-minus" class="h-5 w-5 text-muted-foreground mx-auto" />
+                      <.icon name="tabler-minus" class="mx-auto h-5 w-5 text-muted-foreground" />
                     <% end %>
                   </td>
                 <% end %>
@@ -343,24 +340,24 @@ defmodule AlgoraWeb.PricingLive do
   def faq_section(assigns) do
     ~H"""
     <div class="container mx-auto py-16">
-      <h2 class="text-3xl font-bold text-center text-foreground mb-12">
+      <h2 class="mb-12 text-center text-3xl font-bold text-foreground">
         Frequently asked questions
       </h2>
-      <div class="max-w-3xl mx-auto space-y-4">
+      <div class="mx-auto max-w-3xl space-y-4">
         <%= for item <- @faq_items do %>
-          <div class="border rounded-lg">
+          <div class="rounded-lg border">
             <button
               phx-click="toggle_faq"
               phx-value-id={item.id}
-              class="w-full flex justify-between items-center p-4 text-left"
+              class="flex w-full items-center justify-between p-4 text-left"
             >
-              <span class="text-foreground font-medium">{item.question}</span>
+              <span class="font-medium text-foreground">{item.question}</span>
               <.icon
                 name="tabler-chevron-down"
                 class={
                   classes([
                     "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                    @active_faq == item.id && "transform rotate-180"
+                    @active_faq == item.id && "rotate-180 transform"
                   ])
                 }
               />
@@ -380,11 +377,11 @@ defmodule AlgoraWeb.PricingLive do
   # New ROI Calculator Component
   def roi_calculator(assigns) do
     ~H"""
-    <div class="max-w-2xl mx-auto bg-card rounded-xl p-6 border mt-16">
-      <h3 class="text-2xl font-bold text-card-foreground mb-6">Calculate Your Savings</h3>
+    <div class="mx-auto mt-16 max-w-2xl rounded-xl border bg-card p-6">
+      <h3 class="mb-6 text-2xl font-bold text-card-foreground">Calculate Your Savings</h3>
 
       <form phx-change="calculate_roi" class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div class="space-y-2">
             <label class="text-sm font-medium text-muted-foreground">Number of Developers</label>
             <input
@@ -401,7 +398,7 @@ defmodule AlgoraWeb.PricingLive do
               Average Hourly Rate ($)
               <.icon
                 name="tabler-info-circle"
-                class="inline-block w-4 h-4 ml-1 text-muted-foreground"
+                class="ml-1 inline-block h-4 w-4 text-muted-foreground"
               />
             </label>
             <input
@@ -418,7 +415,7 @@ defmodule AlgoraWeb.PricingLive do
               Hours per Week
               <.icon
                 name="tabler-info-circle"
-                class="inline-block w-4 h-4 ml-1 text-muted-foreground"
+                class="ml-1 inline-block h-4 w-4 text-muted-foreground"
               />
             </label>
             <input
@@ -436,7 +433,7 @@ defmodule AlgoraWeb.PricingLive do
               Annual Total Compensation ($)
               <.icon
                 name="tabler-info-circle"
-                class="inline-block w-4 h-4 ml-1 text-muted-foreground"
+                class="ml-1 inline-block h-4 w-4 text-muted-foreground"
               />
             </label>
             <input
@@ -452,29 +449,29 @@ defmodule AlgoraWeb.PricingLive do
 
       <%= if @roi_estimate do %>
         <div class="mt-8 border-t pt-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div class="space-y-4">
               <h4 class="font-medium text-card-foreground">Traditional Hiring</h4>
               <div>
                 <div class="flex justify-between">
-                  <span class="text-muted-foreground font-medium">Base Monthly Cost</span>
+                  <span class="font-medium text-muted-foreground">Base Monthly Cost</span>
                   <span class="font-display">
                     ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_cost))}
                   </span>
                 </div>
-                <div class="pt-2 flex justify-between">
+                <div class="flex justify-between pt-2">
                   <span class="text-muted-foreground">Overhead (35%)</span>
                   <span class="font-display text-muted-foreground">
                     ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_overhead))}
                   </span>
                 </div>
-                <div class="pt-2 mt-[4.5rem] flex justify-between border-t">
-                  <span class="text-muted-foreground font-medium">Total Monthly Cost</span>
+                <div class="mt-[4.5rem] flex justify-between border-t pt-2">
+                  <span class="font-medium text-muted-foreground">Total Monthly Cost</span>
                   <span class="font-display text-muted-foreground">
                     ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total))}
                   </span>
                 </div>
-                <div class="pt-2 flex justify-between font-medium">
+                <div class="flex justify-between pt-2 font-medium">
                   <span>Total Yearly Cost</span>
                   <span class="font-display">
                     ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.traditional_total * 12))}
@@ -487,7 +484,7 @@ defmodule AlgoraWeb.PricingLive do
               <h4 class="font-medium text-card-foreground">With Algora</h4>
               <div class="space-y-2">
                 <div class="flex justify-between">
-                  <span class="text-muted-foreground font-medium">Base Monthly Cost</span>
+                  <span class="font-medium text-muted-foreground">Base Monthly Cost</span>
                   <span class="font-display">
                     ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_cost))}
                   </span>
@@ -515,7 +512,7 @@ defmodule AlgoraWeb.PricingLive do
                   </span>
                 </div>
                 <div class="flex justify-between border-t pt-2">
-                  <span class="text-muted-foreground font-medium">Total Monthly Cost</span>
+                  <span class="font-medium text-muted-foreground">Total Monthly Cost</span>
                   <span class="font-display text-muted-foreground">
                     ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.algora_total))}
                   </span>
@@ -530,10 +527,10 @@ defmodule AlgoraWeb.PricingLive do
             </div>
           </div>
 
-          <div class="mt-6 pt-6 border-t">
-            <div class="flex justify-between items-center">
+          <div class="mt-6 border-t pt-6">
+            <div class="flex items-center justify-between">
               <span class="text-lg font-medium text-card-foreground">Estimated Yearly Savings</span>
-              <span class="text-2xl font-bold text-success font-display">
+              <span class="font-display text-2xl font-bold text-success">
                 ${Number.Delimit.number_to_delimited(trunc(@roi_estimate.savings))}
               </span>
             </div>
@@ -693,9 +690,9 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </div>
 
-      <div class="mx-auto lg:container lg:px-16 xl:px-12 flex flex-col">
+      <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12">
         <div class="relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div class="mx-auto max-w-md grid lg:max-w-none lg:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-0">
+          <div class="mx-auto grid max-w-md gap-4 lg:max-w-none lg:grid-cols-2 xl:grid-cols-3 xl:gap-0">
             <%= for plan <- @plans do %>
               <.pricing_card plan={plan} />
             <% end %>
@@ -707,7 +704,7 @@ defmodule AlgoraWeb.PricingLive do
         <div class="py-24 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto max-w-xl text-center">
-              <h2 class="text-3xl font-bold text-popover-foreground mb-4">
+              <h2 class="mb-4 text-3xl font-bold text-popover-foreground">
                 Trusted by companies worldwide
               </h2>
               <p class="text-lg text-muted-foreground">
@@ -719,7 +716,7 @@ defmodule AlgoraWeb.PricingLive do
                 <div class="rounded-2xl bg-white/5 p-8 ring-1 ring-white/10">
                   <div class="flex gap-x-3">
                     <img
-                      class="object-cover h-10 w-10 rounded-full bg-gray-800"
+                      class="h-10 w-10 rounded-full bg-gray-800 object-cover"
                       src={testimonial.avatar}
                       alt=""
                     />
@@ -738,24 +735,24 @@ defmodule AlgoraWeb.PricingLive do
         </div>
 
         <div class="container mx-auto py-16">
-          <h2 class="text-3xl font-bold text-center text-popover-foreground mb-12">
+          <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
             Frequently asked questions
           </h2>
-          <div class="max-w-3xl mx-auto space-y-4">
+          <div class="mx-auto max-w-3xl space-y-4">
             <%= for item <- @faq_items do %>
-              <div class="border rounded-lg">
+              <div class="rounded-lg border">
                 <button
                   phx-click="toggle_faq"
                   phx-value-id={item.id}
-                  class="w-full flex justify-between items-center p-4 text-left"
+                  class="flex w-full items-center justify-between p-4 text-left"
                 >
-                  <span class="text-foreground font-medium">{item.question}</span>
+                  <span class="font-medium text-foreground">{item.question}</span>
                   <.icon
                     name="tabler-chevron-down"
                     class={
                       classes([
                         "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                        @active_faq == item.id && "transform rotate-180"
+                        @active_faq == item.id && "rotate-180 transform"
                       ])
                     }
                   />
@@ -771,22 +768,22 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </div>
 
-      <div class="bg-card border-t py-32 text-center">
+      <div class="border-t bg-card py-32 text-center">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <h2 class="text-3xl font-bold text-card-foreground mb-8">
+          <h2 class="mb-8 text-3xl font-bold text-card-foreground">
             <span class="text-muted-foreground">The open source</span>
             <span class="block sm:inline">UpWork alternative.</span>
           </h2>
           <div class="flex justify-center gap-4">
             <.link
               navigate="/signup"
-              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
             >
               Start your project
             </.link>
             <.link
               navigate="/contact/sales"
-              class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+              class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
             >
               Request a demo
             </.link>

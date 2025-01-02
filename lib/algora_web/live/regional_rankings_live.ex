@@ -26,7 +26,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
         <%= for {week_start, rankings} <- @weeks do %>
           <.card>
             <.card_header>
-              <div class="flex justify-between items-center">
+              <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold">
                   Week of {Calendar.strftime(
                     DateTime.from_naive!(week_start, "Etc/UTC"),
@@ -36,10 +36,10 @@ defmodule AlgoraWeb.RegionalRankingsLive do
               </div>
             </.card_header>
             <div class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <%= for {region, user} <- rankings do %>
-                  <div class="flex flex-col space-y-4 p-4 rounded-lg bg-card border">
-                    <div class="flex justify-between items-center">
+                  <div class="flex flex-col space-y-4 rounded-lg border bg-card p-4">
+                    <div class="flex items-center justify-between">
                       <div class="text-sm font-medium text-muted-foreground">
                         #1 {region}
                       </div>

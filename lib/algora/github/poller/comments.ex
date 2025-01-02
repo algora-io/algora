@@ -1,13 +1,17 @@
 defmodule Algora.Github.Poller.Comments do
+  @moduledoc false
   use GenServer
+
   import Ecto.Query, warn: false
-  require Logger
+
   alias Algora.Comments
   alias Algora.Github
   alias Algora.Github.Command
   alias Algora.Parser
   alias Algora.Repo
   alias Algora.Util
+
+  require Logger
 
   @per_page 10
   @poll_interval :timer.seconds(1)
@@ -101,9 +105,8 @@ defmodule Algora.Github.Poller.Comments do
 
   defp process_batch(comments, comment_cursor) do
     Repo.transact(fn ->
-      with :ok <- process_comments(comments),
-           {:ok, updated_cursor} <- update_last_polled(comment_cursor, List.last(comments)) do
-        {:ok, updated_cursor}
+      with :ok <- process_comments(comments) do
+        update_last_polled(comment_cursor, List.last(comments))
       end
     end)
   end
@@ -162,9 +165,7 @@ defmodule Algora.Github.Poller.Comments do
     end
   end
 
-  defp process_comment(
-         %{"updated_at" => updated_at, "body" => body, "html_url" => html_url} = comment
-       ) do
+  defp process_comment(%{"updated_at" => updated_at, "body" => body, "html_url" => html_url} = comment) do
     with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
          {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(html_url),
          {:ok, commands} <- Command.parse(body) do
@@ -187,9 +188,7 @@ defmodule Algora.Github.Poller.Comments do
       end)
     else
       {:error, reason} ->
-        Logger.error(
-          "Failed to parse commands from comment: #{inspect(comment)}. Reason: #{inspect(reason)}"
-        )
+        Logger.error("Failed to parse commands from comment: #{inspect(comment)}. Reason: #{inspect(reason)}")
 
         :ok
     end

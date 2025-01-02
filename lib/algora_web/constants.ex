@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Constants do
+  @moduledoc false
   def constants do
     %{
       email: "info@algora.io",

@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Project.ViewLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
+
   alias Algora.Users
 
   def mount(%{"id" => id}, _session, socket) do

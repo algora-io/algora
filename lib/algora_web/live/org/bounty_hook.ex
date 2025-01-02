@@ -1,17 +1,16 @@
 defmodule AlgoraWeb.Org.BountyHook do
-  import Phoenix.LiveView
+  @moduledoc false
   use Phoenix.Component
+
+  import Phoenix.LiveView
+
   alias Algora.Bounties
 
   def on_mount(:default, _params, _session, socket) do
     {:cont, attach_hook(socket, :handle_create_bounty, :handle_event, &handle_create_bounty/3)}
   end
 
-  defp handle_create_bounty(
-         "create_bounty",
-         %{"github_issue_url" => url, "amount" => amount},
-         socket
-       ) do
+  defp handle_create_bounty("create_bounty", %{"github_issue_url" => url, "amount" => amount}, socket) do
     %{current_user: creator, current_org: owner} = socket.assigns
 
     case Bounties.create_bounty(creator, owner, url, amount) do

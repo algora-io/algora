@@ -1,12 +1,14 @@
 defmodule AlgoraWeb.LeaderboardLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
-  alias Algora.Users
-  alias Algora.Payments.Transaction
-  alias Algora.Repo
-  import Ecto.Query
+
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Algora.Misc.CountryEmojis
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Users
 
   def mount(_params, _session, socket) do
     top_earners = get_top_earners()
@@ -15,7 +17,7 @@ defmodule AlgoraWeb.LeaderboardLive do
 
   def handle_event("toggle-need-avatar", %{"user-id" => user_id}, socket) do
     {:ok, _user} =
-      Users.get_user!(user_id) |> change() |> put_change(:need_avatar, true) |> Repo.update()
+      user_id |> Users.get_user!() |> change() |> put_change(:need_avatar, true) |> Repo.update()
 
     # Refresh the data
     top_earners = get_top_earners()

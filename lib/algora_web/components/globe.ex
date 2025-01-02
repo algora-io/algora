@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Components.Globe do
+  @moduledoc false
   use AlgoraWeb.Component
 
   # https://github.com/d3/d3-geo-projection

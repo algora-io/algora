@@ -1,4 +1,5 @@
 defmodule Algora.Workspace.Repository do
+  @moduledoc false
   use Algora.Schema
 
   alias Algora.Workspace.Repository

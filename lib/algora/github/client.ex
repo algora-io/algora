@@ -1,7 +1,7 @@
 defmodule Algora.Github.Client do
+  @moduledoc false
   @behaviour Algora.Github.Behaviour
 
-  alias Joken
   alias Algora.Github.Crypto
 
   @type token :: String.t()
@@ -30,9 +30,8 @@ defmodule Algora.Github.Client do
 
     with {:ok, encoded_body} <- Jason.encode(body),
          request = Finch.build(method, url, headers, encoded_body),
-         {:ok, response} <- Finch.request(request, Algora.Finch),
-         {:ok, body} <- handle_response(response) do
-      {:ok, body}
+         {:ok, response} <- Finch.request(request, Algora.Finch) do
+      handle_response(response)
     end
   end
 
@@ -70,8 +69,7 @@ defmodule Algora.Github.Client do
 
   def fetch(access_token, url, method \\ "GET", body \\ nil)
 
-  def fetch(access_token, "https://api.github.com" <> path, method, body),
-    do: fetch(access_token, path, method, body)
+  def fetch(access_token, "https://api.github.com" <> path, method, body), do: fetch(access_token, path, method, body)
 
   def fetch(access_token, path, method, body) do
     http(

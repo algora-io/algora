@@ -80,7 +80,8 @@ defmodule AlgoraWeb.Components.UI.Popover do
 
   def popover_content(assigns) do
     assigns =
-      assign(assigns, :variant_class, side_variant(assigns.side, assigns.align))
+      assigns
+      |> assign(:variant_class, side_variant(assigns.side, assigns.align))
       |> assign_new(:state, fn ->
         if assigns[:open] in ["true", true] do
           "open"
@@ -113,7 +114,7 @@ defmodule AlgoraWeb.Components.UI.Popover do
     JS.toggle_attribute({"data-state", "open", "closed"}, to: "##{id}")
   end
 
-  defp hide() do
+  defp hide do
     JS.set_attribute({"data-state", "closed"})
   end
 end

@@ -1,7 +1,10 @@
 defmodule Algora.Github.TokenPool do
+  @moduledoc false
   use GenServer
-  require Logger
+
   alias Algora.Users
+
+  require Logger
 
   @pool_size 100
 

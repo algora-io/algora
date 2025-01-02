@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Org.Forms.JobForm do
+  @moduledoc false
   use Ecto.Schema
+
   import Ecto.Changeset
 
   embedded_schema do

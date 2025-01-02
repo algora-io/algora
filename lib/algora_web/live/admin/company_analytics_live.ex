@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
+
   alias Algora.Analytics
 
   def mount(_params, _session, socket) do

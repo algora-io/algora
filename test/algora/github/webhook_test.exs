@@ -1,5 +1,6 @@
 defmodule Algora.GitHub.WebhookTest do
   use ExUnit.Case, async: true
+
   alias Algora.Github.Webhook
 
   describe "signature verification" do

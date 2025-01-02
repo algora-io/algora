@@ -1,11 +1,13 @@
 defmodule AlgoraWeb.TROTWLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  import Ecto.Query
+
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  import Ecto.Query
+  alias Algora.Users
 
   def mount(_params, _session, socket) do
     weeks = get_weekly_rankings()
@@ -181,8 +183,7 @@ defmodule AlgoraWeb.TROTWLive do
   end
 
   defp calculate_medals(weeks) do
-    weeks
-    |> Enum.reduce(%{}, fn {_week, rankings}, acc ->
+    Enum.reduce(weeks, %{}, fn {_week, rankings}, acc ->
       rankings
       |> Enum.take(3)
       |> Enum.with_index(1)

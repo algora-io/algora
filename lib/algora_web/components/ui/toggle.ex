@@ -12,8 +12,7 @@ defmodule AlgoraWeb.Components.UI.Toggle do
   attr :id, :any, default: nil
   attr :name, :any, default: nil
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :value, :boolean, default: false
   attr :"default-value", :any, values: [true, false, "true", "false"], default: false
@@ -66,8 +65,7 @@ defmodule AlgoraWeb.Components.UI.Toggle do
   @variants %{
     variant: %{
       "default" => "bg-transparent",
-      "outline" =>
-        "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground"
+      "outline" => "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground"
     },
     size: %{
       "default" => "h-10 px-3",

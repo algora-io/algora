@@ -12,8 +12,7 @@ defmodule AlgoraWeb.Components.UI.Switch do
   attr :name, :string, default: nil
   attr :value, :boolean, default: nil
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :"default-value", :any, values: [true, false, "true", "false"], default: false
   attr :class, :string, default: nil

@@ -1,4 +1,5 @@
 defmodule Algora.Jobs.Application do
+  @moduledoc false
   use Algora.Schema
 
   @type t() :: %__MODULE__{}

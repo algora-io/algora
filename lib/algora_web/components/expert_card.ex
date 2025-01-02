@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Components.ExpertCard do
+  @moduledoc false
   use AlgoraWeb.Component
+
   import AlgoraWeb.CoreComponents
 
   attr :github_handle, :string, required: true

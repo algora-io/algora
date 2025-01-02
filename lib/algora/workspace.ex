@@ -1,5 +1,5 @@
 defmodule Algora.Workspace do
-  require Logger
+  @moduledoc false
   import Ecto.Query
 
   alias Algora.Github
@@ -8,6 +8,8 @@ defmodule Algora.Workspace do
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
+
+  require Logger
 
   @type ticket_type :: :issue | :pull_request
 

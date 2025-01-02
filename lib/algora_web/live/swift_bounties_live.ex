@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.SwiftBountiesLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Bounties
@@ -13,8 +14,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
     socket =
       if socket.assigns[:current_user] do
-        socket
-        |> push_navigate(to: ~p"/home")
+        push_navigate(socket, to: ~p"/home")
       else
         socket
         |> assign(:page_title, "Swift Bounties")
@@ -374,6 +374,6 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         limit: 100
       )
 
-    socket |> assign(:tickets, tickets)
+    assign(socket, :tickets, tickets)
   end
 end

@@ -1,4 +1,5 @@
 defmodule Algora.Validators do
+  @moduledoc false
   import Ecto.Changeset
 
   def validate_greater_than(changeset, field, value) do

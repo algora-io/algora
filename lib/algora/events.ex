@@ -1,7 +1,9 @@
 defmodule Algora.Events do
+  @moduledoc false
   import Ecto.Query, warn: false
-  alias Algora.Repo
+
   alias Algora.Events.EventCursor
+  alias Algora.Repo
 
   def get_event_cursor(provider, repo_owner, repo_name) do
     Repo.get_by(EventCursor, provider: provider, repo_owner: repo_owner, repo_name: repo_name)

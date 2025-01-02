@@ -1,7 +1,11 @@
 defmodule Algora.Chat do
+  @moduledoc false
   import Ecto.Query
+
+  alias Algora.Chat.Message
+  alias Algora.Chat.Participant
+  alias Algora.Chat.Thread
   alias Algora.Repo
-  alias Algora.Chat.{Thread, Message, Participant}
 
   def create_direct_thread(user_1, user_2) do
     Repo.transaction(fn ->

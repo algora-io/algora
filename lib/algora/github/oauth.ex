@@ -1,4 +1,5 @@
 defmodule Algora.Github.OAuth do
+  @moduledoc false
   alias Algora.Github
 
   def exchange_access_token(opts) do

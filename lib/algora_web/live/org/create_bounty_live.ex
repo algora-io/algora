@@ -1,15 +1,16 @@
 defmodule AlgoraWeb.Org.CreateBountyLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
-  alias AlgoraWeb.Org.Forms.BountyForm
   alias Algora.Users
+  alias AlgoraWeb.Org.Forms.BountyForm
 
   def mount(_params, _session, socket) do
     recent_bounties = Bounties.list_bounties(limit: 10)
     matching_devs = Users.list_developers(org_id: socket.assigns.current_org.id, limit: 5)
 
-    changeset = %BountyForm{} |> BountyForm.changeset(%{})
+    changeset = BountyForm.changeset(%BountyForm{}, %{})
 
     {:ok,
      socket
@@ -434,9 +435,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   end
 
   def handle_event("validate", %{"bounty_form" => params}, socket) do
-    changeset =
-      %BountyForm{}
-      |> BountyForm.changeset(params)
+    changeset = BountyForm.changeset(%BountyForm{}, params)
 
     {:noreply, assign_form(socket, changeset)}
   end
@@ -472,9 +471,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
            |> push_navigate(to: "/org/#{owner.handle}/bounties")}
 
         {:error, _changeset} ->
-          {:noreply,
-           socket
-           |> put_flash(:error, "Error creating bounty")}
+          {:noreply, put_flash(socket, :error, "Error creating bounty")}
       end
     else
       {:noreply,
@@ -494,9 +491,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   end
 
   def handle_event("close_drawer", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_dev_drawer, false)}
+    {:noreply, assign(socket, :show_dev_drawer, false)}
   end
 
   def handle_event("accept_dev", %{"id" => dev_id}, socket) do

@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Org.DashboardAdminLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Achievement
@@ -524,9 +525,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   # TODO: implement referrals
   defp refer_a_friend(_socket), do: :upcoming
 
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
-      when byte_size(tech) > 0 do
-    tech_stack = [String.trim(tech) | socket.assigns.tech_stack] |> Enum.uniq()
+  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
+    tech_stack = Enum.uniq([String.trim(tech) | socket.assigns.tech_stack])
 
     {:noreply,
      socket
@@ -558,16 +558,16 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   end
 
   def handle_event("begin_collaboration", _, socket) do
-    {:noreply, socket |> assign(:show_begin_collaboration_drawer, true)}
+    {:noreply, assign(socket, :show_begin_collaboration_drawer, true)}
   end
 
   def handle_event("submit_collaboration", _params, socket) do
     # TODO: Implement payment method addition and collaboration initiation
-    {:noreply, socket |> redirect(to: ~p"/contracts/123")}
+    {:noreply, redirect(socket, to: ~p"/contracts/123")}
   end
 
   def handle_event("close_drawer", _, socket) do
-    {:noreply, socket |> assign(:show_begin_collaboration_drawer, false)}
+    {:noreply, assign(socket, :show_begin_collaboration_drawer, false)}
   end
 
   def handle_event("validate_job", %{"job_form" => params}, socket) do
@@ -810,6 +810,6 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       )
 
     reviews = developers |> Enum.map(& &1.id) |> Reviews.get_top_reviews_for_users()
-    developers |> Enum.map(fn dev -> Map.merge(dev, %{review: Map.get(reviews, dev.id)}) end)
+    Enum.map(developers, fn dev -> Map.put(dev, :review, Map.get(reviews, dev.id)) end)
   end
 end

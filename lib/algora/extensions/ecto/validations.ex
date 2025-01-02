@@ -1,11 +1,13 @@
 defmodule Algora.Extensions.Ecto.Validations do
+  @moduledoc false
   import Ecto.Changeset
+
   alias Algora.Parser
 
   def validate_money_positive(changeset, field) do
     with amount when not is_nil(amount) <- get_change(changeset, field),
          true <- Money.positive?(amount) do
-      changeset |> put_change(field, amount)
+      put_change(changeset, field, amount)
     else
       false -> add_error(changeset, field, "must be positive")
       _ -> changeset
@@ -16,7 +18,7 @@ defmodule Algora.Extensions.Ecto.Validations do
     with url when not is_nil(url) <- get_change(changeset, field),
          {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url) do
       if embed_field do
-        changeset |> put_embed(embed_field, ticket_ref)
+        put_embed(changeset, embed_field, ticket_ref)
       else
         changeset
       end

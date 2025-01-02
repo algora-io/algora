@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Job.ViewLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   def mount(%{"id" => id}, _session, socket) do

@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Components.Logos do
+  @moduledoc false
   use Phoenix.Component
 
   def algora(assigns) do

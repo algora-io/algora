@@ -1,7 +1,9 @@
 defmodule Algora.Github.CommandTest do
   use ExUnit.Case, async: true
-  alias Algora.Github.Command
+
   import Money.Sigil
+
+  alias Algora.Github.Command
 
   describe "parse/1 with bounty command" do
     test "parses simple bounty amount" do

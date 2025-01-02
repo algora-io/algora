@@ -50,8 +50,7 @@ defmodule Algora.OnboardingTest do
       github_url: nil,
       email: "admin@algora.io",
       display_name: "Algora",
-      bio:
-        "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
+      bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
       tech_stack: ["Elixir", "Pheonix"],
       hourly_rate_min: Money.new(:USD, "50"),
       hourly_rate_max: Money.new(:USD, "150"),

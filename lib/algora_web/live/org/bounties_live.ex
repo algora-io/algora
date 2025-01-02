@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Org.BountiesLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties

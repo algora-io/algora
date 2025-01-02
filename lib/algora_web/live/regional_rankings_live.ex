@@ -1,11 +1,13 @@
 defmodule AlgoraWeb.RegionalRankingsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  import Ecto.Query
+
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  import Ecto.Query
+  alias Algora.Users
 
   def mount(_params, _session, socket) do
     weeks = get_weekly_rankings(20)

@@ -1,12 +1,15 @@
 defmodule AlgoraWeb.HomeLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
-  alias Algora.Users
+
   import Ecto.Query
   import Phoenix.LiveView.TagEngine
   import Tails, only: [classes: 1]
-  alias Algora.Repo
-  alias Algora.Users.User
+
   alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Users
+  alias Algora.Users.User
   alias AlgoraWeb.Components.Wordmarks
 
   @impl true
@@ -336,48 +339,38 @@ defmodule AlgoraWeb.HomeLive do
 
   def logo_cloud(assigns) do
     assigns =
-      assigns
-      |> assign(
+      assign(
+        assigns,
         :orgs,
-        [
-          %{
-            name: "ZIO",
-            url: "https://zio.dev",
-            args: %{
-              src: ~p"/images/wordmarks/zio.png",
-              class: "mt-4 aspect-[67/20] max-h-10 brightness-0 invert"
+        Enum.map(
+          [
+            %{
+              name: "ZIO",
+              url: "https://zio.dev",
+              args: %{src: ~p"/images/wordmarks/zio.png", class: "mt-4 aspect-[67/20] max-h-10 brightness-0 invert"}
+            },
+            %{
+              name: "Tailcall",
+              url: "https://tailcall.run",
+              component: &Wordmarks.tailcall/1,
+              args: %{class: "max-h-12", fill: "#fff"}
+            },
+            %{name: "Cal.com", url: "https://cal.com", component: &Wordmarks.calcom/1},
+            %{name: "Qdrant", url: "https://qdrant.tech", component: &Wordmarks.qdrant/1, args: %{class: "max-h-9"}},
+            %{
+              name: "Golem Cloud",
+              url: "https://www.golem.cloud",
+              component: &Wordmarks.golemcloud/1,
+              args: %{class: "max-h-9"}
             }
-          },
-          %{
-            name: "Tailcall",
-            url: "https://tailcall.run",
-            component: &Wordmarks.tailcall/1,
-            args: %{class: "max-h-12", fill: "#fff"}
-          },
-          %{
-            name: "Cal.com",
-            url: "https://cal.com",
-            component: &Wordmarks.calcom/1
-          },
-          %{
-            name: "Qdrant",
-            url: "https://qdrant.tech",
-            component: &Wordmarks.qdrant/1,
-            args: %{class: "max-h-9"}
-          },
-          %{
-            name: "Golem Cloud",
-            url: "https://www.golem.cloud",
-            component: &Wordmarks.golemcloud/1,
-            args: %{class: "max-h-9"}
-          }
-        ]
-        |> Enum.map(fn org ->
-          org
-          |> Map.put_new(:args, %{})
-          |> update_in([:args, :class], &classes(["max-h-6 w-full object-contain", &1]))
-          |> put_in([:args, :alt], org.name)
-        end)
+          ],
+          fn org ->
+            org
+            |> Map.put_new(:args, %{})
+            |> update_in([:args, :class], &classes(["max-h-6 w-full object-contain", &1]))
+            |> put_in([:args, :alt], org.name)
+          end
+        )
       )
 
     ~H"""

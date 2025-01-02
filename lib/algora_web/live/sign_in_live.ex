@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.SignInLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   def render(assigns) do

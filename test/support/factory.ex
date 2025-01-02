@@ -1,5 +1,8 @@
 defmodule Algora.Factory do
+  @moduledoc false
   alias Algora.Repo
+  alias Algora.Reviews.Review
+  alias Algora.Users.User
 
   def build(:identity) do
     %Algora.Users.Identity{
@@ -10,7 +13,7 @@ defmodule Algora.Factory do
   end
 
   def build(:user) do
-    %Algora.Users.User{
+    %User{
       id: Nanoid.generate(),
       type: :individual,
       email: "erich@example.com",
@@ -34,7 +37,7 @@ defmodule Algora.Factory do
   end
 
   def build(:organization) do
-    %Algora.Users.User{
+    %User{
       id: Nanoid.generate(),
       type: :organization,
       email: "piedpiper@example.com",
@@ -205,11 +208,10 @@ defmodule Algora.Factory do
   end
 
   def build(:review) do
-    %Algora.Reviews.Review{
+    %Review{
       id: Nanoid.generate(),
-      rating: Algora.Reviews.Review.max_rating(),
-      content:
-        "Great developer who writes clean code, communicates well, and always delivers on time!"
+      rating: Review.max_rating(),
+      content: "Great developer who writes clean code, communicates well, and always delivers on time!"
     }
   end
 

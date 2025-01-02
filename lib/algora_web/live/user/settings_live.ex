@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.User.SettingsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   alias Algora.Users
@@ -93,11 +94,11 @@ defmodule AlgoraWeb.User.SettingsLive do
   end
 
   def handle_params(params, _url, socket) do
-    {:noreply, socket |> apply_action(socket.assigns.live_action, params)}
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
   defp apply_action(socket, :edit, _params) do
-    socket |> assign(:page_title, "Settings")
+    assign(socket, :page_title, "Settings")
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

@@ -1,4 +1,5 @@
 defmodule Algora.Github.Webhook do
+  @moduledoc false
   require Logger
 
   @enforce_keys [
@@ -50,9 +51,10 @@ defmodule Algora.Github.Webhook do
   def verify_signature(signature, payload, secret) do
     sig = generate_signature(payload, secret)
 
-    case Plug.Crypto.secure_compare("sha256=" <> sig, signature) do
-      true -> {:ok, nil}
-      false -> {:error, :signature_mismatch}
+    if Plug.Crypto.secure_compare("sha256=" <> sig, signature) do
+      {:ok, nil}
+    else
+      {:error, :signature_mismatch}
     end
   end
 
@@ -63,6 +65,6 @@ defmodule Algora.Github.Webhook do
   end
 
   defp get_header(conn, header) do
-    Plug.Conn.get_req_header(conn, header) |> List.first()
+    conn |> Plug.Conn.get_req_header(header) |> List.first()
   end
 end

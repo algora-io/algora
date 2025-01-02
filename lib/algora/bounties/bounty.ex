@@ -1,7 +1,11 @@
 defmodule Algora.Bounties.Bounty do
+  @moduledoc false
   use Algora.Schema
+
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
+  alias Algora.Users.User
+
   @type t() :: %__MODULE__{}
 
   schema "bounties" do
@@ -9,8 +13,8 @@ defmodule Algora.Bounties.Bounty do
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
 
     belongs_to :ticket, Algora.Workspace.Ticket
-    belongs_to :owner, Algora.Users.User
-    belongs_to :creator, Algora.Users.User
+    belongs_to :owner, User
+    belongs_to :creator, User
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :transactions, Algora.Payments.Transaction
@@ -30,10 +34,7 @@ defmodule Algora.Bounties.Bounty do
     |> Algora.Extensions.Ecto.Validations.validate_money_positive(:amount)
   end
 
-  def url(%{
-        repository: %{name: name, owner: %{login: login}},
-        ticket: %{provider: "github", number: number}
-      }) do
+  def url(%{repository: %{name: name, owner: %{login: login}}, ticket: %{provider: "github", number: number}}) do
     "https://github.com/#{login}/#{name}/issues/#{number}"
   end
 
@@ -53,15 +54,13 @@ defmodule Algora.Bounties.Bounty do
     |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
   end
 
-  def full_path(%{
-        repository: %{name: name, owner: %{login: login}},
-        ticket: %{number: number}
-      }) do
+  def full_path(%{repository: %{name: name, owner: %{login: login}}, ticket: %{number: number}}) do
     "#{login}/#{name}##{number}"
   end
 
   def full_path(%{ticket: %{provider: "github", url: url}}) do
-    URI.parse(url)
+    url
+    |> URI.parse()
     |> then(& &1.path)
     |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
   end

@@ -1,4 +1,5 @@
 defmodule Algora.Payments.PaymentMethod do
+  @moduledoc false
   use Algora.Schema
 
   schema "payment_methods" do

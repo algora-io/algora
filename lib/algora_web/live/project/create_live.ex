@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Project.CreateLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
+
   alias Algora.Users
 
   def mount(_params, session, socket) do
@@ -307,7 +309,7 @@ defmodule AlgoraWeb.Project.CreateLive do
   end
 
   def handle_event("add_tech", %{"tech" => tech}, socket) do
-    updated_tech_stack = [tech | socket.assigns.project.tech_stack] |> Enum.uniq()
+    updated_tech_stack = Enum.uniq([tech | socket.assigns.project.tech_stack])
     updated_project = Map.put(socket.assigns.project, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, project: updated_project)}
   end

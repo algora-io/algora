@@ -1,16 +1,22 @@
 defmodule AlgoraWeb.Onboarding.OrgLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
-  require Logger
+
   import Ecto.Changeset
-  alias Phoenix.LiveView.AsyncResult
-  alias AlgoraWeb.Components.Wordmarks
+
   alias Algora.Users
+  alias AlgoraWeb.Components.Wordmarks
+  alias Phoenix.LiveView.AsyncResult
+
+  require Logger
 
   # === SCHEMAS === #
 
   defmodule TechStackForm do
+    @moduledoc false
     use Ecto.Schema
+
     import Ecto.Changeset
 
     @primary_key false
@@ -18,7 +24,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :tech_stack, {:array, :string}
     end
 
-    def init() do
+    def init do
       to_form(TechStackForm.changeset(%TechStackForm{}, %{tech_stack: []}))
     end
 
@@ -30,7 +36,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   defmodule EmailForm do
+    @moduledoc false
     use Ecto.Schema
+
     import Ecto.Changeset
 
     @primary_key false
@@ -39,14 +47,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :domain, :string
     end
 
-    def init() do
+    def init do
       to_form(EmailForm.changeset(%EmailForm{}, %{}))
     end
 
     def validate_domain_not_blacklisted(changeset) do
       domain = get_field(changeset, :domain)
 
-      if not is_nil(domain) and Algora.Crawler.is_blacklisted?(domain) do
+      if not is_nil(domain) and Algora.Crawler.blacklisted?(domain) do
         add_error(changeset, :domain, "You can only use a company domain")
       else
         changeset
@@ -84,7 +92,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   defmodule VerificationForm do
+    @moduledoc false
     use Ecto.Schema
+
     import Ecto.Changeset
 
     @primary_key false
@@ -92,7 +102,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :code, :string
     end
 
-    def init() do
+    def init do
       to_form(VerificationForm.changeset(%VerificationForm{}, %{}))
     end
 
@@ -104,7 +114,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   defmodule PreferencesForm do
+    @moduledoc false
     use Ecto.Schema
+
     import Ecto.Changeset
 
     @primary_key false
@@ -116,11 +128,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :company_types, {:array, :string}
     end
 
-    def hiring_options() do
+    def hiring_options do
       [{"Yes", "true"}, {"No", "false"}]
     end
 
-    def company_types_options() do
+    def company_types_options do
       [
         {"Open source company", "open_source"},
         {"Closed source company", "closed_source"},
@@ -129,7 +141,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       ]
     end
 
-    def init() do
+    def init do
       to_form(PreferencesForm.changeset(%PreferencesForm{}, %{company_types: []}))
     end
 
@@ -155,7 +167,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       )
       |> validate_subset(
         :company_types,
-        PreferencesForm.company_types_options() |> Enum.map(&elem(&1, 1))
+        Enum.map(PreferencesForm.company_types_options(), &elem(&1, 1))
       )
       |> validate_rate_range()
     end
@@ -384,8 +396,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               get_in(metadata, [:org, :bio]) ||
                 get_in(metadata, [:org, :og_description]) ||
                 get_in(metadata, [:org, :og_title]),
-            avatar_url:
-              get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
+            avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
             handle: org_unique_handle,
             domain: domain,
             og_title: get_in(metadata, [:org, :og_title]),
@@ -442,15 +453,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             {:ok, %{org: org}} ->
               socket
               |> put_flash(:info, "Welcome to Algora!")
-              |> redirect(
-                to: AlgoraWeb.UserAuth.login_path(email, login_code, ~p"/org/#{org.handle}")
-              )
+              |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, ~p"/org/#{org.handle}"))
 
             {:error, name, changeset, _created} ->
               # TODO try to recover
-              Logger.error(
-                "error onboarding organization: #{inspect(name)} #{inspect(changeset)}"
-              )
+              Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
 
               socket
               |> put_flash(:error, "Something went wrong. Please try again.")
@@ -475,12 +482,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         code = get_field(changeset, :code)
         email = get_field(socket.assigns.email_form.source, :email)
 
-        with {:ok, %{email: ^email}} <- AlgoraWeb.UserAuth.verify_login_code(code) do
-          {:noreply,
-           socket
-           |> assign(:verification_form, to_form(changeset))
-           |> assign(step: :preferences)}
-        else
+        case AlgoraWeb.UserAuth.verify_login_code(code) do
+          {:ok, %{email: ^email}} ->
+            {:noreply,
+             socket
+             |> assign(:verification_form, to_form(changeset))
+             |> assign(step: :preferences)}
+
           {:ok, _different_email} ->
             {:noreply,
              socket
@@ -500,7 +508,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
-    changeset = %TechStackForm{} |> TechStackForm.changeset(%{tech_stack: tech_stack})
+    changeset = TechStackForm.changeset(%TechStackForm{}, %{tech_stack: tech_stack})
 
     {:noreply,
      socket
@@ -984,12 +992,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    {:noreply,
-     assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+    {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
   end
 
   def handle_async(:fetch_metadata, {:exit, reason}, socket) do
-    {:noreply,
-     assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
+    {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 end

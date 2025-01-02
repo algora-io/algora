@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.ChatLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   alias Algora.Users
@@ -96,7 +97,8 @@ defmodule AlgoraWeb.ChatLive do
 
     # Zip the chat histories with matching devs
     chat_threads =
-      Enum.zip(matching_devs, chat_histories)
+      matching_devs
+      |> Enum.zip(chat_histories)
       |> Enum.map(fn {dev, history} ->
         %{
           id: dev.id,
@@ -111,7 +113,7 @@ defmodule AlgoraWeb.ChatLive do
       end)
 
     # Get a random user to chat with
-    other_user = matching_devs |> Enum.at(8)
+    other_user = Enum.at(matching_devs, 8)
 
     other_user =
       Map.merge(other_user, %{
@@ -146,8 +148,7 @@ defmodule AlgoraWeb.ChatLive do
       %{
         id: 2,
         sender: other_user,
-        content:
-          "hey! yeah I've built a few things with LiveView. what kind of collab tool are you working on?",
+        content: "hey! yeah I've built a few things with LiveView. what kind of collab tool are you working on?",
         sent_at: "11:45 AM",
         date: "Monday",
         is_self: false,
@@ -196,8 +197,7 @@ defmodule AlgoraWeb.ChatLive do
       %{
         id: 7,
         sender: current_user,
-        content:
-          "awesome, here's the gist: https://gist.github.com/... also curious how you handled the pubsub sharding",
+        content: "awesome, here's the gist: https://gist.github.com/... also curious how you handled the pubsub sharding",
         sent_at: "10:35 AM",
         date: "Today",
         is_self: true,

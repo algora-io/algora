@@ -1,4 +1,5 @@
 defmodule Algora.Misc.Regions do
+  @moduledoc false
   @regions %{
     "APAC" => [
       "AU",

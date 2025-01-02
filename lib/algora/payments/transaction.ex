@@ -1,5 +1,8 @@
 defmodule Algora.Payments.Transaction do
+  @moduledoc false
   use Algora.Schema
+
+  alias Algora.Contracts.Contract
   alias Money.Ecto.Composite.Type, as: MoneyType
 
   @type t() :: %__MODULE__{}
@@ -31,8 +34,8 @@ defmodule Algora.Payments.Transaction do
     field :group_id, :string
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
-    belongs_to :contract, Algora.Contracts.Contract
-    belongs_to :original_contract, Algora.Contracts.Contract
+    belongs_to :contract, Contract
+    belongs_to :original_contract, Contract
     belongs_to :user, Algora.Users.User
     # belongs_to :claim, Algora.Bounties.Claim
     belongs_to :bounty, Algora.Bounties.Bounty

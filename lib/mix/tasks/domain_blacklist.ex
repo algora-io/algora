@@ -1,11 +1,12 @@
 defmodule Mix.Tasks.DomainBlacklist do
+  @shortdoc "Update the free email provider domain list"
   @moduledoc "The domain_blacklist mix task: `mix help domain_blacklist`"
   use Mix.Task
+
   require Logger
 
   @blacklist_url "https://gist.githubusercontent.com/okutbay/5b4974b70673dfdcc21c517632c1f984/raw/free_email_provider_domains.txt"
 
-  @shortdoc "Update the free email provider domain list"
   def run(_) do
     :application.ensure_all_started(:finch)
 
@@ -31,7 +32,7 @@ defmodule Mix.Tasks.DomainBlacklist do
   end
 
   defp update!(path) do
-    case Finch.build(:get, @blacklist_url) |> Finch.request(:blacklist) do
+    case :get |> Finch.build(@blacklist_url) |> Finch.request(:blacklist) do
       {:ok, resp} ->
         File.write(path, resp.body)
         Logger.info("Wrote domain blacklist to #{inspect(path)}")

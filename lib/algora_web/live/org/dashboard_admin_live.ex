@@ -58,9 +58,9 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 lg:pr-96 bg-background text-foreground">
+    <div class="flex-1 bg-background text-foreground lg:pr-96">
       <!-- Hourly Bounties Section -->
-      <div class="relative h-full max-w-4xl mx-auto p-6">
+      <div class="relative mx-auto h-full max-w-4xl p-6">
         <div class="flex justify-between px-6">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">
@@ -88,16 +88,16 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         </div>
       </div>
       <!-- Job Creation Section -->
-      <div class="relative h-full max-w-4xl mx-auto p-6">
-        <div class="relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
-          <div class="pt-6 px-6 flex justify-between items-center">
+      <div class="relative mx-auto h-full max-w-4xl p-6">
+        <div class="relative h-full rounded-lg border bg-card text-card-foreground md:gap-8">
+          <div class="flex items-center justify-between px-6 pt-6">
             <div class="flex items-center gap-2">
               <h2 class="text-2xl font-semibold">Create New Job</h2>
               <.tooltip>
                 <.tooltip_trigger>
-                  <.icon name="tabler-help" class="w-5 h-5 text-muted-foreground" />
+                  <.icon name="tabler-help" class="h-5 w-5 text-muted-foreground" />
                 </.tooltip_trigger>
-                <.tooltip_content side="bottom" class="w-80 p-3 space-y-2">
+                <.tooltip_content side="bottom" class="w-80 space-y-2 p-3">
                   <p class="font-medium">Example Jobs:</p>
                   <div class="space-y-2 text-sm">
                     <div>
@@ -124,11 +124,11 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             for={@job_form}
             phx-change="validate_job"
             phx-submit="create_job"
-            class="p-6 space-y-6"
+            class="space-y-6 p-6"
           >
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
+            <div class="grid grid-cols-1 gap-y-6 sm:gap-x-4 md:grid-cols-2">
               <div>
-                <.label for="title" class="text-sm font-medium mb-2">
+                <.label for="title" class="mb-2 text-sm font-medium">
                   Title
                 </.label>
                 <.input
@@ -136,12 +136,12 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   field={@job_form[:title]}
                   placeholder="Brief description of the task"
                   required
-                  class="w-full bg-background border-input rounded-lg"
+                  class="w-full rounded-lg border-input bg-background"
                 />
               </div>
               <fieldset>
-                <legend class="text-sm font-medium mb-2">Annual Compensation Range</legend>
-                <div class="mt-1 grid grid-cols-2 rounded-lg overflow-hidden border border-border divide-x divide-border">
+                <legend class="mb-2 text-sm font-medium">Annual Compensation Range</legend>
+                <div class="mt-1 grid grid-cols-2 divide-x divide-border overflow-hidden rounded-lg border border-border">
                   <div>
                     <div class="relative">
                       <.input
@@ -150,8 +150,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         min="0"
                         class="rounded-none border-none"
                       />
-                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <span class="text-muted-foreground text-sm">USD</span>
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <span class="text-sm text-muted-foreground">USD</span>
                       </div>
                     </div>
                   </div>
@@ -163,8 +163,8 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         min="0"
                         class="rounded-none border-none"
                       />
-                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <span class="text-muted-foreground text-sm">USD</span>
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <span class="text-sm text-muted-foreground">USD</span>
                       </div>
                     </div>
                   </div>
@@ -175,7 +175,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             <fieldset class="space-y-4">
               <legend class="text-sm font-medium">Work Type</legend>
               <div class="grid grid-cols-2 gap-4">
-                <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @job_form[:work_type].value == "remote", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
+                <label class={"#{if @job_form[:work_type].value == "remote", do: "border-primary bg-background ring-2 ring-primary", else: "border-input bg-background/75"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
                   <.input
                     type="radio"
                     name="job_form[work_type]"
@@ -186,14 +186,14 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   />
                   <span class="flex flex-col">
                     <span class="flex items-center gap-2">
-                      <.icon name="tabler-world" class="w-5 h-5" />
+                      <.icon name="tabler-world" class="h-5 w-5" />
                       <span class="font-medium">Remote</span>
                     </span>
                     <span class="mt-1 text-sm text-muted-foreground">Work from anywhere</span>
                   </span>
                 </label>
 
-                <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @job_form[:work_type].value == "in_person", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
+                <label class={"#{if @job_form[:work_type].value == "in_person", do: "border-primary bg-background ring-2 ring-primary", else: "border-input bg-background/75"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
                   <.input
                     type="radio"
                     name="job_form[work_type]"
@@ -204,7 +204,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   />
                   <span class="flex flex-col">
                     <span class="flex items-center gap-2">
-                      <.icon name="tabler-building" class="w-5 h-5" />
+                      <.icon name="tabler-building" class="h-5 w-5" />
                       <span class="font-medium">In-Person</span>
                     </span>
                     <span class="mt-1 text-sm text-muted-foreground">Office-based work</span>
@@ -217,7 +217,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       </div>
     </div>
     <!-- Sidebar -->
-    <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8 scrollbar-thin">
+    <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
       <!-- Availability Section -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -241,7 +241,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           name="hourly-rate-min"
           value={@contract.hourly_rate_min.amount}
           phx-debounce="200"
-          class="w-full bg-background border-input font-display"
+          class="font-display w-full border-input bg-background"
           icon="tabler-currency-dollar"
           label="Min hourly rate (USD)"
         />
@@ -249,7 +249,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           name="hourly-rate-max"
           value={@contract.hourly_rate_max.amount}
           phx-debounce="200"
-          class="w-full bg-background border-input font-display"
+          class="font-display w-full border-input bg-background"
           icon="tabler-currency-dollar"
           label="Max hourly rate (USD)"
         />
@@ -266,11 +266,11 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
           phx-keydown="handle_tech_input"
           phx-debounce="200"
           phx-hook="ClearInput"
-          class="mt-2 w-full bg-background border-input"
+          class="mt-2 w-full border-input bg-background"
         />
-        <div class="flex flex-wrap gap-3 mt-4">
+        <div class="mt-4 flex flex-wrap gap-3">
           <%= for tech <- @tech_stack do %>
-            <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
+            <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
               {tech}
               <button
                 phx-click="remove_tech"
@@ -312,20 +312,20 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         Begin Collaboration
       </.drawer_header>
       <.drawer_content class="space-y-6">
-        <div class="gap-6 flex">
+        <div class="flex gap-6">
           <div class="relative w-full">
             <div class="space-y-4">
               <video
                 src="/videos/contract-to-hire.mp4"
-                class="w-full rounded-lg ring-1 ring-border aspect-video bg-card"
+                class="aspect-video w-full rounded-lg bg-card ring-1 ring-border"
                 controls
               />
 
-              <figure class="flex gap-3 items-start">
+              <figure class="flex items-start gap-3">
                 <img
                   src="https://avatars.githubusercontent.com/u/1195435?v=4"
                   alt="Chris Griffing"
-                  class="w-12 h-12 rounded-full"
+                  class="h-12 w-12 rounded-full"
                 />
                 <figcaption class="flex-1">
                   <blockquote class="text-muted-foreground">
@@ -333,14 +333,14 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                     <em>can</em>
                     actually be that easy."
                   </blockquote>
-                  <cite class="mt-2 font-medium block">
+                  <cite class="mt-2 block font-medium">
                     - Chris Griffing
                   </cite>
                 </figcaption>
               </figure>
             </div>
           </div>
-          <div class="space-y-6 shrink-0">
+          <div class="shrink-0 space-y-6">
             <.card>
               <.card_header>
                 <.card_title>How it works</.card_title>
@@ -357,7 +357,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         Add your credit card to initiate the collaboration
                       </span>
                     </div>
-                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                    <div class="absolute top-10 left-5 h-full w-px bg-border" aria-hidden="true" />
                   </div>
 
                   <div class="relative flex gap-4">
@@ -380,7 +380,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         </span>
                       <% end %>
                     </div>
-                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                    <div class="absolute top-10 left-5 h-full w-px bg-border" aria-hidden="true" />
                   </div>
 
                   <div class="relative flex gap-4">
@@ -410,7 +410,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                         @hourly_rate_mid
                       )}/hr)
                     </dt>
-                    <dd class="font-semibold font-display tabular-nums">
+                    <dd class="font-display font-semibold tabular-nums">
                       {Money.to_string!(@weekly_amount_mid)}
                     </dd>
                   </div>
@@ -418,7 +418,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                     <dt class="text-muted-foreground">
                       Algora fees ({Util.format_pct(@platform_fee_pct)})
                     </dt>
-                    <dd class="font-semibold font-display tabular-nums">
+                    <dd class="font-display font-semibold tabular-nums">
                       {Money.to_string!(Money.mult!(@weekly_amount_mid, @platform_fee_pct))}
                     </dd>
                   </div>
@@ -426,21 +426,21 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                     <dt class="text-muted-foreground">
                       Transaction fees ({Util.format_pct(@transaction_fee_pct)})
                     </dt>
-                    <dd class="font-semibold font-display tabular-nums">
+                    <dd class="font-display font-semibold tabular-nums">
                       {Money.to_string!(Money.mult!(@weekly_amount_mid, @transaction_fee_pct))}
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
-                    <dd class="font-semibold font-display tabular-nums">
+                    <dd class="font-display font-semibold tabular-nums">
                       {@weekly_amount_mid
                       |> Money.mult!(Decimal.add(1, @total_fee_pct))
                       |> Money.to_string!()}
                     </dd>
                   </div>
                 </dl>
-                <div class="mt-1 text-muted-foreground text-sm">
+                <div class="mt-1 text-sm text-muted-foreground">
                   <p>Estimated based on the middle of your hourly rate range.</p>
                   <p>
                     Actual charges may vary (up to
@@ -463,7 +463,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             Cancel
           </.button>
           <.button phx-click="submit_collaboration">
-            <.icon name="tabler-credit-card" class="w-4 h-4 mr-2" /> Add payment method
+            <.icon name="tabler-credit-card" class="mr-2 h-4 w-4" /> Add payment method
           </.button>
         </div>
       </.drawer_content>
@@ -596,20 +596,20 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   def compact_view(assigns) do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
-      <td class="py-1 px-4 align-middle">
+      <td class="px-4 py-1 align-middle">
         <div class="flex items-center gap-4">
-          <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
             {Money.to_string!(@bounty.amount)}
           </div>
 
           <.link
             href={Bounty.url(@bounty)}
-            class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
           >
             {@bounty.ticket.title}
           </.link>
 
-          <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+          <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
             <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
               {@bounty.owner.name}
             </.link>
@@ -631,7 +631,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-4">
             <.link href={~p"/org/#{@contract.client.handle}"}>
-              <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
+              <.avatar class="aspect-[1200/630] h-32 w-auto rounded-lg">
                 <.avatar_image
                   src={@contract.client.og_image_url || @contract.client.avatar_url}
                   alt={@contract.client.name}
@@ -650,7 +650,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                   {@contract.client.og_title || @contract.client.name}
                 </.link>
               </div>
-              <div class="text-muted-foreground line-clamp-2">
+              <div class="line-clamp-2 text-muted-foreground">
                 {@contract.client.bio}
               </div>
 
@@ -667,7 +667,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
               <div class="mt-1 flex flex-wrap gap-2">
                 <%= for tag <- @contract.client.tech_stack do %>
-                  <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
+                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
                     {tag}
                   </div>
                 <% end %>
@@ -709,7 +709,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
               <div class="font-display text-xl font-semibold text-success">
                 {Money.to_string!(@bounty.amount)}
               </div>
-              <div class="text-foreground group-hover:underline line-clamp-1">
+              <div class="line-clamp-1 text-foreground group-hover:underline">
                 {@bounty.ticket.title}
               </div>
             </.link>
@@ -756,24 +756,24 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
               <div class="mt-1 flex flex-wrap gap-2">
                 <%= for tech <- @user.tech_stack do %>
-                  <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
+                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
                     {tech}
                   </div>
                 <% end %>
               </div>
             </div>
           </div>
-          <div class="max-w-xs w-full rounded-lg bg-card p-4 text-sm border border-border">
+          <div class="w-full max-w-xs rounded-lg border border-border bg-card p-4 text-sm">
             <%= if @user.review do %>
-              <div class="flex items-center gap-1 mb-2">
+              <div class="mb-2 flex items-center gap-1">
                 <%= for i <- 1..5 do %>
                   <.icon
                     name="tabler-star-filled"
-                    class={"w-4 h-4 #{if i <= @user.review.rating, do: "text-warning", else: "text-muted-foreground/25"}"}
+                    class={"#{if i <= @user.review.rating, do: "text-warning", else: "text-muted-foreground/25"} h-4 w-4"}
                   />
                 <% end %>
               </div>
-              <p class="text-sm mb-2">{@user.review.content}</p>
+              <p class="mb-2 text-sm">{@user.review.content}</p>
               <div class="flex items-center gap-3">
                 <.avatar class="h-8 w-8">
                   <.avatar_image
@@ -792,7 +792,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 </div>
               </div>
             <% else %>
-              <p class="text-muted-foreground text-center">No reviews yet</p>
+              <p class="text-center text-muted-foreground">No reviews yet</p>
             <% end %>
           </div>
         </div>

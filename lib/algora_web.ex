@@ -86,6 +86,7 @@ defmodule AlgoraWeb do
   defp html_helpers do
     quote do
       use Gettext, backend: AlgoraWeb.Gettext
+
       import AlgoraWeb.CoreComponents
       import LiveSvelte
       # HTML escaping functionality

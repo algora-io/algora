@@ -67,12 +67,7 @@ defmodule AlgoraWeb.Components.UI.Sheet do
   defp sheet_overlay(assigns) do
     ~H"""
     <div
-      class={
-        classes([
-          "sheet-overlay fixed hidden inset-0 z-50 bg-black/80",
-          @class
-        ])
-      }
+      class={classes(["sheet-overlay fixed inset-0 z-50 hidden bg-black/80", @class])}
       aria-hidden="true"
     >
     </div>
@@ -117,14 +112,14 @@ defmodule AlgoraWeb.Components.UI.Sheet do
         role="sheet"
         class={
           classes([
-            "sheet-content-wrap hidden fixed z-50 bg-background shadow-lg transition",
+            "sheet-content-wrap fixed z-50 hidden bg-background shadow-lg transition",
             @variant_class,
             @class
           ])
         }
       >
         <div class={classes(["relative h-full"])}>
-          <div class={classes(["p-6 overflow-y-auto h-full", @class])}>
+          <div class={classes(["h-full overflow-y-auto p-6", @class])}>
             {render_slot(@inner_block)}
           </div>
 
@@ -133,7 +128,7 @@ defmodule AlgoraWeb.Components.UI.Sheet do
           <% else %>
             <button
               type="button"
-              class="ring-offset-background absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-ring focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none"
+              class="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
               phx-click={hide_sheet(@id, @side)}
             >
               <svg
@@ -142,7 +137,7 @@ defmodule AlgoraWeb.Components.UI.Sheet do
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="size-6 no-collapse h-4 w-4"
+                class="no-collapse size-6 h-4 w-4"
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>

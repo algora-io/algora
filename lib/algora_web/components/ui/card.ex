@@ -65,7 +65,7 @@ defmodule AlgoraWeb.Components.UI.Card do
 
   def card_description(assigns) do
     ~H"""
-    <p class={classes(["text-muted-foreground text-sm", @class])} {@rest}>
+    <p class={classes(["text-sm text-muted-foreground", @class])} {@rest}>
       {render_slot(@inner_block)}
     </p>
     """

@@ -31,16 +31,16 @@ defmodule AlgoraWeb.Org.CreateJobLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 p-4 pt-6 sm:p-6 md:p-8 max-w-5xl mx-auto">
-      <div class="relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
-        <div class="pt-6 px-6 flex justify-between items-center">
+    <div class="mx-auto max-w-5xl flex-1 p-4 pt-6 sm:p-6 md:p-8">
+      <div class="relative h-full rounded-lg border bg-card text-card-foreground md:gap-8">
+        <div class="flex items-center justify-between px-6 pt-6">
           <div class="flex items-center gap-2">
             <h2 class="text-2xl font-semibold">Create New Job</h2>
             <.tooltip>
               <.tooltip_trigger>
-                <.icon name="tabler-help" class="w-5 h-5 text-muted-foreground" />
+                <.icon name="tabler-help" class="h-5 w-5 text-muted-foreground" />
               </.tooltip_trigger>
-              <.tooltip_content side="bottom" class="w-80 p-3 space-y-2">
+              <.tooltip_content side="bottom" class="w-80 space-y-2 p-3">
                 <p class="font-medium">Example Jobs:</p>
                 <div class="space-y-2 text-sm">
                   <div>
@@ -75,10 +75,10 @@ defmodule AlgoraWeb.Org.CreateJobLive do
             Create job
           </.button>
         </div>
-        <.simple_form for={@form} phx-change="validate" phx-submit="create_job" class="p-6 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
+        <.simple_form for={@form} phx-change="validate" phx-submit="create_job" class="space-y-6 p-6">
+          <div class="grid grid-cols-1 gap-y-6 sm:gap-x-4 md:grid-cols-2">
             <div>
-              <.label for="title" class="text-sm font-medium mb-2">
+              <.label for="title" class="mb-2 text-sm font-medium">
                 Title
               </.label>
               <.input
@@ -86,12 +86,12 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 field={@form[:title]}
                 placeholder="Brief description of the task"
                 required
-                class="w-full bg-background border-input rounded-lg"
+                class="w-full rounded-lg border-input bg-background"
               />
             </div>
             <fieldset>
-              <legend class="text-sm font-medium mb-2">Annual Compensation Range</legend>
-              <div class="mt-1 grid grid-cols-2 rounded-lg overflow-hidden border border-border divide-x divide-border">
+              <legend class="mb-2 text-sm font-medium">Annual Compensation Range</legend>
+              <div class="mt-1 grid grid-cols-2 divide-x divide-border overflow-hidden rounded-lg border border-border">
                 <div>
                   <div class="relative">
                     <.input
@@ -100,8 +100,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       min="0"
                       class="rounded-none border-none"
                     />
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span class="text-muted-foreground text-sm">USD</span>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                      <span class="text-sm text-muted-foreground">USD</span>
                     </div>
                   </div>
                 </div>
@@ -113,8 +113,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       min="0"
                       class="rounded-none border-none"
                     />
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <span class="text-muted-foreground text-sm">USD</span>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                      <span class="text-sm text-muted-foreground">USD</span>
                     </div>
                   </div>
                 </div>
@@ -125,7 +125,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
           <fieldset class="space-y-4">
             <legend class="text-sm font-medium">Work Type</legend>
             <div class="grid grid-cols-2 gap-4">
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:work_type].value == "remote", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
+              <label class={"#{if @form[:work_type].value == "remote", do: "border-primary bg-background ring-2 ring-primary", else: "border-input bg-background/75"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
                 <.input
                   type="radio"
                   name="job_form[work_type]"
@@ -136,14 +136,14 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 />
                 <span class="flex flex-col">
                   <span class="flex items-center gap-2">
-                    <.icon name="tabler-world" class="w-5 h-5" />
+                    <.icon name="tabler-world" class="h-5 w-5" />
                     <span class="font-medium">Remote</span>
                   </span>
                   <span class="mt-1 text-sm text-muted-foreground">Work from anywhere</span>
                 </span>
               </label>
 
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:work_type].value == "in_person", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
+              <label class={"#{if @form[:work_type].value == "in_person", do: "border-primary bg-background ring-2 ring-primary", else: "border-input bg-background/75"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
                 <.input
                   type="radio"
                   name="job_form[work_type]"
@@ -154,7 +154,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 />
                 <span class="flex flex-col">
                   <span class="flex items-center gap-2">
-                    <.icon name="tabler-building" class="w-5 h-5" />
+                    <.icon name="tabler-building" class="h-5 w-5" />
                     <span class="font-medium">In-Person</span>
                   </span>
                   <span class="mt-1 text-sm text-muted-foreground">Office-based work</span>
@@ -164,10 +164,10 @@ defmodule AlgoraWeb.Org.CreateJobLive do
           </fieldset>
         </.simple_form>
         <!-- Attached Projects Section -->
-        <div class="flex flex-col gap-4 bg-background/50 border-t border-border">
+        <div class="flex flex-col gap-4 border-t border-border bg-background/50">
           <div class="px-6 pt-6">
             <h3 class="text-sm font-medium">Add Contract-to-Hire</h3>
-            <p class="text-sm text-muted-foreground mt-1">
+            <p class="mt-1 text-sm text-muted-foreground">
               Interview your top applicants with a paid project. It's the best way to evaluate fit, accelerate onboarding and get work done while hiring.
             </p>
           </div>
@@ -186,17 +186,17 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     />
                   </div>
                   <div>
-                    <.label for="ticket_url" class="text-sm font-medium mb-2">
+                    <.label for="ticket_url" class="mb-2 text-sm font-medium">
                       Ticket
-                      <span class="font-normal text-muted-foreground  ">
+                      <span class="font-normal text-muted-foreground ">
                         (GitHub, Linear, Figma, Jira, Google Docs...)
                       </span>
                     </.label>
                     <div class="relative">
-                      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <.icon
                           name={get_url_icon(@form[:ticket_url].value)}
-                          class="w-5 h-5 text-muted-foreground"
+                          class="h-5 w-5 text-muted-foreground"
                         />
                       </div>
                       <.input
@@ -204,7 +204,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                         field={@form[:ticket_url]}
                         placeholder="https://github.com/owner/repo/issues/123"
                         required
-                        class="w-full pl-10 bg-background border-input rounded-lg"
+                        class="w-full rounded-lg border-input bg-background pl-10"
                       />
                     </div>
                   </div>
@@ -216,8 +216,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                         name="projects[#{i}][amount]"
                         value={project[:amount]}
                       />
-                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <span class="text-muted-foreground text-sm">USD</span>
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <span class="text-sm text-muted-foreground">USD</span>
                       </div>
                     </div>
                   </div>
@@ -229,20 +229,20 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                   phx-click="remove_project"
                   phx-value-index={i}
                 >
-                  <.icon name="tabler-trash" class="w-4 h-4 text-destructive" />
+                  <.icon name="tabler-trash" class="h-4 w-4 text-destructive" />
                 </.button>
               </div>
             <% end %>
           </div>
 
           <.button type="button" variant="outline" size="sm" phx-click="add_project" class="mx-auto">
-            <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Add Project
+            <.icon name="tabler-plus" class="mr-2 h-4 w-4" /> Add Project
           </.button>
         </div>
       </div>
 
-      <div class="mt-8 p-6 relative rounded-lg border bg-card text-card-foreground">
-        <div class="flex justify-between mb-6">
+      <div class="relative mt-8 rounded-lg border bg-card p-6 text-card-foreground">
+        <div class="mb-6 flex justify-between">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">Applicants</h2>
             <p class="text-sm text-muted-foreground">
@@ -289,7 +289,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     <div class="space-y-2">
                       <div class="-ml-2.5 flex flex-wrap gap-1">
                         <%= for tech <- Enum.take(dev.tech_stack, 3) do %>
-                          <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+                          <span class="inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                             {tech}
                           </span>
                         <% end %>
@@ -301,17 +301,17 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       </div>
                       <div class="flex items-center gap-4 text-sm text-muted-foreground">
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-diamond" class="w-4 h-4" />
+                          <.icon name="tabler-diamond" class="h-4 w-4" />
                           <span>{dev.bounties} bounties</span>
                         </div>
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-cash" class="w-4 h-4" />
+                          <.icon name="tabler-cash" class="h-4 w-4" />
                           <span>{Money.to_string!(dev.total_earned)}</span>
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td class="p-4 align-middle text-right">
+                  <td class="p-4 text-right align-middle">
                     <.button
                       phx-click="view_dev"
                       phx-value-id={dev.id}
@@ -326,8 +326,8 @@ defmodule AlgoraWeb.Org.CreateJobLive do
             </tbody>
           </table>
           <%= if !@is_published do %>
-            <div class="absolute bg-gradient-to-b from-transparent to-card inset-0"></div>
-            <div class="absolute flex items-center justify-center inset-0 z-10">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-card"></div>
+            <div class="absolute inset-0 z-10 flex items-center justify-center">
               <div class="bg-black">
                 <.button type="button" variant="default" size="xl" phx-click="publish_job">
                   Publish Job
@@ -345,7 +345,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
       <.drawer show={@show_dev_drawer} on_cancel="close_drawer">
         <%= if @selected_dev do %>
           <.drawer_header class="flex items-center gap-4">
-            <img src={@selected_dev.avatar_url} alt="" class="w-20 h-20 rounded-full" />
+            <img src={@selected_dev.avatar_url} alt="" class="h-20 w-20 rounded-full" />
             <div>
               <h4 class="text-xl font-semibold">
                 {@selected_dev.name} {@selected_dev.flag}
@@ -353,9 +353,9 @@ defmodule AlgoraWeb.Org.CreateJobLive do
               <div class="text-sm text-muted-foreground">
                 @{@selected_dev.handle}
               </div>
-              <div class="-ml-1 mt-2 flex flex-wrap gap-2">
+              <div class="mt-2 -ml-1 flex flex-wrap gap-2">
                 <%= for tech <- @selected_dev.tech_stack do %>
-                  <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                  <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
                     {tech}
                   </span>
                 <% end %>
@@ -368,27 +368,27 @@ defmodule AlgoraWeb.Org.CreateJobLive do
               <div class="space-y-6">
                 <!-- Stats Grid -->
                 <div>
-                  <h5 class="text-sm font-medium mb-3 opacity-0">Stats</h5>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div class="p-4 rounded-lg bg-card border border-border">
-                      <div class="flex items-center gap-2 mb-2">
-                        <div class="text-2xl font-bold font-display">
+                  <h5 class="mb-3 text-sm font-medium opacity-0">Stats</h5>
+                  <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                    <div class="rounded-lg border border-border bg-card p-4">
+                      <div class="mb-2 flex items-center gap-2">
+                        <div class="font-display text-2xl font-bold">
                           {Money.to_string!(@selected_dev.total_earned)}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Total Earnings</div>
                     </div>
-                    <div class="p-4 rounded-lg bg-card border border-border">
-                      <div class="flex items-center gap-2 mb-2">
-                        <div class="text-2xl font-bold font-display">
+                    <div class="rounded-lg border border-border bg-card p-4">
+                      <div class="mb-2 flex items-center gap-2">
+                        <div class="font-display text-2xl font-bold">
                           {@selected_dev.bounties}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Bounties Solved</div>
                     </div>
-                    <div class="p-4 rounded-lg bg-card border border-border">
-                      <div class="flex items-center gap-2 mb-2">
-                        <div class="text-2xl font-bold font-display">
+                    <div class="rounded-lg border border-border bg-card p-4">
+                      <div class="mb-2 flex items-center gap-2">
+                        <div class="font-display text-2xl font-bold">
                           {@selected_dev.projects}
                         </div>
                       </div>
@@ -398,10 +398,10 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                 </div>
                 <!-- Message -->
                 <div class="p-px">
-                  <div class="rounded-lg bg-card border border-border">
-                    <div class="px-4 py-2 border-b border-border">
+                  <div class="rounded-lg border border-border bg-card">
+                    <div class="border-b border-border px-4 py-2">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-message" class="w-4 h-4" />
+                        <.icon name="tabler-message" class="h-4 w-4" />
                         <span>
                           {@selected_dev.handle} wrote to you {Algora.Util.time_ago(
                             DateTime.utc_now()
@@ -410,7 +410,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                         </span>
                       </div>
                     </div>
-                    <div class="px-4 leading-5 text-base whitespace-pre-line min-h-[12rem]">
+                    <div class="min-h-[12rem] whitespace-pre-line px-4 text-base leading-5">
                       {@selected_dev.message}
                     </div>
                   </div>
@@ -418,23 +418,23 @@ defmodule AlgoraWeb.Org.CreateJobLive do
               </div>
               <!-- Right Column -->
               <div>
-                <h5 class="text-sm font-medium mb-3">Past Reviews</h5>
+                <h5 class="mb-3 text-sm font-medium">Past Reviews</h5>
                 <div class="space-y-6">
                   <%= for review <- [
                         %{stars: 5, comment: "Exceptional problem-solving tech_stack and great communication throughout the project.", company: "TechCorp Inc."},
                         %{stars: 4, comment: "Delivered high-quality work ahead of schedule. Would definitely work with again.", company: "StartupXYZ"},
                         %{stars: 5, comment: "Outstanding technical expertise and professional attitude.", company: "DevLabs"}
                       ] do %>
-                    <div class="rounded-lg bg-card p-4 text-sm border border-border">
-                      <div class="flex items-center gap-1 mb-2">
+                    <div class="rounded-lg border border-border bg-card p-4 text-sm">
+                      <div class="mb-2 flex items-center gap-1">
                         <%= for i <- 1..5 do %>
                           <.icon
                             name="tabler-star-filled"
-                            class={"w-4 h-4 #{if i <= review.stars, do: "text-warning", else: "text-muted-foreground/25"}"}
+                            class={"#{if i <= review.stars, do: "text-warning", else: "text-muted-foreground/25"} h-4 w-4"}
                           />
                         <% end %>
                       </div>
-                      <p class="text-sm mb-2">{review.comment}</p>
+                      <p class="mb-2 text-sm">{review.comment}</p>
                       <p class="text-xs text-muted-foreground">— {review.company}</p>
                     </div>
                   <% end %>
@@ -461,7 +461,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
       </.drawer_header>
       <.drawer_content class="space-y-6">
         <div class="grid grid-cols-5 gap-6">
-          <div class="col-span-3 rounded-lg ring-1 ring-border aspect-video w-full h-full bg-card">
+          <div class="col-span-3 aspect-video h-full w-full rounded-lg bg-card ring-1 ring-border">
           </div>
           <div class="col-span-2 space-y-6">
             <.card>
@@ -480,7 +480,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                         Publish to the Algora network of proven developers
                       </span>
                     </div>
-                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                    <div class="absolute top-10 left-5 h-full w-px bg-border" aria-hidden="true" />
                   </div>
 
                   <div class="relative flex gap-4">
@@ -493,7 +493,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                         Review and manage candidates in one place
                       </span>
                     </div>
-                    <div class="absolute left-5 top-10 h-full w-px bg-border" aria-hidden="true" />
+                    <div class="absolute top-10 left-5 h-full w-px bg-border" aria-hidden="true" />
                   </div>
 
                   <div class="relative flex gap-4">
@@ -521,14 +521,14 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                     <dt class="text-muted-foreground">
                       Job posting
                     </dt>
-                    <dd class="font-semibold font-display tabular-nums">
+                    <dd class="font-display font-semibold tabular-nums">
                       {Money.to_string!(Money.new!(599, :USD))}
                     </dd>
                   </div>
                   <div class="h-px bg-border" />
                   <div class="flex justify-between">
                     <dt class="font-medium">Total Due</dt>
-                    <dd class="font-semibold font-display tabular-nums">
+                    <dd class="font-display font-semibold tabular-nums">
                       {Money.to_string!(Money.new!(599, :USD))}
                     </dd>
                   </div>
@@ -543,7 +543,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
             Cancel
           </.button>
           <.button phx-click="submit_collaboration">
-            <.icon name="tabler-credit-card" class="w-4 h-4 mr-2" /> Pay with Stripe
+            <.icon name="tabler-credit-card" class="mr-2 h-4 w-4" /> Pay with Stripe
           </.button>
         </div>
       </.drawer_content>
@@ -553,7 +553,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
 
   def bounties_card(assigns) do
     ~H"""
-    <div class="group/card relative h-full rounded-lg border bg-card text-card-foreground md:gap-8 overflow-hidden lg:col-span-4">
+    <div class="group/card relative h-full overflow-hidden rounded-lg border bg-card text-card-foreground md:gap-8 lg:col-span-4">
       <div class="flex justify-between">
         <div class="flex flex-col space-y-1.5 p-6">
           <h3 class="text-2xl font-semibold leading-none tracking-tight">Bounties</h3>
@@ -579,14 +579,14 @@ defmodule AlgoraWeb.Org.CreateJobLive do
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">
-                    <div class="flex-none rounded-full p-1 bg-success/10 text-success">
+                    <div class="flex-none rounded-full bg-success/10 p-1 text-success">
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
                       {bounty.ticket.title}
                     </h2>
                   </div>
-                  <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
+                  <div class="mt-px ml-7 flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
                       <span class="truncate">tv#{bounty.ticket.number}</span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
@@ -599,7 +599,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                   </div>
                 </div>
                 <div class="pl-6">
-                  <div class="flex-none rounded-lg px-3 py-1 font-display tabular-nums text-lg font-extrabold ring-1 ring-inset bg-success/5 text-success ring-success/30">
+                  <div class="font-display flex-none rounded-lg bg-success/5 px-3 py-1 text-lg font-extrabold tabular-nums text-success ring-1 ring-inset ring-success/30">
                     {Money.to_string!(bounty.amount)}
                   </div>
                 </div>

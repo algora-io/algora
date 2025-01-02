@@ -10,16 +10,7 @@ defmodule AlgoraWeb.Components.UI.Skeleton do
 
   def skeleton(assigns) do
     ~H"""
-    <div
-      class={
-        classes([
-          "animate-pulse rounded-md bg-muted",
-          @class
-        ])
-      }
-      {@rest}
-    >
-    </div>
+    <div class={classes(["animate-pulse rounded-md bg-muted", @class])} {@rest}></div>
     """
   end
 end

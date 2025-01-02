@@ -548,7 +548,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }"
       >
         <div>
-          <h2 class="text-4xl font-semibold mb-3">
+          <h2 class="mb-3 text-4xl font-semibold">
             What is your tech stack?
           </h2>
           <p class="text-muted-foreground">
@@ -579,7 +579,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   defp main_content(%{step: :email, code_sent?: false} = assigns) do
     ~H"""
     <div class="space-y-4">
-      <h2 class="text-4xl font-semibold mb-3">
+      <h2 class="mb-3 text-4xl font-semibold">
         Join Algora with your team
       </h2>
 
@@ -590,7 +590,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           icon="tabler-mail"
           type="text"
           placeholder="you@company.com"
-          class="w-full bg-background border-input"
+          class="w-full border-input bg-background"
           data-domain-target
           phx-hook="DeriveDomain"
           autocomplete="email"
@@ -602,7 +602,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           helptext="We will add your teammates to your organization if they sign up with a verified email address from this domain"
           type="text"
           placeholder="company.com"
-          class="w-full bg-background border-input"
+          class="w-full border-input bg-background"
           data-domain-source
         />
         <p class="mt-4 text-sm text-muted-foreground/75">
@@ -628,7 +628,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="text-4xl font-semibold mb-3">
+        <h2 class="mb-3 text-4xl font-semibold">
           Verify your email
         </h2>
         <p class="text-muted-foreground">
@@ -637,12 +637,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         <div class="mt-6">
           <.form for={@verification_form} phx-submit="submit_verification">
-            <label class="block text-sm font-medium mb-2">Verification Code</label>
+            <label class="mb-2 block text-sm font-medium">Verification Code</label>
             <.input
               field={@verification_form[:code]}
               type="text"
               placeholder="Enter verification code"
-              class="w-full bg-background border-input text-center text-2xl tracking-widest"
+              class="w-full border-input bg-background text-center text-2xl tracking-widest"
             />
 
             <%= if @code_valid? == false do %>
@@ -669,15 +669,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <h2 class="text-4xl font-semibold">
             Let's personalize your experience
           </h2>
-          <p class="text-muted-foreground mt-2">
+          <p class="mt-2 text-muted-foreground">
             We'll use this information to match you with the best developers
           </p>
         </div>
 
         <div class="space-y-8">
           <div>
-            <label class="block text-lg font-semibold mb-1">Hourly Rate (USD)</label>
-            <p class="text-muted-foreground mb-3 text-sm">
+            <label class="mb-1 block text-lg font-semibold">Hourly Rate (USD)</label>
+            <p class="mb-3 text-sm text-muted-foreground">
               Enter the range of hourly rates you're looking for
             </p>
             <div class="flex items-center gap-4">
@@ -687,7 +687,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   icon="tabler-currency-dollar"
                   label="Min"
                   placeholder="0"
-                  class="w-full bg-background border-input"
+                  class="w-full border-input bg-background"
                   hide_errors
                 />
               </div>
@@ -697,7 +697,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   icon="tabler-currency-dollar"
                   label="Max"
                   placeholder="0"
-                  class="w-full bg-background border-input"
+                  class="w-full border-input bg-background"
                   hide_errors
                 />
               </div>
@@ -707,7 +707,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                   icon="tabler-clock"
                   label="Hours per week"
                   placeholder="40"
-                  class="w-full bg-background border-input"
+                  class="w-full border-input bg-background"
                   hide_errors
                 />
               </div>
@@ -723,15 +723,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
 
           <div>
-            <label class="block text-lg font-semibold mb-1">Are you hiring full-time?</label>
-            <p class="text-muted-foreground mb-3 text-sm">
+            <label class="mb-1 block text-lg font-semibold">Are you hiring full-time?</label>
+            <p class="mb-3 text-sm text-muted-foreground">
               We will match you with developers who are looking for full-time work
             </p>
             <div class="grid grid-cols-2 gap-4">
               <%= for {label, value} <- PreferencesForm.hiring_options() do %>
                 <label class={[
                   "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
-                  "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
+                  "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
                   "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
                 ]}>
                   <div class="sr-only">
@@ -746,7 +746,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     <span class="text-sm font-medium">{label}</span>
                     <.icon
                       name="tabler-check"
-                      class="size-5 text-primary invisible group-has-[:checked]:visible"
+                      class="invisible size-5 text-primary group-has-[:checked]:visible"
                     />
                   </span>
                 </label>
@@ -755,17 +755,17 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
 
           <div>
-            <label class="block text-lg font-semibold mb-1">
+            <label class="mb-1 block text-lg font-semibold">
               Which of the following best describes you?
             </label>
-            <p class="text-muted-foreground mb-3 text-sm">
+            <p class="mb-3 text-sm text-muted-foreground">
               Select all that apply
             </p>
             <div class="grid grid-cols-2 gap-4">
               <%= for {label, value} <- PreferencesForm.company_types_options() do %>
                 <label class={[
                   "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
-                  "bg-background border-2 hover:border-primary hover:bg-primary/10 transition-all duration-200",
+                  "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
                   "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
                 ]}>
                   <div class="sr-only">
@@ -781,7 +781,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                     <span class="text-sm font-medium">{label}</span>
                     <.icon
                       name="tabler-check"
-                      class="size-5 text-primary invisible group-has-[:checked]:visible"
+                      class="invisible size-5 text-primary group-has-[:checked]:visible"
                     />
                   </span>
                 </label>
@@ -806,10 +806,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-card">
-      <div class="flex-1 flex">
+      <div class="flex flex-1">
         <div class="flex-grow px-8 py-16">
-          <div class="max-w-3xl mx-auto">
-            <div class="flex items-center gap-4 text-lg mb-4">
+          <div class="mx-auto max-w-3xl">
+            <div class="mb-4 flex items-center gap-4 text-lg">
               <span class="text-muted-foreground">
                 {Enum.find_index(@steps, &(&1 == @step)) + 1} / {length(@steps)}
               </span>
@@ -827,7 +827,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             </div>
           </div>
         </div>
-        <div class="w-1/3 border-l border-border bg-background px-6 py-4 overflow-y-auto h-screen">
+        <div class="h-screen w-1/3 overflow-y-auto border-l border-border bg-background px-6 py-4">
           {sidebar_content(assigns)}
           <!-- HACK: preload images to avoid layout shift -->
           <div class="fixed opacity-0">
@@ -843,18 +843,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   defp sidebar_content(%{step: :email} = assigns) do
     ~H"""
     <div>
-      <h2 class="text-lg font-semibold uppercase mb-6">
+      <h2 class="mb-6 text-lg font-semibold uppercase">
         You're in good company
       </h2>
       <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
         <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
-          <Wordmarks.calcom class="col-auto w-[10rem] mt-3" alt="Cal.com" />
+          <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
         </a>
         <a
           class="relative flex items-center justify-center"
           href="https://console.algora.io/org/qdrant"
         >
-          <Wordmarks.qdrant class="col-auto w-[11rem]" alt="Qdrant" />
+          <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
         </a>
         <a
           class="relative flex items-center justify-center"
@@ -863,14 +863,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/remotion.png"
             alt="Remotion"
-            class="saturate-0 col-auto w-full"
+            class="col-auto w-full saturate-0"
           />
         </a>
         <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
           <img
             src="https://algora.io/banners/zio.png"
             alt="ZIO"
-            class="invert brightness-0 col-auto w-[10rem]"
+            class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
         <a
@@ -880,7 +880,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
-            class="saturate-0 col-auto w-full"
+            class="col-auto w-full saturate-0"
           />
         </a>
         <a
@@ -890,7 +890,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/tembo.png"
             alt="Tembo"
-            class="saturate-0 col-auto w-[13rem]"
+            class="w-[13rem] col-auto saturate-0"
           />
         </a>
         <a
@@ -900,7 +900,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/maybe.png"
             alt="Maybe"
-            class="saturate-0 col-auto w-full"
+            class="col-auto w-full saturate-0"
           />
         </a>
         <a
@@ -916,14 +916,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
-            class="saturate-0 col-auto w-44"
+            class="col-auto w-44 saturate-0"
           />
         </a>
         <a
           class="relative flex items-center justify-center"
           href="https://console.algora.io/org/tailcallhq"
         >
-          <Wordmarks.tailcall class="col-auto w-[10rem]" fill="white" alt="Tailcall" />
+          <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
         <a
           class="relative flex items-center justify-center"
@@ -932,7 +932,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
-            class="saturate-0 col-auto w-44"
+            class="col-auto w-44 saturate-0"
           />
         </a>
         <a
@@ -942,7 +942,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"
-            class="invert brightness-0 col-auto w-40"
+            class="col-auto w-40 brightness-0 invert"
           />
         </a>
       </div>
@@ -953,13 +953,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   defp sidebar_content(assigns) do
     ~H"""
     <div>
-      <h2 class="text-lg font-semibold uppercase mb-4">
+      <h2 class="mb-4 text-lg font-semibold uppercase">
         Matching Developers
       </h2>
       <%= for dev <- @matching_devs do %>
-        <div class="mb-6 bg-card p-4 rounded-lg border border-border">
-          <div class="flex mb-2 gap-3">
-            <img src={dev.avatar_url} alt={dev.name} class="w-24 h-24 rounded-full" />
+        <div class="mb-6 rounded-lg border border-border bg-card p-4">
+          <div class="mb-2 flex gap-3">
+            <img src={dev.avatar_url} alt={dev.name} class="h-24 w-24 rounded-full" />
             <div class="flex-grow">
               <div class="flex justify-between">
                 <div>
@@ -968,16 +968,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </div>
                 <div class="flex flex-col items-end">
                   <div class="text-muted-foreground">Earned</div>
-                  <div class="font-semibold text-success font-display">
+                  <div class="font-display font-semibold text-success">
                     {Money.to_string!(dev.total_earned)}
                   </div>
                 </div>
               </div>
 
               <div class="pt-3 text-sm">
-                <div class="-ml-1 text-sm flex flex-wrap gap-3">
+                <div class="-ml-1 flex flex-wrap gap-3 text-sm">
                   <%= for tech <- dev.tech_stack do %>
-                    <span class="rounded-lg px-2 py-0.5 text-sm ring-1 ring-border bg-secondary">
+                    <span class="rounded-lg bg-secondary px-2 py-0.5 text-sm ring-1 ring-border">
                       {tech}
                     </span>
                   <% end %>

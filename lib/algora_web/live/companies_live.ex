@@ -38,7 +38,7 @@ defmodule AlgoraWeb.CompaniesLive do
           aria-label="Global"
         >
           <div class="flex lg:flex-1">
-            <.wordmark class="text-white h-8 w-auto" />
+            <.wordmark class="h-8 w-auto text-white" />
           </div>
           <div class="flex lg:hidden">
             <button
@@ -78,7 +78,7 @@ defmodule AlgoraWeb.CompaniesLive do
           <div class="fixed inset-0 z-50"></div>
           <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-white/10">
             <div class="flex items-center justify-between">
-              <.wordmark class="text-white h-8 w-auto" />
+              <.wordmark class="h-8 w-auto text-white" />
               <button
                 type="button"
                 class="-m-2.5 rounded-md p-2.5 text-gray-300"
@@ -133,9 +133,9 @@ defmodule AlgoraWeb.CompaniesLive do
       <main>
         <!-- Hero Section -->
         <div class="relative isolate">
-          <div class="mx-auto max-w-7xl px-6 pb-24 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
+          <div class="mx-auto max-w-7xl px-6 pt-36 pb-24 sm:pt-60 lg:px-8 lg:pt-32">
             <div class="mx-auto max-w-2xl text-center">
-              <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl font-display">
+              <h1 class="font-display text-4xl font-bold tracking-tight text-white sm:text-6xl">
                 Hire Elite Open Source Developers
               </h1>
               <p class="mt-6 text-lg leading-8 text-gray-300">
@@ -159,7 +159,7 @@ defmodule AlgoraWeb.CompaniesLive do
               <%= for stat <- @stats do %>
                 <div class="mx-auto flex max-w-xs flex-col gap-y-2">
                   <dt class="text-base leading-7 text-gray-400">{stat.label}</dt>
-                  <dd class="order-first text-3xl font-semibold tracking-tight text-white font-display">
+                  <dd class="font-display order-first text-3xl font-semibold tracking-tight text-white">
                     {stat.value}
                   </dd>
                 </div>
@@ -168,33 +168,33 @@ defmodule AlgoraWeb.CompaniesLive do
           </div>
         </div>
         <!-- Integration Logos -->
-        <div class="mx-auto max-w-7xl px-6 sm:px-8 pb-24">
-          <h2 class="text-center text-lg font-semibold leading-8 text-white mb-8">
+        <div class="mx-auto max-w-7xl px-6 pb-24 sm:px-8">
+          <h2 class="mb-8 text-center text-lg font-semibold leading-8 text-white">
             Seamlessly Integrates With Your Tools
           </h2>
           <div class="mx-auto grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-12 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
             <img
-              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              class="col-span-2 max-h-12 w-full object-contain brightness-200 lg:col-span-1"
               src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
               alt="GitHub"
             />
             <img
-              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              class="col-span-2 max-h-12 w-full object-contain brightness-200 lg:col-span-1"
               src="https://upload.wikimedia.org/wikipedia/commons/8/8e/Slack_icon_2019.svg"
               alt="Slack"
             />
             <img
-              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              class="col-span-2 max-h-12 w-full object-contain brightness-200 lg:col-span-1"
               src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
               alt="Stripe"
             />
             <img
-              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              class="col-span-2 max-h-12 w-full object-contain brightness-200 lg:col-span-1"
               src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Linear_logo_%282021%29.svg"
               alt="Linear"
             />
             <img
-              class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 brightness-200"
+              class="col-span-2 max-h-12 w-full object-contain brightness-200 lg:col-span-1"
               src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg"
               alt="Telegram"
             />
@@ -246,7 +246,7 @@ defmodule AlgoraWeb.CompaniesLive do
                 <%= for {step, i} <- Enum.with_index(how_it_works()) do %>
                   <div class="flex flex-col">
                     <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-                      <div class="rounded-full bg-indigo-400 w-8 h-8 flex items-center justify-center text-black font-bold">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-400 font-bold text-black">
                         {i + 1}
                       </div>
                       {step.name}
@@ -326,14 +326,14 @@ defmodule AlgoraWeb.CompaniesLive do
             </div>
             <div class="mx-auto mt-16 space-y-24">
               <%= for {testimonial, index} <- Enum.with_index(@testimonials) do %>
-                <div class="relative isolate overflow-hidden bg-white/5 px-6 py-12 sm:px-10 sm:py-16 rounded-2xl ring-1 ring-white/10">
+                <div class="relative isolate overflow-hidden rounded-2xl bg-white/5 px-6 py-12 ring-1 ring-white/10 sm:px-10 sm:py-16">
                   <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-12 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
                     <%= if index == 4 do %>
                       <div class="lg:col-span-1">
                         <div class="relative w-full overflow-hidden rounded-2xl">
-                          <div class="relative pt-[56.25%]">
+                          <div class="pt-[56.25%] relative">
                             <iframe
-                              class="absolute inset-0 w-full h-full"
+                              class="absolute inset-0 h-full w-full"
                               src="https://www.youtube.com/embed/your_video_id"
                               title="Customer Success Story"
                               frameborder="0"
@@ -343,30 +343,30 @@ defmodule AlgoraWeb.CompaniesLive do
                             </iframe>
                           </div>
                         </div>
-                        <div class="text-center lg:text-left mt-8">
+                        <div class="mt-8 text-center lg:text-left">
                           <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white">
                             {testimonial.name}
                           </h3>
-                          <p class="text-lg leading-6 text-gray-400 mt-2">{testimonial.role}</p>
+                          <p class="mt-2 text-lg leading-6 text-gray-400">{testimonial.role}</p>
                           <p class="text-md leading-6 text-indigo-400">{testimonial.company}</p>
                         </div>
                         <figure class="mt-8">
-                          <blockquote class="text-xl leading-8 text-gray-300 italic">
+                          <blockquote class="text-xl italic leading-8 text-gray-300">
                             <p>"{testimonial.quote}"</p>
                           </blockquote>
                         </figure>
                       </div>
                       <div class="lg:col-span-1">
                         <div class="rounded-2xl bg-white/5 p-8 ring-1 ring-white/10">
-                          <h4 class="text-lg font-semibold leading-6 text-indigo-400 mb-6">
+                          <h4 class="mb-6 text-lg font-semibold leading-6 text-indigo-400">
                             Their Journey with Algora
                           </h4>
-                          <div class="text-gray-300 text-lg leading-relaxed mb-8">
+                          <div class="mb-8 text-lg leading-relaxed text-gray-300">
                             <%= for paragraph <- testimonial.description do %>
                               <p class="mb-4">{paragraph}</p>
                             <% end %>
                           </div>
-                          <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">
+                          <h4 class="mb-6 text-sm font-semibold leading-6 text-indigo-400">
                             Impact Summary
                           </h4>
                           <dl class="grid grid-cols-2 gap-6">
@@ -385,13 +385,13 @@ defmodule AlgoraWeb.CompaniesLive do
                       </div>
                     <% else %>
                       <div class="lg:col-span-1">
-                        <div class="flex flex-col items-center lg:items-start gap-y-8">
+                        <div class="flex flex-col items-center gap-y-8 lg:items-start">
                           <img class="h-32 w-32 rounded-full" src={testimonial.avatar} alt="" />
                           <div class="text-center lg:text-left">
                             <h3 class="text-2xl font-semibold leading-7 tracking-tight text-white">
                               {testimonial.name}
                             </h3>
-                            <p class="text-lg leading-6 text-gray-400 mt-2">
+                            <p class="mt-2 text-lg leading-6 text-gray-400">
                               {testimonial.role}
                             </p>
                             <p class="text-md leading-6 text-indigo-400">
@@ -400,22 +400,22 @@ defmodule AlgoraWeb.CompaniesLive do
                           </div>
                         </div>
                         <figure class="mt-12">
-                          <blockquote class="text-xl leading-8 text-gray-300 italic">
+                          <blockquote class="text-xl italic leading-8 text-gray-300">
                             <p>"{testimonial.quote}"</p>
                           </blockquote>
                         </figure>
                       </div>
                       <div class="lg:col-span-1">
                         <div class="rounded-2xl bg-white/5 p-8 ring-1 ring-white/10">
-                          <h4 class="text-lg font-semibold leading-6 text-indigo-400 mb-6">
+                          <h4 class="mb-6 text-lg font-semibold leading-6 text-indigo-400">
                             Their Journey with Algora
                           </h4>
-                          <div class="text-gray-300 text-lg leading-relaxed mb-8">
+                          <div class="mb-8 text-lg leading-relaxed text-gray-300">
                             <%= for paragraph <- testimonial.description do %>
                               <p class="mb-4">{paragraph}</p>
                             <% end %>
                           </div>
-                          <h4 class="text-sm font-semibold leading-6 text-indigo-400 mb-6">
+                          <h4 class="mb-6 text-sm font-semibold leading-6 text-indigo-400">
                             Impact Summary
                           </h4>
                           <dl class="grid grid-cols-2 gap-6">
@@ -475,7 +475,7 @@ defmodule AlgoraWeb.CompaniesLive do
             </div>
             <div class="mx-auto mt-16 grid max-w-2xl auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
               <%= for case_study <- case_studies() do %>
-                <article class="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl bg-gray-900 px-8 pb-8 pt-80 sm:pt-48 lg:pt-80">
+                <article class="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl bg-gray-900 px-8 pt-80 pb-8 sm:pt-48 lg:pt-80">
                   <img
                     src={case_study.image}
                     alt=""

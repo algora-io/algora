@@ -51,11 +51,11 @@ defmodule AlgoraWeb.Components.UI.Dialog do
       phx-remove={JS.exec("phx-hide-modal", to: "##{@id}")}
       phx-show-modal={show_modal(@id)}
       phx-hide-modal={hide_modal(@id)}
-      class="relative z-50 hidden group/dialog"
+      class="group/dialog relative z-50 hidden"
     >
       <div
         id={"#{@id}-bg"}
-        class="fixed inset-0 bg-black/80  group-data-[state=open]/dialog:animate-in group-data-[state=closed]/dialog:animate-out group-data-[state=closed]/dialog:fade-out-0 group-data-[state=open]/dialog:fade-in-0"
+        class="fixed inset-0 bg-black/80 group-data-[state=closed]/dialog:animate-out group-data-[state=closed]/dialog:fade-out-0 group-data-[state=open]/dialog:animate-in group-data-[state=open]/dialog:fade-in-0"
         aria-hidden="true"
       />
       <div
@@ -77,7 +77,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
             tabindex="0"
             class={
               classes([
-                "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 group-data-[state=open]/dialog:animate-in group-data-[state=closed]/dialog:animate-out group-data-[state=closed]/dialog:fade-out-0 group-data-[state=open]/dialog:fade-in-0 group-data-[state=closed]/dialog:zoom-out-95 group-data-[state=open]/dialog:zoom-in-95 group-data-[state=closed]/dialog:slide-out-to-left-1/2 group-data-[state=closed]/dialog:slide-out-to-top-[48%] group-data-[state=open]/dialog:slide-in-from-left-1/2 group-data-[state=open]/dialog:slide-in-from-top-[48%] sm:rounded-lg",
+                "left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] fixed z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 group-data-[state=closed]/dialog:slide-out-to-top-[48%] group-data-[state=closed]/dialog:animate-out group-data-[state=closed]/dialog:fade-out-0 group-data-[state=closed]/dialog:zoom-out-95 group-data-[state=closed]/dialog:slide-out-to-left-1/2 group-data-[state=open]/dialog:slide-in-from-top-[48%] group-data-[state=open]/dialog:animate-in group-data-[state=open]/dialog:fade-in-0 group-data-[state=open]/dialog:zoom-in-95 group-data-[state=open]/dialog:slide-in-from-left-1/2 sm:rounded-lg",
                 @class
               ])
             }
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
 
             <button
               type="button"
-              class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none group-data-[state=open]/dialog:bg-accent group-data-[state=open]/dialog:text-muted-foreground"
+              class="absolute top-4 right-4 rounded-sm opacity-70 ring-offset-background transition-opacity group-data-[state=open]/dialog:bg-accent group-data-[state=open]/dialog:text-muted-foreground hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
               phx-click={JS.exec("phx-hide-modal", to: "##{@id}")}
             >
               <svg
@@ -95,7 +95,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-5 h-5"
+                class="h-5 w-5"
               >
                 <path d="M18 6 6 18"></path>
                 <path d="m6 6 12 12"></path>
@@ -174,12 +174,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
 
   def dialog_content(assigns) do
     ~H"""
-    <div class={
-      classes([
-        "relative grid gap-4 border-none bg-background p-6",
-        @class
-      ])
-    }>
+    <div class={classes(["relative grid gap-4 border-none bg-background p-6", @class])}>
       {render_slot(@inner_block)}
     </div>
     """

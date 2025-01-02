@@ -39,7 +39,7 @@ defmodule AlgoraWeb.HomeLive do
           aria-label="Global"
         >
           <div class="flex lg:flex-1">
-            <.wordmark class="text-foreground h-8 w-auto" />
+            <.wordmark class="h-8 w-auto text-foreground" />
           </div>
           <!-- Mobile menu button -->
           <div class="flex lg:hidden">
@@ -76,7 +76,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border">
             <!-- Mobile menu content -->
             <div class="flex items-center justify-between">
-              <.wordmark class="text-foreground h-8 w-auto" />
+              <.wordmark class="h-8 w-auto text-foreground" />
               <button
                 type="button"
                 class="rounded-md p-2.5 text-muted-foreground hover:text-foreground"
@@ -136,13 +136,13 @@ defmodule AlgoraWeb.HomeLive do
             aria-hidden="true"
           >
             <div
-              class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-primary to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+              class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-primary to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
               style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
             >
             </div>
           </div>
 
-          <div class="absolute inset-x-0 -z-10 h-screen w-full stroke-border [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]">
+          <div class="[mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)] absolute inset-x-0 -z-10 h-screen w-full stroke-border">
             <defs>
               <pattern
                 id="grid-pattern"
@@ -165,20 +165,20 @@ defmodule AlgoraWeb.HomeLive do
           </div>
 
           <div
-            class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+            class="top-[calc(100%-13rem)] absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
             aria-hidden="true"
           >
             <div
-              class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-primary to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+              class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-primary to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
               style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
             >
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 pb-24 pt-36 sm:pt-60 lg:px-8 lg:pt-16">
+          <div class="mx-auto max-w-7xl px-6 pt-36 pb-24 sm:pt-60 lg:px-8 lg:pt-16">
             <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="lg:-mt-12 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
-                <h1 class="text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl font-display">
+              <div class="relative w-full lg:-mt-12 lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
+                <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
                   The open source UpWork alternative.
                 </h1>
                 <p class="mt-8 text-pretty text-lg font-medium text-muted-foreground sm:max-w-md sm:text-xl/8 lg:max-w-none">
@@ -204,7 +204,7 @@ defmodule AlgoraWeb.HomeLive do
                   <%= for stat <- @stats do %>
                     <div class="flex flex-col gap-y-2">
                       <dt class="text-sm leading-6 text-muted-foreground">{stat.label}</dt>
-                      <dd class="text-3xl font-semibold tracking-tight text-foreground font-display">
+                      <dd class="font-display text-3xl font-semibold tracking-tight text-foreground">
                         {stat.value}
                       </dd>
                     </div>
@@ -221,7 +221,7 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
               <!-- Featured devs -->
-              <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0 min-h-screen">
+              <div class="mt-14 flex min-h-screen justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
                 <%= if length(@featured_devs) > 0 do %>
                   <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                     <.dev_card dev={List.first(@featured_devs)} />
@@ -280,20 +280,20 @@ defmodule AlgoraWeb.HomeLive do
         alt={@dev.name}
         class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
       />
-      <div class="font-display mt-1 p-3 bg-card/50 backdrop-blur-sm rounded-xl rounded-t-none text-sm ring-1 ring-border">
+      <div class="font-display mt-1 rounded-xl rounded-t-none bg-card/50 p-3 text-sm ring-1 ring-border backdrop-blur-sm">
         <div class="font-semibold text-foreground">{@dev.name} {@dev.flag}</div>
         <div class="mt-1 text-sm">
-          <div class="p-px -ml-1 text-sm flex flex-wrap gap-1 h-6 overflow-hidden">
+          <div class="-ml-1 flex h-6 flex-wrap gap-1 overflow-hidden p-px text-sm">
             <%= for tech <- @dev.tech_stack do %>
-              <span class="text-muted-foreground rounded-xl px-2 py-0.5 text-xs ring-1 ring-border bg-muted/50">
+              <span class="rounded-xl bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground ring-1 ring-border">
                 {tech}
               </span>
             <% end %>
           </div>
         </div>
-        <div class="mt-1 text-muted-foreground text-xs">
+        <div class="mt-1 text-xs text-muted-foreground">
           <span class="font-medium">Total Earned:</span>
-          <span class="font-bold text-sm text-foreground">
+          <span class="text-sm font-bold text-foreground">
             {Money.to_string!(@dev.total_earned)}
           </span>
         </div>

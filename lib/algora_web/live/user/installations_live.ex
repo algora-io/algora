@@ -14,7 +14,7 @@ defmodule AlgoraWeb.User.InstallationsLive do
       <ul class="space-y-6">
         <%= for installation <- @installations do %>
           <li>
-            <div class="group/card relative h-full rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 p-8">
+            <div class="group/card bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] relative h-full rounded-xl border border-white/10 bg-gradient-to-br p-8 md:gap-8">
               <div class="relative divide-y-2 divide-gray-700">
                 <div class="flex items-center gap-4">
                   <div class="relative h-10 w-10">
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.User.InstallationsLive do
                   </label>
                   <div class="relative mt-2">
                     <button
-                      class="relative w-full cursor-pointer rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500 sm:text-sm dark:border-gray-500 dark:bg-gray-700 dark:focus:border-gray-500 dark:focus:ring-gray-500"
+                      class="relative w-full cursor-pointer rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-left shadow-sm focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500 sm:text-sm dark:border-gray-500 dark:bg-gray-700 dark:focus:border-gray-500 dark:focus:ring-gray-500"
                       id="headlessui-listbox-button-:r1:"
                       type="button"
                       aria-haspopup="listbox"

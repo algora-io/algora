@@ -88,7 +88,7 @@ defmodule AlgoraWeb.Components.UI.ToggleGroup do
       disabled={@disabled || @builder.disabled}
       class={
         classes([
-          "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 has-[:checked]:bg-accent has-[:checked]:text-accent-foreground",
+          "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors has-[:checked]:bg-accent has-[:checked]:text-accent-foreground hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           @variant_class,
           @class
         ])
@@ -120,7 +120,7 @@ defmodule AlgoraWeb.Components.UI.ToggleGroup do
       disabled={@disabled || @builder.disabled}
       class={
         classes([
-          "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 has-[:checked]:bg-accent has-[:checked]:text-accent-foreground",
+          "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors has-[:checked]:bg-accent has-[:checked]:text-accent-foreground hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           @variant_class,
           @class
         ])

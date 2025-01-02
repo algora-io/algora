@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Components.UI.Select do
     ~H"""
     <div
       id={@id}
-      class={classes(["relative group", @class])}
+      class={classes(["group relative", @class])}
       data-state="closed"
       {@rest}
       x-hide-select={hide_select(@id)}
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Components.UI.Select do
       type="button"
       class={
         classes([
-          "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+          "[&>span]:line-clamp-1 flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
           @class
         ])
       }
@@ -130,7 +130,7 @@ defmodule AlgoraWeb.Components.UI.Select do
       class={
         classes([
           "select-content absolute hidden",
-          "z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md group-data-[state=open]:animate-in group-data-[state=closed]:animate-out group-data-[state=closed]:fade-out-0 group-data-[state=open]:fade-in-0 group-data-[state=closed]:zoom-out-95 group-data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          "min-w-[8rem] z-50 max-h-96 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 group-data-[state=closed]:animate-out group-data-[state=closed]:fade-out-0 group-data-[state=closed]:zoom-out-95 group-data-[state=open]:animate-in group-data-[state=open]:fade-in-0 group-data-[state=open]:zoom-in-95",
           @position_class,
           @class
         ])
@@ -162,7 +162,7 @@ defmodule AlgoraWeb.Components.UI.Select do
 
   def select_label(assigns) do
     ~H"""
-    <div class={classes(["py-1.5 pl-8 pr-2 text-sm font-semibold", @class])} {@rest}>
+    <div class={classes(["py-1.5 pr-2 pl-8 text-sm font-semibold", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -187,7 +187,7 @@ defmodule AlgoraWeb.Components.UI.Select do
       class={
         classes([
           "group/item",
-          "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+          "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-2 pl-8 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
           @class
         ])
       }
@@ -205,8 +205,8 @@ defmodule AlgoraWeb.Components.UI.Select do
         phx-key="Escape"
         phx-keydown={JS.exec("x-hide-select", to: "##{@builder.id}")}
       />
-      <div class="absolute top-0 left-0 w-full h-full group-hover/item:bg-accent rounded"></div>
-      <span class="hidden peer-checked:block absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <div class="absolute top-0 left-0 h-full w-full rounded group-hover/item:bg-accent"></div>
+      <span class="absolute left-2 flex hidden h-3.5 w-3.5 items-center justify-center peer-checked:block">
         <span aria-hidden="true">
           <svg
             xmlns="http://www.w3.org/2000/svg"

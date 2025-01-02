@@ -36,7 +36,7 @@ defmodule AlgoraWeb.LeaderboardLive do
         <%= for {country, users} <- @top_earners do %>
           <.card>
             <.card_header>
-              <div class="flex justify-between items-center">
+              <div class="flex items-center justify-between">
                 <h3 class="text-2xl font-semibold text-gray-100">
                   {CountryEmojis.get(country, "🌍")}
                   {if country, do: country, else: "Unknown Location"}
@@ -54,7 +54,7 @@ defmodule AlgoraWeb.LeaderboardLive do
                 <div class="flex items-center gap-4">
                   <input
                     type="checkbox"
-                    class="w-6 h-6 rounded border-gray-300"
+                    class="h-6 w-6 rounded border-gray-300"
                     checked={user.need_avatar}
                     phx-click="toggle-need-avatar"
                     phx-value-user-id={user.id}
@@ -67,8 +67,8 @@ defmodule AlgoraWeb.LeaderboardLive do
                   </.avatar>
                   <div>
                     <div class="text-2xl font-semibold text-gray-100">{user.name}</div>
-                    <div class="text-lg text-gray-300 font-medium">@{user.provider_login}</div>
-                    <div class="text-lg text-indigo-400 font-mono font-medium">{user.id}</div>
+                    <div class="text-lg font-medium text-gray-300">@{user.provider_login}</div>
+                    <div class="font-mono text-lg font-medium text-indigo-400">{user.id}</div>
                   </div>
                 </div>
               </:col>
@@ -78,7 +78,7 @@ defmodule AlgoraWeb.LeaderboardLive do
                 </span>
               </:col>
               <:col :let={user} label="Bounties" align="right">
-                <span class="font-display text-3xl text-cyan-300 font-semibold">
+                <span class="font-display text-3xl font-semibold text-cyan-300">
                   {user.transaction_count}
                 </span>
               </:col>

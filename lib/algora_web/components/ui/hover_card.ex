@@ -25,15 +25,7 @@ defmodule AlgoraWeb.Components.UI.HoverCard do
 
   def hover_card(assigns) do
     ~H"""
-    <div
-      class={
-        classes([
-          "inline-block relative group/hover-card",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <div class={classes(["group/hover-card relative inline-block", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -48,15 +40,7 @@ defmodule AlgoraWeb.Components.UI.HoverCard do
 
   def hover_card_trigger(assigns) do
     ~H"""
-    <div
-      class={
-        classes([
-          "",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <div class={classes(["", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

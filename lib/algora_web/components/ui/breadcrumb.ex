@@ -79,15 +79,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
 
   def breadcrumb_item(assigns) do
     ~H"""
-    <li
-      class={
-        classes([
-          "inline-flex items-center gap-1.5",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <li class={classes(["inline-flex items-center gap-1.5", @class])} {@rest}>
       {render_slot(@inner_block)}
     </li>
     """
@@ -102,15 +94,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
 
   def breadcrumb_link(assigns) do
     ~H"""
-    <.link
-      class={
-        classes([
-          "transition-colors hover:text-foreground",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <.link class={classes(["transition-colors hover:text-foreground", @class])} {@rest}>
       {render_slot(@inner_block)}
     </.link>
     """
@@ -129,12 +113,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
       aria-disabled="true"
       aria-current="page"
       role="link"
-      class={
-        classes([
-          "font-normal text-foreground",
-          @class
-        ])
-      }
+      class={classes(["font-normal text-foreground", @class])}
       {@rest}
     >
       {render_slot(@inner_block)}
@@ -150,17 +129,7 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
 
   def breadcrumb_separator(assigns) do
     ~H"""
-    <li
-      role="presentation"
-      aria-hidden="true"
-      class={
-        classes([
-          "[&>svg]:size-3.5",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <li role="presentation" aria-hidden="true" class={classes(["[&>svg]:size-3.5", @class])} {@rest}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -183,22 +152,14 @@ defmodule AlgoraWeb.Components.UI.Breadcrumb do
 
   def breadcrumb_ellipsis(assigns) do
     ~H"""
-    <div
-      class={
-        classes([
-          "flex h-9 w-9 items-center justify-center",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <div class={classes(["flex h-9 w-9 items-center justify-center", @class])} {@rest}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="2"
         stroke="currentColor"
-        class="size-6 w--4 h-4"
+        class="w--4 size-6 h-4"
       >
         <path
           stroke-linecap="round"

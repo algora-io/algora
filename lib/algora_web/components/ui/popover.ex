@@ -25,15 +25,7 @@ defmodule AlgoraWeb.Components.UI.Popover do
 
   def popover(assigns) do
     ~H"""
-    <div
-      class={
-        classes([
-          "inline-block relative",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <div class={classes(["relative inline-block", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -53,16 +45,7 @@ defmodule AlgoraWeb.Components.UI.Popover do
 
   def popover_trigger(assigns) do
     ~H"""
-    <div
-      class={
-        classes([
-          "",
-          @class
-        ])
-      }
-      phx-click={toggle_target(@target)}
-      {@rest}
-    >
+    <div class={classes(["", @class])} phx-click={toggle_target(@target)} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

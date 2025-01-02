@@ -28,6 +28,6 @@ defmodule Algora.Bounties.Tip do
     |> foreign_key_constraint(:owner)
     |> foreign_key_constraint(:creator)
     |> foreign_key_constraint(:recipient)
-    |> Algora.Extensions.Ecto.Validations.validate_money_positive(:amount)
+    |> Algora.Validations.validate_money_positive(:amount)
   end
 end

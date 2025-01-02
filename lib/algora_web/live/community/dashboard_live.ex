@@ -9,10 +9,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
   alias Algora.Bounties
   alias Algora.Contracts
-  alias Algora.Extensions.Ecto.USD
-  alias Algora.Extensions.Ecto.Validations
   alias Algora.Github
+  alias Algora.Types.USD
   alias Algora.Users
+  alias Algora.Validations
   alias Algora.Workspace
 
   require Logger

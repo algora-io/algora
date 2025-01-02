@@ -1,6 +1,5 @@
 defmodule Algora.Contracts do
   @moduledoc false
-  import Algora.Validators
   import Ecto.Changeset
   import Ecto.Query
 
@@ -157,9 +156,9 @@ defmodule Algora.Contracts do
       total_fee: total_fee,
       line_items: line_items
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
-    |> validate_positive(:total_fee)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
@@ -183,8 +182,8 @@ defmodule Algora.Contracts do
       total_fee: Money.zero(:USD),
       linked_transaction_id: linked_transaction_id
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
@@ -208,8 +207,8 @@ defmodule Algora.Contracts do
       user_id: contract.contractor_id,
       linked_transaction_id: linked_transaction_id
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
@@ -232,8 +231,8 @@ defmodule Algora.Contracts do
       timesheet_id: contract.timesheet.id,
       user_id: contract.contractor_id
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)

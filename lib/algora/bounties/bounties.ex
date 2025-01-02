@@ -1,6 +1,5 @@
 defmodule Algora.Bounties do
   @moduledoc false
-  import Algora.Validators
   import Ecto.Changeset
   import Ecto.Query
 
@@ -208,9 +207,9 @@ defmodule Algora.Bounties do
       line_items: line_items,
       group_id: group_id
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
-    |> validate_positive(:total_fee)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:tip_id)
     |> foreign_key_constraint(:user_id)
     |> Repo.insert()
@@ -238,8 +237,8 @@ defmodule Algora.Bounties do
       linked_transaction_id: linked_transaction_id,
       group_id: group_id
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:tip_id)
     |> foreign_key_constraint(:user_id)
     |> Repo.insert()
@@ -267,8 +266,8 @@ defmodule Algora.Bounties do
       linked_transaction_id: linked_transaction_id,
       group_id: group_id
     })
-    |> validate_positive(:gross_amount)
-    |> validate_positive(:net_amount)
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:tip_id)
     |> foreign_key_constraint(:user_id)
     |> Repo.insert()

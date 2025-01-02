@@ -31,7 +31,7 @@ defmodule Algora.Bounties.Bounty do
     |> foreign_key_constraint(:owner)
     |> foreign_key_constraint(:creator)
     |> unique_constraint([:ticket_id, :owner_id])
-    |> Algora.Extensions.Ecto.Validations.validate_money_positive(:amount)
+    |> Algora.Validations.validate_money_positive(:amount)
   end
 
   def url(%{repository: %{name: name, owner: %{login: login}}, ticket: %{provider: "github", number: number}}) do

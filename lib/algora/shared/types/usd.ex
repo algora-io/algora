@@ -1,4 +1,4 @@
-defmodule Algora.Extensions.Ecto.USD do
+defmodule Algora.Types.USD do
   @moduledoc false
   use Ecto.Type
 

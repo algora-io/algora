@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Components.Footer do
+  @moduledoc false
   use AlgoraWeb.Component
 
   import AlgoraWeb.CoreComponents

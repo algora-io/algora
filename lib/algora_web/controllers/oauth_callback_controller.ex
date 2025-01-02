@@ -1,9 +1,10 @@
 defmodule AlgoraWeb.OAuthCallbackController do
   use AlgoraWeb, :controller
-  require Logger
 
   alias Algora.Github
   alias Algora.Users
+
+  require Logger
 
   defp welcome_message(user) do
     if user.name do
@@ -19,7 +20,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
          {:ok, user} <- Users.register_github_user(primary, info, emails, token) do
       conn =
         if params["return_to"] do
-          conn |> put_session(:user_return_to, params["return_to"])
+          put_session(conn, :user_return_to, params["return_to"])
         else
           conn
         end
@@ -51,20 +52,16 @@ defmodule AlgoraWeb.OAuthCallbackController do
     redirect(conn, to: "/")
   end
 
-  def new(conn, %{
-        "provider" => "email",
-        "email" => email,
-        "token" => token,
-        "return_to" => "/onboarding/org"
-      }) do
-    with {:ok, %{email: ^email} = login_token} <- AlgoraWeb.UserAuth.verify_login_code(token) do
-      conn
-      |> put_session(:onboarding_email, login_token.email)
-      |> put_session(:onboarding_domain, login_token.domain)
-      |> put_session(:onboarding_tech_stack, Enum.join(login_token.tech_stack, ","))
-      |> put_session(:onboarding_token, token)
-      |> redirect(to: "/onboarding/org")
-    else
+  def new(conn, %{"provider" => "email", "email" => email, "token" => token, "return_to" => "/onboarding/org"}) do
+    case AlgoraWeb.UserAuth.verify_login_code(token) do
+      {:ok, %{email: ^email} = login_token} ->
+        conn
+        |> put_session(:onboarding_email, login_token.email)
+        |> put_session(:onboarding_domain, login_token.domain)
+        |> put_session(:onboarding_tech_stack, Enum.join(login_token.tech_stack, ","))
+        |> put_session(:onboarding_token, token)
+        |> redirect(to: "/onboarding/org")
+
       {:error, reason} ->
         Logger.debug("invalid email auth token #{inspect(reason)}")
 
@@ -79,7 +76,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
          {:ok, user} <- get_or_register_user(email) do
       conn =
         if params["return_to"] do
-          conn |> put_session(:user_return_to, params["return_to"])
+          put_session(conn, :user_return_to, params["return_to"])
         else
           conn
         end

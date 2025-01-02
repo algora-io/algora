@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Org.AnalyticsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
@@ -176,9 +177,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
   end
 
   defp activity_text(%{type: :pr_submitted, user: user}) do
-    Phoenix.HTML.raw(
-      "<strong class='font-bold'>#{user}</strong> submitted a PR that claims a bounty"
-    )
+    Phoenix.HTML.raw("<strong class='font-bold'>#{user}</strong> submitted a PR that claims a bounty")
   end
 
   defp fetch_recent_activities do

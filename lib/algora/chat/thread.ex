@@ -1,4 +1,5 @@
 defmodule Algora.Chat.Thread do
+  @moduledoc false
   use Algora.Schema
 
   schema "threads" do

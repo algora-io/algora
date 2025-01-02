@@ -1,16 +1,17 @@
 defmodule AlgoraWeb.UserAuth do
+  @moduledoc false
   use AlgoraWeb, :verified_routes
-  import Plug.Conn
-  import Phoenix.Controller
 
-  alias Phoenix.LiveView
+  import Phoenix.Controller
+  import Plug.Conn
+
   alias Algora.Users
+  alias Phoenix.LiveView
 
   def on_mount(:current_user, _params, session, socket) do
     case session do
       %{"user_id" => user_id} ->
-        {:cont,
-         Phoenix.Component.assign_new(socket, :current_user, fn -> Users.get_user(user_id) end)}
+        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> Users.get_user(user_id) end)}
 
       %{} ->
         {:cont, Phoenix.Component.assign(socket, :current_user, nil)}
@@ -59,8 +60,7 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   defp redirect_require_login(socket) do
-    socket
-    |> LiveView.redirect(to: ~p"/auth/login")
+    LiveView.redirect(socket, to: ~p"/auth/login")
   end
 
   @doc """
@@ -80,7 +80,8 @@ defmodule AlgoraWeb.UserAuth do
     conn = assign(conn, :current_user, user)
 
     conn =
-      renew_session(conn)
+      conn
+      |> renew_session()
       |> put_session(:user_id, user.id)
       |> put_session(:last_context, user.last_context)
       |> put_session(:live_socket_id, "users_sessions:#{user.id}")
@@ -191,19 +192,18 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def verify_login_code(code) do
-    case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code,
-           max_age: login_code_ttl()
-         ) do
+    case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
       {:ok, payload} ->
-        with [email, domain | tech_stack] <- String.split(payload, ":") do
-          {:ok,
-           %{
-             email: email,
-             domain: domain || nil,
-             tech_stack: tech_stack || [],
-             token: code
-           }}
-        else
+        case String.split(payload, ":") do
+          [email, domain | tech_stack] ->
+            {:ok,
+             %{
+               email: email,
+               domain: domain || nil,
+               tech_stack: tech_stack || [],
+               token: code
+             }}
+
           [email] ->
             {:ok, %{email: email, token: code}}
 
@@ -216,8 +216,7 @@ defmodule AlgoraWeb.UserAuth do
     end
   end
 
-  def login_path(email, token),
-    do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
+  def login_path(email, token), do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
 
   def login_path(email, token, return_to),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"

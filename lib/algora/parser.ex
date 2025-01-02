@@ -1,90 +1,105 @@
 defmodule Algora.Parser do
+  @moduledoc false
   import NimbleParsec
 
   defmodule Combinator do
-    def whitespace(), do: ascii_string([?\s, ?\t], min: 1)
-    def digits(), do: ascii_string([?0..?9], min: 1)
-    def word_chars(), do: ascii_string([not: ?\s, not: ?\t], min: 1)
-    def non_separator_chars(), do: ascii_string([not: ?#, not: ?/, not: ?\s, not: ?\t], min: 1)
-    def integer(), do: digits() |> reduce({__MODULE__, :to_integer, []})
+    @moduledoc false
+    def whitespace, do: ascii_string([?\s, ?\t], min: 1)
+    def digits, do: ascii_string([?0..?9], min: 1)
+    def word_chars, do: ascii_string([not: ?\s, not: ?\t], min: 1)
+    def non_separator_chars, do: ascii_string([not: ?#, not: ?/, not: ?\s, not: ?\t], min: 1)
+    def integer, do: reduce(digits(), {__MODULE__, :to_integer, []})
 
-    def amount() do
-      ignore(optional(string("$")))
+    def amount do
+      "$"
+      |> string()
+      |> optional()
+      |> ignore()
       |> concat(ascii_string([?0..?9, ?., ?,], min: 1))
       |> post_traverse({__MODULE__, :to_money, []})
       |> unwrap_and_tag(:amount)
       |> label("amount (e.g. 1000 or 1,000.00)")
     end
 
-    def username() do
-      ignore(string("@"))
+    def username do
+      "@"
+      |> string()
+      |> ignore()
       |> concat(word_chars())
       |> unwrap_and_tag(:username)
       |> label("username starting with @")
     end
 
-    def ticket_ref() do
-      choice([
+    def ticket_ref do
+      [
         simple_issue_ref(),
         repo_issue_ref(),
         full_repo_issue_ref(),
         github_url_ref()
-      ])
+      ]
+      |> choice()
       |> tag(:ticket_ref)
       |> label("issue reference (e.g. #123, repo#123, owner/repo#123, or GitHub URL)")
     end
 
-    def full_ticket_ref() do
-      choice([full_repo_issue_ref(), github_url_ref()])
+    def full_ticket_ref do
+      [full_repo_issue_ref(), github_url_ref()]
+      |> choice()
       |> tag(:ticket_ref)
       |> label("issue reference (e.g. owner/repo#123 or GitHub URL)")
     end
 
     def simple_issue_ref do
       # Format: #123
-      optional(ignore(string("#")))
-      |> concat(integer() |> unwrap_and_tag(:number))
+      "#"
+      |> string()
+      |> ignore()
+      |> optional()
+      |> concat(unwrap_and_tag(integer(), :number))
     end
 
     def repo_issue_ref do
       # Format: repo#123
       empty()
-      |> concat(non_separator_chars() |> unwrap_and_tag(:repo))
+      |> concat(unwrap_and_tag(non_separator_chars(), :repo))
       |> ignore(string("#"))
-      |> concat(integer() |> unwrap_and_tag(:number))
+      |> concat(unwrap_and_tag(integer(), :number))
     end
 
     def full_repo_issue_ref do
       # Format: owner/repo#123
       empty()
-      |> concat(non_separator_chars() |> unwrap_and_tag(:owner))
+      |> concat(unwrap_and_tag(non_separator_chars(), :owner))
       |> ignore(string("/"))
-      |> concat(non_separator_chars() |> unwrap_and_tag(:repo))
+      |> concat(unwrap_and_tag(non_separator_chars(), :repo))
       |> ignore(string("#"))
-      |> concat(integer() |> unwrap_and_tag(:number))
+      |> concat(unwrap_and_tag(integer(), :number))
     end
 
     def github_url_ref do
       # Format: https://github.com/owner/repo/(issues|pull|discussions)/123
-      ignore(choice([string("https://"), string("http://"), empty()]))
+      [string("https://"), string("http://"), empty()]
+      |> choice()
+      |> ignore()
       |> ignore(string("github.com/"))
-      |> concat(non_separator_chars() |> unwrap_and_tag(:owner))
+      |> concat(unwrap_and_tag(non_separator_chars(), :owner))
       |> ignore(string("/"))
-      |> concat(non_separator_chars() |> unwrap_and_tag(:repo))
+      |> concat(unwrap_and_tag(non_separator_chars(), :repo))
       |> ignore(string("/"))
       |> concat(
-        choice([string("issues"), string("pull"), string("discussions")])
+        [string("issues"), string("pull"), string("discussions")]
+        |> choice()
         |> unwrap_and_tag(:type)
       )
       |> ignore(string("/"))
-      |> concat(integer() |> unwrap_and_tag(:number))
+      |> concat(unwrap_and_tag(integer(), :number))
     end
 
     # Helper functions
     def to_money(rest, args, context, _line, _offset) do
       delimiters = [",", "."]
 
-      amount_string = args |> Enum.join()
+      amount_string = Enum.join(args)
 
       amount_string =
         Enum.reduce(delimiters, amount_string, fn delimiter, acc ->

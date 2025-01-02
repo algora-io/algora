@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.Org.Nav do
-  import Phoenix.LiveView
+  @moduledoc false
   use Phoenix.Component
+
+  import Phoenix.LiveView
 
   alias Algora.Organizations
 
@@ -44,7 +46,7 @@ defmodule AlgoraWeb.Org.Nav do
         {_, _} -> nil
       end
 
-    {:cont, socket |> assign(:active_tab, active_tab)}
+    {:cont, assign(socket, :active_tab, active_tab)}
   end
 
   def nav_items(org_handle) do

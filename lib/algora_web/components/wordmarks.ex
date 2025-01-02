@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Components.Wordmarks do
+  @moduledoc false
   use Phoenix.Component
 
   attr :class, :string, default: nil

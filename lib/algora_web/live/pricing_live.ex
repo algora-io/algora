@@ -1,7 +1,9 @@
 defmodule AlgoraWeb.PricingLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   defmodule Plan do
+    @moduledoc false
     defstruct [
       :name,
       :description,
@@ -15,18 +17,22 @@ defmodule AlgoraWeb.PricingLive do
   end
 
   defmodule Feature do
+    @moduledoc false
     defstruct [:name, :detail]
   end
 
   defmodule ComputeOption do
+    @moduledoc false
     defstruct [:name, :cpu, :memory, :price]
   end
 
   defmodule FaqItem do
+    @moduledoc false
     defstruct [:id, :question, :answer]
   end
 
   defmodule ROIEstimate do
+    @moduledoc false
     defstruct [
       :developers,
       :hourly_rate,

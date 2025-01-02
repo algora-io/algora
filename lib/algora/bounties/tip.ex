@@ -1,5 +1,9 @@
 defmodule Algora.Bounties.Tip do
+  @moduledoc false
   use Algora.Schema
+
+  alias Algora.Users.User
+
   @type t() :: %__MODULE__{}
 
   schema "tips" do
@@ -7,9 +11,9 @@ defmodule Algora.Bounties.Tip do
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
 
     belongs_to :ticket, Algora.Workspace.Ticket
-    belongs_to :owner, Algora.Users.User
-    belongs_to :creator, Algora.Users.User
-    belongs_to :recipient, Algora.Users.User
+    belongs_to :owner, User
+    belongs_to :creator, User
+    belongs_to :recipient, User
     has_many :transactions, Algora.Payments.Transaction
 
     timestamps()

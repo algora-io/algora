@@ -1,7 +1,11 @@
 defmodule Algora.Contracts.Contract do
+  @moduledoc false
   use Algora.Schema
-  alias Money.Ecto.Composite.Type, as: MoneyType
+
+  alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
+  alias Algora.Users.User
+  alias Money.Ecto.Composite.Type, as: MoneyType
 
   schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
@@ -23,11 +27,11 @@ defmodule Algora.Contracts.Contract do
     field :total_transferred, MoneyType, virtual: true, no_fraction_if_integer: true
     field :total_withdrawn, MoneyType, virtual: true, no_fraction_if_integer: true
 
-    belongs_to :original_contract, Algora.Contracts.Contract
-    has_many :renewals, Algora.Contracts.Contract, foreign_key: :original_contract_id
+    belongs_to :original_contract, Contract
+    has_many :renewals, Contract, foreign_key: :original_contract_id
 
-    belongs_to :client, Algora.Users.User
-    belongs_to :contractor, Algora.Users.User
+    belongs_to :client, User
+    belongs_to :contractor, User
 
     has_many :transactions, Algora.Payments.Transaction
     has_many :reviews, Algora.Reviews.Review
@@ -41,21 +45,25 @@ defmodule Algora.Contracts.Contract do
   def after_load(nil), do: nil
 
   def after_load(struct) do
-    [
-      :amount_credited,
-      :amount_debited,
-      :total_charged,
-      :total_credited,
-      :total_debited,
-      :total_deposited,
-      :total_transferred,
-      :total_withdrawn
-    ]
-    |> Enum.reduce(struct, &MoneyUtils.ensure_money_field(&2, &1))
+    Enum.reduce(
+      [
+        :amount_credited,
+        :amount_debited,
+        :total_charged,
+        :total_credited,
+        :total_debited,
+        :total_deposited,
+        :total_transferred,
+        :total_withdrawn
+      ],
+      struct,
+      &MoneyUtils.ensure_money_field(&2, &1)
+    )
   end
 
   def balance(contract) do
-    Money.zero(:USD)
+    :USD
+    |> Money.zero()
     |> Money.add!(contract.total_charged)
     |> Money.add!(contract.total_deposited)
     |> Money.sub!(contract.total_debited)

@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Components.Experts do
+  @moduledoc false
   use AlgoraWeb.Component
 
   import AlgoraWeb.Components.ExpertCard

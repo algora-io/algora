@@ -1,4 +1,5 @@
 defmodule Algora.Misc.CountryEmojis do
+  @moduledoc false
   @country_emojis %{
     "AC" => "🇦🇨",
     "AD" => "🇦🇩",

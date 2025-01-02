@@ -1,8 +1,11 @@
 defmodule Algora.Github.Poller.Supervisor do
+  @moduledoc false
   use DynamicSupervisor
-  require Logger
+
   alias Algora.Comments
   alias Algora.Github.Poller.Comments, as: CommentsPoller
+
+  require Logger
 
   # Client API
   def start_link(init_arg) do
@@ -46,12 +49,12 @@ defmodule Algora.Github.Poller.Supervisor do
   end
 
   def find_child(owner, name) do
-    which_children()
-    |> Enum.find(fn {_, pid, _, _} -> GenServer.call(pid, :get_repo_info) == {owner, name} end)
+    Enum.find(which_children(), fn {_, pid, _, _} -> GenServer.call(pid, :get_repo_info) == {owner, name} end)
   end
 
   def pause(owner, name) do
-    find_child(owner, name)
+    owner
+    |> find_child(name)
     |> case do
       {_, pid, _, _} -> CommentsPoller.pause(pid)
       nil -> {:error, :not_found}
@@ -59,7 +62,8 @@ defmodule Algora.Github.Poller.Supervisor do
   end
 
   def resume(owner, name) do
-    find_child(owner, name)
+    owner
+    |> find_child(name)
     |> case do
       {_, pid, _, _} -> CommentsPoller.resume(pid)
       nil -> {:error, :not_found}
@@ -67,11 +71,11 @@ defmodule Algora.Github.Poller.Supervisor do
   end
 
   def pause_all do
-    which_children() |> Enum.each(fn {_, pid, _, _} -> CommentsPoller.pause(pid) end)
+    Enum.each(which_children(), fn {_, pid, _, _} -> CommentsPoller.pause(pid) end)
   end
 
   def resume_all do
-    which_children() |> Enum.each(fn {_, pid, _, _} -> CommentsPoller.resume(pid) end)
+    Enum.each(which_children(), fn {_, pid, _, _} -> CommentsPoller.resume(pid) end)
   end
 
   def which_children do

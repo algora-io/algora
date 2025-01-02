@@ -1,12 +1,16 @@
 defmodule Algora.Github.Poller.Events do
+  @moduledoc false
   use GenServer
+
   import Ecto.Query, warn: false
-  require Logger
+
   alias Algora.Events
   alias Algora.Github
   alias Algora.Github.Command
   alias Algora.Repo
   alias Algora.Util
+
+  require Logger
 
   @per_page 10
   @poll_interval :timer.seconds(1)
@@ -91,9 +95,10 @@ defmodule Algora.Github.Poller.Events do
         events,
         {[], length(acc), true},
         fn event, {page_acc, total_count, _} ->
-          case should_continue_processing?(event, state, total_count) do
-            true -> {:cont, {[event | page_acc], total_count + 1, true}}
-            false -> {:halt, {page_acc, total_count, false}}
+          if should_continue_processing?(event, state, total_count) do
+            {:cont, {[event | page_acc], total_count + 1, true}}
+          else
+            {:halt, {page_acc, total_count, false}}
           end
         end
       )
@@ -133,9 +138,8 @@ defmodule Algora.Github.Poller.Events do
 
   defp process_batch(events, event_cursor) do
     Repo.transact(fn ->
-      with :ok <- process_events(events),
-           {:ok, updated_cursor} <- update_last_polled(event_cursor, List.first(events)) do
-        {:ok, updated_cursor}
+      with :ok <- process_events(events) do
+        update_last_polled(event_cursor, List.first(events))
       end
     end)
   end
@@ -199,32 +203,18 @@ defmodule Algora.Github.Poller.Events do
       end)
     else
       {:error, reason} ->
-        Logger.error(
-          "Failed to parse commands from event: #{inspect(event)}. Reason: #{inspect(reason)}"
-        )
+        Logger.error("Failed to parse commands from event: #{inspect(event)}. Reason: #{inspect(reason)}")
 
         :ok
     end
   end
 
-  defp extract_body(%{
-         "type" => "IssueCommentEvent",
-         "payload" => %{
-           "action" => action,
-           "comment" => %{"body" => body}
-         }
-       })
+  defp extract_body(%{"type" => "IssueCommentEvent", "payload" => %{"action" => action, "comment" => %{"body" => body}}})
        when action in ["created", "edited"] do
     body
   end
 
-  defp extract_body(%{
-         "type" => "IssuesEvent",
-         "payload" => %{
-           "action" => action,
-           "issue" => %{"body" => body}
-         }
-       })
+  defp extract_body(%{"type" => "IssuesEvent", "payload" => %{"action" => action, "issue" => %{"body" => body}}})
        when action in ["opened", "edited"] do
     body
   end

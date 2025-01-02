@@ -1,9 +1,10 @@
 defmodule AlgoraWeb.Org.JobLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Users
 
   def mount(_params, _session, socket) do
     job = %{

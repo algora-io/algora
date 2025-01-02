@@ -1,11 +1,12 @@
 defmodule AlgoraWeb.InstallationCallbackController do
   use AlgoraWeb, :controller
-  require Logger
 
-  alias Algora.Users
-  alias Algora.Organizations
-  alias Algora.Workspace
   alias Algora.Github
+  alias Algora.Organizations
+  alias Algora.Users
+  alias Algora.Workspace
+
+  require Logger
 
   def new(conn, params) do
     case validate_query_params(params) do
@@ -45,8 +46,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
         # TODO: Trigger org joined event
         # trigger_org_joined(org)
 
-        conn
-        |> put_flash(:info, "Organization created successfully: #{org.handle}")
+        put_flash(conn, :info, "Organization created successfully: #{org.handle}")
 
         # TODO: Redirect to the org dashboard and set the session context
         redirect_url = determine_redirect_url(conn, org, user)
@@ -55,9 +55,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
       {:error, error} ->
         Logger.error("❌ Installation callback failed: #{inspect(error)}")
 
-        conn
-        |> put_flash(:error, "#{inspect(error)}")
-
+        put_flash(conn, :error, "#{inspect(error)}")
         redirect(conn, to: "/user/installations")
     end
   end

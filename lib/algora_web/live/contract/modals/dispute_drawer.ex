@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
+  @moduledoc false
   use AlgoraWeb.LiveComponent
 
   attr :show, :boolean, required: true

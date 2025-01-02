@@ -1,8 +1,9 @@
 defmodule AlgoraWeb.User.InstallationsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Workspace
   alias Algora.Github
+  alias Algora.Workspace
 
   def render(assigns) do
     ~H"""
@@ -126,6 +127,6 @@ defmodule AlgoraWeb.User.InstallationsLive do
 
   def mount(_params, _session, socket) do
     installations = Workspace.list_user_installations(socket.assigns.current_user.id)
-    {:ok, socket |> assign(:installations, installations)}
+    {:ok, assign(socket, :installations, installations)}
   end
 end

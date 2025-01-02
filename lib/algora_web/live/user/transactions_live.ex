@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.User.TransactionsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
+
   alias Algora.Payments
   alias Algora.Util
 
@@ -37,8 +39,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
   end
 
   defp calculate_balance(transactions) do
-    transactions
-    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
+    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :deposit, :credit] ->
           Money.add!(acc, transaction.net_amount)
@@ -53,8 +54,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
   end
 
   defp calculate_volume(transactions) do
-    transactions
-    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
+    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :credit] -> Money.add!(acc, transaction.net_amount)
         _ -> acc
@@ -171,29 +171,21 @@ defmodule AlgoraWeb.User.TransactionsLive do
     end
   end
 
-  defp description(%{type: type, tip_id: tip_id})
-       when type in [:debit, :credit] and not is_nil(tip_id),
-       do: "Tip payment"
+  defp description(%{type: type, tip_id: tip_id}) when type in [:debit, :credit] and not is_nil(tip_id), do: "Tip payment"
 
-  defp description(%{type: type, contract_id: contract_id})
-       when type in [:debit, :credit] and not is_nil(contract_id),
-       do: "Contract payment"
+  defp description(%{type: type, contract_id: contract_id}) when type in [:debit, :credit] and not is_nil(contract_id),
+    do: "Contract payment"
 
-  defp description(%{type: type, bounty_id: bounty_id})
-       when type in [:debit, :credit] and not is_nil(bounty_id),
-       do: "Bounty payment"
+  defp description(%{type: type, bounty_id: bounty_id}) when type in [:debit, :credit] and not is_nil(bounty_id),
+    do: "Bounty payment"
 
-  defp description(%{type: type})
-       when type in [:debit, :credit],
-       do: "Payment"
+  defp description(%{type: type}) when type in [:debit, :credit], do: "Payment"
 
   defp description(%{type: type}) do
     type |> to_string() |> String.capitalize()
   end
 
-  defp get_linked_user(%{type: type, linked_transaction: %{user: user}})
-       when type in [:credit, :debit],
-       do: user
+  defp get_linked_user(%{type: type, linked_transaction: %{user: user}}) when type in [:credit, :debit], do: user
 
   defp get_linked_user(_), do: nil
 end

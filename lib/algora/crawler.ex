@@ -1,4 +1,5 @@
 defmodule Algora.Crawler do
+  @moduledoc false
   require Logger
 
   @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -8,8 +9,9 @@ defmodule Algora.Crawler do
   @retry_delay :timer.seconds(1)
   @blacklist_filename "domain_blacklist.txt"
 
-  def is_blacklisted?(domain) do
-    :code.priv_dir(:algora)
+  def blacklisted?(domain) do
+    :algora
+    |> :code.priv_dir()
     |> Path.join(@blacklist_filename)
     |> File.stream!()
     |> Stream.map(&String.trim/1)
@@ -22,49 +24,50 @@ defmodule Algora.Crawler do
   def fetch_site_metadata(url, redirect_count, retry_count) do
     request = Finch.build(:get, url, @headers)
 
-    with {:ok, response} <- Finch.request(request, Algora.Finch) do
-      case handle_response(response, url, redirect_count) do
-        {:ok, body} ->
-          case Floki.parse_document(body) do
-            {:ok, html_tree} ->
-              metadata = %{
-                og_title: find_title(html_tree),
-                og_description: find_description(html_tree),
-                og_image_url: find_og_image(html_tree),
-                favicon_url: find_logo(html_tree, url),
-                socials: find_social_links(html_tree)
-              }
+    case Finch.request(request, Algora.Finch) do
+      {:ok, response} ->
+        case handle_response(response, url, redirect_count) do
+          {:ok, body} ->
+            case Floki.parse_document(body) do
+              {:ok, html_tree} ->
+                metadata = %{
+                  og_title: find_title(html_tree),
+                  og_description: find_description(html_tree),
+                  og_image_url: find_og_image(html_tree),
+                  favicon_url: find_logo(html_tree, url),
+                  socials: find_social_links(html_tree)
+                }
 
-              # Enhance metadata with GitHub info if available
-              metadata =
-                case get_github_info(metadata.socials[:github]) do
-                  {:ok, github_info} -> Map.merge(metadata, github_info)
-                  _ -> metadata
-                end
+                # Enhance metadata with GitHub info if available
+                metadata =
+                  case get_github_info(metadata.socials[:github]) do
+                    {:ok, github_info} -> Map.merge(metadata, github_info)
+                    _ -> metadata
+                  end
 
-              metadata
-              |> update_in([:socials, :twitter], fn twitter_url ->
-                case get_in(metadata, [:twitter_username]) do
-                  nil -> twitter_url
-                  username -> "https://x.com/#{username}"
-                end
-              end)
-              |> Map.delete(:twitter_username)
-              |> then(&{:ok, &1})
+                metadata
+                |> update_in([:socials, :twitter], fn twitter_url ->
+                  case get_in(metadata, [:twitter_username]) do
+                    nil -> twitter_url
+                    username -> "https://x.com/#{username}"
+                  end
+                end)
+                |> Map.delete(:twitter_username)
+                |> then(&{:ok, &1})
 
-            error ->
-              Logger.error("Failed to parse HTML from #{url}: #{inspect(error)}")
-              {:error, :parse_failed}
-          end
+              error ->
+                Logger.error("Failed to parse HTML from #{url}: #{inspect(error)}")
+                {:error, :parse_failed}
+            end
 
-        {:redirect, new_url} ->
-          fetch_site_metadata(new_url, redirect_count + 1, retry_count)
+          {:redirect, new_url} ->
+            fetch_site_metadata(new_url, redirect_count + 1, retry_count)
 
-        {:error, reason} ->
-          Logger.error("Failed to fetch metadata from #{url}: #{inspect(reason)}")
-          {:error, reason}
-      end
-    else
+          {:error, reason} ->
+            Logger.error("Failed to fetch metadata from #{url}: #{inspect(reason)}")
+            {:error, reason}
+        end
+
       error ->
         Logger.error("Failed to fetch metadata from #{url}: #{inspect(error)}")
 
@@ -90,11 +93,7 @@ defmodule Algora.Crawler do
     end
   end
 
-  defp handle_response(
-         %Finch.Response{status: status, headers: headers, body: _body},
-         url,
-         redirect_count
-       )
+  defp handle_response(%Finch.Response{status: status, headers: headers, body: _body}, url, redirect_count)
        when status in [301, 302, 303, 307, 308] do
     if redirect_count >= @max_redirects do
       {:error, :too_many_redirects}
@@ -171,7 +170,7 @@ defmodule Algora.Crawler do
       |> Enum.map(fn element ->
         {
           element,
-          get_size_in_pixels(Floki.attribute(element, "sizes") |> List.first())
+          element |> Floki.attribute("sizes") |> List.first() |> get_size_in_pixels()
         }
       end)
       |> Enum.sort_by(fn {_, size} -> size end, :desc)
@@ -221,17 +220,19 @@ defmodule Algora.Crawler do
   defp get_content_or_nil([]), do: nil
 
   defp get_content_or_nil([element | _]) do
-    Floki.attribute(element, "content")
+    element
+    |> Floki.attribute("content")
     |> List.first()
   end
 
   defp get_logo_url([]), do: nil
 
   defp get_logo_url([element | _]) do
-    Floki.attribute(element, "href")
+    element
+    |> Floki.attribute("href")
     |> List.first()
     |> case do
-      nil -> Floki.attribute(element, "src") |> List.first()
+      nil -> element |> Floki.attribute("src") |> List.first()
       href -> href
     end
   end
@@ -278,7 +279,7 @@ defmodule Algora.Crawler do
       linkedin: find_social_url(html_tree, :linkedin)
     }
     |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-    |> Enum.into(%{})
+    |> Map.new()
   end
 
   @social_selectors %{
@@ -390,13 +391,14 @@ defmodule Algora.Crawler do
   defp get_href_or_nil([]), do: nil
 
   defp get_href_or_nil([element | _]) do
-    Floki.attribute(element, "href")
+    element
+    |> Floki.attribute("href")
     |> List.first()
   end
 
   defp get_email_domain(email) do
     [_, domain] = String.split(email, "@")
-    if not is_blacklisted?(domain), do: domain
+    if not blacklisted?(domain), do: domain
   end
 
   defp get_gravatar_url(email, opts) do
@@ -407,14 +409,14 @@ defmodule Algora.Crawler do
     |> String.trim()
     |> String.downcase()
     |> remove_plus_suffix()
-    |> (&:crypto.hash(:sha256, &1)).()
+    |> then(&:crypto.hash(:sha256, &1))
     |> Base.encode16(case: :lower)
     |> build_gravatar_url(default, size)
   end
 
   defp remove_plus_suffix(email) do
     [local_part, domain] = String.split(email, "@")
-    base_local_part = String.split(local_part, "+") |> List.first()
+    base_local_part = local_part |> String.split("+") |> List.first()
     base_local_part <> "@" <> domain
   end
 

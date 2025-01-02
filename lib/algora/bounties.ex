@@ -1,7 +1,8 @@
 defmodule Algora.Bounties do
+  @moduledoc false
+  import Algora.Validators
   import Ecto.Changeset
   import Ecto.Query
-  import Algora.Validators
 
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -83,12 +84,7 @@ defmodule Algora.Bounties do
           amount: Money.t()
         }) ::
           {:ok, String.t()} | {:error, atom()}
-  def create_tip(%{
-        creator: creator,
-        owner: owner,
-        recipient: recipient,
-        amount: amount
-      }) do
+  def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}) do
     changeset =
       Tip.changeset(%Tip{}, %{
         amount: amount,
@@ -316,7 +312,7 @@ defmodule Algora.Bounties do
   def list_bounties_with(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 
-    base_bounties = base_query |> select([b], b.id)
+    base_bounties = select(base_query, [b], b.id)
 
     from(b in Bounty)
     |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
@@ -363,20 +359,20 @@ defmodule Algora.Bounties do
   end
 
   def list_bounties_awarded_to_user(user_id, criteria \\ []) do
-    awarded_to_user(user_id)
+    user_id
+    |> awarded_to_user()
     |> list_bounties_with(criteria)
   end
 
   def list_bounties(criteria \\ []) do
-    base_query()
-    |> list_bounties_with(criteria)
+    list_bounties_with(base_query(), criteria)
   end
 
   def fetch_stats(org_id \\ nil) do
-    open_bounties_query = Bounty.open() |> Bounty.filter_by_org_id(org_id)
-    rewarded_bounties_query = Bounty.completed() |> Bounty.filter_by_org_id(org_id)
-    rewarded_claims_query = Claim.rewarded() |> Claim.filter_by_org_id(org_id)
-    members_query = Member |> Member.filter_by_org_id(org_id)
+    open_bounties_query = Bounty.filter_by_org_id(Bounty.open(), org_id)
+    rewarded_bounties_query = Bounty.filter_by_org_id(Bounty.completed(), org_id)
+    rewarded_claims_query = Claim.filter_by_org_id(Claim.rewarded(), org_id)
+    members_query = Member.filter_by_org_id(Member, org_id)
 
     open_bounties = Repo.aggregate(open_bounties_query, :count, :id)
     open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || Money.zero(:USD)
@@ -385,9 +381,8 @@ defmodule Algora.Bounties do
     completed_bounties = Repo.aggregate(rewarded_bounties_query, :count, :id)
 
     solvers_count_last_month =
-      Repo.aggregate(
-        rewarded_claims_query
-        |> where([c], c.inserted_at >= fragment("NOW() - INTERVAL '1 month'")),
+      where(rewarded_claims_query, [c], c.inserted_at >= fragment("NOW() - INTERVAL '1 month'"))
+      |> Repo.aggregate(
         :count,
         :user_id,
         distinct: true

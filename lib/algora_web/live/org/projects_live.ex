@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Org.ProjectsLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   on_mount AlgoraWeb.Org.BountyHook

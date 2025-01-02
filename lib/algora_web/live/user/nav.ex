@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.User.Nav do
-  import Phoenix.LiveView
+  @moduledoc false
   use Phoenix.Component
+
+  import Phoenix.LiveView
 
   alias Algora.Users
   alias AlgoraWeb.User
@@ -26,10 +28,10 @@ defmodule AlgoraWeb.User.Nav do
         {_, _} -> nil
       end
 
-    {:cont, socket |> assign(:active_tab, active_tab)}
+    {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def nav_items() do
+  def nav_items do
     [
       %{
         title: "Main Navigation",

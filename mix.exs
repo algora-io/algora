@@ -43,8 +43,7 @@ defmodule Algora.MixProject do
       {:floki, ">= 0.30.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
-      {:tabler_icons,
-       github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
+      {:tabler_icons, github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},
@@ -68,7 +67,8 @@ defmodule Algora.MixProject do
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},
       {:nimble_parsec, "~> 1.4"},
-      {:oban, "~> 2.17"}
+      {:oban, "~> 2.17"},
+      {:styler, "~> 1.2", only: [:dev, :test], runtime: false}
     ]
   end
 

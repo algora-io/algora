@@ -1,5 +1,5 @@
 defmodule Algora.Github.Crypto do
-  alias Joken
+  @moduledoc false
   alias Algora.Github
 
   @doc """
@@ -10,7 +10,7 @@ defmodule Algora.Github.Crypto do
   `{:ok, jwt, claims}` on success, `{:error, reason}` on failure
   """
   @spec generate_jwt() :: {:ok, String.t(), map()} | {:error, any()}
-  def generate_jwt() do
+  def generate_jwt do
     payload = %{
       "iat" => System.system_time(:second),
       "exp" => System.system_time(:second) + 600,

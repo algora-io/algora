@@ -1,20 +1,18 @@
 defmodule Algora.ContractsTest do
   use Algora.DataCase
+
   import Algora.Factory
   import Money.Sigil
+
   alias Algora.Contracts
   alias Algora.Payments
   alias Algora.Payments.Transaction
 
-  def card_declined_error(),
-    do: %Stripe.Error{
-      source: :stripe,
-      code: :card_error,
-      message: "Your card was declined."
-    }
+  def card_declined_error, do: %Stripe.Error{source: :stripe, code: :card_error, message: "Your card was declined."}
 
   # Mock implementation for Stripe API calls
   defmodule MockStripe do
+    @moduledoc false
     def create_invoice(params) do
       {:ok, %{id: "inv_mock", customer: params.customer}}
     end
@@ -33,6 +31,7 @@ defmodule Algora.ContractsTest do
   end
 
   defmodule MockStripeWithFailure do
+    @moduledoc false
     def create_invoice(params) do
       {:ok, %{id: "inv_mock", customer: params.customer}}
     end

@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Project.IndexLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   def mount(_params, _session, socket) do
@@ -36,8 +37,7 @@ defmodule AlgoraWeb.Project.IndexLive do
     ]
 
     projects =
-      projects
-      |> Enum.map(fn project ->
+      Enum.map(projects, fn project ->
         Map.put(project, :applicants, [
           %{
             name: "Alice Johnson",

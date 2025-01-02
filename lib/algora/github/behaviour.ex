@@ -1,4 +1,5 @@
 defmodule Algora.Github.Behaviour do
+  @moduledoc false
   @type token :: String.t()
   @type response :: {:ok, map()} | {:error, any()}
 

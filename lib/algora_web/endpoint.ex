@@ -55,6 +55,7 @@ defmodule AlgoraWeb.Endpoint do
   ]
 
   defmodule BodyReader do
+    @moduledoc false
     def cache_raw_body(conn, opts) do
       with {:ok, body, conn} <- Plug.Conn.read_body(conn, opts) do
         conn = update_in(conn.assigns[:raw_body], &[body | &1 || []])
@@ -68,11 +69,9 @@ defmodule AlgoraWeb.Endpoint do
   @parser_with_cache Plug.Parsers.init([body_reader: {BodyReader, :cache_raw_body, []}] ++ opts)
 
   # All endpoints that start with "webhooks" have their body cached.
-  defp parse_body(%{path_info: ["webhooks" | _]} = conn, _),
-    do: Plug.Parsers.call(conn, @parser_with_cache)
+  defp parse_body(%{path_info: ["webhooks" | _]} = conn, _), do: Plug.Parsers.call(conn, @parser_with_cache)
 
-  defp parse_body(conn, _),
-    do: Plug.Parsers.call(conn, @parser_without_cache)
+  defp parse_body(conn, _), do: Plug.Parsers.call(conn, @parser_without_cache)
 
   plug Plug.MethodOverride
   plug Plug.Head

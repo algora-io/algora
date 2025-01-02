@@ -1,5 +1,5 @@
-import Ecto.Query
 import Ecto.Changeset
+import Ecto.Query
 import Money.Sigil
 
 alias Algora.Admin

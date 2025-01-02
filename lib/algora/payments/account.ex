@@ -1,4 +1,5 @@
 defmodule Algora.Payments.Account do
+  @moduledoc false
   use Algora.Schema
 
   @type t() :: %__MODULE__{}

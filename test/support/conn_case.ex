@@ -19,15 +19,14 @@ defmodule AlgoraWeb.ConnCase do
 
   using do
     quote do
+      use AlgoraWeb, :verified_routes
+      import AlgoraWeb.ConnCase
+      import Phoenix.ConnTest
+      import Plug.Conn
       # The default endpoint for testing
       @endpoint AlgoraWeb.Endpoint
 
-      use AlgoraWeb, :verified_routes
-
       # Import conveniences for testing with connections
-      import Plug.Conn
-      import Phoenix.ConnTest
-      import AlgoraWeb.ConnCase
     end
   end
 

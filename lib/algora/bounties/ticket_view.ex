@@ -1,7 +1,11 @@
 defmodule Algora.Bounties.TicketView do
   use Algora.Schema
+
   import Ecto.Query
+
+  alias Algora.Bounties.Bounty
   alias Algora.Repo
+  alias Algora.Workspace.Ticket
 
   @primary_key false
   schema "ticket_views" do
@@ -15,16 +19,16 @@ defmodule Algora.Bounties.TicketView do
     field :bounty_count, :integer
 
     # Original associations
-    belongs_to :ticket, Algora.Workspace.Ticket
+    belongs_to :ticket, Ticket
     belongs_to :repository, Algora.Workspace.Repository
-    has_many :bounties, Algora.Bounties.Bounty, references: :ticket_id
+    has_many :bounties, Bounty, references: :ticket_id
 
-    has_many :top_bounties, Algora.Bounties.Bounty, references: :ticket_id
+    has_many :top_bounties, Bounty, references: :ticket_id
   end
 
   def base_query(criteria \\ []) do
     bounty_subquery =
-      from(b in Algora.Bounties.Bounty)
+      from(b in Bounty)
       |> apply_criteria(criteria)
       |> group_by([b], b.ticket_id)
       |> select([b], %{
@@ -33,7 +37,7 @@ defmodule Algora.Bounties.TicketView do
         bounty_count: count(b.id)
       })
 
-    from(t in Algora.Workspace.Ticket)
+    from(t in Ticket)
     |> join(:inner, [t], b in subquery(bounty_subquery), on: b.ticket_id == t.id, as: :b)
     |> join(:left, [t], r in assoc(t, :repository), as: :r)
     |> join(:left, [t, r: repo], ro in assoc(repo, :user), as: :ro)
@@ -60,19 +64,18 @@ defmodule Algora.Bounties.TicketView do
   end
 
   def list(criteria \\ []) do
-    tickets = base_query(criteria) |> Repo.all()
+    tickets = criteria |> base_query() |> Repo.all()
     ticket_ids = Enum.map(tickets, & &1.ticket_id)
 
     top_bounties = fetch_top_bounties(ticket_ids)
 
-    tickets
-    |> Enum.map(fn ticket ->
+    Enum.map(tickets, fn ticket ->
       Map.put(ticket, :top_bounties, Map.get(top_bounties, ticket.ticket_id, []))
     end)
   end
 
   defp fetch_top_bounties(ticket_ids) do
-    from(b in Algora.Bounties.Bounty)
+    from(b in Bounty)
     |> join(:left, [b], o in assoc(b, :owner))
     |> where([b], b.ticket_id in ^ticket_ids)
     |> select([b, o], %{

@@ -1,4 +1,5 @@
 defmodule Algora.Chat.Message do
+  @moduledoc false
   use Algora.Schema
 
   schema "messages" do

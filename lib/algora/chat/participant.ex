@@ -1,4 +1,5 @@
 defmodule Algora.Chat.Participant do
+  @moduledoc false
   use Algora.Schema
 
   schema "chat_participants" do

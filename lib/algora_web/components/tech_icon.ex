@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Components.TechIcon do
+  @moduledoc false
   use Phoenix.Component
 
   def tech_icon(assigns) do

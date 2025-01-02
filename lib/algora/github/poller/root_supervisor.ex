@@ -1,4 +1,5 @@
 defmodule Algora.Github.Poller.RootSupervisor do
+  @moduledoc false
   use Supervisor
 
   def start_link(init_arg) do

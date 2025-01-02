@@ -1,27 +1,31 @@
 defmodule AlgoraWeb.Community.DashboardLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
-  require Logger
-
-  import Ecto.Changeset
   import AlgoraWeb.Components.Achievement
   import AlgoraWeb.Components.Bounties
   import AlgoraWeb.Components.Experts
+  import Ecto.Changeset
 
   alias Algora.Bounties
   alias Algora.Contracts
+  alias Algora.Extensions.Ecto.USD
   alias Algora.Extensions.Ecto.Validations
   alias Algora.Github
   alias Algora.Users
   alias Algora.Workspace
 
+  require Logger
+
   defmodule BountyForm do
+    @moduledoc false
     use Ecto.Schema
+
     import Ecto.Changeset
 
     embedded_schema do
       field :url, :string
-      field :amount, Algora.Extensions.Ecto.USD
+      field :amount, USD
 
       embeds_one :ticket_ref, TicketRef, primary_key: false do
         field :owner, :string
@@ -41,12 +45,14 @@ defmodule AlgoraWeb.Community.DashboardLive do
   end
 
   defmodule TipForm do
+    @moduledoc false
     use Ecto.Schema
+
     import Ecto.Changeset
 
     embedded_schema do
       field :github_handle, :string
-      field :amount, Algora.Extensions.Ecto.USD
+      field :amount, USD
     end
 
     def changeset(form, attrs \\ %{}) do
@@ -256,14 +262,13 @@ defmodule AlgoraWeb.Community.DashboardLive do
        |> put_flash(:info, "Bounty created")}
     else
       %{valid?: false} ->
-        {:noreply, socket |> assign(:bounty_form, to_form(changeset))}
+        {:noreply, assign(socket, :bounty_form, to_form(changeset))}
 
       {:error, :already_exists} ->
-        {:noreply,
-         socket |> put_flash(:warning, "You have already created a bounty for this ticket")}
+        {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
       {:error, _reason} ->
-        {:noreply, socket |> put_flash(:error, "Something went wrong")}
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 
@@ -283,16 +288,14 @@ defmodule AlgoraWeb.Community.DashboardLive do
              recipient: recipient,
              amount: get_field(changeset, :amount)
            }) do
-      {:noreply,
-       socket
-       |> redirect(external: checkout_url)}
+      {:noreply, redirect(socket, external: checkout_url)}
     else
       %{valid?: false} ->
-        {:noreply, socket |> assign(:tip_form, to_form(changeset))}
+        {:noreply, assign(socket, :tip_form, to_form(changeset))}
 
       {:error, reason} ->
         Logger.error("Failed to create tip: #{inspect(reason)}")
-        {:noreply, socket |> put_flash(:error, "Something went wrong")}
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 
@@ -309,7 +312,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
       ) ++
         Bounties.TicketView.sample_tickets()
 
-    socket |> assign(:tickets, tickets |> Enum.take(6))
+    assign(socket, :tickets, Enum.take(tickets, 6))
   end
 
   defp assign_achievements(socket) do
@@ -337,7 +340,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
         {:cont, result}
       end)
 
-    socket |> assign(:achievements, achievements)
+    assign(socket, :achievements, achievements)
   end
 
   defp personalize_status(_socket), do: :completed

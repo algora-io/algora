@@ -1,11 +1,12 @@
 defmodule AlgoraWeb.Contract.ViewLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Chat
   alias Algora.Contracts
   alias Algora.Contracts.Contract
-  alias Algora.Chat
-  alias Algora.Repo
   alias Algora.Organizations
+  alias Algora.Repo
 
   defp page_size, do: 10
 
@@ -460,7 +461,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
     {:ok, contract} = Contracts.fetch_last_contract(id)
     contract_chain = Contracts.list_contract_chain(original_contract_id: id, limit: page_size())
     thread = Chat.get_or_create_thread!(contract)
-    messages = Chat.list_messages(thread.id) |> Repo.preload(:sender)
+    messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
 
     {:ok,
      socket

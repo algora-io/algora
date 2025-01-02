@@ -21,6 +21,11 @@ defmodule Algora.Github.Poller.CommentConsumer do
     run_command(command, ticket_ref, comment)
   end
 
+  defp run_command({:claim, args}, ticket_ref, _comment) do
+    # TODO: implement claim command
+    :ok
+  end
+
   defp run_command({:tip, args}, ticket_ref, _comment) do
     amount = Keyword.get(args, :amount)
     recipient = Keyword.get(args, :username)

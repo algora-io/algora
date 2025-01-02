@@ -1,4 +1,5 @@
 defmodule Algora.Util do
+  @moduledoc false
   def random_string do
     binary = <<
       System.system_time(:nanosecond)::64,
@@ -37,7 +38,7 @@ defmodule Algora.Util do
   end
 
   def timestamp(date, nil) do
-    date |> Calendar.strftime("%Y-%m-%d %I:%M %p UTC")
+    Calendar.strftime(date, "%Y-%m-%d %I:%M %p UTC")
   end
 
   def timestamp(date, timezone) do

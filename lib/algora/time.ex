@@ -1,4 +1,5 @@
 defmodule Algora.Time do
+  @moduledoc false
   @doc """
   Converts an IANA timezone to a friendly display format with proper offset handling.
   Examples:
@@ -8,13 +9,12 @@ defmodule Algora.Time do
   def friendly_timezone(nil), do: nil
 
   def friendly_timezone(timezone) do
-    with datetime <- DateTime.now!(timezone),
-         offset_hours = div(datetime.utc_offset, 3600),
-         offset_mins = div(rem(datetime.utc_offset, 3600), 60),
-         offset_string <- format_offset(offset_hours, offset_mins),
-         city <- format_city(timezone) do
-      "(#{offset_string}) #{city}"
-    end
+    datetime = DateTime.now!(timezone)
+    offset_hours = div(datetime.utc_offset, 3600)
+    offset_mins = div(rem(datetime.utc_offset, 3600), 60)
+    offset_string = format_offset(offset_hours, offset_mins)
+    city = format_city(timezone)
+    "(#{offset_string}) #{city}"
   end
 
   defp format_offset(hours, mins) do

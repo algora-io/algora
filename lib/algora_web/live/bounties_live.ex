@@ -1,15 +1,19 @@
 defmodule AlgoraWeb.BountiesLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
-  require Logger
+
   import AlgoraWeb.Components.Bounties
+
   alias Algora.Bounties
+
+  require Logger
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
     end
 
-    {:ok, socket |> assign_tickets()}
+    {:ok, assign_tickets(socket)}
   end
 
   def render(assigns) do
@@ -49,6 +53,6 @@ defmodule AlgoraWeb.BountiesLive do
       ) ++
         Bounties.TicketView.sample_tickets()
 
-    socket |> assign(:tickets, tickets)
+    assign(socket, :tickets, tickets)
   end
 end

@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Job.IndexLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   def mount(_params, _session, socket) do
@@ -36,8 +37,7 @@ defmodule AlgoraWeb.Job.IndexLive do
     ]
 
     jobs =
-      jobs
-      |> Enum.map(fn job ->
+      Enum.map(jobs, fn job ->
         Map.put(job, :applicants, [
           %{
             name: "Alice Johnson",

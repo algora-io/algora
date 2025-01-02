@@ -1,5 +1,6 @@
 defmodule AlgoraWeb.RootController do
   use AlgoraWeb, :controller
+
   alias AlgoraWeb.UserAuth
   alias AlgoraWeb.VisitorCountry
 

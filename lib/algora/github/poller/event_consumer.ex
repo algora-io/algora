@@ -1,10 +1,13 @@
 defmodule Algora.Github.Poller.EventConsumer do
+  @moduledoc false
   use Oban.Worker, queue: :event_consumers
-  require Logger
+
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Util
   alias Algora.Workspace
+
+  require Logger
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"event" => event, "command" => encoded_command} = _args}) do
@@ -36,10 +39,7 @@ defmodule Algora.Github.Poller.EventConsumer do
 
   defp extract_actor(%{"actor" => %{"login" => login}}), do: login
 
-  defp extract_ticket_ref(%{
-         "repo" => %{"name" => repo_full_name},
-         "payload" => %{"issue" => %{"number" => number}}
-       }) do
+  defp extract_ticket_ref(%{"repo" => %{"name" => repo_full_name}, "payload" => %{"issue" => %{"number" => number}}}) do
     [repo_owner, repo_name] = String.split(repo_full_name, "/")
     %{owner: repo_owner, repo: repo_name, number: number}
   end

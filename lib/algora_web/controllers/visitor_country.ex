@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.VisitorCountry do
+  @moduledoc false
   import Plug.Conn
 
   @dev_country_code "us"
@@ -36,7 +37,7 @@ defmodule AlgoraWeb.VisitorCountry do
   defp get_country_code(ip) do
     url = "https://ipinfo.io/#{ip}?token=#{System.get_env("IPINFO_TOKEN")}"
 
-    task = Task.async(fn -> Finch.build(:get, url) |> Finch.request(Algora.Finch) end)
+    task = Task.async(fn -> :get |> Finch.build(url) |> Finch.request(Algora.Finch) end)
     res = Task.yield(task, :timer.seconds(3)) || Task.shutdown(task)
 
     with {:ok, {:ok, %Finch.Response{status: 200, body: body}}} <- res,

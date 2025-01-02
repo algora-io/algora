@@ -1,5 +1,8 @@
 defmodule Algora.Workspace.Installation do
+  @moduledoc false
   use Algora.Schema
+
+  alias Algora.Users.User
 
   @type t() :: %__MODULE__{}
 
@@ -13,8 +16,8 @@ defmodule Algora.Workspace.Installation do
     field :avatar_url, :string
     field :repository_selection, :string
 
-    belongs_to :owner, Algora.Users.User
-    belongs_to :connected_user, Algora.Users.User
+    belongs_to :owner, User
+    belongs_to :connected_user, User
 
     timestamps()
   end

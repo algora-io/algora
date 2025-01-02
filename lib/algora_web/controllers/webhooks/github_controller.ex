@@ -1,40 +1,40 @@
 defmodule AlgoraWeb.Webhooks.GithubController do
   use AlgoraWeb, :controller
-  require Logger
-  alias Algora.Github.Webhook
+
   alias Algora.Github
+  alias Algora.Github.Webhook
+
+  require Logger
 
   # TODO: persist & alert about failed deliveries
   # TODO: auto-retry failed deliveries with exponential backoff
 
   def new(conn, params) do
-    try do
-      with {:ok, %Webhook{delivery: _delivery, event: event, installation_id: _installation_id}} <-
-             Webhook.new(conn) do
+    case Webhook.new(conn) do
+      {:ok, %Webhook{delivery: _delivery, event: event, installation_id: _installation_id}} ->
         author = get_author(event, params)
         body = get_body(event, params)
         process_commands(body, author, params)
 
         conn |> put_status(:accepted) |> json(%{status: "ok"})
-      else
-        {:error, %Jason.EncodeError{}} ->
-          conn |> put_status(:bad_request) |> json(%{error: "Invalid payload"})
 
-        {:error, :missing_header} ->
-          conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
+      {:error, %Jason.EncodeError{}} ->
+        conn |> put_status(:bad_request) |> json(%{error: "Invalid payload"})
 
-        {:error, :signature_mismatch} ->
-          conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
+      {:error, :missing_header} ->
+        conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
 
-        {:error, reason} ->
-          conn |> put_status(:internal_server_error) |> json(%{error: reason})
-      end
-    rescue
-      e ->
-        Logger.error("Unexpected error: #{inspect(e)}")
+      {:error, :signature_mismatch} ->
+        conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
 
-        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
+      {:error, reason} ->
+        conn |> put_status(:internal_server_error) |> json(%{error: reason})
     end
+  rescue
+    e ->
+      Logger.error("Unexpected error: #{inspect(e)}")
+
+      conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
   end
 
   # TODO: cache installation tokens
@@ -48,8 +48,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
              author["login"]
            ) do
       {:ok, permission}
-    else
-      error -> error
     end
   end
 
@@ -58,49 +56,53 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command({:bounty, args}, author, params) do
     amount = Keyword.get(args, :amount)
 
-    with {:ok, "admin"} <- get_permissions(author, params) do
-      case amount do
-        nil ->
-          {:ok, :open_to_bids}
+    case get_permissions(author, params) do
+      {:ok, "admin"} ->
+        case amount do
+          nil ->
+            {:ok, :open_to_bids}
 
-        amount ->
-          # Get repository and issue details from params
-          repo = params["repository"]
-          issue = params["issue"]
+          amount ->
+            # Get repository and issue details from params
+            repo = params["repository"]
+            issue = params["issue"]
 
-          # Construct the bounty message
-          message = """
-          ## 💎 $#{amount} bounty [• #{repo["owner"]["login"]}](https://console.algora.io/org/#{repo["owner"]["login"]})
-          ### Steps to solve:
-          1. **Start working**: Comment `/attempt ##{issue["number"]}` with your implementation plan
-          2. **Submit work**: Create a pull request including `/claim ##{issue["number"]}` in the PR body to claim the bounty
-          3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+            # Construct the bounty message
+            message = """
+            ## 💎 $#{amount} bounty [• #{repo["owner"]["login"]}](https://console.algora.io/org/#{repo["owner"]["login"]})
+            ### Steps to solve:
+            1. **Start working**: Comment `/attempt ##{issue["number"]}` with your implementation plan
+            2. **Submit work**: Create a pull request including `/claim ##{issue["number"]}` in the PR body to claim the bounty
+            3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
 
-          Thank you for contributing to #{repo["full_name"]}!
+            Thank you for contributing to #{repo["full_name"]}!
 
-          **[Add a bounty](https://console.algora.io/org/#{repo["owner"]["login"]}/bounties/community?fund=#{repo["full_name"]}%23#{issue["number"]})** • **[Share on socials](https://twitter.com/intent/tweet?text=%24#{amount}+bounty%21+%F0%9F%92%8E+#{issue["html_url"]}&related=algoraio)**
+            **[Add a bounty](https://console.algora.io/org/#{repo["owner"]["login"]}/bounties/community?fund=#{repo["full_name"]}%23#{issue["number"]})** • **[Share on socials](https://twitter.com/intent/tweet?text=%24#{amount}+bounty%21+%F0%9F%92%8E+#{issue["html_url"]}&related=algoraio)**
 
-          Attempt | Started (GMT+0) | Solution
-          --------|----------------|----------
-          """
+            Attempt | Started (GMT+0) | Solution
+            --------|----------------|----------
+            """
 
-          # Post comment to the issue
-          with {:ok, %{"token" => token}} <-
-                 Github.get_installation_token(params["installation"]["id"]) do
-            Github.create_issue_comment(
-              token,
-              repo["owner"]["login"],
-              repo["name"],
-              issue["number"],
-              message
-            )
-          end
+            # Post comment to the issue
+            with {:ok, %{"token" => token}} <-
+                   Github.get_installation_token(params["installation"]["id"]) do
+              Github.create_issue_comment(
+                token,
+                repo["owner"]["login"],
+                repo["name"],
+                issue["number"],
+                message
+              )
+            end
 
-          {:ok, amount}
-      end
-    else
-      {:ok, _permission} -> {:error, :unauthorized}
-      {:error, error} -> {:error, error}
+            {:ok, amount}
+        end
+
+      {:ok, _permission} ->
+        {:error, :unauthorized}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -123,9 +125,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     do: Logger.info("Unhandled command: #{command} #{inspect(args)}")
 
   def process_commands(body, author, params) when is_binary(body) do
-    with {:ok, commands} <- Algora.Github.Command.parse(body) do
-      Enum.map(commands, &execute_command(&1, author, params))
-    else
+    case Algora.Github.Command.parse(body) do
+      {:ok, commands} -> Enum.map(commands, &execute_command(&1, author, params))
       # TODO: handle errors
       {:error, error} -> Logger.error("Error parsing commands: #{inspect(error)}")
     end

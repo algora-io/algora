@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Org.CreateLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
+
   alias Algora.Users
 
   def mount(_params, session, socket) do

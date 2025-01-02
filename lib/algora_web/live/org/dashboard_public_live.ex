@@ -1,7 +1,11 @@
 defmodule AlgoraWeb.Org.DashboardPublicLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
-  alias Algora.{Organizations, Bounties, Users}
+
+  alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Organizations
+  alias Algora.Users
 
   def mount(%{"org_handle" => handle}, _session, socket) do
     org = Organizations.get_org_by_handle!(handle)

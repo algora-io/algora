@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Onboarding.DevLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
+
   alias Algora.Bounties
 
   def mount(_params, _session, socket) do
@@ -10,11 +12,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     }
 
     bounties =
-      Bounties.list_bounties(
-        status: :paid,
-        limit: 50,
-        solver_country: socket.assigns.current_country
-      )
+      [status: :paid, limit: 50, solver_country: socket.assigns.current_country]
+      |> Bounties.list_bounties()
       |> Enum.uniq_by(& &1.solver.id)
 
     {:ok,
@@ -249,7 +248,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   def handle_event("add_tech", %{"tech" => tech}, socket) do
-    updated_tech_stack = [tech | socket.assigns.context.tech_stack] |> Enum.uniq()
+    updated_tech_stack = Enum.uniq([tech | socket.assigns.context.tech_stack])
     updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end
@@ -277,9 +276,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     {:noreply, assign(socket, context: updated_context)}
   end
 
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
-      when byte_size(tech) > 0 do
-    updated_tech_stack = [String.trim(tech) | socket.assigns.context.tech_stack] |> Enum.uniq()
+  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
+    updated_tech_stack = Enum.uniq([String.trim(tech) | socket.assigns.context.tech_stack])
     updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
     {:noreply, assign(socket, context: updated_context)}
   end

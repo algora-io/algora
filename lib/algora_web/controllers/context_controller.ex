@@ -1,5 +1,6 @@
 defmodule AlgoraWeb.ContextController do
   use AlgoraWeb, :controller
+
   alias Algora.Users
   alias AlgoraWeb.UserAuth
 

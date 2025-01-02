@@ -1,5 +1,7 @@
 defmodule Algora.Reviews do
+  @moduledoc false
   import Ecto.Query
+
   alias Algora.Repo
   alias Algora.Reviews.Review
 
@@ -67,8 +69,7 @@ defmodule Algora.Reviews do
   end
 
   def list_reviews(criteria \\ []) do
-    base_query()
-    |> list_reviews_with(criteria)
+    list_reviews_with(base_query(), criteria)
   end
 
   def get_top_reviews_for_users(user_ids) when is_list(user_ids) do

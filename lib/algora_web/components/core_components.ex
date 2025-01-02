@@ -10,9 +10,25 @@ defmodule AlgoraWeb.CoreComponents do
   """
   use AlgoraWeb.Component
   use AlgoraWeb, :verified_routes
-
-  alias Phoenix.LiveView.JS
   use Gettext, backend: AlgoraWeb.Gettext
+
+  alias AlgoraWeb.Components.UI.Accordion
+  alias AlgoraWeb.Components.UI.Avatar
+  alias AlgoraWeb.Components.UI.Card
+  alias AlgoraWeb.Components.UI.Dialog
+  alias AlgoraWeb.Components.UI.Drawer
+  alias AlgoraWeb.Components.UI.DropdownMenu
+  alias AlgoraWeb.Components.UI.HoverCard
+  alias AlgoraWeb.Components.UI.Menu
+  alias AlgoraWeb.Components.UI.Popover
+  alias AlgoraWeb.Components.UI.RadioGroup
+  alias AlgoraWeb.Components.UI.Select
+  alias AlgoraWeb.Components.UI.Sheet
+  alias AlgoraWeb.Components.UI.Tabs
+  alias AlgoraWeb.Components.UI.ToggleGroup
+  alias AlgoraWeb.Components.UI.Tooltip
+  alias Phoenix.HTML.FormField
+  alias Phoenix.LiveView.JS
 
   slot :inner_block
 
@@ -380,8 +396,7 @@ defmodule AlgoraWeb.CoreComponents do
       to: "#mobile-sidebar",
       display: "flex",
       time: 300,
-      transition:
-        {"transition ease-in-out duration-300 transform", "-translate-x-full", "translate-x-0"}
+      transition: {"transition ease-in-out duration-300 transform", "-translate-x-full", "translate-x-0"}
     )
     |> JS.hide(to: "#show-mobile-sidebar", transition: "fade-out")
     |> JS.dispatch("js:exec", to: "#hide-mobile-sidebar", detail: %{call: "focus", args: []})
@@ -393,30 +408,27 @@ defmodule AlgoraWeb.CoreComponents do
     |> JS.hide(
       to: "#mobile-sidebar",
       time: 300,
-      transition:
-        {"transition ease-in-out duration-300 transform", "translate-x-0", "-translate-x-full"}
+      transition: {"transition ease-in-out duration-300 transform", "translate-x-0", "-translate-x-full"}
     )
     |> JS.show(to: "#show-mobile-sidebar", transition: "fade-in")
     |> JS.dispatch("js:exec", to: "#show-mobile-sidebar", detail: %{call: "focus", args: []})
   end
 
   def show_dropdown(to) do
-    JS.show(
+    [
       to: to,
-      transition:
-        {"transition ease-out duration-120", "transform opacity-0 scale-95",
-         "transform opacity-100 scale-100"}
-    )
+      transition: {"transition ease-out duration-120", "transform opacity-0 scale-95", "transform opacity-100 scale-100"}
+    ]
+    |> JS.show()
     |> JS.set_attribute({"aria-expanded", "true"}, to: to)
   end
 
   def hide_dropdown(to) do
-    JS.hide(
+    [
       to: to,
-      transition:
-        {"transition ease-in duration-120", "transform opacity-100 scale-100",
-         "transform opacity-0 scale-95"}
-    )
+      transition: {"transition ease-in duration-120", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+    ]
+    |> JS.hide()
     |> JS.remove_attribute("aria-expanded", to: to)
   end
 
@@ -705,8 +717,7 @@ defmodule AlgoraWeb.CoreComponents do
     values: ~w(checkbox color date datetime-local email file hidden month number password
                range radio search select tel text textarea time url week)
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :errors, :list, default: []
   attr :hide_errors, :boolean, default: false
@@ -718,7 +729,7 @@ defmodule AlgoraWeb.CoreComponents do
                                    pattern placeholder readonly required rows size step)
   slot :inner_block
 
-  def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
+  def input(%{field: %FormField{} = field} = assigns) do
     errors =
       if Phoenix.Component.used_input?(field) and not assigns.hide_errors,
         do: field.errors,
@@ -727,7 +738,7 @@ defmodule AlgoraWeb.CoreComponents do
     value =
       with %Money{} <- field.value,
            {:ok, value} <- Money.to_string(field.value) do
-        value |> String.trim("$")
+        String.trim(value, "$")
       else
         _ -> field.value
       end
@@ -1059,8 +1070,7 @@ defmodule AlgoraWeb.CoreComponents do
     JS.show(js,
       to: selector,
       transition:
-        {"transition-all transform ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+        {"transition-all transform ease-out duration-300", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
          "opacity-100 translate-y-0 sm:scale-100"}
     )
   end
@@ -1070,8 +1080,7 @@ defmodule AlgoraWeb.CoreComponents do
       to: selector,
       time: 200,
       transition:
-        {"transition-all transform ease-in duration-200",
-         "opacity-100 translate-y-0 sm:scale-100",
+        {"transition-all transform ease-in duration-200", "opacity-100 translate-y-0 sm:scale-100",
          "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
     )
   end
@@ -1244,81 +1253,81 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
-  defdelegate accordion_item(assigns), to: AlgoraWeb.Components.UI.Accordion
-  defdelegate accordion_trigger(assigns), to: AlgoraWeb.Components.UI.Accordion
-  defdelegate accordion(assigns), to: AlgoraWeb.Components.UI.Accordion
+  defdelegate accordion_item(assigns), to: Accordion
+  defdelegate accordion_trigger(assigns), to: Accordion
+  defdelegate accordion(assigns), to: Accordion
   defdelegate alert(assigns), to: AlgoraWeb.Components.UI.Alert
-  defdelegate avatar_fallback(assigns), to: AlgoraWeb.Components.UI.Avatar
-  defdelegate avatar_image(assigns), to: AlgoraWeb.Components.UI.Avatar
-  defdelegate avatar(assigns), to: AlgoraWeb.Components.UI.Avatar
+  defdelegate avatar_fallback(assigns), to: Avatar
+  defdelegate avatar_image(assigns), to: Avatar
+  defdelegate avatar(assigns), to: Avatar
   defdelegate badge(assigns), to: AlgoraWeb.Components.UI.Badge
   defdelegate button(assigns), to: AlgoraWeb.Components.UI.Button
-  defdelegate card_content(assigns), to: AlgoraWeb.Components.UI.Card
-  defdelegate card_description(assigns), to: AlgoraWeb.Components.UI.Card
-  defdelegate card_footer(assigns), to: AlgoraWeb.Components.UI.Card
-  defdelegate card_header(assigns), to: AlgoraWeb.Components.UI.Card
-  defdelegate card_title(assigns), to: AlgoraWeb.Components.UI.Card
-  defdelegate card(assigns), to: AlgoraWeb.Components.UI.Card
+  defdelegate card_content(assigns), to: Card
+  defdelegate card_description(assigns), to: Card
+  defdelegate card_footer(assigns), to: Card
+  defdelegate card_header(assigns), to: Card
+  defdelegate card_title(assigns), to: Card
+  defdelegate card(assigns), to: Card
   defdelegate checkbox(assigns), to: AlgoraWeb.Components.UI.Checkbox
   defdelegate data_table(assigns), to: AlgoraWeb.Components.UI.DataTable
-  defdelegate dialog(assigns), to: AlgoraWeb.Components.UI.Dialog
-  defdelegate dialog_content(assigns), to: AlgoraWeb.Components.UI.Dialog
-  defdelegate dialog_description(assigns), to: AlgoraWeb.Components.UI.Dialog
-  defdelegate dialog_footer(assigns), to: AlgoraWeb.Components.UI.Dialog
-  defdelegate dialog_header(assigns), to: AlgoraWeb.Components.UI.Dialog
-  defdelegate dialog_title(assigns), to: AlgoraWeb.Components.UI.Dialog
-  defdelegate drawer(assigns), to: AlgoraWeb.Components.UI.Drawer
-  defdelegate drawer_content(assigns), to: AlgoraWeb.Components.UI.Drawer
-  defdelegate drawer_header(assigns), to: AlgoraWeb.Components.UI.Drawer
-  defdelegate drawer_footer(assigns), to: AlgoraWeb.Components.UI.Drawer
-  defdelegate dropdown_menu_content(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
-  defdelegate dropdown_menu_item(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
-  defdelegate dropdown_menu_separator(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
-  defdelegate dropdown_menu_trigger(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
-  defdelegate dropdown_menu(assigns), to: AlgoraWeb.Components.UI.DropdownMenu
+  defdelegate dialog(assigns), to: Dialog
+  defdelegate dialog_content(assigns), to: Dialog
+  defdelegate dialog_description(assigns), to: Dialog
+  defdelegate dialog_footer(assigns), to: Dialog
+  defdelegate dialog_header(assigns), to: Dialog
+  defdelegate dialog_title(assigns), to: Dialog
+  defdelegate drawer(assigns), to: Drawer
+  defdelegate drawer_content(assigns), to: Drawer
+  defdelegate drawer_header(assigns), to: Drawer
+  defdelegate drawer_footer(assigns), to: Drawer
+  defdelegate dropdown_menu_content(assigns), to: DropdownMenu
+  defdelegate dropdown_menu_item(assigns), to: DropdownMenu
+  defdelegate dropdown_menu_separator(assigns), to: DropdownMenu
+  defdelegate dropdown_menu_trigger(assigns), to: DropdownMenu
+  defdelegate dropdown_menu(assigns), to: DropdownMenu
   defdelegate form_control(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_description(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_item(assigns), to: AlgoraWeb.Components.UI.Form
   defdelegate form_label(assigns), to: AlgoraWeb.Components.UI.Form
-  defdelegate hover_card_content(assigns), to: AlgoraWeb.Components.UI.HoverCard
-  defdelegate hover_card_trigger(assigns), to: AlgoraWeb.Components.UI.HoverCard
-  defdelegate hover_card(assigns), to: AlgoraWeb.Components.UI.HoverCard
-  defdelegate menu_group(assigns), to: AlgoraWeb.Components.UI.Menu
-  defdelegate menu_item(assigns), to: AlgoraWeb.Components.UI.Menu
-  defdelegate menu_label(assigns), to: AlgoraWeb.Components.UI.Menu
-  defdelegate menu_separator(assigns), to: AlgoraWeb.Components.UI.Menu
-  defdelegate menu_shortcut(assigns), to: AlgoraWeb.Components.UI.Menu
-  defdelegate menu(assigns), to: AlgoraWeb.Components.UI.Menu
-  defdelegate popover_content(assigns), to: AlgoraWeb.Components.UI.Popover
-  defdelegate popover_trigger(assigns), to: AlgoraWeb.Components.UI.Popover
-  defdelegate popover(assigns), to: AlgoraWeb.Components.UI.Popover
-  defdelegate radio_group_item(assigns), to: AlgoraWeb.Components.UI.RadioGroup
-  defdelegate radio_group(assigns), to: AlgoraWeb.Components.UI.RadioGroup
+  defdelegate hover_card_content(assigns), to: HoverCard
+  defdelegate hover_card_trigger(assigns), to: HoverCard
+  defdelegate hover_card(assigns), to: HoverCard
+  defdelegate menu_group(assigns), to: Menu
+  defdelegate menu_item(assigns), to: Menu
+  defdelegate menu_label(assigns), to: Menu
+  defdelegate menu_separator(assigns), to: Menu
+  defdelegate menu_shortcut(assigns), to: Menu
+  defdelegate menu(assigns), to: Menu
+  defdelegate popover_content(assigns), to: Popover
+  defdelegate popover_trigger(assigns), to: Popover
+  defdelegate popover(assigns), to: Popover
+  defdelegate radio_group_item(assigns), to: RadioGroup
+  defdelegate radio_group(assigns), to: RadioGroup
   defdelegate scroll_area(assigns), to: AlgoraWeb.Components.UI.ScrollArea
-  defdelegate select_content(assigns), to: AlgoraWeb.Components.UI.Select
-  defdelegate select_group(assigns), to: AlgoraWeb.Components.UI.Select
-  defdelegate select_item(assigns), to: AlgoraWeb.Components.UI.Select
-  defdelegate select_label(assigns), to: AlgoraWeb.Components.UI.Select
-  defdelegate select_separator(assigns), to: AlgoraWeb.Components.UI.Select
-  defdelegate select_trigger(assigns), to: AlgoraWeb.Components.UI.Select
-  defdelegate select(assigns), to: AlgoraWeb.Components.UI.Select
+  defdelegate select_content(assigns), to: Select
+  defdelegate select_group(assigns), to: Select
+  defdelegate select_item(assigns), to: Select
+  defdelegate select_label(assigns), to: Select
+  defdelegate select_separator(assigns), to: Select
+  defdelegate select_trigger(assigns), to: Select
+  defdelegate select(assigns), to: Select
   defdelegate separator(assigns), to: AlgoraWeb.Components.UI.Separator
-  defdelegate sheet_content(assigns), to: AlgoraWeb.Components.UI.Sheet
-  defdelegate sheet_description(assigns), to: AlgoraWeb.Components.UI.Sheet
-  defdelegate sheet_footer(assigns), to: AlgoraWeb.Components.UI.Sheet
-  defdelegate sheet_header(assigns), to: AlgoraWeb.Components.UI.Sheet
-  defdelegate sheet_title(assigns), to: AlgoraWeb.Components.UI.Sheet
-  defdelegate sheet(assigns), to: AlgoraWeb.Components.UI.Sheet
+  defdelegate sheet_content(assigns), to: Sheet
+  defdelegate sheet_description(assigns), to: Sheet
+  defdelegate sheet_footer(assigns), to: Sheet
+  defdelegate sheet_header(assigns), to: Sheet
+  defdelegate sheet_title(assigns), to: Sheet
+  defdelegate sheet(assigns), to: Sheet
   defdelegate stat_card(assigns), to: AlgoraWeb.Components.UI.StatCard
   defdelegate switch(assigns), to: AlgoraWeb.Components.UI.Switch
-  defdelegate tabs_content(assigns), to: AlgoraWeb.Components.UI.Tabs
-  defdelegate tabs_list(assigns), to: AlgoraWeb.Components.UI.Tabs
-  defdelegate tabs_trigger(assigns), to: AlgoraWeb.Components.UI.Tabs
-  defdelegate tabs(assigns), to: AlgoraWeb.Components.UI.Tabs
-  defdelegate toggle_group_item(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
-  defdelegate toggle_group(assigns), to: AlgoraWeb.Components.UI.ToggleGroup
+  defdelegate tabs_content(assigns), to: Tabs
+  defdelegate tabs_list(assigns), to: Tabs
+  defdelegate tabs_trigger(assigns), to: Tabs
+  defdelegate tabs(assigns), to: Tabs
+  defdelegate toggle_group_item(assigns), to: ToggleGroup
+  defdelegate toggle_group(assigns), to: ToggleGroup
   defdelegate toggle(assigns), to: AlgoraWeb.Components.UI.Toggle
-  defdelegate tooltip_content(assigns), to: AlgoraWeb.Components.UI.Tooltip
-  defdelegate tooltip_trigger(assigns), to: AlgoraWeb.Components.UI.Tooltip
-  defdelegate tooltip(assigns), to: AlgoraWeb.Components.UI.Tooltip
+  defdelegate tooltip_content(assigns), to: Tooltip
+  defdelegate tooltip_trigger(assigns), to: Tooltip
+  defdelegate tooltip(assigns), to: Tooltip
 end

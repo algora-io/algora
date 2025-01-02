@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.CompaniesLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
+
   alias Algora.Users
 
   @impl true
@@ -22,8 +24,7 @@ defmodule AlgoraWeb.CompaniesLive do
 
   @impl true
   def handle_event("toggle-faq", %{"id" => id}, socket) do
-    {:noreply,
-     assign(socket, expanded_faq: if(socket.assigns.expanded_faq == id, do: nil, else: id))}
+    {:noreply, assign(socket, expanded_faq: if(socket.assigns.expanded_faq == id, do: nil, else: id))}
   end
 
   @impl true
@@ -522,26 +523,22 @@ defmodule AlgoraWeb.CompaniesLive do
       %{
         name: "Global Talent Pool",
         icon: "tabler-world",
-        description:
-          "Access top developers from around the world, pre-vetted and ready to contribute to your projects."
+        description: "Access top developers from around the world, pre-vetted and ready to contribute to your projects."
       },
       %{
         name: "Seamless Integration",
         icon: "tabler-puzzle",
-        description:
-          "Our platform integrates with your existing tools and workflows, making team expansion effortless."
+        description: "Our platform integrates with your existing tools and workflows, making team expansion effortless."
       },
       %{
         name: "Quality Assurance",
         icon: "tabler-shield-check",
-        description:
-          "Every developer is thoroughly vetted through technical assessments and real-world projects."
+        description: "Every developer is thoroughly vetted through technical assessments and real-world projects."
       },
       %{
         name: "Flexible Engagement",
         icon: "tabler-clock",
-        description:
-          "Work with developers on your terms - full-time, part-time, or project-based."
+        description: "Work with developers on your terms - full-time, part-time, or project-based."
       },
       %{
         name: "Cost Effective",
@@ -564,13 +561,11 @@ defmodule AlgoraWeb.CompaniesLive do
       },
       %{
         name: "Get Matched",
-        description:
-          "Our AI matches you with the best developers for your project based on tech stack and experience."
+        description: "Our AI matches you with the best developers for your project based on tech stack and experience."
       },
       %{
         name: "Start Working",
-        description:
-          "Begin collaboration immediately with our integrated project management tools."
+        description: "Begin collaboration immediately with our integrated project management tools."
       }
     ]
   end
@@ -760,8 +755,7 @@ defmodule AlgoraWeb.CompaniesLive do
       %{
         title: "How StartupX Scaled Their Engineering Team",
         href: "#",
-        description:
-          "StartupX needed to double their engineering team in 3 months. See how they did it with Algora.",
+        description: "StartupX needed to double their engineering team in 3 months. See how they did it with Algora.",
         date: "Mar 16, 2024",
         author: "Tom Cook",
         author_image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
@@ -781,8 +775,7 @@ defmodule AlgoraWeb.CompaniesLive do
       %{
         title: "DevCo's Open Source Success Story",
         href: "#",
-        description:
-          "How DevCo leveraged open source talent to accelerate their product development.",
+        description: "How DevCo leveraged open source talent to accelerate their product development.",
         date: "Mar 5, 2024",
         author: "Emily Thompson",
         author_image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",

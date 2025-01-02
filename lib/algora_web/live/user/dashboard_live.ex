@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.User.DashboardLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Achievement
@@ -167,7 +168,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     """
   end
 
-  defp fetch_achievements() do
+  defp fetch_achievements do
     [
       %{status: :completed, name: "Personalize Algora"},
       %{status: :current, name: "Create Stripe account"},
@@ -177,9 +178,8 @@ defmodule AlgoraWeb.User.DashboardLive do
     ]
   end
 
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket)
-      when byte_size(tech) > 0 do
-    tech_stack = [String.trim(tech) | socket.assigns.tech_stack] |> Enum.uniq()
+  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
+    tech_stack = Enum.uniq([String.trim(tech) | socket.assigns.tech_stack])
 
     {:noreply,
      socket
@@ -223,7 +223,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       ) ++
         Bounties.TicketView.sample_tickets()
 
-    socket |> assign(:tickets, tickets |> Enum.take(6))
+    assign(socket, :tickets, Enum.take(tickets, 6))
   end
 
   def compact_view(assigns) do

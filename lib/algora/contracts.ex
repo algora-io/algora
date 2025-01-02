@@ -1,19 +1,20 @@
 defmodule Algora.Contracts do
+  @moduledoc false
+  import Algora.Validators
   import Ecto.Changeset
   import Ecto.Query
-  import Algora.Validators
+
+  alias Algora.Contracts.Contract
+  alias Algora.Contracts.Timesheet
+  alias Algora.FeeTier
+  alias Algora.MoneyUtils
+  alias Algora.Payments
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Stripe
+  alias Algora.Util
 
   require Algora.SQL
-
-  alias Algora.Repo
-  alias Algora.Contracts.Contract
-  alias Algora.FeeTier
-  alias Algora.Contracts.Timesheet
-  alias Algora.Payments.Transaction
-  alias Algora.Payments
-  alias Algora.Util
-  alias Algora.Stripe
-  alias Algora.MoneyUtils
 
   @type payment_status ::
           {:paid, Contract.t()}
@@ -72,13 +73,12 @@ defmodule Algora.Contracts do
   end
 
   defp build_contract_period({contract, index}) do
-    [
+    List.flatten([
       build_initial_prepayment(contract),
       build_contract_renewal(contract, index),
       build_timesheet_submission(contract),
       build_payment_releases(contract)
-    ]
-    |> List.flatten()
+    ])
   end
 
   defp build_initial_prepayment(contract) do
@@ -167,12 +167,7 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  defp initialize_debit(%{
-         id: id,
-         contract: contract,
-         amount: amount,
-         linked_transaction_id: linked_transaction_id
-       }) do
+  defp initialize_debit(%{id: id, contract: contract, amount: amount, linked_transaction_id: linked_transaction_id}) do
     %Transaction{}
     |> change(%{
       id: id,
@@ -197,12 +192,7 @@ defmodule Algora.Contracts do
     |> Repo.insert()
   end
 
-  defp initialize_credit(%{
-         id: id,
-         contract: contract,
-         amount: amount,
-         linked_transaction_id: linked_transaction_id
-       }) do
+  defp initialize_credit(%{id: id, contract: contract, amount: amount, linked_transaction_id: linked_transaction_id}) do
     %Transaction{}
     |> change(%{
       id: id,
@@ -307,33 +297,26 @@ defmodule Algora.Contracts do
 
     line_items =
       if Money.positive?(net_charge_amount) do
-        [
-          %{
-            amount: transfer_amount,
-            description:
-              "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
-          },
-          %{
-            amount: Money.negate!(balance),
-            description: "Less: Previously prepaid amount"
-          },
-          if new_prepayment do
+        Enum.reject(
+          [
             %{
-              amount: new_prepayment,
+              amount: transfer_amount,
               description:
-                "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
-            }
-          end,
-          %{
-            amount: platform_fee,
-            description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"
-          },
-          %{
-            amount: transaction_fee,
-            description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"
-          }
-        ]
-        |> Enum.reject(&Money.zero?(&1.amount))
+                "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+            },
+            %{amount: Money.negate!(balance), description: "Less: Previously prepaid amount"},
+            if new_prepayment do
+              %{
+                amount: new_prepayment,
+                description:
+                  "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+              }
+            end,
+            %{amount: platform_fee, description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"},
+            %{amount: transaction_fee, description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"}
+          ],
+          &Money.zero?(&1.amount)
+        )
       else
         []
       end
@@ -408,8 +391,7 @@ defmodule Algora.Contracts do
   end
 
   defp create_line_items(contract, invoice, line_items) do
-    line_items
-    |> Enum.reduce_while({:ok, []}, fn line_item, {:ok, acc} ->
+    Enum.reduce_while(line_items, {:ok, []}, fn line_item, {:ok, acc} ->
       case Stripe.create_invoice_item(%{
              invoice: invoice.id,
              customer: contract.client.customer.provider_id,
@@ -447,8 +429,7 @@ defmodule Algora.Contracts do
   end
 
   # TODO: do we need to lock the transactions here?
-  defp transfer_funds(contract, %Transaction{type: :transfer} = transaction)
-       when transaction.status != :succeeded do
+  defp transfer_funds(contract, %Transaction{type: :transfer} = transaction) when transaction.status != :succeeded do
     case Stripe.create_transfer(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
            currency: to_string(transaction.net_amount.currency),
@@ -480,7 +461,7 @@ defmodule Algora.Contracts do
       provider_id: record[:id],
       provider_meta: Util.normalize_struct(record),
       status: status,
-      succeeded_at: if(status == :succeeded, do: DateTime.utc_now(), else: nil)
+      succeeded_at: if(status == :succeeded, do: DateTime.utc_now())
     })
     |> Repo.update()
   end
@@ -497,7 +478,7 @@ defmodule Algora.Contracts do
       id: Nanoid.generate(),
       status: :active,
       start_date: contract.end_date,
-      end_date: contract.end_date |> DateTime.add(7, :day),
+      end_date: DateTime.add(contract.end_date, 7, :day),
       sequence_number: contract.sequence_number + 1,
       original_contract_id: contract.original_contract_id,
       client_id: contract.client_id,
@@ -529,8 +510,7 @@ defmodule Algora.Contracts do
   end
 
   def list_contracts(criteria \\ []) do
-    criteria
-    |> list_contract_chain()
+    list_contract_chain(criteria)
   end
 
   # TODO: rename

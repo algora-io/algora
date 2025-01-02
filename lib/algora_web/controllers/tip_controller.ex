@@ -1,7 +1,9 @@
 defmodule AlgoraWeb.TipController do
   use AlgoraWeb, :controller
 
-  alias Algora.{Bounties, Users, Workspace}
+  alias Algora.Bounties
+  alias Algora.Users
+  alias Algora.Workspace
   alias AlgoraWeb.UserAuth
 
   def create(conn, %{"amount" => amount, "recipient" => recipient} = _params) do

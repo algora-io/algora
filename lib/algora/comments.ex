@@ -1,7 +1,9 @@
 defmodule Algora.Comments do
+  @moduledoc false
   import Ecto.Query, warn: false
-  alias Algora.Repo
+
   alias Algora.Comments.CommentCursor
+  alias Algora.Repo
 
   def get_comment_cursor(provider, repo_owner, repo_name) do
     Repo.get_by(CommentCursor, provider: provider, repo_owner: repo_owner, repo_name: repo_name)

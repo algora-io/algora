@@ -1,5 +1,7 @@
 defmodule Algora.Bounties.Claim do
+  @moduledoc false
   use Algora.Schema
+
   alias Algora.Bounties.Claim
 
   @type t() :: %__MODULE__{}

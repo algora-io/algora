@@ -1,9 +1,10 @@
 defmodule AlgoraWeb.Org.CreateJobLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
-  alias AlgoraWeb.Org.Forms.JobForm
   alias Algora.Users
+  alias AlgoraWeb.Org.Forms.JobForm
 
   def mount(_params, _session, socket) do
     form =
@@ -672,7 +673,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   end
 
   def handle_event("publish_job", _, socket) do
-    {:noreply, socket |> assign(:show_publish_job_drawer, true)}
+    {:noreply, assign(socket, :show_publish_job_drawer, true)}
   end
 
   def handle_event("view_dev", %{"id" => dev_id}, socket) do
@@ -702,12 +703,12 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   end
 
   def handle_event("begin_collaboration", _, socket) do
-    {:noreply, socket |> assign(:show_publish_job_drawer, true)}
+    {:noreply, assign(socket, :show_publish_job_drawer, true)}
   end
 
   def handle_event("submit_collaboration", _params, socket) do
     # TODO: Implement payment method addition and collaboration initiation
-    {:noreply, socket |> redirect(to: ~p"/contracts/123")}
+    {:noreply, redirect(socket, to: ~p"/contracts/123")}
   end
 
   defp get_url_icon(nil), do: "tabler-link"

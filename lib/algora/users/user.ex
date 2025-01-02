@@ -1,9 +1,13 @@
 defmodule Algora.Users.User do
+  @moduledoc false
   use Algora.Schema
 
+  alias Algora.Bounties.Bounty
+  alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
-  alias Algora.Users.User
+  alias Algora.Organizations.Member
   alias Algora.Users.Identity
+  alias Algora.Users.User
   alias Algora.Workspace.Installation
   alias Money.Ecto.Composite.Type, as: MoneyType
 
@@ -69,10 +73,10 @@ defmodule Algora.Users.User do
     field :og_image_url, :string
 
     has_many :identities, Identity
-    has_many :memberships, Algora.Organizations.Member, foreign_key: :user_id
-    has_many :members, Algora.Organizations.Member, foreign_key: :org_id
-    has_many :owned_bounties, Algora.Bounties.Bounty, foreign_key: :owner_id
-    has_many :created_bounties, Algora.Bounties.Bounty, foreign_key: :creator_id
+    has_many :memberships, Member, foreign_key: :user_id
+    has_many :members, Member, foreign_key: :org_id
+    has_many :owned_bounties, Bounty, foreign_key: :owner_id
+    has_many :created_bounties, Bounty, foreign_key: :creator_id
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project
@@ -80,8 +84,8 @@ defmodule Algora.Users.User do
     has_many :transactions, Algora.Payments.Transaction, foreign_key: :user_id
     has_many :owned_installations, Installation, foreign_key: :owner_id
     has_many :connected_installations, Installation, foreign_key: :connected_user_id
-    has_many :contractor_contracts, Algora.Contracts.Contract, foreign_key: :contractor_id
-    has_many :client_contracts, Algora.Contracts.Contract, foreign_key: :client_id
+    has_many :contractor_contracts, Contract, foreign_key: :contractor_id
+    has_many :client_contracts, Contract, foreign_key: :client_id
 
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
 
@@ -93,8 +97,7 @@ defmodule Algora.Users.User do
   def after_load(nil), do: nil
 
   def after_load(struct) do
-    [:total_earned]
-    |> Enum.reduce(struct, &MoneyUtils.ensure_money_field(&2, &1))
+    Enum.reduce([:total_earned], struct, &MoneyUtils.ensure_money_field(&2, &1))
   end
 
   def org_registration_changeset(params) do
@@ -160,7 +163,7 @@ defmodule Algora.Users.User do
     end
   end
 
-  def github_registration_changeset(user = %User{}, info, primary_email, emails, token) do
+  def github_registration_changeset(%User{} = user, info, primary_email, emails, token) do
     identity_changeset =
       Identity.github_registration_changeset(user, info, primary_email, emails, token)
 
@@ -293,8 +296,7 @@ defmodule Algora.Users.User do
   end
 
   def validate_timezone(changeset) do
-    changeset
-    |> validate_inclusion(:timezone, Tzdata.zone_list())
+    validate_inclusion(changeset, :timezone, Tzdata.zone_list())
   end
 
   defp type_from_provider(:github, "Organization"), do: :organization

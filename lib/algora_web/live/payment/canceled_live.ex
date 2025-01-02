@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Payment.CanceledLive do
+  @moduledoc false
   use AlgoraWeb, :live_view
 
   def mount(_params, _session, socket) do

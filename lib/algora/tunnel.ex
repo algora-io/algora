@@ -1,5 +1,7 @@
 defmodule Algora.Tunnel do
+  @moduledoc false
   use GenServer
+
   require Logger
 
   def start_link(arg) do

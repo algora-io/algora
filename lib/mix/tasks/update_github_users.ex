@@ -1,10 +1,13 @@
 defmodule Mix.Tasks.UpdateGithubUsers do
+  @shortdoc "Updates user data from GitHub"
+
+  @moduledoc false
   use Mix.Task
-  require Logger
+
   alias Algora.Admin
   alias Algora.Github
 
-  @shortdoc "Updates user data from GitHub"
+  require Logger
 
   @input_dir "dev/experts/raw"
   @output_dir "dev/experts"
@@ -17,7 +20,9 @@ defmodule Mix.Tasks.UpdateGithubUsers do
     File.mkdir_p!(output_path)
 
     # Process all JSON files in the input directory
-    Path.join(:code.priv_dir(:algora), @input_dir)
+    :algora
+    |> :code.priv_dir()
+    |> Path.join(@input_dir)
     |> File.ls!()
     |> Enum.filter(&String.ends_with?(&1, ".json"))
     |> Enum.each(&process_file/1)

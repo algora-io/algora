@@ -1,4 +1,5 @@
 defmodule Algora.MoneyUtils do
+  @moduledoc false
   def fmt_precise(money), do: Money.to_string(money, no_fraction_if_integer: false)
   def fmt_precise!(money), do: Money.to_string!(money, no_fraction_if_integer: false)
 

@@ -1,5 +1,8 @@
 defmodule Algora.Reviews.Review do
+  @moduledoc false
   use Algora.Schema
+
+  alias Algora.Users.User
 
   @type t() :: %__MODULE__{}
 
@@ -10,9 +13,9 @@ defmodule Algora.Reviews.Review do
 
     belongs_to :contract, Algora.Contracts.Contract
     belongs_to :bounty, Algora.Bounties.Bounty
-    belongs_to :organization, Algora.Users.User
-    belongs_to :reviewer, Algora.Users.User
-    belongs_to :reviewee, Algora.Users.User
+    belongs_to :organization, User
+    belongs_to :reviewer, User
+    belongs_to :reviewee, User
 
     timestamps()
   end
@@ -27,6 +30,6 @@ defmodule Algora.Reviews.Review do
     )
   end
 
-  def min_rating(), do: 1
-  def max_rating(), do: 5
+  def min_rating, do: 1
+  def max_rating, do: 5
 end

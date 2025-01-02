@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
+  @moduledoc false
   use AlgoraWeb.LiveComponent
 
   alias Algora.Contracts
@@ -224,14 +225,10 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
   def handle_event("release_and_renew", _params, socket) do
     case Contracts.release_and_renew_contract(socket.assigns.contract) do
       {:ok, _} ->
-        {:noreply,
-         socket
-         |> put_flash(:success, "Payment released and contract renewed")}
+        {:noreply, put_flash(socket, :success, "Payment released and contract renewed")}
 
       {:error, error} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Error releasing payment: #{inspect(error)}")}
+        {:noreply, put_flash(socket, :error, "Error releasing payment: #{inspect(error)}")}
     end
   end
 end

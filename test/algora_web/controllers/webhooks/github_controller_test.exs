@@ -1,7 +1,8 @@
 defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use AlgoraWeb.ConnCase
-  import Mox
+
   import Money.Sigil
+  import Mox
 
   alias AlgoraWeb.Webhooks.GithubController
 

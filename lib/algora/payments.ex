@@ -1,12 +1,13 @@
 defmodule Algora.Payments do
-  require Logger
-
+  @moduledoc false
   import Ecto.Query
 
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Repo
+
+  require Logger
 
   def broadcast! do
     Phoenix.PubSub.broadcast!(Algora.PubSub, "payments:all", :payments_updated)
@@ -30,18 +31,16 @@ defmodule Algora.Payments do
     Stripe.Session.create(params)
   end
 
-  def get_transaction_fee_pct(), do: Decimal.new("0.04")
+  def get_transaction_fee_pct, do: Decimal.new("0.04")
 
   def get_provider_fee_from_balance_transaction(txn) do
-    with %Money{} = amount <- Money.from_integer(txn.fee, txn.currency) do
-      amount
-    else
+    case Money.from_integer(txn.fee, txn.currency) do
+      %Money{} = amount -> amount
       _ -> nil
     end
   end
 
-  def get_provider_fee_from_invoice(%{charge: %{balance_transaction: txn}})
-      when not is_nil(txn) do
+  def get_provider_fee_from_invoice(%{charge: %{balance_transaction: txn}}) when not is_nil(txn) do
     get_provider_fee_from_balance_transaction(txn)
   end
 
@@ -68,12 +67,13 @@ defmodule Algora.Payments do
   def get_customer_by(fields), do: Repo.get_by(Customer, fields)
 
   def get_default_payment_method(org) do
-    from(pm in PaymentMethod,
-      join: c in assoc(pm, :customer),
-      join: u in assoc(c, :user),
-      where: u.id == ^org.id and pm.is_default == true
+    Repo.one(
+      from(pm in PaymentMethod,
+        join: c in assoc(pm, :customer),
+        join: u in assoc(c, :user),
+        where: u.id == ^org.id and pm.is_default == true
+      )
     )
-    |> Repo.one()
   end
 
   def get_total_paid(client_id, contractor_id) do

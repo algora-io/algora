@@ -1,12 +1,14 @@
 defmodule Algora.Users do
-  import Ecto.Query
+  @moduledoc false
   import Ecto.Changeset
-  require Algora.SQL
+  import Ecto.Query
 
-  alias Algora.Repo
-  alias Algora.Users.User
-  alias Algora.Users.Identity
   alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Users.Identity
+  alias Algora.Users.User
+
+  require Algora.SQL
 
   def base_query, do: User
 
@@ -141,8 +143,7 @@ defmodule Algora.Users do
   end
 
   def list_developers(criteria \\ []) do
-    base_query()
-    |> list_developers_with(criteria)
+    list_developers_with(base_query(), criteria)
   end
 
   def fetch_developer(id) do
@@ -181,7 +182,7 @@ defmodule Algora.Users do
         handle: user.handle,
         flag: get_flag(user),
         amount: :rand.uniform(100_000),
-        tech_stack: user.tech_stack |> Enum.take(6),
+        tech_stack: Enum.take(user.tech_stack, 6),
         avatar_url: user.avatar_url
       }
     end)
@@ -261,23 +262,23 @@ defmodule Algora.Users do
   end
 
   def register_org(params) do
-    User.org_registration_changeset(params) |> Repo.insert()
+    params |> User.org_registration_changeset() |> Repo.insert()
   end
 
   def create_user(info, primary_email, emails, token) do
-    User.github_registration_changeset(nil, info, primary_email, emails, token)
+    nil
+    |> User.github_registration_changeset(info, primary_email, emails, token)
     |> Repo.insert()
   end
 
   def update_user(user, info, primary_email, emails, token) do
     with {:ok, _} <-
-           Identity.github_registration_changeset(user, info, primary_email, emails, token)
-           |> Repo.insert(),
-         {:ok, user} <-
            user
-           |> User.github_registration_changeset(info, primary_email, emails, token)
-           |> Repo.update() do
-      {:ok, user}
+           |> Identity.github_registration_changeset(info, primary_email, emails, token)
+           |> Repo.insert() do
+      user
+      |> User.github_registration_changeset(info, primary_email, emails, token)
+      |> Repo.update()
     end
   end
 
@@ -338,7 +339,7 @@ defmodule Algora.Users do
 
   # TODO: implement this
   def list_experts(tech_stack) do
-    experts_file = :code.priv_dir(:algora) |> Path.join("dev/experts/#{tech_stack}.json")
+    experts_file = :algora |> :code.priv_dir() |> Path.join("dev/experts/#{tech_stack}.json")
 
     with true <- File.exists?(experts_file),
          {:ok, contents} <- File.read(experts_file),
@@ -366,7 +367,9 @@ defmodule Algora.Users do
       "Ruby"
     ]
 
-    Path.join(:code.priv_dir(:algora), "dev/experts")
+    :algora
+    |> :code.priv_dir()
+    |> Path.join("dev/experts")
     |> File.ls!()
     |> Enum.filter(&String.ends_with?(&1, ".json"))
     |> Enum.map(&String.trim_trailing(&1, ".json"))

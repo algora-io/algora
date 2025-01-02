@@ -1,5 +1,7 @@
 defmodule Algora.Comments.CommentCursor do
+  @moduledoc false
   use Algora.Schema
+
   import Ecto.Changeset
 
   schema "comment_cursors" do

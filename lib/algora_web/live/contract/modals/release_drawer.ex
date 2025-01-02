@@ -1,17 +1,18 @@
 defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
+  @moduledoc false
   use AlgoraWeb.LiveComponent
 
-  import Ecto.Query
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Algora.Contracts
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Payments
-  alias Algora.Repo
-  alias Algora.Util
-  alias Algora.Users.User
   alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias Algora.Users.User
+  alias Algora.Util
 
   attr :show, :boolean, required: true
   attr :on_cancel, :string, required: true
@@ -107,11 +108,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
     %{contract: contract, fee_data: fee_data} = socket.assigns
 
     org =
-      from(u in User,
-        where: u.handle == ^contract.client.handle,
-        preload: [customer: :default_payment_method]
-      )
-      |> Repo.one!()
+      Repo.one!(from(u in User, where: u.handle == ^contract.client.handle, preload: [customer: :default_payment_method]))
 
     net_amount =
       Money.sub!(Contracts.calculate_transfer_amount(contract), Contract.balance(contract))
@@ -151,7 +148,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
             provider_meta: Util.normalize_struct(pi),
             provider_fee: Payments.get_provider_fee(:stripe, pi),
             status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
-            succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now(), else: nil)
+            succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now())
           })
           |> Repo.update!()
 

@@ -1,7 +1,8 @@
 defmodule Algora.Analytics do
+  @moduledoc false
   def get_company_analytics(period \\ "30d") do
-    days = String.replace(period, "d", "") |> String.to_integer()
-    _since = DateTime.utc_now() |> DateTime.add(-days * 24 * 3600)
+    days = period |> String.replace("d", "") |> String.to_integer()
+    _since = DateTime.add(DateTime.utc_now(), -days * 24 * 3600)
 
     # Mock data for demonstration
     %{

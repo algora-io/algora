@@ -1,19 +1,17 @@
 defmodule Algora.Github.Poller.CommentConsumer do
+  @moduledoc false
   use Oban.Worker, queue: :comment_consumers
-  require Logger
+
   alias Algora.Bounties
-  alias Algora.Workspace
   alias Algora.Github
   alias Algora.Util
+  alias Algora.Workspace
+
+  require Logger
 
   @impl Oban.Worker
   def perform(%Oban.Job{
-        args:
-          %{
-            "comment" => comment,
-            "command" => encoded_command,
-            "ticket_ref" => encoded_ticket_ref
-          } = _args
+        args: %{"comment" => comment, "command" => encoded_command, "ticket_ref" => encoded_ticket_ref} = _args
       }) do
     command = Util.base64_to_term!(encoded_command)
     ticket_ref = Util.base64_to_term!(encoded_ticket_ref)
@@ -21,7 +19,7 @@ defmodule Algora.Github.Poller.CommentConsumer do
     run_command(command, ticket_ref, comment)
   end
 
-  defp run_command({:claim, args}, ticket_ref, _comment) do
+  defp run_command({:claim, _args}, _ticket_ref, _comment) do
     # TODO: implement claim command
     :ok
   end

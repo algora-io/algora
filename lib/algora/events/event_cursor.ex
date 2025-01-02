@@ -1,5 +1,7 @@
 defmodule Algora.Events.EventCursor do
+  @moduledoc false
   use Algora.Schema
+
   import Ecto.Changeset
 
   schema "event_cursors" do

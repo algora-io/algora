@@ -1,12 +1,14 @@
 defmodule Algora.Admin do
-  require Logger
-
+  @moduledoc false
   import Ecto.Query
 
   alias Algora.Repo
   alias Algora.Workspace
+  alias Algora.Workspace.Ticket
 
-  def token!(), do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
+  require Logger
+
+  def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 
   def run(worker) do
     worker.perform(%Oban.Job{args: read!("dev/job.json")})
@@ -28,16 +30,17 @@ defmodule Algora.Admin do
     end
   end
 
-  def backfill_repos!() do
+  def backfill_repos! do
     query =
-      from(t in Algora.Workspace.Ticket,
+      from(t in Ticket,
         where: fragment("?->>'repository_url' IS NOT NULL", t.provider_meta),
         distinct: fragment("?->>'repository_url'", t.provider_meta),
         select: fragment("?->>'repository_url'", t.provider_meta)
       )
 
     {success, failure} =
-      Repo.all(query)
+      query
+      |> Repo.all()
       |> Task.async_stream(&backfill_repo/1, max_concurrency: 1, timeout: :infinity)
       |> Enum.reduce({0, 0}, fn
         {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
@@ -63,10 +66,9 @@ defmodule Algora.Admin do
   end
 
   defp update_tickets(url, repo_id) do
-    from(t in Algora.Workspace.Ticket,
-      where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)
+    Repo.update_all(from(t in Ticket, where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)),
+      set: [repository_id: repo_id]
     )
-    |> Repo.update_all(set: [repository_id: repo_id])
 
     :ok
   end

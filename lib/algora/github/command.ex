@@ -1,19 +1,21 @@
 defmodule Algora.Github.Command do
-  import NimbleParsec
+  @moduledoc false
   import Algora.Parser.Combinator
+  import NimbleParsec
 
   defmodule Helper do
+    @moduledoc false
     @usage %{
       bounty: "/bounty <amount>",
       tip: "/tip <amount> @username or /tip @username <amount>",
       claim: "/claim <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)"
     }
 
-    def commands() do
+    def commands do
       repeat(
         choice([
           # Any text that is not a command
-          ascii_string([not: ?/], min: 1) |> ignore(),
+          [not: ?/] |> ascii_string(min: 1) |> ignore(),
 
           # Known command
           choice([
@@ -23,22 +25,28 @@ defmodule Algora.Github.Command do
           ]),
 
           # Unknown command
-          ignore(string("/"))
+          "/"
+          |> string()
+          |> ignore()
           |> concat(ascii_string([?a..?z, ?A..?Z, ?_, ?-], min: 1))
           |> ignore()
         ])
       )
     end
 
-    def bounty_command() do
-      ignore(string("/bounty"))
-      |> concat(optional(ignore(whitespace()) |> concat(amount())))
+    def bounty_command do
+      "/bounty"
+      |> string()
+      |> ignore()
+      |> concat(whitespace() |> ignore() |> concat(amount()) |> optional())
       |> tag(:bounty)
       |> label(@usage.bounty)
     end
 
-    def tip_command() do
-      ignore(string("/tip"))
+    def tip_command do
+      "/tip"
+      |> string()
+      |> ignore()
       |> concat(ignore(whitespace()))
       |> choice([
         amount() |> concat(ignore(whitespace())) |> concat(username()),
@@ -50,8 +58,10 @@ defmodule Algora.Github.Command do
       |> label(@usage.tip)
     end
 
-    def claim_command() do
-      ignore(string("/claim"))
+    def claim_command do
+      "/claim"
+      |> string()
+      |> ignore()
       |> concat(ignore(whitespace()))
       |> concat(ticket_ref())
       |> tag(:claim)
@@ -64,23 +74,21 @@ defmodule Algora.Github.Command do
   def parse(nil), do: {:ok, %{}}
 
   def parse(input) when is_binary(input) do
-    try do
-      case parse_raw(input) do
-        {:ok, [], _, _, _, _} ->
-          {:ok, %{}}
+    case parse_raw(input) do
+      {:ok, [], _, _, _, _} ->
+        {:ok, %{}}
 
-        {:ok, parsed, _, _, _, _} ->
-          {:ok,
-           parsed
-           |> Enum.reject(&is_nil/1)
-           |> Enum.into(%{})}
+      {:ok, parsed, _, _, _, _} ->
+        {:ok,
+         parsed
+         |> Enum.reject(&is_nil/1)
+         |> Map.new()}
 
-        {:error, reason, _, _, _, _} ->
-          {:error, reason}
-      end
-    rescue
-      ArgumentError ->
-        {:error, "Failed to parse commands"}
+      {:error, reason, _, _, _, _} ->
+        {:error, reason}
     end
+  rescue
+    ArgumentError ->
+      {:error, "Failed to parse commands"}
   end
 end

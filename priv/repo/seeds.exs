@@ -2,14 +2,17 @@
 #
 #     mix ecto.seed <your-github-id>
 
-require Logger
 import Algora.Factory
-alias Algora.Util
+
 alias Algora.Repo
+alias Algora.Util
+
+require Logger
 
 Application.put_env(:algora, :stripe_impl, Algora.Stripe.SeedImpl)
 
 defmodule Algora.Stripe.SeedImpl do
+  @moduledoc false
   @behaviour Algora.Stripe.Behaviour
 
   @impl true
@@ -285,16 +288,13 @@ messages = [
    days_from_now(-4, ~T[14:20:00.000000])},
   {gilfoyle, "the current setup is adequate. but i suppose a second opinion wouldn't hurt",
    days_from_now(-3, ~T[15:05:00.000000])},
-  {dinesh, "adequate? the servers catch fire every time we deploy",
-   days_from_now(-3, ~T[15:12:00.000000])},
-  {jared,
-   "our uptime metrics have been concerning. i've prepared a spreadsheet tracking all incidents",
+  {dinesh, "adequate? the servers catch fire every time we deploy", days_from_now(-3, ~T[15:12:00.000000])},
+  {jared, "our uptime metrics have been concerning. i've prepared a spreadsheet tracking all incidents",
    days_from_now(-2, ~T[10:30:00.000000])},
   {carver,
    "i specialize in unconventional but effective solutions. fair warning - my methods might seem chaotic at first",
    days_from_now(-1, ~T[11:45:00.000000])},
-  {gilfoyle, "chaos is good. keeps everyone on their toes",
-   days_from_now(-1, ~T[16:20:00.000000])},
+  {gilfoyle, "chaos is good. keeps everyone on their toes", days_from_now(-1, ~T[16:20:00.000000])},
   {carver, "give me root access and a week. i'll make your infrastructure bulletproof 🚀",
    days_from_now(0, ~T[09:00:00.000000])}
 ]
@@ -311,9 +311,7 @@ for {sender, content, inserted_at} <- messages do
   )
 end
 
-Logger.info(
-  "Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}"
-)
+Logger.info("Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}")
 
 repos = [
   {

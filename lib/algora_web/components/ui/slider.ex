@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Components.UI.Slider do
       </span>
       <input
         type="range"
-        class="absolute top-0 -left-2 z-1 w-full appearance-none cursor-pointer opacity-0"
+        class="z-1 absolute top-0 -left-2 w-full cursor-pointer appearance-none opacity-0"
         phx-update="ignore"
         style="width: calc(100% + 20px)"
         oninput={"this.parentNode.style='--#{@id}-val:' + (this.value - #{@min})/#{@max - @min}*100; return true;"}

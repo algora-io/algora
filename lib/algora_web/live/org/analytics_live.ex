@@ -60,7 +60,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
 
   def bounties_card(assigns) do
     ~H"""
-    <div class="group/card relative h-full rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 overflow-hidden lg:col-span-4">
+    <div class="group/card bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] relative h-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br md:gap-8 lg:col-span-4">
       <div class="flex justify-between">
         <div class="flex flex-col space-y-1.5 p-6">
           <h3 class="text-2xl font-semibold leading-none tracking-tight">Bounties</h3>
@@ -86,14 +86,14 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">
-                    <div class="flex-none rounded-full p-1 bg-emerald-400/10 text-emerald-400">
+                    <div class="flex-none rounded-full bg-emerald-400/10 p-1 text-emerald-400">
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
                       {bounty.ticket.title}
                     </h2>
                   </div>
-                  <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
+                  <div class="mt-px ml-7 flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
                       <span class="truncate">tv#{bounty.ticket.number}</span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
@@ -106,7 +106,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                   </div>
                 </div>
                 <div class="pl-6">
-                  <div class="flex-none rounded-xl px-3 py-1 font-mono text-lg font-extrabold ring-1 ring-inset bg-emerald-400/5 text-emerald-400 ring-emerald-400/30">
+                  <div class="flex-none rounded-xl bg-emerald-400/5 px-3 py-1 font-mono text-lg font-extrabold text-emerald-400 ring-1 ring-inset ring-emerald-400/30">
                     {Money.to_string!(bounty.amount)}
                   </div>
                 </div>
@@ -121,7 +121,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
 
   def activity_card(assigns) do
     ~H"""
-    <div class="group/card relative h-full rounded-xl border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 overflow-hidden lg:col-span-3">
+    <div class="group/card bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] relative h-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br md:gap-8 lg:col-span-3">
       <div class="flex flex-col space-y-1.5 p-6">
         <h3 class="text-2xl font-semibold leading-none tracking-tight">Activity</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400">See what's popping</p>
@@ -141,7 +141,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
                     <div class="relative flex space-x-3">
                       <div class="flex min-w-0 flex-1 justify-between space-x-4">
                         <div class="flex items-center gap-4">
-                          <span class="relative flex shrink-0 overflow-hidden rounded-full h-10 w-10">
+                          <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                             <img
                               class="aspect-square h-full w-full"
                               alt={activity.user}

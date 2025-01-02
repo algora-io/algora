@@ -40,12 +40,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
     <nav
       arial-label="pagination"
       role="pagination"
-      class={
-        classes([
-          "mx-auto flex w-full justify-center",
-          @class
-        ])
-      }
+      class={classes(["mx-auto flex w-full justify-center", @class])}
       {@rest}
       }
     >
@@ -63,16 +58,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
 
   def pagination_content(assigns) do
     ~H"""
-    <ul
-      class={
-        classes([
-          "flex flex-row items-center gap-1",
-          @class
-        ])
-      }
-      {@rest}
-      }
-    >
+    <ul class={classes(["flex flex-row items-center gap-1", @class])} {@rest} }>
       {render_slot(@inner_block)}
     </ul>
     """
@@ -87,15 +73,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
 
   def pagination_item(assigns) do
     ~H"""
-    <li
-      class={
-        classes([
-          "",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <li class={classes(["", @class])} {@rest}>
       {render_slot(@inner_block)}
     </li>
     """
@@ -126,7 +104,7 @@ defmodule AlgoraWeb.Components.UI.Pagination do
       aria-current={(assigns[:"is-active"] && "page") || ""}
       class={
         classes([
-          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
           @variation_class,
           @class
         ])
@@ -204,22 +182,14 @@ defmodule AlgoraWeb.Components.UI.Pagination do
 
   def pagination_ellipsis(assigns) do
     ~H"""
-    <span
-      class={
-        classes([
-          "flex h-9 w-9 items-center justify-center",
-          @class
-        ])
-      }
-      {@rest}
-    >
+    <span class={classes(["flex h-9 w-9 items-center justify-center", @class])} {@rest}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
         stroke-width="2"
         stroke="currentColor"
-        class="size-6 w--4 h-4"
+        class="w--4 size-6 h-4"
       >
         <path
           stroke-linecap="round"

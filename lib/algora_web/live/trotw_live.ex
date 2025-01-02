@@ -19,9 +19,9 @@ defmodule AlgoraWeb.TROTWLive do
     ~H"""
     <div class="font-display container mx-auto px-4 py-8">
       <.header class="mb-8 text-center">
-        <span class="text-6xl font-display font-bold">TROTW</span>
+        <span class="font-display text-6xl font-bold">TROTW</span>
         <:subtitle>
-          <span class="text-base font-display font-medium">Top Regions of the Week</span>
+          <span class="font-display text-base font-medium">Top Regions of the Week</span>
         </:subtitle>
       </.header>
 
@@ -30,12 +30,12 @@ defmodule AlgoraWeb.TROTWLive do
           <h3 class="text-lg font-semibold">All-Time Medal Count</h3>
         </.card_header>
         <div class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
             <%= for {region, medals} <- Enum.sort_by(@medals, fn {_, m} -> m.total end, :desc) do %>
-              <div class="flex flex-col space-y-4 p-4 rounded-lg border bg-card">
-                <div class="flex justify-between items-center">
-                  <div class="text-xl font-medium font-display">{region}</div>
-                  <div class="flex gap-6 items-center">
+              <div class="flex flex-col space-y-4 rounded-lg border bg-card p-4">
+                <div class="flex items-center justify-between">
+                  <div class="font-display text-xl font-medium">{region}</div>
+                  <div class="flex items-center gap-6">
                     <span class="flex items-center gap-1">
                       <span class="text-2xl">🥇</span>
                       <span class="text-xl font-semibold">{medals.gold}</span>
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.TROTWLive do
         <%= for {week_start, rankings} <- @weeks do %>
           <.card>
             <.card_header>
-              <div class="flex justify-between items-center">
+              <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold">
                   Week of {Calendar.strftime(
                     DateTime.from_naive!(week_start, "Etc/UTC"),
@@ -70,19 +70,12 @@ defmodule AlgoraWeb.TROTWLive do
               </div>
             </.card_header>
             <div class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                 <%= for {{region, total_earned, top_earners}, index} <- rankings |> Enum.take(3) |> Enum.with_index(1) do %>
-                  <div class={[
-                    "flex flex-col space-y-4 p-4 rounded-lg border",
-                    case index do
-                      1 -> "bg-amber-500/20 border-amber-700/50"
-                      2 -> "bg-slate-700/50 border-slate-500/50"
-                      3 -> "bg-orange-700/20 border-orange-700/50"
-                    end
-                  ]}>
-                    <div class="flex justify-between items-center">
-                      <div class="text-xl font-display font-medium">
-                        <span class="font-display font-bold text-4xl">
+                  <div class={["flex flex-col space-y-4 rounded-lg border p-4", medal_class(index)]}>
+                    <div class="flex items-center justify-between">
+                      <div class="font-display text-xl font-medium">
+                        <span class="font-display text-4xl font-bold">
                           {case index do
                             1 -> "🥇"
                             2 -> "🥈"
@@ -104,14 +97,14 @@ defmodule AlgoraWeb.TROTWLive do
                               <img
                                 src={earner.avatar_url}
                                 alt={earner.handle}
-                                class="bg-muted inline-block h-16 w-16 rounded-full ring-2 ring-background hover:translate-y-1 transition-transform"
+                                class="inline-block h-16 w-16 rounded-full bg-muted ring-2 ring-background transition-transform hover:translate-y-1"
                               />
                             </div>
                           </.tooltip_trigger>
                           <.tooltip_content>
                             <div class="flex flex-col items-center gap-1">
                               <span class="font-medium">@{earner.handle}</span>
-                              <span class="text-sm font-display text-muted-foreground">
+                              <span class="font-display text-sm text-muted-foreground">
                                 {Money.to_string!(earner.total_earned)}
                               </span>
                             </div>
@@ -129,6 +122,10 @@ defmodule AlgoraWeb.TROTWLive do
     </div>
     """
   end
+
+  defp medal_class(1), do: "bg-amber-500/20 border-amber-700/50"
+  defp medal_class(2), do: "bg-slate-700/50 border-slate-500/50"
+  defp medal_class(3), do: "bg-orange-700/20 border-orange-700/50"
 
   defp get_weekly_rankings do
     transactions_query =

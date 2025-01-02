@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Components.UI.Separator do
       class={
         classes([
           "shrink-0 bg-border",
-          (@orientation == "horizontal" && "h-[1px] w-full") || "h-full w-[1px]",
+          (@orientation == "horizontal" && "h-[1px] w-full") || "w-[1px] h-full",
           @class
         ])
       }

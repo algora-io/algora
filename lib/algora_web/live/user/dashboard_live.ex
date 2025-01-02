@@ -28,10 +28,10 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 lg:pr-96 bg-background text-foreground">
+    <div class="flex-1 bg-background text-foreground lg:pr-96">
       <!-- Hourly Bounties Section -->
       <%= if length(@contracts) > 0 do %>
-        <div class="relative h-full max-w-4xl mx-auto p-6">
+        <div class="relative mx-auto h-full max-w-4xl p-6">
           <div class="flex justify-between px-6">
             <div class="flex flex-col space-y-1.5">
               <h2 class="text-2xl font-semibold leading-none tracking-tight">
@@ -40,7 +40,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               <p class="text-sm text-muted-foreground">Paid out weekly</p>
             </div>
           </div>
-          <div class="px-6 -ml-4">
+          <div class="-ml-4 px-6">
             <div class="relative w-full overflow-auto">
               <table class="w-full caption-bottom text-sm">
                 <tbody>
@@ -55,14 +55,14 @@ defmodule AlgoraWeb.User.DashboardLive do
       <% end %>
       <!-- Regular Bounties Section -->
 
-      <div class="relative h-full max-w-4xl mx-auto p-6">
+      <div class="relative mx-auto h-full max-w-4xl p-6">
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
           <.bounties tickets={@tickets} />
         </.section>
       </div>
     </div>
     <!-- Sidebar -->
-    <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8">
+    <aside class="fixed top-16 right-0 bottom-0 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
       <!-- Availability Section -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -84,8 +84,8 @@ defmodule AlgoraWeb.User.DashboardLive do
       <div class="mt-4 grid grid-cols-2 gap-4">
         <div>
           <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
-          <div class="mt-2 relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-display">
+          <div class="relative mt-2">
+            <span class="font-display absolute top-1/2 left-3 -translate-y-1/2">
               $
             </span>
             <.input
@@ -97,7 +97,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               phx-keydown="handle_hourly_rate"
               phx-debounce="200"
               phx-hook="ClearInput"
-              class="w-full bg-background border-input font-display ps-6"
+              class="font-display w-full border-input bg-background ps-6"
             />
           </div>
         </div>
@@ -112,7 +112,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             value={@hours_per_week}
             phx-keydown="handle_hours_per_week"
             phx-debounce="200"
-            class="mt-2 w-full bg-background border-input font-display"
+            class="font-display mt-2 w-full border-input bg-background"
           />
         </div>
       </div>
@@ -128,11 +128,11 @@ defmodule AlgoraWeb.User.DashboardLive do
           phx-keydown="handle_tech_input"
           phx-debounce="200"
           phx-hook="ClearInput"
-          class="mt-2 w-full bg-background border-input"
+          class="mt-2 w-full border-input bg-background"
         />
-        <div class="flex flex-wrap gap-3 mt-4">
+        <div class="mt-4 flex flex-wrap gap-3">
           <%= for tech <- @current_user.tech_stack do %>
-            <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
+            <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
               {tech}
               <button
                 phx-click="remove_tech"
@@ -228,21 +228,21 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def compact_view(assigns) do
     ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
       <td class="p-4 py-0 align-middle">
         <div class="flex items-center gap-4">
-          <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
             {Money.to_string!(@bounty.amount)}
           </div>
 
           <.link
             href={@bounty.ticket.url}
-            class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
           >
             {@bounty.ticket.title}
           </.link>
 
-          <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+          <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
             <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
               {@bounty.owner.name}
             </.link>
@@ -286,7 +286,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               <div class="font-display text-xl font-semibold text-success">
                 {Money.to_string!(@bounty.amount)}
               </div>
-              <div class="text-foreground group-hover:underline line-clamp-1">
+              <div class="line-clamp-1 text-foreground group-hover:underline">
                 {@bounty.ticket.title}
               </div>
             </.link>
@@ -312,7 +312,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-4">
             <.link href={~p"/org/#{@contract.client.handle}"}>
-              <.avatar class="h-32 w-auto aspect-[1200/630] rounded-lg">
+              <.avatar class="aspect-[1200/630] h-32 w-auto rounded-lg">
                 <.avatar_image src={@contract.client.og_image_url} alt={@contract.client.name} />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
               </.avatar>
@@ -327,7 +327,7 @@ defmodule AlgoraWeb.User.DashboardLive do
                   {@contract.client.og_title || @contract.client.name}
                 </.link>
               </div>
-              <div class="text-muted-foreground line-clamp-2">
+              <div class="line-clamp-2 text-muted-foreground">
                 {@contract.client.bio}
               </div>
               <div class="group flex items-center gap-2">
@@ -344,7 +344,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
               <div class="mt-1 flex flex-wrap gap-2">
                 <%= for tag <- @contract.client.tech_stack || [] do %>
-                  <div class="ring-foreground/25 ring-1 ring-inset bg-foreground/5 text-foreground rounded-lg px-2 py-1 text-xs font-medium">
+                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
                     {tag}
                   </div>
                 <% end %>
@@ -354,7 +354,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
           <div class="flex flex-col items-end gap-3">
             <div class="text-right">
-              <div class="text-sm text-muted-foreground whitespace-nowrap">Total contract value</div>
+              <div class="whitespace-nowrap text-sm text-muted-foreground">Total contract value</div>
               <div
                 :if={@contract.status != :draft}
                 class="font-display text-lg font-semibold text-foreground"

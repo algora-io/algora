@@ -64,21 +64,21 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-7xl mx-auto p-6 space-y-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <div class="space-y-1">
         <h1 class="text-2xl font-bold">Your Transactions</h1>
         <p class="text-muted-foreground">View and manage your transaction history</p>
       </div>
       
     <!-- Totals Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <.card>
           <.card_header>
             <.card_title>Lifetime Volume</.card_title>
             <.card_description>Total volume of your transactions</.card_description>
           </.card_header>
           <.card_content>
-            <span class="text-2xl font-bold font-display">{Money.to_string!(@total_volume)}</span>
+            <span class="font-display text-2xl font-bold">{Money.to_string!(@total_volume)}</span>
           </.card_content>
         </.card>
         <.card>
@@ -87,7 +87,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
             <.card_description>Net balance across all transactions</.card_description>
           </.card_header>
           <.card_content>
-            <span class="text-2xl font-bold font-display">{Money.to_string!(@total_balance)}</span>
+            <span class="font-display text-2xl font-bold">{Money.to_string!(@total_balance)}</span>
           </.card_content>
         </.card>
       </div>
@@ -140,7 +140,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
                           </div>
                         <% end %>
                       </td>
-                      <td class="whitespace-nowrap px-6 py-4 font-display font-medium text-right tabular-nums">
+                      <td class="font-display whitespace-nowrap px-6 py-4 text-right font-medium tabular-nums">
                         <%= case transaction_direction(transaction.type) do %>
                           <% :plus -> %>
                             <span class="text-emerald-400">

@@ -8,12 +8,12 @@ defmodule AlgoraWeb.Payment.CanceledLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex h-screen overflow-hidden text-gray-600 dark:text-white bg-background">
+    <div class="flex h-screen overflow-hidden bg-background text-gray-600 dark:text-white">
       <div class="flex h-full flex-grow flex-col items-center justify-center overflow-hidden">
         <div class="mx-auto flex w-full max-w-2xl flex-col items-center justify-center">
-          <div class="group/card relative h-full border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] flex flex-col items-center gap-4 rounded-lg px-10 py-16 text-center md:gap-4">
+          <div class="group/card bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] relative flex h-full flex-col items-center gap-4 rounded-lg border border-white/10 bg-gradient-to-br px-10 py-16 text-center md:gap-4">
             <div
-              class="absolute inset-0 opacity-100 transition-opacity duration-1000 ease-in-out pointer-events-none"
+              class="pointer-events-none absolute inset-0 opacity-100 transition-opacity duration-1000 ease-in-out"
               aria-hidden="true"
             >
               <canvas width="753" height="375" style="width: 603px; height: 300px;"></canvas>
@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Payment.CanceledLive do
               Your payment has been canceled.
             </h1>
             <.link
-              class="flex items-center gap-1 text-sm font-medium dark:text-amber-400 hover:dark:text-amber-300"
+              class="flex items-center gap-1 text-sm font-medium dark:text-amber-400 dark:hover:text-amber-300"
               navigate={~p"/"}
             >
               Back to dashboard

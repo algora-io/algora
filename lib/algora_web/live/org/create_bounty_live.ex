@@ -23,8 +23,8 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 p-4 pt-6 sm:p-6 md:p-8 max-w-5xl mx-auto">
-      <div class="p-6 relative rounded-lg border bg-card text-card-foreground md:gap-8 h-full">
+    <div class="mx-auto max-w-5xl flex-1 p-4 pt-6 sm:p-6 md:p-8">
+      <div class="relative h-full rounded-lg border bg-card p-6 text-card-foreground md:gap-8">
         <div class="flex justify-between">
           <div>
             <h2 class="inline text-2xl font-semibold">Create New Bounty</h2>
@@ -40,9 +40,9 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
           phx-submit="create_bounty"
           class="mt-6 space-y-6"
         >
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 sm:gap-x-4">
+          <div class="grid grid-cols-1 gap-y-6 sm:gap-x-4 md:grid-cols-2">
             <div>
-              <.label for="title" class="text-sm font-medium mb-2">
+              <.label for="title" class="mb-2 text-sm font-medium">
                 Title
               </.label>
               <.input
@@ -50,21 +50,21 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                 field={@form[:title]}
                 placeholder="Brief description of the task"
                 required
-                class="w-full bg-background border-input rounded-lg"
+                class="w-full rounded-lg border-input bg-background"
               />
             </div>
             <div>
-              <.label for="ticket_url" class="text-sm font-medium mb-2">
+              <.label for="ticket_url" class="mb-2 text-sm font-medium">
                 Ticket
-                <span class="font-normal text-muted-foreground  ">
+                <span class="font-normal text-muted-foreground ">
                   (GitHub, Linear, Figma, Jira, Google Docs...)
                 </span>
               </.label>
               <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                   <.icon
                     name={get_url_icon(@form[:ticket_url].value)}
-                    class="w-5 h-5 text-muted-foreground"
+                    class="h-5 w-5 text-muted-foreground"
                   />
                 </div>
                 <.input
@@ -72,16 +72,16 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                   field={@form[:ticket_url]}
                   placeholder="https://github.com/owner/repo/issues/123"
                   required
-                  class="w-full pl-10 bg-background border-input rounded-lg"
+                  class="w-full rounded-lg border-input bg-background pl-10"
                 />
               </div>
             </div>
           </div>
 
           <fieldset class="mb-8">
-            <legend class="text-sm font-medium text-foreground mb-2">Share Bounty With</legend>
+            <legend class="mb-2 text-sm font-medium text-foreground">Share Bounty With</legend>
             <div class="mt-1 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "private", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
+              <label class={"#{if @form[:sharing_type].value == "private", do: "border-primary bg-background ring-2 ring-primary", else: "border-input bg-background/75"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
                 <input
                   type="radio"
                   name="bounty_form[sharing_type]"
@@ -90,10 +90,10 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                   class="sr-only"
                 />
                 <span class="flex flex-1 flex-col">
-                  <span class="flex items-center mb-1">
+                  <span class="mb-1 flex items-center">
                     <span class="block text-sm font-medium text-foreground">Private Share</span>
                     <svg
-                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "private", do: "invisible"}"}
+                      class={"#{if @form[:sharing_type].value != "private", do: "invisible"} ml-2 h-5 w-5 text-primary"}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -108,16 +108,16 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                     Share with specific people via email or link
                   </span>
 
-                  <div class={"mt-3 space-y-3 transition-opacity duration-200 #{if @form[:sharing_type].value != "private", do: "opacity-0 h-0 overflow-hidden", else: "opacity-100"}"}>
+                  <div class={"#{if @form[:sharing_type].value != "private", do: "h-0 overflow-hidden opacity-0", else: "opacity-100"} mt-3 space-y-3 transition-opacity duration-200"}>
                     <div class="relative">
                       <.input
                         type="text"
                         field={@form[:share_emails]}
                         placeholder="email1@example.com, email2@example.com"
-                        class="w-full bg-background border-input rounded-lg"
+                        class="w-full rounded-lg border-input bg-background"
                       />
-                      <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <.icon name="tabler-mail" class="w-5 h-5 text-muted-foreground" />
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <.icon name="tabler-mail" class="h-5 w-5 text-muted-foreground" />
                       </div>
                     </div>
                     <div class="relative">
@@ -126,11 +126,11 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                         field={@form[:share_url]}
                         value="https://algora.io/bounties/share/abc123"
                         readonly
-                        class="w-full bg-background/50 border-input rounded-lg cursor-pointer"
+                        class="w-full cursor-pointer rounded-lg border-input bg-background/50"
                       />
                       <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                         <button type="button" class="text-muted-foreground hover:text-foreground">
-                          <.icon name="tabler-copy" class="w-5 h-5" />
+                          <.icon name="tabler-copy" class="h-5 w-5" />
                         </button>
                       </div>
                     </div>
@@ -138,7 +138,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                 </span>
               </label>
 
-              <label class={"relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none #{if @form[:sharing_type].value == "platform", do: "border-primary ring-2 ring-primary bg-background", else: "border-input bg-background/75"}"}>
+              <label class={"#{if @form[:sharing_type].value == "platform", do: "border-primary bg-background ring-2 ring-primary", else: "border-input bg-background/75"} relative flex cursor-pointer rounded-lg border p-4 shadow-sm focus:outline-none"}>
                 <input
                   type="radio"
                   name="bounty_form[sharing_type]"
@@ -147,10 +147,10 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                   class="sr-only"
                 />
                 <span class="flex flex-1 flex-col">
-                  <span class="flex items-center mb-1">
+                  <span class="mb-1 flex items-center">
                     <span class="block text-sm font-medium text-foreground">Platform</span>
                     <svg
-                      class={"ml-2 h-5 w-5 text-primary #{if @form[:sharing_type].value != "platform", do: "invisible"}"}
+                      class={"#{if @form[:sharing_type].value != "platform", do: "invisible"} ml-2 h-5 w-5 text-primary"}
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -171,8 +171,8 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
         </.simple_form>
       </div>
 
-      <div class="mt-8 p-6 relative rounded-lg border bg-card text-card-foreground">
-        <div class="flex justify-between mb-6">
+      <div class="relative mt-8 rounded-lg border bg-card p-6 text-card-foreground">
+        <div class="mb-6 flex justify-between">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">Applicants</h2>
             <p class="text-sm text-muted-foreground">
@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                     <div class="space-y-2">
                       <div class="-ml-2.5 flex flex-wrap gap-1">
                         <%= for tech <- Enum.take(dev.tech_stack, 3) do %>
-                          <span class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+                          <span class="inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                             {tech}
                           </span>
                         <% end %>
@@ -231,17 +231,17 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                       </div>
                       <div class="flex items-center gap-4 text-sm text-muted-foreground">
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-diamond" class="w-4 h-4" />
+                          <.icon name="tabler-diamond" class="h-4 w-4" />
                           <span>{dev.bounties} bounties</span>
                         </div>
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-cash" class="w-4 h-4" />
+                          <.icon name="tabler-cash" class="h-4 w-4" />
                           <span>{Money.to_string!(dev.total_earned)}</span>
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td class="p-4 align-middle text-right">
+                  <td class="p-4 text-right align-middle">
                     <.button phx-click="view_dev" phx-value-id={dev.id} size="sm" variant="default">
                       View Profile
                     </.button>
@@ -260,7 +260,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
       <.drawer show={@show_dev_drawer} on_cancel="close_drawer">
         <%= if @selected_dev do %>
           <.drawer_header class="flex items-center gap-4">
-            <img src={@selected_dev.avatar_url} alt="" class="w-20 h-20 rounded-full" />
+            <img src={@selected_dev.avatar_url} alt="" class="h-20 w-20 rounded-full" />
             <div>
               <h4 class="text-xl font-semibold">
                 {@selected_dev.name} {@selected_dev.flag}
@@ -268,9 +268,9 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
               <div class="text-sm text-muted-foreground">
                 @{@selected_dev.handle}
               </div>
-              <div class="-ml-1 mt-2 flex flex-wrap gap-2">
+              <div class="mt-2 -ml-1 flex flex-wrap gap-2">
                 <%= for tech <- @selected_dev.tech_stack do %>
-                  <span class="rounded-lg px-2 py-0.5 text-xs ring-1 ring-border bg-secondary">
+                  <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
                     {tech}
                   </span>
                 <% end %>
@@ -283,27 +283,27 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
               <div class="space-y-6">
                 <!-- Stats Grid -->
                 <div>
-                  <h5 class="text-sm font-medium mb-3 opacity-0">Stats</h5>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div class="p-4 rounded-lg bg-card border border-border">
-                      <div class="flex items-center gap-2 mb-2">
-                        <div class="text-2xl font-bold font-display">
+                  <h5 class="mb-3 text-sm font-medium opacity-0">Stats</h5>
+                  <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                    <div class="rounded-lg border border-border bg-card p-4">
+                      <div class="mb-2 flex items-center gap-2">
+                        <div class="font-display text-2xl font-bold">
                           {Money.to_string!(@selected_dev.total_earned)}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Total Earnings</div>
                     </div>
-                    <div class="p-4 rounded-lg bg-card border border-border">
-                      <div class="flex items-center gap-2 mb-2">
-                        <div class="text-2xl font-bold font-display">
+                    <div class="rounded-lg border border-border bg-card p-4">
+                      <div class="mb-2 flex items-center gap-2">
+                        <div class="font-display text-2xl font-bold">
                           {@selected_dev.bounties}
                         </div>
                       </div>
                       <div class="text-sm text-muted-foreground">Bounties Solved</div>
                     </div>
-                    <div class="p-4 rounded-lg bg-card border border-border">
-                      <div class="flex items-center gap-2 mb-2">
-                        <div class="text-2xl font-bold font-display">
+                    <div class="rounded-lg border border-border bg-card p-4">
+                      <div class="mb-2 flex items-center gap-2">
+                        <div class="font-display text-2xl font-bold">
                           {@selected_dev.projects}
                         </div>
                       </div>
@@ -313,10 +313,10 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                 </div>
                 <!-- Message -->
                 <div class="p-px">
-                  <div class="rounded-lg bg-card border border-border">
-                    <div class="px-4 py-2 border-b border-border">
+                  <div class="rounded-lg border border-border bg-card">
+                    <div class="border-b border-border px-4 py-2">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-message" class="w-4 h-4" />
+                        <.icon name="tabler-message" class="h-4 w-4" />
                         <span>
                           {@selected_dev.handle} wrote to you {Algora.Util.time_ago(
                             DateTime.utc_now()
@@ -325,7 +325,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                         </span>
                       </div>
                     </div>
-                    <div class="px-4 leading-5 text-base whitespace-pre-line min-h-[12rem]">
+                    <div class="min-h-[12rem] whitespace-pre-line px-4 text-base leading-5">
                       {@selected_dev.message}
                     </div>
                   </div>
@@ -333,23 +333,23 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
               </div>
               <!-- Right Column -->
               <div>
-                <h5 class="text-sm font-medium mb-3">Past Reviews</h5>
+                <h5 class="mb-3 text-sm font-medium">Past Reviews</h5>
                 <div class="space-y-6">
                   <%= for review <- [
                         %{stars: 5, comment: "Exceptional problem-solving tech_stack and great communication throughout the project.", company: "TechCorp Inc."},
                         %{stars: 4, comment: "Delivered high-quality work ahead of schedule. Would definitely work with again.", company: "StartupXYZ"},
                         %{stars: 5, comment: "Outstanding technical expertise and professional attitude.", company: "DevLabs"}
                       ] do %>
-                    <div class="rounded-lg bg-card p-4 text-sm border border-border">
-                      <div class="flex items-center gap-1 mb-2">
+                    <div class="rounded-lg border border-border bg-card p-4 text-sm">
+                      <div class="mb-2 flex items-center gap-1">
                         <%= for i <- 1..5 do %>
                           <.icon
                             name="tabler-star-filled"
-                            class={"w-4 h-4 #{if i <= review.stars, do: "text-warning", else: "text-muted-foreground/25"}"}
+                            class={"#{if i <= review.stars, do: "text-warning", else: "text-muted-foreground/25"} h-4 w-4"}
                           />
                         <% end %>
                       </div>
-                      <p class="text-sm mb-2">{review.comment}</p>
+                      <p class="mb-2 text-sm">{review.comment}</p>
                       <p class="text-xs text-muted-foreground">— {review.company}</p>
                     </div>
                   <% end %>
@@ -375,7 +375,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
 
   def bounties_card(assigns) do
     ~H"""
-    <div class="group/card relative h-full rounded-lg border bg-card text-card-foreground md:gap-8 overflow-hidden lg:col-span-4">
+    <div class="group/card relative h-full overflow-hidden rounded-lg border bg-card text-card-foreground md:gap-8 lg:col-span-4">
       <div class="flex justify-between">
         <div class="flex flex-col space-y-1.5 p-6">
           <h3 class="text-2xl font-semibold leading-none tracking-tight">Bounties</h3>
@@ -401,14 +401,14 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">
-                    <div class="flex-none rounded-full p-1 bg-success/10 text-success">
+                    <div class="flex-none rounded-full bg-success/10 p-1 text-success">
                       <div class="h-2 w-2 rounded-full bg-current"></div>
                     </div>
                     <h2 class="line-clamp-2 min-w-0 text-base font-semibold leading-none text-white group-hover:underline">
                       {bounty.ticket.title}
                     </h2>
                   </div>
-                  <div class="ml-7 mt-px flex items-center gap-x-2 text-xs leading-5 text-gray-400">
+                  <div class="mt-px ml-7 flex items-center gap-x-2 text-xs leading-5 text-gray-400">
                     <div class="flex items-center gap-x-2 md:hidden lg:flex">
                       <span class="truncate">tv#{bounty.ticket.number}</span>
                       <svg viewBox="0 0 2 2" class="h-0.5 w-0.5 flex-none fill-gray-400">
@@ -421,7 +421,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                   </div>
                 </div>
                 <div class="pl-6">
-                  <div class="flex-none rounded-lg px-3 py-1 font-display tabular-nums text-lg font-extrabold ring-1 ring-inset bg-success/5 text-success ring-success/30">
+                  <div class="font-display flex-none rounded-lg bg-success/5 px-3 py-1 text-lg font-extrabold tabular-nums text-success ring-1 ring-inset ring-success/30">
                     {Money.to_string!(bounty.amount)}
                   </div>
                 </div>

@@ -2,7 +2,7 @@
   <!-- Static sidebar for desktop -->
   <div>
     <!-- Sidebar component -->
-    <div class="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4 scrollbar-thin border-r border-border/50">
+    <div class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
       <div class="flex h-16 shrink-0 items-center justify-center">
         <.logo class="h-8 w-auto text-white" />
       </div>
@@ -15,7 +15,7 @@
                   <li>
                     <.link
                       navigate={item.href}
-                      class={"group flex justify-center rounded-md p-3 text-sm/6 font-semibold #{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:text-white hover:bg-gray-800"}"}
+                      class={"#{if @active_tab == item.tab, do: "bg-gray-800 text-white", else: "text-gray-400 hover:bg-gray-800 hover:text-white"} group flex justify-center rounded-md p-3 text-sm/6 font-semibold"}
                       title={item.label}
                     >
                       <.icon name={item.icon} class="h-6 w-6 shrink-0" />
@@ -28,7 +28,7 @@
           <% end %>
         </ul>
 
-        <.separator class="my-4 w-2/3 mx-auto" />
+        <.separator class="mx-auto my-4 w-2/3" />
         <!-- Online users section -->
         <ul role="list" class="space-y-1">
           <%= for user <- @online_users do %>
@@ -39,7 +39,7 @@
                 title={user.handle}
               >
                 <div class="relative inline-block">
-                  <div class="relative flex-shrink-0 overflow-hidden h-8 w-8 rounded-full">
+                  <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                     <img
                       alt={user.handle}
                       loading="lazy"
@@ -48,7 +48,7 @@
                       class="h-full w-full object-cover"
                     />
                   </div>
-                  <span class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                  <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
                   </span>
                 </div>
               </.link>
@@ -63,44 +63,44 @@
     <div
       id="navbar"
       phx-hook="NavBar"
-      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 border-b border-border px-4 shadow-sm sm:px-6 lg:px-8 bg-background"
+      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 border-b border-border bg-background px-4 shadow-sm sm:px-6 lg:px-8"
     >
       <.wordmark class="h-8 w-auto text-white lg:hidden" />
       <div class="flex items-center gap-x-6">
         <.link
-          class="group outline-none w-fit"
+          class="group w-fit outline-none"
           target="_blank"
           rel="noopener"
           href={AlgoraWeb.Constants.get(:youtube_url)}
         >
-          <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
-            <div class="justify-center flex w-full items-center gap-x-1">
-              <AlgoraWeb.Components.Logos.youtube class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
+          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent px-2 text-center text-sm font-semibold transition duration-150 hover:bg-slate-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+            <div class="flex w-full items-center justify-center gap-x-1">
+              <AlgoraWeb.Components.Logos.youtube class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
             </div>
           </div>
         </.link>
         <.link
-          class="group outline-none w-fit"
+          class="group w-fit outline-none"
           rel="noopener"
           target="_blank"
           href={AlgoraWeb.Constants.get(:discord_url)}
         >
-          <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 px-2 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap lg:flex">
-            <div class="justify-center flex w-full items-center gap-x-1">
+          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent px-2 text-center text-sm font-semibold transition duration-150 hover:bg-slate-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+            <div class="flex w-full items-center justify-center gap-x-1">
               <AlgoraWeb.Components.Logos.discord class="h-7 w-7" />
             </div>
           </div>
         </.link>
         <.link
           :if={Algora.Stargazer.count()}
-          class="group outline-none w-fit"
+          class="group w-fit outline-none"
           target="_blank"
           rel="noopener"
           href={AlgoraWeb.Constants.get(:github_url)}
         >
-          <div class="text-center justify-center items-center shrink-0 transition duration-150 select-none group-focus:outline-none group-disabled:opacity-75 group-disabled:pointer-events-none bg-transparent hover:bg-slate-850 disabled:opacity-50 h-8 text-sm font-semibold rounded-[3px] hidden whitespace-nowrap p-2 lg:flex">
-            <div class="justify-center flex w-full items-center gap-x-1">
-              <AlgoraWeb.Components.Logos.github class="h-5 text-gray-300 transition mr-0.5 shrink-0 justify-start" />
+          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent p-2 text-center text-sm font-semibold transition duration-150 hover:bg-slate-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+            <div class="flex w-full items-center justify-center gap-x-1">
+              <AlgoraWeb.Components.Logos.github class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
               <span class="hidden xl:block">Star</span>
               <span class="font-semibold text-gray-300">
                 {Algora.Stargazer.count()}
@@ -109,11 +109,11 @@
           </div>
         </.link>
         <.link
-          class="px-4 py-2 lg:flex hidden whitespace-nowrap"
+          class="hidden whitespace-nowrap px-4 py-2 lg:flex"
           target="_blank"
           href={AlgoraWeb.Constants.get(:docs_url)}
         >
-          <span class="relative font-semibold text-sm">Docs</span>
+          <span class="relative text-sm font-semibold">Docs</span>
         </.link>
         <%= if @current_user do %>
           <div>
@@ -126,7 +126,7 @@
                   <img
                     src={@current_user.avatar_url}
                     alt={@current_user.name}
-                    class="w-8 h-8 rounded-full mr-3"
+                    class="mr-3 h-8 w-8 rounded-full"
                   />
                   <div>
                     <div class="font-semibold">{@current_user.name}</div>
@@ -143,7 +143,7 @@
                 href={~p"/set_context/#{org.handle}"}
               >
                 <div class="flex items-center whitespace-nowrap">
-                  <img src={org.avatar_url} alt={org.name} class="w-8 h-8 rounded-full mr-3" />
+                  <img src={org.avatar_url} alt={org.name} class="mr-3 h-8 w-8 rounded-full" />
                   <div>
                     <div class="font-semibold">{org.name}</div>
                     <div class="text-sm text-gray-500">@{org.handle}</div>
@@ -152,7 +152,7 @@
               </:link>
               <:link href={~p"/auth/logout"} method="delete">
                 <div class="flex items-center whitespace-nowrap">
-                  <div class="h-8 w-8 flex items-center justify-center mr-3">
+                  <div class="mr-3 flex h-8 w-8 items-center justify-center">
                     <.icon name="tabler-logout" class="h-5 w-5" />
                   </div>
                   <div class="font-semibold">Logout</div>
@@ -163,9 +163,9 @@
         <% else %>
           <.link
             navigate="/auth/login"
-            class="rounded-lg bg-gray-50 hover:bg-gray-200 py-1 px-2 text-sm font-semibold leading-6 text-gray-950 active:text-gray-950/80"
+            class="rounded-lg bg-gray-50 px-2 py-1 text-sm font-semibold leading-6 text-gray-950 hover:bg-gray-200 active:text-gray-950/80"
           >
-            <span class="relative font-semibold text-sm">Login</span>
+            <span class="relative text-sm font-semibold">Login</span>
           </.link>
         <% end %>
       </div>

@@ -86,9 +86,9 @@ defmodule AlgoraWeb.Community.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
-      <div class="container max-w-7xl mx-auto p-8 space-y-8">
+      <div class="container mx-auto max-w-7xl space-y-8 p-8">
         <.section>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
             {create_bounty(assigns)}
             {create_tip(assigns)}
           </div>
@@ -96,10 +96,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
           <%= if Enum.empty?(@tickets) do %>
-            <.card class="text-center bg-card py-12 rounded-lg lg:rounded-[2rem]">
+            <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
               <.card_header>
-                <div class="mx-auto rounded-full bg-muted p-4 mb-2">
-                  <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+                <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                  <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
                 </div>
                 <.card_title>No bounties yet</.card_title>
                 <.card_description>
@@ -194,7 +194,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
   defp sidebar(assigns) do
     ~H"""
-    <aside class="fixed bottom-0 right-0 top-16 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 lg:block sm:p-6 md:p-8 scrollbar-thin">
+    <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Getting started</h2>
       </div>

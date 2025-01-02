@@ -38,11 +38,11 @@ defmodule AlgoraWeb.Job.ViewLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-950 text-white p-8">
-      <div class="max-w-4xl mx-auto">
-        <div class="flex items-center gap-3 text-gray-400 mb-6">
-          <.link navigate={~p"/jobs"} class="hover:text-white transition">
-            <.icon name="tabler-arrow-left" class="w-5 h-5" />
+    <div class="min-h-screen bg-gray-950 p-8 text-white">
+      <div class="mx-auto max-w-4xl">
+        <div class="mb-6 flex items-center gap-3 text-gray-400">
+          <.link navigate={~p"/jobs"} class="transition hover:text-white">
+            <.icon name="tabler-arrow-left" class="h-5 w-5" />
           </.link>
           <div class="text-sm">Back to jobs</div>
         </div>
@@ -50,24 +50,24 @@ defmodule AlgoraWeb.Job.ViewLive do
         <div class="space-y-8">
           <%!-- Header Section --%>
           <div class="bg-white/[7.5%] rounded-lg p-6">
-            <div class="flex justify-between items-start gap-8">
+            <div class="flex items-start justify-between gap-8">
               <div class="flex-1">
-                <h1 class="text-2xl font-display font-semibold mb-4">
+                <h1 class="font-display mb-4 text-2xl font-semibold">
                   {@job.title}
                 </h1>
-                <div class="flex items-center gap-4 text-gray-400 text-sm">
+                <div class="flex items-center gap-4 text-sm text-gray-400">
                   <div class="flex items-center gap-1">
-                    <.icon name="tabler-clock" class="w-4 h-4" />
+                    <.icon name="tabler-clock" class="h-4 w-4" />
                     Posted {Calendar.strftime(@job.posted_at, "%B %d, %Y")}
                   </div>
                   <div class="flex items-center gap-1">
-                    <.icon name="tabler-world" class="w-4 h-4" />
+                    <.icon name="tabler-world" class="h-4 w-4" />
                     {@job.country}
                   </div>
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-indigo-400 font-medium text-xl">
+                <div class="text-xl font-medium text-indigo-400">
                   <%= case @job.budget.type do %>
                     <% :hourly -> %>
                       ${@job.budget.from}-{@job.budget.to}/hour
@@ -87,8 +87,8 @@ defmodule AlgoraWeb.Job.ViewLive do
             <div class="col-span-2 space-y-8">
               <%!-- Job Details --%>
               <div class="bg-white/[7.5%] rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">Job Details</h2>
-                <div class="prose prose-invert max-w-none">
+                <h2 class="mb-4 text-lg font-semibold">Job Details</h2>
+                <div class="max-w-none prose prose-invert">
                   <div class="whitespace-pre-line text-gray-300">
                     {@job.description}
                   </div>
@@ -97,10 +97,10 @@ defmodule AlgoraWeb.Job.ViewLive do
 
               <%!-- Tech Stack Required --%>
               <div class="bg-white/[7.5%] rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">Tech Stack Required</h2>
+                <h2 class="mb-4 text-lg font-semibold">Tech Stack Required</h2>
                 <div class="flex flex-wrap gap-2">
                   <%= for tech <- @job.tech_stack do %>
-                    <span class="text-white rounded-xl px-3 py-1 text-sm ring-1 ring-white/20">
+                    <span class="rounded-xl px-3 py-1 text-sm text-white ring-1 ring-white/20">
                       {tech}
                     </span>
                   <% end %>
@@ -111,32 +111,32 @@ defmodule AlgoraWeb.Job.ViewLive do
             <%!-- Sidebar --%>
             <div class="space-y-8">
               <%!-- Apply Button --%>
-              <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition">
+              <button class="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700">
                 Apply Now
               </button>
 
               <%!-- Job Scope --%>
               <div class="bg-white/[7.5%] rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">Job Scope</h2>
+                <h2 class="mb-4 text-lg font-semibold">Job Scope</h2>
                 <div class="space-y-4">
                   <div class="flex items-center justify-between text-sm">
                     <div class="text-gray-400">Experience Level</div>
                     <div class="flex items-center gap-2">
-                      <.icon name="tabler-chart-bar" class="w-4 h-4" />
+                      <.icon name="tabler-chart-bar" class="h-4 w-4" />
                       {String.capitalize(@job.scope.experience)}
                     </div>
                   </div>
                   <div class="flex items-center justify-between text-sm">
                     <div class="text-gray-400">Job Length</div>
                     <div class="flex items-center gap-2">
-                      <.icon name="tabler-clock" class="w-4 h-4" />
+                      <.icon name="tabler-clock" class="h-4 w-4" />
                       {String.capitalize(@job.scope.duration)} term
                     </div>
                   </div>
                   <div class="flex items-center justify-between text-sm">
                     <div class="text-gray-400">Job Size</div>
                     <div class="flex items-center gap-2">
-                      <.icon name="tabler-layout-grid" class="w-4 h-4" />
+                      <.icon name="tabler-layout-grid" class="h-4 w-4" />
                       {String.capitalize(@job.scope.size)} size
                     </div>
                   </div>
@@ -145,9 +145,9 @@ defmodule AlgoraWeb.Job.ViewLive do
 
               <%!-- Client Info --%>
               <div class="bg-white/[7.5%] rounded-lg p-6">
-                <h2 class="text-lg font-semibold mb-4">About the Client</h2>
-                <div class="flex items-center gap-3 mb-4">
-                  <img src={@job.client.avatar_url} class="w-12 h-12 rounded-full" />
+                <h2 class="mb-4 text-lg font-semibold">About the Client</h2>
+                <div class="mb-4 flex items-center gap-3">
+                  <img src={@job.client.avatar_url} class="h-12 w-12 rounded-full" />
                   <div>
                     <div class="font-medium">{@job.client.name}</div>
                     <div class="text-sm text-gray-400">

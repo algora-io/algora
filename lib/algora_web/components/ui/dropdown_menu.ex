@@ -43,7 +43,7 @@ defmodule AlgoraWeb.Components.UI.DropdownMenu do
 
   def dropdown_menu(assigns) do
     ~H"""
-    <div class={classes(["relative group inline-block", @class])} {@rest}>
+    <div class={classes(["group relative inline-block", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """
@@ -80,7 +80,7 @@ defmodule AlgoraWeb.Components.UI.DropdownMenu do
     ~H"""
     <div
       class={[
-        "z-50 animate-in peer-data-[state=closed]:fade-out-0 peer-data-[state=open]:fade-in-0 peer-data-[state=closed]:zoom-out-95 peer-data-[state=open]:zoom-in-95 peer-data-[side=bottom]:slide-in-from-top-2 peer-data-[side=left]:slide-in-from-right-2 peer-data-[side=right]:slide-in-from-left-2 peer-data-[side=top]:slide-in-from-bottom-2",
+        "z-50 animate-in peer-data-[side=bottom]:slide-in-from-top-2 peer-data-[side=left]:slide-in-from-right-2 peer-data-[side=right]:slide-in-from-left-2 peer-data-[side=top]:slide-in-from-bottom-2 peer-data-[state=closed]:fade-out-0 peer-data-[state=closed]:zoom-out-95 peer-data-[state=open]:fade-in-0 peer-data-[state=open]:zoom-in-95",
         "absolute peer-data-[state=closed]:hidden",
         @variant_class,
         @class
@@ -131,7 +131,7 @@ defmodule AlgoraWeb.Components.UI.DropdownMenu do
 
   def dropdown_menu_separator(assigns) do
     ~H"""
-    <div class={classes(["h-px bg-border my-1", @class])} {@rest} role="separator" />
+    <div class={classes(["my-1 h-px bg-border", @class])} {@rest} role="separator" />
     """
   end
 end

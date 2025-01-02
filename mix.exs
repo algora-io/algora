@@ -68,7 +68,8 @@ defmodule Algora.MixProject do
       {:live_svelte, "~> 0.14.1"},
       {:nimble_parsec, "~> 1.4"},
       {:oban, "~> 2.17"},
-      {:styler, "~> 1.2", only: [:dev, :test], runtime: false}
+      {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
+      {:tailwind_formatter, "~> 0.4.2", only: [:dev, :test], runtime: false}
     ]
   end
 

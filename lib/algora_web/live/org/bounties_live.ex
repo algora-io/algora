@@ -40,7 +40,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
               <div
                 role="tablist"
                 aria-orientation="horizontal"
-                class="items-center justify-center rounded-md p-1 dark:bg-gray-800 dark:text-gray-400 -ml-1 grid h-full w-full grid-cols-2 gap-1 bg-white/5 text-white/50"
+                class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-md bg-white/5 p-1 text-white/50 dark:bg-gray-800 dark:text-gray-400"
                 tabindex="0"
                 data-orientation="horizontal"
                 style="outline: none;"
@@ -54,7 +54,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
-                    <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-indigo-200">
+                    <span class="min-w-[1ch] font-mono text-indigo-200 transition duration-300 ease-out">
                       {@open_count}
                     </span>
                   </div>
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
-                    <span class="min-w-[1ch] font-mono transition duration-300 ease-out text-gray-400 group-hover:text-indigo-200">
+                    <span class="min-w-[1ch] font-mono text-gray-400 transition duration-300 ease-out group-hover:text-indigo-200">
                       {@completed_count}
                     </span>
                   </div>
@@ -109,15 +109,15 @@ defmodule AlgoraWeb.Org.BountiesLive do
             <tbody class="[&_tr:last-child]:border-0">
               <%= for bounty  <- @bounties do %>
                 <tr
-                  class="border-b transition-colors hover:bg-gray-100/50 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800 border-white/15 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] dark:hover:bg-white/[2%]"
+                  class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                   data-state="false"
                 >
-                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                     <div class="min-w-[250px]">
                       <div class="group relative flex h-full flex-col">
                         <div class="relative h-full pl-2">
                           <div class="flex items-start justify-between">
-                            <div class="font-mono text-2xl cursor-pointer">
+                            <div class="cursor-pointer font-mono text-2xl">
                               <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
                                 ${bounty.amount}
                               </div>
@@ -125,7 +125,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           </div>
                           <.link
                             rel="noopener"
-                            class="inline-flex flex-col group/issue"
+                            class="group/issue inline-flex flex-col"
                             href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
                           >
                             <div class="flex items-center gap-4">
@@ -146,7 +146,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       </div>
                     </div>
                   </td>
-                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                     <%= if length(@claims) > 0 do %>
                       <div class="group flex cursor-pointer flex-col items-center gap-1">
                         <div class="flex cursor-pointer justify-center -space-x-3">
@@ -179,7 +179,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             stroke-width="2"
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            class="-mr-4 h-4 w-4 text-gray-400 group-hover:text-gray-300 rotate-90"
+                            class="-mr-4 h-4 w-4 rotate-90 text-gray-400 group-hover:text-gray-300"
                           >
                             <path d="M9 6l6 6l-6 6"></path>
                           </svg>
@@ -187,7 +187,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       </div>
                     <% end %>
                   </td>
-                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                     <div class="min-w-[180px]">
                       <div class="flex items-center justify-end gap-2">
                         <!-- Add action buttons here (edit, delete, menu) -->
@@ -197,10 +197,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 </tr>
                 <%= for claim <- @claims do %>
                   <tr
-                    class="border-b transition-colors hover:bg-gray-100/50 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800 border-white/15 bg-gray-950/50 dark:hover:bg-gray-950/50"
+                    class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
                     data-state="false"
                   >
-                    <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <div class="min-w-[250px]">
                         <div class="flex items-center gap-3">
                           <div class="flex -space-x-3">
@@ -226,19 +226,19 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                       </div>
                     </td>
-                    <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0"></td>
-                    <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle"></td>
+                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <div class="min-w-[180px]">
                         <div class="flex items-center justify-end gap-4">
                           <.link
                             rel="noopener"
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-gray-100 text-gray-900 hover:bg-gray-100/80 dark:bg-white/15 dark:text-gray-50 dark:hover:bg-white/20 h-10 px-4 py-2"
+                            class="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100/80 dark:bg-white/15 dark:text-gray-50 dark:hover:bg-white/20"
                             href={claim.pull_request_url}
                           >
                             View
                           </.link>
                           <.link
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-600/90 h-10 px-4 py-2"
+                            class="inline-flex h-10 items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600/90"
                             navigate={~p"/org/#{@current_org.handle}/checkout?claims=#{claim.id}"}
                           >
                             Reward

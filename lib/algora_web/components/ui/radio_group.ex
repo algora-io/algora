@@ -60,13 +60,13 @@ defmodule AlgoraWeb.Components.UI.RadioGroup do
     ~H"""
     <label class={
       classes([
-        "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 inline-grid",
+        "inline-grid aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         @class
       ])
     }>
       <input
         type="radio"
-        class="hidden peer/radio"
+        class="peer/radio hidden"
         name={@builder.name}
         value={@value}
         checked={normalize_boolean(@checked) || @builder.value == @value}

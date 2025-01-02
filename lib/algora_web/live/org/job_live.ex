@@ -121,36 +121,36 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="grid auto-rows-max items-start gap-4 lg:col-span-2">
             <div class="grid gap-4 sm:grid-cols-2">
               <div
-                class="rounded-xl bg-card text-card-foreground shadow sm:col-span-2 border"
+                class="rounded-xl border bg-card text-card-foreground shadow sm:col-span-2"
                 data-phx-id="m57-phx-GAPTpMFHc9kS4XZh"
               >
-                <div class="flex p-6 pb-3 flex-col space-y-1.5">
-                  <div class="flex justify-between items-start gap-4">
+                <div class="flex flex-col space-y-1.5 p-6 pb-3">
+                  <div class="flex items-start justify-between gap-4">
                     <div class="flex-1">
-                      <h3 class="tracking-tight font-semibold leading-none text-2xl mb-4">
+                      <h3 class="mb-4 text-2xl font-semibold leading-none tracking-tight">
                         {@job.title}
                       </h3>
 
-                      <div class="flex flex-wrap gap-2 mb-4">
+                      <div class="mb-4 flex flex-wrap gap-2">
                         <%= for tech <- @job.tech_stack do %>
-                          <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+                          <span class="inline-flex items-center rounded-full border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                             {tech}
                           </span>
                         <% end %>
                       </div>
 
-                      <div class="flex items-center gap-4 text-muted-foreground text-sm">
+                      <div class="flex items-center gap-4 text-sm text-muted-foreground">
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-clock" class="w-4 h-4" /> Posted March 15, 2024
+                          <.icon name="tabler-clock" class="h-4 w-4" /> Posted March 15, 2024
                         </div>
                         <div class="flex items-center gap-1">
-                          <.icon name="tabler-world" class="w-4 h-4" /> {@job.country}
+                          <.icon name="tabler-world" class="h-4 w-4" /> {@job.country}
                         </div>
                       </div>
                     </div>
                     <%= if @job[:hourly_rate] do %>
                       <div class="text-right">
-                        <div class="text-primary font-semibold font-display text-3xl">
+                        <div class="font-display text-3xl font-semibold text-primary">
                           {Money.to_string!(@job.hourly_rate)}/hour
                         </div>
                         <div class="text-sm text-muted-foreground">
@@ -161,7 +161,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   </div>
                 </div>
                 <div class="border-t p-6">
-                  <div class="prose prose-invert max-w-none">
+                  <div class="max-w-none prose prose-invert">
                     <div class="text-foreground-muted">
                       <%= if @show_full_description do %>
                         {@job.description}
@@ -171,7 +171,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
                       <button
                         phx-click="toggle_description"
-                        class="mt-2 text-primary hover:text-primary/80 text-sm font-medium"
+                        class="mt-2 text-sm font-medium text-primary hover:text-primary/80"
                       >
                         {if @show_full_description, do: "Show less", else: "See more"}
                       </button>
@@ -187,36 +187,36 @@ defmodule AlgoraWeb.Org.JobLive do
               data-phx-id="m77-phx-GAPTpMFHc9kS4XZh"
             >
               <div
-                class="ring-offset-background focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 tabs-content"
+                class="tabs-content ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value="week"
                 data-phx-id="m93-phx-GAPTpMFHc9kS4XZh"
               >
                 <div
-                  class="rounded-xl bg-card text-card-foreground shadow border"
+                  class="rounded-xl border bg-card text-card-foreground shadow"
                   data-phx-id="m94-phx-GAPTpMFHc9kS4XZh"
                 >
                   <div
-                    class="flex p-6 px-7 flex-col space-y-1.5"
+                    class="flex flex-col space-y-1.5 p-6 px-7"
                     data-phx-id="m95-phx-GAPTpMFHc9kS4XZh"
                   >
                     <h3
-                      class="tracking-tight font-semibold leading-none text-2xl"
+                      class="text-2xl font-semibold leading-none tracking-tight"
                       data-phx-id="m96-phx-GAPTpMFHc9kS4XZh"
                     >
                       Bounties
                     </h3>
-                    <p class="text-muted-foreground text-sm" data-phx-id="m97-phx-GAPTpMFHc9kS4XZh">
+                    <p class="text-sm text-muted-foreground" data-phx-id="m97-phx-GAPTpMFHc9kS4XZh">
                       Bounties linked to your job
                     </p>
                   </div>
                   <div class="p-6 pt-0" data-phx-id="m98-phx-GAPTpMFHc9kS4XZh">
                     <table
-                      class="text-sm w-full caption-bottom"
+                      class="w-full caption-bottom text-sm"
                       data-phx-id="m99-phx-GAPTpMFHc9kS4XZh"
                     >
                       <thead class="[&_tr]:border-b sr-only">
-                        <tr class="transition-colors hover:bg-muted/50 border-b data-[state=selected]:bg-muted">
-                          <th class="px-4 text-muted-foreground text-left align-middle font-medium h-12">
+                        <tr class="border-b transition-colors data-[state=selected]:bg-muted hover:bg-muted/50">
+                          <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                             Ticket
                           </th>
                         </tr>
@@ -225,37 +225,37 @@ defmodule AlgoraWeb.Org.JobLive do
                         <%= if @bounties == [] do %>
                           <tr>
                             <td colspan="5" class="p-8">
-                              <div class="flex flex-col items-center text-center space-y-3">
+                              <div class="flex flex-col items-center space-y-3 text-center">
                                 <div class="rounded-full bg-primary/10 p-3">
-                                  <.icon name="tabler-plus" class="w-6 h-6 text-primary" />
+                                  <.icon name="tabler-plus" class="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 class="font-semibold text-lg">No Bounties Yet</h3>
-                                <p class="text-sm text-muted-foreground text-balance">
+                                <h3 class="text-lg font-semibold">No Bounties Yet</h3>
+                                <p class="text-balance text-sm text-muted-foreground">
                                   Create your first bounty to start attracting developers to your job.
                                 </p>
                                 <.button>
-                                  <.icon name="tabler-plus" class="w-4 h-4 mr-2" /> Add Bounty
+                                  <.icon name="tabler-plus" class="mr-2 h-4 w-4" /> Add Bounty
                                 </.button>
                               </div>
                             </td>
                           </tr>
                         <% else %>
                           <%= for bounty <- @bounties do %>
-                            <tr class="border-b transition-colors hover:bg-muted/10 h-10">
+                            <tr class="h-10 border-b transition-colors hover:bg-muted/10">
                               <td class="p-4 py-0 align-middle">
                                 <div class="flex items-center gap-4">
-                                  <div class="font-display text-base font-semibold text-success whitespace-nowrap shrink-0">
+                                  <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
                                     {Money.to_string!(bounty.amount)}
                                   </div>
 
                                   <.link
                                     href={Bounty.url(bounty)}
-                                    class="truncate text-sm text-foreground hover:underline max-w-[400px]"
+                                    class="max-w-[400px] truncate text-sm text-foreground hover:underline"
                                   >
                                     {bounty.ticket.title}
                                   </.link>
 
-                                  <div class="flex items-center gap-1 text-sm text-muted-foreground whitespace-nowrap shrink-0">
+                                  <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
                                     <.link
                                       href={~p"/org/#{bounty.owner.handle}"}
                                       class="font-semibold hover:underline"
@@ -280,13 +280,13 @@ defmodule AlgoraWeb.Org.JobLive do
             </div>
           </div>
           <div class="lg:col-span-1">
-            <div class="rounded-xl bg-card text-card-foreground shadow border mb-4">
+            <div class="mb-4 rounded-xl border bg-card text-card-foreground shadow">
               <div class="p-6">
-                <div class="flex flex-col items-center text-center space-y-3">
+                <div class="flex flex-col items-center space-y-3 text-center">
                   <div class="rounded-full bg-primary/10 p-3">
-                    <.icon name="tabler-users-plus" class="w-6 h-6 text-primary" />
+                    <.icon name="tabler-users-plus" class="h-6 w-6 text-primary" />
                   </div>
-                  <h3 class="font-semibold text-lg">Invite Developers</h3>
+                  <h3 class="text-lg font-semibold">Invite Developers</h3>
                   <p class="text-sm text-muted-foreground">
                     Share this job with developers in your network or invite them directly.
                   </p>
@@ -303,27 +303,27 @@ defmodule AlgoraWeb.Org.JobLive do
             </div>
 
             <%= if @matching_devs != [] do %>
-              <div class="rounded-xl bg-card text-card-foreground shadow border">
+              <div class="rounded-xl border bg-card text-card-foreground shadow">
                 <div class="p-6">
-                  <h2 class="tracking-tight font-semibold leading-none text-lg mb-4">
+                  <h2 class="mb-4 text-lg font-semibold leading-none tracking-tight">
                     Matching Developers
                   </h2>
 
                   <div class="space-y-4">
                     <%= for dev <- @matching_devs do %>
-                      <div class="flex items-center gap-4 p-4 rounded-lg bg-accent/50">
-                        <img src={dev.avatar_url} alt={dev.name} class="w-12 h-12 rounded-full" />
-                        <div class="flex-grow min-w-0">
-                          <div class="flex justify-between items-start gap-2">
+                      <div class="flex items-center gap-4 rounded-lg bg-accent/50 p-4">
+                        <img src={dev.avatar_url} alt={dev.name} class="h-12 w-12 rounded-full" />
+                        <div class="min-w-0 flex-grow">
+                          <div class="flex items-start justify-between gap-2">
                             <div class="truncate">
-                              <div class="font-medium truncate">
+                              <div class="truncate font-medium">
                                 {dev.name} {dev.flag}
                               </div>
-                              <div class="text-sm text-muted-foreground truncate">
+                              <div class="truncate text-sm text-muted-foreground">
                                 @{dev.handle}
                               </div>
                             </div>
-                            <div class="text-right shrink-0">
+                            <div class="shrink-0 text-right">
                               <div class="text-sm text-muted-foreground">Earned</div>
                               <div class="font-medium">
                                 {Money.to_string!(dev.total_earned)}
@@ -333,7 +333,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
                           <div class="mt-2 flex flex-wrap gap-1">
                             <%= for tech <- dev.tech_stack do %>
-                              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                              <span class="inline-flex items-center rounded-full border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                                 {tech}
                               </span>
                             <% end %>

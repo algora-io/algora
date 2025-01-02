@@ -18,7 +18,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8">
-      <div class="flex justify-between items-center">
+      <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Company Analytics</h1>
         <div class="flex gap-2">
           <.button
@@ -43,7 +43,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
         </.card_content>
       </.card>
       <!-- Key Metrics -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <.stat_card
           title="Total Companies"
           value={@analytics.total_companies}
@@ -79,12 +79,12 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
             <table class="w-full">
               <thead>
                 <tr class="border-b border-border">
-                  <th class="text-left p-4">Company</th>
-                  <th class="text-left p-4">Joined</th>
-                  <th class="text-left p-4">Status</th>
-                  <th class="text-left p-4">Contracts</th>
-                  <th class="text-left p-4">Success Rate</th>
-                  <th class="text-left p-4">Last Active</th>
+                  <th class="p-4 text-left">Company</th>
+                  <th class="p-4 text-left">Joined</th>
+                  <th class="p-4 text-left">Status</th>
+                  <th class="p-4 text-left">Contracts</th>
+                  <th class="p-4 text-left">Success Rate</th>
+                  <th class="p-4 text-left">Last Active</th>
                 </tr>
               </thead>
               <tbody>

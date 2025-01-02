@@ -32,23 +32,22 @@ defmodule AlgoraWeb.ExpertsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container max-w-7xl mx-auto p-6 space-y-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <.section title="Experts" subtitle="View all experts on Algora">
         <div class="-mt-4 mb-4 flex flex-wrap gap-2">
           <%= for tech <- @techs do %>
             <div
               phx-click="select_tech"
               phx-value-tech={tech}
-              class={["group/card relative h-full rounded-xl border min-w-14 text-center
-                     #{if tech == @tech, do: "border-white/20 bg-white/[4%]", else: "border-white/10 bg-white/[2%]"}
-                     bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8
-                     hover:border-white/15 hover:bg-white/[4%] group cursor-pointer p-2"]}
+              class={[
+                "#{if tech == @tech, do: "bg-white/[4%] border-white/20", else: "bg-white/[2%] border-white/10"} group/card from-white/[2%] via-white/[2%] to-white/[2%] group relative h-full min-w-14 cursor-pointer rounded-xl border bg-gradient-to-br p-2 text-center hover:bg-white/[4%] hover:border-white/15 md:gap-8"
+              ]}
             >
               <div class="pointer-events-none">
-                <div class="absolute inset-0 z-0 opacity-0 [mask-image:linear-gradient(black,transparent)] group-hover/card:opacity-100">
+                <div class="[mask-image:linear-gradient(black,transparent)] absolute inset-0 z-0 opacity-0 group-hover/card:opacity-100">
                 </div>
                 <div
-                  class="absolute inset-0 z-10 bg-gradient-to-br via-white/[2%] opacity-0 group-hover/card:opacity-100"
+                  class="via-white/[2%] absolute inset-0 z-10 bg-gradient-to-br opacity-0 group-hover/card:opacity-100"
                   style="mask-image: radial-gradient(240px at 0px 0px, white, transparent);"
                 >
                 </div>

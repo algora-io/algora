@@ -28,7 +28,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     ~H"""
     <div class="relative isolate overflow-hidden bg-background">
       <svg
-        class="absolute inset-0 -z-10 size-full stroke-white/10 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
+        class="[mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)] absolute inset-0 -z-10 size-full stroke-white/10"
         aria-hidden="true"
       >
         <defs>
@@ -57,21 +57,21 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         />
       </svg>
       <div
-        class="absolute left-[calc(50%-4rem)] top-10 -z-10 transform blur-3xl sm:left-[calc(50%-18rem)] lg:left-48 lg:top-[calc(50%-30rem)] xl:left-[calc(50%-24rem)]"
+        class="left-[calc(50%-4rem)] absolute top-10 -z-10 transform blur-3xl sm:left-[calc(50%-18rem)] lg:top-[calc(50%-30rem)] lg:left-48 xl:left-[calc(50%-24rem)]"
         aria-hidden="true"
       >
         <div
-          class="aspect-[1108/632] w-[69.25rem] bg-gradient-to-r to-[#ed5236] from-[#fdba74] opacity-20"
+          class="aspect-[1108/632] w-[69.25rem] to-[#ed5236] from-[#fdba74] bg-gradient-to-r opacity-20"
           style="clip-path: polygon(73.6% 51.7%, 91.7% 11.8%, 100% 46.4%, 97.4% 82.2%, 92.5% 84.9%, 75.7% 64%, 55.3% 47.5%, 46.5% 49.4%, 45% 62.9%, 50.3% 87.2%, 21.3% 64.1%, 0.1% 100%, 5.4% 51.1%, 21.4% 63.9%, 58.9% 0.2%, 73.6% 51.7%)"
         >
         </div>
       </div>
-      <div class="mx-auto max-w-7xl px-6 pb-12 pt-10 sm:pb-16 lg:flex lg:px-8 lg:py-20 xl:py-24">
+      <div class="mx-auto max-w-7xl px-6 pt-10 pb-12 sm:pb-16 lg:flex lg:px-8 lg:py-20 xl:py-24">
         <div class="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:pt-8">
           <.wordmark />
-          <h1 class="mt-10 text-2xl font-semibold font-display tracking-tight text-white sm:text-6xl">
+          <h1 class="font-display mt-10 text-2xl font-semibold tracking-tight text-white sm:text-6xl">
             Fund
-            <svg viewBox="0 0 128 128" class="inline-block h-10 w-10 sm:h-16 lg:w-16 -mt-2 ml-2">
+            <svg viewBox="0 0 128 128" class="-mt-2 ml-2 inline-block h-10 w-10 sm:h-16 lg:w-16">
               <path
                 fill="#f05138"
                 d="M126.33 34.06a39.32 39.32 0 00-.79-7.83 28.78 28.78 0 00-2.65-7.58 28.84 28.84 0 00-4.76-6.32 23.42 23.42 0 00-6.62-4.55 27.27 27.27 0 00-7.68-2.53c-2.65-.51-5.56-.51-8.21-.76H30.25a45.46 45.46 0 00-6.09.51 21.82 21.82 0 00-5.82 1.52c-.53.25-1.32.51-1.85.76a33.82 33.82 0 00-5 3.28c-.53.51-1.06.76-1.59 1.26a22.41 22.41 0 00-4.76 6.32 23.61 23.61 0 00-2.65 7.58 78.5 78.5 0 00-.79 7.83v60.39a39.32 39.32 0 00.79 7.83 28.78 28.78 0 002.65 7.58 28.84 28.84 0 004.76 6.32 23.42 23.42 0 006.62 4.55 27.27 27.27 0 007.68 2.53c2.65.51 5.56.51 8.21.76h63.22a45.08 45.08 0 008.21-.76 27.27 27.27 0 007.68-2.53 30.13 30.13 0 006.62-4.55 22.41 22.41 0 004.76-6.32 23.61 23.61 0 002.65-7.58 78.49 78.49 0 00.79-7.83V34.06z"
@@ -96,32 +96,32 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             <.link
               href={Algora.Github.authorize_url()}
               rel="noopener"
-              class="inline-flex px-6 rounded-md border-white/80 bg-white text-gray-900 transition-colors whitespace-nowrap items-center justify-center font-semibold shadow text-lg h-12 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:outline-white-600 disabled:pointer-events-none disabled:opacity-50 hover:border-white hover:bg-white/90 border phx-submit-loading:opacity-75"
+              class="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-md border border-white/80 bg-white px-6 text-lg font-semibold text-gray-900 shadow transition-colors hover:border-white hover:bg-white/90 focus-visible:outline-white-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 phx-submit-loading:opacity-75"
             >
               Start Contributing
             </.link>
           </div>
         </div>
-        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none xl:ml-32">
-          <div class="max-w-3xl sm:flex-none sm:max-w-5xl lg:max-w-none">
-            <.card class="bg-card/25 -mx-3 sm:mx-0" id="how-it-works">
+        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-10 lg:max-w-none xl:ml-32">
+          <div class="max-w-3xl sm:max-w-5xl sm:flex-none lg:max-w-none">
+            <.card class="-mx-3 bg-card/25 sm:mx-0" id="how-it-works">
               <.card_header class="-mx-3 sm:mx-0">
                 <.card_title>How It Works</.card_title>
               </.card_header>
               <.card_content class="-mx-3 sm:mx-0">
-                <div class="space-y-10 sm:space-y-6 pt-4 sm:pt-0">
+                <div class="space-y-10 pt-4 sm:space-y-6 sm:pt-0">
                   <div class="space-y-2">
                     <div class="flex items-center gap-2 sm:flex-col sm:items-start">
                       <.icon name="tabler-diamond" class="h-8 w-8 text-white" />
                       <h3 class="font-semibold">Post Bounties</h3>
                     </div>
-                    <div class="text-sm font-medium text-muted-foreground space-y-2 sm:space-y-1">
+                    <div class="space-y-2 text-sm font-medium text-muted-foreground sm:space-y-1">
                       <div>
                         Create bounties for Swift issues and pay only when they're solved.
                       </div>
                       <div class="space-x-1">
                         <span>Just comment</span>
-                        <code class="inline-block rounded bg-orange-950/75 ring-1 ring-orange-400/25 text-orange-400 px-1 py-0.5 font-mono text-sm">
+                        <code class="inline-block rounded bg-orange-950/75 px-1 py-0.5 font-mono text-sm text-orange-400 ring-1 ring-orange-400/25">
                           /bounty $1000
                         </code>
                         <span>in any Swift issue or PR.</span>
@@ -133,7 +133,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                       <.icon name="tabler-users" class="h-8 w-8 text-white" />
                       <h3 class="font-semibold">Pool Resources</h3>
                     </div>
-                    <div class="text-sm font-medium text-muted-foreground space-y-2 sm:space-y-1">
+                    <div class="space-y-2 text-sm font-medium text-muted-foreground sm:space-y-1">
                       <div>
                         Pool funds with other developers and companies to make bigger impact.
                       </div>
@@ -147,13 +147,13 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                       <.icon name="tabler-coin" class="h-8 w-8 text-white" />
                       <h3 class="font-semibold">Send Tips</h3>
                     </div>
-                    <div class="text-sm font-medium text-muted-foreground space-y-2 sm:space-y-1">
+                    <div class="space-y-2 text-sm font-medium text-muted-foreground sm:space-y-1">
                       <div>
                         Show appreciation for helpful issues and merged pull requests.
                       </div>
                       <div class="space-x-1">
                         <span>Just comment</span>
-                        <code class="inline-block rounded bg-orange-950/75 ring-1 ring-orange-400/25 text-orange-400 px-1 py-0.5 font-mono text-sm">
+                        <code class="inline-block rounded bg-orange-950/75 px-1 py-0.5 font-mono text-sm text-orange-400 ring-1 ring-orange-400/25">
                           /tip $500 @username
                         </code>
                         <span>in any Swift issue or PR.</span>
@@ -173,7 +173,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         <h2 class="text-center text-base/7 font-semibold text-orange-400">
           Reward contributions
         </h2>
-        <p class="text-center mt-2 text-3xl font-display font-semibold tracking-tight text-white sm:text-5xl">
+        <p class="font-display mt-2 text-center text-3xl font-semibold tracking-tight text-white sm:text-5xl">
           You don't even need to leave GitHub
         </p>
         <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-7">
@@ -208,8 +208,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           <div class="flex p-px lg:col-span-3">
             <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
               <div class="flex object-cover">
-                <div class="flex h-full w-full gap-x-4 p-4 pb-0 sm:gap-x-6 items-center justify-center">
-                  <div class="flex flex-col w-full sm:w-auto space-y-3 sm:py-9">
+                <div class="flex h-full w-full items-center justify-center gap-x-4 p-4 pb-0 sm:gap-x-6">
+                  <div class="flex w-full flex-col space-y-3 sm:w-auto sm:py-9">
                     <div
                       class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
                       style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
@@ -326,12 +326,12 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       </div>
     </div>
 
-    <div class="container max-w-7xl mx-auto px-6 space-y-12">
+    <div class="container mx-auto max-w-7xl space-y-12 px-6">
       <%= if Enum.empty?(@tickets) do %>
-        <.card class="text-center bg-card py-12 rounded-[2rem]">
+        <.card class="rounded-[2rem] bg-card py-12 text-center">
           <.card_header>
-            <div class="mx-auto rounded-full bg-muted p-4 mb-2">
-              <.icon name="tabler-diamond" class="w-8 h-8 text-muted-foreground" />
+            <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+              <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
             </div>
             <.card_title>No bounties yet</.card_title>
             <.card_description>
@@ -340,15 +340,15 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           </.card_header>
         </.card>
       <% else %>
-        <.card class="bg-card rounded-[2rem]">
+        <.card class="rounded-[2rem] bg-card">
           <.card_header class="flex justify-between">
             <.card_title>Open Bounties</.card_title>
           </.card_header>
           <.card_content>
             <.bounties tickets={@tickets} />
-            <div class="pt-4 justify-center hidden">
+            <div class="hidden justify-center pt-4">
               <.button variant="ghost" phx-click="load_more">
-                <.icon name="tabler-arrow-down" class="w-4 h-4 mr-2" /> Load More
+                <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
               </.button>
             </div>
           </.card_content>

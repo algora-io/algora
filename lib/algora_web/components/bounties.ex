@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Components.Bounties do
                       <.avatar class="h-8 w-8">
                         <.avatar_image src={bounty.owner.avatar_url} />
                         <.avatar_fallback>
-                          {String.slice(bounty.owner.handle, 0, 2)}
+                          {String.slice(bounty.owner.provider_login, 0, 2)}
                         </.avatar_fallback>
                       </.avatar>
                     </.link>

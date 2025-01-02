@@ -229,24 +229,26 @@ defmodule AlgoraWeb.Community.DashboardLive do
       👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining swift.algora.io
       """
 
-      if Github.pat_enabled() do
-        Github.create_issue_comment(
-          Github.pat(),
-          ticket_ref.owner,
-          ticket_ref.repo,
-          ticket_ref.number,
-          body
-        )
-      else
-        Logger.info("""
-        Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
-               \"\"\"
-               #{body}
-               \"\"\")
-        """)
+      Task.start(fn ->
+        if Github.pat_enabled() do
+          Github.create_issue_comment(
+            Github.pat(),
+            ticket_ref.owner,
+            ticket_ref.repo,
+            ticket_ref.number,
+            body
+          )
+        else
+          Logger.info("""
+          Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
+                 \"\"\"
+                 #{body}
+                 \"\"\")
+          """)
 
-        :ok
-      end
+          :ok
+        end
+      end)
 
       {:noreply,
        socket

@@ -2,9 +2,9 @@ defmodule AlgoraWeb.Org.JobLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
-  alias Algora.Users
 
   def mount(_params, _session, socket) do
     job = %{
@@ -88,7 +88,7 @@ defmodule AlgoraWeb.Org.JobLive do
     ]
 
     matching_devs =
-      Users.list_developers(
+      Accounts.list_developers(
         limit: 5,
         sort_by_country: job.country,
         sort_by_tech_stack: job.tech_stack,

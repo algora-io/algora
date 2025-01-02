@@ -2,14 +2,14 @@ defmodule AlgoraWeb.ChatLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  alias Algora.Accounts
 
   def mount(_params, _session, socket) do
     # Get current user details
     current_user = socket.assigns.current_user
 
     # Get all matching devs for the sidebar
-    matching_devs = Users.list_developers(limit: 20, sort_by_tech_stack: ["Elixir", "Phoenix"])
+    matching_devs = Accounts.list_developers(limit: 20, sort_by_tech_stack: ["Elixir", "Phoenix"])
 
     # In mount function, create static chat histories
     chat_histories = [

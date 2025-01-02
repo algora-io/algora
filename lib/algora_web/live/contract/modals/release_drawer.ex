@@ -5,13 +5,13 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Contracts
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users.User
   alias Algora.Util
 
   attr :show, :boolean, required: true

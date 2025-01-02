@@ -2,7 +2,7 @@ defmodule AlgoraWeb.Project.CreateLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Users
+  alias Algora.Accounts
 
   def mount(_params, session, socket) do
     project = %{
@@ -332,7 +332,7 @@ defmodule AlgoraWeb.Project.CreateLive do
   defp next_step_label(4), do: "Review"
 
   defp get_matching_devs(project) do
-    Users.list_developers(
+    Accounts.list_developers(
       limit: 5,
       sort_by_country: project.country,
       sort_by_tech_stack: project.tech_stack,

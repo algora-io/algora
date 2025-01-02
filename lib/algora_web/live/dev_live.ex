@@ -65,7 +65,7 @@ defmodule AlgoraWeb.DevLive do
     ]
 
     # matching_devs =
-    #   Users.list_developers(
+    #   Accounts.list_developers(
     #     limit: 5,
     #     sort_by_country: project.country,
     #     sort_by_tech_stack: project.tech_stack

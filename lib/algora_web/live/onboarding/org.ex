@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   import Ecto.Changeset
 
-  alias Algora.Users
+  alias Algora.Accounts
   alias AlgoraWeb.Components.Wordmarks
   alias Phoenix.LiveView.AsyncResult
 
@@ -198,7 +198,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         },
         socket
       ) do
-    if Users.get_user_by_email(email) do
+    if Accounts.get_user_by_email(email) do
       # user already exists, so onboarding is complete
       # allow user to login with token until expiry
       {:ok,
@@ -526,7 +526,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
 
     matching_devs =
-      Users.list_developers(
+      Accounts.list_developers(
         limit: 5,
         sort_by_tech_stack: tech_stack,
         sort_by_country: socket.assigns.current_country,

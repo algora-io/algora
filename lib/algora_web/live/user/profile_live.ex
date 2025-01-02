@@ -2,13 +2,13 @@ defmodule AlgoraWeb.User.ProfileLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Reviews
   alias Algora.Reviews.Review
-  alias Algora.Users
 
   def mount(%{"handle" => handle}, _session, socket) do
-    {:ok, user} = Users.fetch_developer_by(handle: handle)
+    {:ok, user} = Accounts.fetch_developer_by(handle: handle)
 
     {:ok,
      socket

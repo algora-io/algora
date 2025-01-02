@@ -1,11 +1,11 @@
 defmodule Algora.Factory do
   @moduledoc false
+  alias Algora.Accounts.User
   alias Algora.Repo
   alias Algora.Reviews.Review
-  alias Algora.Users.User
 
   def build(:identity) do
-    %Algora.Users.Identity{
+    %Algora.Accounts.Identity{
       id: Nanoid.generate(),
       provider: "github",
       provider_token: ""

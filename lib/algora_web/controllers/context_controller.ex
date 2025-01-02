@@ -1,12 +1,12 @@
 defmodule AlgoraWeb.ContextController do
   use AlgoraWeb, :controller
 
-  alias Algora.Users
+  alias Algora.Accounts
   alias AlgoraWeb.UserAuth
 
   def set(conn, %{"context" => context}) do
     {:ok, _updated_user} =
-      Users.update_settings(conn.assigns.current_user, %{last_context: context})
+      Accounts.update_settings(conn.assigns.current_user, %{last_context: context})
 
     conn = put_session(conn, :last_context, context)
 

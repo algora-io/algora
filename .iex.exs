@@ -2,6 +2,9 @@ import Ecto.Changeset
 import Ecto.Query
 import Money.Sigil
 
+alias Algora.Accounts
+alias Algora.Accounts.Identity
+alias Algora.Accounts.User
 alias Algora.Admin
 alias Algora.Contracts
 alias Algora.Contracts.Contract
@@ -15,8 +18,5 @@ alias Algora.Payments.Customer
 alias Algora.Payments.PaymentMethod
 alias Algora.Payments.Transaction
 alias Algora.Repo
-alias Algora.Users
-alias Algora.Users.Identity
-alias Algora.Users.User
 
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity], auto_reload: true)

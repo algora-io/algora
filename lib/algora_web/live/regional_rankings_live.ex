@@ -4,10 +4,10 @@ defmodule AlgoraWeb.RegionalRankingsLive do
 
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Users
 
   def mount(_params, _session, socket) do
     weeks = get_weekly_rankings(20)
@@ -81,7 +81,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
     # Get all transactions in date range
     transactions_query =
       from t in Transaction,
-        join: u in Users.User,
+        join: u in Accounts.User,
         on: t.user_id == u.id,
         where: t.succeeded_at >= ^start_date and t.succeeded_at <= ^end_date,
         where: not is_nil(u.country),

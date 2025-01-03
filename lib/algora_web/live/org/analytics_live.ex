@@ -39,14 +39,14 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
           title="Solvers"
           value={@stats.solvers_count}
           subtext={"+#{@stats.solvers_diff} from last month"}
-          href={"/org/#{@current_org.handle}/solvers"}
+          href="#"
           icon="tabler-user-code"
         />
         <.stat_card
           title="Members"
           value={@stats.members_count}
           subtext=""
-          href={"/org/#{@current_org.handle}/members"}
+          href="#"
           icon="tabler-users"
         />
       </div>

@@ -561,7 +561,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
 
   def handle_event("submit_collaboration", _params, socket) do
     # TODO: Implement payment method addition and collaboration initiation
-    {:noreply, redirect(socket, to: ~p"/contracts/123")}
+    {:noreply, socket}
   end
 
   def handle_event("close_drawer", _, socket) do

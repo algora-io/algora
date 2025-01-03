@@ -21,9 +21,9 @@ defmodule Algora.Bounties.TicketView do
     # Original associations
     belongs_to :ticket, Ticket
     belongs_to :repository, Algora.Workspace.Repository
-    has_many :bounties, Bounty, references: :ticket_id
 
-    has_many :top_bounties, Bounty, references: :ticket_id
+    has_many :bounties, Bounty, foreign_key: :ticket_id, references: :ticket_id
+    has_many :top_bounties, Bounty, foreign_key: :ticket_id, references: :ticket_id
   end
 
   @type criterion ::

@@ -5,7 +5,7 @@ defmodule AlgoraWeb.RootController do
   alias AlgoraWeb.VisitorCountry
 
   def index(%{assigns: %{current_user: nil}} = conn, _params) do
-    redirect(conn, to: ~p"/#{VisitorCountry.get_current_country(conn)}")
+    redirect(conn, to: "/#{VisitorCountry.get_current_country(conn)}")
   end
 
   def index(conn, _params) do

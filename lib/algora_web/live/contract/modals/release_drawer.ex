@@ -146,7 +146,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
           |> change(%{
             provider_id: pi.id,
             provider_meta: Util.normalize_struct(pi),
-            provider_fee: Payments.get_provider_fee(:stripe, pi),
+            provider_fee: Payments.get_provider_fee_from_payment_intent(pi),
             status: if(pi.status == "succeeded", do: :succeeded, else: :processing),
             succeeded_at: if(pi.status == "succeeded", do: DateTime.utc_now())
           })

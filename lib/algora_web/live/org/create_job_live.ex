@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
 
   alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Jobs
   alias AlgoraWeb.Org.Forms.JobForm
 
   def mount(_params, _session, socket) do
@@ -660,7 +661,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   end
 
   def handle_event("create_job", %{"job_form" => params}, socket) do
-    case JobForm.changeset(params) do
+    case Jobs.create_job(params) do
       {:ok, job} ->
         {:noreply,
          socket

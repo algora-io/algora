@@ -2,8 +2,11 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import Ecto.Changeset
+
   alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Parser
   alias AlgoraWeb.Org.Forms.BountyForm
 
   def mount(_params, _session, socket) do
@@ -443,35 +446,32 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
     %{current_user: creator, current_org: owner} = socket.assigns
 
+    # TODO: use AlgoraWeb.Community.DashboardLive.BountyForm
     changeset =
       %BountyForm{}
       |> BountyForm.changeset(params)
       |> Map.put(:action, :validate)
 
     if changeset.valid? do
-      form_data = Ecto.Changeset.apply_changes(changeset)
+      amount = get_change(changeset, :amount)
+      url = get_change(changeset, :ticket_url)
 
-      amount = form_data.amount
+      with {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url),
+           {:ok, _bounty} <- Bounties.create_bounty(%{creator: creator, owner: owner, ticket: ticket_ref, amount: amount}) do
+        {:noreply,
+         socket
+         |> put_flash(:info, "Bounty created successfully")
+         |> push_navigate(to: "/org/#{owner.handle}/bounties")}
+      else
+        {:error, :already_exists} ->
+          {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
-      # Create params map in the format expected by Bounty.create_changeset
-      bounty_params = %{
-        "ticket" => %{
-          "url" => form_data.ticket_url,
-          "title" => form_data.title
-        },
-        "amount" => amount,
-        "status" => "open"
-      }
+        {:error, :internal_server_error} ->
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
 
-      case Bounties.create_bounty(creator, owner, bounty_params) do
-        {:ok, _bounty} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Bounty created successfully")
-           |> push_navigate(to: "/org/#{owner.handle}/bounties")}
-
-        {:error, _changeset} ->
-          {:noreply, put_flash(socket, :error, "Error creating bounty")}
+        {:error, _reason} ->
+          changeset = add_error(socket.assigns.new_bounty_form.changeset, :github_issue_url, "Invalid URL")
+          {:noreply, assign(socket, :new_bounty_form, to_form(changeset))}
       end
     else
       {:noreply,

@@ -29,7 +29,6 @@ defmodule Algora.Reviews do
     end)
   end
 
-  @spec list_reviews_with(base_query :: Ecto.Query.t(), criteria :: keyword()) :: [map()]
   def list_reviews_with(base_query, criteria \\ []) do
     base_reviews =
       base_query

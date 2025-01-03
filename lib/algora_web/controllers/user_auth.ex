@@ -199,8 +199,8 @@ defmodule AlgoraWeb.UserAuth do
             {:ok,
              %{
                email: email,
-               domain: domain || nil,
-               tech_stack: tech_stack || [],
+               domain: if(domain != "", do: domain),
+               tech_stack: Enum.reject(tech_stack, &(&1 == "")),
                token: code
              }}
 

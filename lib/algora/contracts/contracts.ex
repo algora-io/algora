@@ -21,6 +21,20 @@ defmodule Algora.Contracts do
           | {:pending_payment, Contract.t()}
           | {:pending_timesheet, Contract.t()}
 
+  @type criterion ::
+          {:id, binary()}
+          | {:client_id, binary()}
+          | {:original_contract_id, binary()}
+          | {:open?, true}
+          | {:active_or_paid?, true}
+          | {:original?, true}
+          | {:status, :open | :paid}
+          | {:after, non_neg_integer()}
+          | {:before, non_neg_integer()}
+          | {:order, :asc | :desc}
+          | {:limit, non_neg_integer()}
+          | {:tech_stack, [String.t()]}
+
   def create_contract(attrs) do
     %Contract{}
     |> Contract.changeset(attrs)
@@ -304,7 +318,7 @@ defmodule Algora.Contracts do
                 "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
             },
             %{amount: Money.negate!(balance), description: "Less: Previously prepaid amount"},
-            if new_prepayment do
+            if Money.positive?(new_prepayment) do
               %{
                 amount: new_prepayment,
                 description:
@@ -579,6 +593,7 @@ defmodule Algora.Contracts do
     |> Enum.map(&Contract.after_load/1)
   end
 
+  @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->

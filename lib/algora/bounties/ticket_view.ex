@@ -26,6 +26,13 @@ defmodule Algora.Bounties.TicketView do
     has_many :top_bounties, Bounty, references: :ticket_id
   end
 
+  @type criterion ::
+          {:limit, non_neg_integer()}
+          | {:owner_id, integer()}
+          | {:status, :open | :paid}
+          | {:tech_stack, [String.t()]}
+
+  @spec base_query([criterion()]) :: Ecto.Queryable.t()
   def base_query(criteria \\ []) do
     bounty_subquery =
       from(b in Bounty)
@@ -96,12 +103,7 @@ defmodule Algora.Bounties.TicketView do
     end)
   end
 
-  @type criteria :: %{
-          optional(:limit) => non_neg_integer(),
-          optional(:owner_id) => integer(),
-          optional(:status) => :open | :paid,
-          optional(:tech_stack) => [String.t()]
-        }
+  @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
       {:limit, limit}, query ->

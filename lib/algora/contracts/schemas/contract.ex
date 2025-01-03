@@ -7,6 +7,8 @@ defmodule Algora.Contracts.Contract do
   alias Algora.MoneyUtils
   alias Money.Ecto.Composite.Type, as: MoneyType
 
+  @type t() :: %__MODULE__{}
+
   schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1

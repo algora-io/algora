@@ -12,16 +12,16 @@ defmodule Algora.Accounts do
 
   def base_query, do: User
 
-  @type criteria :: %{
-          optional(:id) => String.t(),
-          optional(:limit) => non_neg_integer(),
-          optional(:handle) => String.t(),
-          optional(:handles) => [String.t()],
-          optional(:min_earnings) => non_neg_integer(),
-          optional(:sort_by_country) => String.t(),
-          optional(:sort_by_tech_stack) => [String.t()]
-        }
+  @type criterion ::
+          {:id, binary()}
+          | {:limit, non_neg_integer()}
+          | {:handle, String.t()}
+          | {:handles, [String.t()]}
+          | {:min_earnings, non_neg_integer()}
+          | {:sort_by_country, String.t()}
+          | {:sort_by_tech_stack, [String.t()]}
 
+  @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
@@ -68,7 +68,6 @@ defmodule Algora.Accounts do
     end)
   end
 
-  @spec list_developers_with(base_query :: Ecto.Query.t(), criteria :: criteria()) :: [map()]
   def list_developers_with(base_query, criteria \\ []) do
     criteria = Keyword.merge([limit: 10], criteria)
 
@@ -146,6 +145,7 @@ defmodule Algora.Accounts do
     list_developers_with(base_query(), criteria)
   end
 
+  @spec fetch_developer(binary()) :: {:ok, User.t()} | {:error, :not_found}
   def fetch_developer(id) do
     case list_developers(id: id, limit: 1) do
       [developer] -> {:ok, developer}
@@ -153,6 +153,7 @@ defmodule Algora.Accounts do
     end
   end
 
+  @spec fetch_developer_by([criterion()]) :: {:ok, User.t()} | {:error, :not_found}
   def fetch_developer_by(criteria) do
     criteria = Keyword.put(criteria, :limit, 1)
 

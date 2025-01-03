@@ -9,51 +9,53 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   alias Algora.Bounties.Bounty
   alias Algora.Contracts
   alias Algora.FeeTier
+  alias Algora.Jobs
   alias Algora.Payments
   alias Algora.Reviews
   alias Algora.Util
   alias AlgoraWeb.Org.Forms.JobForm
 
   def mount(_params, _session, socket) do
-    %{tech_stack: tech_stack} = socket.assigns.current_org
+    case Contracts.fetch_contract(client_id: socket.assigns.current_org.id, open?: true) do
+      {:ok, contract} ->
+        %{tech_stack: tech_stack} = socket.assigns.current_org
 
-    {:ok, contract} =
-      Contracts.fetch_contract(client_id: socket.assigns.current_org.id, open?: true)
+        job_form =
+          %JobForm{}
+          |> JobForm.changeset(%{work_type: "remote"})
+          |> to_form(as: :job_form)
 
-    job_form =
-      %JobForm{}
-      |> JobForm.changeset(%{work_type: "remote"})
-      |> to_form(as: :job_form)
+        hourly_rate_mid =
+          contract.hourly_rate_min
+          |> Money.add!(contract.hourly_rate_max)
+          |> Money.div!(2)
 
-    hourly_rate_mid =
-      contract.hourly_rate_min
-      |> Money.add!(contract.hourly_rate_max)
-      |> Money.div!(2)
+        weekly_amount_mid = Money.mult!(hourly_rate_mid, contract.hours_per_week)
 
-    weekly_amount_mid = Money.mult!(hourly_rate_mid, contract.hours_per_week)
+        platform_fee_pct = hd(FeeTier.all()).fee
+        transaction_fee_pct = Payments.get_transaction_fee_pct()
+        total_fee_pct = Decimal.add(platform_fee_pct, transaction_fee_pct)
 
-    platform_fee_pct = hd(FeeTier.all()).fee
-    transaction_fee_pct = Payments.get_transaction_fee_pct()
-    total_fee_pct = Decimal.add(platform_fee_pct, transaction_fee_pct)
+        {:ok,
+         socket
+         |> assign(:tech_stack, tech_stack)
+         |> assign(:view_mode, "compact")
+         |> assign(:looking_to_collaborate, true)
+         |> assign(:hourly_rate_mid, hourly_rate_mid)
+         |> assign(:weekly_amount_mid, weekly_amount_mid)
+         |> assign(:platform_fee_pct, platform_fee_pct)
+         |> assign(:transaction_fee_pct, transaction_fee_pct)
+         |> assign(:total_fee_pct, total_fee_pct)
+         |> assign(:selected_dev, nil)
+         |> assign(:matching_devs, fetch_matching_devs(tech_stack))
+         |> assign(:contract, contract)
+         |> assign(:achievements, fetch_achievements(socket))
+         |> assign(:show_begin_collaboration_drawer, false)
+         |> assign(:job_form, job_form)}
 
-    socket =
-      socket
-      |> assign(:tech_stack, tech_stack)
-      |> assign(:view_mode, "compact")
-      |> assign(:looking_to_collaborate, true)
-      |> assign(:hourly_rate_mid, hourly_rate_mid)
-      |> assign(:weekly_amount_mid, weekly_amount_mid)
-      |> assign(:platform_fee_pct, platform_fee_pct)
-      |> assign(:transaction_fee_pct, transaction_fee_pct)
-      |> assign(:total_fee_pct, total_fee_pct)
-      |> assign(:selected_dev, nil)
-      |> assign(:matching_devs, fetch_matching_devs(tech_stack))
-      |> assign(:contract, contract)
-      |> assign(:achievements, fetch_achievements(socket))
-      |> assign(:show_begin_collaboration_drawer, false)
-      |> assign(:job_form, job_form)
-
-    {:ok, socket}
+      {:error, _reason} ->
+        {:ok, push_navigate(socket, to: ~p"/status/404")}
+    end
   end
 
   def render(assigns) do
@@ -581,7 +583,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
   end
 
   def handle_event("create_job", %{"job_form" => params}, socket) do
-    case JobForm.changeset(params) do
+    case Jobs.create_job(params) do
       {:ok, job} ->
         {:noreply,
          socket

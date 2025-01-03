@@ -2,9 +2,11 @@ defmodule AlgoraWeb.Org.BountyHook do
   @moduledoc false
   use Phoenix.Component
 
+  import Ecto.Changeset
   import Phoenix.LiveView
 
   alias Algora.Bounties
+  alias Algora.Parser
 
   def on_mount(:default, _params, _session, socket) do
     {:cont, attach_hook(socket, :handle_create_bounty, :handle_event, &handle_create_bounty/3)}
@@ -13,18 +15,23 @@ defmodule AlgoraWeb.Org.BountyHook do
   defp handle_create_bounty("create_bounty", %{"github_issue_url" => url, "amount" => amount}, socket) do
     %{current_user: creator, current_org: owner} = socket.assigns
 
-    case Bounties.create_bounty(creator, owner, url, amount) do
-      {:ok, _bounty} ->
-        {:halt,
-         socket
-         |> put_flash(:info, "Bounty created successfully")
-         |> push_navigate(to: "/org/#{owner.handle}/bounties")}
+    # TODO: use AlgoraWeb.Community.DashboardLive.BountyForm
+    with {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url),
+         {:ok, _bounty} <- Bounties.create_bounty(%{creator: creator, owner: owner, ticket: ticket_ref, amount: amount}) do
+      {:halt,
+       socket
+       |> put_flash(:info, "Bounty created successfully")
+       |> push_navigate(to: "/org/#{owner.handle}/bounties")}
+    else
+      {:error, :already_exists} ->
+        {:halt, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
-      {:error, changeset} ->
-        {:halt,
-         socket
-         |> put_flash(:error, "Error creating bounty")
-         |> assign(:new_bounty_form, to_form(changeset))}
+      {:error, :internal_server_error} ->
+        {:halt, put_flash(socket, :error, "Something went wrong")}
+
+      {:error, _reason} ->
+        changeset = add_error(socket.assigns.new_bounty_form.changeset, :github_issue_url, "Invalid URL")
+        {:halt, assign(socket, :new_bounty_form, to_form(changeset))}
     end
   end
 

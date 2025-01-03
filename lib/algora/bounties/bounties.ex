@@ -18,6 +18,14 @@ defmodule Algora.Bounties do
   alias Algora.Workspace
   alias Algora.Workspace.Ticket
 
+  def base_query, do: Bounty
+
+  @type criterion ::
+          {:limit, non_neg_integer()}
+          | {:owner_id, integer()}
+          | {:status, :open | :paid}
+          | {:tech_stack, [String.t()]}
+
   def broadcast! do
     Phoenix.PubSub.broadcast!(Algora.PubSub, "bounties:all", :bounties_updated)
   end
@@ -26,12 +34,7 @@ defmodule Algora.Bounties do
     Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
   end
 
-  @spec create_bounty(%{
-          creator: User.t(),
-          owner: User.t(),
-          amount: Money.t(),
-          ticket: Ticket.t()
-        }) ::
+  @spec create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
           {:ok, Bounty.t()} | {:error, atom()}
   def create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
     changeset =
@@ -76,12 +79,7 @@ defmodule Algora.Bounties do
     end
   end
 
-  @spec create_tip(%{
-          creator: User.t(),
-          owner: User.t(),
-          recipient: User.t(),
-          amount: Money.t()
-        }) ::
+  @spec create_tip(%{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()}) ::
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}) do
     changeset =
@@ -273,14 +271,7 @@ defmodule Algora.Bounties do
     |> Repo.insert()
   end
 
-  def base_query, do: Bounty
-
-  @type criteria :: %{
-          optional(:limit) => non_neg_integer(),
-          optional(:owner_id) => integer(),
-          optional(:status) => :open | :paid,
-          optional(:tech_stack) => [String.t()]
-        }
+  @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
       {:limit, limit}, query ->
@@ -307,7 +298,6 @@ defmodule Algora.Bounties do
     end)
   end
 
-  @spec list_bounties_with(base_query :: Ecto.Query.t(), criteria :: criteria()) :: [map()]
   def list_bounties_with(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 

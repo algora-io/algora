@@ -18,17 +18,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
         conn |> put_status(:accepted) |> json(%{status: "ok"})
 
-      {:error, %Jason.EncodeError{}} ->
-        conn |> put_status(:bad_request) |> json(%{error: "Invalid payload"})
-
       {:error, :missing_header} ->
         conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
 
       {:error, :signature_mismatch} ->
         conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
-
-      {:error, reason} ->
-        conn |> put_status(:internal_server_error) |> json(%{error: reason})
     end
   rescue
     e ->

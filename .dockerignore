@@ -32,3 +32,4 @@ node_modules
 /.fly
 /xref*
 /priv/domain_blacklist.txt
+/priv/plts

@@ -46,11 +46,11 @@ defmodule AlgoraWeb.UserAuth do
       %{"user_id" => user_id} ->
         user = Accounts.get_user!(user_id)
 
-        if Accounts.admin?(user) do
-          {:cont, socket}
-        else
-          {:halt, LiveView.redirect(socket, to: ~p"/status/404")}
+        if not Accounts.admin?(user) do
+          raise(AlgoraWeb.NotFoundError)
         end
+
+        {:cont, socket}
 
       %{} ->
         {:halt, redirect_require_login(socket)}

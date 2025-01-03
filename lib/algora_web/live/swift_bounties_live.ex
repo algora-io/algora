@@ -368,7 +368,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
   defp assign_tickets(socket) do
     tickets =
-      Bounties.TicketView.list(
+      Bounties.BountyListing.list(
         status: :open,
         tech_stack: ["Swift"],
         limit: 100

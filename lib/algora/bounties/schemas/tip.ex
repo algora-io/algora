@@ -4,9 +4,7 @@ defmodule Algora.Bounties.Tip do
 
   alias Algora.Accounts.User
 
-  @type t() :: %__MODULE__{}
-
-  schema "tips" do
+  typed_schema "tips" do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
 

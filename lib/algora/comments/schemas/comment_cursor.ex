@@ -4,7 +4,7 @@ defmodule Algora.Comments.CommentCursor do
 
   import Ecto.Changeset
 
-  schema "comment_cursors" do
+  typed_schema "comment_cursors" do
     field :provider, :string
     field :repo_owner, :string
     field :repo_name, :string

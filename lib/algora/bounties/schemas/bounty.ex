@@ -6,9 +6,7 @@ defmodule Algora.Bounties.Bounty do
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
 
-  @type t() :: %__MODULE__{}
-
-  schema "bounties" do
+  typed_schema "bounties" do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
 

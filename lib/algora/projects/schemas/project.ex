@@ -2,9 +2,7 @@ defmodule Algora.Projects.Project do
   @moduledoc false
   use Algora.Schema
 
-  @type t() :: %__MODULE__{}
-
-  schema "projects" do
+  typed_schema "projects" do
     field :name, :string
 
     belongs_to :user, Algora.Accounts.User

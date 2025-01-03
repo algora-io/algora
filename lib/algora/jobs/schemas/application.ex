@@ -2,9 +2,7 @@ defmodule Algora.Jobs.Application do
   @moduledoc false
   use Algora.Schema
 
-  @type t() :: %__MODULE__{}
-
-  schema "applications" do
+  typed_schema "applications" do
     belongs_to :job, Algora.Jobs.Job
     belongs_to :user, Algora.Accounts.User
 

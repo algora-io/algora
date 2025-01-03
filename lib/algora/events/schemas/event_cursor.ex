@@ -4,7 +4,7 @@ defmodule Algora.Events.EventCursor do
 
   import Ecto.Changeset
 
-  schema "event_cursors" do
+  typed_schema "event_cursors" do
     field :provider, :string
     field :repo_owner, :string
     field :repo_name, :string

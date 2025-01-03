@@ -1,8 +1,8 @@
 defmodule Algora.Analytics.CompanyAnalytics do
   @moduledoc false
-  use Ecto.Schema
+  use Algora.Schema
 
-  schema "company_analytics" do
+  typed_schema "company_analytics" do
     belongs_to :organization, Algora.Accounts.User
 
     # Registration & Onboarding

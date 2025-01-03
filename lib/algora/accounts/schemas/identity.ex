@@ -5,10 +5,8 @@ defmodule Algora.Accounts.Identity do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_token, :provider_meta]}
-  schema "identities" do
+  typed_schema "identities" do
     field :provider, :string
     field :provider_token, :string
     field :provider_email, :string

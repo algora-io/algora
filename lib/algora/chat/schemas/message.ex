@@ -2,7 +2,7 @@ defmodule Algora.Chat.Message do
   @moduledoc false
   use Algora.Schema
 
-  schema "messages" do
+  typed_schema "messages" do
     field :content, :string
 
     belongs_to :thread, Algora.Chat.Thread

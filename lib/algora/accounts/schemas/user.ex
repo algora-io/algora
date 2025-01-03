@@ -8,8 +8,8 @@ defmodule Algora.Accounts.User do
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
+  alias Algora.Types.Money
   alias Algora.Workspace.Installation
-  alias Money.Ecto.Composite.Type, as: MoneyType
 
   @type t() :: %__MODULE__{}
 
@@ -42,11 +42,11 @@ defmodule Algora.Accounts.User do
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
 
-    field :hourly_rate_min, MoneyType, no_fraction_if_integer: true
-    field :hourly_rate_max, MoneyType, no_fraction_if_integer: true
+    field :hourly_rate_min, Money
+    field :hourly_rate_max, Money
     field :hours_per_week, :integer
 
-    field :total_earned, MoneyType, no_fraction_if_integer: true, virtual: true
+    field :total_earned, Money, virtual: true
     field :completed_bounties_count, :integer, virtual: true
     field :contributed_projects_count, :integer, virtual: true
 

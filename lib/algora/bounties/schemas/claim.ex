@@ -4,10 +4,8 @@ defmodule Algora.Bounties.Claim do
 
   alias Algora.Bounties.Claim
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_meta]}
-  schema "claims" do
+  typed_schema "claims" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map

@@ -4,10 +4,8 @@ defmodule Algora.Workspace.Ticket do
 
   alias Algora.Workspace.Ticket
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_meta]}
-  schema "tickets" do
+  typed_schema "tickets" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map

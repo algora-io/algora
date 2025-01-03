@@ -2,9 +2,7 @@ defmodule Algora.Bounties.Bonus do
   @moduledoc false
   use Algora.Schema
 
-  @type t() :: %__MODULE__{}
-
-  schema "bonuses" do
+  typed_schema "bonuses" do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :user, Algora.Accounts.User
 

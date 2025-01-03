@@ -2,7 +2,7 @@ defmodule Algora.Payments.PaymentMethod do
   @moduledoc false
   use Algora.Schema
 
-  schema "payment_methods" do
+  typed_schema "payment_methods" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map

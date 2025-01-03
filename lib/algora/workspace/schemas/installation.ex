@@ -4,10 +4,8 @@ defmodule Algora.Workspace.Installation do
 
   alias Algora.Accounts.User
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_meta]}
-  schema "installations" do
+  typed_schema "installations" do
     field :provider, :string
     field :provider_id, :string
     field :provider_login, :string

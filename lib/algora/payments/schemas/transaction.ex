@@ -5,13 +5,11 @@ defmodule Algora.Payments.Transaction do
   alias Algora.Contracts.Contract
   alias Algora.Types.Money
 
-  @type t() :: %__MODULE__{}
-
   @transaction_types [:charge, :transfer, :reversal, :debit, :credit, :deposit, :withdrawal]
   @transaction_statuses [:initialized, :processing, :succeeded, :failed, :canceled]
 
   @derive {Inspect, except: [:provider_meta]}
-  schema "transactions" do
+  typed_schema "transactions" do
     field :provider, :string
     field :provider_id, :string
     field :provider_charge_id, :string

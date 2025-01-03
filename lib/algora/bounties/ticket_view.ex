@@ -8,7 +8,7 @@ defmodule Algora.Bounties.TicketView do
   alias Algora.Workspace.Ticket
 
   @primary_key false
-  schema "ticket_views" do
+  typed_schema "ticket_views" do
     # Denormalized fields from Ticket
     field :title, :string
     field :number, :integer

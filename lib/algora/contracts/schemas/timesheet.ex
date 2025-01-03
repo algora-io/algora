@@ -2,9 +2,7 @@ defmodule Algora.Contracts.Timesheet do
   @moduledoc false
   use Algora.Schema
 
-  @type t() :: %__MODULE__{}
-
-  schema "timesheets" do
+  typed_schema "timesheets" do
     field :hours_worked, :integer
     field :description, :string
 

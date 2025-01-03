@@ -4,9 +4,7 @@ defmodule Algora.Reviews.Review do
 
   alias Algora.Accounts.User
 
-  @type t() :: %__MODULE__{}
-
-  schema "reviews" do
+  typed_schema "reviews" do
     field :rating, :integer
     field :content, :string
     field :visibility, Ecto.Enum, values: [:public, :private]

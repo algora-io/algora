@@ -4,10 +4,8 @@ defmodule Algora.Workspace.Repository do
 
   alias Algora.Workspace.Repository
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_meta]}
-  schema "repositories" do
+  typed_schema "repositories" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map

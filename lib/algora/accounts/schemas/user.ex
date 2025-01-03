@@ -11,10 +11,8 @@ defmodule Algora.Accounts.User do
   alias Algora.Types.Money
   alias Algora.Workspace.Installation
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_meta]}
-  schema "users" do
+  typed_schema "users" do
     field :provider, :string
     field :provider_id, :string
     field :provider_login, :string

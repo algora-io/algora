@@ -2,10 +2,8 @@ defmodule Algora.Payments.Account do
   @moduledoc false
   use Algora.Schema
 
-  @type t() :: %__MODULE__{}
-
   @derive {Inspect, except: [:provider_meta]}
-  schema "accounts" do
+  typed_schema "accounts" do
     field :provider, :string
     field :provider_id, :string
     field :provider_meta, :map

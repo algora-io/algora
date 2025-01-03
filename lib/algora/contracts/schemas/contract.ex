@@ -6,9 +6,7 @@ defmodule Algora.Contracts.Contract do
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
 
-  @type t() :: %__MODULE__{}
-
-  schema "contracts" do
+  typed_schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1
     field :hourly_rate, Algora.Types.Money

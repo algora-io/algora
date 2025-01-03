@@ -4,9 +4,7 @@ defmodule Algora.Organizations.Member do
 
   alias Algora.Accounts.User
 
-  @type t() :: %__MODULE__{}
-
-  schema "members" do
+  typed_schema "members" do
     field :role, Ecto.Enum, values: [:admin, :mod, :expert]
 
     belongs_to :org, User

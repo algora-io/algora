@@ -120,9 +120,4 @@ defmodule Algora.Bounties.BountyListing do
         query
     end)
   end
-
-  # TODO: remove this once we have real data
-  def sample_tickets do
-    []
-  end
 end

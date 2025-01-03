@@ -50,8 +50,7 @@ defmodule AlgoraWeb.BountiesLive do
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100
-      ) ++
-        Bounties.BountyListing.sample_tickets()
+      )
 
     assign(socket, :tickets, tickets)
   end

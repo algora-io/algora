@@ -176,7 +176,7 @@ defmodule Algora.Bounties do
              Payments.create_stripe_session(line_items, %{
                # Mandatory for some countries like India
                description: "Tip payment for OSS contributions",
-               metadata: %{version: "2", group_id: tx_group_id}
+               metadata: %{"version" => "2", "group_id" => tx_group_id}
              }) do
         {:ok, session.url}
       end

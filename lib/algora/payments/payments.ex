@@ -17,18 +17,22 @@ defmodule Algora.Payments do
     Phoenix.PubSub.subscribe(Algora.PubSub, "payments:all")
   end
 
+  @spec create_stripe_session(
+          line_items :: [Stripe.Session.line_item_data()],
+          payment_intent_data :: Stripe.Session.payment_intent_data()
+        ) ::
+          {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
   def create_stripe_session(line_items, payment_intent_data) do
-    params = %{
+    Stripe.Session.create(%{
       mode: "payment",
       billing_address_collection: "required",
       line_items: line_items,
-      invoice_creation: %{enabled: true},
+      # TODO: handle invoice creation which is not supported by current version
+      # invoice_creation: %{enabled: true},
       success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
       cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
       payment_intent_data: payment_intent_data
-    }
-
-    Stripe.Session.create(params)
+    })
   end
 
   def get_transaction_fee_pct, do: Decimal.new("0.04")

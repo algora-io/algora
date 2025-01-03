@@ -2,6 +2,8 @@ defmodule AlgoraWeb.DevLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts.User
+
   def mount(_params, _session, socket) do
     project = %{
       title: "Looking for an Elixir developer to build a real-time chat application",
@@ -778,7 +780,7 @@ defmodule AlgoraWeb.DevLive do
                                 {dev.name} {dev.flag}
                               </div>
                               <div class="truncate text-sm text-muted-foreground">
-                                @{dev.handle}
+                                @{User.handle(dev)}
                               </div>
                             </div>
                             <div class="shrink-0 text-right">

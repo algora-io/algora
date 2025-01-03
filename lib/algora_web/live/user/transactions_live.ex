@@ -3,6 +3,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
+  alias Algora.Accounts.User
   alias Algora.Payments
   alias Algora.Util
 
@@ -134,7 +135,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
                             <div class="font-medium">
                               <div>{linked_user.name}</div>
                               <div class="text-sm text-muted-foreground">
-                                @{linked_user.provider_login}
+                                @{User.handle(linked_user)}
                               </div>
                             </div>
                           </div>

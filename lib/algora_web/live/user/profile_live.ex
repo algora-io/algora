@@ -3,6 +3,7 @@ defmodule AlgoraWeb.User.ProfileLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Reviews
   alias Algora.Reviews.Review
@@ -33,7 +34,7 @@ defmodule AlgoraWeb.User.ProfileLive do
           <div class="flex-1 space-y-4">
             <div>
               <h1 class="text-2xl font-bold">{@user.name}</h1>
-              <p class="text-muted-foreground">@{@user.handle}</p>
+              <p class="text-muted-foreground">@{User.handle(@user)}</p>
             </div>
 
             <p class="max-w-2xl text-foreground">{@user.bio}</p>
@@ -109,7 +110,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                     <tr class="border-b transition-colors hover:bg-muted/10">
                       <td class="p-4 align-middle">
                         <div class="flex items-center gap-4">
-                          <.link href={~p"/org/#{bounty.owner.handle}"}>
+                          <.link navigate={User.url(bounty.owner)}>
                             <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
                               <img
                                 class="aspect-square h-full w-full"
@@ -122,7 +123,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                           <div class="flex flex-col gap-1">
                             <div class="flex items-center gap-1 text-sm text-muted-foreground">
                               <.link
-                                href={~p"/org/#{bounty.owner.handle}"}
+                                navigate={User.url(bounty.owner)}
                                 class="font-semibold hover:underline"
                               >
                                 {bounty.owner.name}

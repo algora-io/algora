@@ -2,6 +2,7 @@ defmodule Algora.Chat do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Chat.Message
   alias Algora.Chat.Participant
   alias Algora.Chat.Thread
@@ -11,7 +12,7 @@ defmodule Algora.Chat do
     Repo.transaction(fn ->
       {:ok, thread} =
         %Thread{}
-        |> Thread.changeset(%{title: "#{user_1.handle} <> #{user_2.handle}"})
+        |> Thread.changeset(%{title: "#{User.handle(user_1)} <> #{User.handle(user_2)}"})
         |> Repo.insert()
 
       # Add participants

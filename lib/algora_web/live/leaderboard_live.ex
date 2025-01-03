@@ -6,6 +6,7 @@ defmodule AlgoraWeb.LeaderboardLive do
   import Ecto.Query
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Misc.CountryEmojis
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -67,7 +68,7 @@ defmodule AlgoraWeb.LeaderboardLive do
                   </.avatar>
                   <div>
                     <div class="text-2xl font-semibold text-gray-100">{user.name}</div>
-                    <div class="text-lg font-medium text-gray-300">@{user.provider_login}</div>
+                    <div class="text-lg font-medium text-gray-300">@{User.handle(user)}</div>
                     <div class="font-mono text-lg font-medium text-indigo-400">{user.id}</div>
                   </div>
                 </div>

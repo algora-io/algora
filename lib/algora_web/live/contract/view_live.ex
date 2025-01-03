@@ -2,6 +2,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts.User
   alias Algora.Chat
   alias Algora.Contracts
   alias Algora.Contracts.Contract
@@ -242,7 +243,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <div>
                         <div class="text-lg font-medium">{@contract.client.name}</div>
                         <div class="text-sm text-muted-foreground">
-                          @{@contract.client.handle}
+                          @{User.handle(@contract.client)}
                         </div>
                       </div>
                     </div>
@@ -278,7 +279,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <div>
                         <div class="text-lg font-medium">{@contract.contractor.name}</div>
                         <div class="text-sm text-muted-foreground">
-                          @{@contract.contractor.handle}
+                          @{User.handle(@contract.contractor)}
                         </div>
                       </div>
                     </div>

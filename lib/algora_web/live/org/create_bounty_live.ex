@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
   import Ecto.Changeset
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Parser
   alias AlgoraWeb.Org.Forms.BountyForm
@@ -269,7 +270,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                 {@selected_dev.name} {@selected_dev.flag}
               </h4>
               <div class="text-sm text-muted-foreground">
-                @{@selected_dev.handle}
+                @{User.handle(@selected_dev)}
               </div>
               <div class="mt-2 -ml-1 flex flex-wrap gap-2">
                 <%= for tech <- @selected_dev.tech_stack do %>
@@ -321,7 +322,7 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-message" class="h-4 w-4" />
                         <span>
-                          {@selected_dev.handle} wrote to you {Algora.Util.time_ago(
+                          {User.handle(@selected_dev)} wrote to you {Algora.Util.time_ago(
                             DateTime.utc_now()
                             |> DateTime.add(-3, :day)
                           )}

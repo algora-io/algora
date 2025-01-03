@@ -5,6 +5,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
   import Ecto.Query
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -59,7 +60,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
                           {user.name}
                         </div>
                         <div class="text-sm text-muted-foreground">
-                          @{user.handle}
+                          @{User.handle(user)}
                         </div>
                       </div>
                     </div>

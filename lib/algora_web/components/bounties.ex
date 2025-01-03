@@ -4,6 +4,8 @@ defmodule AlgoraWeb.Components.Bounties do
 
   import AlgoraWeb.CoreComponents
 
+  alias Algora.Accounts.User
+
   def bounties(assigns) do
     ~H"""
     <div class="relative -mx-2 -mt-2 overflow-auto">
@@ -42,11 +44,11 @@ defmodule AlgoraWeb.Components.Bounties do
               <td class="px-2 py-2 pr-2 sm:px-6">
                 <div class="flex justify-end -space-x-2">
                   <%= for bounty <- Enum.take(ticket.top_bounties, 3) do %>
-                    <.link href={"https://github.com/#{bounty.owner.provider_login}"}>
+                    <.link navigate={User.url(bounty.owner)}>
                       <.avatar class="h-8 w-8">
                         <.avatar_image src={bounty.owner.avatar_url} />
                         <.avatar_fallback>
-                          {String.slice(bounty.owner.provider_login, 0, 2)}
+                          {String.slice(User.handle(bounty.owner), 0, 2)}
                         </.avatar_fallback>
                       </.avatar>
                     </.link>

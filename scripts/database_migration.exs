@@ -19,11 +19,12 @@ defmodule DatabaseMigration do
   - Set the output_file to your desired output file path.
   - Run the script using: elixir scripts/database_migration.exs
   """
-  require Logger
   alias Algora.Accounts.User
-  alias Algora.Workspace.Ticket
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
+  alias Algora.Workspace.Ticket
+
+  require Logger
 
   @table_mappings %{
     "User" => "users",
@@ -183,8 +184,6 @@ defmodule DatabaseMigration do
         |> Map.put("updated_at", row["updated_at"])
         |> Map.put("status", if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded))
         |> Map.put("succeeded_at", row["succeeded_at"])
-      else
-        nil
       end
 
     row
@@ -195,7 +194,8 @@ defmodule DatabaseMigration do
   def process_dump(input_file, output_file) do
     db = collect_data(input_file)
 
-    File.stream!(input_file)
+    input_file
+    |> File.stream!()
     |> Stream.chunk_while(
       [],
       &chunk_fun/2,
@@ -208,7 +208,8 @@ defmodule DatabaseMigration do
   end
 
   defp collect_data(input_file) do
-    File.stream!(input_file)
+    input_file
+    |> File.stream!()
     |> Stream.chunk_while(
       nil,
       &collect_chunk_fun/2,
@@ -233,8 +234,8 @@ defmodule DatabaseMigration do
       |> String.split(", ")
 
     Enum.map(data, fn line ->
-      values = String.trim(line) |> String.split("\t")
-      Enum.zip(columns, values) |> Map.new()
+      values = line |> String.trim() |> String.split("\t")
+      columns |> Enum.zip(values) |> Map.new()
     end)
   end
 
@@ -257,14 +258,16 @@ defmodule DatabaseMigration do
   defp collect_after_fun({table, acc}), do: {:cont, {table, Enum.reverse(acc)}, nil}
 
   defp process_chunk(chunk, db) do
-    case extract_copy_section(chunk) do
-      %{table: table} = section when table in @relevant_tables ->
-        transform_section(section, db)
+    case_result =
+      case extract_copy_section(chunk) do
+        %{table: table} = section when table in @relevant_tables ->
+          transform_section(section, db)
 
-      _ ->
-        nil
-    end
-    |> load_copy_section()
+        _ ->
+          nil
+      end
+
+    load_copy_section(case_result)
   end
 
   defp transform_section(%{table: table, columns: _columns, data: data}, db) do
@@ -309,8 +312,7 @@ defmodule DatabaseMigration do
       |> Map.new(fn {k, v} -> {k, v} end)
       |> conditionally_rename_created_at()
       |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
-      |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
-      |> Map.new()
+      |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
     # Ensure handle is unique
     fields = ensure_unique_handle(fields)
@@ -368,8 +370,7 @@ defmodule DatabaseMigration do
     data_lines =
       Enum.map(data, fn row ->
         columns
-        |> Enum.map(fn col -> serialize_value(Map.get(row, col, "")) end)
-        |> Enum.join("\t")
+        |> Enum.map_join("\t", fn col -> serialize_value(Map.get(row, col, "")) end)
         |> Kernel.<>("\n")
       end)
 
@@ -381,30 +382,29 @@ defmodule DatabaseMigration do
   defp serialize_value(%Decimal{} = value), do: Decimal.to_string(value)
 
   defp serialize_value(value) when is_map(value) or is_list(value) do
-    try do
-      json = Jason.encode!(value, escape: :json)
-      # Handle empty arrays specifically
-      if json == "[]" do
-        "{}"
-      else
-        # Escape backslashes and double quotes for PostgreSQL COPY
-        String.replace(json, ["\\", "\""], fn
-          "\\" -> "\\\\"
-          "\"" -> "\\\""
-        end)
-      end
-    rescue
-      _ ->
-        # Fallback to a safe string representation
-        inspect(value, limit: :infinity, printable_limit: :infinity)
-        |> String.replace(["\\", "\n", "\r", "\t"], fn
-          "\\" -> "\\\\"
-          "\n" -> "\\n"
-          "\r" -> "\\r"
-          "\t" -> "\\t"
-        end)
-        |> String.replace("\"", "\\\"")
+    json = Jason.encode!(value, escape: :json)
+    # Handle empty arrays specifically
+    if json == "[]" do
+      "{}"
+    else
+      # Escape backslashes and double quotes for PostgreSQL COPY
+      String.replace(json, ["\\", "\""], fn
+        "\\" -> "\\\\"
+        "\"" -> "\\\""
+      end)
     end
+  rescue
+    _ ->
+      # Fallback to a safe string representation
+      value
+      |> inspect(limit: :infinity, printable_limit: :infinity)
+      |> String.replace(["\\", "\n", "\r", "\t"], fn
+        "\\" -> "\\\\"
+        "\n" -> "\\n"
+        "\r" -> "\\r"
+        "\t" -> "\\t"
+      end)
+      |> String.replace("\"", "\\\"")
   end
 
   defp serialize_value(value) when is_nil(value), do: "\\N"
@@ -413,7 +413,7 @@ defmodule DatabaseMigration do
     # Remove any surrounding quotes for numeric values
     value =
       if String.starts_with?(value, "\"") and String.ends_with?(value, "\"") do
-        String.slice(value, 1..-2)
+        String.slice(value, 1..-2//1)
       else
         value
       end
@@ -495,9 +495,7 @@ defmodule DatabaseMigration do
   defp deserialize_value("{}"), do: []
 
   defp deserialize_value(value) when is_map(value) do
-    value
-    |> Enum.map(fn {k, v} -> {k, deserialize_value(v)} end)
-    |> Map.new()
+    Map.new(value, fn {k, v} -> {k, deserialize_value(v)} end)
   end
 
   defp deserialize_value(value) when is_list(value) do
@@ -505,30 +503,28 @@ defmodule DatabaseMigration do
   end
 
   defp deserialize_value(value) when is_binary(value) do
-    cond do
-      String.starts_with?(value, "{") and String.ends_with?(value, "}") ->
-        value
-        |> String.slice(1..-2)
-        |> String.split(",", trim: true)
-        |> Enum.map(&deserialize_value/1)
+    if String.starts_with?(value, "{") and String.ends_with?(value, "}") do
+      value
+      |> String.slice(1..-2//1)
+      |> String.split(",", trim: true)
+      |> Enum.map(&deserialize_value/1)
+    else
+      case Integer.parse(value) do
+        {int, ""} ->
+          int
 
-      true ->
-        case Integer.parse(value) do
-          {int, ""} ->
-            int
-
-          _ ->
-            case Float.parse(value) do
-              {float, ""} -> float
-              _ -> value
-            end
-        end
+        _ ->
+          case Float.parse(value) do
+            {float, ""} -> float
+            _ -> value
+          end
+      end
     end
   end
 
   defp deserialize_value(value), do: value
 
-  defp clear_tables!() do
+  defp clear_tables! do
     commands =
       [
         "BEGIN TRANSACTION;",
@@ -564,7 +560,7 @@ defmodule DatabaseMigration do
     end
   end
 
-  def run!() do
+  def run! do
     input_file = ".local/prod_db.sql"
     output_file = ".local/prod_db_new.sql"
 

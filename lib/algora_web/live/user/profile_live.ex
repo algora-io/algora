@@ -8,18 +8,14 @@ defmodule AlgoraWeb.User.ProfileLive do
   alias Algora.Reviews.Review
 
   def mount(%{"handle" => handle}, _session, socket) do
-    case Accounts.fetch_developer_by(handle: handle) do
-      {:ok, user} ->
-        {:ok,
-         socket
-         |> assign(:user, user)
-         |> assign(:page_title, "#{user.name}")
-         |> assign(:completed_bounties, Bounties.list_bounties_awarded_to_user(user.id, limit: 10))
-         |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))}
+    {:ok, user} = Accounts.fetch_developer_by(handle: handle)
 
-      {:error, _reason} ->
-        {:ok, push_navigate(socket, to: ~p"/status/404")}
-    end
+    {:ok,
+     socket
+     |> assign(:user, user)
+     |> assign(:page_title, "#{user.name}")
+     |> assign(:completed_bounties, Bounties.list_bounties_awarded_to_user(user.id, limit: 10))
+     |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))}
   end
 
   def render(assigns) do

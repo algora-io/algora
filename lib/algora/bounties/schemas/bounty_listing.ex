@@ -1,4 +1,5 @@
-defmodule Algora.Bounties.TicketView do
+defmodule Algora.Bounties.BountyListing do
+  @moduledoc false
   use Algora.Schema
 
   import Ecto.Query
@@ -8,7 +9,7 @@ defmodule Algora.Bounties.TicketView do
   alias Algora.Workspace.Ticket
 
   @primary_key false
-  typed_schema "ticket_views" do
+  typed_schema "bounty_listings" do
     # Denormalized fields from Ticket
     field :title, :string
     field :number, :integer

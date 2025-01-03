@@ -305,12 +305,12 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
   defp assign_tickets(socket) do
     tickets =
-      Bounties.TicketView.list(
+      Bounties.BountyListing.list(
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100
       ) ++
-        Bounties.TicketView.sample_tickets()
+        Bounties.BountyListing.sample_tickets()
 
     assign(socket, :tickets, Enum.take(tickets, 6))
   end

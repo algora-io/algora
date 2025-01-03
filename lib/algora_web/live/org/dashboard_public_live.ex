@@ -103,14 +103,14 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           title="Solvers"
           value={@stats.solvers_count}
           subtext={"+#{@stats.solvers_diff} from last month"}
-          href={~p"/org/#{@org.handle}/solvers"}
+          href="#"
           icon="tabler-user-code"
         />
         <.stat_card
           title="Reviews"
           value={@stats.reviews_count}
           subtext="reviews"
-          href={~p"/org/#{@org.handle}/reviews"}
+          href="#"
           icon="tabler-star"
         />
       </div>

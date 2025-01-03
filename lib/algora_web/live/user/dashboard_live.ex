@@ -363,7 +363,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               </div>
             </div>
             <.button phx-click="accept_contract" phx-value-org={@contract.client.handle} size="sm">
-              <.link navigate={~p"/contracts/#{@contract.id}"}>
+              <.link navigate={~p"/org/#{@contract.client.handle}/contracts/#{@contract.id}"}>
                 Accept contract
               </.link>
             </.button>

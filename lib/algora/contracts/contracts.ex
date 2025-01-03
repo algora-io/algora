@@ -310,26 +310,15 @@ defmodule Algora.Contracts do
 
     line_items =
       if Money.positive?(net_charge_amount) do
-        Enum.reject(
-          [
-            %{
-              amount: transfer_amount,
-              description:
-                "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
-            },
-            %{amount: Money.negate!(balance), description: "Less: Previously prepaid amount"},
-            if Money.positive?(new_prepayment) do
-              %{
-                amount: new_prepayment,
-                description:
-                  "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
-              }
-            end,
-            %{amount: platform_fee, description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"},
-            %{amount: transaction_fee, description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"}
-          ],
-          &Money.zero?(&1.amount)
-        )
+        [
+          build_transfer_line_item(contract, transfer_amount),
+          build_balance_line_item(balance),
+          build_prepayment_line_item(contract, new_prepayment),
+          build_platform_fee_line_item(platform_fee, fee_data),
+          build_transaction_fee_line_item(transaction_fee, fee_data)
+        ]
+        |> Enum.reject(&is_nil/1)
+        |> Enum.reject(&Money.zero?(&1.amount))
       else
         []
       end
@@ -401,6 +390,45 @@ defmodule Algora.Contracts do
          {:ok, _line_items} <- create_line_items(contract, invoice, charge.line_items) do
       {:ok, invoice}
     end
+  end
+
+  defp build_transfer_line_item(contract, amount) do
+    %{
+      amount: amount,
+      description:
+        "Payment for completed work - #{contract.timesheet.hours_worked} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+    }
+  end
+
+  defp build_balance_line_item(balance) do
+    %{
+      amount: Money.negate!(balance),
+      description: "Less: Previously prepaid amount"
+    }
+  end
+
+  defp build_prepayment_line_item(contract, amount) do
+    if Money.positive?(amount) do
+      %{
+        amount: amount,
+        description:
+          "Prepayment for upcoming period - #{contract.hours_per_week} hours @ #{Money.to_string!(contract.hourly_rate)}/hr"
+      }
+    end
+  end
+
+  defp build_platform_fee_line_item(fee, fee_data) do
+    %{
+      amount: fee,
+      description: "Algora platform fee (#{Util.format_pct(fee_data.current_fee)})"
+    }
+  end
+
+  defp build_transaction_fee_line_item(fee, fee_data) do
+    %{
+      amount: fee,
+      description: "Transaction fee (#{Util.format_pct(fee_data.transaction_fee)})"
+    }
   end
 
   defp create_line_items(contract, invoice, line_items) do

@@ -1,16 +1,11 @@
 name: Elixir CI
 
-# Define workflow that runs when changes are pushed to the
-# `main` branch or pushed to a PR branch that targets the `main`
-# branch. Change the branch name if your project uses a
-# different name for the main branch like "master" or "production".
 on:
   push:
-    branches: ["main"] # adapt branch for project
+    branches: ["main"]
   pull_request:
-    branches: ["main"] # adapt branch for project
+    branches: ["main"]
 
-# Sets the environment variables for running tests
 env:
   MIX_ENV: test
   TEST_DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
@@ -20,9 +15,6 @@ permissions:
 
 jobs:
   test:
-    # Set up a Postgres DB service. By default, Phoenix applications
-    # use Postgres. This creates a database for running tests.
-    # Additional services can be defined here if required.
     services:
       db:
         image: postgres:12
@@ -38,24 +30,19 @@ jobs:
     runs-on: ubuntu-latest
     name: Test on OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
-      # Specify the OTP and Elixir versions to use when building
-      # and running the workflow steps.
       matrix:
-        otp: ["27.2"] # Define the OTP version [required]
-        elixir: ["1.18.1"] # Define the elixir version [required]
+        otp: ["27.2"]
+        elixir: ["1.18.1"]
     steps:
-      # Step: Setup Elixir + Erlang image as the base.
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
 
-      # Step: Check out the code.
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step: Define how to cache deps. Restores existing cache if present.
       - name: Cache deps
         id: cache-deps
         uses: actions/cache@v3
@@ -67,9 +54,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mix-${{ env.cache-name }}-
 
-      # Step: Define how to cache the `_build` directory. After the first run,
-      # this speeds up tests runs a lot. This includes not re-compiling our
-      # project's downloaded deps every run.
       - name: Cache compiled build
         id: cache-build
         uses: actions/cache@v3
@@ -82,17 +66,12 @@ jobs:
             ${{ runner.os }}-mix-${{ env.cache-name }}-
             ${{ runner.os }}-mix-
 
-      # Step: Download project dependencies. If unchanged, uses
-      # the cached version.
       - name: Install dependencies
         run: mix deps.get
 
-      # Step: Compile the project treating any warnings as errors.
-      # Customize this step if a different behavior is desired.
-      - name: Compiles without warnings
+      - name: Compile without warnings
         run: mix compile --warnings-as-errors
 
-      # Step: Restore PLT cache. Cache key based on Erlang/Elixir version and the mix.lock hash
       - name: Restore PLT cache
         id: plt_cache
         uses: actions/cache/restore@v3
@@ -104,12 +83,10 @@ jobs:
           path: |
             priv/plts
 
-      # Step: Create PLTs if no cache was found
       - name: Create PLTs
         if: steps.plt_cache.outputs.cache-hit != 'true'
         run: mix dialyzer --plt
 
-      # Step: Save PLT cache. By default, the GitHub Cache action will only save the cache if all steps in the job succeed, so we separate the cache restore and save steps in case running dialyzer fails.
       - name: Save PLT cache
         id: plt_cache_save
         uses: actions/cache/save@v3
@@ -120,19 +97,11 @@ jobs:
           path: |
             priv/plts
 
-      # Step: Run dialyzer
       - name: Run dialyzer
-        # Two formats are included for ease of debugging and it is lightly recommended to use both, see https://github.com/jeremyjh/dialyxir/issues/530 for reasoning
-        # --format github is helpful to print the warnings in a way that GitHub understands and can place on the /files page of a PR
-        # --format dialyxir allows the raw GitHub actions logs to be useful because they have the full warning printed
         run: mix dialyzer --format github --format dialyxir
 
-      # Step: Check that the checked in code has already been formatted.
-      # This step fails if something was found unformatted.
-      # Customize this step as desired.
-      - name: Check Formatting
+      - name: Check formatting
         run: mix format --check-formatted
 
-      # Step: Execute the tests.
       - name: Run tests
         run: mix test

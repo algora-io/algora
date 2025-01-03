@@ -328,8 +328,6 @@ defmodule AlgoraWeb.Project.CreateLive do
 
   defp next_step_label(1), do: "Project Details"
   defp next_step_label(2), do: "Collaboration"
-  defp next_step_label(3), do: "Description"
-  defp next_step_label(4), do: "Review"
 
   defp get_matching_devs(project) do
     Accounts.list_developers(

@@ -15,7 +15,7 @@ defmodule Algora.Bounties.TicketView do
     field :url, :string
 
     # Computed/aggregated fields
-    field :total_bounty_amount, Money.Ecto.Composite.Type
+    field :total_bounty_amount, Algora.Types.Money
     field :bounty_count, :integer
 
     # Original associations

@@ -7,7 +7,7 @@ defmodule Algora.Bounties.Tip do
   @type t() :: %__MODULE__{}
 
   schema "tips" do
-    field :amount, Money.Ecto.Composite.Type, no_fraction_if_integer: true
+    field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
 
     belongs_to :ticket, Algora.Workspace.Ticket

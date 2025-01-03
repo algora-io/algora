@@ -11,7 +11,7 @@ defmodule Algora.Payments.PlatformTransaction do
     field :provider_meta, :map
 
     field :succeeded_at, :utc_datetime_usec
-    field :amount, Money.Ecto.Composite.Type
+    field :amount, Algora.Types.Money
     field :type, :string
     field :reporting_category, :string
 

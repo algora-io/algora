@@ -3,7 +3,7 @@ defmodule Algora.Payments.Transaction do
   use Algora.Schema
 
   alias Algora.Contracts.Contract
-  alias Money.Ecto.Composite.Type, as: MoneyType
+  alias Algora.Types.Money
 
   @type t() :: %__MODULE__{}
 
@@ -21,10 +21,10 @@ defmodule Algora.Payments.Transaction do
     field :provider_balance_transaction_id, :string
     field :provider_meta, :map
 
-    field :gross_amount, MoneyType, no_fraction_if_integer: true
-    field :net_amount, MoneyType, no_fraction_if_integer: true
-    field :total_fee, MoneyType, no_fraction_if_integer: true
-    field :provider_fee, MoneyType, no_fraction_if_integer: true
+    field :gross_amount, Money
+    field :net_amount, Money
+    field :total_fee, Money
+    field :provider_fee, Money
     field :line_items, {:array, :map}
 
     field :type, Ecto.Enum, values: @transaction_types

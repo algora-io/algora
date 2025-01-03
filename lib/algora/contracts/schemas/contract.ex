@@ -5,29 +5,28 @@ defmodule Algora.Contracts.Contract do
   alias Algora.Accounts.User
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
-  alias Money.Ecto.Composite.Type, as: MoneyType
 
   @type t() :: %__MODULE__{}
 
   schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1
-    field :hourly_rate, MoneyType, no_fraction_if_integer: true
-    field :hourly_rate_min, MoneyType, no_fraction_if_integer: true
-    field :hourly_rate_max, MoneyType, no_fraction_if_integer: true
+    field :hourly_rate, Algora.Types.Money
+    field :hourly_rate_min, Algora.Types.Money
+    field :hourly_rate_max, Algora.Types.Money
     field :hours_per_week, :integer
     field :start_date, :utc_datetime_usec
     field :end_date, :utc_datetime_usec
 
-    field :amount_credited, MoneyType, virtual: true, no_fraction_if_integer: true
-    field :amount_debited, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :amount_credited, Algora.Types.Money, virtual: true
+    field :amount_debited, Algora.Types.Money, virtual: true
 
-    field :total_charged, MoneyType, virtual: true, no_fraction_if_integer: true
-    field :total_credited, MoneyType, virtual: true, no_fraction_if_integer: true
-    field :total_debited, MoneyType, virtual: true, no_fraction_if_integer: true
-    field :total_deposited, MoneyType, virtual: true, no_fraction_if_integer: true
-    field :total_transferred, MoneyType, virtual: true, no_fraction_if_integer: true
-    field :total_withdrawn, MoneyType, virtual: true, no_fraction_if_integer: true
+    field :total_charged, Algora.Types.Money, virtual: true
+    field :total_credited, Algora.Types.Money, virtual: true
+    field :total_debited, Algora.Types.Money, virtual: true
+    field :total_deposited, Algora.Types.Money, virtual: true
+    field :total_transferred, Algora.Types.Money, virtual: true
+    field :total_withdrawn, Algora.Types.Money, virtual: true
 
     belongs_to :original_contract, Contract
     has_many :renewals, Contract, foreign_key: :original_contract_id

@@ -309,8 +309,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100
-      ) ++
-        Bounties.BountyListing.sample_tickets()
+      )
 
     assign(socket, :tickets, Enum.take(tickets, 6))
   end

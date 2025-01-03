@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Job.CreateLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
 
   def mount(_params, session, socket) do
     job = %{
@@ -77,7 +78,7 @@ defmodule AlgoraWeb.Job.CreateLive do
                   <div class="flex justify-between">
                     <div>
                       <div class="font-semibold">{dev.name} {dev.flag}</div>
-                      <div class="text-sm text-gray-400">@{dev.handle}</div>
+                      <div class="text-sm text-gray-400">@{User.handle(dev)}</div>
                     </div>
                     <div class="flex flex-col items-end">
                       <div class="text-gray-300">Earned</div>

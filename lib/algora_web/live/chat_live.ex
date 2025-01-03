@@ -3,6 +3,7 @@ defmodule AlgoraWeb.ChatLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
 
   def mount(_params, _session, socket) do
     # Get current user details
@@ -391,7 +392,7 @@ defmodule AlgoraWeb.ChatLive do
               <h3 class="mt-4 text-lg font-semibold">
                 {@other_user.name} {@other_user.flag}
               </h3>
-              <p class="text-sm text-muted-foreground">@{@other_user.handle}</p>
+              <p class="text-sm text-muted-foreground">@{User.handle(@other_user)}</p>
 
               <div class="-mx-1 mt-3 flex flex-wrap justify-center gap-1">
                 <%= for tech <- Enum.take(@other_user.tech_stack || [], 3) do %>
@@ -443,7 +444,7 @@ defmodule AlgoraWeb.ChatLive do
         </div>
 
         <div class="mt-auto p-4 text-center">
-          <.button variant="outline" href={"/devs/#{@other_user.handle}"} class="w-full">
+          <.button variant="outline" navigate={User.url(@other_user)} class="w-full">
             View Full Profile <.icon name="tabler-arrow-right" class="ml-2 h-4 w-4" />
           </.button>
         </div>

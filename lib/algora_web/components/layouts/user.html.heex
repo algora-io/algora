@@ -88,11 +88,15 @@
       <ul role="list" class="space-y-1">
         <%= for org <- @online_orgs do %>
           <li>
-            <.link class="flex justify-center p-2" navigate={"/#{org.handle}"} title={org.handle}>
+            <.link
+              class="flex justify-center p-2"
+              navigate={Algora.Accounts.User.url(org)}
+              title={Algora.Accounts.User.handle(org)}
+            >
               <div class="relative inline-block">
                 <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                   <img
-                    alt={org.handle}
+                    alt={Algora.Accounts.User.handle(org)}
                     loading="lazy"
                     decoding="async"
                     src={org.avatar_url}

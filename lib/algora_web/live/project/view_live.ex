@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Project.ViewLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
 
   def mount(%{"id" => id}, _session, socket) do
     # Mock data for a single project
@@ -134,7 +135,7 @@ defmodule AlgoraWeb.Project.ViewLive do
                           <div class="flex justify-between">
                             <div class="truncate">
                               <div class="text-lg font-semibold">{dev.name} {dev.flag}</div>
-                              <div class="text-sm text-gray-400">@{dev.handle}</div>
+                              <div class="text-sm text-gray-400">@{User.handle(dev)}</div>
                             </div>
                             <div class="text-right">
                               <div class="text-sm text-gray-400">Earned</div>

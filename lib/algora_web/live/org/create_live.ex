@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.CreateLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
 
   def mount(_params, session, socket) do
     org = %{
@@ -99,7 +100,7 @@ defmodule AlgoraWeb.Org.CreateLive do
                   <div class="flex justify-between">
                     <div>
                       <div class="font-semibold">{org.name} {org.flag}</div>
-                      <div class="text-sm text-gray-400">@{org.handle}</div>
+                      <div class="text-sm text-gray-400">@{User.handle(org)}</div>
                     </div>
                     <div class="flex flex-col items-end">
                       <div class="text-gray-300">Awarded</div>

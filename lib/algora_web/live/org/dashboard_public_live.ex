@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Organizations
@@ -39,13 +40,8 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
     ]
   end
 
-  defp social_link(user, :github) do
-    if login = Map.get(user, :provider_login) do
-      "https://github.com/#{login}"
-    end
-  end
-
-  defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
+  defp social_link(user, :github), do: if(login = user[:provider_login], do: "https://github.com/#{login}")
+  defp social_link(user, platform), do: user[:"#{platform}_url"]
 
   def render(assigns) do
     ~H"""
@@ -168,13 +164,13 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
               <div class="w-8 flex-shrink-0 text-center font-mono text-muted-foreground">
                 #{idx + 1}
               </div>
-              <.link href={~p"/@/#{earner.handle}"} class="flex flex-1 items-center gap-3">
+              <.link navigate={User.url(earner)} class="flex flex-1 items-center gap-3">
                 <.avatar class="h-8 w-8">
                   <.avatar_image src={earner.avatar_url} alt={earner.name} />
                 </.avatar>
                 <div>
                   <div class="font-medium">{earner.name} {earner.flag}</div>
-                  <div class="text-sm text-muted-foreground">@{earner.handle}</div>
+                  <div class="text-sm text-muted-foreground">@{User.handle(earner)}</div>
                 </div>
               </.link>
               <div class="font-display flex-shrink-0 font-medium text-success">

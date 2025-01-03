@@ -35,13 +35,13 @@
             <li>
               <.link
                 class="flex justify-center p-2"
-                navigate={~p"/@/#{user.handle}"}
-                title={user.handle}
+                navigate={Algora.Accounts.User.url(user)}
+                title={Algora.Accounts.User.handle(user)}
               >
                 <div class="relative inline-block">
                   <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                     <img
-                      alt={user.handle}
+                      alt={Algora.Accounts.User.handle(user)}
                       loading="lazy"
                       decoding="async"
                       src={user.avatar_url}

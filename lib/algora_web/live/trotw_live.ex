@@ -5,6 +5,7 @@ defmodule AlgoraWeb.TROTWLive do
   import Ecto.Query
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Misc.Regions
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -96,14 +97,14 @@ defmodule AlgoraWeb.TROTWLive do
                             <div class="relative">
                               <img
                                 src={earner.avatar_url}
-                                alt={earner.handle}
+                                alt={User.handle(earner)}
                                 class="inline-block h-16 w-16 rounded-full bg-muted ring-2 ring-background transition-transform hover:translate-y-1"
                               />
                             </div>
                           </.tooltip_trigger>
                           <.tooltip_content>
                             <div class="flex flex-col items-center gap-1">
-                              <span class="font-medium">@{earner.handle}</span>
+                              <span class="font-medium">@{User.handle(earner)}</span>
                               <span class="font-display text-sm text-muted-foreground">
                                 {Money.to_string!(earner.total_earned)}
                               </span>

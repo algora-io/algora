@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Jobs
   alias AlgoraWeb.Org.Forms.JobForm
@@ -404,7 +405,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-message" class="h-4 w-4" />
                         <span>
-                          {@selected_dev.handle} wrote to you {Algora.Util.time_ago(
+                          {User.handle(@selected_dev)} wrote to you {Algora.Util.time_ago(
                             DateTime.utc_now()
                             |> DateTime.add(-3, :day)
                           )}

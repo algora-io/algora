@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.JobLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
 
@@ -257,7 +258,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
                                   <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
                                     <.link
-                                      href={~p"/org/#{bounty.owner.handle}"}
+                                      navigate={User.url(bounty.owner)}
                                       class="font-semibold hover:underline"
                                     >
                                       {bounty.owner.name}
@@ -320,7 +321,7 @@ defmodule AlgoraWeb.Org.JobLive do
                                 {dev.name} {dev.flag}
                               </div>
                               <div class="truncate text-sm text-muted-foreground">
-                                @{dev.handle}
+                                @{User.handle(dev)}
                               </div>
                             </div>
                             <div class="shrink-0 text-right">

@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Project.CreateLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
 
   def mount(_params, session, socket) do
     project = %{
@@ -84,7 +85,7 @@ defmodule AlgoraWeb.Project.CreateLive do
                       <div class="font-display truncate text-base font-semibold sm:text-lg">
                         {dev.name} {dev.flag}
                       </div>
-                      <div class="truncate text-sm text-gray-400">@{dev.handle}</div>
+                      <div class="truncate text-sm text-gray-400">@{User.handle(dev)}</div>
                     </div>
                     <div class="ml-2 flex flex-col items-end">
                       <div class="text-sm text-gray-300">Earned</div>

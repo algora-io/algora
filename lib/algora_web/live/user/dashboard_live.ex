@@ -5,6 +5,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   import AlgoraWeb.Components.Achievement
   import AlgoraWeb.Components.Bounties
 
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
 
@@ -243,7 +244,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </.link>
 
           <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
-            <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+            <.link navigate={User.url(@bounty.owner)} class="font-semibold hover:underline">
               {@bounty.owner.name}
             </.link>
             <.icon name="tabler-chevron-right" class="h-4 w-4" />
@@ -262,7 +263,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     <tr class="border-b transition-colors hover:bg-muted/10">
       <td class="p-4 align-middle">
         <div class="flex items-center gap-4">
-          <.link href={~p"/org/#{@bounty.owner.handle}"}>
+          <.link navigate={User.url(@bounty.owner)}>
             <.avatar class="h-14 w-14 rounded-xl">
               <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
               <.avatar_fallback>
@@ -273,7 +274,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1 text-sm text-muted-foreground">
-              <.link href={~p"/org/#{@bounty.owner.handle}"} class="font-semibold hover:underline">
+              <.link navigate={User.url(@bounty.owner)} class="font-semibold hover:underline">
                 {@bounty.owner.name}
               </.link>
               <.icon name="tabler-chevron-right" class="h-4 w-4" />
@@ -311,7 +312,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       <td class="p-4 align-middle">
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-4">
-            <.link href={~p"/org/#{@contract.client.handle}"}>
+            <.link navigate={User.url(@contract.client)}>
               <.avatar class="aspect-[1200/630] h-32 w-auto rounded-lg">
                 <.avatar_image src={@contract.client.og_image_url} alt={@contract.client.name} />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
@@ -320,10 +321,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
             <div class="flex flex-col gap-1">
               <div class="flex items-center gap-1 text-base text-foreground">
-                <.link
-                  href={~p"/org/#{@contract.client.handle}"}
-                  class="font-semibold hover:underline"
-                >
+                <.link navigate={User.url(@contract.client)} class="font-semibold hover:underline">
                   {@contract.client.og_title || @contract.client.name}
                 </.link>
               </div>

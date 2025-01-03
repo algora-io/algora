@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   import Ecto.Changeset
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias AlgoraWeb.Components.Wordmarks
   alias Phoenix.LiveView.AsyncResult
 
@@ -453,7 +454,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             {:ok, %{org: org}} ->
               socket
               |> put_flash(:info, "Welcome to Algora!")
-              |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, ~p"/org/#{org.handle}"))
+              |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
               # TODO try to recover
@@ -964,7 +965,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               <div class="flex justify-between">
                 <div>
                   <div class="font-semibold">{dev.name} {dev.flag}</div>
-                  <div class="text-sm text-muted-foreground">@{dev.handle}</div>
+                  <div class="text-sm text-muted-foreground">@{User.handle(dev)}</div>
                 </div>
                 <div class="flex flex-col items-end">
                   <div class="text-muted-foreground">Earned</div>

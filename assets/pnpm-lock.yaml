@@ -11,6 +11,18 @@ dependencies:
   framer-motion:
     specifier: ^11.11.10
     version: 11.11.10
+  live_svelte:
+    specifier: file:../deps/live_svelte
+    version: file:../deps/live_svelte
+  phoenix:
+    specifier: file:../deps/phoenix
+    version: file:../deps/phoenix
+  phoenix_html:
+    specifier: file:../deps/phoenix_html
+    version: file:../deps/phoenix_html
+  phoenix_live_view:
+    specifier: file:../deps/phoenix_live_view
+    version: file:../deps/phoenix_live_view
 
 devDependencies:
   '@types/node':
@@ -661,3 +673,23 @@ packages:
   /undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
     dev: true
+
+  file:../deps/live_svelte:
+    resolution: {directory: ../deps/live_svelte, type: directory}
+    name: live_svelte
+    dev: false
+
+  file:../deps/phoenix:
+    resolution: {directory: ../deps/phoenix, type: directory}
+    name: phoenix
+    dev: false
+
+  file:../deps/phoenix_html:
+    resolution: {directory: ../deps/phoenix_html, type: directory}
+    name: phoenix_html
+    dev: false
+
+  file:../deps/phoenix_live_view:
+    resolution: {directory: ../deps/phoenix_live_view, type: directory}
+    name: phoenix_live_view
+    dev: false

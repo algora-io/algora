@@ -41,7 +41,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
     {:ok,
      socket
-     |> assign(:page_title, "Your transactions")
+     |> assign(:page_title, "Transactions")
      |> assign(:show_create_payout_drawer, false)
      |> assign(:show_manage_payout_drawer, false)
      |> assign(:show_delete_confirmation, false)
@@ -170,9 +170,9 @@ defmodule AlgoraWeb.User.TransactionsLive do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <div class="space-y-4">
-        <div class="flex items-end justify-between gap-4">
+        <div class="flex items-center justify-between gap-4">
           <div class="space-y-1">
-            <h1 class="text-2xl font-bold">Your Transactions</h1>
+            <h1 class="text-2xl font-bold">Transactions</h1>
             <p class="text-muted-foreground">View and manage your transaction history</p>
           </div>
           <%= if @account do %>
@@ -223,7 +223,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
       </div>
       
     <!-- Transactions Table -->
-      <.card>
+      <.card :if={length(@transactions) > 0}>
         <.card_header>
           <.card_title>Transaction History</.card_title>
         </.card_header>

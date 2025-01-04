@@ -1276,10 +1276,12 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate dialog_footer(assigns), to: Dialog
   defdelegate dialog_header(assigns), to: Dialog
   defdelegate dialog_title(assigns), to: Dialog
-  defdelegate drawer(assigns), to: Drawer
   defdelegate drawer_content(assigns), to: Drawer
-  defdelegate drawer_header(assigns), to: Drawer
+  defdelegate drawer_description(assigns), to: Drawer
   defdelegate drawer_footer(assigns), to: Drawer
+  defdelegate drawer_header(assigns), to: Drawer
+  defdelegate drawer_title(assigns), to: Drawer
+  defdelegate drawer(assigns), to: Drawer
   defdelegate dropdown_menu_content(assigns), to: DropdownMenu
   defdelegate dropdown_menu_item(assigns), to: DropdownMenu
   defdelegate dropdown_menu_separator(assigns), to: DropdownMenu

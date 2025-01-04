@@ -11,7 +11,7 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
     <div>
       <.drawer show={@show} on_cancel={@on_cancel}>
         <.drawer_header>
-          <h3 class="text-lg font-semibold text-destructive">Raise Payment Dispute</h3>
+          <.drawer_title>Raise Payment Dispute</.drawer_title>
         </.drawer_header>
         <.drawer_content>
           <div class="grid grid-cols-2 gap-8">

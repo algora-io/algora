@@ -459,7 +459,7 @@ defmodule AlgoraWeb.Org.CreateJobLive do
     </div>
     <.drawer id="publish-job-drawer" show={@show_publish_job_drawer} on_cancel="close_drawer">
       <.drawer_header>
-        Publish Job
+        <.drawer_title>Publish Job</.drawer_title>
       </.drawer_header>
       <.drawer_content class="space-y-6">
         <div class="grid grid-cols-5 gap-6">

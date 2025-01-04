@@ -125,4 +125,6 @@ defmodule Algora.Stripe.ConnectCountries do
       {"Uzbekistan", "UZ"},
       {"Vietnam", "VN"}
     ]
+
+  def list_codes, do: Enum.map(list(), &elem(&1, 1))
 end

@@ -236,6 +236,7 @@ defmodule Algora.Accounts.User do
       :need_avatar,
       :website_url,
       :bio,
+      :country,
       :location,
       :timezone
     ])

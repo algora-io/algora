@@ -2,10 +2,14 @@ defmodule Algora.Payments do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts
+  alias Algora.Accounts.User
+  alias Algora.Payments.Account
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Util
 
   require Logger
 
@@ -127,5 +131,96 @@ defmodule Algora.Payments do
     |> preload(linked_transaction: :user)
     |> order_by([t], desc: t.inserted_at)
     |> Repo.all()
+  end
+
+  def get_account(user_id, region) do
+    Account
+    |> where([a], a.user_id == ^user_id and a.region == ^region)
+    |> Repo.one()
+  end
+
+  @spec create_account(user :: User.t(), attrs :: %{optional(atom()) => any()}) ::
+          {:ok, Account.t()} | {:error, any()}
+  def create_account(user, attrs) do
+    with {:ok, stripe_account} <- create_stripe_account(attrs) do
+      attrs = %{
+        provider: "stripe",
+        provider_id: stripe_account.id,
+        provider_meta: Util.normalize_struct(stripe_account),
+        type: attrs.type,
+        region: :US,
+        user_id: user.id,
+        country: attrs.country
+      }
+
+      %Account{}
+      |> Account.changeset(attrs)
+      |> Repo.insert()
+    end
+  end
+
+  @spec create_stripe_account(attrs :: %{optional(atom()) => any()}) ::
+          {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
+  defp create_stripe_account(%{country: country, type: type}) do
+    case Stripe.Account.create(%{country: country, type: type}) do
+      {:ok, account} -> {:ok, account}
+      {:error, _reason} -> Stripe.Account.create(%{type: type})
+    end
+  end
+
+  @spec create_account_link(account :: Account.t(), base_url :: String.t()) ::
+          {:ok, Stripe.AccountLink.t()} | {:error, Stripe.Error.t()}
+  def create_account_link(account, base_url) do
+    Stripe.AccountLink.create(%{
+      account: account.provider_id,
+      refresh_url: "#{base_url}/callbacks/stripe/refresh",
+      return_url: "#{base_url}/callbacks/stripe/return",
+      type: "account_onboarding"
+    })
+  end
+
+  @spec create_login_link(account :: Account.t()) ::
+          {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
+  def create_login_link(account) do
+    Stripe.Account.create_login_link(account.provider_id, %{})
+  end
+
+  @spec refresh_stripe_account(user_id :: binary()) ::
+          {:ok, Account.t()} | {:error, :account_not_found} | {:error, any()}
+  def refresh_stripe_account(user_id) do
+    case get_account(user_id, :US) do
+      nil ->
+        {:error, :account_not_found}
+
+      account ->
+        with {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id) do
+          attrs = %{
+            charges_enabled: stripe_account.charges_enabled,
+            details_submitted: stripe_account.details_submitted,
+            country: stripe_account.country,
+            service_agreement: stripe_account.tos_acceptance.service_agreement,
+            provider_meta: Util.normalize_struct(stripe_account)
+          }
+
+          account
+          |> Account.changeset(attrs)
+          |> Repo.update()
+          |> case do
+            {:ok, updated_account} ->
+              if stripe_account.charges_enabled do
+                account.user_id
+                |> Accounts.get_user!()
+                |> Accounts.update_settings(%{country: stripe_account.country})
+              end
+
+              # TODO: enqueue pending transfers
+
+              {:ok, updated_account}
+
+            error ->
+              error
+          end
+        end
+    end
   end
 end

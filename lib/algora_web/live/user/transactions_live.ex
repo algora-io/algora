@@ -63,13 +63,44 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
     case changeset do
       %{valid?: true} = changeset ->
-        # TODO: Actually create the payout account
-        IO.inspect(changeset.changes, label: "Would create payout account with")
+        # Get or create Stripe account
+        account = Payments.get_account(socket.assigns.current_user.id, :US)
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Payout account created!")
-         |> assign(:show_payout_drawer, false)}
+        result =
+          if is_nil(account) do
+            Payments.create_account(socket.assigns.current_user, %{
+              country: changeset.changes.country,
+              type: "express"
+            })
+          else
+            {:ok, account}
+          end
+
+        case result do
+          {:ok, account} ->
+            if account.charges_enabled do
+              if account.type == :express do
+                {:ok, %{url: url}} = Payments.create_login_link(account)
+
+                {:noreply, redirect(socket, external: url)}
+              else
+                {:noreply,
+                 socket
+                 |> put_flash(:info, "Account already set up!")
+                 |> assign(:show_payout_drawer, false)}
+              end
+            else
+              {:ok, %{url: url}} = Payments.create_account_link(account, AlgoraWeb.Endpoint.url())
+
+              {:noreply, redirect(socket, external: url)}
+            end
+
+          {:error, _reason} ->
+            {:noreply,
+             socket
+             |> put_flash(:error, "Failed to create payout account")
+             |> assign(:show_payout_drawer, false)}
+        end
 
       %{valid?: false} = changeset ->
         {:noreply, assign(socket, :payout_account_form, to_form(changeset))}
@@ -224,7 +255,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
     </div>
     <.drawer show={@show_payout_drawer} on_cancel="close_drawer" direction="right">
       <.drawer_header>
-        <.drawer_title>Create Payout Account</.drawer_title>
+        <.drawer_title>Payout Account</.drawer_title>
         <.drawer_description>Create a payout account to receive your earnings</.drawer_description>
       </.drawer_header>
       <.drawer_content class="mt-4">

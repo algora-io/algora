@@ -336,13 +336,13 @@ defmodule AlgoraWeb.User.TransactionsLive do
       </.drawer_header>
       <.drawer_content class="mt-4">
         <div class="space-y-6">
-          <div class="grid gap-4">
+          <div class="grid gap-6">
             <.card>
               <.card_header>
                 <.card_title>Account Status</.card_title>
               </.card_header>
               <.card_content>
-                <dl class="grid grid-cols-2 gap-4">
+                <dl class="grid grid-cols-2 gap-6">
                   <div>
                     <dt class="text-sm font-medium text-muted-foreground">Account Type</dt>
                     <dd class="text-sm font-semibold">
@@ -384,7 +384,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
                 <.card_title>Payout Settings</.card_title>
               </.card_header>
               <.card_content>
-                <dl class="grid grid-cols-2 gap-4">
+                <dl class="grid grid-cols-2 gap-6">
                   <div :if={@account.payout_interval}>
                     <dt class="text-sm font-medium text-muted-foreground">Payout Interval</dt>
                     <dd class="text-sm font-semibold">
@@ -417,26 +417,26 @@ defmodule AlgoraWeb.User.TransactionsLive do
             </.card>
           </div>
 
-          <div class="flex gap-4">
+          <div class="flex gap-6">
+            <.button class="flex-1" phx-click="show_delete_confirmation" variant="destructive">
+              Delete account
+            </.button>
+
             <%= if not @account.details_submitted do %>
-              <.button phx-click="setup_payout_account">
+              <.button class="flex-1" phx-click="setup_payout_account">
                 Continue onboarding
               </.button>
             <% else %>
-              <.button phx-click="setup_payout_account" variant="outline">
+              <.button class="flex-1" phx-click="setup_payout_account" variant="secondary">
                 Update details
               </.button>
             <% end %>
 
             <%= if @account.details_submitted and @account.type == :express do %>
-              <.button phx-click="view_dashboard" variant="outline">
+              <.button class="flex-1" phx-click="view_dashboard">
                 View dashboard
               </.button>
             <% end %>
-
-            <.button phx-click="show_delete_confirmation" variant="destructive">
-              Delete account
-            </.button>
           </div>
         </div>
       </.drawer_content>

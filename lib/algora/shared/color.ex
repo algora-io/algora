@@ -14,14 +14,10 @@ defmodule Algora.Color do
     |> String.split(~r/[,\s]+/, trim: true)
     |> Enum.map(&String.trim/1)
     |> Enum.map(fn str ->
-      str = String.replace(str, "%", "")
-
-      with {:error, _} <- Float.parse(str),
-           {:error, _} <- Integer.parse(str) do
-        raise "Invalid number: #{str}"
-      else
-        {num, _} -> num * 1.0
-      end
+      str
+      |> String.replace("%", "")
+      |> Float.parse()
+      |> then(fn {num, _} -> num end)
     end)
     |> then(fn [h, s, l] -> hsl_to_hex(h, s, l) end)
   end

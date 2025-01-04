@@ -35,11 +35,14 @@ defmodule AlgoraWeb.User.TransactionsLive do
       Payments.subscribe()
     end
 
+    account = Payments.get_account(socket.assigns.current_user.id, :US)
+
     {:ok,
      socket
      |> assign(:page_title, "Your transactions")
-     |> assign(:show_payout_drawer, true)
+     |> assign(:show_payout_drawer, false)
      |> assign(:payout_account_form, to_form(PayoutAccountForm.changeset(%PayoutAccountForm{}, %{})))
+     |> assign(:account, account)
      |> assign_transactions()}
   end
 
@@ -150,15 +153,26 @@ defmodule AlgoraWeb.User.TransactionsLive do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
-      <div class="flex items-end justify-between gap-4">
-        <div class="space-y-1">
-          <h1 class="text-2xl font-bold">Your Transactions</h1>
-          <p class="text-muted-foreground">View and manage your transaction history</p>
+      <div class="space-y-4">
+        <div class="flex items-end justify-between gap-4">
+          <div class="space-y-1">
+            <h1 class="text-2xl font-bold">Your Transactions</h1>
+            <p class="text-muted-foreground">View and manage your transaction history</p>
+          </div>
+          <.button phx-click="show_payout_drawer">
+            <.icon name="tabler-plus" class="w-4 h-4 mr-2 -ml-1" />
+            <span>Create payout account</span>
+          </.button>
         </div>
-        <.button phx-click="show_payout_drawer">
-          <.icon name="tabler-plus" class="w-4 h-4 mr-2 -ml-1" />
-          <span>Create payout account</span>
-        </.button>
+        <%= if @account do %>
+          <div class="flex items-center gap-2">
+            <.badge variant={if @account.charges_enabled, do: "success", else: "warning"}>
+              {if @account.charges_enabled,
+                do: "Payout account active",
+                else: "Payout account setup required"}
+            </.badge>
+          </div>
+        <% end %>
       </div>
       
     <!-- Totals Cards -->

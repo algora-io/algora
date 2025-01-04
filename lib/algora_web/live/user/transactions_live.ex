@@ -3,6 +3,8 @@ defmodule AlgoraWeb.User.TransactionsLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
+  import Ecto.Changeset
+
   alias Algora.Accounts.User
   alias Algora.Payments
   alias Algora.Stripe.ConnectCountries
@@ -35,7 +37,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
       Payments.subscribe()
     end
 
-    account = Payments.get_account(socket.assigns.current_user.id, :US)
+    account = Payments.get_account(socket.assigns.current_user, :US)
 
     dbg(account)
 
@@ -86,8 +88,11 @@ defmodule AlgoraWeb.User.TransactionsLive do
       |> PayoutAccountForm.changeset(params)
       |> Map.put(:action, :validate)
 
+    country = get_change(changeset, :country)
+
     if changeset.valid? do
-      with {:ok, account} <- Payments.get_or_create_account(socket.assigns.current_user.id, :US),
+      with {:ok, account} <-
+             Payments.get_or_create_account(socket.assigns.current_user, :US, country),
            {:ok, %{url: url}} <- Payments.create_account_link(account, AlgoraWeb.Endpoint.url()) do
         {:noreply, redirect(socket, external: url)}
       else

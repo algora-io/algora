@@ -14,7 +14,7 @@ defmodule AlgoraWeb.StripeCallbackController do
         |> halt()
 
       current_user ->
-        case Payments.refresh_stripe_account(current_user.id) do
+        case Payments.refresh_stripe_account(current_user) do
           {:ok, _account} ->
             redirect(conn, to: ~p"/user/transactions")
 

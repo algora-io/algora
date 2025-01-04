@@ -134,35 +134,36 @@ defmodule Algora.Payments do
     |> Repo.all()
   end
 
-  @spec get_or_create_account(user_id :: binary(), region :: :US | :EU) :: Account.t()
-  def get_or_create_account(user_id, region) do
-    case get_account(user_id, region) do
-      nil -> create_account(user_id, region)
+  @spec get_or_create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
+          {:ok, Account.t()} | {:error, any()}
+  def get_or_create_account(user, region, country) do
+    case get_account(user, region) do
+      nil -> create_account(user, region, country)
       account -> {:ok, account}
     end
   end
 
-  @spec get_account(user_id :: binary(), region :: :US | :EU) :: Account.t() | nil
-  def get_account(user_id, region) do
+  @spec get_account(user :: User.t(), region :: :US | :EU) :: Account.t() | nil
+  def get_account(user, region) do
     Account
-    |> where([a], a.user_id == ^user_id and a.region == ^region)
+    |> where([a], a.user_id == ^user.id and a.region == ^region)
     |> Repo.one()
   end
 
-  @spec create_account(user :: User.t(), attrs :: %{optional(atom()) => any()}) ::
+  @spec create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
           {:ok, Account.t()} | {:error, any()}
-  def create_account(user, attrs) do
-    attrs = Map.put(attrs, :type, ConnectCountries.account_type(attrs.country))
+  def create_account(user, region, country) do
+    type = ConnectCountries.account_type(country)
 
-    with {:ok, stripe_account} <- create_stripe_account(attrs) do
+    with {:ok, stripe_account} <- create_stripe_account(%{country: country, type: type}) do
       attrs = %{
         provider: "stripe",
         provider_id: stripe_account.id,
         provider_meta: Util.normalize_struct(stripe_account),
-        type: attrs.type,
-        region: :US,
+        type: type,
+        region: region,
         user_id: user.id,
-        country: attrs.country
+        country: country
       }
 
       %Account{}
@@ -171,12 +172,12 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec create_stripe_account(attrs :: %{optional(atom()) => any()}) ::
+  @spec create_stripe_account(attrs :: any()) ::
           {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
   defp create_stripe_account(%{country: country, type: type}) do
-    case Stripe.Account.create(%{country: country, type: type}) do
+    case Stripe.Account.create(%{country: country, type: to_string(type)}) do
       {:ok, account} -> {:ok, account}
-      {:error, _reason} -> Stripe.Account.create(%{type: type})
+      {:error, _reason} -> Stripe.Account.create(%{type: to_string(type)})
     end
   end
 
@@ -192,58 +193,60 @@ defmodule Algora.Payments do
   end
 
   @spec create_login_link(account :: Account.t()) ::
-          {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
+          {:ok, Stripe.LoginLink.t()} | {:error, Stripe.Error.t()}
   def create_login_link(account) do
-    Stripe.Account.create_login_link(account.provider_id, %{})
+    Stripe.LoginLink.create(account.provider_id, %{})
   end
 
-  @spec refresh_stripe_account(user_id :: binary()) ::
-          {:ok, Account.t()} | {:error, :account_not_found} | {:error, any()}
-  def refresh_stripe_account(user_id) do
-    case get_account(user_id, :US) do
+  @spec refresh_stripe_account(user :: User.t()) ::
+          {:ok, Account.t()} | {:error, any()}
+  def refresh_stripe_account(user) do
+    case get_account(user, :US) do
       nil ->
         {:error, :account_not_found}
 
       account ->
-        with {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id) do
-          attrs = %{
-            charges_enabled: stripe_account.charges_enabled,
-            payouts_enabled: stripe_account.payouts_enabled,
-            payout_interval: stripe_account.settings.payouts.schedule.interval,
-            payout_speed: stripe_account.settings.payouts.schedule.delay_days,
-            default_currency: stripe_account.default_currency,
-            details_submitted: stripe_account.details_submitted,
-            country: stripe_account.country,
-            service_agreement: get_service_agreement(stripe_account),
-            provider_meta: Util.normalize_struct(stripe_account)
-          }
+        case Stripe.Account.retrieve(account.provider_id) do
+          {:ok, stripe_account} ->
+            attrs = %{
+              provider: "stripe",
+              provider_id: stripe_account.id,
+              provider_meta: Util.normalize_struct(stripe_account),
+              charges_enabled: stripe_account.charges_enabled,
+              payouts_enabled: stripe_account.payouts_enabled,
+              payout_interval: stripe_account.settings.payouts.schedule.interval,
+              payout_speed: stripe_account.settings.payouts.schedule.delay_days,
+              default_currency: stripe_account.default_currency,
+              details_submitted: stripe_account.details_submitted,
+              country: stripe_account.country,
+              service_agreement: get_service_agreement(stripe_account)
+            }
 
-          account
-          |> Account.changeset(attrs)
-          |> Repo.update()
-          |> case do
-            {:ok, updated_account} ->
-              if stripe_account.charges_enabled do
-                account.user_id
-                |> Accounts.get_user!()
-                |> Accounts.update_settings(%{country: stripe_account.country})
-              end
+            res =
+              account
+              |> Account.changeset(attrs)
+              |> Repo.update()
 
-              # TODO: enqueue pending transfers
+            user = Accounts.get_user(account.user_id)
 
-              {:ok, updated_account}
+            if user && stripe_account.charges_enabled do
+              Accounts.update_settings(user, %{country: stripe_account.country})
+            end
 
-            error ->
-              error
-          end
+            res
+
+          {:error, error} ->
+            {:error, error}
         end
     end
   end
 
+  @spec get_service_agreement(account :: Stripe.Account.t()) :: String.t()
   defp get_service_agreement(%{tos_acceptance: %{service_agreement: agreement}} = _account) when not is_nil(agreement) do
     agreement
   end
 
+  @spec get_service_agreement(account :: Stripe.Account.t()) :: String.t()
   defp get_service_agreement(%{capabilities: capabilities}) do
     if is_nil(capabilities[:card_payments]), do: "recipient", else: "full"
   end

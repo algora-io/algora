@@ -308,7 +308,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       on_cancel="close_drawer"
     >
       <.drawer_header>
-        Begin Collaboration
+        <.drawer_title>Begin Collaboration</.drawer_title>
       </.drawer_header>
       <.drawer_content class="space-y-6">
         <div class="flex gap-6">

@@ -6,7 +6,8 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
       <.drawer show={@show} phx-click="close">
         <.drawer_header>
-          <.h3>Drawer Title</.h3>
+          <.drawer_title>Drawer Title</.drawer_title>
+          <.drawer_description>Drawer Description</.drawer_description>
         </.drawer_header>
         <.drawer_content>
           Content goes here
@@ -69,12 +70,31 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   def drawer_header(assigns) do
     ~H"""
-    <div
-      class={
-        classes(["font-display pb-4 text-base font-semibold uppercase text-muted-foreground", @class])
-      }
-      {@rest}
-    >
+    <div class={classes(["flex flex-col space-y-1.5 pb-4", @class])} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+  attr :rest, :global
+
+  def drawer_title(assigns) do
+    ~H"""
+    <div class={classes(["text-2xl font-semibold text-white", @class])} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+  attr :rest, :global
+
+  def drawer_description(assigns) do
+    ~H"""
+    <div class={classes(["text-sm text-muted-foreground", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

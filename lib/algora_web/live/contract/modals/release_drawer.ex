@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
     <div>
       <.drawer show={@show} on_cancel={@on_cancel}>
         <.drawer_header>
-          <h3 class="text-lg font-semibold">Release Payment</h3>
+          <.drawer_title>Release Payment</.drawer_title>
         </.drawer_header>
         <.drawer_content>
           <div class="grid grid-cols-2 gap-8">

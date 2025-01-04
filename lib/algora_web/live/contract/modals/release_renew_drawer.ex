@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
     <div>
       <.drawer show={@show} on_cancel={@on_cancel}>
         <.drawer_header>
-          Release Payment & Renew Contract
+          <.drawer_title>Release Payment & Renew Contract</.drawer_title>
         </.drawer_header>
         <.drawer_content class="mt-4">
           <div class="grid grid-cols-2 gap-8">

@@ -134,6 +134,15 @@ defmodule Algora.Payments do
     |> Repo.all()
   end
 
+  @spec get_or_create_account(user_id :: binary(), region :: :US | :EU) :: Account.t()
+  def get_or_create_account(user_id, region) do
+    case get_account(user_id, region) do
+      nil -> create_account(user_id, region)
+      account -> {:ok, account}
+    end
+  end
+
+  @spec get_account(user_id :: binary(), region :: :US | :EU) :: Account.t() | nil
   def get_account(user_id, region) do
     Account
     |> where([a], a.user_id == ^user_id and a.region == ^region)
@@ -199,6 +208,10 @@ defmodule Algora.Payments do
         with {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id) do
           attrs = %{
             charges_enabled: stripe_account.charges_enabled,
+            payouts_enabled: stripe_account.payouts_enabled,
+            payout_interval: stripe_account.settings.payouts.schedule.interval,
+            payout_speed: stripe_account.settings.payouts.schedule.delay_days,
+            default_currency: stripe_account.default_currency,
             details_submitted: stripe_account.details_submitted,
             country: stripe_account.country,
             service_agreement: get_service_agreement(stripe_account),
@@ -233,5 +246,12 @@ defmodule Algora.Payments do
 
   defp get_service_agreement(%{capabilities: capabilities}) do
     if is_nil(capabilities[:card_payments]), do: "recipient", else: "full"
+  end
+
+  @spec delete_account(account :: Account.t()) :: {:ok, Account.t()} | {:error, any()}
+  def delete_account(account) do
+    with {:ok, _stripe_account} <- Stripe.Account.delete(account.provider_id) do
+      Repo.delete(account)
+    end
   end
 end

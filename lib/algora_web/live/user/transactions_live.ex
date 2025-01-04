@@ -37,10 +37,14 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
     account = Payments.get_account(socket.assigns.current_user.id, :US)
 
+    dbg(account)
+
     {:ok,
      socket
      |> assign(:page_title, "Your transactions")
-     |> assign(:show_payout_drawer, false)
+     |> assign(:show_create_payout_drawer, false)
+     |> assign(:show_manage_payout_drawer, false)
+     |> assign(:show_delete_confirmation, false)
      |> assign(:payout_account_form, to_form(PayoutAccountForm.changeset(%PayoutAccountForm{}, %{})))
      |> assign(:account, account)
      |> assign_transactions()}
@@ -50,12 +54,30 @@ defmodule AlgoraWeb.User.TransactionsLive do
     {:noreply, assign_transactions(socket)}
   end
 
-  def handle_event("show_payout_drawer", _params, socket) do
-    {:noreply, assign(socket, :show_payout_drawer, true)}
+  def handle_event("show_create_payout_drawer", _params, socket) do
+    {:noreply, assign(socket, :show_create_payout_drawer, true)}
+  end
+
+  def handle_event("show_manage_payout_drawer", _params, socket) do
+    {:noreply, assign(socket, :show_manage_payout_drawer, true)}
   end
 
   def handle_event("close_drawer", _params, socket) do
-    {:noreply, assign(socket, :show_payout_drawer, false)}
+    {:noreply, socket |> assign(:show_create_payout_drawer, false) |> assign(:show_manage_payout_drawer, false)}
+  end
+
+  def handle_event("view_dashboard", _params, socket) do
+    case Payments.create_login_link(socket.assigns.account) do
+      {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
+      {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
+  end
+
+  def handle_event("setup_payout_account", _params, socket) do
+    case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url()) do
+      {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
+      {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
   end
 
   def handle_event("create_payout_account", %{"payout_account_form" => params}, socket) do
@@ -64,48 +86,42 @@ defmodule AlgoraWeb.User.TransactionsLive do
       |> PayoutAccountForm.changeset(params)
       |> Map.put(:action, :validate)
 
-    case changeset do
-      %{valid?: true} = changeset ->
-        # Get or create Stripe account
-        account = Payments.get_account(socket.assigns.current_user.id, :US)
+    if changeset.valid? do
+      with {:ok, account} <- Payments.get_or_create_account(socket.assigns.current_user.id, :US),
+           {:ok, %{url: url}} <- Payments.create_account_link(account, AlgoraWeb.Endpoint.url()) do
+        {:noreply, redirect(socket, external: url)}
+      else
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Failed to create payout account")}
+      end
+    else
+      {:noreply, assign(socket, :payout_account_form, to_form(changeset))}
+    end
+  end
 
-        result =
-          if is_nil(account) do
-            Payments.create_account(socket.assigns.current_user, %{
-              country: changeset.changes.country
-            })
-          else
-            {:ok, account}
-          end
+  def handle_event("show_delete_confirmation", _params, socket) do
+    {:noreply, assign(socket, :show_delete_confirmation, true)}
+  end
 
-        case result do
-          {:ok, account} ->
-            if account.charges_enabled do
-              if account.type == :express do
-                {:ok, %{url: url}} = Payments.create_login_link(account)
+  def handle_event("cancel_delete", _params, socket) do
+    {:noreply, assign(socket, :show_delete_confirmation, false)}
+  end
 
-                {:noreply, redirect(socket, external: url)}
-              else
-                {:noreply,
-                 socket
-                 |> put_flash(:info, "Account already set up!")
-                 |> assign(:show_payout_drawer, false)}
-              end
-            else
-              {:ok, %{url: url}} = Payments.create_account_link(account, AlgoraWeb.Endpoint.url())
+  def handle_event("delete_payout_account", _params, socket) do
+    case Payments.delete_account(socket.assigns.account) do
+      {:ok, _account} ->
+        {:noreply,
+         socket
+         |> assign(:account, nil)
+         |> assign(:show_delete_confirmation, false)
+         |> assign(:show_manage_payout_drawer, false)
+         |> put_flash(:info, "Payout account deleted successfully")}
 
-              {:noreply, redirect(socket, external: url)}
-            end
-
-          {:error, _reason} ->
-            {:noreply,
-             socket
-             |> put_flash(:error, "Failed to create payout account")
-             |> assign(:show_payout_drawer, false)}
-        end
-
-      %{valid?: false} = changeset ->
-        {:noreply, assign(socket, :payout_account_form, to_form(changeset))}
+      {:error, _reason} ->
+        {:noreply,
+         socket
+         |> assign(:show_delete_confirmation, false)
+         |> put_flash(:error, "Failed to delete payout account")}
     end
   end
 
@@ -159,18 +175,27 @@ defmodule AlgoraWeb.User.TransactionsLive do
             <h1 class="text-2xl font-bold">Your Transactions</h1>
             <p class="text-muted-foreground">View and manage your transaction history</p>
           </div>
-          <.button phx-click="show_payout_drawer">
-            <.icon name="tabler-plus" class="w-4 h-4 mr-2 -ml-1" />
-            <span>Create payout account</span>
-          </.button>
+          <%= if @account do %>
+            <.button phx-click="show_manage_payout_drawer">
+              Manage payout settings
+            </.button>
+          <% else %>
+            <.button phx-click="show_create_payout_drawer">
+              Create payout account
+            </.button>
+          <% end %>
         </div>
         <%= if @account do %>
           <div class="flex items-center gap-2">
-            <.badge variant={if @account.charges_enabled, do: "success", else: "warning"}>
-              {if @account.charges_enabled,
-                do: "Payout account active",
-                else: "Payout account setup required"}
-            </.badge>
+            <%= if @account.charges_enabled do %>
+              <.badge variant="success" phx-click="show_manage_payout_drawer" class="cursor-pointer">
+                Payout account active
+              </.badge>
+            <% else %>
+              <.badge variant="warning" phx-click="show_manage_payout_drawer" class="cursor-pointer">
+                Payout account setup required
+              </.badge>
+            <% end %>
           </div>
         <% end %>
       </div>
@@ -266,7 +291,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
         </.card_content>
       </.card>
     </div>
-    <.drawer show={@show_payout_drawer} on_cancel="close_drawer" direction="right">
+    <.drawer show={@show_create_payout_drawer} on_cancel="close_drawer" direction="right">
       <.drawer_header>
         <.drawer_title>Payout Account</.drawer_title>
         <.drawer_description>Create a payout account to receive your earnings</.drawer_description>
@@ -299,6 +324,142 @@ defmodule AlgoraWeb.User.TransactionsLive do
         </.simple_form>
       </.drawer_content>
     </.drawer>
+    <.drawer
+      :if={@account}
+      show={@show_manage_payout_drawer}
+      on_cancel="close_drawer"
+      direction="right"
+    >
+      <.drawer_header>
+        <.drawer_title>Payout Account</.drawer_title>
+        <.drawer_description>Manage your payout account</.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <div class="space-y-6">
+          <div class="grid gap-4">
+            <.card>
+              <.card_header>
+                <.card_title>Account Status</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="grid grid-cols-2 gap-4">
+                  <div>
+                    <dt class="text-sm font-medium text-muted-foreground">Account Type</dt>
+                    <dd class="text-sm font-semibold">
+                      {@account.type |> to_string() |> String.capitalize()}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-muted-foreground">Country</dt>
+                    <dd class="text-sm font-semibold">
+                      {ConnectCountries.from_code(@account.country)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-muted-foreground">Can Accept Payments</dt>
+                    <dd class="text-sm font-semibold">
+                      <%= if @account.charges_enabled do %>
+                        <div class="text-success text-lg">✓</div>
+                      <% else %>
+                        <div class="text-destructive text-lg">✗</div>
+                      <% end %>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-muted-foreground">Can Withdraw Payments</dt>
+                    <dd class="text-sm font-semibold">
+                      <%= if @account.payouts_enabled do %>
+                        <div class="text-success text-lg">✓</div>
+                      <% else %>
+                        <div class="text-destructive text-lg">✗</div>
+                      <% end %>
+                    </dd>
+                  </div>
+                </dl>
+              </.card_content>
+            </.card>
+
+            <.card :if={@account.details_submitted}>
+              <.card_header>
+                <.card_title>Payout Settings</.card_title>
+              </.card_header>
+              <.card_content>
+                <dl class="grid grid-cols-2 gap-4">
+                  <div :if={@account.payout_interval}>
+                    <dt class="text-sm font-medium text-muted-foreground">Payout Interval</dt>
+                    <dd class="text-sm font-semibold">
+                      {String.capitalize(@account.payout_interval)}
+                    </dd>
+                  </div>
+                  <div :if={@account.payout_speed}>
+                    <dt class="text-sm font-medium text-muted-foreground">Payout Speed</dt>
+                    <dd class="text-sm font-semibold">
+                      {@account.payout_speed} {ngettext("day", "days", @account.payout_speed)}
+                    </dd>
+                  </div>
+                  <div :if={@account.default_currency}>
+                    <dt class="text-sm font-medium text-muted-foreground">Payout Currency</dt>
+                    <dd class="text-sm font-semibold">
+                      {@account.default_currency |> String.upcase()}
+                    </dd>
+                  </div>
+                  <%= if bank_account = Enum.find(get_in(@account.provider_meta, ["external_accounts", "data"]), fn account -> account["default_for_currency"] end) do %>
+                    <div>
+                      <dt class="text-sm font-medium text-muted-foreground">Bank Account</dt>
+                      <dd class="text-sm font-semibold">
+                        <div>{bank_account["bank_name"]}</div>
+                        <div class="text-muted-foreground">**** {bank_account["last4"]}</div>
+                      </dd>
+                    </div>
+                  <% end %>
+                </dl>
+              </.card_content>
+            </.card>
+          </div>
+
+          <div class="flex gap-4">
+            <%= if not @account.details_submitted do %>
+              <.button phx-click="setup_payout_account">
+                Continue onboarding
+              </.button>
+            <% else %>
+              <.button phx-click="setup_payout_account" variant="outline">
+                Update details
+              </.button>
+            <% end %>
+
+            <%= if @account.details_submitted and @account.type == :express do %>
+              <.button phx-click="view_dashboard" variant="outline">
+                View dashboard
+              </.button>
+            <% end %>
+
+            <.button phx-click="show_delete_confirmation" variant="destructive">
+              Delete account
+            </.button>
+          </div>
+        </div>
+      </.drawer_content>
+    </.drawer>
+    <.dialog
+      :if={@show_delete_confirmation}
+      id="delete-confirmation-dialog"
+      show={@show_delete_confirmation}
+      on_cancel={JS.patch(~p"/user/transactions", [])}
+    >
+      <.dialog_content>
+        <.dialog_header>
+          <.dialog_title>Delete Payout Account</.dialog_title>
+          <.dialog_description>
+            Are you sure you want to delete your payout account? This action is irreversible and you will need to create a new account to receive payments.
+          </.dialog_description>
+        </.dialog_header>
+        <.dialog_footer>
+          <.button variant="outline" phx-click="cancel_delete">Cancel</.button>
+          <.button variant="destructive" phx-click="delete_payout_account">Delete Account</.button>
+        </.dialog_footer>
+      </.dialog_content>
+    </.dialog>
     """
   end
 

@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
           "fixed z-50 transform border bg-background transition-transform duration-300 ease-in-out",
           case @direction do
             "bottom" -> "inset-x-0 bottom-0 rounded-t-xl"
-            "right" -> "inset-y-0 right-0 h-full max-w-lg"
+            "right" -> "inset-y-0 right-0 h-full max-w-lg w-full"
           end,
           case @direction do
             "bottom" -> if(@show, do: "translate-y-0", else: "translate-y-full")

@@ -126,6 +126,11 @@ defmodule Algora.Stripe.ConnectCountries do
       {"Vietnam", "VN"}
     ]
 
+  @spec from_code(String.t()) :: String.t()
+  def from_code(code) do
+    list() |> Enum.find(&(elem(&1, 1) == code)) |> elem(0) || code
+  end
+
   @spec list_codes() :: [String.t()]
   def list_codes, do: Enum.map(list(), &elem(&1, 1))
 

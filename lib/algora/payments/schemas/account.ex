@@ -13,6 +13,10 @@ defmodule Algora.Payments.Account do
     field :name, :string
     field :details_submitted, :boolean, default: false, null: false
     field :charges_enabled, :boolean, default: false, null: false
+    field :payouts_enabled, :boolean, default: false, null: false
+    field :payout_interval, :string
+    field :payout_speed, :integer
+    field :default_currency, :string
     field :service_agreement, :string
     field :country, :string, null: false
     field :type, Ecto.Enum, values: [:standard, :express], null: false
@@ -32,6 +36,10 @@ defmodule Algora.Payments.Account do
       :provider_meta,
       :details_submitted,
       :charges_enabled,
+      :payouts_enabled,
+      :payout_interval,
+      :payout_speed,
+      :default_currency,
       :service_agreement,
       :country,
       :type,
@@ -45,6 +53,7 @@ defmodule Algora.Payments.Account do
       :provider_meta,
       :details_submitted,
       :charges_enabled,
+      :payouts_enabled,
       :country,
       :type,
       :region,

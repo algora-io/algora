@@ -13,7 +13,7 @@ defmodule AlgoraWeb.Components.UI.Badge do
   attr :class, :string, default: nil
 
   attr :variant, :string,
-    values: ~w(default secondary destructive outline),
+    values: ~w(default secondary destructive success warning outline),
     default: "default",
     doc: "the badge variant style"
 
@@ -27,7 +27,7 @@ defmodule AlgoraWeb.Components.UI.Badge do
     <div
       class={
         classes([
-          "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset",
           @variant_class,
           @class
         ])
@@ -41,10 +41,12 @@ defmodule AlgoraWeb.Components.UI.Badge do
 
   @variants %{
     variant: %{
-      "default" => "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-      "secondary" => "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-      "destructive" => "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-      "outline" => "text-foreground"
+      "default" => "bg-accent/60 text-accent-foreground ring-accent-foreground/20",
+      "secondary" => "bg-secondary/10 text-secondary ring-secondary/20",
+      "destructive" => "bg-destructive/10 text-destructive ring-destructive/20",
+      "success" => "bg-success/10 text-success ring-success/20",
+      "warning" => "bg-warning/10 text-warning ring-warning/20",
+      "outline" => "bg-transparent text-foreground ring-foreground/30"
     }
   }
 

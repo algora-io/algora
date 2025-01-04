@@ -198,7 +198,7 @@ defmodule Algora.Payments do
             charges_enabled: stripe_account.charges_enabled,
             details_submitted: stripe_account.details_submitted,
             country: stripe_account.country,
-            service_agreement: stripe_account.tos_acceptance.service_agreement,
+            service_agreement: get_service_agreement(stripe_account),
             provider_meta: Util.normalize_struct(stripe_account)
           }
 
@@ -222,5 +222,13 @@ defmodule Algora.Payments do
           end
         end
     end
+  end
+
+  defp get_service_agreement(%{tos_acceptance: %{service_agreement: agreement}} = _account) when not is_nil(agreement) do
+    agreement
+  end
+
+  defp get_service_agreement(%{capabilities: capabilities}) do
+    if is_nil(capabilities[:card_payments]), do: "recipient", else: "full"
   end
 end

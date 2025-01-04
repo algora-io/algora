@@ -300,10 +300,10 @@ defmodule Algora.Accounts.User do
   defp type_from_provider(:github, "Organization"), do: :organization
   defp type_from_provider(:github, _), do: :individual
 
-  def handle(%User{handle: handle}), do: handle
-  def handle(%User{provider_login: handle}), do: handle
+  def handle(%{handle: handle}), do: handle
+  def handle(%{provider_login: handle}), do: handle
 
-  def url(%User{handle: handle, type: :individual}), do: "/@/#{handle}"
-  def url(%User{handle: handle, type: :organization}), do: "/org/#{handle}"
-  def url(%User{provider_login: handle}), do: "https://github.com/#{handle}"
+  def url(%{handle: handle, type: :individual}), do: "/@/#{handle}"
+  def url(%{handle: handle, type: :organization}), do: "/org/#{handle}"
+  def url(%{provider_login: handle}), do: "https://github.com/#{handle}"
 end

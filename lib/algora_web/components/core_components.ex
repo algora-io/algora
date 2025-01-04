@@ -803,6 +803,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <div>
       <.label for={@id}>{@label}</.label>
+      <p :if={@helptext} class="mb-2 text-sm text-muted-foreground">{@helptext}</p>
       <select
         id={@id}
         name={@name}
@@ -822,6 +823,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <div>
       <.label for={@id}>{@label}</.label>
+      <p :if={@helptext} class="mb-2 text-sm text-muted-foreground">{@helptext}</p>
       <textarea
         id={@id || @name}
         name={@name}

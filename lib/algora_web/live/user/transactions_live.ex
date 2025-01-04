@@ -5,7 +5,30 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   alias Algora.Accounts.User
   alias Algora.Payments
+  alias Algora.Stripe.ConnectCountries
   alias Algora.Util
+
+  defmodule PayoutAccountForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @countries ConnectCountries.list()
+
+    embedded_schema do
+      field :country, :string
+    end
+
+    def changeset(schema \\ %__MODULE__{}, attrs) do
+      schema
+      |> cast(attrs, [:country])
+      |> validate_required([:country])
+      |> validate_inclusion(:country, Enum.map(@countries, &elem(&1, 1)))
+    end
+
+    def countries, do: @countries
+  end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -15,11 +38,42 @@ defmodule AlgoraWeb.User.TransactionsLive do
     {:ok,
      socket
      |> assign(:page_title, "Your transactions")
+     |> assign(:show_payout_drawer, true)
+     |> assign(:payout_account_form, to_form(PayoutAccountForm.changeset(%PayoutAccountForm{}, %{})))
      |> assign_transactions()}
   end
 
   def handle_info(:payments_updated, socket) do
     {:noreply, assign_transactions(socket)}
+  end
+
+  def handle_event("show_payout_drawer", _params, socket) do
+    {:noreply, assign(socket, :show_payout_drawer, true)}
+  end
+
+  def handle_event("close_drawer", _params, socket) do
+    {:noreply, assign(socket, :show_payout_drawer, false)}
+  end
+
+  def handle_event("create_payout_account", %{"payout_account_form" => params}, socket) do
+    changeset =
+      %PayoutAccountForm{}
+      |> PayoutAccountForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    case changeset do
+      %{valid?: true} = changeset ->
+        # TODO: Actually create the payout account
+        IO.inspect(changeset.changes, label: "Would create payout account with")
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Payout account created!")
+         |> assign(:show_payout_drawer, false)}
+
+      %{valid?: false} = changeset ->
+        {:noreply, assign(socket, :payout_account_form, to_form(changeset))}
+    end
   end
 
   defp assign_transactions(socket) do
@@ -66,9 +120,15 @@ defmodule AlgoraWeb.User.TransactionsLive do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
-      <div class="space-y-1">
-        <h1 class="text-2xl font-bold">Your Transactions</h1>
-        <p class="text-muted-foreground">View and manage your transaction history</p>
+      <div class="flex items-end justify-between gap-4">
+        <div class="space-y-1">
+          <h1 class="text-2xl font-bold">Your Transactions</h1>
+          <p class="text-muted-foreground">View and manage your transaction history</p>
+        </div>
+        <.button phx-click="show_payout_drawer">
+          <.icon name="tabler-plus" class="w-4 h-4 mr-2 -ml-1" />
+          <span>Create payout account</span>
+        </.button>
       </div>
       
     <!-- Totals Cards -->
@@ -162,6 +222,39 @@ defmodule AlgoraWeb.User.TransactionsLive do
         </.card_content>
       </.card>
     </div>
+    <.drawer show={@show_payout_drawer} on_cancel="close_drawer" direction="right">
+      <.drawer_header>
+        <.drawer_title>Create Payout Account</.drawer_title>
+        <.drawer_description>Create a payout account to receive your earnings</.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.simple_form for={@payout_account_form} phx-submit="create_payout_account">
+          <div class="space-y-6 max-w-md">
+            <.input
+              field={@payout_account_form[:country]}
+              label="Country"
+              type="select"
+              prompt=""
+              options={
+                PayoutAccountForm.countries()
+                |> Enum.map(fn {name, code} ->
+                  {Algora.Misc.CountryEmojis.get(code, "🌎") <> " " <> name, code}
+                end)
+              }
+              helptext="Select the country where you or your business will legally operate."
+            />
+            <div class="flex justify-end gap-4">
+              <.button variant="outline" type="button" phx-click="close_drawer">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Create Account
+              </.button>
+            </div>
+          </div>
+        </.simple_form>
+      </.drawer_content>
+    </.drawer>
     """
   end
 

@@ -21,6 +21,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   # Main drawer wrapper
   attr :show, :boolean, default: false, doc: "Controls drawer visibility"
+  attr :direction, :string, default: "bottom", values: ["bottom", "right"], doc: "Drawer slide direction"
   attr :class, :string, default: nil
   attr :on_cancel, JS, default: %JS{}
   attr :rest, :global
@@ -41,8 +42,15 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     <div
       class={
         classes([
-          "fixed inset-x-0 bottom-0 z-50 transform rounded-t-xl border bg-background transition-transform duration-300 ease-in-out",
-          "#{if @show, do: "translate-y-0", else: "translate-y-full"}",
+          "fixed z-50 transform border bg-background transition-transform duration-300 ease-in-out",
+          case @direction do
+            "bottom" -> "inset-x-0 bottom-0 rounded-t-xl"
+            "right" -> "inset-y-0 right-0 h-full max-w-lg"
+          end,
+          case @direction do
+            "bottom" -> if(@show, do: "translate-y-0", else: "translate-y-full")
+            "right" -> if(@show, do: "translate-x-0", else: "translate-x-full")
+          end,
           @class
         ])
       }

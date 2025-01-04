@@ -69,8 +69,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
         result =
           if is_nil(account) do
             Payments.create_account(socket.assigns.current_user, %{
-              country: changeset.changes.country,
-              type: "express"
+              country: changeset.changes.country
             })
           else
             {:ok, account}

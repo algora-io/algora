@@ -1,6 +1,7 @@
 defmodule Algora.Stripe.ConnectCountries do
   @moduledoc false
 
+  @spec list() :: [{String.t(), String.t()}]
   def list,
     do: [
       {"Albania", "AL"},
@@ -27,7 +28,6 @@ defmodule Algora.Stripe.ConnectCountries do
       {"Cambodia", "KH"},
       {"Canada", "CA"},
       {"Chile", "CL"},
-      {"China", "CN"},
       {"Colombia", "CO"},
       {"Costa Rica", "CR"},
       {"Croatia", "HR"},
@@ -126,5 +126,10 @@ defmodule Algora.Stripe.ConnectCountries do
       {"Vietnam", "VN"}
     ]
 
+  @spec list_codes() :: [String.t()]
   def list_codes, do: Enum.map(list(), &elem(&1, 1))
+
+  @spec account_type(String.t()) :: :standard | :express
+  def account_type("BR"), do: :standard
+  def account_type(_), do: :express
 end

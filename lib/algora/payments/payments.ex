@@ -9,6 +9,7 @@ defmodule Algora.Payments do
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Stripe.ConnectCountries
   alias Algora.Util
 
   require Logger
@@ -142,6 +143,8 @@ defmodule Algora.Payments do
   @spec create_account(user :: User.t(), attrs :: %{optional(atom()) => any()}) ::
           {:ok, Account.t()} | {:error, any()}
   def create_account(user, attrs) do
+    attrs = Map.put(attrs, :type, ConnectCountries.account_type(attrs.country))
+
     with {:ok, stripe_account} <- create_stripe_account(attrs) do
       attrs = %{
         provider: "stripe",

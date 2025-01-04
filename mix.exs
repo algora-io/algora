@@ -74,7 +74,8 @@ defmodule Algora.MixProject do
       {:nimble_parsec, "~> 1.4"},
       {:oban, "~> 2.17"},
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
-      {:typed_ecto_schema, "~> 0.4.1", runtime: false}
+      {:typed_ecto_schema, "~> 0.4.1", runtime: false},
+      {:chameleon, "~> 2.2.0", only: [:dev]}
     ]
   end
 

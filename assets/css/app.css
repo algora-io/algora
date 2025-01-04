@@ -236,20 +236,20 @@ input:-webkit-autofill:active {
     --radius: 0.5rem;
   }
   .dark {
-    --background: 255 0% 0%;
-    --foreground: 255 0% 90%;
-    --card: 255 10% 5%;
-    --card-foreground: 255 0% 90%;
-    --popover: 255 10% 5%;
-    --popover-foreground: 255 0% 90%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     --primary: 161 93.5% 30.4%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 255 10% 10%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 217 10% 15%;
-    --muted-foreground: 255 0% 60%;
-    --accent: 217 10% 15%;
-    --accent-foreground: 255 0% 90%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 91% 71%;
     --destructive-foreground: 0 86% 97%;
     --destructive-50: 0 86% 97%;

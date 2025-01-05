@@ -81,8 +81,7 @@ defmodule Algora.Factory do
       provider: "stripe",
       provider_id: "cus_1234567890",
       provider_meta: %{},
-      name: "Pied Piper",
-      region: :US
+      name: "Pied Piper"
     }
   end
 
@@ -106,7 +105,6 @@ defmodule Algora.Factory do
       service_agreement: "recipient",
       country: "US",
       type: :express,
-      region: :US,
       stale: false
     }
   end

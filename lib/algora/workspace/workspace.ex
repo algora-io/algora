@@ -6,6 +6,7 @@ defmodule Algora.Workspace do
   alias Algora.Github
   alias Algora.Repo
   alias Algora.Workspace.Installation
+  alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
@@ -49,10 +50,34 @@ defmodule Algora.Workspace do
         where: u.provider_login == ^owner
       )
 
-    case Repo.one(repository_query) do
-      %Repository{} = repository -> {:ok, repository}
-      nil -> create_repository_from_github(token, owner, repo)
+    res =
+      case Repo.one(repository_query) do
+        %Repository{} = repository -> {:ok, repository}
+        nil -> create_repository_from_github(token, owner, repo)
+      end
+
+    case res do
+      {:ok, repository} -> maybe_schedule_og_image_update(repository)
+      error -> error
     end
+
+    res
+  end
+
+  defp maybe_schedule_og_image_update(%Repository{} = repository) do
+    one_day_ago = DateTime.add(DateTime.utc_now(), -1, :day)
+
+    needs_update? =
+      Repository.has_default_og_image?(repository) ||
+        (repository.og_image_updated_at && DateTime.before?(repository.og_image_updated_at, one_day_ago))
+
+    if needs_update? do
+      %{repository_id: repository.id}
+      |> Jobs.UpdateRepositoryOgImage.new()
+      |> Oban.insert()
+    end
+
+    :ok
   end
 
   def create_repository_from_github(token, owner, repo) do

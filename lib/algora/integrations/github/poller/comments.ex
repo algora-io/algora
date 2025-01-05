@@ -82,7 +82,7 @@ defmodule Algora.Github.Poller.Comments do
 
   @impl true
   def handle_call(:is_paused, _from, state) do
-    {:reply, false, state}
+    {:reply, state.paused, state}
   end
 
   defp schedule_poll do

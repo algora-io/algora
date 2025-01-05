@@ -362,7 +362,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
               <div class="p-4 sm:p-6">
                 <h3 class="text-sm/4 font-semibold text-gray-400">Payouts</h3>
                 <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                  Get Paid Quickly
+                  Fast, Global Payouts
                 </p>
                 <p class="mt-2 text-sm/6 text-gray-400">
                   Receive payments directly to your bank account from all around the world
@@ -433,7 +433,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           Get Started Now
         </h2>
         <p class="mx-auto mt-6 max-w-xl font-medium text-lg/8 text-gray-300">
-          You can create bounties and send tips on any of the Swift repositories below once you've connected your GitHub account.
+          You can create bounties and send tips in any of the Swift repos below once you've connected your GitHub account.
         </p>
         <div class="mt-6 flex items-center justify-center gap-x-6">
           <.link

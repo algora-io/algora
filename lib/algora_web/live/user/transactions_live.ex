@@ -177,7 +177,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <div class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div class="space-y-1">
             <h1 class="text-2xl font-bold">Transactions</h1>
             <p class="text-muted-foreground">View and manage your transaction history</p>
@@ -424,7 +424,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
             </.card>
           </div>
 
-          <div class="flex gap-6">
+          <div class="flex flex-col-reverse sm:flex-row gap-3">
             <.button class="flex-1" phx-click="show_delete_confirmation" variant="destructive">
               Delete account
             </.button>

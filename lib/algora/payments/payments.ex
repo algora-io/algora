@@ -2,10 +2,15 @@ defmodule Algora.Payments do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts
+  alias Algora.Accounts.User
+  alias Algora.Payments.Account
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Stripe.ConnectCountries
+  alias Algora.Util
 
   require Logger
 
@@ -127,5 +132,120 @@ defmodule Algora.Payments do
     |> preload(linked_transaction: :user)
     |> order_by([t], desc: t.inserted_at)
     |> Repo.all()
+  end
+
+  @spec fetch_or_create_account(user :: User.t(), country :: String.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def fetch_or_create_account(user, country) do
+    case fetch_account(user) do
+      {:ok, account} -> {:ok, account}
+      {:error, :not_found} -> create_account(user, country)
+    end
+  end
+
+  @spec fetch_account(user :: User.t()) ::
+          {:ok, Account.t()} | {:error, :not_found}
+  def fetch_account(user) do
+    Repo.fetch_by(Account, user_id: user.id)
+  end
+
+  @spec create_account(user :: User.t(), country :: String.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def create_account(user, country) do
+    type = ConnectCountries.account_type(country)
+
+    with {:ok, stripe_account} <- create_stripe_account(%{country: country, type: type}) do
+      attrs = %{
+        provider: "stripe",
+        provider_id: stripe_account.id,
+        provider_meta: Util.normalize_struct(stripe_account),
+        type: type,
+        user_id: user.id,
+        country: country
+      }
+
+      %Account{}
+      |> Account.changeset(attrs)
+      |> Repo.insert()
+    end
+  end
+
+  @spec create_stripe_account(attrs :: map()) ::
+          {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
+  defp create_stripe_account(%{country: country, type: type}) do
+    case Stripe.Account.create(%{country: country, type: to_string(type)}) do
+      {:ok, account} -> {:ok, account}
+      {:error, _reason} -> Stripe.Account.create(%{type: to_string(type)})
+    end
+  end
+
+  @spec create_account_link(account :: Account.t(), base_url :: String.t()) ::
+          {:ok, Stripe.AccountLink.t()} | {:error, Stripe.Error.t()}
+  def create_account_link(account, base_url) do
+    Stripe.AccountLink.create(%{
+      account: account.provider_id,
+      refresh_url: "#{base_url}/callbacks/stripe/refresh",
+      return_url: "#{base_url}/callbacks/stripe/return",
+      type: "account_onboarding"
+    })
+  end
+
+  @spec create_login_link(account :: Account.t()) ::
+          {:ok, Stripe.LoginLink.t()} | {:error, Stripe.Error.t()}
+  def create_login_link(account) do
+    Stripe.LoginLink.create(account.provider_id, %{})
+  end
+
+  @spec update_account(account :: Account.t(), stripe_account :: Stripe.Account.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def update_account(account, stripe_account) do
+    account
+    |> Account.changeset(%{
+      provider: "stripe",
+      provider_id: stripe_account.id,
+      provider_meta: Util.normalize_struct(stripe_account),
+      charges_enabled: stripe_account.charges_enabled,
+      payouts_enabled: stripe_account.payouts_enabled,
+      payout_interval: stripe_account.settings.payouts.schedule.interval,
+      payout_speed: stripe_account.settings.payouts.schedule.delay_days,
+      default_currency: stripe_account.default_currency,
+      details_submitted: stripe_account.details_submitted,
+      country: stripe_account.country,
+      service_agreement: get_service_agreement(stripe_account)
+    })
+    |> Repo.update()
+  end
+
+  @spec refresh_stripe_account(user :: User.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found} | {:error, Stripe.Error.t()}
+  def refresh_stripe_account(user) do
+    with {:ok, account} <- fetch_account(user),
+         {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id, []),
+         {:ok, updated_account} <- update_account(account, stripe_account) do
+      user = Accounts.get_user(account.user_id)
+
+      if user && stripe_account.charges_enabled do
+        Accounts.update_settings(user, %{country: stripe_account.country})
+      end
+
+      {:ok, updated_account}
+    end
+  end
+
+  @spec get_service_agreement(account :: Stripe.Account.t()) :: String.t()
+  defp get_service_agreement(%{tos_acceptance: %{service_agreement: agreement}} = _account) when not is_nil(agreement) do
+    agreement
+  end
+
+  @spec get_service_agreement(account :: Stripe.Account.t()) :: String.t()
+  defp get_service_agreement(%{capabilities: capabilities}) do
+    if is_nil(capabilities[:card_payments]), do: "recipient", else: "full"
+  end
+
+  @spec delete_account(account :: Account.t()) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def delete_account(account) do
+    with {:ok, _stripe_account} <- Stripe.Account.delete(account.provider_id) do
+      Repo.delete(account)
+    end
   end
 end

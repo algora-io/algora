@@ -9,7 +9,6 @@ defmodule Algora.Payments.Customer do
     field :provider_meta, :map
 
     field :name, :string
-    field :region, Ecto.Enum, values: [:US, :EU]
 
     belongs_to :user, Algora.Accounts.User
 
@@ -22,8 +21,8 @@ defmodule Algora.Payments.Customer do
 
   def changeset(customer, attrs) do
     customer
-    |> cast(attrs, [:user_id, :provider, :provider_id, :provider_meta, :name, :region])
-    |> validate_required([:user_id, :provider, :provider_id, :provider_meta, :name, :region])
+    |> cast(attrs, [:user_id, :provider, :provider_id, :provider_meta, :name])
+    |> validate_required([:user_id, :provider, :provider_id, :provider_meta, :name])
     |> unique_constraint(:user_id)
   end
 end

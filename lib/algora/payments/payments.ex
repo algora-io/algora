@@ -134,24 +134,23 @@ defmodule Algora.Payments do
     |> Repo.all()
   end
 
-  @spec get_or_create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
-          {:ok, Account.t()} | {:error, any()}
-  def get_or_create_account(user, region, country) do
-    case get_account(user, region) do
-      nil -> create_account(user, region, country)
-      account -> {:ok, account}
+  @spec fetch_or_create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def fetch_or_create_account(user, region, country) do
+    case fetch_account(user, region) do
+      {:ok, account} -> {:ok, account}
+      {:error, :not_found} -> create_account(user, region, country)
     end
   end
 
-  @spec get_account(user :: User.t(), region :: :US | :EU) :: Account.t() | nil
-  def get_account(user, region) do
-    Account
-    |> where([a], a.user_id == ^user.id and a.region == ^region)
-    |> Repo.one()
+  @spec fetch_account(user :: User.t(), region :: :US | :EU) ::
+          {:ok, Account.t()} | {:error, :not_found}
+  def fetch_account(user, region) do
+    Repo.fetch_by(Account, user_id: user.id, region: region)
   end
 
   @spec create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
-          {:ok, Account.t()} | {:error, any()}
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   def create_account(user, region, country) do
     type = ConnectCountries.account_type(country)
 
@@ -172,7 +171,7 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec create_stripe_account(attrs :: any()) ::
+  @spec create_stripe_account(attrs :: map()) ::
           {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
   defp create_stripe_account(%{country: country, type: type}) do
     case Stripe.Account.create(%{country: country, type: to_string(type)}) do
@@ -198,46 +197,39 @@ defmodule Algora.Payments do
     Stripe.LoginLink.create(account.provider_id, %{})
   end
 
+  @spec update_account(account :: Account.t(), stripe_account :: Stripe.Account.t()) ::
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
+  def update_account(account, stripe_account) do
+    account
+    |> Account.changeset(%{
+      provider: "stripe",
+      provider_id: stripe_account.id,
+      provider_meta: Util.normalize_struct(stripe_account),
+      charges_enabled: stripe_account.charges_enabled,
+      payouts_enabled: stripe_account.payouts_enabled,
+      payout_interval: stripe_account.settings.payouts.schedule.interval,
+      payout_speed: stripe_account.settings.payouts.schedule.delay_days,
+      default_currency: stripe_account.default_currency,
+      details_submitted: stripe_account.details_submitted,
+      country: stripe_account.country,
+      service_agreement: get_service_agreement(stripe_account)
+    })
+    |> Repo.update()
+  end
+
   @spec refresh_stripe_account(user :: User.t()) ::
-          {:ok, Account.t()} | {:error, any()}
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found} | {:error, Stripe.Error.t()}
   def refresh_stripe_account(user) do
-    case get_account(user, :US) do
-      nil ->
-        {:error, :account_not_found}
+    with {:ok, account} <- fetch_account(user, :US),
+         {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id),
+         {:ok, updated_account} <- update_account(account, stripe_account) do
+      user = Accounts.get_user(account.user_id)
 
-      account ->
-        case Stripe.Account.retrieve(account.provider_id) do
-          {:ok, stripe_account} ->
-            attrs = %{
-              provider: "stripe",
-              provider_id: stripe_account.id,
-              provider_meta: Util.normalize_struct(stripe_account),
-              charges_enabled: stripe_account.charges_enabled,
-              payouts_enabled: stripe_account.payouts_enabled,
-              payout_interval: stripe_account.settings.payouts.schedule.interval,
-              payout_speed: stripe_account.settings.payouts.schedule.delay_days,
-              default_currency: stripe_account.default_currency,
-              details_submitted: stripe_account.details_submitted,
-              country: stripe_account.country,
-              service_agreement: get_service_agreement(stripe_account)
-            }
+      if user && stripe_account.charges_enabled do
+        Accounts.update_settings(user, %{country: stripe_account.country})
+      end
 
-            res =
-              account
-              |> Account.changeset(attrs)
-              |> Repo.update()
-
-            user = Accounts.get_user(account.user_id)
-
-            if user && stripe_account.charges_enabled do
-              Accounts.update_settings(user, %{country: stripe_account.country})
-            end
-
-            res
-
-          {:error, error} ->
-            {:error, error}
-        end
+      {:ok, updated_account}
     end
   end
 
@@ -251,7 +243,7 @@ defmodule Algora.Payments do
     if is_nil(capabilities[:card_payments]), do: "recipient", else: "full"
   end
 
-  @spec delete_account(account :: Account.t()) :: {:ok, Account.t()} | {:error, any()}
+  @spec delete_account(account :: Account.t()) :: {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   def delete_account(account) do
     with {:ok, _stripe_account} <- Stripe.Account.delete(account.provider_id) do
       Repo.delete(account)

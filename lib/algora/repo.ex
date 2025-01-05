@@ -37,7 +37,7 @@ defmodule Algora.Repo do
     fetch_one(query, opts)
   end
 
-  @spec fetch_by(Ecto.Queryable.t(), Keyword.t(), Keyword.t()) ::
+  @spec fetch_by(Ecto.Queryable.t(), Keyword.t() | map(), Keyword.t()) ::
           {:ok, struct()} | {:error, :not_found}
   def fetch_by(queryable, clauses, opts \\ []) do
     query =

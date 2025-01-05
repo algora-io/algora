@@ -113,6 +113,7 @@ defmodule Algora.Accounts do
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
     |> order_by([u], desc: u.id)
     |> select([u, earnings: e, bounties: b, projects: p], %{
+      type: u.type,
       id: u.id,
       handle: u.handle,
       name: u.name,

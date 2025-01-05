@@ -44,7 +44,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               </div>
             </div>
             <div>
-              <.badge variant="primary">Active</.badge>
+              <.badge variant="success">Active</.badge>
             </div>
           </div>
           <!-- Stats Grid -->

@@ -20,7 +20,8 @@ defmodule AlgoraWeb.Org.Nav do
           id: user.id,
           name: user.name || user.handle,
           handle: user.handle,
-          avatar_url: user.avatar_url
+          avatar_url: user.avatar_url,
+          type: :individual
         }
       end)
 
@@ -57,7 +58,7 @@ defmodule AlgoraWeb.Org.Nav do
           %{
             href: "/org/#{org_handle}",
             tab: :dashboard,
-            icon: "tabler-flower",
+            icon: "tabler-home",
             label: "Dashboard"
           },
           %{

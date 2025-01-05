@@ -4,6 +4,8 @@ defmodule Algora.Github.Poller.Supervisor do
 
   alias Algora.Comments
   alias Algora.Github.Poller.Comments, as: CommentsPoller
+  alias Algora.Github.TokenPool
+  alias Algora.Workspace
 
   require Logger
 
@@ -30,8 +32,16 @@ defmodule Algora.Github.Poller.Supervisor do
   end
 
   def add_repo(owner, name, opts \\ []) do
-    spec = {CommentsPoller, [repo_owner: owner, repo_name: name] ++ opts}
-    DynamicSupervisor.start_child(__MODULE__, spec)
+    token = TokenPool.get_token()
+
+    case Workspace.ensure_repository(token, owner, name) do
+      {:ok, _repository} ->
+        spec = {CommentsPoller, [repo_owner: owner, repo_name: name] ++ opts}
+        DynamicSupervisor.start_child(__MODULE__, spec)
+
+      error ->
+        error
+    end
   end
 
   def terminate_child(owner, name) do

@@ -37,7 +37,11 @@ defmodule AlgoraWeb.User.TransactionsLive do
       Payments.subscribe()
     end
 
-    {:ok, account} = Payments.fetch_account(socket.assigns.current_user)
+    account =
+      case Payments.fetch_account(socket.assigns.current_user) do
+        {:ok, account} -> account
+        {:error, :not_found} -> nil
+      end
 
     {:ok,
      socket

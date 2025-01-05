@@ -221,7 +221,7 @@ defmodule Algora.Payments do
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found} | {:error, Stripe.Error.t()}
   def refresh_stripe_account(user) do
     with {:ok, account} <- fetch_account(user, :US),
-         {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id),
+         {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id, []),
          {:ok, updated_account} <- update_account(account, stripe_account) do
       user = Accounts.get_user(account.user_id)
 

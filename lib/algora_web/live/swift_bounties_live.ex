@@ -513,7 +513,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           join: u in assoc(r, :user),
           where: r.provider == "github",
           where: ^conditions,
-          preload: [user: u]
+          preload: [user: u],
+          order_by: [asc: r.inserted_at]
         )
       )
 

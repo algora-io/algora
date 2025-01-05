@@ -56,6 +56,16 @@ if config_env() == :prod do
     migration_primary_key: [type: :string],
     migration_timestamps: [type: :utc_datetime_usec]
 
+  config :ex_aws,
+    json_codec: Jason,
+    access_key_id: System.fetch_env!("AWS_ACCESS_KEY_ID"),
+    secret_access_key: System.fetch_env!("AWS_SECRET_ACCESS_KEY")
+
+  config :ex_aws, :s3,
+    scheme: "https://",
+    host: URI.parse(System.fetch_env!("AWS_ENDPOINT_URL_S3")).host,
+    region: System.fetch_env!("AWS_REGION")
+
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
@@ -136,5 +146,6 @@ if config_env() == :prod do
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 
   config :algora,
+    bucket_name: System.fetch_env!("BUCKET_NAME"),
     auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
 end

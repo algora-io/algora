@@ -213,7 +213,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
   )
 end
 
-num_cycles = 5
+num_cycles = 20
 
 # Create the contract template
 _contract_template =
@@ -575,3 +575,5 @@ for {reviewer, reviewee, rating_delta, content} <- reviews do
     }
   )
 end
+
+IO.puts("Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}")

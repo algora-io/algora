@@ -4,8 +4,11 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
   import AlgoraWeb.Components.Bounties
   import AlgoraWeb.Components.Footer
+  import Ecto.Query
 
   alias Algora.Bounties
+  alias Algora.Repo
+  alias AlgoraWeb.Components.Logos
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -21,6 +24,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         |> assign(:page_description, "Help grow the Swift ecosystem by funding the work we all depend on.")
         |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/swift.png")
         |> assign_tickets()
+        |> assign_active_repos()
       end
 
     {:ok, socket}
@@ -104,7 +108,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             </.link>
           </div>
         </div>
-        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-10 lg:max-w-none xl:ml-24">
+        <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-10 lg:max-w-none xl:ml-24 2xl:ml-32">
           <div class="max-w-3xl sm:max-w-5xl sm:flex-none lg:max-w-none">
             <.card class="-mx-3 bg-card/25 sm:mx-0" id="how-it-works">
               <.card_header class="-mx-3 sm:mx-0">
@@ -415,6 +419,45 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       <% end %>
     </div>
 
+    <div class="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
+      <div class="relative isolate overflow-hidden px-6 text-center shadow-2xl sm:rounded-3xl sm:px-16">
+        <div class="flex items-center justify-center gap-4">
+          <code class="inline-block rounded bg-orange-950/75 px-1 py-0.5 font-mono text-sm text-orange-400 ring-1 ring-orange-400/25">
+            /bounty $1000
+          </code>
+          <code class="inline-block rounded bg-orange-950/75 px-1 py-0.5 font-mono text-sm text-orange-400 ring-1 ring-orange-400/25">
+            /tip $500 @username
+          </code>
+        </div>
+        <h2 class="mt-6 text-balance font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          Get Started Now
+        </h2>
+        <p class="mx-auto mt-6 max-w-xl font-medium text-lg/8 text-gray-300">
+          You can create bounties and send tips on any of the Swift repositories below once you've connected your GitHub account.
+        </p>
+        <div class="mt-6 flex items-center justify-center gap-x-6">
+          <.link
+            href={Algora.Github.authorize_url()}
+            rel="noopener"
+            class="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-md border border-white/80 bg-white px-6 text-lg font-semibold text-gray-900 shadow transition-colors hover:border-white hover:bg-white/90 focus-visible:outline-white-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 phx-submit-loading:opacity-75"
+          >
+            <Logos.github class="-ml-1 mr-2 h-6 w-6 sm:h-8 sm:w-8" /> Connect with GitHub
+          </.link>
+        </div>
+        <div class="mt-10 grid grid-cols-3 gap-4">
+          <%= for repo <- @repos do %>
+            <.link href={repo.url}>
+              <img
+                src={repo.og_image_url}
+                alt={repo.name}
+                class="rounded-lg aspect-[1200/630] w-full h-full bg-muted"
+              />
+            </.link>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
     <div class="relative">
       <.footer />
     </div>
@@ -434,5 +477,46 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       )
 
     assign(socket, :tickets, tickets)
+  end
+
+  defp assign_active_repos(socket) do
+    active_pollers =
+      Enum.reduce(Algora.Github.Poller.Supervisor.which_children(), [], fn {_, pid, _, _}, acc ->
+        {owner, name} = GenServer.call(pid, :get_repo_info)
+
+        case Algora.Github.Poller.Supervisor.find_child(owner, name) do
+          {_, pid, _, _} ->
+            if GenServer.call(pid, :is_paused) do
+              acc
+            else
+              [{owner, name} | acc]
+            end
+
+          _ ->
+            acc
+        end
+      end)
+
+    # Build dynamic OR conditions for each owner/name pair
+    conditions =
+      Enum.reduce(active_pollers, false, fn {owner, name}, acc_query ->
+        if acc_query do
+          dynamic([r, u], ^acc_query or (u.provider_login == ^owner and r.name == ^name))
+        else
+          dynamic([r, u], u.provider_login == ^owner and r.name == ^name)
+        end
+      end)
+
+    repos =
+      Repo.all(
+        from(r in Algora.Workspace.Repository,
+          join: u in assoc(r, :user),
+          where: r.provider == "github",
+          where: ^conditions,
+          preload: [user: u]
+        )
+      )
+
+    assign(socket, :repos, repos)
   end
 end

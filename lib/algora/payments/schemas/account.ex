@@ -20,7 +20,6 @@ defmodule Algora.Payments.Account do
     field :service_agreement, :string
     field :country, :string, null: false
     field :type, Ecto.Enum, values: [:standard, :express], null: false
-    field :region, Ecto.Enum, values: [:US, :EU], null: false
     field :stale, :boolean, default: false, null: false
 
     belongs_to :user, Algora.Accounts.User, null: false
@@ -43,7 +42,6 @@ defmodule Algora.Payments.Account do
       :service_agreement,
       :country,
       :type,
-      :region,
       :stale,
       :user_id
     ])
@@ -56,12 +54,10 @@ defmodule Algora.Payments.Account do
       :payouts_enabled,
       :country,
       :type,
-      :region,
       :stale,
       :user_id
     ])
     |> validate_inclusion(:type, [:standard, :express])
-    |> validate_inclusion(:region, [:US, :EU])
     |> validate_inclusion(:country, Stripe.ConnectCountries.list_codes())
     |> foreign_key_constraint(:user_id)
     |> generate_id()

@@ -134,24 +134,24 @@ defmodule Algora.Payments do
     |> Repo.all()
   end
 
-  @spec fetch_or_create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
+  @spec fetch_or_create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
-  def fetch_or_create_account(user, region, country) do
-    case fetch_account(user, region) do
+  def fetch_or_create_account(user, country) do
+    case fetch_account(user) do
       {:ok, account} -> {:ok, account}
-      {:error, :not_found} -> create_account(user, region, country)
+      {:error, :not_found} -> create_account(user, country)
     end
   end
 
-  @spec fetch_account(user :: User.t(), region :: :US | :EU) ::
+  @spec fetch_account(user :: User.t()) ::
           {:ok, Account.t()} | {:error, :not_found}
-  def fetch_account(user, region) do
-    Repo.fetch_by(Account, user_id: user.id, region: region)
+  def fetch_account(user) do
+    Repo.fetch_by(Account, user_id: user.id)
   end
 
-  @spec create_account(user :: User.t(), region :: :US | :EU, country :: String.t()) ::
+  @spec create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
-  def create_account(user, region, country) do
+  def create_account(user, country) do
     type = ConnectCountries.account_type(country)
 
     with {:ok, stripe_account} <- create_stripe_account(%{country: country, type: type}) do
@@ -160,7 +160,6 @@ defmodule Algora.Payments do
         provider_id: stripe_account.id,
         provider_meta: Util.normalize_struct(stripe_account),
         type: type,
-        region: region,
         user_id: user.id,
         country: country
       }
@@ -220,7 +219,7 @@ defmodule Algora.Payments do
   @spec refresh_stripe_account(user :: User.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found} | {:error, Stripe.Error.t()}
   def refresh_stripe_account(user) do
-    with {:ok, account} <- fetch_account(user, :US),
+    with {:ok, account} <- fetch_account(user),
          {:ok, stripe_account} <- Stripe.Account.retrieve(account.provider_id, []),
          {:ok, updated_account} <- update_account(account, stripe_account) do
       user = Accounts.get_user(account.user_id)

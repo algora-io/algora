@@ -37,7 +37,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
       Payments.subscribe()
     end
 
-    {:ok, account} = Payments.fetch_account(socket.assigns.current_user, :US)
+    {:ok, account} = Payments.fetch_account(socket.assigns.current_user)
 
     {:ok,
      socket
@@ -90,7 +90,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
     if changeset.valid? do
       with {:ok, account} <-
-             Payments.fetch_or_create_account(socket.assigns.current_user, :US, country),
+             Payments.fetch_or_create_account(socket.assigns.current_user, country),
            {:ok, %{url: url}} <- Payments.create_account_link(account, AlgoraWeb.Endpoint.url()) do
         {:noreply, redirect(socket, external: url)}
       else

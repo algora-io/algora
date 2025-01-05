@@ -2,6 +2,7 @@ defmodule Algora.Github.Poller.CommentConsumer do
   @moduledoc false
   use Oban.Worker, queue: :comment_consumers
 
+  alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Util
@@ -50,15 +51,13 @@ defmodule Algora.Github.Poller.CommentConsumer do
   end
 
   defp run_command({:bounty, args}, ticket_ref, comment) do
-    # TODO: use user's own token if available
-    token = Github.TokenPool.get_token()
-
     owner = Keyword.get(ticket_ref, :owner)
     repo = Keyword.get(ticket_ref, :repo)
     number = Keyword.get(ticket_ref, :number)
 
-    with {:ok, amount} <- Keyword.fetch(args, :amount),
-         {:ok, user} <- Workspace.ensure_user(token, extract_actor(comment)),
+    with {:ok, user} <- Accounts.fetch_user_by(provider_id: to_string(comment["user"]["id"])),
+         {:ok, token} <- Accounts.get_access_token(user),
+         {:ok, amount} <- Keyword.fetch(args, :amount),
          {:ok, ticket} <- Workspace.ensure_ticket(token, owner, repo, number),
          {:ok, _bounty} <-
            Bounties.create_bounty(%{
@@ -94,6 +93,4 @@ defmodule Algora.Github.Poller.CommentConsumer do
         error
     end
   end
-
-  defp extract_actor(%{"user" => %{"login" => login}}), do: login
 end

@@ -242,6 +242,12 @@ defmodule Algora.Accounts do
 
   def get_user_by!(fields), do: Repo.get_by!(User, fields)
 
+  @spec fetch_user_by(clauses :: Keyword.t() | map()) ::
+          {:ok, User.t()} | {:error, :not_found}
+  def fetch_user_by(clauses) do
+    Repo.fetch_by(User, clauses)
+  end
+
   ## User registration
 
   @doc """

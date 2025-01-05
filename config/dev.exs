@@ -30,6 +30,16 @@ config :algora, Algora.Repo,
   migration_primary_key: [type: :string],
   migration_timestamps: [type: :utc_datetime_usec]
 
+config :ex_aws,
+  json_codec: Jason,
+  access_key_id: System.get_env("AWS_ACCESS_KEY_ID"),
+  secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY")
+
+config :ex_aws, :s3,
+  scheme: "https://",
+  host: if(url = System.get_env("AWS_ENDPOINT_URL_S3"), do: URI.parse(url).host),
+  region: System.get_env("AWS_REGION")
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -108,6 +118,7 @@ config :swoosh, :api_client, false
 config :salad_ui, components_path: Path.join(File.cwd!(), "lib/algora_web/components/ui")
 
 config :algora,
+  bucket_name: System.get_env("BUCKET_NAME"),
   cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
   swift_mode: System.get_env("SWIFT_MODE") == "true",
   auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"

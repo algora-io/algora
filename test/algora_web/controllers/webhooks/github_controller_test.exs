@@ -29,11 +29,11 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
     @tag user: @unauthorized_user
     test "handles bounty command with unauthorized user", %{user: user} do
-      assert [error: :unauthorized] == process_bounty_command("/bounty", user)
+      assert [error: :unauthorized] == process_bounty_command("/bounty $100", user)
     end
 
     test "handles bounty command without amount" do
-      assert [ok: :open_to_bids] == process_bounty_command("/bounty")
+      assert [] == process_bounty_command("/bounty")
     end
 
     test "handles valid bounty command with $ prefix" do

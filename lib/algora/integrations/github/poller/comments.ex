@@ -14,7 +14,7 @@ defmodule Algora.Github.Poller.Comments do
   require Logger
 
   @per_page 10
-  @poll_interval :timer.seconds(1)
+  @poll_interval :timer.seconds(3)
 
   # Client API
   def start_link(opts) do

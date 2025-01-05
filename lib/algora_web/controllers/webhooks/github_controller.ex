@@ -48,49 +48,43 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
   defp execute_command({:bounty, args}, author, params) do
-    amount = Keyword.get(args, :amount)
+    amount = Keyword.fetch!(args, :amount)
 
     case get_permissions(author, params) do
       {:ok, "admin"} ->
-        case amount do
-          nil ->
-            {:ok, :open_to_bids}
+        # Get repository and issue details from params
+        repo = params["repository"]
+        issue = params["issue"]
 
-          amount ->
-            # Get repository and issue details from params
-            repo = params["repository"]
-            issue = params["issue"]
+        # Construct the bounty message
+        message = """
+        ## 💎 $#{amount} bounty [• #{repo["owner"]["login"]}](https://console.algora.io/org/#{repo["owner"]["login"]})
+        ### Steps to solve:
+        1. **Start working**: Comment `/attempt ##{issue["number"]}` with your implementation plan
+        2. **Submit work**: Create a pull request including `/claim ##{issue["number"]}` in the PR body to claim the bounty
+        3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
 
-            # Construct the bounty message
-            message = """
-            ## 💎 $#{amount} bounty [• #{repo["owner"]["login"]}](https://console.algora.io/org/#{repo["owner"]["login"]})
-            ### Steps to solve:
-            1. **Start working**: Comment `/attempt ##{issue["number"]}` with your implementation plan
-            2. **Submit work**: Create a pull request including `/claim ##{issue["number"]}` in the PR body to claim the bounty
-            3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+        Thank you for contributing to #{repo["full_name"]}!
 
-            Thank you for contributing to #{repo["full_name"]}!
+        **[Add a bounty](https://console.algora.io/org/#{repo["owner"]["login"]}/bounties/community?fund=#{repo["full_name"]}%23#{issue["number"]})** • **[Share on socials](https://twitter.com/intent/tweet?text=%24#{amount}+bounty%21+%F0%9F%92%8E+#{issue["html_url"]}&related=algoraio)**
 
-            **[Add a bounty](https://console.algora.io/org/#{repo["owner"]["login"]}/bounties/community?fund=#{repo["full_name"]}%23#{issue["number"]})** • **[Share on socials](https://twitter.com/intent/tweet?text=%24#{amount}+bounty%21+%F0%9F%92%8E+#{issue["html_url"]}&related=algoraio)**
+        Attempt | Started (GMT+0) | Solution
+        --------|----------------|----------
+        """
 
-            Attempt | Started (GMT+0) | Solution
-            --------|----------------|----------
-            """
-
-            # Post comment to the issue
-            with {:ok, %{"token" => token}} <-
-                   Github.get_installation_token(params["installation"]["id"]) do
-              Github.create_issue_comment(
-                token,
-                repo["owner"]["login"],
-                repo["name"],
-                issue["number"],
-                message
-              )
-            end
-
-            {:ok, amount}
+        # Post comment to the issue
+        with {:ok, %{"token" => token}} <-
+               Github.get_installation_token(params["installation"]["id"]) do
+          Github.create_issue_comment(
+            token,
+            repo["owner"]["login"],
+            repo["name"],
+            issue["number"],
+            message
+          )
         end
+
+        {:ok, amount}
 
       {:ok, _permission} ->
         {:error, :unauthorized}

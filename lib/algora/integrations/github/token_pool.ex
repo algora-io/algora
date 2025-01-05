@@ -49,13 +49,6 @@ defmodule Algora.Github.TokenPool do
 
   @impl true
   def handle_cast(:refresh_tokens, state) do
-    {
-      :noreply,
-      if length(state.tokens) < @pool_size do
-        state
-      else
-        %{state | tokens: Accounts.get_random_access_tokens(@pool_size), current_token_index: 0}
-      end
-    }
+    {:noreply, %{state | tokens: Accounts.get_random_access_tokens(@pool_size), current_token_index: 0}}
   end
 end

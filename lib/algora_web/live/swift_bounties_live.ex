@@ -444,7 +444,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             <Logos.github class="-ml-1 mr-2 h-6 w-6 sm:h-8 sm:w-8" /> Connect with GitHub
           </.link>
         </div>
-        <div class="mt-10 grid grid-cols-3 gap-4">
+        <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <%= for repo <- @repos do %>
             <.link href={repo.url}>
               <img

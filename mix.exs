@@ -79,7 +79,9 @@ defmodule Algora.MixProject do
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
-      {:hackney, "~> 1.9"}
+      {:hackney, "~> 1.9"},
+      {:appsignal_phoenix, "~> 2.6"},
+      {:logfmt_ex, "~> 0.4"}
     ]
   end
 

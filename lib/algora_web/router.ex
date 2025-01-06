@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Router do
 
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
   import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
+  import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -53,10 +54,26 @@ defmodule AlgoraWeb.Router do
 
     get "/tip", TipController, :create
 
-    live_session :admin,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/admin/analytics", Admin.CompanyAnalyticsLive
+    scope "/admin" do
+      live_session :admin,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [
+          {AlgoraWeb.UserAuth, :ensure_authenticated},
+          {AlgoraWeb.UserAuth, :ensure_admin},
+          AlgoraWeb.User.Nav
+        ] do
+        live "/analytics", Admin.CompanyAnalyticsLive
+      end
+
+      live_dashboard "/dashboard",
+        metrics: AlgoraWeb.Telemetry,
+        additional_pages: [oban: Oban.LiveDashboard],
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [
+          {AlgoraWeb.UserAuth, :ensure_authenticated},
+          {AlgoraWeb.UserAuth, :ensure_admin},
+          AlgoraWeb.User.Nav
+        ]
     end
 
     live_session :community,
@@ -137,19 +154,11 @@ defmodule AlgoraWeb.Router do
   #   pipe_through :api
   # end
 
-  # Enable LiveDashboard and Swoosh mailbox preview in development
+  # Enable Swoosh mailbox preview in development
   if Application.compile_env(:algora, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
-
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: AlgoraWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end

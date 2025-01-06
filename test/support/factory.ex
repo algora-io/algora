@@ -1,10 +1,11 @@
 defmodule Algora.Factory do
   @moduledoc false
+  use ExMachina.Ecto, repo: Algora.Repo
+
   alias Algora.Accounts.User
-  alias Algora.Repo
   alias Algora.Reviews.Review
 
-  def build(:identity) do
+  def identity_factory do
     %Algora.Accounts.Identity{
       id: Nanoid.generate(),
       provider: "github",
@@ -12,13 +13,13 @@ defmodule Algora.Factory do
     }
   end
 
-  def build(:user) do
+  def user_factory do
     %User{
       id: Nanoid.generate(),
       type: :individual,
-      email: "erich@example.com",
+      email: sequence(:email, &"enrich#{&1}@example.com"),
       display_name: "Erlich Bachman",
-      handle: "erich",
+      handle: sequence(:handle, &"enrich#{&1}"),
       bio: "Founder of Aviato, Incubator extraordinaire",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/erich.jpg",
       location: "Palo Alto, CA",
@@ -36,13 +37,13 @@ defmodule Algora.Factory do
     }
   end
 
-  def build(:organization) do
+  def organization_factory do
     %User{
       id: Nanoid.generate(),
       type: :organization,
-      email: "piedpiper@example.com",
+      email: sequence(:email, &"piedpiper#{&1}@example.com"),
       display_name: "Pied Piper",
-      handle: "piedpiper",
+      handle: sequence(:handle, &"piedpiper#{&1}"),
       bio:
         "Making the world a better place through constructing elegant hierarchies for maximum code re-use and extensibility",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
@@ -68,37 +69,37 @@ defmodule Algora.Factory do
     }
   end
 
-  def build(:member) do
+  def member_factory do
     %Algora.Organizations.Member{
       id: Nanoid.generate(),
       role: :admin
     }
   end
 
-  def build(:customer) do
+  def customer_factory do
     %Algora.Payments.Customer{
       id: Nanoid.generate(),
       provider: "stripe",
-      provider_id: "cus_1234567890",
+      provider_id: sequence(:cus, &"cus_#{&1}"),
       provider_meta: %{},
       name: "Pied Piper"
     }
   end
 
-  def build(:payment_method) do
+  def payment_method_factory do
     %Algora.Payments.PaymentMethod{
       id: Nanoid.generate(),
       provider: "stripe",
-      provider_id: "pm_1234567890",
-      provider_customer_id: "cus_1234567890"
+      provider_id: sequence(:pm, &"pm_#{&1}"),
+      provider_customer_id: sequence(:cus, &"cus_#{&1}")
     }
   end
 
-  def build(:account) do
+  def account_factory do
     %Algora.Payments.Account{
       id: Nanoid.generate(),
       provider: "stripe",
-      provider_id: "acct_1234567890",
+      provider_id: sequence(:acct, &"acct_#{&1}"),
       name: "Kevin 'The Carver'",
       details_submitted: true,
       charges_enabled: true,
@@ -109,7 +110,7 @@ defmodule Algora.Factory do
     }
   end
 
-  def build(:contract) do
+  def contract_factory do
     id = Nanoid.generate()
 
     %Algora.Contracts.Contract{
@@ -126,76 +127,76 @@ defmodule Algora.Factory do
     }
   end
 
-  def build(:transaction) do
+  def transaction_factory do
     %Algora.Payments.Transaction{
       id: Nanoid.generate()
     }
   end
 
-  def build(:timesheet) do
+  def timesheet_factory do
     %Algora.Contracts.Timesheet{
       id: Nanoid.generate(),
       hours_worked: 40
     }
   end
 
-  def build(:thread) do
+  def thread_factory do
     %Algora.Chat.Thread{
       id: Nanoid.generate(),
       title: "Lorem ipsum dolor sit amet"
     }
   end
 
-  def build(:participant) do
+  def participant_factory do
     %Algora.Chat.Participant{
       id: Nanoid.generate(),
       last_read_at: DateTime.utc_now()
     }
   end
 
-  def build(:message) do
+  def message_factory do
     %Algora.Chat.Message{
       id: Nanoid.generate(),
       content: "What's up?"
     }
   end
 
-  def build(:repository) do
+  def repository_factory do
     %Algora.Workspace.Repository{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: "#{:rand.uniform(999_999_999)}",
+      provider_id: sequence(:provider_id, &"#{&1}"),
       name: "middle-out",
       url: "https://github.com/piedpiper/middle-out",
       provider_meta: %{}
     }
   end
 
-  def build(:ticket) do
+  def ticket_factory do
     %Algora.Workspace.Ticket{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: "#{:rand.uniform(999_999_999)}",
+      provider_id: sequence(:provider_id, &"#{&1}"),
       type: :issue,
       title: "Optimize compression algorithm for large files",
       description: "We need to improve performance when handling files over 1GB",
-      number: :rand.uniform(100),
-      url: "https://github.com/piedpiper/middle-out/issues/1",
+      number: sequence(:number, &"#{&1}"),
+      url: sequence(:url, &"https://github.com/piedpiper/middle-out/issues/#{&1}"),
       provider_meta: %{}
     }
   end
 
-  def build(:bounty) do
+  def bounty_factory do
     %Algora.Bounties.Bounty{
       id: Nanoid.generate()
     }
   end
 
-  def build(:claim) do
+  def claim_factory do
     %Algora.Bounties.Claim{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: "#{:rand.uniform(999_999_999)}",
+      provider_id: sequence(:privider_id, &"#{&1}"),
       type: :code,
       status: :pending,
       title: "Implemented compression optimization",
@@ -205,7 +206,7 @@ defmodule Algora.Factory do
     }
   end
 
-  def build(:review) do
+  def review_factory do
     %Review{
       id: Nanoid.generate(),
       rating: Review.max_rating(),
@@ -214,18 +215,14 @@ defmodule Algora.Factory do
   end
 
   # Convenience API
-  def build(factory_name, attributes) do
-    factory_name |> build() |> struct!(attributes)
-  end
-
   def insert!(factory_name, attributes \\ []) do
-    factory_name |> build(attributes) |> Repo.insert!()
+    insert(factory_name, attributes)
   end
 
   def upsert!(factory_name, conflict_target, attributes \\ []) do
-    factory_name
-    |> build(attributes)
-    |> Repo.insert!(
+    insert(
+      factory_name,
+      attributes,
       on_conflict: {:replace_all_except, [:id, :name]},
       conflict_target: conflict_target,
       returning: true

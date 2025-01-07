@@ -76,6 +76,7 @@ defmodule Algora.MixProject do
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:chameleon, "~> 2.2.0"},
+      {:ex_machina, "~> 2.8.0", only: :test},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

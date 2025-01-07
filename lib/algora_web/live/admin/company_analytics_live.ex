@@ -5,7 +5,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   alias Algora.Analytics
 
   def mount(_params, _session, socket) do
-    analytics = Analytics.get_company_analytics()
+    {:ok, analytics} = Analytics.get_company_analytics()
     funnel_data = Analytics.get_funnel_data()
 
     {:ok,
@@ -134,7 +134,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   def status_color(_), do: "secondary"
 
   def handle_event("select_period", %{"period" => period}, socket) do
-    analytics = Analytics.get_company_analytics(period)
+    {:ok, analytics} = Analytics.get_company_analytics(period)
     funnel_data = Analytics.get_funnel_data(period)
 
     {:noreply,

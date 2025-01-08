@@ -99,13 +99,11 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             Anyone can contribute whether you're a company or an individual.
           </p>
           <div class="mt-10 flex items-center gap-x-6">
-            <.link
-              href={Algora.Github.authorize_url()}
-              rel="noopener"
-              class="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-md border border-white/80 bg-white px-6 text-lg font-semibold text-gray-900 shadow transition-colors hover:border-white hover:bg-white/90 focus-visible:outline-white-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 phx-submit-loading:opacity-75"
-            >
-              Start Contributing
-            </.link>
+            <.button variant="subtle" class="h-12 px-6 text-lg font-semibold">
+              <.link href={Algora.Github.authorize_url()} rel="noopener">
+                Start Contributing
+              </.link>
+            </.button>
           </div>
         </div>
         <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-10 lg:max-w-none xl:ml-24 2xl:ml-32">
@@ -436,13 +434,15 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           You can create bounties and send tips in any of the Swift repos below once you've connected your GitHub account.
         </p>
         <div class="mt-6 flex items-center justify-center gap-x-6">
-          <.link
-            href={Algora.Github.authorize_url()}
-            rel="noopener"
-            class="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-md border border-white/80 bg-white px-6 text-lg font-semibold text-gray-900 shadow transition-colors hover:border-white hover:bg-white/90 focus-visible:outline-white-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 phx-submit-loading:opacity-75"
-          >
-            <Logos.github class="-ml-1 mr-2 h-6 w-6 sm:h-8 sm:w-8" /> Connect with GitHub
-          </.link>
+          <.button variant="subtle" class="h-12 px-6 text-lg font-semibold">
+            <.link
+              href={Algora.Github.authorize_url()}
+              rel="noopener"
+              class="inline-flex items-center"
+            >
+              <Logos.github class="-ml-1 mr-2 h-6 w-6 sm:h-8 sm:w-8" /> Connect with GitHub
+            </.link>
+          </.button>
         </div>
         <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <%= for repo <- @repos do %>

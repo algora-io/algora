@@ -86,16 +86,20 @@ defmodule AlgoraWeb.UserAuth do
   """
   def log_in_user(conn, user) do
     user_return_to = get_session(conn, :user_return_to)
+
+    conn
+    |> put_current_user(user)
+    |> redirect(to: user_return_to || signed_in_path(conn))
+  end
+
+  def put_current_user(conn, user) do
     conn = assign(conn, :current_user, user)
 
-    conn =
-      conn
-      |> renew_session()
-      |> put_session(:user_id, user.id)
-      |> put_session(:last_context, user.last_context)
-      |> put_session(:live_socket_id, "users_sessions:#{user.id}")
-
-    redirect(conn, to: user_return_to || signed_in_path(conn))
+    conn
+    |> renew_session()
+    |> put_session(:user_id, user.id)
+    |> put_session(:last_context, user.last_context)
+    |> put_session(:live_socket_id, "users_sessions:#{user.id}")
   end
 
   defp renew_session(conn) do

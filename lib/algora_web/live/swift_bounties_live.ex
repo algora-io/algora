@@ -4,15 +4,70 @@ defmodule AlgoraWeb.SwiftBountiesLive do
 
   import AlgoraWeb.Components.Bounties
   import AlgoraWeb.Components.Footer
+  import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Github
   alias Algora.Repo
+  alias Algora.Types.USD
+  alias Algora.Validations
+  alias Algora.Workspace
   alias AlgoraWeb.Components.Logos
+
+  require Logger
+
+  defmodule BountyForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :url, :string
+      field :amount, USD
+
+      embeds_one :ticket_ref, TicketRef, primary_key: false do
+        field :owner, :string
+        field :repo, :string
+        field :number, :integer
+        field :type, :string
+      end
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> cast(attrs, [:url, :amount])
+      |> validate_required([:url, :amount])
+      |> Validations.validate_money_positive(:amount)
+      |> Validations.validate_ticket_ref(:url, :ticket_ref)
+    end
+  end
+
+  defmodule TipForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :github_handle, :string
+      field :amount, USD
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> cast(attrs, [:github_handle, :amount])
+      |> validate_required([:github_handle, :amount])
+      |> Validations.validate_money_positive(:amount)
+    end
+  end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
+      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
     end
 
     socket =
@@ -23,6 +78,10 @@ defmodule AlgoraWeb.SwiftBountiesLive do
         |> assign(:page_title, "Fund Swift Together")
         |> assign(:page_description, "Help grow the Swift ecosystem by funding the work we all depend on.")
         |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/swift.png")
+        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+        |> assign(:pending_action, nil)
         |> assign_tickets()
         |> assign_active_repos()
       end
@@ -192,6 +251,21 @@ defmodule AlgoraWeb.SwiftBountiesLive do
               </.card_content>
             </.card>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="py-24 sm:py-32">
+      <div class="mx-auto max-w-2xl px-6 lg:max-w-4xl lg:px-8">
+        <h2 class="text-center text-base/7 font-semibold text-orange-400">
+          Start Contributing
+        </h2>
+        <p class="font-display mt-2 text-center text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+          Fund Swift Development in Seconds
+        </p>
+        <div class="mt-5 grid grid-cols-1 gap-5 sm:gap-8 sm:mt-8 lg:grid-cols-2">
+          {create_bounty(assigns)}
+          {create_tip(assigns)}
         </div>
       </div>
     </div>
@@ -462,6 +536,147 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       <.footer />
     </div>
     """
+  end
+
+  defp create_bounty(assigns) do
+    ~H"""
+    <.card class="bg-muted/30">
+      <.card_header>
+        <div class="flex items-center gap-3">
+          <.icon name="tabler-diamond" class="h-8 w-8" />
+          <h2 class="text-2xl font-semibold">Post a bounty</h2>
+        </div>
+      </.card_header>
+      <.card_content>
+        <.simple_form for={@bounty_form} phx-submit="create_bounty">
+          <div class="flex flex-col gap-6">
+            <.input
+              label="URL"
+              field={@bounty_form[:url]}
+              placeholder="https://github.com/swift-lang/swift/issues/1337"
+            />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+            <div class="flex justify-end gap-4">
+              <.button variant="subtle">Submit</.button>
+            </div>
+          </div>
+        </.simple_form>
+      </.card_content>
+    </.card>
+    """
+  end
+
+  defp create_tip(assigns) do
+    ~H"""
+    <.card class="bg-muted/30">
+      <.card_header>
+        <div class="flex items-center gap-3">
+          <.icon name="tabler-gift" class="h-8 w-8" />
+          <h2 class="text-2xl font-semibold">Tip a developer</h2>
+        </div>
+      </.card_header>
+      <.card_content>
+        <.simple_form for={@tip_form} phx-submit="create_tip">
+          <div class="flex flex-col gap-6">
+            <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+            <div class="flex justify-end gap-4">
+              <.button variant="subtle">Submit</.button>
+            </div>
+          </div>
+        </.simple_form>
+      </.card_content>
+    </.card>
+    """
+  end
+
+  def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+    changeset =
+      %BountyForm{}
+      |> BountyForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    amount = get_field(changeset, :amount)
+    ticket_ref = get_field(changeset, :ticket_ref)
+
+    if changeset.valid? do
+      if socket.assigns[:current_user] do
+        case Bounties.create_bounty(%{
+               creator: socket.assigns.current_user,
+               owner: socket.assigns.current_user,
+               amount: amount,
+               ticket_ref: ticket_ref
+             }) do
+          {:ok, bounty} ->
+            Bounties.notify_bounty(%{owner: socket.assigns.current_user, bounty: bounty, ticket_ref: ticket_ref})
+
+            {:noreply,
+             socket
+             |> put_flash(:info, "Bounty created")
+             |> push_navigate(to: ~p"/home")}
+
+          {:error, :already_exists} ->
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+
+          {:error, _reason} ->
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+      else
+        {:noreply,
+         socket
+         |> assign(:pending_action, {event, unsigned_params})
+         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+      end
+    else
+      {:noreply, assign(socket, :bounty_form, to_form(changeset))}
+    end
+  end
+
+  def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
+    changeset =
+      %TipForm{}
+      |> TipForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    if changeset.valid? do
+      if socket.assigns[:current_user] do
+        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+             {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
+             {:ok, checkout_url} <-
+               Bounties.create_tip(%{
+                 creator: socket.assigns.current_user,
+                 owner: socket.assigns.current_user,
+                 recipient: recipient,
+                 amount: get_field(changeset, :amount)
+               }) do
+          {:noreply, redirect(socket, external: checkout_url)}
+        else
+          {:error, reason} ->
+            Logger.error("Failed to create tip: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+      else
+        {:noreply,
+         socket
+         |> assign(:pending_action, {event, unsigned_params})
+         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+      end
+    else
+      {:noreply, assign(socket, :tip_form, to_form(changeset))}
+    end
+  end
+
+  def handle_info({:authenticated, user}, socket) do
+    socket = assign(socket, :current_user, user)
+
+    case socket.assigns.pending_action do
+      {event, params} ->
+        socket = assign(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+
+      nil ->
+        {:noreply, socket}
+    end
   end
 
   def handle_info(:bounties_updated, socket) do

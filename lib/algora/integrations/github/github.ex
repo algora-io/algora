@@ -29,11 +29,6 @@ defmodule Algora.Github do
   end
 
   def authorize_url(data \\ nil) do
-    # TODO: find out a way to set return_to w/o github complaining about redirect_uri mismatch
-
-    # redirect_query = if return_to, do: URI.encode_query(return_to: return_to)
-    # redirect_uri = "#{AlgoraWeb.Endpoint.url()}/callbacks/github/oauth?#{redirect_query}"
-
     redirect_uri = "#{AlgoraWeb.Endpoint.url()}/callbacks/github/oauth"
 
     query =

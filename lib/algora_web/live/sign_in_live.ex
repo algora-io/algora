@@ -10,7 +10,7 @@ defmodule AlgoraWeb.SignInLive do
           Algora Console
         </h2>
         <.link
-          href={Algora.Github.authorize_url()}
+          href={@authorize_url}
           rel="noopener"
           class="mt-8 flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
         >
@@ -21,7 +21,13 @@ defmodule AlgoraWeb.SignInLive do
     """
   end
 
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(params, _session, socket) do
+    authorize_url =
+      case params["return_to"] do
+        nil -> Algora.Github.authorize_url()
+        return_to -> Algora.Github.authorize_url(%{return_to: return_to})
+      end
+
+    {:ok, assign(socket, authorize_url: authorize_url)}
   end
 end

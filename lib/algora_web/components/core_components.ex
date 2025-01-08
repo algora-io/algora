@@ -571,7 +571,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed right-4 bottom-4 z-50 hidden w-80 rounded-lg p-3 shadow-md ring-1 sm:w-96",
+        "fixed right-4 bottom-4 z-50 hidden w-80 rounded-lg p-3 pr-8 shadow-md ring-1 sm:w-96",
         @kind == :info &&
           "bg-emerald-950 fill-success-foreground text-success-foreground ring ring-success/70",
         @kind == :warning &&
@@ -583,7 +583,7 @@ defmodule AlgoraWeb.CoreComponents do
     >
       <%= case msg do %>
         <% %{body: body, action: %{ href: href, body: action_body }} -> %>
-          <div class="text-[0.8125rem] flex gap-1.5 font-semibold leading-6">
+          <div class="text-[0.8125rem] flex gap-3 font-semibold">
             <.icon :if={@kind == :info} name="tabler-circle-check" class="h-6 w-6 text-success" />
             <.icon
               :if={@kind == :warning}
@@ -601,7 +601,7 @@ defmodule AlgoraWeb.CoreComponents do
             </div>
           </div>
         <% body -> %>
-          <p class="text-[0.8125rem] flex items-center gap-1.5 font-semibold leading-6">
+          <p class="text-[0.8125rem] flex items-center gap-3 font-semibold">
             <.icon :if={@kind == :info} name="tabler-circle-check" class="h-6 w-6 text-success" />
             <.icon
               :if={@kind == :warning}

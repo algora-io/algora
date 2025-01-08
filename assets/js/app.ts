@@ -623,3 +623,23 @@ window.addEventListener("phx:js-exec", ({ detail }) => {
     liveSocket.execJS(el, el.getAttribute(detail.attr));
   });
 });
+
+window.addEventListener("phx:open_popup", (e: CustomEvent) => {
+  const url = e.detail.url;
+  if (!url) return;
+
+  const width = e.detail.width || 600;
+  const height = e.detail.height || 600;
+  const left = e.detail.left || window.screen.width / 2 - width / 2;
+  const top = e.detail.top || window.screen.height / 2 - height / 2;
+
+  const newWindow = window.open(
+    url,
+    "oauth",
+    `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1`
+  );
+
+  if (window.focus && newWindow) {
+    newWindow.focus();
+  }
+});

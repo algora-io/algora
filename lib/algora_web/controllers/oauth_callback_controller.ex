@@ -14,44 +14,54 @@ defmodule AlgoraWeb.OAuthCallbackController do
     end
   end
 
+  def translate_error(:invalid), do: "Unable to verify your login request. Please try signing in again"
+  def translate_error(:expired), do: "Your login link has expired. Please request a new one to continue"
+  def translate_error(%Ecto.Changeset{}), do: "We were unable to fetch the necessary information from your GitHub account"
+  def translate_error(_reason), do: "We were unable to contact GitHub. Please try again later"
+
   def new(conn, %{"provider" => "github", "code" => code, "state" => state}) do
-    with {:ok, data} <- Github.verify_oauth_state(state),
+    res = Github.verify_oauth_state(state)
+
+    socket_id =
+      case res do
+        {:ok, %{socket_id: socket_id}} -> socket_id
+        _ -> nil
+      end
+
+    type = if(socket_id, do: :popup, else: :redirect)
+
+    with {:ok, data} <- res,
          {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
          {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
-      conn =
-        case data[:return_to] do
-          nil -> conn
-          return_to -> put_session(conn, :user_return_to, return_to)
-        end
+      if socket_id do
+        Phoenix.PubSub.broadcast(Algora.PubSub, "auth:#{socket_id}", {:authenticated, user})
+      end
 
-      conn
-      |> put_flash(:info, welcome_message(user))
-      |> AlgoraWeb.UserAuth.log_in_user(user)
+      case type do
+        :popup ->
+          conn
+          |> AlgoraWeb.UserAuth.put_current_user(user)
+          |> render(:success)
+
+        :redirect ->
+          conn
+          |> put_flash(:info, welcome_message(user))
+          |> AlgoraWeb.UserAuth.put_current_user(user)
+          |> redirect(to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
+      end
     else
-      {:error, :invalid} ->
-        conn
-        |> put_flash(:error, "Unable to verify your login request. Please try signing in again.")
-        |> redirect(to: "/")
-
-      {:error, :expired} ->
-        conn
-        |> put_flash(:error, "Your login link has expired. Please request a new one to continue.")
-        |> redirect(to: "/")
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        Logger.debug("failed GitHub insert #{inspect(changeset.errors)}")
-
-        conn
-        |> put_flash(:error, "We were unable to fetch the necessary information from your GitHub account")
-        |> redirect(to: "/")
-
       {:error, reason} ->
         Logger.debug("failed GitHub exchange #{inspect(reason)}")
+        conn = put_flash(conn, :error, translate_error(reason))
 
-        conn
-        |> put_flash(:error, "We were unable to contact GitHub. Please try again later")
-        |> redirect(to: "/")
+        case type do
+          :popup ->
+            render(conn, :error)
+
+          :redirect ->
+            redirect(conn, to: "/")
+        end
     end
   end
 

@@ -17,7 +17,18 @@ defmodule Algora.Github do
     "https://github.com/apps/#{app_handle()}/installations/new"
   end
 
-  def authorize_url(_return_to \\ nil) do
+  defp oauth_state_ttl, do: 600
+  defp oauth_state_salt, do: "github-oauth-state"
+
+  def generate_oauth_state(data) do
+    Phoenix.Token.sign(AlgoraWeb.Endpoint, oauth_state_salt(), data, max_age: oauth_state_ttl())
+  end
+
+  def verify_oauth_state(token) do
+    Phoenix.Token.verify(AlgoraWeb.Endpoint, oauth_state_salt(), token, max_age: oauth_state_ttl())
+  end
+
+  def authorize_url(data \\ nil) do
     # TODO: find out a way to set return_to w/o github complaining about redirect_uri mismatch
 
     # redirect_query = if return_to, do: URI.encode_query(return_to: return_to)
@@ -28,7 +39,7 @@ defmodule Algora.Github do
     query =
       URI.encode_query(
         client_id: client_id(),
-        state: Algora.Util.random_string(),
+        state: generate_oauth_state(data),
         redirect_uri: redirect_uri
       )
 

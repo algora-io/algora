@@ -57,11 +57,7 @@ defmodule AlgoraWeb.Router do
     scope "/admin" do
       live_session :admin,
         layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [
-          {AlgoraWeb.UserAuth, :ensure_authenticated},
-          {AlgoraWeb.UserAuth, :ensure_admin},
-          AlgoraWeb.User.Nav
-        ] do
+        on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav] do
         live "/analytics", Admin.CompanyAnalyticsLive
       end
 
@@ -69,11 +65,7 @@ defmodule AlgoraWeb.Router do
         metrics: AlgoraWeb.Telemetry,
         additional_pages: [oban: Oban.LiveDashboard],
         layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [
-          {AlgoraWeb.UserAuth, :ensure_authenticated},
-          {AlgoraWeb.UserAuth, :ensure_admin},
-          AlgoraWeb.User.Nav
-        ]
+        on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
     end
 
     live_session :community,

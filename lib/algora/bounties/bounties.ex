@@ -9,6 +9,7 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Tip
   alias Algora.FeeTier
+  alias Algora.Github
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
   alias Algora.Payments
@@ -17,6 +18,8 @@ defmodule Algora.Bounties do
   alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Ticket
+
+  require Logger
 
   def base_query, do: Bounty
 
@@ -77,6 +80,36 @@ defmodule Algora.Bounties do
     else
       {:error, _reason} = error -> error
     end
+  end
+
+  def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}) do
+    # TODO: post comment in a separate job
+    body = """
+    💎 **#{owner.provider_login}** is offering a **#{Money.to_string!(bounty.amount, no_fraction_if_integer: true)}** bounty for this issue
+
+    👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining swift.algora.io
+    """
+
+    Task.start(fn ->
+      if Github.pat_enabled() do
+        Github.create_issue_comment(
+          Github.pat(),
+          ticket_ref.owner,
+          ticket_ref.repo,
+          ticket_ref.number,
+          body
+        )
+      else
+        Logger.info("""
+        Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
+               \"\"\"
+               #{body}
+               \"\"\")
+        """)
+
+        :ok
+      end
+    end)
   end
 
   @spec create_tip(%{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()}) ::

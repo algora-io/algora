@@ -15,7 +15,8 @@ defmodule AlgoraWeb.OAuthCallbackController do
   end
 
   def new(conn, %{"provider" => "github", "code" => code, "state" => state} = params) do
-    with {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
+    with {:ok, _data} <- Github.verify_oauth_state(state),
+         {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
          {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
       conn =
@@ -29,14 +30,21 @@ defmodule AlgoraWeb.OAuthCallbackController do
       |> put_flash(:info, welcome_message(user))
       |> AlgoraWeb.UserAuth.log_in_user(user)
     else
+      {:error, :invalid} ->
+        conn
+        |> put_flash(:error, "Unable to verify your login request. Please try signing in again.")
+        |> redirect(to: "/")
+
+      {:error, :expired} ->
+        conn
+        |> put_flash(:error, "Your login link has expired. Please request a new one to continue.")
+        |> redirect(to: "/")
+
       {:error, %Ecto.Changeset{} = changeset} ->
         Logger.debug("failed GitHub insert #{inspect(changeset.errors)}")
 
         conn
-        |> put_flash(
-          :error,
-          "We were unable to fetch the necessary information from your GitHub account"
-        )
+        |> put_flash(:error, "We were unable to fetch the necessary information from your GitHub account")
         |> redirect(to: "/")
 
       {:error, reason} ->

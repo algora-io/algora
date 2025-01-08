@@ -19,44 +19,47 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
-    case session do
-      %{"user_id" => user_id} ->
-        new_socket =
-          Phoenix.Component.assign_new(socket, :current_user, fn ->
-            Accounts.get_user!(user_id)
-          end)
+    case get_authenticated_user(session, socket) do
+      {:ok, user} ->
+        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> user end)}
 
-        case new_socket.assigns.current_user do
-          %Accounts.User{} ->
-            {:cont, new_socket}
-
-          nil ->
-            {:halt, redirect_require_login(socket)}
-        end
-
-      %{} ->
+      {:error, :unauthenticated} ->
         {:halt, redirect_require_login(socket)}
     end
-  rescue
-    Ecto.NoResultsError -> {:halt, redirect_require_login(socket)}
   end
 
   def on_mount(:ensure_admin, _params, session, socket) do
-    case session do
-      %{"user_id" => user_id} ->
-        user = Accounts.get_user!(user_id)
-
+    case get_authenticated_user(session, socket) do
+      {:ok, user} ->
         if not Accounts.admin?(user) do
           raise(AlgoraWeb.NotFoundError)
         end
 
-        {:cont, socket}
+        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> user end)}
 
-      %{} ->
+      {:error, :unauthenticated} ->
         {:halt, redirect_require_login(socket)}
     end
+  end
+
+  defp get_authenticated_user(session, socket) do
+    case session do
+      %{"user_id" => user_id} ->
+        new_socket = Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
+
+        case new_socket.assigns.current_user do
+          %Accounts.User{} = user ->
+            {:ok, user}
+
+          nil ->
+            {:error, :unauthenticated}
+        end
+
+      %{} ->
+        {:error, :unauthenticated}
+    end
   rescue
-    Ecto.NoResultsError -> {:halt, redirect_require_login(socket)}
+    Ecto.NoResultsError -> {:error, :unauthenticated}
   end
 
   defp redirect_require_login(socket) do

@@ -14,16 +14,15 @@ defmodule AlgoraWeb.OAuthCallbackController do
     end
   end
 
-  def new(conn, %{"provider" => "github", "code" => code, "state" => state} = params) do
-    with {:ok, _data} <- Github.verify_oauth_state(state),
+  def new(conn, %{"provider" => "github", "code" => code, "state" => state}) do
+    with {:ok, data} <- Github.verify_oauth_state(state),
          {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
          {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
       conn =
-        if params["return_to"] do
-          put_session(conn, :user_return_to, params["return_to"])
-        else
-          conn
+        case data[:return_to] do
+          nil -> conn
+          return_to -> put_session(conn, :user_return_to, return_to)
         end
 
       conn

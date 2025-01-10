@@ -101,6 +101,7 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/jobs/:id", Org.JobLive, :index
       live "/org/:org_handle/analytics", Org.AnalyticsLive, :index
       live "/org/:org_handle/chat", ChatLive, :index
+      live "/org/:org_handle/settings", Org.SettingsLive, :edit
     end
 
     live_session :org2,

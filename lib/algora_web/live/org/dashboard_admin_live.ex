@@ -765,7 +765,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                 <%= for i <- 1..5 do %>
                   <.icon
                     name="tabler-star-filled"
-                    class={"#{if i <= @user.review.rating, do: "text-warning", else: "text-muted-foreground/25"} h-4 w-4"}
+                    class={"#{if i <= @user.review.rating, do: "text-foreground", else: "text-muted-foreground/25"} h-4 w-4"}
                   />
                 <% end %>
               </div>

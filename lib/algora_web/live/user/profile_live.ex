@@ -181,7 +181,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                     <%= for i <- 1..Review.max_rating() do %>
                       <.icon
                         name="tabler-star-filled"
-                        class={"#{if i <= review.rating, do: "text-warning", else: "text-muted-foreground/25"} h-4 w-4"}
+                        class={"#{if i <= review.rating, do: "text-foreground", else: "text-muted-foreground/25"} h-4 w-4"}
                       />
                     <% end %>
                   </div>

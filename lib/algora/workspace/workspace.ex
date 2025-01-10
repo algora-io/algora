@@ -104,16 +104,26 @@ defmodule Algora.Workspace do
     end
   end
 
-  def create_installation(:github, user, org, data) do
+  def create_installation(user, provider_user, org, data) do
     %Installation{}
-    |> Installation.changeset(:github, user, org, data)
+    |> Installation.github_changeset(user, provider_user, org, data)
     |> Repo.insert()
   end
 
-  def update_installation(:github, user, org, installation, data) do
+  def update_installation(installation, user, provider_user, org, data) do
     installation
-    |> Installation.changeset(:github, user, org, data)
+    |> Installation.github_changeset(user, provider_user, org, data)
     |> Repo.update()
+  end
+
+  def upsert_installation(installation, user, org, provider_user) do
+    case get_installation_by_provider_id("github", installation["id"]) do
+      nil ->
+        create_installation(user, provider_user, org, installation)
+
+      existing_installation ->
+        update_installation(existing_installation, user, provider_user, org, installation)
+    end
   end
 
   def get_installation_by(fields), do: Repo.get_by(Installation, fields)
@@ -131,6 +141,8 @@ defmodule Algora.Workspace do
 
   def get_installation(id), do: Repo.get(Installation, id)
   def get_installation!(id), do: Repo.get!(Installation, id)
+
+  def list_installations_by(fields), do: Repo.all(from(i in Installation, where: ^fields))
 
   def list_user_installations(user_id) do
     Repo.all(from(i in Installation, where: i.owner_id == ^user_id, preload: [:connected_user]))

@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias AlgoraWeb.Components.Logos
 
   def render(assigns) do
     ~H"""
@@ -12,6 +13,47 @@ defmodule AlgoraWeb.Org.SettingsLive do
         <h1 class="text-2xl font-bold">Settings</h1>
         <p class="text-muted-foreground">Update your settings and preferences</p>
       </div>
+
+      <.card>
+        <.card_header>
+          <.card_title>GitHub Integration</.card_title>
+          <.card_description :if={@installations == []}>
+            Install the Algora app to enable slash commands in your GitHub repositories
+          </.card_description>
+        </.card_header>
+        <.card_content>
+          <div class="flex flex-col gap-3">
+            <%= if @installations != [] do %>
+              <%= for installation <- @installations do %>
+                <div class="flex items-center gap-2">
+                  <img src={installation.avatar_url} class="w-9 h-9 rounded-lg" />
+                  <div>
+                    <p class="font-medium">{installation.provider_meta["account"]["login"]}</p>
+                    <p class="text-sm text-muted-foreground">
+                      Algora app is installed in <strong>{installation.repository_selection}</strong>
+                      repositories
+                    </p>
+                  </div>
+                </div>
+              <% end %>
+              <.link href={Algora.Github.install_url()} rel="noopener" class="ml-auto gap-2">
+                <.button>
+                  <Logos.github class="w-4 h-4 mr-2 -ml-1" />
+                  Manage {ngettext("installation", "installations", length(@installations))}
+                </.button>
+              </.link>
+            <% else %>
+              <div class="flex flex-col gap-2">
+                <.link href={Algora.Github.install_url()} rel="noopener" class="ml-auto gap-2">
+                  <.button>
+                    <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+                  </.button>
+                </.link>
+              </div>
+            <% end %>
+          </div>
+        </.card_content>
+      </.card>
 
       <.card>
         <.card_header>
@@ -63,10 +105,11 @@ defmodule AlgoraWeb.Org.SettingsLive do
     %{current_org: current_org} = socket.assigns
 
     changeset = User.settings_changeset(current_org, %{})
+    installations = Algora.Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
     {:ok,
      socket
-     |> assign(current_org: current_org)
+     |> assign(:installations, installations)
      |> assign_form(changeset)}
   end
 

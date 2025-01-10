@@ -20,7 +20,13 @@ defmodule AlgoraWeb.User.SettingsLive do
         <.card_content>
           <.simple_form for={@form} phx-change="validate" phx-submit="save">
             <div class="flex flex-col gap-6">
-              <.input field={@form[:handle]} label="Handle" />
+              <div class="flex flex-col gap-2">
+                <.input field={@form[:handle]} label="Handle" />
+                <p class="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <.icon name="tabler-alert-triangle" class="w-4 h-4" />
+                  Changing your handle can have unintended side effects.
+                </p>
+              </div>
               <.input
                 label="Email"
                 name="email"

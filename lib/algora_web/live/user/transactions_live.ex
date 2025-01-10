@@ -433,13 +433,18 @@ defmodule AlgoraWeb.User.TransactionsLive do
               <.button class="flex-1" phx-click="setup_payout_account">
                 Continue onboarding
               </.button>
-            <% else %>
-              <.button class="flex-1" phx-click="setup_payout_account" variant="secondary">
+            <% end %>
+
+            <%= if @account.details_submitted and @account.type != :express do %>
+              <.button class="flex-1" phx-click="setup_payout_account">
                 Update details
               </.button>
             <% end %>
 
             <%= if @account.details_submitted and @account.type == :express do %>
+              <.button class="flex-1" phx-click="setup_payout_account" variant="secondary">
+                Update details
+              </.button>
               <.button class="flex-1" phx-click="view_dashboard">
                 View dashboard
               </.button>

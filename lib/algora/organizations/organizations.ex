@@ -64,6 +64,12 @@ defmodule Algora.Organizations do
   def get_org(id), do: Repo.get(User, id)
   def get_org!(id), do: Repo.get!(User, id)
 
+  @spec fetch_org_by(clauses :: Keyword.t() | map()) ::
+          {:ok, User.t()} | {:error, :not_found}
+  def fetch_org_by(clauses) do
+    Repo.fetch_by(User, clauses)
+  end
+
   def list_orgs(opts) do
     Repo.all(
       from u in User,

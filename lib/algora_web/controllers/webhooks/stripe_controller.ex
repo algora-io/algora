@@ -33,7 +33,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     if count == 0 do
       {:error, :no_transactions_found}
     else
-      Payments.broadcast!()
+      Payments.broadcast()
       {:ok, nil}
     end
   end

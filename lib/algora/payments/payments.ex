@@ -14,8 +14,8 @@ defmodule Algora.Payments do
 
   require Logger
 
-  def broadcast! do
-    Phoenix.PubSub.broadcast!(Algora.PubSub, "payments:all", :payments_updated)
+  def broadcast do
+    Phoenix.PubSub.broadcast(Algora.PubSub, "payments:all", :payments_updated)
   end
 
   def subscribe do

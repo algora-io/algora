@@ -29,8 +29,8 @@ defmodule Algora.Bounties do
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
 
-  def broadcast! do
-    Phoenix.PubSub.broadcast!(Algora.PubSub, "bounties:all", :bounties_updated)
+  def broadcast do
+    Phoenix.PubSub.broadcast(Algora.PubSub, "bounties:all", :bounties_updated)
   end
 
   def subscribe do
@@ -50,7 +50,7 @@ defmodule Algora.Bounties do
 
     case Repo.insert(changeset) do
       {:ok, bounty} ->
-        broadcast!()
+        broadcast()
         {:ok, bounty}
 
       {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->

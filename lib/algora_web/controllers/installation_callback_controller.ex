@@ -10,128 +10,72 @@ defmodule AlgoraWeb.InstallationCallbackController do
 
   def new(conn, params) do
     case validate_query_params(params) do
-      {:ok, %{setup_action: "install", installation_id: installation_id}} ->
-        handle_installation(conn, installation_id)
+      {:ok, %{setup_action: :install, installation_id: installation_id}} ->
+        handle_installation(conn, :install, installation_id)
 
-      # TODO: Implement update
-      {:ok, %{setup_action: "update"}} ->
-        redirect(conn, to: "/user/installations")
+      {:ok, %{setup_action: :update, installation_id: installation_id}} ->
+        handle_installation(conn, :update, installation_id)
+
+      # TODO: Implement request
+      {:ok, %{setup_action: :request}} ->
+        conn
+        |> put_flash(
+          :info,
+          "Installation request submitted! The Algora app will be activated upon approval from your organization administrator."
+        )
+        |> redirect(to: redirect_url(conn))
 
       {:error, _reason} ->
-        redirect(conn, to: "/user/installations")
+        redirect(conn, to: redirect_url(conn))
     end
   end
 
   defp validate_query_params(params) do
     case params do
       %{"setup_action" => "install", "installation_id" => installation_id} ->
-        {:ok, %{setup_action: "install", installation_id: String.to_integer(installation_id)}}
+        {:ok, %{setup_action: :install, installation_id: String.to_integer(installation_id)}}
 
       %{"setup_action" => "update", "installation_id" => installation_id} ->
-        {:ok, %{setup_action: "update", installation_id: String.to_integer(installation_id)}}
+        {:ok, %{setup_action: :update, installation_id: String.to_integer(installation_id)}}
 
       %{"setup_action" => "request"} ->
-        {:ok, %{setup_action: "request"}}
+        {:ok, %{setup_action: :request}}
 
       _ ->
         {:error, :invalid_params}
     end
   end
 
-  defp handle_installation(conn, installation_id) do
+  defp handle_installation(conn, setup_action, installation_id) do
     user = conn.assigns.current_user
 
-    case do_handle_installation(conn, user, installation_id) do
-      {:ok, org} ->
-        # TODO: Trigger org joined event
-        # trigger_org_joined(org)
-
-        put_flash(conn, :info, "Organization created successfully: #{org.handle}")
-
-        # TODO: Redirect to the org dashboard and set the session context
-        redirect_url = determine_redirect_url(conn, org, user)
-        redirect(conn, to: redirect_url)
+    case do_handle_installation(user, installation_id) do
+      {:ok, _org} ->
+        conn
+        |> put_flash(:info, if(setup_action == :install, do: "Installation successful!", else: "Installation updated!"))
+        |> redirect(to: redirect_url(conn))
 
       {:error, error} ->
         Logger.error("❌ Installation callback failed: #{inspect(error)}")
 
-        put_flash(conn, :error, "#{inspect(error)}")
-        redirect(conn, to: "/user/installations")
+        conn
+        |> put_flash(:error, "#{inspect(error)}")
+        |> redirect(to: redirect_url(conn))
     end
   end
 
-  defp do_handle_installation(conn, user, installation_id) do
+  defp do_handle_installation(user, installation_id) do
+    # TODO: replace :last_context with a new :last_installation_target field
+    # TODO: handle nil user
+    # TODO: handle nil last_context
     with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
-         {:ok, github_handle} <- extract_github_handle(installation),
-         {:ok, account} <- Github.get_user_by_username(access_token, github_handle),
-         {:ok, org} <- upsert_org(conn, user, installation, account),
-         {:ok, _} <- upsert_installation(user, org, installation) do
+         {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]),
+         {:ok, org} <- Organizations.fetch_org_by(handle: user.last_context),
+         {:ok, _} <- Workspace.upsert_installation(installation, user, org, provider_user) do
       {:ok, org}
     end
   end
 
-  defp extract_github_handle(%{"account" => %{"login" => login}}), do: {:ok, login}
-  defp extract_github_handle(_), do: {:error, 404}
-
-  defp upsert_installation(user, org, installation) do
-    case Workspace.get_installation_by_provider_id("github", installation["id"]) do
-      nil ->
-        Workspace.create_installation(:github, user, org, installation)
-
-      existing_installation ->
-        Workspace.update_installation(:github, user, org, existing_installation, installation)
-    end
-  end
-
-  defp upsert_org(conn, user, installation, account) do
-    attrs = %{
-      provider: "github",
-      provider_id: account["id"],
-      provider_login: account["login"],
-      provider_meta: account,
-      handle: account["login"],
-      name: account["name"],
-      description: account["bio"],
-      website_url: account["blog"],
-      twitter_url: get_twitter_url(account),
-      avatar_url: account["avatar_url"],
-      # TODO:
-      active: true,
-      featured: account["type"] != "User",
-      github_handle: account["login"]
-    }
-
-    case Organizations.get_org_by_handle(account["login"]) do
-      nil -> create_org(conn, user, attrs, installation)
-      existing_org -> update_org(conn, user, existing_org, attrs, installation)
-    end
-  end
-
-  # TODO: handle conflicting handles
-  defp create_org(_conn, user, attrs, _installation) do
-    # TODO: trigger org joined event
-    # trigger_org_joined(org)
-    with {:ok, org} <- Organizations.create_organization(attrs),
-         {:ok, _} <- Organizations.create_member(org, user, :admin) do
-      {:ok, org}
-    end
-  end
-
-  defp update_org(_conn, _user, existing_org, attrs, _installation) do
-    with {:ok, _} <- Organizations.update_organization(existing_org, attrs) do
-      {:ok, existing_org}
-    end
-  end
-
-  defp determine_redirect_url(_conn, _org, _user) do
-    # TODO: Implement
-    "/user/installations"
-  end
-
-  defp get_twitter_url(%{twitter_username: username}) when is_binary(username) do
-    "https://twitter.com/#{username}"
-  end
-
-  defp get_twitter_url(_), do: nil
+  defp redirect_url(conn), do: ~p"/org/#{conn.assigns.current_user.last_context}/settings"
 end

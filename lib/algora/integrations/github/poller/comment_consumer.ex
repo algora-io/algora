@@ -6,7 +6,6 @@ defmodule Algora.Github.Poller.CommentConsumer do
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Util
-  alias Algora.Workspace
 
   require Logger
 
@@ -51,42 +50,14 @@ defmodule Algora.Github.Poller.CommentConsumer do
   end
 
   defp run_command({:bounty, args}, ticket_ref, comment) do
-    owner = Keyword.get(ticket_ref, :owner)
-    repo = Keyword.get(ticket_ref, :repo)
-    number = Keyword.get(ticket_ref, :number)
-
     with {:ok, user} <- Accounts.fetch_user_by(provider_id: to_string(comment["user"]["id"])),
-         {:ok, token} <- Accounts.get_access_token(user),
-         {:ok, amount} <- Keyword.fetch(args, :amount),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, owner, repo, number),
-         {:ok, _bounty} <-
-           Bounties.create_bounty(%{
-             creator: user,
-             owner: user,
-             amount: amount,
-             ticket: ticket
-           }) do
-      # TODO: post comment in a separate job
-      body = """
-      💎 **#{user.provider_login}** is offering a **#{Money.to_string!(amount, no_fraction_if_integer: true)}** bounty for this issue
-
-      👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{number}` in your PR and joining swift.algora.io
-      """
-
-      if Github.pat_enabled() do
-        Github.create_issue_comment(Github.pat(), owner, repo, number, body)
-      else
-        Logger.info("""
-        Github.create_issue_comment(Github.pat(), "#{owner}", "#{repo}", #{number},
-               \"\"\"
-               #{body}
-               \"\"\")
-        """)
-
-        :ok
-      end
-
-      :ok
+         {:ok, amount} <- Keyword.fetch(args, :amount) do
+      Bounties.create_bounty(%{
+        creator: user,
+        owner: user,
+        amount: amount,
+        ticket_ref: %{owner: ticket_ref[:owner], repo: ticket_ref[:repo], number: ticket_ref[:number]}
+      })
     else
       {:error, _reason} = error ->
         Logger.error("Failed to create bounty: #{inspect(error)}")

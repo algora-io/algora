@@ -458,7 +458,8 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
       url = get_change(changeset, :ticket_url)
 
       with {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url),
-           {:ok, _bounty} <- Bounties.create_bounty(%{creator: creator, owner: owner, ticket: ticket_ref, amount: amount}) do
+           {:ok, _bounty} <-
+             Bounties.create_bounty(%{creator: creator, owner: owner, ticket_ref: ticket_ref, amount: amount}) do
         {:noreply,
          socket
          |> put_flash(:info, "Bounty created successfully")

@@ -168,6 +168,7 @@ defmodule Algora.Factory do
       provider_id: sequence(:provider_id, &"#{&1}"),
       name: "middle-out",
       url: "https://github.com/piedpiper/middle-out",
+      og_image_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-banner.jpg",
       provider_meta: %{}
     }
   end

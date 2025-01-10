@@ -30,6 +30,7 @@ defmodule Algora.MixProject do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Specifies your project dependencies.
@@ -75,7 +76,7 @@ defmodule Algora.MixProject do
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:chameleon, "~> 2.2.0"},
-      {:ex_machina, "~> 2.8.0", only: :test},
+      {:ex_machina, "~> 2.8.0", only: [:dev, :test]},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

@@ -17,9 +17,9 @@ defmodule Algora.Factory do
     %User{
       id: Nanoid.generate(),
       type: :individual,
-      email: sequence(:email, &"enrich#{&1}@example.com"),
+      email: sequence(:email, &"erlich#{&1}@example.com"),
       display_name: "Erlich Bachman",
-      handle: sequence(:handle, &"enrich#{&1}"),
+      handle: sequence(:handle, &"erlich#{&1}"),
       bio: "Founder of Aviato, Incubator extraordinaire",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/erich.jpg",
       location: "Palo Alto, CA",

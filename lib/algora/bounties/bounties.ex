@@ -7,9 +7,9 @@ defmodule Algora.Bounties do
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Jobs
   alias Algora.Bounties.Tip
   alias Algora.FeeTier
-  alias Algora.Github
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
   alias Algora.Payments
@@ -37,9 +37,9 @@ defmodule Algora.Bounties do
     Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
   end
 
-  @spec create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
+  @spec do_create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  def create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
+  defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
     changeset =
       Bounty.changeset(%Bounty{}, %{
         amount: amount,
@@ -72,44 +72,28 @@ defmodule Algora.Bounties do
         creator: creator,
         owner: owner,
         amount: amount,
-        ticket_ref: %{owner: repo_owner, repo: repo_name, number: number}
+        ticket_ref: %{owner: repo_owner, repo: repo_name, number: number} = ticket_ref
       }) do
-    with {:ok, token} <- Accounts.get_access_token(creator),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number) do
-      create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
-    else
-      {:error, _reason} = error -> error
-    end
+    Repo.transact(fn ->
+      with {:ok, token} <- Accounts.get_access_token(creator),
+           {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
+           {:ok, bounty} <- do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}),
+           {:ok, _job} <- notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}) do
+        {:ok, bounty}
+      else
+        {:error, _reason} = error -> error
+      end
+    end)
   end
 
   def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}) do
-    # TODO: post comment in a separate job
-    body = """
-    💎 **#{owner.provider_login}** is offering a **#{Money.to_string!(bounty.amount, no_fraction_if_integer: true)}** bounty for this issue
-
-    👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining swift.algora.io
-    """
-
-    Task.start(fn ->
-      if Github.pat_enabled() do
-        Github.create_issue_comment(
-          Github.pat(),
-          ticket_ref.owner,
-          ticket_ref.repo,
-          ticket_ref.number,
-          body
-        )
-      else
-        Logger.info("""
-        Github.create_issue_comment(Github.pat(), "#{ticket_ref.owner}", "#{ticket_ref.repo}", #{ticket_ref.number},
-               \"\"\"
-               #{body}
-               \"\"\")
-        """)
-
-        :ok
-      end
-    end)
+    %{
+      owner_login: owner.provider_login,
+      amount: Money.to_string!(bounty.amount, no_fraction_if_integer: true),
+      ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number}
+    }
+    |> Jobs.NotifyBounty.new()
+    |> Oban.insert()
   end
 
   @spec create_tip(%{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()}) ::

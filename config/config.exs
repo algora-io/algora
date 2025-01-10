@@ -31,7 +31,8 @@ config :algora, Oban,
   queues: [
     event_consumers: 1,
     comment_consumers: 1,
-    github_og_image: 5
+    github_og_image: 5,
+    notify_bounty: 1
   ]
 
 # Configures the mailer

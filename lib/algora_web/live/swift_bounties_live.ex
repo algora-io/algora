@@ -607,9 +607,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                amount: amount,
                ticket_ref: ticket_ref
              }) do
-          {:ok, bounty} ->
-            Bounties.notify_bounty(%{owner: socket.assigns.current_user, bounty: bounty, ticket_ref: ticket_ref})
-
+          {:ok, _bounty} ->
             {:noreply,
              socket
              |> put_flash(:info, "Bounty created")

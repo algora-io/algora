@@ -220,15 +220,13 @@ defmodule AlgoraWeb.Community.DashboardLive do
     ticket_ref = get_field(changeset, :ticket_ref)
 
     with %{valid?: true} <- changeset,
-         {:ok, bounty} <-
+         {:ok, _bounty} <-
            Bounties.create_bounty(%{
              creator: socket.assigns.current_user,
              owner: socket.assigns.current_user,
              amount: amount,
              ticket_ref: ticket_ref
            }) do
-      Bounties.notify_bounty(%{owner: socket.assigns.current_user, bounty: bounty, ticket_ref: ticket_ref})
-
       {:noreply,
        socket
        |> assign_achievements()

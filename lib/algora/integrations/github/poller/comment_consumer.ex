@@ -26,7 +26,7 @@ defmodule Algora.Github.Poller.CommentConsumer do
 
   defp run_command({:tip, args}, ticket_ref, _comment) do
     amount = Keyword.get(args, :amount)
-    recipient = Keyword.get(args, :username)
+    recipient = Keyword.get(args, :recipient)
     owner = Keyword.get(ticket_ref, :owner)
     repo = Keyword.get(ticket_ref, :repo)
     number = Keyword.get(ticket_ref, :number)

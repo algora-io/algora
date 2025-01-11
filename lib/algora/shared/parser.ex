@@ -21,12 +21,12 @@ defmodule Algora.Parser do
       |> label("amount (e.g. 1000 or 1,000.00)")
     end
 
-    def username do
+    def recipient do
       "@"
       |> string()
       |> ignore()
       |> concat(word_chars())
-      |> unwrap_and_tag(:username)
+      |> unwrap_and_tag(:recipient)
       |> label("username starting with @")
     end
 

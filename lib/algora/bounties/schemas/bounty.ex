@@ -16,6 +16,7 @@ defmodule Algora.Bounties.Bounty do
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :transactions, Algora.Payments.Transaction
+    has_many :activities, {"bounty_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

@@ -85,6 +85,7 @@ defmodule Algora.Accounts.User do
     has_many :connected_installations, Installation, foreign_key: :connected_user_id
     has_many :contractor_contracts, Contract, foreign_key: :contractor_id
     has_many :client_contracts, Contract, foreign_key: :client_id
+    has_many :activities, {"account_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
 
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
 

@@ -4,6 +4,7 @@ defmodule Algora.ContractsTest do
   import Algora.Factory
   import Money.Sigil
 
+  alias Algora.Activities
   alias Algora.Contracts
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -173,6 +174,104 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(contract3.total_debited, ~M[9_000]usd)
       assert Money.equal?(contract3.total_credited, ~M[9_000]usd)
       assert Money.equal?(contract3.total_transferred, ~M[9_000]usd)
+    end
+
+    test "produces activities" do
+      # Group a
+      contract_a_0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
+      {:ok, _txs0} = Contracts.prepay_contract(contract_a_0)
+
+      # First cycle
+      insert!(:timesheet, %{contract_id: contract_a_0.id, hours_worked: 30})
+      {:ok, contract_a_0} = Contracts.fetch_contract(contract_a_0.id)
+      {:ok, {_txs1, contract_a_1}} = Contracts.release_and_renew_contract(contract_a_0)
+
+      # Second cycle
+      insert!(:timesheet, %{contract_id: contract_a_1.id, hours_worked: 20})
+      {:ok, contract_a_1} = Contracts.fetch_contract(contract_a_1.id)
+      {:ok, {_txs2, _contract_a_2}} = Contracts.release_and_renew_contract(contract_a_1)
+
+      # Group b
+      contract_b_0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
+      {:ok, _txs0} = Contracts.prepay_contract(contract_b_0)
+
+      # First cycle
+      insert!(:timesheet, %{contract_id: contract_b_0.id, hours_worked: 30})
+      {:ok, contract_b_0} = Contracts.fetch_contract(contract_b_0.id)
+      {:ok, {_txs1, contract_b_1}} = Contracts.release_and_renew_contract(contract_b_0)
+
+      # Second cycle
+      insert!(:timesheet, %{contract_id: contract_b_1.id, hours_worked: 20})
+      {:ok, contract_b_1} = Contracts.fetch_contract(contract_b_1.id)
+      {:ok, {_txs2, _contract_b_2}} = Contracts.release_and_renew_contract(contract_b_1)
+
+      activities_per_contract = [
+        :transaction_created,
+        :transaction_created,
+        :transaction_created,
+        :transaction_created,
+        :transaction_status_change,
+        :transaction_status_change,
+        :transaction_status_change,
+        :contract_paid
+      ]
+
+      activities_per_cycle =
+        activities_per_contract ++
+          [
+            :contract_renewed
+          ]
+
+      activities_per_group =
+        [
+          :transaction_created,
+          :contract_prepaid
+        ] ++
+          activities_per_cycle ++
+          activities_per_cycle
+
+      {:ok, contract_a_0_final} = Contracts.fetch_contract(contract_a_0.id)
+
+      assert Enum.map(contract_a_0_final.activities, &Map.get(&1, :type)) ==
+               [
+                 :transaction_created,
+                 :contract_prepaid
+               ] ++ activities_per_contract
+
+      assert contract_a_0_final.activities == Activities.all(contract_a_0_final)
+
+      {:ok, contract_a_1_final} = Contracts.fetch_contract(contract_a_1.id)
+
+      assert Enum.map(contract_a_1_final.activities, &Map.get(&1, :type)) ==
+               [
+                 :contract_renewed
+               ] ++ activities_per_contract
+
+      assert contract_a_1_final.activities == Activities.all(contract_a_1_final)
+
+      assert "contract_activities"
+             |> Activities.all()
+             |> Enum.reverse()
+             |> Enum.map(&Map.get(&1, :type)) ==
+               activities_per_group ++ activities_per_group
+
+      assert contract_a_0.contractor_id
+             |> Algora.Activities.all_for_user()
+             |> Enum.reverse()
+             |> Enum.map(&Map.get(&1, :type)) ==
+               activities_per_group
+
+      assert contract_b_0.contractor_id
+             |> Algora.Activities.all_for_user()
+             |> Enum.reverse()
+             |> Enum.map(&Map.get(&1, :type)) ==
+               activities_per_group
+
+      assert Activities.all_for_user(contract_a_0.client_id) !=
+               Activities.all_for_user(contract_b_0.client_id)
+
+      assert Activities.all_for_user(contract_a_0.contractor_id) !=
+               Activities.all_for_user(contract_b_0.contractor_id)
     end
 
     test "prepayment fails when payment method is invalid" do

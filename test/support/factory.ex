@@ -124,7 +124,8 @@ defmodule Algora.Factory do
       hours_per_week: 40,
       sequence_number: 1,
       start_date: days_from_now(0),
-      end_date: days_from_now(7)
+      end_date: days_from_now(7),
+      activities: []
     }
   end
 

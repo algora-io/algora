@@ -15,6 +15,8 @@ defmodule Algora.Accounts.Identity do
     field :provider_id, :string
     field :provider_meta, :map
 
+    has_many :activities, {"identity_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
+
     belongs_to :user, User
 
     timestamps()

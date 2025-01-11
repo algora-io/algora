@@ -1,4 +1,4 @@
-defmodule Algora.Bounties.BountyListing do
+defmodule Algora.Bounties.PrizePool do
   @moduledoc false
   use Algora.Schema
 

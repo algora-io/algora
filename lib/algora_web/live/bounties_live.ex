@@ -46,7 +46,7 @@ defmodule AlgoraWeb.BountiesLive do
 
   defp assign_tickets(socket) do
     tickets =
-      Bounties.BountyListing.list(
+      Bounties.PrizePool.list(
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100

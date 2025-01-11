@@ -49,10 +49,10 @@ defmodule Algora.Github.Command do
       |> ignore()
       |> concat(ignore(whitespace()))
       |> choice([
-        amount() |> concat(ignore(whitespace())) |> concat(username()),
-        username() |> concat(ignore(whitespace())) |> concat(amount()),
+        amount() |> concat(ignore(whitespace())) |> concat(recipient()),
+        recipient() |> concat(ignore(whitespace())) |> concat(amount()),
         amount(),
-        username()
+        recipient()
       ])
       |> tag(:tip)
       |> label(@usage.tip)

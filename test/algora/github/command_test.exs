@@ -49,12 +49,12 @@ defmodule Algora.Github.CommandTest do
 
   describe "parse/1 with tip command" do
     test "parses tip with amount first" do
-      assert {:ok, %{tip: [{:amount, ~M[100]usd}, {:username, "user"}]}} ==
+      assert {:ok, %{tip: [{:amount, ~M[100]usd}, {:recipient, "user"}]}} ==
                Command.parse("/tip 100 @user")
     end
 
-    test "parses tip with username first" do
-      assert {:ok, %{tip: [{:username, "user"}, {:amount, ~M[100]usd}]}} ==
+    test "parses tip with recipient first" do
+      assert {:ok, %{tip: [{:recipient, "user"}, {:amount, ~M[100]usd}]}} ==
                Command.parse("/tip @user 100")
     end
 
@@ -63,8 +63,8 @@ defmodule Algora.Github.CommandTest do
                Command.parse("/tip 100")
     end
 
-    test "parses tip with only username" do
-      assert {:ok, %{tip: [{:username, "user"}]}} ==
+    test "parses tip with only recipient" do
+      assert {:ok, %{tip: [{:recipient, "user"}]}} ==
                Command.parse("/tip @user")
     end
   end
@@ -126,7 +126,7 @@ defmodule Algora.Github.CommandTest do
       assert {:ok,
               %{
                 bounty: [{:amount, Money.new!(100, :USD)}],
-                tip: [{:amount, Money.new!(50, :USD)}, {:username, "user"}]
+                tip: [{:amount, Money.new!(50, :USD)}, {:recipient, "user"}]
               }} == Command.parse("/bounty 100 /tip 50 @user")
     end
 
@@ -134,7 +134,7 @@ defmodule Algora.Github.CommandTest do
       assert {:ok,
               %{
                 bounty: [{:amount, Money.new!(100, :USD)}],
-                tip: [{:username, "user"}, {:amount, Money.new!(50, :USD)}]
+                tip: [{:recipient, "user"}, {:amount, Money.new!(50, :USD)}]
               }} == Command.parse("Hello /bounty 100 world /tip @user 50")
     end
   end

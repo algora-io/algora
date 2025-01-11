@@ -53,7 +53,7 @@ erich =
   upsert!(
     :user,
     [:provider, :provider_id],
-    %{provider_id: github_id, last_context: pied_piper.handle}
+    %{provider_id: github_id, last_context: pied_piper.handle, is_admin: true}
   )
 
 upsert!(

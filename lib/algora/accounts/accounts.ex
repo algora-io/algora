@@ -194,10 +194,6 @@ defmodule Algora.Accounts do
     Repo.all(from u in User, where: u.id in ^user_ids, select: {u.id, u})
   end
 
-  def admin?(%User{} = user) do
-    user.email in Algora.config([:admin_emails])
-  end
-
   def update_settings(%User{} = user, attrs) do
     user |> User.settings_changeset(attrs) |> Repo.update()
   end

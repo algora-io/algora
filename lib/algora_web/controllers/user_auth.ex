@@ -31,7 +31,7 @@ defmodule AlgoraWeb.UserAuth do
   def on_mount(:ensure_admin, _params, session, socket) do
     case get_authenticated_user(session, socket) do
       {:ok, user} ->
-        if not Accounts.admin?(user) do
+        if not user.is_admin do
           raise(AlgoraWeb.NotFoundError)
         end
 
@@ -166,7 +166,7 @@ defmodule AlgoraWeb.UserAuth do
   def require_authenticated_admin(conn, _opts) do
     user = conn.assigns[:current_user]
 
-    if user && Algora.Accounts.admin?(user) do
+    if user && user.is_admin do
       assign(conn, :current_admin, user)
     else
       conn

@@ -126,6 +126,12 @@ defmodule Algora.Workspace do
     end
   end
 
+  @spec fetch_installation_by(clauses :: Keyword.t() | map()) ::
+          {:ok, Installation.t()} | {:error, :not_found}
+  def fetch_installation_by(clauses) do
+    Repo.fetch_by(Installation, clauses)
+  end
+
   def get_installation_by(fields), do: Repo.get_by(Installation, fields)
   def get_installation_by!(fields), do: Repo.get_by!(Installation, fields)
 

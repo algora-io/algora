@@ -10,6 +10,7 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Jobs
   alias Algora.Bounties.Tip
   alias Algora.FeeTier
+  alias Algora.Github
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
   alias Algora.Payments
@@ -50,7 +51,6 @@ defmodule Algora.Bounties do
 
     case Repo.insert(changeset) do
       {:ok, bounty} ->
-        broadcast()
         {:ok, bounty}
 
       {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
@@ -61,24 +61,39 @@ defmodule Algora.Bounties do
     end
   end
 
-  @spec create_bounty(%{
-          creator: User.t(),
-          owner: User.t(),
-          amount: Money.t(),
-          ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
-        }) ::
+  @spec create_bounty(
+          %{
+            creator: User.t(),
+            owner: User.t(),
+            amount: Money.t(),
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+          },
+          opts :: [installation_id: integer()]
+        ) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  def create_bounty(%{
-        creator: creator,
-        owner: owner,
-        amount: amount,
-        ticket_ref: %{owner: repo_owner, repo: repo_name, number: number} = ticket_ref
-      }) do
+  def create_bounty(
+        %{
+          creator: creator,
+          owner: owner,
+          amount: amount,
+          ticket_ref: %{owner: repo_owner, repo: repo_name, number: number} = ticket_ref
+        },
+        opts \\ []
+      ) do
+    installation_id = opts[:installation_id]
+
+    token_res =
+      if installation_id,
+        do: Github.get_installation_token(installation_id),
+        else: Accounts.get_access_token(creator)
+
     Repo.transact(fn ->
-      with {:ok, token} <- Accounts.get_access_token(creator),
+      with {:ok, token} <- token_res,
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
            {:ok, bounty} <- do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}),
-           {:ok, _job} <- notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}) do
+           {:ok, _job} <-
+             notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, installation_id: installation_id) do
+        broadcast()
         {:ok, bounty}
       else
         {:error, _reason} = error -> error
@@ -86,11 +101,21 @@ defmodule Algora.Bounties do
     end)
   end
 
-  def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}) do
+  @spec notify_bounty(
+          %{
+            owner: User.t(),
+            bounty: Bounty.t(),
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+          },
+          opts :: [installation_id: integer()]
+        ) ::
+          {:ok, Oban.Job.t()} | {:error, atom()}
+  def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, opts \\ []) do
     %{
       owner_login: owner.provider_login,
       amount: Money.to_string!(bounty.amount, no_fraction_if_integer: true),
-      ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number}
+      ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
+      installation_id: opts[:installation_id]
     }
     |> Jobs.NotifyBounty.new()
     |> Oban.insert()

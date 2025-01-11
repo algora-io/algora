@@ -155,9 +155,9 @@ defmodule Algora.Github.Client do
   def get_installation_token(installation_id) do
     path = "/app/installations/#{installation_id}/access_tokens"
 
-    case Crypto.generate_jwt() do
-      {:ok, jwt, _claims} -> fetch(jwt, path, "POST")
-      error -> error
+    with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
+         {:ok, %{"token" => token}} <- fetch(jwt, path, "POST") do
+      {:ok, token}
     end
   end
 

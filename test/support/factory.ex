@@ -4,6 +4,7 @@ defmodule Algora.Factory do
 
   alias Algora.Accounts.User
   alias Algora.Reviews.Review
+  alias Algora.Workspace.Installation
 
   def identity_factory do
     %Algora.Accounts.Identity{
@@ -197,7 +198,7 @@ defmodule Algora.Factory do
     %Algora.Bounties.Claim{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:privider_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1}"),
       type: :code,
       status: :pending,
       title: "Implemented compression optimization",
@@ -212,6 +213,21 @@ defmodule Algora.Factory do
       id: Nanoid.generate(),
       rating: Review.max_rating(),
       content: "Great developer who writes clean code, communicates well, and always delivers on time!"
+    }
+  end
+
+  def installation_factory do
+    %Installation{
+      id: Nanoid.generate(),
+      provider: "github",
+      provider_id: sequence(:provider_id, &"#{&1}"),
+      provider_user_id: sequence(:provider_user_id, &"#{&1}"),
+      provider_meta: %{
+        "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
+        "repository_selection" => "selected"
+      },
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
+      repository_selection: "selected"
     }
   end
 

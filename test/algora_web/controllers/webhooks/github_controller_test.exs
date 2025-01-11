@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use AlgoraWeb.ConnCase
 
+  import Algora.Factory
   import Money.Sigil
   import Mox
 
@@ -19,65 +20,84 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       "owner" => %{"login" => @repo_owner},
       "name" => @repo_name
     },
+    "issue" => %{
+      "number" => 123
+    },
     "installation" => %{
       "id" => @installation_id
     }
   }
+
+  setup do
+    admin = insert!(:user, handle: @admin_user)
+    org = insert!(:organization, handle: @repo_owner)
+
+    installation =
+      insert!(:installation, %{
+        owner: admin,
+        connected_user: org,
+        provider_id: to_string(@installation_id)
+      })
+
+    %{admin: admin, org: org, installation: installation}
+  end
 
   describe "bounty command" do
     setup [:setup_github_mocks]
 
     @tag user: @unauthorized_user
     test "handles bounty command with unauthorized user", %{user: user} do
-      assert [error: :unauthorized] == process_bounty_command("/bounty $100", user)
+      assert process_bounty_command("/bounty $100", user)[:ok] == nil
+      assert process_bounty_command("/bounty $100", user)[:error] == :unauthorized
     end
 
     test "handles bounty command without amount" do
-      assert [] == process_bounty_command("/bounty")
+      assert process_bounty_command("/bounty")[:ok] == nil
+      assert process_bounty_command("/bounty")[:error] == nil
     end
 
     test "handles valid bounty command with $ prefix" do
-      assert [ok: ~M[100]usd] == process_bounty_command("/bounty $100")
+      assert process_bounty_command("/bounty $100")[:ok].amount == ~M[100]usd
     end
 
     test "handles invalid bounty command with $ suffix" do
-      assert [ok: ~M[100]usd] == process_bounty_command("/bounty 100$")
+      assert process_bounty_command("/bounty 100$")[:ok].amount == ~M[100]usd
     end
 
     test "handles bounty command without $ symbol" do
-      assert [ok: ~M[100]usd] == process_bounty_command("/bounty 100")
+      assert process_bounty_command("/bounty 100")[:ok].amount == ~M[100]usd
     end
 
     test "handles bounty command with decimal amount" do
-      assert [ok: ~M[100.50]usd] == process_bounty_command("/bounty 100.50")
+      assert process_bounty_command("/bounty 100.50")[:ok].amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount" do
-      assert [ok: ~M[100.5]usd] == process_bounty_command("/bounty 100.5")
+      assert process_bounty_command("/bounty 100.5")[:ok].amount == ~M[100.5]usd
     end
 
     test "handles bounty command with decimal amount and $ prefix" do
-      assert [ok: ~M[100.50]usd] == process_bounty_command("/bounty $100.50")
+      assert process_bounty_command("/bounty $100.50")[:ok].amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount and $ prefix" do
-      assert [ok: ~M[100.5]usd] == process_bounty_command("/bounty $100.5")
+      assert process_bounty_command("/bounty $100.5")[:ok].amount == ~M[100.5]usd
     end
 
     test "handles bounty command with decimal amount and $ suffix" do
-      assert [ok: ~M[100.50]usd] == process_bounty_command("/bounty 100.50$")
+      assert process_bounty_command("/bounty 100.50$")[:ok].amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount and $ suffix" do
-      assert [ok: ~M[100.5]usd] == process_bounty_command("/bounty 100.5$")
+      assert process_bounty_command("/bounty 100.5$")[:ok].amount == ~M[100.5]usd
     end
 
     test "handles bounty command with comma separator" do
-      assert [ok: ~M[1000]usd] == process_bounty_command("/bounty 1,000")
+      assert process_bounty_command("/bounty 1,000")[:ok].amount == ~M[1000]usd
     end
 
     test "handles bounty command with comma separator and decimal amount" do
-      assert [ok: ~M[1000.50]usd] == process_bounty_command("/bounty 1,000.50")
+      assert process_bounty_command("/bounty 1,000.50")[:ok].amount == ~M[1000.50]usd
     end
   end
 
@@ -85,6 +105,9 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     setup_installation_token()
     setup_repository_permissions(context[:user] || @admin_user)
     setup_create_issue_comment()
+    setup_get_user_by_username()
+    setup_get_issue()
+    setup_get_repository()
     :ok
   end
 
@@ -117,6 +140,46 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       Algora.GithubMock,
       :create_issue_comment,
       fn _token, _owner, _repo, _issue_number, _body -> {:ok, %{"id" => 1}} end
+    )
+  end
+
+  defp setup_get_user_by_username do
+    stub(
+      Algora.GithubMock,
+      :get_user_by_username,
+      fn _token, username -> {:ok, %{"id" => 123, "login" => username}} end
+    )
+  end
+
+  defp setup_get_issue do
+    stub(
+      Algora.GithubMock,
+      :get_issue,
+      fn _token, owner, repo, issue_number ->
+        {:ok,
+         %{
+           "id" => 123,
+           "number" => issue_number,
+           "title" => "Test Issue",
+           "body" => "Test body",
+           "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{issue_number}"
+         }}
+      end
+    )
+  end
+
+  defp setup_get_repository do
+    stub(
+      Algora.GithubMock,
+      :get_repository,
+      fn _token, owner, repo ->
+        {:ok,
+         %{
+           "id" => 123,
+           "name" => repo,
+           "html_url" => "https://github.com/#{owner}/#{repo}"
+         }}
+      end
     )
   end
 

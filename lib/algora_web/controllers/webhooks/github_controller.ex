@@ -1,8 +1,11 @@
 defmodule AlgoraWeb.Webhooks.GithubController do
   use AlgoraWeb, :controller
 
+  alias Algora.Accounts
+  alias Algora.Bounties
   alias Algora.Github
   alias Algora.Github.Webhook
+  alias Algora.Workspace
 
   require Logger
 
@@ -32,8 +35,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   # TODO: cache installation tokens
+  # TODO: check org permissions on algora
   defp get_permissions(author, %{"repository" => repository, "installation" => installation}) do
-    with {:ok, %{"token" => access_token}} <- Github.get_installation_token(installation["id"]),
+    with {:ok, access_token} <- Github.get_installation_token(installation["id"]),
          {:ok, %{"permission" => permission}} <-
            Github.get_repository_permissions(
              access_token,
@@ -48,49 +52,32 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
   defp execute_command({:bounty, args}, author, params) do
-    amount = Keyword.fetch!(args, :amount)
+    amount = args[:amount]
+    repo = params["repository"]
+    issue = params["issue"]
+    installation_id = params["installation"]["id"]
 
-    case get_permissions(author, params) do
-      {:ok, "admin"} ->
-        # Get repository and issue details from params
-        repo = params["repository"]
-        issue = params["issue"]
-
-        # Construct the bounty message
-        message = """
-        ## 💎 $#{amount} bounty [• #{repo["owner"]["login"]}](https://console.algora.io/org/#{repo["owner"]["login"]})
-        ### Steps to solve:
-        1. **Start working**: Comment `/attempt ##{issue["number"]}` with your implementation plan
-        2. **Submit work**: Create a pull request including `/claim ##{issue["number"]}` in the PR body to claim the bounty
-        3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
-
-        Thank you for contributing to #{repo["full_name"]}!
-
-        **[Add a bounty](https://console.algora.io/org/#{repo["owner"]["login"]}/bounties/community?fund=#{repo["full_name"]}%23#{issue["number"]})** • **[Share on socials](https://twitter.com/intent/tweet?text=%24#{amount}+bounty%21+%F0%9F%92%8E+#{issue["html_url"]}&related=algoraio)**
-
-        Attempt | Started (GMT+0) | Solution
-        --------|----------------|----------
-        """
-
-        # Post comment to the issue
-        with {:ok, %{"token" => token}} <-
-               Github.get_installation_token(params["installation"]["id"]) do
-          Github.create_issue_comment(
-            token,
-            repo["owner"]["login"],
-            repo["name"],
-            issue["number"],
-            message
-          )
-        end
-
-        {:ok, amount}
-
+    with {:ok, "admin"} <- get_permissions(author, params),
+         {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, installation} <-
+           Workspace.fetch_installation_by(provider: "github", provider_id: to_string(installation_id)),
+         {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
+         {:ok, creator} <- Workspace.ensure_user(token, repo["owner"]["login"]) do
+      Bounties.create_bounty(
+        %{
+          creator: creator,
+          owner: owner,
+          amount: amount,
+          ticket_ref: %{owner: repo["owner"]["login"], repo: repo["name"], number: issue["number"]}
+        },
+        installation_id: installation_id
+      )
+    else
       {:ok, _permission} ->
         {:error, :unauthorized}
 
-      {:error, error} ->
-        {:error, error}
+      {:error, _reason} = error ->
+        error
     end
   end
 
@@ -113,7 +100,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     do: Logger.info("Unhandled command: #{command} #{inspect(args)}")
 
   def process_commands(body, author, params) when is_binary(body) do
-    case Algora.Github.Command.parse(body) do
+    case Github.Command.parse(body) do
       {:ok, commands} -> Enum.map(commands, &execute_command(&1, author, params))
       # TODO: handle errors
       {:error, error} -> Logger.error("Error parsing commands: #{inspect(error)}")

@@ -39,6 +39,7 @@ defmodule Algora.Accounts.User do
     field :activated, :boolean, default: false
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
+    field :is_admin, :boolean, default: false
 
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money

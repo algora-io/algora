@@ -11,7 +11,6 @@ config :algora,
   title: "Algora",
   description:
     "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
-  admin_emails: ["zafer@algora.io", "ioannis@algora.io"],
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec]
 

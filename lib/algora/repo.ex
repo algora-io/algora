@@ -68,4 +68,25 @@ defmodule Algora.Repo do
       opts
     )
   end
+
+  @spec insert_with_activity(Ecto.Changeset.t() | Ecto.Multi.t(), struct()) ::
+          {:ok, struct()} | {:error, Ecto.Changeset.t()}
+  def insert_with_activity(changeset, activity) do
+    response =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:target, changeset)
+      |> Ecto.Multi.insert(:activity, fn %{target: target} ->
+        Algora.Activities.Activity.build_activity(target, Map.put(activity, :id, target.id))
+      end)
+      |> Oban.insert(:notification, fn %{activity: activity, target: target} ->
+        Algora.Activities.Notifier.changeset(activity, target)
+      end)
+      |> transaction()
+
+    case response do
+      {:ok, %{target: target}} -> {:ok, target}
+      {:error, %{target: target}} -> {:error, target}
+      {:error, error} -> {:error, error}
+    end
+  end
 end

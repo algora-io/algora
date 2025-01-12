@@ -584,11 +584,14 @@ defmodule Algora.Contracts do
       hourly_rate: contract.hourly_rate,
       hours_per_week: contract.hours_per_week
     })
-    |> put_activity(contract, %{
+    # |> put_activity(contract, %{
+    #   type: :contract_renewed,
+    #   trace_id: Nanoid.generate()
+    # })
+    |> Repo.insert_with_activity(%{
       type: :contract_renewed,
       trace_id: Nanoid.generate()
     })
-    |> Repo.insert()
   end
 
   def calculate_transfer_amount(contract) do

@@ -1,5 +1,6 @@
 defmodule Algora.ContractsTest do
   use Algora.DataCase
+  use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
   import Money.Sigil
@@ -265,6 +266,8 @@ defmodule Algora.ContractsTest do
 
       assert Activities.all_for_user(contract_a_0.contractor_id) !=
                Activities.all_for_user(contract_b_0.contractor_id)
+
+      assert_enqueued(worker: Activities.Notifier, worker: "Algora.Activities.Notifier")
     end
 
     test "prepayment fails when payment method is invalid" do

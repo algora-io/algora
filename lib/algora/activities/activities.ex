@@ -7,8 +7,33 @@ defmodule Algora.Activities do
   alias Algora.Repo
 
   @tables [
+    :identity_activities,
+    :user_activities,
+    :attempt_activities,
+    :bonus_activities,
+    :bounty_activities,
+    :claim_activities,
+    # :prize_pool_activities,
+    :tip_activities,
+    :message_activities,
+    # :participant_activities,
+    :thread_activities,
+    # :comment_cursor_activities,
+    :contract_activities,
+    :timesheet_activities,
+    # :event_cursor_activities,
+    # :member_activities,
+    # :org_activities,
     :account_activities,
-    :contract_activities
+    :customer_activities,
+    :payment_method_activities,
+    :platform_transaction_activities,
+    # :transaction_activities,
+    :project_activities,
+    :review_activities,
+    :installation_activities,
+    :repository_activities,
+    :ticket_activities
   ]
 
   def base_query do
@@ -52,7 +77,10 @@ defmodule Algora.Activities do
   end
 
   def all(target) when is_map(target) do
-    Repo.all(Ecto.assoc(target, :activities))
+    target
+    |> Ecto.assoc(:activities)
+    |> order_by(desc: :inserted_at)
+    |> Repo.all()
   end
 
   def all do

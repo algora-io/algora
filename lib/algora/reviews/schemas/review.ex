@@ -3,6 +3,7 @@ defmodule Algora.Reviews.Review do
   use Algora.Schema
 
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
 
   typed_schema "reviews" do
     field :rating, :integer
@@ -14,6 +15,8 @@ defmodule Algora.Reviews.Review do
     belongs_to :organization, User
     belongs_to :reviewer, User
     belongs_to :reviewee, User
+
+    has_many :activities, {"review_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end

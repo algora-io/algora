@@ -4,6 +4,7 @@ defmodule Algora.Accounts.Identity do
 
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
 
   @derive {Inspect, except: [:provider_token, :provider_meta]}
   typed_schema "identities" do
@@ -15,9 +16,9 @@ defmodule Algora.Accounts.Identity do
     field :provider_id, :string
     field :provider_meta, :map
 
-    has_many :activities, {"identity_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
-
     belongs_to :user, User
+
+    has_many :activities, {"identity_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end
@@ -42,6 +43,7 @@ defmodule Algora.Accounts.Identity do
       :provider_name,
       :provider_id
     ])
+    |> Activity.put_activity(%Identity{}, %{type: :identity_created})
     |> generate_id()
     |> validate_required([:provider_token, :provider_email, :provider_name, :provider_id])
     |> validate_length(:provider_meta, max: 10_000)
@@ -68,6 +70,7 @@ defmodule Algora.Accounts.Identity do
       :provider_name,
       :provider_id
     ])
+    |> Activity.put_activity(%Identity{}, %{type: :identity_created})
     |> generate_id()
     |> validate_required([:provider_token, :provider_email, :provider_name, :provider_id])
     |> validate_length(:provider_meta, max: 10_000)

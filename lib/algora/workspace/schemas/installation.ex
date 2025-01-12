@@ -3,6 +3,7 @@ defmodule Algora.Workspace.Installation do
   use Algora.Schema
 
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
 
   @derive {Inspect, except: [:provider_meta]}
   typed_schema "installations" do
@@ -17,6 +18,7 @@ defmodule Algora.Workspace.Installation do
     belongs_to :owner, User, null: false
     belongs_to :connected_user, User, null: false
 
+    has_many :activities, {"installation_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
     timestamps()
   end
 

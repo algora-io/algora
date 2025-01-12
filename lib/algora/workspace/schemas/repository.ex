@@ -2,6 +2,7 @@ defmodule Algora.Workspace.Repository do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
   alias Algora.Workspace.Repository
 
   @derive {Inspect, except: [:provider_meta]}
@@ -17,6 +18,7 @@ defmodule Algora.Workspace.Repository do
     field :og_image_updated_at, :utc_datetime_usec
 
     has_many :tickets, Algora.Workspace.Ticket
+    has_many :activities, {"repository_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
     belongs_to :user, Algora.Accounts.User, null: false
 
     timestamps()

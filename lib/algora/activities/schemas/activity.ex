@@ -13,6 +13,8 @@ defmodule Algora.Activities.Activity do
     transaction_created
     transaction_failed
     transaction_processed
+
+    identity_created
   }a
 
   typed_schema "activities" do

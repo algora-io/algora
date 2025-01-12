@@ -2,6 +2,7 @@ defmodule Algora.Bounties.Claim do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
   alias Algora.Bounties.Claim
 
   @derive {Inspect, except: [:provider_meta]}
@@ -28,6 +29,8 @@ defmodule Algora.Bounties.Claim do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :user, Algora.Accounts.User
     # has_one :transaction, Algora.Payments.Transaction
+
+    has_many :activities, {"claim_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end

@@ -230,42 +230,35 @@ defmodule Algora.ContractsTest do
           activities_per_cycle ++
           activities_per_cycle
 
-      {:ok, contract_a_0_final} = Contracts.fetch_contract(contract_a_0.id)
+      assert_activity_names(
+        contract_a_0,
+        [
+          :transaction_created,
+          :contract_prepaid
+        ] ++ activities_per_contract
+      )
 
-      assert Enum.map(contract_a_0_final.activities, &Map.get(&1, :type)) ==
-               [
-                 :transaction_created,
-                 :contract_prepaid
-               ] ++ activities_per_contract
+      assert_activity_names(
+        contract_a_1,
+        [
+          :contract_renewed
+        ] ++ activities_per_contract
+      )
 
-      assert contract_a_0_final.activities == Activities.all(contract_a_0_final)
+      assert_activity_names(
+        "contract_activities",
+        activities_per_group ++ activities_per_group
+      )
 
-      {:ok, contract_a_1_final} = Contracts.fetch_contract(contract_a_1.id)
+      assert_activity_names_for_user(
+        contract_a_0.contractor_id,
+        activities_per_group
+      )
 
-      assert Enum.map(contract_a_1_final.activities, &Map.get(&1, :type)) ==
-               [
-                 :contract_renewed
-               ] ++ activities_per_contract
-
-      assert contract_a_1_final.activities == Activities.all(contract_a_1_final)
-
-      assert "contract_activities"
-             |> Activities.all()
-             |> Enum.reverse()
-             |> Enum.map(&Map.get(&1, :type)) ==
-               activities_per_group ++ activities_per_group
-
-      assert contract_a_0.contractor_id
-             |> Algora.Activities.all_for_user()
-             |> Enum.reverse()
-             |> Enum.map(&Map.get(&1, :type)) ==
-               activities_per_group
-
-      assert contract_b_0.contractor_id
-             |> Algora.Activities.all_for_user()
-             |> Enum.reverse()
-             |> Enum.map(&Map.get(&1, :type)) ==
-               activities_per_group
+      assert_activity_names_for_user(
+        contract_b_0.contractor_id,
+        activities_per_group
+      )
 
       assert Activities.all_for_user(contract_a_0.client_id) !=
                Activities.all_for_user(contract_b_0.client_id)

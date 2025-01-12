@@ -2,6 +2,8 @@ defmodule Algora.Payments.PaymentMethod do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
+
   typed_schema "payment_methods" do
     field :provider, :string
     field :provider_id, :string
@@ -10,6 +12,8 @@ defmodule Algora.Payments.PaymentMethod do
     field :is_default, :boolean, default: true
 
     belongs_to :customer, Algora.Payments.Customer
+
+    has_many :activities, {"platform_transaction_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end

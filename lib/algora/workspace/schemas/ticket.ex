@@ -2,6 +2,7 @@ defmodule Algora.Workspace.Ticket do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
   alias Algora.Workspace.Ticket
 
   @derive {Inspect, except: [:provider_meta]}
@@ -18,6 +19,8 @@ defmodule Algora.Workspace.Ticket do
 
     belongs_to :repository, Algora.Workspace.Repository
     has_many :bounties, Algora.Bounties.Bounty
+
+    has_many :activities, {"ticket_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end

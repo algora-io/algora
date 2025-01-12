@@ -2,6 +2,8 @@ defmodule Algora.Projects.Project do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
+
   typed_schema "projects" do
     field :name, :string
 
@@ -9,6 +11,7 @@ defmodule Algora.Projects.Project do
     # has_many :milestones, Algora.Projects.Milestone
     # has_many :assignees, Algora.Projects.Assignee
     # has_many :transactions, Algora.Payments.Transaction
+    has_many :activities, {"project_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end

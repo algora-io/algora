@@ -3,6 +3,7 @@ defmodule Algora.Bounties.Tip do
   use Algora.Schema
 
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
 
   typed_schema "tips" do
     field :amount, Algora.Types.Money
@@ -13,6 +14,8 @@ defmodule Algora.Bounties.Tip do
     belongs_to :creator, User
     belongs_to :recipient, User
     has_many :transactions, Algora.Payments.Transaction
+
+    has_many :activities, {"tip_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
 
     timestamps()
   end

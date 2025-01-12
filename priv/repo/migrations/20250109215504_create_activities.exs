@@ -2,10 +2,33 @@ defmodule Algora.Repo.Migrations.CreateActivities do
   use Ecto.Migration
 
   @tables [
-    :account_activities,
+    :identity_activities,
+    :user_activities,
+    :attempt_activities,
+    :bonus_activities,
     :bounty_activities,
+    :claim_activities,
+    # :prize_pool_activities,
+    :tip_activities,
+    :message_activities,
+    # :participant_activities,
+    :thread_activities,
+    # :comment_cursor_activities,
     :contract_activities,
-    :project_activities
+    :timesheet_activities,
+    # :event_cursor_activities,
+    # :member_activities,
+    # :org_activities,
+    :account_activities,
+    :customer_activities,
+    :payment_method_activities,
+    :platform_transaction_activities,
+    # :transaction_activities,
+    :project_activities,
+    :review_activities,
+    :installation_activities,
+    :repository_activities,
+    :ticket_activities
   ]
 
   def change do

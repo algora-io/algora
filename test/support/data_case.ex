@@ -57,4 +57,24 @@ defmodule Algora.DataCase do
       end)
     end)
   end
+
+  def assert_activity_names(names) do
+    assert Algora.Activities.all()
+           |> Enum.reverse()
+           |> Enum.map(&Map.get(&1, :type)) == names
+  end
+
+  def assert_activity_names(target, names) do
+    assert target
+           |> Algora.Activities.all()
+           |> Enum.reverse()
+           |> Enum.map(&Map.get(&1, :type)) == names
+  end
+
+  def assert_activity_names_for_user(user_id, names) do
+    user_id
+    |> Algora.Activities.all_for_user()
+    |> Enum.reverse()
+    |> Enum.map(&Map.get(&1, :type)) == names
+  end
 end

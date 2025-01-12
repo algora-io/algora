@@ -399,7 +399,6 @@ for {repo_name, issues} <- repos do
         insert!(:claim, %{
           bounty_id: bounty.id,
           user_id: carver.id,
-          status: if(paid, do: :paid, else: :pending),
           title: "Implementation for #{issue_title}",
           description: "Here's my solution to this issue.",
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"

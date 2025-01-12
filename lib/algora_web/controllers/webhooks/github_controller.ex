@@ -113,12 +113,21 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({:claim, args}, _author, _params) when not is_nil(args) do
-    owner = Keyword.get(args, :owner)
-    repo = Keyword.get(args, :repo)
-    number = Keyword.get(args, :number)
+  defp execute_command({:claim, args}, author, params) when not is_nil(args) do
+    installation_id = params["installation"]["id"]
+    pull_request = params["pull_request"]
 
-    Logger.info("Claim #{owner}/#{repo}##{number}")
+    with {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
+      Bounties.claim_bounty(
+        %{
+          user: user,
+          ticket_ref: %{owner: args[:owner], repo: args[:repo], number: args[:number]},
+          pull_request: pull_request
+        },
+        installation_id: installation_id
+      )
+    end
   end
 
   defp execute_command({command, _} = args, _author, _params),

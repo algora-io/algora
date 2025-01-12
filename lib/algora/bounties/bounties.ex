@@ -121,6 +121,88 @@ defmodule Algora.Bounties do
     |> Oban.insert()
   end
 
+  @spec do_claim_bounty(%{user: User.t(), ticket: Ticket.t(), pull_request: map()}) ::
+          {:ok, Claim.t()} | {:error, atom()}
+  defp do_claim_bounty(%{user: user, ticket: ticket, pull_request: pull_request}) do
+    # TODO: ensure user is pull request author
+    id = Nanoid.generate()
+
+    changeset =
+      Claim.changeset(%Claim{}, %{
+        ticket_id: ticket.id,
+        user_id: user.id,
+        provider: "github",
+        provider_id: pull_request["id"],
+        provider_meta: pull_request,
+        title: pull_request["title"],
+        url: pull_request["html_url"],
+        group_id: id,
+        merged_at: Util.to_date(pull_request["merged_at"])
+      })
+
+    case Repo.insert(changeset) do
+      {:ok, claim} ->
+        {:ok, claim}
+
+      {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
+        {:error, :already_exists}
+
+      {:error, _changeset} ->
+        {:error, :internal_server_error}
+    end
+  end
+
+  @spec claim_bounty(
+          %{
+            user: User.t(),
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            pull_request: map()
+          },
+          opts :: [installation_id: integer()]
+        ) ::
+          {:ok, Bounty.t()} | {:error, atom()}
+  def claim_bounty(
+        %{
+          user: user,
+          ticket_ref: %{owner: repo_owner, repo: repo_name, number: number} = ticket_ref,
+          pull_request: pull_request
+        },
+        opts \\ []
+      ) do
+    installation_id = opts[:installation_id]
+
+    token_res =
+      if installation_id,
+        do: Github.get_installation_token(installation_id),
+        else: Accounts.get_access_token(user)
+
+    Repo.transact(fn ->
+      with {:ok, token} <- token_res,
+           {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
+           {:ok, claim} <- do_claim_bounty(%{user: user, ticket: ticket, pull_request: pull_request}),
+           {:ok, _job} <- notify_claim(%{ticket_ref: ticket_ref}, installation_id: installation_id) do
+        broadcast()
+        {:ok, claim}
+      else
+        {:error, _reason} = error -> error
+      end
+    end)
+  end
+
+  @spec notify_claim(
+          %{ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}},
+          opts :: [installation_id: integer()]
+        ) ::
+          {:ok, Oban.Job.t()} | {:error, atom()}
+  def notify_claim(%{ticket_ref: ticket_ref}, opts \\ []) do
+    %{
+      ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
+      installation_id: opts[:installation_id]
+    }
+    |> Jobs.NotifyClaim.new()
+    |> Oban.insert()
+  end
+
   @spec create_tip_intent(
           %{
             recipient: String.t(),

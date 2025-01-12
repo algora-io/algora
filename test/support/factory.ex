@@ -199,8 +199,6 @@ defmodule Algora.Factory do
       id: Nanoid.generate(),
       provider: "github",
       provider_id: sequence(:provider_id, &"#{&1}"),
-      type: :code,
-      status: :pending,
       title: "Implemented compression optimization",
       description: "Added parallel processing for large files",
       url: "https://github.com/piedpiper/middle-out/pull/2",

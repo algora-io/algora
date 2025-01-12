@@ -36,6 +36,20 @@ defmodule Algora.Activities do
     :ticket_activities
   ]
 
+  @user_attributes [
+    :identities,
+    :owned_bounties,
+    :created_bounties,
+    # :attempts,
+    :claims,
+    # :projects,
+    :repositories,
+    :owned_installations,
+    :connected_installations,
+    :client_contracts,
+    :contractor_contracts
+  ]
+
   def base_query do
     [head | tail] = @tables
 
@@ -52,7 +66,7 @@ defmodule Algora.Activities do
   end
 
   def base_query_for_user(user_id) do
-    [head | tail] = [:client_contracts, :contractor_contracts]
+    [head | tail] = @user_attributes
     first_query = base_query_for_user(user_id, head)
 
     Enum.reduce(tail, first_query, fn relation_name, acc ->

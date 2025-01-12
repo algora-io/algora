@@ -17,6 +17,8 @@ defmodule Algora.Repo.Migrations.CreateActivities do
     :contract_activities,
     :timesheet_activities,
     # :event_cursor_activities,
+    :application_activities,
+    :job_activities,
     # :member_activities,
     # :org_activities,
     :account_activities,

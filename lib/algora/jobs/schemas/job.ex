@@ -5,6 +5,8 @@ defmodule Algora.Jobs.Job do
   typed_schema "jobs" do
     belongs_to :user, Algora.Accounts.User
 
+    has_many :activities, {"job_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+
     timestamps()
   end
 

@@ -6,6 +6,8 @@ defmodule Algora.Jobs.Application do
     belongs_to :job, Algora.Jobs.Job
     belongs_to :user, Algora.Accounts.User
 
+    has_many :activities, {"application_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+
     timestamps()
   end
 

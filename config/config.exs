@@ -31,7 +31,8 @@ config :algora, Oban,
     event_consumers: 1,
     comment_consumers: 1,
     github_og_image: 5,
-    notify_bounty: 1
+    notify_bounty: 1,
+    notify_tip_intent: 1
   ]
 
 # Configures the mailer

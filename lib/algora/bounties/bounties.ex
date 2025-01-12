@@ -121,9 +121,47 @@ defmodule Algora.Bounties do
     |> Oban.insert()
   end
 
-  @spec create_tip(%{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()}) ::
+  @spec create_tip_intent(
+          %{
+            recipient: String.t(),
+            amount: Money.t(),
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+          },
+          opts :: [installation_id: integer()]
+        ) ::
           {:ok, String.t()} | {:error, atom()}
-  def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}) do
+  def create_tip_intent(
+        %{recipient: recipient, amount: amount, ticket_ref: %{owner: owner, repo: repo, number: number}},
+        opts \\ []
+      ) do
+    query =
+      URI.encode_query(
+        amount: Money.to_decimal(amount),
+        recipient: recipient,
+        owner: owner,
+        repo: repo,
+        number: number
+      )
+
+    url = AlgoraWeb.Endpoint.url() <> "/tip" <> "?" <> query
+
+    %{
+      url: url,
+      ticket_ref: %{owner: owner, repo: repo, number: number},
+      installation_id: opts[:installation_id]
+    }
+    |> Jobs.NotifyTipIntent.new()
+    |> Oban.insert()
+  end
+
+  @spec create_tip(
+          %{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()},
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
+        ) ::
+          {:ok, String.t()} | {:error, atom()}
+  def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
+    ticket_ref = opts[:ticket_ref]
+
     changeset =
       Tip.changeset(%Tip{}, %{
         amount: amount,
@@ -157,7 +195,11 @@ defmodule Algora.Bounties do
           product_data: %{
             name: "Payment to @#{recipient.provider_login}",
             # TODO:
-            # description: nil,
+            description:
+              if(ticket_ref,
+                do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}",
+                else: "Tip to @#{recipient.provider_login}"
+              ),
             images: [recipient.avatar_url]
           }
         },

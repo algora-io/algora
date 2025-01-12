@@ -57,6 +57,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     issue = params["issue"]
     installation_id = params["installation"]["id"]
 
+    # TODO: community bounties?
     with {:ok, "admin"} <- get_permissions(author, params),
          {:ok, token} <- Github.get_installation_token(installation_id),
          {:ok, installation} <-
@@ -81,11 +82,35 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({:tip, args}, _author, _params) when not is_nil(args) do
-    amount = Keyword.get(args, :amount)
-    recipient = Keyword.get(args, :username)
+  defp execute_command({:tip, args}, author, params) when not is_nil(args) do
+    amount = args[:amount]
+    recipient = args[:recipient]
+    repo = params["repository"]
+    issue = params["issue"]
+    installation_id = params["installation"]["id"]
 
-    Logger.info("Tip #{amount} to #{recipient}")
+    # TODO: handle missing amount
+    # TODO: handle missing recipient
+    # TODO: handle tip to self
+    # TODO: handle autopay with cooldown
+    # TODO: community tips?
+    case get_permissions(author, params) do
+      {:ok, "admin"} ->
+        Bounties.create_tip_intent(
+          %{
+            recipient: recipient,
+            amount: amount,
+            ticket_ref: %{owner: repo["owner"]["login"], repo: repo["name"], number: issue["number"]}
+          },
+          installation_id: installation_id
+        )
+
+      {:ok, _permission} ->
+        {:error, :unauthorized}
+
+      {:error, _reason} = error ->
+        error
+    end
   end
 
   defp execute_command({:claim, args}, _author, _params) when not is_nil(args) do

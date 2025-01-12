@@ -560,14 +560,9 @@ defmodule Algora.Contracts do
   defp mark_contract_as_paid(contract) do
     contract
     |> change(%{status: :paid})
-    |> put_activity(contract, %{
-      type: :contract_paid,
-      meta: %{},
-      template: "",
-      trace_id: Nanoid.generate(),
-      notify_users: []
+    |> Repo.update_with_activity(%{
+      type: :contract_paid
     })
-    |> Repo.update()
   end
 
   defp renew_contract(contract) do

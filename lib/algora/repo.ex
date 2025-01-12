@@ -69,20 +69,49 @@ defmodule Algora.Repo do
     )
   end
 
-  @spec insert_with_activity(Ecto.Changeset.t() | Ecto.Multi.t(), struct()) ::
+  @spec insert_with_activity(Ecto.Changeset.t(), struct()) ::
           {:ok, struct()} | {:error, Ecto.Changeset.t()}
   def insert_with_activity(changeset, activity) do
-    response =
-      Ecto.Multi.new()
-      |> Ecto.Multi.insert(:target, changeset)
-      |> Ecto.Multi.insert(:activity, fn %{target: target} ->
-        Algora.Activities.Activity.build_activity(target, Map.put(activity, :id, target.id))
-      end)
-      |> Oban.insert(:notification, fn %{activity: activity, target: target} ->
-        Algora.Activities.Notifier.changeset(activity, target)
-      end)
-      |> transaction()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:target, changeset)
+    |> with_activity(activity)
+    |> transaction()
+    |> extract_target()
+  end
 
+  @spec update_with_activity(Ecto.Changeset.t(), struct()) ::
+          {:ok, struct()} | {:error, Ecto.Changeset.t()}
+  def update_with_activity(changeset, activity) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:target, changeset)
+    |> with_activity(activity)
+    |> transaction()
+    |> extract_target()
+  end
+
+  @spec delete_with_activity(Ecto.Changeset.t(), struct()) ::
+          {:ok, struct()} | {:error, Ecto.Changeset.t()}
+  def delete_with_activity(changeset, activity) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.delete(:target, changeset)
+    |> with_activity(activity)
+    |> transaction()
+    |> extract_target()
+  end
+
+  @spec with_activity(Ecto.Multi.t(), struct()) ::
+          {:ok, struct()} | {:error, Ecto.Changeset.t()}
+  def with_activity(multi, activity) do
+    multi
+    |> Ecto.Multi.insert(:activity, fn %{target: target} ->
+      Algora.Activities.Activity.build_activity(target, Map.put(activity, :id, target.id))
+    end)
+    |> Oban.insert(:notification, fn %{activity: activity, target: target} ->
+      Algora.Activities.Notifier.changeset(activity, target)
+    end)
+  end
+
+  defp extract_target(response) do
     case response do
       {:ok, %{target: target}} -> {:ok, target}
       {:error, %{target: target}} -> {:error, target}

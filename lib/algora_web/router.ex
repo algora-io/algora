@@ -140,6 +140,8 @@ defmodule AlgoraWeb.Router do
     live "/trotw", TROTWLive
 
     live "/open-source", OpenSourceLive, :index
+
+    live "/claims/:id", ClaimLive
   end
 
   # Other scopes may use custom stacks.

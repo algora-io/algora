@@ -357,6 +357,7 @@ for {repo_name, issues} <- repos do
   for {issue_title, index} <- Enum.with_index(issues, 1) do
     issue =
       insert!(:ticket, %{
+        type: :issue,
         repository_id: repo.id,
         title: issue_title,
         description: "We need help implementing this feature to improve our platform.",
@@ -378,36 +379,63 @@ for {repo_name, issues} <- repos do
         status: if(paid, do: :paid, else: :open)
       })
 
-    if not claimed do
-      pied_piper_members
-      |> Enum.take_random(Enum.random(0..(length(pied_piper_members) - 1)))
-      |> Enum.each(fn member ->
-        amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
+    pied_piper_members
+    |> Enum.take_random(Enum.random(0..(length(pied_piper_members) - 1)))
+    |> Enum.each(fn member ->
+      amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
 
-        insert!(:bounty, %{
-          ticket_id: issue.id,
-          owner_id: member.id,
-          creator_id: member.id,
-          amount: amount,
-          status: :open
-        })
-      end)
-    end
+      insert!(:bounty, %{
+        ticket_id: issue.id,
+        owner_id: member.id,
+        creator_id: member.id,
+        amount: amount,
+        status: :open
+      })
+    end)
 
     if claimed do
       pull_request =
         insert!(:ticket, %{
-          user_id: carver.id,
-          title: "Implementation for #{issue_title}",
-          description: "Here's my solution to this issue.",
+          type: :pull_request,
+          repository_id: repo.id,
+          title: "Fix memory leak in upload handler and optimize buffer allocation",
+          description: """
+          This PR addresses the memory leak in the file upload handler by:
+          - Implementing proper buffer cleanup in the streaming pipeline
+          - Adding automatic resource disposal using with-clauses
+          - Optimizing memory allocation for large file uploads
+          - Adding memory usage monitoring
+
+          Testing shows a 60% reduction in memory usage during sustained uploads.
+
+          Key changes:
+          ```python
+          def process_upload(file_stream):
+              try:
+                  with MemoryManager.track() as memory:
+                      for chunk in file_stream:
+                          # Optimize buffer allocation
+                          buffer = BytesIO(initial_size=chunk.size)
+                          compressed = middle_out.compress(chunk, buffer)
+                          yield compressed
+
+                      memory.log_usage("Upload complete")
+              finally:
+                  buffer.close()
+                  gc.collect()  # Force cleanup
+          ```
+
+          Closes ##{index}
+          """,
+          number: index + length(issues),
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
         })
 
       claim =
         insert!(:claim, %{
           user_id: carver.id,
-          target_id: pull_request.id,
-          source_id: issue.id,
+          target_id: issue.id,
+          source_id: pull_request.id,
           type: :pull_request,
           status: if(paid, do: :paid, else: :pending),
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"

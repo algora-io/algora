@@ -1,13 +1,10 @@
 {
   "skip_files": [
-    "lib/algora/repo.ex",
-    "lib/algora/s3.ex",
     "lib/algora/integrations",
-    "lib/algora/\\w+/schemas/\\w+.ex",
     "lib/algora/shared/*",
+    "lib/algora/admin/admin.ex",
     "lib/algora_web/components",
-    "lib/algora_web/live",
-    "lib/algora_web/\\w+.ex",
+    "lib/algora_web",
     "lib/mix/tasks",
     "priv/",
     "test/support"
@@ -16,7 +13,9 @@
     "defmodule",
     "defrecord",
     "defimpl",
-    "def.+(.+\/\/.+).+do"
+    "def.+(.+\/\/.+).+do",
+    "typed_schema",
+    "use .+"
   ],
 
   "custom_stop_words": [

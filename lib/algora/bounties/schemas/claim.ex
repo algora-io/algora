@@ -79,6 +79,8 @@ defmodule Algora.Bounties.Claim do
   def type_label(:article), do: "an article"
   def type_label(nil), do: "a URL"
 
+  def reward_url(claim), do: "#{AlgoraWeb.Endpoint.url()}/claims/#{claim.id}"
+
   def rewarded(query \\ Claim) do
     from c in query,
       where: c.state == :approved and not is_nil(c.charged_at)

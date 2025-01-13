@@ -91,4 +91,7 @@ defmodule Algora.Github do
   @impl true
   def list_repository_comments(token, owner, repo, opts \\ []),
     do: client().list_repository_comments(token, owner, repo, opts)
+
+  @impl true
+  def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)
 end

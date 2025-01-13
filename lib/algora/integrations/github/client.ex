@@ -180,4 +180,9 @@ defmodule Algora.Github.Client do
   def list_repository_comments(access_token, owner, repo, opts \\ []) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/comments#{build_query(opts)}")
   end
+
+  @impl true
+  def add_labels(access_token, owner, repo, number, labels) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{labels: labels})
+  end
 end

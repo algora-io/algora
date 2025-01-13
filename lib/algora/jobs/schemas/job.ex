@@ -2,6 +2,8 @@ defmodule Algora.Jobs.Job do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
+
   typed_schema "jobs" do
     belongs_to :user, Algora.Accounts.User
 

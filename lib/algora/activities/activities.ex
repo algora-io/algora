@@ -62,20 +62,24 @@ defmodule Algora.Activities do
     end)
   end
 
-  def base_query(table_name) do
-    from(_e in {to_string(table_name), Activity})
+  def base_query(table_name) when is_atom(table_name) do
+    table_name |> to_string() |> base_query()
   end
 
-  def base_query({parent_table_name, table_name}) do
-    parent = to_string(parent_table_name)
-    child = to_string(table_name)
-
-    parent_table_name
-    |> base_query()
-    |> join(:inner, [p], assoc(p, ^parent), as: :parent)
-    |> join(:inner, [c], assoc(c, ^child), as: :child)
-    |> join(:inner, [a], assoc(a, :activities), as: :activities)
+  def base_query(table_name) when is_binary(table_name) do
+    from(_e in {table_name, Activity})
   end
+
+  # def base_query({parent_table_name, table_name}) do
+  #   parent = to_string(parent_table_name)
+  #   child = to_string(table_name)
+
+  #   parent_table_name
+  #   |> base_query()
+  #   |> join(:inner, [p], assoc(p, ^parent), as: :parent)
+  #   |> join(:inner, [c], assoc(c, ^child), as: :child)
+  #   |> join(:inner, [a], assoc(a, :activities), as: :activities)
+  # end
 
   def base_query_for_user(user_id) do
     [head | tail] = @user_attributes

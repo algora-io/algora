@@ -69,7 +69,7 @@ defmodule Algora.Repo do
     )
   end
 
-  @spec insert_with_activity(Ecto.Changeset.t(), struct()) ::
+  @spec insert_with_activity(Ecto.Changeset.t(), map()) ::
           {:ok, struct()} | {:error, Ecto.Changeset.t()}
   def insert_with_activity(changeset, activity) do
     Ecto.Multi.new()
@@ -79,7 +79,7 @@ defmodule Algora.Repo do
     |> extract_target()
   end
 
-  @spec update_with_activity(Ecto.Changeset.t(), struct()) ::
+  @spec update_with_activity(Ecto.Changeset.t(), map()) ::
           {:ok, struct()} | {:error, Ecto.Changeset.t()}
   def update_with_activity(changeset, activity) do
     Ecto.Multi.new()
@@ -89,7 +89,7 @@ defmodule Algora.Repo do
     |> extract_target()
   end
 
-  @spec delete_with_activity(Ecto.Changeset.t(), struct()) ::
+  @spec delete_with_activity(Ecto.Changeset.t(), map()) ::
           {:ok, struct()} | {:error, Ecto.Changeset.t()}
   def delete_with_activity(changeset, activity) do
     Ecto.Multi.new()
@@ -99,8 +99,7 @@ defmodule Algora.Repo do
     |> extract_target()
   end
 
-  @spec with_activity(Ecto.Multi.t(), struct()) ::
-          {:ok, struct()} | {:error, Ecto.Changeset.t()}
+  @spec with_activity(Ecto.Multi.t(), map()) :: Ecto.Multi.t()
   def with_activity(multi, activity) do
     multi
     |> Ecto.Multi.insert(:activity, fn %{target: target} ->

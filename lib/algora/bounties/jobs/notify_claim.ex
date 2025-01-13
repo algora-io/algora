@@ -14,6 +14,7 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"ticket_ref" => ticket_ref, "installation_id" => installation_id}}) do
     with {:ok, token} <- Github.get_installation_token(installation_id) do
+      # TODO: update message
       body = "Claimed!"
 
       Github.create_issue_comment(

@@ -125,18 +125,15 @@ defmodule Algora.Bounties do
           {:ok, Claim.t()} | {:error, atom()}
   defp do_claim_bounty(%{user: user, ticket: ticket, pull_request: pull_request}) do
     # TODO: ensure user is pull request author
-    id = Nanoid.generate()
-
     changeset =
       Claim.changeset(%Claim{}, %{
         ticket_id: ticket.id,
         user_id: user.id,
         provider: "github",
-        provider_id: pull_request["id"],
-        provider_meta: pull_request,
+        provider_id: to_string(pull_request["id"]),
+        provider_meta: Util.normalize_struct(pull_request),
         title: pull_request["title"],
         url: pull_request["html_url"],
-        group_id: id,
         merged_at: Util.to_date(pull_request["merged_at"])
       })
 

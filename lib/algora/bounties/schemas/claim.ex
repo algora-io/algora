@@ -53,12 +53,20 @@ defmodule Algora.Bounties.Claim do
       :provider_id,
       :provider_meta,
       :title,
-      :url,
-      :group_id
+      :url
     ])
+    |> generate_id()
+    |> put_group_id()
     |> foreign_key_constraint(:ticket_id)
     |> foreign_key_constraint(:user_id)
     |> unique_constraint([:ticket_id, :user_id])
+  end
+
+  def put_group_id(changeset) do
+    case get_field(changeset, :group_id) do
+      nil -> put_change(changeset, :group_id, get_field(changeset, :id))
+      _existing -> changeset
+    end
   end
 
   def rewarded(query \\ Claim) do

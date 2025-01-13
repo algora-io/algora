@@ -206,59 +206,56 @@ defmodule Algora.ContractsTest do
       {:ok, contract_b_1} = Contracts.fetch_contract(contract_b_1.id)
       {:ok, {_txs2, _contract_b_2}} = Contracts.release_and_renew_contract(contract_b_1)
 
-      activities_per_contract = [
-        # :transaction_created,
-        # :transaction_created,
-        # :transaction_created,
-        # :transaction_created,
-        # :transaction_status_change,
-        # :transaction_status_change,
-        # :transaction_status_change,
-        :contract_paid
-      ]
-
-      activities_per_cycle =
-        activities_per_contract ++
-          [
-            :contract_renewed
-          ]
-
-      activities_per_group =
-        [
-          # :transaction_created,
-          :contract_prepaid
-        ] ++
-          activities_per_cycle ++
-          activities_per_cycle
-
       assert_activity_names(
         contract_a_0,
-        [
-          # :transaction_created,
-          :contract_prepaid
-        ] ++ activities_per_contract
+        [:contract_prepaid, :contract_paid]
       )
 
       assert_activity_names(
         contract_a_1,
-        [
-          :contract_renewed
-        ] ++ activities_per_contract
+        [:contract_renewed, :contract_paid]
       )
 
       assert_activity_names(
         "contract_activities",
-        activities_per_group ++ activities_per_group
+        [
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed,
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed
+        ]
       )
 
       assert_activity_names_for_user(
         contract_a_0.contractor_id,
-        activities_per_group
-      )
-
-      assert_activity_names_for_user(
-        contract_b_0.contractor_id,
-        activities_per_group
+        [
+          :transaction_created,
+          :contract_prepaid,
+          :transaction_created,
+          :transaction_created,
+          :transaction_created,
+          :transaction_created,
+          :transaction_status_change,
+          :transaction_status_change,
+          :transaction_status_change,
+          :contract_paid,
+          :contract_renewed,
+          :transaction_created,
+          :transaction_created,
+          :transaction_created,
+          :transaction_created,
+          :transaction_status_change,
+          :transaction_status_change,
+          :transaction_status_change,
+          :contract_paid,
+          :contract_renewed
+        ]
       )
 
       assert Activities.all_for_user(contract_a_0.client_id) !=

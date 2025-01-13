@@ -2,6 +2,7 @@ defmodule Algora.Activities do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Activities.Activity
   alias Algora.Repo
 
@@ -42,6 +43,9 @@ defmodule Algora.Activities do
     :owned_installations,
     :connected_installations,
     :client_contracts,
+    {:client_contracts, :transactions},
+    :client_contracts,
+    {:contractor_contracts, :transactions},
     :contractor_contracts
   ]
 
@@ -50,17 +54,27 @@ defmodule Algora.Activities do
 
   def base_query do
     [head | tail] = @tables
-
     query = head |> to_string() |> base_query()
 
-    Enum.reduce(tail, query, fn table_name, acc ->
-      new_query = table_name |> to_string() |> base_query()
+    Enum.reduce(tail, query, fn table_path, acc ->
+      new_query = base_query(table_path)
       union_all(new_query, ^acc)
     end)
   end
 
   def base_query(table_name) do
-    from(_e in {table_name, Activity})
+    from(_e in {to_string(table_name), Activity})
+  end
+
+  def base_query({parent_table_name, table_name}) do
+    parent = to_string(parent_table_name)
+    child = to_string(table_name)
+
+    parent_table_name
+    |> base_query()
+    |> join(:inner, [p], assoc(p, ^parent), as: :parent)
+    |> join(:inner, [c], assoc(c, ^child), as: :child)
+    |> join(:inner, [a], assoc(a, :activities), as: :activities)
   end
 
   def base_query_for_user(user_id) do
@@ -73,8 +87,17 @@ defmodule Algora.Activities do
     end)
   end
 
+  def base_query_for_user(user_id, {parent_table_name, table_name}) do
+    from u in User,
+      where: u.id == ^user_id,
+      join: p in assoc(u, ^parent_table_name),
+      join: c in assoc(p, ^table_name),
+      join: a in assoc(c, :activities),
+      select: a
+  end
+
   def base_query_for_user(user_id, name) do
-    from u in Algora.Accounts.User,
+    from u in User,
       where: u.id == ^user_id,
       join: c in assoc(u, ^name),
       join: a in assoc(c, :activities),

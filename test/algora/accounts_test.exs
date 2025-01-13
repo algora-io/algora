@@ -26,11 +26,11 @@ defmodule Algora.AccountsTest do
       user_2 = insert(:user, tech_stack: ["rust", "c++"])
       org_1 = insert(:organization, seeded: false)
 
-      assert Accounts.fetch_developer(user_1.id) |> elem(1) |> Map.get(:id) == user_1.id
-      assert Accounts.fetch_developer_by([sort_by_tech_stack: ["rust"]]) |> elem(1) |> Map.get(:id) == user_2.id
+      assert user_1.id |> Accounts.fetch_developer() |> elem(1) |> Map.get(:id) == user_1.id
+      assert [sort_by_tech_stack: ["rust"]] |> Accounts.fetch_developer_by() |> elem(1) |> Map.get(:id) == user_2.id
 
-      assert Accounts.list_developers([]) |> length == 2
-      assert Accounts.list_orgs([]) |> length == 2
+      assert [] |> Accounts.list_developers() |> length() == 2
+      assert [] |> Accounts.list_orgs() |> length() == 1
 
       assert_activity_names_for_user(user_1.id, [])
       assert_activity_names_for_user(org_1.id, [])

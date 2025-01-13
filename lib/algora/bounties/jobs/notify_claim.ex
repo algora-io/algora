@@ -17,7 +17,7 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
   def perform(%Oban.Job{args: %{"claim_id" => claim_id, "installation_id" => installation_id}}) do
     with {:ok, token} <- Github.get_installation_token(installation_id),
          {:ok, claim} <- Repo.fetch(Claim, claim_id),
-         claim = Repo.preload(claim, ticket: [repository: [:user]], user: []),
+         claim = Repo.preload(claim, source: [repository: [:user]], target: [repository: [:user]], user: []),
          {:ok, _} <- maybe_add_labels(token, claim),
          {:ok, _} <- add_comment(token, claim) do
       :ok
@@ -27,21 +27,21 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
   defp add_comment(token, claim) do
     Github.create_issue_comment(
       token,
-      claim.ticket.repository.user.provider_login,
-      claim.ticket.repository.name,
-      claim.ticket.number,
+      claim.target.repository.user.provider_login,
+      claim.target.repository.name,
+      claim.target.number,
       "💡 @#{claim.user.provider_login} submitted [#{Claim.type_label(claim.type)}](#{claim.url}) that claims the bounty. You can visit [Algora](#{Claim.reward_url(claim)}) to reward."
     )
   end
 
-  defp maybe_add_labels(token, %Claim{type: :pull_request} = claim) do
+  defp maybe_add_labels(token, %Claim{source: source} = claim) when not is_nil(source) do
     Github.add_labels(
       token,
-      claim.provider_meta["base"]["repo"]["owner"]["login"],
-      claim.provider_meta["base"]["repo"]["name"],
-      claim.provider_meta["number"],
-      ["🙋 Bounty claim"])
-    
+      claim.source.repository.user.provider_login,
+      claim.source.repository.name,
+      claim.source.number,
+      ["🙋 Bounty claim"]
+    )
   end
 
   defp maybe_add_labels(_token, _claim), do: {:ok, nil}

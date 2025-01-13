@@ -18,7 +18,6 @@ defmodule Algora.Workspace.Ticket do
 
     belongs_to :repository, Algora.Workspace.Repository
     has_many :bounties, Algora.Bounties.Bounty
-    has_many :claims, Algora.Bounties.Claim
 
     timestamps()
   end

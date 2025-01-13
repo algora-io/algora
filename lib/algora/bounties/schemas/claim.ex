@@ -3,27 +3,16 @@ defmodule Algora.Bounties.Claim do
   use Algora.Schema
 
   alias Algora.Bounties.Claim
+  alias Algora.Workspace.Ticket
 
-  @derive {Inspect, except: [:provider_meta]}
   typed_schema "claims" do
-    field :provider, :string, null: false
-    field :provider_id, :string, null: false
-    field :provider_meta, :map, null: false
-
+    field :status, Ecto.Enum, values: [:pending, :approved, :rejected, :paid], null: false
     field :type, Ecto.Enum, values: [:pull_request, :review, :video, :design, :article]
-
-    field :merged_at, :utc_datetime_usec
-    field :approved_at, :utc_datetime_usec
-    field :rejected_at, :utc_datetime_usec
-    field :charged_at, :utc_datetime_usec
-    field :paid_at, :utc_datetime_usec
-
-    field :title, :string, null: false
-    field :description, :string
     field :url, :string, null: false
     field :group_id, :string, null: false
 
-    belongs_to :ticket, Algora.Workspace.Ticket, null: false
+    belongs_to :source, Ticket
+    belongs_to :target, Ticket, null: false
     belongs_to :user, Algora.Accounts.User, null: false
     # has_one :transaction, Algora.Payments.Transaction
 
@@ -32,37 +21,14 @@ defmodule Algora.Bounties.Claim do
 
   def changeset(claim, attrs) do
     claim
-    |> cast(attrs, [
-      :ticket_id,
-      :user_id,
-      :provider,
-      :provider_id,
-      :provider_meta,
-      :merged_at,
-      :approved_at,
-      :rejected_at,
-      :charged_at,
-      :paid_at,
-      :type,
-      :title,
-      :description,
-      :url,
-      :group_id
-    ])
-    |> validate_required([
-      :ticket_id,
-      :user_id,
-      :provider,
-      :provider_id,
-      :provider_meta,
-      :title,
-      :url
-    ])
+    |> cast(attrs, [:source_id, :target_id, :user_id, :status, :type, :url, :group_id])
+    |> validate_required([:target_id, :user_id, :status, :type, :url])
     |> generate_id()
     |> put_group_id()
-    |> foreign_key_constraint(:ticket_id)
+    |> foreign_key_constraint(:source_id)
+    |> foreign_key_constraint(:target_id)
     |> foreign_key_constraint(:user_id)
-    |> unique_constraint([:ticket_id, :user_id])
+    |> unique_constraint([:target_id, :user_id])
   end
 
   def put_group_id(changeset) do

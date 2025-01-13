@@ -117,19 +117,28 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     pull_request = params["pull_request"]
     repo = params["repository"]
 
-    ticket_ref = %{
-      owner: args[:ticket_ref][:owner] || repo["owner"]["login"],
-      repo: args[:ticket_ref][:repo] || repo["name"],
-      number: args[:ticket_ref][:number]
+    source_ticket_ref = %{
+      owner: repo["owner"]["login"],
+      repo: repo["name"],
+      number: pull_request["number"]
     }
+
+    target_ticket_ref =
+      %{
+        owner: args[:ticket_ref][:owner] || source_ticket_ref.owner,
+        repo: args[:ticket_ref][:repo] || source_ticket_ref.repo,
+        number: args[:ticket_ref][:number]
+      }
 
     with {:ok, token} <- Github.get_installation_token(installation_id),
          {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
       Bounties.claim_bounty(
         %{
           user: user,
-          ticket_ref: ticket_ref,
-          pull_request: pull_request
+          target_ticket_ref: target_ticket_ref,
+          source_ticket_ref: source_ticket_ref,
+          status: if(pull_request["merged_at"], do: :approved, else: :pending),
+          type: :pull_request
         },
         installation_id: installation_id
       )

@@ -197,12 +197,8 @@ defmodule Algora.Factory do
   def claim_factory do
     %Algora.Bounties.Claim{
       id: Nanoid.generate(),
-      provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
-      title: "Implemented compression optimization",
-      description: "Added parallel processing for large files",
-      url: "https://github.com/piedpiper/middle-out/pull/2",
-      provider_meta: %{}
+      type: :pull_request,
+      status: :pending
     }
   end
 

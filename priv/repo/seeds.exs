@@ -355,7 +355,7 @@ for {repo_name, issues} <- repos do
     })
 
   for {issue_title, index} <- Enum.with_index(issues, 1) do
-    ticket =
+    issue =
       insert!(:ticket, %{
         repository_id: repo.id,
         title: issue_title,
@@ -371,7 +371,7 @@ for {repo_name, issues} <- repos do
 
     bounty =
       insert!(:bounty, %{
-        ticket_id: ticket.id,
+        ticket_id: issue.id,
         owner_id: pied_piper.id,
         creator_id: richard.id,
         amount: amount,
@@ -385,7 +385,7 @@ for {repo_name, issues} <- repos do
         amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
 
         insert!(:bounty, %{
-          ticket_id: ticket.id,
+          ticket_id: issue.id,
           owner_id: member.id,
           creator_id: member.id,
           amount: amount,
@@ -395,12 +395,21 @@ for {repo_name, issues} <- repos do
     end
 
     if claimed do
-      claim =
-        insert!(:claim, %{
-          bounty_id: bounty.id,
+      pull_request =
+        insert!(:ticket, %{
           user_id: carver.id,
           title: "Implementation for #{issue_title}",
           description: "Here's my solution to this issue.",
+          url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
+        })
+
+      claim =
+        insert!(:claim, %{
+          user_id: carver.id,
+          target_id: pull_request.id,
+          source_id: issue.id,
+          type: :pull_request,
+          status: if(paid, do: :paid, else: :pending),
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
         })
 

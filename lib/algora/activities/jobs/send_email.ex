@@ -1,4 +1,4 @@
-defmodule Algora.Activities.Notifier do
+defmodule Algora.Activities.SendEmail do
   @moduledoc false
   use Oban.Worker,
     queue: :activities,

@@ -46,7 +46,6 @@ defmodule Algora.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ecto, github: "lastcanal/ecto", branch: "has_many_on_replace_ignore", override: true},
       {:phoenix, "~> 1.7.11"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},

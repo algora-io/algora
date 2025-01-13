@@ -30,8 +30,7 @@ defmodule Algora.Bounties.Claim do
     belongs_to :user, Algora.Accounts.User
     # has_one :transaction, Algora.Payments.Transaction
 
-    has_many :activities, {"claim_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
-
+    has_many :activities, {"claim_activities", Activity}, foreign_key: :assoc_id
     timestamps()
   end
 

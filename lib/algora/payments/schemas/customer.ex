@@ -18,7 +18,7 @@ defmodule Algora.Payments.Customer do
       foreign_key: :customer_id,
       where: [is_default: true]
 
-    has_many :activities, {"customer_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"customer_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

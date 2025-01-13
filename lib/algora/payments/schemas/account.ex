@@ -25,7 +25,7 @@ defmodule Algora.Payments.Account do
 
     belongs_to :user, Algora.Accounts.User, null: false
 
-    has_many :activities, {"account_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"account_activities", Activity}, foreign_key: :assoc_id
     timestamps()
   end
 

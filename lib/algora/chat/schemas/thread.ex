@@ -9,7 +9,7 @@ defmodule Algora.Chat.Thread do
 
     has_many :messages, Algora.Chat.Message
     has_many :participants, Algora.Chat.Participant
-    has_many :activities, {"thread_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"thread_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

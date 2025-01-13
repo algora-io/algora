@@ -12,22 +12,18 @@ defmodule Algora.Activities do
     :bonus_activities,
     :bounty_activities,
     :claim_activities,
-    # :prize_pool_activities,
     :tip_activities,
     :message_activities,
-    # :participant_activities,
     :thread_activities,
-    # :comment_cursor_activities,
     :contract_activities,
     :timesheet_activities,
-    # :event_cursor_activities,
-    # :member_activities,
-    # :org_activities,
+    :application_activities,
+    :job_activities,
     :account_activities,
     :customer_activities,
     :payment_method_activities,
     :platform_transaction_activities,
-    # :transaction_activities,
+    :transaction_activities,
     :project_activities,
     :review_activities,
     :installation_activities,
@@ -48,6 +44,9 @@ defmodule Algora.Activities do
     :client_contracts,
     :contractor_contracts
   ]
+
+  def tables, do: @tables
+  def user_attributes, do: @user_attributes
 
   def base_query do
     [head | tail] = @tables

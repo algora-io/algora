@@ -11,7 +11,7 @@ defmodule Algora.Contracts.Timesheet do
     belongs_to :contract, Algora.Contracts.Contract
     has_many :transactions, Algora.Payments.Transaction
 
-    has_many :activities, {"timesheet_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"timesheet_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

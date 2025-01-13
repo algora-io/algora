@@ -8,7 +8,7 @@ defmodule Algora.Bounties.Attempt do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :user, Algora.Accounts.User
 
-    has_many :activities, {"attempt_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"attempt_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

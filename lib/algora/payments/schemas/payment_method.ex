@@ -13,7 +13,7 @@ defmodule Algora.Payments.PaymentMethod do
 
     belongs_to :customer, Algora.Payments.Customer
 
-    has_many :activities, {"platform_transaction_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"platform_transaction_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

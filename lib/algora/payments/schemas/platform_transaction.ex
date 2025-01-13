@@ -15,8 +15,7 @@ defmodule Algora.Payments.PlatformTransaction do
     field :type, :string
     field :reporting_category, :string
 
-    has_many :activities, {"platform_transaction_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
-
+    has_many :activities, {"platform_transaction_activities", Activity}, foreign_key: :assoc_id
     timestamps()
   end
 

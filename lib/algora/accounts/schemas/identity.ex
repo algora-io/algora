@@ -18,7 +18,7 @@ defmodule Algora.Accounts.Identity do
 
     belongs_to :user, User
 
-    has_many :activities, {"identity_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"identity_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

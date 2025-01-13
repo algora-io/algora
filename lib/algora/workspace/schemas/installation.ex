@@ -18,7 +18,7 @@ defmodule Algora.Workspace.Installation do
     belongs_to :owner, User, null: false
     belongs_to :connected_user, User, null: false
 
-    has_many :activities, {"installation_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"installation_activities", Activity}, foreign_key: :assoc_id
     timestamps()
   end
 

@@ -2,6 +2,7 @@ defmodule Algora.Payments.Transaction do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
   alias Algora.Contracts.Contract
   alias Algora.Types.Money
 
@@ -39,6 +40,8 @@ defmodule Algora.Payments.Transaction do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :tip, Algora.Bounties.Tip
     belongs_to :linked_transaction, Algora.Payments.Transaction
+
+    has_many :activities, {"transaction_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

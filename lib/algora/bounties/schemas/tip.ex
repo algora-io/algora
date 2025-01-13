@@ -15,7 +15,7 @@ defmodule Algora.Bounties.Tip do
     belongs_to :recipient, User
     has_many :transactions, Algora.Payments.Transaction
 
-    has_many :activities, {"tip_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"tip_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

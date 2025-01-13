@@ -1,6 +1,5 @@
 defmodule Algora.Contracts do
   @moduledoc false
-  import Algora.Activities.Activity, only: [put_activity: 2]
   import Ecto.Changeset
   import Ecto.Query
 
@@ -172,12 +171,6 @@ defmodule Algora.Contracts do
       total_fee: total_fee,
       line_items: line_items
     })
-    |> put_assoc(
-      :contract,
-      put_activity(contract, %{
-        type: :transaction_created
-      })
-    )
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> Algora.Validations.validate_positive(:total_fee)
@@ -185,7 +178,9 @@ defmodule Algora.Contracts do
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert()
+    |> Repo.insert_with_activity(%{
+      type: :transaction_created
+    })
   end
 
   defp initialize_debit(%{id: id, contract: contract, amount: amount, linked_transaction_id: linked_transaction_id}) do
@@ -204,19 +199,15 @@ defmodule Algora.Contracts do
       total_fee: Money.zero(:USD),
       linked_transaction_id: linked_transaction_id
     })
-    |> put_assoc(
-      :contract,
-      put_activity(contract, %{
-        type: :transaction_created
-      })
-    )
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert()
+    |> Repo.insert_with_activity(%{
+      type: :transaction_created
+    })
   end
 
   defp initialize_credit(%{id: id, contract: contract, amount: amount, linked_transaction_id: linked_transaction_id}) do
@@ -235,19 +226,15 @@ defmodule Algora.Contracts do
       user_id: contract.contractor_id,
       linked_transaction_id: linked_transaction_id
     })
-    |> put_assoc(
-      :contract,
-      put_activity(contract, %{
-        type: :transaction_created
-      })
-    )
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert()
+    |> Repo.insert_with_activity(%{
+      type: :transaction_created
+    })
   end
 
   defp initialize_transfer(%{contract: contract, amount: amount}) do
@@ -265,19 +252,15 @@ defmodule Algora.Contracts do
       timesheet_id: contract.timesheet.id,
       user_id: contract.contractor_id
     })
-    |> put_assoc(
-      :contract,
-      put_activity(contract, %{
-        type: :transaction_created
-      })
-    )
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert()
+    |> Repo.insert_with_activity(%{
+      type: :transaction_created
+    })
   end
 
   defp initialize_prepayment_transaction(contract) do
@@ -529,14 +512,10 @@ defmodule Algora.Contracts do
       provider_meta: Util.normalize_struct(%{error: error}),
       status: :failed
     })
-    |> put_assoc(
-      :contract,
-      put_activity(transaction.contract, %{
-        type: :transaction_status_change,
-        meta: %{status: :failed, transaction_id: transaction.id}
-      })
-    )
-    |> Repo.update()
+    |> Repo.update_with_activity(%{
+      type: :transaction_status_change,
+      meta: %{status: :failed, transaction_id: transaction.id}
+    })
   end
 
   defp update_transaction_status(transaction, record, status) do
@@ -547,14 +526,10 @@ defmodule Algora.Contracts do
       status: status,
       succeeded_at: if(status == :succeeded, do: DateTime.utc_now())
     })
-    |> put_assoc(
-      :contract,
-      put_activity(transaction.contract, %{
-        type: :transaction_status_change,
-        meta: %{status: status, transaction_id: transaction.id}
-      })
-    )
-    |> Repo.update()
+    |> Repo.update_with_activity(%{
+      type: :transaction_status_change,
+      meta: %{status: status, transaction_id: transaction.id}
+    })
   end
 
   defp mark_contract_as_paid(contract) do
@@ -579,10 +554,6 @@ defmodule Algora.Contracts do
       hourly_rate: contract.hourly_rate,
       hours_per_week: contract.hours_per_week
     })
-    # |> put_activity(contract, %{
-    #   type: :contract_renewed,
-    #   trace_id: Nanoid.generate()
-    # })
     |> Repo.insert_with_activity(%{
       type: :contract_renewed,
       trace_id: Nanoid.generate()

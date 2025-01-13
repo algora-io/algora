@@ -207,13 +207,13 @@ defmodule Algora.ContractsTest do
       {:ok, {_txs2, _contract_b_2}} = Contracts.release_and_renew_contract(contract_b_1)
 
       activities_per_contract = [
-        :transaction_created,
-        :transaction_created,
-        :transaction_created,
-        :transaction_created,
-        :transaction_status_change,
-        :transaction_status_change,
-        :transaction_status_change,
+        # :transaction_created,
+        # :transaction_created,
+        # :transaction_created,
+        # :transaction_created,
+        # :transaction_status_change,
+        # :transaction_status_change,
+        # :transaction_status_change,
         :contract_paid
       ]
 
@@ -225,7 +225,7 @@ defmodule Algora.ContractsTest do
 
       activities_per_group =
         [
-          :transaction_created,
+          # :transaction_created,
           :contract_prepaid
         ] ++
           activities_per_cycle ++
@@ -234,7 +234,7 @@ defmodule Algora.ContractsTest do
       assert_activity_names(
         contract_a_0,
         [
-          :transaction_created,
+          # :transaction_created,
           :contract_prepaid
         ] ++ activities_per_contract
       )

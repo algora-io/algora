@@ -10,7 +10,7 @@ defmodule Algora.Chat.Message do
     belongs_to :thread, Algora.Chat.Thread
     belongs_to :sender, Algora.Accounts.User
 
-    has_many :activities, {"message_activities", Activity}, foreign_key: :assoc_id, on_replace: :ignore
+    has_many :activities, {"message_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

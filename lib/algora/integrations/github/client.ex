@@ -7,11 +7,11 @@ defmodule Algora.Github.Client do
   @type token :: String.t()
 
   # TODO: move to a separate module and use only for data migration between databases
-  def http_cached(host, method, path, headers, body) do
+  def http_cached(host, method, path, headers, body, opts \\ []) do
     cache_path = ".local/github/#{path}.json"
 
     with :error <- read_from_cache(cache_path),
-         {:ok, response_body} <- do_http_request(host, method, path, headers, body) do
+         {:ok, response_body} <- do_http_request(host, method, path, headers, body, opts) do
       write_to_cache(cache_path, response_body)
       {:ok, response_body}
     else
@@ -20,18 +20,18 @@ defmodule Algora.Github.Client do
     end
   end
 
-  def http(host, method, path, headers, body) do
-    do_http_request(host, method, path, headers, body)
+  def http(host, method, path, headers, body, opts \\ []) do
+    do_http_request(host, method, path, headers, body, opts)
   end
 
-  defp do_http_request(host, method, path, headers, body) do
+  defp do_http_request(host, method, path, headers, body, opts) do
     url = "https://#{host}#{path}"
     headers = [{"Content-Type", "application/json"} | headers]
 
     with {:ok, encoded_body} <- Jason.encode(body),
          request = Finch.build(method, url, headers, encoded_body),
          {:ok, response} <- Finch.request(request, Algora.Finch) do
-      handle_response(response)
+      if opts[:skip_decoding], do: {:ok, response.body}, else: handle_response(response)
     end
   end
 
@@ -67,17 +67,19 @@ defmodule Algora.Github.Client do
     File.write!(cache_path, Jason.encode!(data))
   end
 
-  def fetch(access_token, url, method \\ "GET", body \\ nil)
+  def fetch(access_token, url, method \\ "GET", body \\ nil, opts \\ [])
 
-  def fetch(access_token, "https://api.github.com" <> path, method, body), do: fetch(access_token, path, method, body)
+  def fetch(access_token, "https://api.github.com" <> path, method, body, opts),
+    do: fetch(access_token, path, method, body, opts)
 
-  def fetch(access_token, path, method, body) do
+  def fetch(access_token, path, method, body, opts) do
     http(
       "api.github.com",
       method,
       path,
       [{"accept", "application/vnd.github.v3+json"}, {"Authorization", "Bearer #{access_token}"}],
-      body
+      body,
+      opts
     )
   end
 
@@ -184,5 +186,10 @@ defmodule Algora.Github.Client do
   @impl true
   def add_labels(access_token, owner, repo, number, labels) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{labels: labels})
+  end
+
+  @impl true
+  def render_markdown(access_token, markdown) do
+    fetch(access_token, "/markdown", "POST", %{text: markdown}, skip_decoding: true)
   end
 end

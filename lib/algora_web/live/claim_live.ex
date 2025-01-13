@@ -3,16 +3,23 @@ defmodule AlgoraWeb.ClaimLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties.Claim
+  alias Algora.Github
   alias Algora.Repo
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     {:ok, claim} = Repo.fetch(Claim, id)
 
-    claim = Repo.preload(claim, [:user, source: [repository: [:user]], target: [repository: [:user], bounties: [:owner]]])
+    claim =
+      Repo.preload(claim, [
+        :user,
+        source: [repository: [:user]],
+        target: [repository: [:user], bounties: [:owner]]
+      ])
 
-    dbg(claim)
     {:ok, prize_pool} = claim.target.bounties |> Enum.map(& &1.amount) |> Money.sum()
+    token = Github.TokenPool.get_token()
+    {:ok, source_body_html} = Github.render_markdown(token, claim.source.description)
 
     {:ok,
      socket
@@ -22,7 +29,8 @@ defmodule AlgoraWeb.ClaimLive do
      |> assign(:source, claim.source)
      |> assign(:user, claim.user)
      |> assign(:bounties, claim.target.bounties)
-     |> assign(:prize_pool, prize_pool)}
+     |> assign(:prize_pool, prize_pool)
+     |> assign(:source_body_html, source_body_html)}
   end
 
   @impl true
@@ -133,8 +141,8 @@ defmodule AlgoraWeb.ClaimLive do
               <div class="text-sm text-muted-foreground">
                 {@source.repository.user.provider_login}/{@source.repository.name}#{@source.number}
               </div>
-              <div class="mt-4">
-                {@source.description}
+              <div class="mt-4 prose dark:prose-invert">
+                {Phoenix.HTML.raw(@source_body_html)}
               </div>
             </div>
           </.card_content>

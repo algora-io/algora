@@ -18,6 +18,7 @@ defmodule Algora.Repo.Migrations.RecreateClaims do
       add :charged_at, :utc_datetime_usec
       add :paid_at, :utc_datetime_usec
 
+      add :type, :string, null: false
       add :title, :string, null: false
       add :description, :string
       add :url, :string, null: false

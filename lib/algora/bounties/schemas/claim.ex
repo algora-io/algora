@@ -10,6 +10,8 @@ defmodule Algora.Bounties.Claim do
     field :provider_id, :string, null: false
     field :provider_meta, :map, null: false
 
+    field :type, Ecto.Enum, values: [:pull_request, :review, :video, :design, :article]
+
     field :merged_at, :utc_datetime_usec
     field :approved_at, :utc_datetime_usec
     field :rejected_at, :utc_datetime_usec
@@ -41,6 +43,7 @@ defmodule Algora.Bounties.Claim do
       :rejected_at,
       :charged_at,
       :paid_at,
+      :type,
       :title,
       :description,
       :url,
@@ -68,6 +71,13 @@ defmodule Algora.Bounties.Claim do
       _existing -> changeset
     end
   end
+
+  def type_label(:pull_request), do: "a pull request"
+  def type_label(:review), do: "a review"
+  def type_label(:video), do: "a video"
+  def type_label(:design), do: "a design"
+  def type_label(:article), do: "an article"
+  def type_label(nil), do: "a URL"
 
   def rewarded(query \\ Claim) do
     from c in query,

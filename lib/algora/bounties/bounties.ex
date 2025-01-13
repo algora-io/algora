@@ -132,6 +132,7 @@ defmodule Algora.Bounties do
         provider: "github",
         provider_id: to_string(pull_request["id"]),
         provider_meta: Util.normalize_struct(pull_request),
+        type: :pull_request,
         title: pull_request["title"],
         url: pull_request["html_url"],
         merged_at: Util.to_date(pull_request["merged_at"])
@@ -177,7 +178,7 @@ defmodule Algora.Bounties do
       with {:ok, token} <- token_res,
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
            {:ok, claim} <- do_claim_bounty(%{user: user, ticket: ticket, pull_request: pull_request}),
-           {:ok, _job} <- notify_claim(%{ticket_ref: ticket_ref}, installation_id: installation_id) do
+           {:ok, _job} <- notify_claim(%{claim: claim}, installation_id: installation_id) do
         broadcast()
         {:ok, claim}
       else
@@ -187,15 +188,12 @@ defmodule Algora.Bounties do
   end
 
   @spec notify_claim(
-          %{ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}},
+          %{claim: Claim.t()},
           opts :: [installation_id: integer()]
         ) ::
           {:ok, Oban.Job.t()} | {:error, atom()}
-  def notify_claim(%{ticket_ref: ticket_ref}, opts \\ []) do
-    %{
-      ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
-      installation_id: opts[:installation_id]
-    }
+  def notify_claim(%{claim: claim}, opts \\ []) do
+    %{claim_id: claim.id, installation_id: opts[:installation_id]}
     |> Jobs.NotifyClaim.new()
     |> Oban.insert()
   end

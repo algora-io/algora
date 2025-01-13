@@ -13,7 +13,6 @@ defmodule Algora.Activities.Activity do
     transaction_created
     transaction_failed
     transaction_processed
-
     identity_created
   }a
 
@@ -51,7 +50,7 @@ defmodule Algora.Activities.Activity do
   def build_activity(target, activity) do
     target
     |> Ecto.build_assoc(:activities)
-    |> Algora.Activities.Activity.changeset(activity)
+    |> changeset(activity)
   end
 
   def put_activity(target, activity) do

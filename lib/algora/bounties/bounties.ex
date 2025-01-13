@@ -56,8 +56,8 @@ defmodule Algora.Bounties do
       {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
         {:error, :already_exists}
 
-      {:error, _changeset} ->
-        {:error, :internal_server_error}
+      {:error, _changeset} = error ->
+        error
     end
   end
 
@@ -147,8 +147,8 @@ defmodule Algora.Bounties do
       {:error, %{errors: [ticket_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
         {:error, :already_exists}
 
-      {:error, _changeset} ->
-        {:error, :internal_server_error}
+      {:error, _changeset} = error ->
+        error
     end
   end
 

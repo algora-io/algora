@@ -13,24 +13,23 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: auto-retry failed deliveries with exponential backoff
 
   def new(conn, params) do
-    case Webhook.new(conn) do
-      {:ok, %Webhook{delivery: _delivery, event: event, installation_id: _installation_id}} ->
-        author = get_author(event, params)
-        body = get_body(event, params)
-        process_commands(body, author, params)
-
-        conn |> put_status(:accepted) |> json(%{status: "ok"})
-
+    with {:ok, %Webhook{event: event}} <- Webhook.new(conn),
+         {:ok, _} <- process_commands(event, params) do
+      conn |> put_status(:accepted) |> json(%{status: "ok"})
+    else
       {:error, :missing_header} ->
         conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
 
       {:error, :signature_mismatch} ->
         conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
+
+      {:error, reason} ->
+        Logger.error("Error processing webhook: #{inspect(reason)}")
+        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
     end
   rescue
     e ->
       Logger.error("Unexpected error: #{inspect(e)}")
-
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
   end
 
@@ -137,18 +136,32 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({command, _} = args, _author, _params),
-    do: Logger.info("Unhandled command: #{command} #{inspect(args)}")
-
-  def process_commands(body, author, params) when is_binary(body) do
-    case Github.Command.parse(body) do
-      {:ok, commands} -> Enum.map(commands, &execute_command(&1, author, params))
-      # TODO: handle errors
-      {:error, error} -> Logger.error("Error parsing commands: #{inspect(error)}")
-    end
+  defp execute_command(_command, _author, _params) do
+    {:error, :unhandled_command}
   end
 
-  def process_commands(_body, _author, _params), do: nil
+  def process_commands(event, params) do
+    author = get_author(event, params)
+    body = get_body(event, params)
+
+    case Github.Command.parse(body) do
+      {:ok, commands} ->
+        Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
+          case execute_command(command, author, params) do
+            {:ok, result} ->
+              {:cont, {:ok, [result | results]}}
+
+            error ->
+              Logger.error("Command execution failed for #{inspect(command)}: #{inspect(error)}")
+              {:halt, error}
+          end
+        end)
+
+      {:error, reason} = error ->
+        Logger.error("Error parsing commands: #{inspect(reason)}")
+        error
+    end
+  end
 
   defp get_author("issues", params), do: params["issue"]["user"]
   defp get_author("issue_comment", params), do: params["comment"]["user"]

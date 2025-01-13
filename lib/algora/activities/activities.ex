@@ -1,6 +1,5 @@
 defmodule Algora.Activities do
   @moduledoc false
-  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Activities.Activity

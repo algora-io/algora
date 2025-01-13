@@ -47,3 +47,7 @@ config :algora,
   cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
   swift_mode: false,
   auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
+
+config :algora, :stripe,
+  test_customer_id: System.get_env("STRIPE_TEST_CUSTOMER_ID"),
+  test_account_id: System.get_env("STRIPE_TEST_ACCOUNT_ID")

@@ -45,7 +45,7 @@ defmodule Algora.Activities.Activity do
   end
 
   def build_activity(target, %{meta: %struct{}} = activity) when struct in [Stripe.Error] do
-    build_activity(target, %{activity | meta: Algora.Utils.normalize_struct(struct)})
+    build_activity(target, %{activity | meta: Algora.Util.normalize_struct(struct)})
   end
 
   def build_activity(target, activity) do

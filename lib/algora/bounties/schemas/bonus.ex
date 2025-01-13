@@ -8,7 +8,7 @@ defmodule Algora.Bounties.Bonus do
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :user, Algora.Accounts.User
 
-    has_many :activities, {"bonus_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
+    has_many :activities, {"bonus_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

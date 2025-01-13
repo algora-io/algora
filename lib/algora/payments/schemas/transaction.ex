@@ -2,7 +2,6 @@ defmodule Algora.Payments.Transaction do
   @moduledoc false
   use Algora.Schema
 
-  alias Algora.Activities.Activity
   alias Algora.Contracts.Contract
   alias Algora.Types.Money
 

@@ -28,7 +28,7 @@ defmodule Algora.Payments do
         ) ::
           {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
   def create_stripe_session(line_items, payment_intent_data) do
-    Stripe.Session.create(%{
+    Algora.Stripe.create_session(%{
       mode: "payment",
       billing_address_collection: "required",
       line_items: line_items,

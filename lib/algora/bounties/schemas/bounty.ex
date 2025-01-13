@@ -3,7 +3,6 @@ defmodule Algora.Bounties.Bounty do
   use Algora.Schema
 
   alias Algora.Accounts.User
-  alias Algora.Activities.Activity
   alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
 

@@ -13,7 +13,6 @@ defmodule Algora.DataCase do
   by setting `use Algora.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
-
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
@@ -21,9 +20,11 @@ defmodule Algora.DataCase do
   using do
     quote do
       import Algora.DataCase
+      import Algora.Factory
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
+      import Money.Sigil
 
       alias Algora.Repo
     end

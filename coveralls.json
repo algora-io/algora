@@ -1,0 +1,30 @@
+{
+  "skip_files": [
+    "lib/algora/repo.ex",
+    "lib/algora/s3.ex",
+    "lib/algora/integrations",
+    "lib/algora/\\w+/schemas/\\w+.ex",
+    "lib/algora/shared/*",
+    "lib/algora_web/components",
+    "lib/algora_web/live",
+    "lib/algora_web/\\w+.ex",
+    "lib/mix/tasks",
+    "priv/",
+    "test/support"
+  ],
+  "default_stop_words": [
+    "defmodule",
+    "defrecord",
+    "defimpl",
+    "def.+(.+\/\/.+).+do"
+  ],
+
+  "custom_stop_words": [
+  ],
+
+  "coverage_options": {
+    "treat_no_relevant_lines_as_covered": true,
+    "output_dir": "cover/",
+    "html_filter_full_covered": true
+  }
+}

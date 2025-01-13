@@ -1,6 +1,6 @@
 defmodule Algora.Contracts do
   @moduledoc false
-  import Algora.Activities.Activity, only: [put_activity: 2, put_activity: 3]
+  import Algora.Activities.Activity, only: [put_activity: 2]
   import Ecto.Changeset
   import Ecto.Query
 

@@ -69,7 +69,8 @@ defmodule Algora.Factory do
       twitter_url: "https://twitter.com/piedpiper",
       github_url: "https://github.com/piedpiper",
       discord_url: "https://discord.gg/piedpiper",
-      slack_url: "https://piedpiper.slack.com"
+      slack_url: "https://piedpiper.slack.com",
+      provider_login: sequence(:provider_login, &"org#{&1}")
     }
   end
 

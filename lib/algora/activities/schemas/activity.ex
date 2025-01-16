@@ -25,6 +25,7 @@ defmodule Algora.Activities.Activity do
     field :changes, :map, default: %{}
     field :trace_id, :string
     field :notify_users, {:array, :string}, default: []
+    field :assoc_name, :string, virtual: true
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :previous_event, __MODULE__

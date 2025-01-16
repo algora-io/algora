@@ -178,9 +178,7 @@ defmodule Algora.Contracts do
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert_with_activity(%{
-      type: :transaction_created
-    })
+    |> Repo.insert()
   end
 
   defp initialize_debit(%{id: id, contract: contract, amount: amount, linked_transaction_id: linked_transaction_id}) do
@@ -205,9 +203,7 @@ defmodule Algora.Contracts do
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert_with_activity(%{
-      type: :transaction_created
-    })
+    |> Repo.insert()
   end
 
   defp initialize_credit(%{id: id, contract: contract, amount: amount, linked_transaction_id: linked_transaction_id}) do
@@ -232,9 +228,7 @@ defmodule Algora.Contracts do
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert_with_activity(%{
-      type: :transaction_created
-    })
+    |> Repo.insert()
   end
 
   defp initialize_transfer(%{contract: contract, amount: amount}) do
@@ -258,9 +252,7 @@ defmodule Algora.Contracts do
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)
     |> foreign_key_constraint(:user_id)
-    |> Repo.insert_with_activity(%{
-      type: :transaction_created
-    })
+    |> Repo.insert()
   end
 
   defp initialize_prepayment_transaction(contract) do

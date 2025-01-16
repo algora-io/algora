@@ -10,6 +10,7 @@ defmodule Algora.Bounties.Claim do
     field :type, Ecto.Enum, values: [:pull_request, :review, :video, :design, :article]
     field :url, :string, null: false
     field :group_id, :string, null: false
+    field :group_share, :decimal, null: false, default: 1.0
 
     belongs_to :source, Ticket
     belongs_to :target, Ticket, null: false

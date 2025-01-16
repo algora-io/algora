@@ -2,39 +2,44 @@ defmodule AlgoraWeb.ClaimLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import Ecto.Query
+
   alias Algora.Bounties.Claim
   alias Algora.Github
   alias Algora.Repo
 
   @impl true
-  def mount(%{"id" => id}, _session, socket) do
-    {:ok, claim} = Repo.fetch(Claim, id)
-
-    claim =
-      Repo.preload(claim, [
+  def mount(%{"group_id" => group_id}, _session, socket) do
+    claims =
+      from(c in Claim, where: c.group_id == ^group_id)
+      |> order_by(desc: :group_share)
+      |> Repo.all()
+      |> Repo.preload([
         :user,
         source: [repository: [:user]],
         target: [repository: [:user], bounties: [:owner]]
       ])
 
-    {:ok, prize_pool} = claim.target.bounties |> Enum.map(& &1.amount) |> Money.sum()
+    [primary_claim | _] = claims
+
+    {:ok, prize_pool} = primary_claim.target.bounties |> Enum.map(& &1.amount) |> Money.sum()
 
     source_body_html =
       with token when is_binary(token) <- Github.TokenPool.get_token(),
-           {:ok, source_body_html} <- Github.render_markdown(token, claim.source.description) do
+           {:ok, source_body_html} <- Github.render_markdown(token, primary_claim.source.description) do
         source_body_html
       else
-        _ -> claim.source.description
+        _ -> primary_claim.source.description
       end
 
     {:ok,
      socket
-     |> assign(:page_title, "Claim Details")
-     |> assign(:claim, claim)
-     |> assign(:target, claim.target)
-     |> assign(:source, claim.source)
-     |> assign(:user, claim.user)
-     |> assign(:bounties, claim.target.bounties)
+     |> assign(:page_title, primary_claim.source.title)
+     |> assign(:claims, claims)
+     |> assign(:primary_claim, primary_claim)
+     |> assign(:target, primary_claim.target)
+     |> assign(:source, primary_claim.source)
+     |> assign(:bounties, primary_claim.target.bounties)
      |> assign(:prize_pool, prize_pool)
      |> assign(:source_body_html, source_body_html)}
   end
@@ -76,15 +81,19 @@ defmodule AlgoraWeb.ClaimLive do
             <%!-- Claimer Info --%>
             <.card>
               <.card_header>
-                <div class="flex items-center gap-4">
-                  <.avatar>
-                    <.avatar_image src={@user.avatar_url} />
-                    <.avatar_fallback>{String.first(@user.name)}</.avatar_fallback>
-                  </.avatar>
-                  <div>
-                    <p class="font-medium">{@user.name}</p>
-                    <p class="text-sm text-muted-foreground">@{@user.handle}</p>
-                  </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3">
+                  <%= for claim <- @claims do %>
+                    <div class="flex items-center gap-4">
+                      <.avatar>
+                        <.avatar_image src={claim.user.avatar_url} />
+                        <.avatar_fallback>{String.first(claim.user.name)}</.avatar_fallback>
+                      </.avatar>
+                      <div>
+                        <p class="font-medium">{claim.user.name}</p>
+                        <p class="text-sm text-muted-foreground">@{claim.user.handle}</p>
+                      </div>
+                    </div>
+                  <% end %>
                 </div>
               </.card_header>
               <.card_content>
@@ -126,15 +135,15 @@ defmodule AlgoraWeb.ClaimLive do
                 <div class="space-y-2">
                   <div class="flex justify-between text-sm">
                     <span class="text-muted-foreground">Status</span>
-                    <span>{@claim.status |> to_string() |> String.capitalize()}</span>
+                    <span>{@primary_claim.status |> to_string() |> String.capitalize()}</span>
                   </div>
                   <div class="flex justify-between text-sm">
                     <span class="text-muted-foreground">Submitted</span>
-                    <span>{Calendar.strftime(@claim.inserted_at, "%B %d, %Y")}</span>
+                    <span>{Calendar.strftime(@primary_claim.inserted_at, "%B %d, %Y")}</span>
                   </div>
                   <div class="flex justify-between text-sm">
                     <span class="text-muted-foreground">Last Updated</span>
-                    <span>{Calendar.strftime(@claim.updated_at, "%B %d, %Y")}</span>
+                    <span>{Calendar.strftime(@primary_claim.updated_at, "%B %d, %Y")}</span>
                   </div>
                 </div>
               </.card_content>

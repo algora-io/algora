@@ -141,7 +141,7 @@ defmodule AlgoraWeb.Router do
 
     live "/open-source", OpenSourceLive, :index
 
-    live "/claims/:id", ClaimLive
+    live "/claims/:group_id", ClaimLive
   end
 
   # Other scopes may use custom stacks.

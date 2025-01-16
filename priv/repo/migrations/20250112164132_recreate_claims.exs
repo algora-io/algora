@@ -19,14 +19,12 @@ defmodule Algora.Repo.Migrations.RecreateClaims do
       timestamps()
     end
 
-    create unique_index(:claims, [:target_id, :user_id])
     create index(:claims, [:source_id])
     create index(:claims, [:target_id])
     create index(:claims, [:user_id])
   end
 
   def down do
-    drop unique_index(:claims, [:target_id, :user_id])
     drop index(:claims, [:source_id])
     drop index(:claims, [:target_id])
     drop index(:claims, [:user_id])

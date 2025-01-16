@@ -313,6 +313,108 @@ end
 
 Logger.info("Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}")
 
+big_head =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "bighead@example.com",
+      display_name: "Nelson Bighetti",
+      handle: "bighead",
+      bio: "Former Hooli executive. Accidental tech success. Stanford President.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
+      tech_stack: ["Python", "JavaScript"],
+      country: "IT",
+      hourly_rate_min: Money.new!(150, :USD),
+      hourly_rate_max: Money.new!(200, :USD),
+      hours_per_week: 25
+    }
+  )
+
+jian_yang =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "jianyang@example.com",
+      display_name: "Jian Yang",
+      handle: "jianyang",
+      bio: "App developer. Creator of SeeFood and Smokation.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
+      tech_stack: ["Swift", "Python", "TensorFlow"],
+      country: "HK",
+      hourly_rate_min: Money.new!(125, :USD),
+      hourly_rate_max: Money.new!(175, :USD),
+      hours_per_week: 35
+    }
+  )
+
+john =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "john@example.com",
+      display_name: "John Stafford",
+      handle: "john",
+      bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
+      tech_stack: ["Perl", "Terraform", "C++", "C"],
+      country: "GB",
+      hourly_rate_min: Money.new!(140, :USD),
+      hourly_rate_max: Money.new!(190, :USD),
+      hours_per_week: 40
+    }
+  )
+
+aly =
+  upsert!(
+    :user,
+    [:email],
+    %{
+      email: "aly@example.com",
+      display_name: "Aly Dutta",
+      handle: "aly",
+      bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
+      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",
+      tech_stack: ["Java", "Kotlin", "Go"],
+      country: "IN",
+      hourly_rate_min: Money.new!(160, :USD),
+      hourly_rate_max: Money.new!(220, :USD),
+      hours_per_week: 35
+    }
+  )
+
+for user <- [aly, big_head, jian_yang, john] do
+  debit_id = Nanoid.generate()
+  credit_id = Nanoid.generate()
+  amount = Money.new!(Enum.random(1..10) * 10_000, :USD)
+
+  Repo.transact(fn ->
+    insert!(:transaction, %{
+      id: debit_id,
+      linked_transaction_id: credit_id,
+      type: :debit,
+      status: :succeeded,
+      net_amount: amount,
+      user_id: pied_piper.id,
+      succeeded_at: days_from_now(0)
+    })
+
+    insert!(:transaction, %{
+      id: credit_id,
+      linked_transaction_id: debit_id,
+      type: :credit,
+      status: :succeeded,
+      net_amount: amount,
+      user_id: user.id,
+      succeeded_at: days_from_now(0)
+    })
+
+    {:ok, :ok}
+  end)
+end
+
 repos = [
   {
     "middle-out",
@@ -431,151 +533,55 @@ for {repo_name, issues} <- repos do
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
         })
 
-      claim =
-        insert!(:claim, %{
-          user_id: carver.id,
-          target_id: issue.id,
-          source_id: pull_request.id,
-          type: :pull_request,
-          status: if(paid, do: :approved, else: :pending),
-          url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
-        })
+      group_id = Nanoid.generate()
 
-      # Create transaction pairs for paid claims
-      if paid do
-        debit_id = Nanoid.generate()
-        credit_id = Nanoid.generate()
-
-        Repo.transact(fn ->
-          insert!(:transaction, %{
-            id: debit_id,
-            linked_transaction_id: credit_id,
-            bounty_id: bounty.id,
-            type: :debit,
-            status: :succeeded,
-            net_amount: amount,
-            user_id: pied_piper.id,
-            succeeded_at: claim.inserted_at
+      for {user, share} <- [{carver, Decimal.new("0.5")}, {aly, Decimal.new("0.3")}, {big_head, Decimal.new("0.2")}] do
+        claim =
+          insert!(:claim, %{
+            group_id: group_id,
+            group_share: share,
+            user_id: user.id,
+            target_id: issue.id,
+            source_id: pull_request.id,
+            type: :pull_request,
+            status: if(paid, do: :approved, else: :pending),
+            url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
           })
 
-          insert!(:transaction, %{
-            id: credit_id,
-            linked_transaction_id: debit_id,
-            bounty_id: bounty.id,
-            type: :credit,
-            status: :succeeded,
-            net_amount: amount,
-            user_id: carver.id,
-            succeeded_at: claim.inserted_at
-          })
+        # Create transaction pairs for paid claims
+        if paid do
+          debit_id = Nanoid.generate()
+          credit_id = Nanoid.generate()
 
-          {:ok, :ok}
-        end)
+          Repo.transact(fn ->
+            insert!(:transaction, %{
+              id: debit_id,
+              linked_transaction_id: credit_id,
+              bounty_id: bounty.id,
+              type: :debit,
+              status: :succeeded,
+              net_amount: Money.mult!(amount, share),
+              user_id: pied_piper.id,
+              succeeded_at: claim.inserted_at
+            })
+
+            insert!(:transaction, %{
+              id: credit_id,
+              linked_transaction_id: debit_id,
+              bounty_id: bounty.id,
+              type: :credit,
+              status: :succeeded,
+              net_amount: Money.mult!(amount, share),
+              user_id: user.id,
+              succeeded_at: claim.inserted_at
+            })
+
+            {:ok, :ok}
+          end)
+        end
       end
     end
   end
-end
-
-big_head =
-  upsert!(
-    :user,
-    [:email],
-    %{
-      email: "bighead@example.com",
-      display_name: "Nelson Bighetti",
-      handle: "bighead",
-      bio: "Former Hooli executive. Accidental tech success. Stanford President.",
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
-      tech_stack: ["Python", "JavaScript"],
-      country: "IT",
-      hourly_rate_min: Money.new!(150, :USD),
-      hourly_rate_max: Money.new!(200, :USD),
-      hours_per_week: 25
-    }
-  )
-
-jian_yang =
-  upsert!(
-    :user,
-    [:email],
-    %{
-      email: "jianyang@example.com",
-      display_name: "Jian Yang",
-      handle: "jianyang",
-      bio: "App developer. Creator of SeeFood and Smokation.",
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
-      tech_stack: ["Swift", "Python", "TensorFlow"],
-      country: "HK",
-      hourly_rate_min: Money.new!(125, :USD),
-      hourly_rate_max: Money.new!(175, :USD),
-      hours_per_week: 35
-    }
-  )
-
-john =
-  upsert!(
-    :user,
-    [:email],
-    %{
-      email: "john@example.com",
-      display_name: "John Stafford",
-      handle: "john",
-      bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
-      tech_stack: ["Perl", "Terraform", "C++", "C"],
-      country: "GB",
-      hourly_rate_min: Money.new!(140, :USD),
-      hourly_rate_max: Money.new!(190, :USD),
-      hours_per_week: 40
-    }
-  )
-
-aly =
-  upsert!(
-    :user,
-    [:email],
-    %{
-      email: "aly@example.com",
-      display_name: "Aly Dutta",
-      handle: "aly",
-      bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",
-      tech_stack: ["Java", "Kotlin", "Go"],
-      country: "IN",
-      hourly_rate_min: Money.new!(160, :USD),
-      hourly_rate_max: Money.new!(220, :USD),
-      hours_per_week: 35
-    }
-  )
-
-for user <- [aly, big_head, jian_yang, john] do
-  debit_id = Nanoid.generate()
-  credit_id = Nanoid.generate()
-  amount = Money.new!(Enum.random(1..10) * 10_000, :USD)
-
-  Repo.transact(fn ->
-    insert!(:transaction, %{
-      id: debit_id,
-      linked_transaction_id: credit_id,
-      type: :debit,
-      status: :succeeded,
-      net_amount: amount,
-      user_id: pied_piper.id,
-      succeeded_at: days_from_now(0)
-    })
-
-    insert!(:transaction, %{
-      id: credit_id,
-      linked_transaction_id: debit_id,
-      type: :credit,
-      status: :succeeded,
-      net_amount: amount,
-      user_id: user.id,
-      succeeded_at: days_from_now(0)
-    })
-
-    {:ok, :ok}
-  end)
 end
 
 reviews = [

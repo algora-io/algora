@@ -437,7 +437,7 @@ for {repo_name, issues} <- repos do
           target_id: issue.id,
           source_id: pull_request.id,
           type: :pull_request,
-          status: if(paid, do: :paid, else: :pending),
+          status: if(paid, do: :approved, else: :pending),
           url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
         })
 

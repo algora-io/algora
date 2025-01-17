@@ -31,9 +31,13 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.map(& &1.amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
+        credits =
+          claims
+          |> Enum.flat_map(& &1.transactions)
+          |> Enum.filter(&(&1.type == :credit and &1.status == :succeeded))
+
         total_paid =
-          primary_claim.transactions
-          |> Enum.filter(&(&1.type == :debit and &1.status == :succeeded))
+          credits
           |> Enum.map(& &1.net_amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 

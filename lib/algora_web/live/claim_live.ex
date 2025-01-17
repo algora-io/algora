@@ -7,6 +7,7 @@ defmodule AlgoraWeb.ClaimLive do
   alias Algora.Bounties.Claim
   alias Algora.Github
   alias Algora.Repo
+  alias Algora.Util
 
   @impl true
   def mount(%{"group_id" => group_id}, _session, socket) do
@@ -118,176 +119,198 @@ defmodule AlgoraWeb.ClaimLive do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto py-8 px-4">
-      <div class="space-y-8">
-        <.header class="mb-8">
-          <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
-            <div class="flex items-center gap-4">
-              <.avatar class="h-12 w-12 rounded-full">
-                <.avatar_image src={@source_or_target.repository.user.avatar_url} />
-                <.avatar_fallback>
-                  {String.first(@source_or_target.repository.user.provider_login)}
-                </.avatar_fallback>
-              </.avatar>
-              <div>
-                <.link
-                  href={@source_or_target.url}
-                  class="text-xl font-semibold hover:underline"
-                  target="_blank"
-                >
-                  {@source_or_target.title}
-                </.link>
-                <div class="text-sm text-muted-foreground">
-                  {@source_or_target.repository.user.provider_login}/{@source_or_target.repository.name}#{@source_or_target.number}
+      <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
+        <div class="space-y-8">
+          <.card>
+            <.card_header>
+              <div class="flex items-center gap-4">
+                <.avatar class="h-12 w-12 rounded-full">
+                  <.avatar_image src={@source_or_target.repository.user.avatar_url} />
+                  <.avatar_fallback>
+                    {String.first(@source_or_target.repository.user.provider_login)}
+                  </.avatar_fallback>
+                </.avatar>
+                <div>
+                  <.link
+                    href={@source_or_target.url}
+                    class="text-xl font-semibold hover:underline"
+                    target="_blank"
+                  >
+                    {@source_or_target.title}
+                  </.link>
+                  <div class="text-sm text-muted-foreground">
+                    {@source_or_target.repository.user.provider_login}/{@source_or_target.repository.name}#{@source_or_target.number}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="mt-4 grid grid-cols-2 gap-8">
-              <.stat_card title="Total Paid">
-                <div class="text-success">
-                  {Money.to_string!(@total_paid)}
-                </div>
-              </.stat_card>
-              <.stat_card title="Prize Pool">
-                <div class="text-success">
-                  {Money.to_string!(@prize_pool)}
-                </div>
-              </.stat_card>
-            </div>
-          </div>
-        </.header>
+            </.card_header>
+            <.card_content>
+              <div class="prose dark:prose-invert">
+                {Phoenix.HTML.raw(@source_body_html)}
+              </div>
+            </.card_content>
+          </.card>
+        </div>
 
-        <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
-          <div class="space-y-8">
-            <.card>
-              <.card_header>
-                <div class="grid grid-cols-1 sm:grid-cols-3">
-                  <%= for claim <- @claims do %>
-                    <div class="flex items-center gap-4">
-                      <.avatar>
-                        <.avatar_image src={claim.user.avatar_url} />
-                        <.avatar_fallback>{String.first(claim.user.name)}</.avatar_fallback>
-                      </.avatar>
-                      <div>
-                        <p class="font-medium">{claim.user.name}</p>
-                        <p class="text-sm text-muted-foreground">@{claim.user.handle}</p>
-                      </div>
-                    </div>
-                  <% end %>
-                </div>
-              </.card_header>
-              <.card_content>
-                <div class="prose dark:prose-invert">
-                  {Phoenix.HTML.raw(@source_body_html)}
-                </div>
-              </.card_content>
-            </.card>
-          </div>
-
-          <div class="space-y-8">
-            <.card>
-              <.card_header>
+        <div class="space-y-8">
+          <.card>
+            <.card_header>
+              <div class="flex items-center justify-between">
                 <.card_title>
                   Claim
                 </.card_title>
-              </.card_header>
-              <.card_content>
-                <div class="space-y-2">
-                  <div class="flex justify-between text-sm">
-                    <span class="text-muted-foreground">Status</span>
-                    <span>{@primary_claim.status |> to_string() |> String.capitalize()}</span>
-                  </div>
-                  <div class="flex justify-between text-sm">
-                    <span class="text-muted-foreground">Submitted</span>
-                    <span>{Calendar.strftime(@primary_claim.inserted_at, "%B %d, %Y")}</span>
-                  </div>
-                  <div class="flex justify-between text-sm">
-                    <span class="text-muted-foreground">Last Updated</span>
-                    <span>{Calendar.strftime(@primary_claim.updated_at, "%B %d, %Y")}</span>
-                  </div>
+                <.button>
+                  Reward bounty
+                </.button>
+              </div>
+            </.card_header>
+            <.card_content>
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Total prize pool</span>
+                  <span class="font-medium font-display tabular-nums">
+                    {Money.to_string!(@prize_pool)}
+                  </span>
                 </div>
-              </.card_content>
-            </.card>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Total paid</span>
+                  <span class="font-medium font-display tabular-nums">
+                    {Money.to_string!(@total_paid)}
+                  </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Status</span>
+                  <span>{@primary_claim.status |> to_string() |> String.capitalize()}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Submitted</span>
+                  <span>{Calendar.strftime(@primary_claim.inserted_at, "%B %d, %Y")}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-muted-foreground">Last updated</span>
+                  <span>{Calendar.strftime(@primary_claim.updated_at, "%B %d, %Y")}</span>
+                </div>
+              </div>
+            </.card_content>
+          </.card>
 
-            <.card>
-              <.card_header>
+          <.card>
+            <.card_header>
+              <div class="flex items-center justify-between">
                 <.card_title>
-                  Sponsors
+                  Authors
                 </.card_title>
-              </.card_header>
-              <.card_content>
-                <div class="divide-y divide-border">
-                  <%= for sponsor <- @sponsors do %>
-                    <div class="flex items-center justify-between py-4">
+                <.button variant="secondary">
+                  Split bounty
+                </.button>
+              </div>
+            </.card_header>
+            <.card_content>
+              <div class="space-y-4">
+                <%= for claim <- @claims do %>
+                  <div class="flex justify-between text-sm">
+                    <span>
                       <div class="flex items-center gap-4">
                         <.avatar>
-                          <.avatar_image src={sponsor.sponsor.avatar_url} />
-                          <.avatar_fallback>
-                            {String.first(sponsor.sponsor.name)}
-                          </.avatar_fallback>
+                          <.avatar_image src={claim.user.avatar_url} />
+                          <.avatar_fallback>{String.first(claim.user.name)}</.avatar_fallback>
                         </.avatar>
                         <div>
-                          <p class="font-medium">{sponsor.sponsor.name}</p>
-                          <p class="text-sm text-muted-foreground">@{sponsor.sponsor.handle}</p>
+                          <p class="font-medium">{claim.user.name}</p>
+                          <p class="text-sm text-muted-foreground">@{claim.user.handle}</p>
                         </div>
                       </div>
-                      <div class="text-right">
-                        <div class="text-sm font-medium">
-                          <%= case sponsor.status do %>
-                            <% :overpaid -> %>
-                              <div class="text-success">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  {Money.to_string!(Money.sub!(sponsor.paid, sponsor.tipped))}
-                                </span>
-                                paid
-                              </div>
-                              <div class="text-success">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  +{Money.to_string!(sponsor.tipped)}
-                                </span>
-                                tip!
-                              </div>
-                            <% :paid -> %>
-                              <div class="text-success">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  {Money.to_string!(sponsor.paid)}
-                                </span>
-                                paid
-                              </div>
-                            <% :partial -> %>
-                              <div class="text-success">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  {Money.to_string!(sponsor.paid)}
-                                </span>
-                                paid
-                              </div>
-                              <div class="text-muted-foreground">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  {Money.to_string!(Money.sub!(sponsor.pledged, sponsor.paid))}
-                                </span>
-                                pending
-                              </div>
-                            <% :pending -> %>
-                              <div class="text-muted-foreground">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  {Money.to_string!(sponsor.pledged)}
-                                </span>
-                                pending
-                              </div>
-                            <% :none -> %>
-                              <div class="text-success">
-                                <span class="text-base font-semibold font-display tabular-nums">
-                                  {Money.to_string!(sponsor.pledged)}
-                                </span>
-                              </div>
-                          <% end %>
-                        </div>
+                    </span>
+                    <span class="text-foreground font-medium">
+                      <span>
+                        {Util.format_pct(claim.group_share)}
+                      </span>
+                    </span>
+                  </div>
+                <% end %>
+              </div>
+            </.card_content>
+          </.card>
+
+          <.card>
+            <.card_header>
+              <.card_title>
+                Sponsors
+              </.card_title>
+            </.card_header>
+            <.card_content>
+              <div class="divide-y divide-border">
+                <%= for sponsor <- @sponsors do %>
+                  <div class="flex items-center justify-between py-4">
+                    <div class="flex items-center gap-4">
+                      <.avatar>
+                        <.avatar_image src={sponsor.sponsor.avatar_url} />
+                        <.avatar_fallback>
+                          {String.first(sponsor.sponsor.name)}
+                        </.avatar_fallback>
+                      </.avatar>
+                      <div>
+                        <p class="font-medium">{sponsor.sponsor.name}</p>
+                        <p class="text-sm text-muted-foreground">@{sponsor.sponsor.handle}</p>
                       </div>
                     </div>
-                  <% end %>
-                </div>
-              </.card_content>
-            </.card>
-          </div>
+                    <div class="text-right">
+                      <div class="text-sm font-medium">
+                        <%= case sponsor.status do %>
+                          <% :overpaid -> %>
+                            <div class="text-success">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                {Money.to_string!(Money.sub!(sponsor.paid, sponsor.tipped))}
+                              </span>
+                              paid
+                            </div>
+                            <div class="text-success">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                +{Money.to_string!(sponsor.tipped)}
+                              </span>
+                              tip!
+                            </div>
+                          <% :paid -> %>
+                            <div class="text-success">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                {Money.to_string!(sponsor.paid)}
+                              </span>
+                              paid
+                            </div>
+                          <% :partial -> %>
+                            <div class="text-success">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                {Money.to_string!(sponsor.paid)}
+                              </span>
+                              paid
+                            </div>
+                            <div class="text-muted-foreground">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                {Money.to_string!(Money.sub!(sponsor.pledged, sponsor.paid))}
+                              </span>
+                              pending
+                            </div>
+                          <% :pending -> %>
+                            <div class="text-muted-foreground">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                {Money.to_string!(sponsor.pledged)}
+                              </span>
+                              pending
+                            </div>
+                          <% :none -> %>
+                            <div class="text-success">
+                              <span class="text-base font-semibold font-display tabular-nums">
+                                {Money.to_string!(sponsor.pledged)}
+                              </span>
+                            </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </.card_content>
+          </.card>
         </div>
       </div>
     </div>

@@ -142,9 +142,9 @@ defmodule Algora.Activities do
     |> Algora.Repo.insert()
   end
 
-  def dataloader() do
+  def dataloader do
     Dataloader.add_source(
-      Dataloader.new,
+      Dataloader.new(),
       :db,
       Dataloader.Ecto.new(Algora.Repo)
     )
@@ -152,15 +152,16 @@ defmodule Algora.Activities do
 
   def all_with_assoc(query) do
     activities = Repo.all(query)
+
     loader =
       activities
-      |> Enum.reduce(dataloader(), fn(activity, loader) ->
+      |> Enum.reduce(dataloader(), fn activity, loader ->
         schema = schema_from_table(activity.assoc_name)
         Dataloader.load(loader, :db, schema, activity.assoc_id)
       end)
       |> Dataloader.run()
 
-    Enum.map(activities, fn(activity) ->
+    Enum.map(activities, fn activity ->
       schema = schema_from_table(activity.assoc_name)
       assoc = Dataloader.get(loader, :db, schema, activity.assoc_id)
       Map.put(activity, :assoc, assoc)

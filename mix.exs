@@ -75,7 +75,7 @@ defmodule Algora.MixProject do
       {:salad_ui, "~> 0.14.0"},
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
-      {:mox, "~> 1.0", only: :test},
+      {:mox, "~> 1.0", only: [:dev, :test]},
       {:tzdata, "~> 1.1"},
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},

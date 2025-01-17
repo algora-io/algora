@@ -96,13 +96,16 @@ defmodule AlgoraWeb.ClaimLive do
           end)
           |> Enum.sort_by(&{&1.pledged, &1.paid, &1.sponsor.name}, :desc)
 
+        source_or_target = primary_claim.source || primary_claim.target
+
         {:ok,
          socket
-         |> assign(:page_title, primary_claim.source.title)
+         |> assign(:page_title, source_or_target.title)
          |> assign(:claims, claims)
          |> assign(:primary_claim, primary_claim)
          |> assign(:target, primary_claim.target)
          |> assign(:source, primary_claim.source)
+         |> assign(:source_or_target, source_or_target)
          |> assign(:bounties, primary_claim.target.bounties)
          |> assign(:prize_pool, prize_pool)
          |> assign(:total_paid, total_paid)
@@ -119,22 +122,22 @@ defmodule AlgoraWeb.ClaimLive do
         <.header class="mb-8">
           <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
             <div class="flex items-center gap-4">
-              <.avatar class="h-16 w-16 rounded-full">
-                <.avatar_image src={@source.repository.user.avatar_url} />
+              <.avatar class="h-12 w-12 rounded-full">
+                <.avatar_image src={@source_or_target.repository.user.avatar_url} />
                 <.avatar_fallback>
-                  {String.first(@source.repository.user.provider_login)}
+                  {String.first(@source_or_target.repository.user.provider_login)}
                 </.avatar_fallback>
               </.avatar>
-              <div class="space-y-2">
+              <div>
                 <.link
-                  href={@target.url}
+                  href={@source_or_target.url}
                   class="text-xl font-semibold hover:underline"
                   target="_blank"
                 >
-                  {@target.title}
+                  {@source_or_target.title}
                 </.link>
                 <div class="text-sm text-muted-foreground">
-                  {@source.repository.user.provider_login}/{@source.repository.name}#{@source.number}
+                  {@source_or_target.repository.user.provider_login}/{@source_or_target.repository.name}#{@source_or_target.number}
                 </div>
               </div>
             </div>
@@ -173,22 +176,8 @@ defmodule AlgoraWeb.ClaimLive do
                 </div>
               </.card_header>
               <.card_content>
-                <div class="space-y-6">
-                  <div class="space-y-4">
-                    <.link
-                      href={@source.url}
-                      class="text-lg font-semibold hover:underline"
-                      target="_blank"
-                    >
-                      {@source.title}
-                    </.link>
-                    <div class="text-sm text-muted-foreground">
-                      {@source.repository.user.provider_login}/{@source.repository.name}#{@source.number}
-                    </div>
-                    <div class="mt-4 prose dark:prose-invert">
-                      {Phoenix.HTML.raw(@source_body_html)}
-                    </div>
-                  </div>
+                <div class="prose dark:prose-invert">
+                  {Phoenix.HTML.raw(@source_body_html)}
                 </div>
               </.card_content>
             </.card>

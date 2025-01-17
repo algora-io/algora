@@ -255,51 +255,51 @@ defmodule AlgoraWeb.ClaimLive do
                       </div>
                     </div>
                     <div class="text-right">
-                      <div class="text-sm font-medium">
+                      <div class="text-sm">
                         <%= case sponsor.status do %>
                           <% :overpaid -> %>
-                            <div class="text-success">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                            <div class="text-foreground">
+                              <span class="font-semibold font-display tabular-nums">
                                 {Money.to_string!(Money.sub!(sponsor.paid, sponsor.tipped))}
                               </span>
                               paid
                             </div>
-                            <div class="text-success">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                            <div class="text-foreground">
+                              <span class="font-semibold font-display tabular-nums">
                                 +{Money.to_string!(sponsor.tipped)}
                               </span>
                               tip!
                             </div>
                           <% :paid -> %>
-                            <div class="text-success">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                            <div class="text-foreground">
+                              <span class="font-semibold font-display tabular-nums">
                                 {Money.to_string!(sponsor.paid)}
                               </span>
                               paid
                             </div>
                           <% :partial -> %>
-                            <div class="text-success">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                            <div class="text-foreground">
+                              <span class="font-semibold font-display tabular-nums">
                                 {Money.to_string!(sponsor.paid)}
                               </span>
                               paid
                             </div>
                             <div class="text-muted-foreground">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                              <span class="font-semibold font-display tabular-nums">
                                 {Money.to_string!(Money.sub!(sponsor.pledged, sponsor.paid))}
                               </span>
                               pending
                             </div>
                           <% :pending -> %>
                             <div class="text-muted-foreground">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                              <span class="font-semibold font-display tabular-nums">
                                 {Money.to_string!(sponsor.pledged)}
                               </span>
                               pending
                             </div>
                           <% :none -> %>
-                            <div class="text-success">
-                              <span class="text-base font-semibold font-display tabular-nums">
+                            <div class="text-foreground">
+                              <span class="font-semibold font-display tabular-nums">
                                 {Money.to_string!(sponsor.pledged)}
                               </span>
                             </div>

@@ -142,37 +142,29 @@ defmodule Algora.Activities do
     |> Algora.Repo.insert()
   end
 
+  def dataloader() do
+    Dataloader.add_source(
+      Dataloader.new,
+      :db,
+      Dataloader.Ecto.new(Algora.Repo)
+    )
+  end
+
   def all_with_assoc(query) do
-    multi =
-      Multi.new()
-      |> Multi.run(:activities, fn repo, _changes ->
-        {:ok, repo.all(query)}
+    activities = Repo.all(query)
+    loader =
+      activities
+      |> Enum.reduce(dataloader(), fn(activity, loader) ->
+        schema = schema_from_table(activity.assoc_name)
+        Dataloader.load(loader, :db, schema, activity.assoc_id)
       end)
-      |> Multi.run(:associations, fn repo, %{activities: activities} ->
-        associations =
-          Enum.map(activities, fn activity ->
-            repo.one(from b in schema_from_table(activity.assoc_name), where: b.id == ^activity.assoc_id)
-          end)
+      |> Dataloader.run()
 
-        {:ok, associations}
-      end)
-      |> Multi.run(:preloaded, fn _repo, %{activities: activities, associations: assocs} ->
-        preloaded =
-          Enum.zip_with(activities, assocs, fn act, assoc ->
-            Map.put(act, :assoc, assoc)
-          end)
-
-        {:ok, preloaded}
-      end)
-
-    case Repo.transaction(multi) do
-      {:ok, %{preloaded: preloaded} = a} ->
-        preloaded
-
-      {:error, _step, reason, _changes} ->
-        reason
-        # Handle error
-    end
+    Enum.map(activities, fn(activity) ->
+      schema = schema_from_table(activity.assoc_name)
+      assoc = Dataloader.get(loader, :db, schema, activity.assoc_id)
+      Map.put(activity, :assoc, assoc)
+    end)
   end
 
   def schema_from_table("identity_activities"), do: Algora.Accounts.Identity

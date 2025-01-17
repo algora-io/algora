@@ -86,6 +86,7 @@ defmodule Algora.MixProject do
       {:chameleon, "~> 2.2.0"},
       {:ex_machina, "~> 2.8.0", only: [:dev, :test]},
       {:excoveralls, "~> 0.18", only: :test},
+      {:dataloader, "~> 2.0.0"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

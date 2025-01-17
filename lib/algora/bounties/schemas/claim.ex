@@ -15,7 +15,7 @@ defmodule Algora.Bounties.Claim do
     belongs_to :source, Ticket
     belongs_to :target, Ticket, null: false
     belongs_to :user, Algora.Accounts.User, null: false
-    # has_one :transaction, Algora.Payments.Transaction
+    has_many :transactions, Algora.Payments.Transaction
 
     timestamps()
   end

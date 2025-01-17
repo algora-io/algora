@@ -16,13 +16,23 @@ defmodule AlgoraWeb.ClaimLive do
       |> Repo.all()
       |> Repo.preload([
         :user,
+        :transactions,
         source: [repository: [:user]],
         target: [repository: [:user], bounties: [:owner]]
       ])
 
     [primary_claim | _] = claims
 
-    {:ok, prize_pool} = primary_claim.target.bounties |> Enum.map(& &1.amount) |> Money.sum()
+    prize_pool =
+      primary_claim.target.bounties
+      |> Enum.map(& &1.amount)
+      |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
+
+    total_paid =
+      primary_claim.transactions
+      |> Enum.filter(&(&1.type == :debit and &1.status == :succeeded))
+      |> Enum.map(& &1.net_amount)
+      |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
     source_body_html =
       with token when is_binary(token) <- Github.TokenPool.get_token(),
@@ -41,6 +51,7 @@ defmodule AlgoraWeb.ClaimLive do
      |> assign(:source, primary_claim.source)
      |> assign(:bounties, primary_claim.target.bounties)
      |> assign(:prize_pool, prize_pool)
+     |> assign(:total_paid, total_paid)
      |> assign(:source_body_html, source_body_html)}
   end
 
@@ -49,36 +60,37 @@ defmodule AlgoraWeb.ClaimLive do
     ~H"""
     <div class="container mx-auto py-8 px-4">
       <div class="space-y-8">
-        <%!-- Header with target issue and prize pool --%>
         <.header class="mb-8">
-          <div class="flex items-center gap-4">
-            <.avatar class="h-16 w-16 rounded-full">
-              <.avatar_image src={@source.repository.user.avatar_url} />
-              <.avatar_fallback>
-                {String.first(@source.repository.user.provider_login)}
-              </.avatar_fallback>
-            </.avatar>
-            <div class="space-y-2">
-              <.link href={@target.url} class="text-xl font-semibold hover:underline" target="_blank">
-                {@target.title}
-              </.link>
-              <div class="text-sm text-muted-foreground">
-                {@source.repository.user.provider_login}/{@source.repository.name}#{@source.number}
+          <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
+            <div class="flex items-center gap-4">
+              <.avatar class="h-16 w-16 rounded-full">
+                <.avatar_image src={@source.repository.user.avatar_url} />
+                <.avatar_fallback>
+                  {String.first(@source.repository.user.provider_login)}
+                </.avatar_fallback>
+              </.avatar>
+              <div class="space-y-2">
+                <.link
+                  href={@target.url}
+                  class="text-xl font-semibold hover:underline"
+                  target="_blank"
+                >
+                  {@target.title}
+                </.link>
+                <div class="text-sm text-muted-foreground">
+                  {@source.repository.user.provider_login}/{@source.repository.name}#{@source.number}
+                </div>
               </div>
             </div>
-          </div>
-          <:actions>
-            <div class="mt-4 text-2xl font-bold text-success font-display">
-              {Money.to_string!(@prize_pool)}
+            <div class="mt-4 grid grid-cols-2 gap-8">
+              <.stat_card title="Total Paid" value={Money.to_string!(@total_paid)} />
+              <.stat_card title="Prize Pool" value={Money.to_string!(@prize_pool)} />
             </div>
-          </:actions>
+          </div>
         </.header>
 
-        <%!-- New grid layout with different column widths --%>
         <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
-          <%!-- Combined Claim Details Card --%>
           <div class="space-y-8">
-            <%!-- Claimer Info --%>
             <.card>
               <.card_header>
                 <div class="grid grid-cols-1 sm:grid-cols-3">
@@ -119,16 +131,11 @@ defmodule AlgoraWeb.ClaimLive do
             </.card>
           </div>
 
-          <%!-- Right Column: Claim Metadata + Sponsors --%>
           <div class="space-y-8">
-            <%!-- Claim Metadata Card --%>
             <.card>
               <.card_header>
                 <.card_title>
-                  <div class="flex items-center gap-2">
-                    <.icon name="tabler-info-circle" class="h-5 w-5 text-muted-foreground" />
-                    Claim Info
-                  </div>
+                  Claim
                 </.card_title>
               </.card_header>
               <.card_content>
@@ -149,13 +156,10 @@ defmodule AlgoraWeb.ClaimLive do
               </.card_content>
             </.card>
 
-            <%!-- Sponsors Card --%>
             <.card>
               <.card_header>
                 <.card_title>
-                  <div class="flex items-center gap-2">
-                    <.icon name="tabler-users" class="h-5 w-5 text-muted-foreground" /> Sponsors
-                  </div>
+                  Sponsors
                 </.card_title>
               </.card_header>
               <.card_content>

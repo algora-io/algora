@@ -20,6 +20,10 @@ defmodule Algora.Repo.Migrations.RecreateClaims do
       timestamps()
     end
 
+    alter table(:transactions) do
+      add :claim_id, references(:claims, on_delete: :nothing)
+    end
+
     create unique_index(:claims, [:group_id, :user_id])
     create index(:claims, [:source_id])
     create index(:claims, [:target_id])
@@ -32,6 +36,10 @@ defmodule Algora.Repo.Migrations.RecreateClaims do
     drop index(:claims, [:target_id])
     drop index(:claims, [:user_id])
     drop table(:claims)
+
+    alter table(:transactions) do
+      remove :claim_id
+    end
 
     create table(:claims) do
       add :provider, :string

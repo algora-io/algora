@@ -21,38 +21,42 @@ defmodule AlgoraWeb.ClaimLive do
         target: [repository: [:user], bounties: [:owner]]
       ])
 
-    [primary_claim | _] = claims
+    case claims do
+      [] ->
+        raise(AlgoraWeb.NotFoundError)
 
-    prize_pool =
-      primary_claim.target.bounties
-      |> Enum.map(& &1.amount)
-      |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
+      [primary_claim | _] ->
+        prize_pool =
+          primary_claim.target.bounties
+          |> Enum.map(& &1.amount)
+          |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-    total_paid =
-      primary_claim.transactions
-      |> Enum.filter(&(&1.type == :debit and &1.status == :succeeded))
-      |> Enum.map(& &1.net_amount)
-      |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
+        total_paid =
+          primary_claim.transactions
+          |> Enum.filter(&(&1.type == :debit and &1.status == :succeeded))
+          |> Enum.map(& &1.net_amount)
+          |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-    source_body_html =
-      with token when is_binary(token) <- Github.TokenPool.get_token(),
-           {:ok, source_body_html} <- Github.render_markdown(token, primary_claim.source.description) do
-        source_body_html
-      else
-        _ -> primary_claim.source.description
-      end
+        source_body_html =
+          with token when is_binary(token) <- Github.TokenPool.get_token(),
+               {:ok, source_body_html} <- Github.render_markdown(token, primary_claim.source.description) do
+            source_body_html
+          else
+            _ -> primary_claim.source.description
+          end
 
-    {:ok,
-     socket
-     |> assign(:page_title, primary_claim.source.title)
-     |> assign(:claims, claims)
-     |> assign(:primary_claim, primary_claim)
-     |> assign(:target, primary_claim.target)
-     |> assign(:source, primary_claim.source)
-     |> assign(:bounties, primary_claim.target.bounties)
-     |> assign(:prize_pool, prize_pool)
-     |> assign(:total_paid, total_paid)
-     |> assign(:source_body_html, source_body_html)}
+        {:ok,
+         socket
+         |> assign(:page_title, primary_claim.source.title)
+         |> assign(:claims, claims)
+         |> assign(:primary_claim, primary_claim)
+         |> assign(:target, primary_claim.target)
+         |> assign(:source, primary_claim.source)
+         |> assign(:bounties, primary_claim.target.bounties)
+         |> assign(:prize_pool, prize_pool)
+         |> assign(:total_paid, total_paid)
+         |> assign(:source_body_html, source_body_html)}
+    end
   end
 
   @impl true

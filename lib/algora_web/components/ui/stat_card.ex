@@ -6,9 +6,11 @@ defmodule AlgoraWeb.Components.UI.StatCard do
 
   attr :href, :string, default: nil
   attr :title, :string
-  attr :value, :string
+  attr :value, :string, default: nil
   attr :subtext, :string, default: nil
   attr :icon, :string, default: nil
+
+  slot :inner_block
 
   def stat_card(assigns) do
     ~H"""
@@ -35,7 +37,13 @@ defmodule AlgoraWeb.Components.UI.StatCard do
         <.icon :if={@icon} name={@icon} class="h-6 w-6 text-muted-foreground" />
       </div>
       <div class="p-6 pt-0">
-        <div class="text-2xl font-bold font-display">{@value}</div>
+        <div class="text-2xl font-bold font-display">
+          <%= if @value do %>
+            {@value}
+          <% else %>
+            {render_slot(@inner_block)}
+          <% end %>
+        </div>
         <p :if={@subtext} class="text-xs text-muted-foreground">{@subtext}</p>
       </div>
     </div>

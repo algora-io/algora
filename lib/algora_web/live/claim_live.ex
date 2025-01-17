@@ -31,13 +31,13 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.map(& &1.amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-        credits =
+        debits =
           claims
           |> Enum.flat_map(& &1.transactions)
-          |> Enum.filter(&(&1.type == :credit and &1.status == :succeeded))
+          |> Enum.filter(&(&1.type == :debit and &1.status == :succeeded))
 
         total_paid =
-          credits
+          debits
           |> Enum.map(& &1.net_amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
@@ -49,6 +49,47 @@ defmodule AlgoraWeb.ClaimLive do
             _ -> primary_claim.source.description
           end
 
+        pledges =
+          primary_claim.target.bounties
+          |> Enum.group_by(& &1.owner.id)
+          |> Map.new(fn {owner_id, bounties} ->
+            {owner_id,
+             {hd(bounties).owner,
+              Enum.reduce(bounties, Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1.amount, &2))}}
+          end)
+
+        payments =
+          debits
+          |> Enum.group_by(& &1.user_id)
+          |> Map.new(fn {user_id, debits} ->
+            {user_id, Enum.reduce(debits, Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1.net_amount, &2))}
+          end)
+
+        sponsors =
+          pledges
+          |> Enum.map(fn {sponsor_id, {sponsor, pledged}} ->
+            paid = Map.get(payments, sponsor_id, Money.zero(:USD, no_fraction_if_integer: true))
+            tipped = Money.sub!(paid, pledged)
+
+            status =
+              cond do
+                Money.equal?(paid, pledged) -> :paid
+                Money.positive?(tipped) -> :overpaid
+                Money.positive?(paid) -> :partial
+                primary_claim.status == :approved -> :pending
+                true -> :none
+              end
+
+            %{
+              sponsor: sponsor,
+              status: status,
+              pledged: pledged,
+              paid: paid,
+              tipped: tipped
+            }
+          end)
+          |> Enum.sort_by(&{&1.pledged, &1.paid, &1.sponsor.name}, :desc)
+
         {:ok,
          socket
          |> assign(:page_title, primary_claim.source.title)
@@ -59,7 +100,8 @@ defmodule AlgoraWeb.ClaimLive do
          |> assign(:bounties, primary_claim.target.bounties)
          |> assign(:prize_pool, prize_pool)
          |> assign(:total_paid, total_paid)
-         |> assign(:source_body_html, source_body_html)}
+         |> assign(:source_body_html, source_body_html)
+         |> assign(:sponsors, sponsors)}
     end
   end
 
@@ -91,8 +133,16 @@ defmodule AlgoraWeb.ClaimLive do
               </div>
             </div>
             <div class="mt-4 grid grid-cols-2 gap-8">
-              <.stat_card title="Total Paid" value={Money.to_string!(@total_paid)} />
-              <.stat_card title="Prize Pool" value={Money.to_string!(@prize_pool)} />
+              <.stat_card title="Total Paid">
+                <div class="text-success">
+                  {Money.to_string!(@total_paid)}
+                </div>
+              </.stat_card>
+              <.stat_card title="Prize Pool">
+                <div class="text-success">
+                  {Money.to_string!(@prize_pool)}
+                </div>
+              </.stat_card>
             </div>
           </div>
         </.header>
@@ -118,7 +168,6 @@ defmodule AlgoraWeb.ClaimLive do
               </.card_header>
               <.card_content>
                 <div class="space-y-6">
-                  <%!-- Pull Request Details --%>
                   <div class="space-y-4">
                     <.link
                       href={@source.url}
@@ -172,23 +221,72 @@ defmodule AlgoraWeb.ClaimLive do
               </.card_header>
               <.card_content>
                 <div class="divide-y divide-border">
-                  <%= for bounty <- Enum.sort_by(@bounties, &{&1.amount, &1.inserted_at}, :desc) do %>
+                  <%= for sponsor <- @sponsors do %>
                     <div class="flex items-center justify-between py-4">
                       <div class="flex items-center gap-4">
                         <.avatar>
-                          <.avatar_image src={bounty.owner.avatar_url} />
+                          <.avatar_image src={sponsor.sponsor.avatar_url} />
                           <.avatar_fallback>
-                            {String.first(bounty.owner.name)}
+                            {String.first(sponsor.sponsor.name)}
                           </.avatar_fallback>
                         </.avatar>
                         <div>
-                          <p class="font-medium">{bounty.owner.name}</p>
-                          <p class="text-sm text-muted-foreground">@{bounty.owner.handle}</p>
+                          <p class="font-medium">{sponsor.sponsor.name}</p>
+                          <p class="text-sm text-muted-foreground">@{sponsor.sponsor.handle}</p>
                         </div>
                       </div>
-                      <.badge variant="success" class="font-display">
-                        {Money.to_string!(bounty.amount)}
-                      </.badge>
+                      <div class="text-right">
+                        <div class="text-sm font-medium">
+                          <%= case sponsor.status do %>
+                            <% :overpaid -> %>
+                              <div class="text-success">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  {Money.to_string!(Money.sub!(sponsor.paid, sponsor.tipped))}
+                                </span>
+                                paid
+                              </div>
+                              <div class="text-success">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  +{Money.to_string!(sponsor.tipped)}
+                                </span>
+                                tip!
+                              </div>
+                            <% :paid -> %>
+                              <div class="text-success">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  {Money.to_string!(sponsor.paid)}
+                                </span>
+                                paid
+                              </div>
+                            <% :partial -> %>
+                              <div class="text-success">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  {Money.to_string!(sponsor.paid)}
+                                </span>
+                                paid
+                              </div>
+                              <div class="text-muted-foreground">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  {Money.to_string!(Money.sub!(sponsor.pledged, sponsor.paid))}
+                                </span>
+                                pending
+                              </div>
+                            <% :pending -> %>
+                              <div class="text-muted-foreground">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  {Money.to_string!(sponsor.pledged)}
+                                </span>
+                                pending
+                              </div>
+                            <% :none -> %>
+                              <div class="text-success">
+                                <span class="text-base font-semibold font-display tabular-nums">
+                                  {Money.to_string!(sponsor.pledged)}
+                                </span>
+                              </div>
+                          <% end %>
+                        </div>
+                      </div>
                     </div>
                   <% end %>
                 </div>

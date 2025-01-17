@@ -467,33 +467,22 @@ for {repo_name, issues} <- repos do
         url: "https://github.com/piedpiper/#{repo_name}/issues/#{index}"
       })
 
-    amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
-
     claimed = rem(index, 2) > 0
     paid = claimed and rem(index, 3) > 0
 
-    bounty =
-      insert!(:bounty, %{
-        ticket_id: issue.id,
-        owner_id: pied_piper.id,
-        creator_id: richard.id,
-        amount: amount,
-        status: if(paid, do: :paid, else: :open)
-      })
-
-    pied_piper_members
-    |> Enum.take_random(Enum.random(0..(length(pied_piper_members) - 1)))
-    |> Enum.each(fn member ->
-      amount = Money.new!(Enum.random([500, 1000, 1500, 2000]), :USD)
-
-      insert!(:bounty, %{
-        ticket_id: issue.id,
-        owner_id: member.id,
-        creator_id: member.id,
-        amount: amount,
-        status: :open
-      })
-    end)
+    bounties =
+      [2000, 500, 400, 300, 200, 100]
+      |> Enum.map(&Money.new!(&1, :USD))
+      |> Enum.zip([pied_piper | pied_piper_members])
+      |> Enum.map(fn {amount, sponsor} ->
+        insert!(:bounty, %{
+          ticket_id: issue.id,
+          owner_id: sponsor.id,
+          creator_id: sponsor.id,
+          amount: amount,
+          status: if(paid, do: :paid, else: :open)
+        })
+      end)
 
     if claimed do
       pull_request =
@@ -535,7 +524,12 @@ for {repo_name, issues} <- repos do
 
       group_id = Nanoid.generate()
 
-      for {user, share} <- [{carver, Decimal.new("0.5")}, {aly, Decimal.new("0.3")}, {big_head, Decimal.new("0.2")}] do
+      claimants =
+        [carver, aly, big_head]
+        |> Enum.zip(["0.5", "0.3", "0.2"])
+        |> Enum.map(fn {user, share} -> {user, Decimal.new(share)} end)
+
+      for {user, share} <- claimants do
         claim =
           insert!(:claim, %{
             group_id: group_id,
@@ -548,38 +542,45 @@ for {repo_name, issues} <- repos do
             url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
           })
 
-        # Create transaction pairs for paid claims
         if paid do
-          debit_id = Nanoid.generate()
-          credit_id = Nanoid.generate()
+          for {pct_paid, bounty} <-
+                ["1.25", "1.0", "1.0", "0.5", "0.0", "0.0"]
+                |> Enum.map(&Decimal.new/1)
+                |> Enum.zip(bounties) do
+            debit_id = Nanoid.generate()
+            credit_id = Nanoid.generate()
 
-          Repo.transact(fn ->
-            insert!(:transaction, %{
-              id: debit_id,
-              linked_transaction_id: credit_id,
-              bounty_id: bounty.id,
-              claim_id: claim.id,
-              type: :debit,
-              status: :succeeded,
-              net_amount: Money.mult!(amount, share),
-              user_id: pied_piper.id,
-              succeeded_at: claim.inserted_at
-            })
+            net_paid = Money.mult!(bounty.amount, Decimal.mult(share, pct_paid))
 
-            insert!(:transaction, %{
-              id: credit_id,
-              linked_transaction_id: debit_id,
-              bounty_id: bounty.id,
-              claim_id: claim.id,
-              type: :credit,
-              status: :succeeded,
-              net_amount: Money.mult!(amount, share),
-              user_id: user.id,
-              succeeded_at: claim.inserted_at
-            })
+            # Create transaction pairs for paid claims
+            Repo.transact(fn ->
+              insert!(:transaction, %{
+                id: debit_id,
+                linked_transaction_id: credit_id,
+                bounty_id: bounty.id,
+                claim_id: claim.id,
+                type: :debit,
+                status: :succeeded,
+                net_amount: net_paid,
+                user_id: bounty.owner_id,
+                succeeded_at: claim.inserted_at
+              })
 
-            {:ok, :ok}
-          end)
+              insert!(:transaction, %{
+                id: credit_id,
+                linked_transaction_id: debit_id,
+                bounty_id: bounty.id,
+                claim_id: claim.id,
+                type: :credit,
+                status: :succeeded,
+                net_amount: net_paid,
+                user_id: user.id,
+                succeeded_at: claim.inserted_at
+              })
+
+              {:ok, :ok}
+            end)
+          end
         end
       end
     end

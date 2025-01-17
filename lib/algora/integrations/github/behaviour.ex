@@ -20,5 +20,5 @@ defmodule Algora.Github.Behaviour do
   @callback list_repository_events(token(), String.t(), String.t(), keyword()) :: response
   @callback list_repository_comments(token(), String.t(), String.t(), keyword()) :: response
   @callback add_labels(token(), String.t(), String.t(), integer(), [String.t()]) :: response
-  @callback render_markdown(token(), String.t()) :: response
+  @callback render_markdown(token(), String.t(), keyword()) :: response
 end

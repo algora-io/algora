@@ -189,7 +189,9 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
-  def render_markdown(access_token, markdown) do
-    fetch(access_token, "/markdown", "POST", %{text: markdown}, skip_decoding: true)
+  def render_markdown(access_token, text, opts \\ []) do
+    fetch(access_token, "/markdown", "POST", %{text: text, mode: opts[:mode] || "gfm", context: opts[:context]},
+      skip_decoding: true
+    )
   end
 end

@@ -99,8 +99,8 @@ defmodule Algora.Analytics do
            active_change: orgs.active_current,
            active_trend: calculate_trend(orgs.active_current, orgs.active_previous),
            # TODO track time when contract is filled
-           avg_time_to_fill: 4.2,
-           time_to_fill_change: -0.8,
+           avg_time_to_fill: 0.0,
+           time_to_fill_change: -0.0,
            time_to_fill_trend: :down,
            contract_success_rate: current_success_rate,
            previous_contract_success_rate: previous_success_rate,

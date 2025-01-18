@@ -103,7 +103,7 @@ defmodule Algora.Activities do
       join: c in assoc(u, ^relation_name),
       join: a in assoc(c, :activities),
       select: %{
-        id: id,
+        id: a.id,
         type: a.type,
         assoc_id: a.assoc_id,
         assoc_name: ^table_name,

@@ -504,10 +504,7 @@ defmodule Algora.Contracts do
       provider_meta: Util.normalize_struct(%{error: error}),
       status: :failed
     })
-    |> Repo.update_with_activity(%{
-      type: :transaction_status_change,
-      meta: %{status: :failed, transaction_id: transaction.id}
-    })
+    |> Repo.update()
   end
 
   defp update_transaction_status(transaction, record, status) do
@@ -518,10 +515,7 @@ defmodule Algora.Contracts do
       status: status,
       succeeded_at: if(status == :succeeded, do: DateTime.utc_now())
     })
-    |> Repo.update_with_activity(%{
-      type: :transaction_status_change,
-      meta: %{status: status, transaction_id: transaction.id}
-    })
+    |> Repo.update()
   end
 
   defp mark_contract_as_paid(contract) do

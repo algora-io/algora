@@ -310,6 +310,16 @@ defmodule Algora.Accounts do
     Repo.one(query)
   end
 
+  def get_user_by_handle(handle) do
+    query =
+      from(u in User,
+        where: u.handle == ^handle,
+        select: u
+      )
+
+    Repo.one(query)
+  end
+
   def get_access_token(%User{} = user) do
     case Repo.one(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github")) do
       %Identity{provider_token: token} -> {:ok, token}

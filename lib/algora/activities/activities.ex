@@ -2,17 +2,19 @@ defmodule Algora.Activities do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Activities.Activity
+  alias Algora.Bounties.Bounty
   alias Algora.Repo
   alias Ecto.Multi
 
   @schema_from_table %{
-    identity_activities: Algora.Accounts.Identity,
+    identity_activities: Identity,
     user_activities: Algora.Accounts.User,
     attempt_activities: Algora.Bounties.Attempt,
     bonus_activities: Algora.Bounties.Bonus,
-    bounty_activities: Algora.Bounties.Bounty,
+    bounty_activities: Bounty,
     claim_activities: Algora.Bounties.Claim,
     tip_activities: Algora.Bounties.Tip,
     message_activities: Algora.Chat.Message,
@@ -40,9 +42,9 @@ defmodule Algora.Activities do
     connected_installations: "installation_activities",
     contractor_contracts: "contract_activities",
     created_bounties: "bounty_activities",
+    # owned_bounties: "bounty_activities",
     owned_tips: "tip_activities",
     created_tips: "tip_activities",
-    owned_bounties: "bounty_activities",
     identities: "identity_activities",
     owned_installations: "installation_activities",
     #   projects: "project_activities",
@@ -147,20 +149,14 @@ defmodule Algora.Activities do
     |> Algora.Repo.insert()
   end
 
-  def dataloader do
-    Dataloader.add_source(
-      Dataloader.new(),
-      :db,
-      Dataloader.Ecto.new(Algora.Repo)
-    )
-  end
-
   def all_with_assoc(query) do
     activities = Repo.all(query)
+    source = Dataloader.Ecto.new(Algora.Repo)
+    dataloader = Dataloader.add_source(Dataloader.new(), :db, source)
 
     loader =
       activities
-      |> Enum.reduce(dataloader(), fn activity, loader ->
+      |> Enum.reduce(dataloader, fn activity, loader ->
         schema = schema_from_table(activity.assoc_name)
         Dataloader.load(loader, :db, schema, activity.assoc_id)
       end)
@@ -173,11 +169,75 @@ defmodule Algora.Activities do
     end)
   end
 
-  def schema_from_table(name) do
-    Map.fetch!(@schema_from_table, String.to_atom(name))
+  def get(table, id) do
+    query =
+      from a in table,
+        where: a.id == ^id,
+        select: %{
+          id: a.id,
+          type: a.type,
+          assoc_id: a.assoc_id,
+          assoc_name: ^table,
+          inserted_at: a.inserted_at
+        }
+
+    Algora.Repo.one(query)
+  end
+
+  def get_assoc(prefix, assoc_id) when prefix in ["bounty_activities"] do
+    get_assoc(prefix, assoc_id, [:owner])
+  end
+
+  def get_assoc(prefix, assoc_id) when prefix in ["identity_activities"] do
+    get_assoc(prefix, assoc_id, [:user])
+  end
+
+  def get_assoc(prefix, assoc_id, preload) do
+    assoc_table = schema_from_table(prefix)
+
+    query =
+      from a in assoc_table,
+        preload: ^preload,
+        where: a.id == ^assoc_id
+
+    Algora.Repo.one(query)
+  end
+
+  def get_with_assoc(table, id) do
+    with %{assoc_id: assoc_id} = activity <- get(table, id),
+         assoc when is_map(assoc) <- get_assoc(table, assoc_id) do
+      Map.put(activity, :assoc, assoc)
+    end
+  end
+
+  def assoc_url(table, id) do
+    activity = get_with_assoc(table, id)
+    build_url(activity)
+  end
+
+  def schema_from_table(name) when is_binary(name), do: name |> String.to_atom() |> schema_from_table()
+
+  def schema_from_table(name) when is_atom(name) do
+    Map.fetch!(@schema_from_table, name)
   end
 
   def table_from_user_relation(table) do
     Map.fetch!(@table_from_user_relation, table)
+  end
+
+  def build_url(%{assoc: %Bounty{id: id, owner: owner}}) do
+    {:ok, "/org/#{owner.handle}/bounties"}
+  end
+
+  def build_url(%{assoc: %Identity{id: id, user: %{type: :individual} = user}}) do
+    {:ok, "/@/#{user.handle}"}
+  end
+
+  def build_url(%{assoc: %Identity{id: id, user: %{type: :organization} = user}}) do
+    {:ok, "/org/#{user.handle}"}
+  end
+
+  def build_url(a) do
+    {:error, :not_found}
   end
 end

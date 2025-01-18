@@ -169,15 +169,15 @@
         >
           <span class="relative text-sm font-semibold">Docs</span>
         </.link>
-        <div>
-          {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
-            id: "activity-timeline",
-            session: %{},
-            sticky: true,
-            assigns: %{current_user: @current_user}
-          )}
-        </div>
         <%= if @current_user do %>
+          <div>
+            {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
+              id: "activity-timeline",
+              session: %{},
+              sticky: true,
+              assigns: %{current_user: @current_user}
+            )}
+          </div>
           <div>
             <.dropdown2 id="dashboard-dropdown">
               <:img src={@current_user.avatar_url} alt={@current_user.handle} />

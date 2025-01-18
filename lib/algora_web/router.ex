@@ -44,6 +44,7 @@ defmodule AlgoraWeb.Router do
     end
 
     get "/set_context/:context", ContextController, :set
+    get "/a/:table_prefix/:activity_id", ActivityController, :get
 
     get "/callbacks/stripe/refresh", StripeCallbackController, :refresh
     get "/callbacks/stripe/return", StripeCallbackController, :return

@@ -98,8 +98,6 @@ defmodule AlgoraWeb.Components.Activity do
     """
   end
 
-  defp url_for_activity(%{type: :identity_created, assoc: assoc}), do: "/@/#{assoc.provider_login}"
-
   defp url_for_activity(activity) do
     slug = activity.assoc_name |> to_string() |> String.replace("_activities", "")
     "/a/#{slug}/#{activity.id}"

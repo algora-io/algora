@@ -44,15 +44,14 @@ defmodule Algora.BountiesTest do
           amount: amount
         }
 
-      {:ok, bounty} = Algora.Bounties.create_bounty(bounty_params, [])
-      {:ok, tip} = Algora.Bounties.create_tip(%{amount: amount, owner: owner, creator: creator, recipient: creator})
+      assert {:ok, bounty} = Algora.Bounties.create_bounty(bounty_params, [])
 
-      assert bounty
-      assert tip
+      assert {:ok, tip} =
+               Algora.Bounties.create_tip(%{amount: amount, owner: owner, creator: creator, recipient: creator})
 
-      assert_activity_names([])
-      assert_activity_names_for_user(creator.id, [])
-      assert_activity_names_for_user(owner.id, [])
+      assert_activity_names([:bounty_posted, :tip_awarded])
+      assert_activity_names_for_user(creator.id, [:bounty_posted, :tip_awarded])
+      assert_activity_names_for_user(owner.id, [:bounty_posted, :tip_awarded])
     end
 
     test "query" do

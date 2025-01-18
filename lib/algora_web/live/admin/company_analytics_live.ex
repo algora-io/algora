@@ -2,7 +2,10 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Activities
   alias Algora.Analytics
+
+  import AlgoraWeb.Components.Activity
 
   def mount(_params, _session, socket) do
     analytics = Analytics.get_company_analytics()
@@ -12,7 +15,10 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
      socket
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
-     |> assign(:selected_period, "30d")}
+     |> assign(:selected_period, "30d")
+     |> stream(:activities, [])
+     |> start_async(:get_activities, fn -> Activities.all() end)}
+
   end
 
   def render(assigns) do

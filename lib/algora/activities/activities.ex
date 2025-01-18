@@ -34,7 +34,7 @@ defmodule Algora.Activities do
   }
 
   @table_from_user_relation %{
-  #  attempts: "attempt_activities",
+    #  attempts: "attempt_activities",
     claims: "claim_activities",
     client_contracts: "contract_activities",
     connected_installations: "installation_activities",
@@ -45,7 +45,7 @@ defmodule Algora.Activities do
     owned_bounties: "bounty_activities",
     identities: "identity_activities",
     owned_installations: "installation_activities",
- #   projects: "project_activities",
+    #   projects: "project_activities",
     repositories: "repository_activities",
     transactions: "transaction_activities"
   }

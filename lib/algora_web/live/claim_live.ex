@@ -116,31 +116,41 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   @impl true
-  def handle_event("reward_bounty", _params, socket) do
-    claim = socket.assigns.primary_claim
+  def handle_event("reward_bounty", _params, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply,
+     redirect(socket, to: ~p"/auth/login?#{%{return_to: ~p"/claims/#{socket.assigns.primary_claim.group_id}"}}")}
+  end
 
-    # TODO: use the correct bounty
-    bounty = hd(claim.target.bounties)
+  def handle_event("reward_bounty", _params, %{assigns: %{current_user: current_user, target: target}} = socket) do
+    user_org_ids = MapSet.new([current_user | Algora.Organizations.get_user_orgs(current_user)], & &1.id)
 
-    case Algora.Bounties.reward_bounty(
-           %{
-             # TODO: handle unauthenticated user
-             creator: socket.assigns.current_user,
-             amount: bounty.amount,
-             bounty_id: bounty.id,
-             claims: socket.assigns.claims
-           },
-           ticket_ref: %{
-             owner: claim.target.repository.user.provider_login,
-             repo: claim.target.repository.name,
-             number: claim.target.number
-           }
-         ) do
-      {:ok, session_url} ->
-        {:noreply, redirect(socket, external: session_url)}
+    # TODO: allow user to choose if multiple bounties are available
+    case Enum.find(target.bounties, &MapSet.member?(user_org_ids, &1.owner_id)) do
+      nil ->
+        # TODO: allow user to add a bounty
+        {:noreply, put_flash(socket, :error, "You are not authorized to reward this bounty")}
 
-      {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, "Failed to create payment session. Please try again later.")}
+      bounty ->
+        case Algora.Bounties.reward_bounty(
+               %{
+                 creator: current_user,
+                 # TODO: allow user to choose amount
+                 amount: bounty.amount,
+                 bounty_id: bounty.id,
+                 claims: socket.assigns.claims
+               },
+               ticket_ref: %{
+                 owner: target.repository.user.provider_login,
+                 repo: target.repository.name,
+                 number: target.number
+               }
+             ) do
+          {:ok, session_url} ->
+            {:noreply, redirect(socket, external: session_url)}
+
+          {:error, _reason} ->
+            {:noreply, put_flash(socket, :error, "Failed to create payment session. Please try again later.")}
+        end
     end
   end
 

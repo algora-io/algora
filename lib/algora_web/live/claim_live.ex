@@ -126,11 +126,9 @@ defmodule AlgoraWeb.ClaimLive do
            %{
              # TODO: handle unauthenticated user
              creator: socket.assigns.current_user,
-             owner: bounty.owner,
-             recipient: claim.user,
              amount: bounty.amount,
              bounty_id: bounty.id,
-             claim_id: claim.id
+             claims: socket.assigns.claims
            },
            ticket_ref: %{
              owner: claim.target.repository.user.provider_login,

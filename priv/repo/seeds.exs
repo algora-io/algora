@@ -77,6 +77,7 @@ richard =
       email: "richard@example.com",
       display_name: "Richard Hendricks",
       handle: "richard",
+      provider_login: "richard",
       bio: "CEO of Pied Piper. Creator of the middle-out compression algorithm.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/richard.jpg",
       tech_stack: ["Python", "C++"],
@@ -94,6 +95,7 @@ dinesh =
       email: "dinesh@example.com",
       display_name: "Dinesh Chugtai",
       handle: "dinesh",
+      provider_login: "dinesh",
       bio: "Lead Frontend Engineer at Pied Piper. Java bad, Python good.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/dinesh.png",
       tech_stack: ["Python", "JavaScript"],
@@ -111,6 +113,7 @@ gilfoyle =
       email: "gilfoyle@example.com",
       display_name: "Bertram Gilfoyle",
       handle: "gilfoyle",
+      provider_login: "gilfoyle",
       bio: "Systems Architect. Security. DevOps. Satanist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/gilfoyle.jpg",
       tech_stack: ["Python", "Rust", "Go", "Terraform"],
@@ -128,6 +131,7 @@ jared =
       email: "jared@example.com",
       display_name: "Jared Dunn",
       handle: "jared",
+      provider_login: "jared",
       bio: "COO of Pied Piper. Former Hooli executive. Excel wizard.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jared.png",
       tech_stack: ["Python", "SQL"],
@@ -145,6 +149,7 @@ carver =
       email: "carver@example.com",
       display_name: "Kevin 'The Carver'",
       handle: "carver",
+      provider_login: "carver",
       bio:
         "Cloud architecture specialist. If your infrastructure needs a teardown, I'm your guy. Known for my 'insane' cloud architectures and occasional server incidents.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/carver.jpg",
@@ -321,6 +326,7 @@ big_head =
       email: "bighead@example.com",
       display_name: "Nelson Bighetti",
       handle: "bighead",
+      provider_login: "bighead",
       bio: "Former Hooli executive. Accidental tech success. Stanford President.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/bighead.jpg",
       tech_stack: ["Python", "JavaScript"],
@@ -339,6 +345,7 @@ jian_yang =
       email: "jianyang@example.com",
       display_name: "Jian Yang",
       handle: "jianyang",
+      provider_login: "jianyang",
       bio: "App developer. Creator of SeeFood and Smokation.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/jianyang.jpg",
       tech_stack: ["Swift", "Python", "TensorFlow"],
@@ -357,6 +364,7 @@ john =
       email: "john@example.com",
       display_name: "John Stafford",
       handle: "john",
+      provider_login: "john",
       bio: "Datacenter infrastructure expert. Rack space optimization specialist.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/john.png",
       tech_stack: ["Perl", "Terraform", "C++", "C"],
@@ -375,6 +383,7 @@ aly =
       email: "aly@example.com",
       display_name: "Aly Dutta",
       handle: "aly",
+      provider_login: "aly",
       bio: "Former Hooli engineer. Expert in distributed systems and scalability.",
       avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/aly.png",
       tech_stack: ["Java", "Kotlin", "Go"],
@@ -582,6 +591,8 @@ for {repo_name, issues} <- repos do
             end)
           end
         end
+
+        Logger.info("Claim [#{claim.status}]: #{AlgoraWeb.Endpoint.url()}/claims/#{claim.group_id}")
       end
     end
   end

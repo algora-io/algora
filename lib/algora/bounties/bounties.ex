@@ -256,15 +256,10 @@ defmodule Algora.Bounties do
     Repo.transact(fn ->
       with {:ok, tip} <- Repo.insert(changeset) do
         create_payment_session(
-          %{
-            creator: creator,
-            owner: owner,
-            recipient: recipient,
-            amount: amount,
-            description: "Tip payment for OSS contributions"
-          },
+          %{creator: creator, amount: amount, description: "Tip payment for OSS contributions"},
           ticket_ref: opts[:ticket_ref],
-          tip_id: tip.id
+          tip_id: tip.id,
+          recipient: recipient
         )
       end
     end)
@@ -273,60 +268,43 @@ defmodule Algora.Bounties do
   @spec reward_bounty(
           %{
             creator: User.t(),
-            owner: User.t(),
-            recipient: User.t(),
             amount: Money.t(),
             bounty_id: String.t(),
-            claim_id: String.t()
+            claims: [Claim.t()]
           },
           opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
         ) ::
           {:ok, String.t()} | {:error, atom()}
-  def reward_bounty(
-        %{creator: creator, owner: owner, recipient: recipient, amount: amount, bounty_id: bounty_id, claim_id: claim_id},
-        opts \\ []
-      ) do
-    # TODO: handle bounty splits
+  def reward_bounty(%{creator: creator, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
     create_payment_session(
-      %{
-        creator: creator,
-        owner: owner,
-        recipient: recipient,
-        amount: amount,
-        description: "Bounty payment for OSS contributions"
-      },
+      %{creator: creator, amount: amount, description: "Bounty payment for OSS contributions"},
       ticket_ref: opts[:ticket_ref],
       bounty_id: bounty_id,
-      claim_id: claim_id
+      claims: claims
     )
   end
 
   @spec create_payment_session(
-          %{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t(), description: String.t()},
+          %{creator: User.t(), amount: Money.t(), description: String.t()},
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             tip_id: String.t(),
             bounty_id: String.t(),
-            claim_id: String.t()
+            claims: [Claim.t()],
+            recipient: User.t()
           ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
-  def create_payment_session(
-        %{creator: creator, owner: owner, recipient: recipient, amount: amount, description: description},
-        opts \\ []
-      ) do
+  def create_payment_session(%{creator: creator, amount: amount, description: description}, opts \\ []) do
     ticket_ref = opts[:ticket_ref]
+    recipient = opts[:recipient]
+    claims = opts[:claims]
 
-    # Initialize transaction IDs
-    charge_id = Nanoid.generate()
-    debit_id = Nanoid.generate()
-    credit_id = Nanoid.generate()
     tx_group_id = Nanoid.generate()
 
     # Calculate fees
     currency = to_string(amount.currency)
-    total_paid = Payments.get_total_paid(owner.id, recipient.id)
-    platform_fee_pct = FeeTier.calculate_fee_percentage(total_paid)
+    platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
     platform_fee = Money.mult!(amount, platform_fee_pct)
@@ -334,44 +312,66 @@ defmodule Algora.Bounties do
     total_fee = Money.add!(platform_fee, transaction_fee)
     gross_amount = Money.add!(amount, total_fee)
 
-    line_items = [
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(amount),
-          currency: currency,
-          product_data: %{
-            name: "Payment to @#{recipient.provider_login}",
-            description: if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"),
-            images: [recipient.avatar_url]
+    line_items =
+      if recipient do
+        [
+          %{
+            price_data: %{
+              unit_amount: MoneyUtils.to_minor_units(amount),
+              currency: currency,
+              product_data: %{
+                name: "Payment to @#{recipient.provider_login}",
+                description: if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"),
+                images: [recipient.avatar_url]
+              }
+            },
+            quantity: 1
           }
-        },
-        quantity: 1
-      },
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, platform_fee_pct)),
-          currency: currency,
-          product_data: %{name: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})"}
-        },
-        quantity: 1
-      },
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, transaction_fee_pct)),
-          currency: currency,
-          product_data: %{name: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})"}
-        },
-        quantity: 1
-      }
-    ]
+        ]
+      else
+        []
+      end ++
+        Enum.map(claims, fn claim ->
+          %{
+            price_data: %{
+              # TODO: ensure shares are normalized
+              unit_amount: amount |> Money.mult!(claim.group_share) |> MoneyUtils.to_minor_units(),
+              currency: currency,
+              product_data: %{
+                name: "Payment to @#{claim.user.provider_login}",
+                description: if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"),
+                images: [claim.user.avatar_url]
+              }
+            },
+            quantity: 1
+          }
+        end) ++
+        [
+          %{
+            price_data: %{
+              unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, platform_fee_pct)),
+              currency: currency,
+              product_data: %{name: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})"}
+            },
+            quantity: 1
+          },
+          %{
+            price_data: %{
+              unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, transaction_fee_pct)),
+              currency: currency,
+              product_data: %{name: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})"}
+            },
+            quantity: 1
+          }
+        ]
 
     Repo.transact(fn ->
       with {:ok, _charge} <-
              initialize_charge(%{
-               id: charge_id,
+               id: Nanoid.generate(),
                tip_id: opts[:tip_id],
                bounty_id: opts[:bounty_id],
-               claim_id: opts[:claim_id],
+               claim_id: nil,
                user_id: creator.id,
                gross_amount: gross_amount,
                net_amount: amount,
@@ -379,26 +379,13 @@ defmodule Algora.Bounties do
                line_items: line_items,
                group_id: tx_group_id
              }),
-           {:ok, _debit} <-
-             initialize_debit(%{
-               id: debit_id,
+           {:ok, _transactions} <-
+             create_transaction_pairs(%{
+               claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
                bounty_id: opts[:bounty_id],
-               claim_id: opts[:claim_id],
                amount: amount,
-               user_id: creator.id,
-               linked_transaction_id: credit_id,
-               group_id: tx_group_id
-             }),
-           {:ok, _credit} <-
-             initialize_credit(%{
-               id: credit_id,
-               tip_id: opts[:tip_id],
-               bounty_id: opts[:bounty_id],
-               claim_id: opts[:claim_id],
-               amount: amount,
-               user_id: recipient.id,
-               linked_transaction_id: debit_id,
+               creator_id: creator.id,
                group_id: tx_group_id
              }),
            {:ok, session} <-
@@ -415,7 +402,6 @@ defmodule Algora.Bounties do
          id: id,
          tip_id: tip_id,
          bounty_id: bounty_id,
-         claim_id: claim_id,
          user_id: user_id,
          gross_amount: gross_amount,
          net_amount: net_amount,
@@ -431,7 +417,6 @@ defmodule Algora.Bounties do
       status: :initialized,
       tip_id: tip_id,
       bounty_id: bounty_id,
-      claim_id: claim_id,
       user_id: user_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
@@ -642,5 +627,53 @@ defmodule Algora.Bounties do
       # TODO
       reviews_count: 4
     }
+  end
+
+  # Helper function to create transaction pairs
+  defp create_transaction_pairs(%{claims: claims} = params) when length(claims) > 0 do
+    Enum.reduce_while(claims, {:ok, []}, fn claim, {:ok, acc} ->
+      params
+      |> Map.put(:claim_id, claim.id)
+      |> Map.put(:recipient_id, claim.user.id)
+      |> create_single_transaction_pair()
+      |> case do
+        {:ok, transactions} -> {:cont, {:ok, transactions ++ acc}}
+        error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp create_transaction_pairs(params) do
+    create_single_transaction_pair(params)
+  end
+
+  defp create_single_transaction_pair(params) do
+    debit_id = Nanoid.generate()
+    credit_id = Nanoid.generate()
+
+    with {:ok, debit} <-
+           initialize_debit(%{
+             id: debit_id,
+             tip_id: params.tip_id,
+             bounty_id: params.bounty_id,
+             claim_id: params.claim_id,
+             amount: params.amount,
+             user_id: params.creator_id,
+             linked_transaction_id: credit_id,
+             group_id: params.group_id
+           }),
+         {:ok, credit} <-
+           initialize_credit(%{
+             id: credit_id,
+             tip_id: params.tip_id,
+             bounty_id: params.bounty_id,
+             claim_id: params.claim_id,
+             amount: params.amount,
+             user_id: params.recipient_id,
+             linked_transaction_id: debit_id,
+             group_id: params.group_id
+           }) do
+      {:ok, [debit, credit]}
+    end
   end
 end

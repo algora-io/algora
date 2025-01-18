@@ -49,7 +49,9 @@ defmodule Algora.Bounties do
         creator_id: creator.id
       })
 
-    case Repo.insert(changeset) do
+    changeset
+    |> Repo.insert_with_activity(%{type: :bounty_posted})
+    |> case do
       {:ok, bounty} ->
         {:ok, bounty}
 
@@ -182,7 +184,7 @@ defmodule Algora.Bounties do
     ]
 
     Repo.transact(fn ->
-      with {:ok, tip} <- Repo.insert(changeset),
+      with {:ok, tip} <- Repo.insert_with_activity(changeset, %{type: :tip_awarded}),
            {:ok, _charge} <-
              initialize_charge(%{
                id: charge_id,

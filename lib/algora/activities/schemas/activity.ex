@@ -14,6 +14,12 @@ defmodule Algora.Activities.Activity do
     transaction_failed
     transaction_processed
     identity_created
+    bounty_awarded
+    bounty_posted
+    bounty_repriced
+    claim_submitted
+    claim_approved
+    tip_awarded
   }a
 
   typed_schema "activities" do

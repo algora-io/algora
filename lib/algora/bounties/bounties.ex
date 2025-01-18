@@ -245,8 +245,6 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
-    ticket_ref = opts[:ticket_ref]
-
     changeset =
       Tip.changeset(%Tip{}, %{
         amount: amount,
@@ -254,6 +252,39 @@ defmodule Algora.Bounties do
         creator_id: creator.id,
         recipient_id: recipient.id
       })
+
+    Repo.transact(fn ->
+      with {:ok, tip} <- Repo.insert(changeset) do
+        create_payment_session(
+          %{
+            creator: creator,
+            owner: owner,
+            recipient: recipient,
+            amount: amount,
+            description: "Tip payment for OSS contributions"
+          },
+          ticket_ref: opts[:ticket_ref],
+          tip_id: tip.id
+        )
+      end
+    end)
+  end
+
+  @spec create_payment_session(
+          %{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t(), description: String.t()},
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            tip_id: String.t(),
+            bounty_id: String.t(),
+            claim_id: String.t()
+          ]
+        ) ::
+          {:ok, String.t()} | {:error, atom()}
+  def create_payment_session(
+        %{creator: creator, owner: owner, recipient: recipient, amount: amount, description: description},
+        opts \\ []
+      ) do
+    ticket_ref = opts[:ticket_ref]
 
     # Initialize transaction IDs
     charge_id = Nanoid.generate()
@@ -279,12 +310,7 @@ defmodule Algora.Bounties do
           currency: currency,
           product_data: %{
             name: "Payment to @#{recipient.provider_login}",
-            # TODO:
-            description:
-              if(ticket_ref,
-                do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}",
-                else: "Tip to @#{recipient.provider_login}"
-              ),
+            description: if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"),
             images: [recipient.avatar_url]
           }
         },
@@ -309,11 +335,12 @@ defmodule Algora.Bounties do
     ]
 
     Repo.transact(fn ->
-      with {:ok, tip} <- Repo.insert(changeset),
-           {:ok, _charge} <-
+      with {:ok, _charge} <-
              initialize_charge(%{
                id: charge_id,
-               tip: tip,
+               tip_id: opts[:tip_id],
+               bounty_id: opts[:bounty_id],
+               claim_id: opts[:claim_id],
                user_id: creator.id,
                gross_amount: gross_amount,
                net_amount: amount,
@@ -324,7 +351,9 @@ defmodule Algora.Bounties do
            {:ok, _debit} <-
              initialize_debit(%{
                id: debit_id,
-               tip: tip,
+               tip_id: opts[:tip_id],
+               bounty_id: opts[:bounty_id],
+               claim_id: opts[:claim_id],
                amount: amount,
                user_id: creator.id,
                linked_transaction_id: credit_id,
@@ -333,7 +362,9 @@ defmodule Algora.Bounties do
            {:ok, _credit} <-
              initialize_credit(%{
                id: credit_id,
-               tip: tip,
+               tip_id: opts[:tip_id],
+               bounty_id: opts[:bounty_id],
+               claim_id: opts[:claim_id],
                amount: amount,
                user_id: recipient.id,
                linked_transaction_id: debit_id,
@@ -341,8 +372,7 @@ defmodule Algora.Bounties do
              }),
            {:ok, session} <-
              Payments.create_stripe_session(line_items, %{
-               # Mandatory for some countries like India
-               description: "Tip payment for OSS contributions",
+               description: description,
                metadata: %{"version" => "2", "group_id" => tx_group_id}
              }) do
         {:ok, session.url}
@@ -352,7 +382,9 @@ defmodule Algora.Bounties do
 
   defp initialize_charge(%{
          id: id,
-         tip: tip,
+         tip_id: tip_id,
+         bounty_id: bounty_id,
+         claim_id: claim_id,
          user_id: user_id,
          gross_amount: gross_amount,
          net_amount: net_amount,
@@ -366,7 +398,9 @@ defmodule Algora.Bounties do
       provider: "stripe",
       type: :charge,
       status: :initialized,
-      tip_id: tip.id,
+      tip_id: tip_id,
+      bounty_id: bounty_id,
+      claim_id: claim_id,
       user_id: user_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
@@ -377,14 +411,18 @@ defmodule Algora.Bounties do
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> Algora.Validations.validate_positive(:total_fee)
-    |> foreign_key_constraint(:tip_id)
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:bounty_id)
+    |> foreign_key_constraint(:claim_id)
     |> Repo.insert()
   end
 
   defp initialize_debit(%{
          id: id,
-         tip: tip,
+         tip_id: tip_id,
+         bounty_id: bounty_id,
+         claim_id: claim_id,
          amount: amount,
          user_id: user_id,
          linked_transaction_id: linked_transaction_id,
@@ -396,7 +434,9 @@ defmodule Algora.Bounties do
       provider: "stripe",
       type: :debit,
       status: :initialized,
-      tip_id: tip.id,
+      tip_id: tip_id,
+      bounty_id: bounty_id,
+      claim_id: claim_id,
       user_id: user_id,
       gross_amount: amount,
       net_amount: amount,
@@ -406,14 +446,18 @@ defmodule Algora.Bounties do
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
-    |> foreign_key_constraint(:tip_id)
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:bounty_id)
+    |> foreign_key_constraint(:claim_id)
     |> Repo.insert()
   end
 
   defp initialize_credit(%{
          id: id,
-         tip: tip,
+         tip_id: tip_id,
+         bounty_id: bounty_id,
+         claim_id: claim_id,
          amount: amount,
          user_id: user_id,
          linked_transaction_id: linked_transaction_id,
@@ -425,7 +469,9 @@ defmodule Algora.Bounties do
       provider: "stripe",
       type: :credit,
       status: :initialized,
-      tip_id: tip.id,
+      tip_id: tip_id,
+      bounty_id: bounty_id,
+      claim_id: claim_id,
       user_id: user_id,
       gross_amount: amount,
       net_amount: amount,
@@ -435,8 +481,10 @@ defmodule Algora.Bounties do
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
-    |> foreign_key_constraint(:tip_id)
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:bounty_id)
+    |> foreign_key_constraint(:claim_id)
     |> Repo.insert()
   end
 

@@ -6,6 +6,7 @@ defmodule Algora.Accounts.User do
   alias Algora.Accounts.User
   alias Algora.Activities.Activity
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Tip
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
@@ -77,6 +78,8 @@ defmodule Algora.Accounts.User do
     has_many :members, Member, foreign_key: :org_id
     has_many :owned_bounties, Bounty, foreign_key: :owner_id
     has_many :created_bounties, Bounty, foreign_key: :creator_id
+    has_many :owned_tips, Tip, foreign_key: :owner_id
+    has_many :created_tips, Tip, foreign_key: :creator_id
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project

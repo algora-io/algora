@@ -4,7 +4,7 @@ defmodule AlgoraWeb.Activity.UserNavTimelineLive do
 
   import AlgoraWeb.Components.Activity
 
-  def mount(_params, %{"user_id" => user_id} = session, socket) when is_binary(user_id) do
+  def mount(_params, %{"user_id" => user_id}, socket) when is_binary(user_id) do
     {:ok,
      socket
      |> stream(:activities, [])

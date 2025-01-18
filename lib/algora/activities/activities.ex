@@ -7,7 +7,6 @@ defmodule Algora.Activities do
   alias Algora.Activities.Activity
   alias Algora.Bounties.Bounty
   alias Algora.Repo
-  alias Ecto.Multi
 
   @schema_from_table %{
     identity_activities: Identity,
@@ -74,7 +73,6 @@ defmodule Algora.Activities do
   end
 
   def base_query(table_name) when is_binary(table_name) do
-    assoc_name = schema_from_table(table_name)
     base = from(e in {table_name, Activity})
 
     from(u in subquery(base),
@@ -99,20 +97,18 @@ defmodule Algora.Activities do
 
   def base_query_for_user(user_id, relation_name) do
     table_name = table_from_user_relation(relation_name)
-    assoc_name = schema_from_table(table_name)
 
-    base =
-      from u in User,
-        where: u.id == ^user_id,
-        join: c in assoc(u, ^relation_name),
-        join: a in assoc(c, :activities),
-        select: %{
-          id: a.id,
-          type: a.type,
-          assoc_id: a.assoc_id,
-          assoc_name: ^table_name,
-          inserted_at: a.inserted_at
-        }
+    from u in User,
+      where: u.id == ^user_id,
+      join: c in assoc(u, ^relation_name),
+      join: a in assoc(c, :activities),
+      select: %{
+        id: id,
+        type: a.type,
+        assoc_id: a.assoc_id,
+        assoc_name: ^table_name,
+        inserted_at: a.inserted_at
+      }
   end
 
   def all(table_name) when is_binary(table_name) do
@@ -226,19 +222,11 @@ defmodule Algora.Activities do
     Map.fetch!(@table_from_user_relation, table)
   end
 
-  def build_url(%{assoc: %Bounty{id: id, owner: owner}}) do
-    {:ok, "/org/#{owner.handle}/bounties"}
-  end
+  def build_url(%{assoc: %Bounty{owner: user}}), do: {:ok, "/org/#{user.handle}/bounties"}
+  def build_url(%{assoc: %Identity{user: %{type: :individual} = user}}), do: {:ok, "/@/#{user.handle}"}
+  def build_url(%{assoc: %Identity{user: %{type: :organization} = user}}), do: {:ok, "/org/#{user.handle}"}
 
-  def build_url(%{assoc: %Identity{id: id, user: %{type: :individual} = user}}) do
-    {:ok, "/@/#{user.handle}"}
-  end
-
-  def build_url(%{assoc: %Identity{id: id, user: %{type: :organization} = user}}) do
-    {:ok, "/org/#{user.handle}"}
-  end
-
-  def build_url(a) do
+  def build_url(_activity) do
     {:error, :not_found}
   end
 end

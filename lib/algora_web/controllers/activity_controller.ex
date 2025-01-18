@@ -4,7 +4,7 @@ defmodule AlgoraWeb.ActivityController do
   alias Algora.Activities
 
   def get(conn, %{"table_prefix" => table, "activity_id" => id} = _params) do
-    with {:ok, url} <- Algora.Activities.assoc_url("#{table}_activities", id) do
+    with {:ok, url} <- Activities.assoc_url("#{table}_activities", id) do
       redirect(conn, external: url)
     end
   end

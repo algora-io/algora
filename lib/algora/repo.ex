@@ -113,8 +113,7 @@ defmodule Algora.Repo do
   defp extract_target(response) do
     case response do
       {:ok, %{target: target}} -> {:ok, target}
-      {:error, %{target: target}} -> {:error, target}
-      {:error, error} -> {:error, error}
+      {:error, :target, target, _extra} -> {:error, target}
     end
   end
 end

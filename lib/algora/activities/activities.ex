@@ -7,46 +7,51 @@ defmodule Algora.Activities do
   alias Algora.Repo
   alias Ecto.Multi
 
-  @tables [
-    :identity_activities,
-    :user_activities,
-    :attempt_activities,
-    :bonus_activities,
-    :bounty_activities,
-    :claim_activities,
-    :tip_activities,
-    :message_activities,
-    :thread_activities,
-    :contract_activities,
-    :timesheet_activities,
-    :application_activities,
-    :job_activities,
-    :account_activities,
-    :customer_activities,
-    :payment_method_activities,
-    :platform_transaction_activities,
-    :transaction_activities,
-    :project_activities,
-    :review_activities,
-    :installation_activities,
-    :repository_activities,
-    :ticket_activities
-  ]
+  @schema_from_table %{
+    identity_activities: Algora.Accounts.Identity,
+    user_activities: Algora.Accounts.User,
+    attempt_activities: Algora.Bounties.Attempt,
+    bonus_activities: Algora.Bounties.Bonus,
+    bounty_activities: Algora.Bounties.Bounty,
+    claim_activities: Algora.Bounties.Claim,
+    tip_activities: Algora.Bounties.Tip,
+    message_activities: Algora.Chat.Message,
+    thread_activities: Algora.Chat.Thread,
+    contract_activities: Algora.Contracts.Contract,
+    timesheet_activities: Algora.Contracts.Timesheet,
+    application_activities: Algora.Jobs.Application,
+    job_activities: Algora.Jobs.Job,
+    account_activities: Algora.Payments.Account,
+    customer_activities: Algora.Payments.Customer,
+    payment_method_activities: Algora.Payments.PaymentMethod,
+    platform_transaction_activities: Algora.Payments.PlatformTransaction,
+    transaction_activities: Algora.Payments.Transaction,
+    project_activities: Algora.Projects.Project,
+    review_activities: Algora.Reviews.Project,
+    installation_activities: Algora.Workplace.Installation,
+    ticket_activities: Algora.Workspace.Ticket,
+    repository_activities: Algora.Workspace.Repository
+  }
 
-  @user_attributes [
-    :identities,
-    :owned_bounties,
-    :created_bounties,
-    # :attempts,
-    :claims,
-    # :projects,
-    :repositories,
-    :owned_installations,
-    :connected_installations,
-    :client_contracts,
-    :client_contracts,
-    :contractor_contracts
-  ]
+  @table_from_user_relation %{
+  #  attempts: "attempt_activities",
+    claims: "claim_activities",
+    client_contracts: "contract_activities",
+    connected_installations: "installation_activities",
+    contractor_contracts: "contract_activities",
+    created_bounties: "bounty_activities",
+    owned_tips: "tip_activities",
+    created_tips: "tip_activities",
+    owned_bounties: "bounty_activities",
+    identities: "identity_activities",
+    owned_installations: "installation_activities",
+ #   projects: "project_activities",
+    repositories: "repository_activities",
+    transactions: "transaction_activities"
+  }
+
+  @tables Map.keys(@schema_from_table)
+  @user_attributes Map.keys(@table_from_user_relation)
 
   def tables, do: @tables
   def user_attributes, do: @user_attributes
@@ -168,40 +173,11 @@ defmodule Algora.Activities do
     end)
   end
 
-  def schema_from_table("identity_activities"), do: Algora.Accounts.Identity
-  def schema_from_table("user_activities"), do: Algora.Accounts.User
-  def schema_from_table("attempt_activities"), do: Algora.Bounties.Attempt
-  def schema_from_table("bonus_activities"), do: Algora.Bounties.Bonus
-  def schema_from_table("bounty_activities"), do: Algora.Bounties.Bounty
-  def schema_from_table("claim_activities"), do: Algora.Bounties.Claim
-  def schema_from_table("tip_activities"), do: Algora.Bounties.Tip
-  def schema_from_table("message_activities"), do: Algora.Chat.Message
-  def schema_from_table("thread_activities"), do: Algora.Chat.Thread
-  def schema_from_table("contract_activities"), do: Algora.Contracts.Contract
-  def schema_from_table("timesheet_activities"), do: Algora.Contracts.Timesheet
-  def schema_from_table("application_activities"), do: Algora.Jobs.Application
-  def schema_from_table("job_activities"), do: Algora.Jobs.Job
-  def schema_from_table("account_activities"), do: Algora.Payments.Account
-  def schema_from_table("customer_activities"), do: Algora.Payments.Customer
-  def schema_from_table("payment_method_activities"), do: Algora.Payments.PaymentMethod
-  def schema_from_table("platform_transaction_activities"), do: Algora.Payments.PlatformTransaction
-  def schema_from_table("transaction_activities"), do: Algora.Payments.Transaction
-  def schema_from_table("project_activities"), do: Algora.Projects.Project
-  def schema_from_table("review_activities"), do: Algora.Reviews.Project
-  def schema_from_table("installation_activities"), do: Algora.Workplace.Installation
-  def schema_from_table("ticket_activities"), do: Algora.Workspace.Ticket
-  def schema_from_table("repository_activities"), do: Algora.Workspace.Repository
+  def schema_from_table(name) do
+    Map.fetch!(@schema_from_table, String.to_atom(name))
+  end
 
-  def table_from_user_relation(:attempts), do: "attempt_activities"
-  def table_from_user_relation(:claims), do: "claim_activities"
-  def table_from_user_relation(:client_contracts), do: "contract_activities"
-  def table_from_user_relation(:connected_installations), do: "installation_activities"
-  def table_from_user_relation(:contractor_contracts), do: "contract_activities"
-  def table_from_user_relation(:created_bounties), do: "bounty_activities"
-  def table_from_user_relation(:owned_bounties), do: "bounty_activities"
-  def table_from_user_relation(:identities), do: "identity_activities"
-  def table_from_user_relation(:owned_installations), do: "installation_activities"
-  def table_from_user_relation(:projects), do: "project_activities"
-  def table_from_user_relation(:repositories), do: "repository_activities"
-  def table_from_user_relation(:transactions), do: "transaction_activities"
+  def table_from_user_relation(table) do
+    Map.fetch!(@table_from_user_relation, table)
+  end
 end

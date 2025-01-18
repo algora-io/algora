@@ -270,6 +270,37 @@ defmodule Algora.Bounties do
     end)
   end
 
+  @spec reward_bounty(
+          %{
+            creator: User.t(),
+            owner: User.t(),
+            recipient: User.t(),
+            amount: Money.t(),
+            bounty_id: String.t(),
+            claim_id: String.t()
+          },
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
+        ) ::
+          {:ok, String.t()} | {:error, atom()}
+  def reward_bounty(
+        %{creator: creator, owner: owner, recipient: recipient, amount: amount, bounty_id: bounty_id, claim_id: claim_id},
+        opts \\ []
+      ) do
+    # TODO: handle bounty splits
+    create_payment_session(
+      %{
+        creator: creator,
+        owner: owner,
+        recipient: recipient,
+        amount: amount,
+        description: "Bounty payment for OSS contributions"
+      },
+      ticket_ref: opts[:ticket_ref],
+      bounty_id: bounty_id,
+      claim_id: claim_id
+    )
+  end
+
   @spec create_payment_session(
           %{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t(), description: String.t()},
           opts :: [

@@ -116,6 +116,37 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   @impl true
+  def handle_event("reward_bounty", _params, socket) do
+    claim = socket.assigns.primary_claim
+
+    # TODO: use the correct bounty
+    bounty = hd(claim.target.bounties)
+
+    case Algora.Bounties.reward_bounty(
+           %{
+             # TODO: handle unauthenticated user
+             creator: socket.assigns.current_user,
+             owner: bounty.owner,
+             recipient: claim.user,
+             amount: bounty.amount,
+             bounty_id: bounty.id,
+             claim_id: claim.id
+           },
+           ticket_ref: %{
+             owner: claim.target.repository.user.provider_login,
+             repo: claim.target.repository.name,
+             number: claim.target.number
+           }
+         ) do
+      {:ok, session_url} ->
+        {:noreply, redirect(socket, external: session_url)}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, "Failed to create payment session. Please try again later.")}
+    end
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto py-8 px-4">
@@ -159,7 +190,7 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_title>
                   Claim
                 </.card_title>
-                <.button>
+                <.button phx-click="reward_bounty">
                   Reward bounty
                 </.button>
               </div>

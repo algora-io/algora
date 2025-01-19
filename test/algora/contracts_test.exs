@@ -7,6 +7,7 @@ defmodule Algora.ContractsTest do
 
   alias Algora.Activities
   alias Algora.Contracts
+  alias Algora.Contracts.Contract
   alias Algora.Payments
   alias Algora.Payments.Transaction
 
@@ -253,6 +254,8 @@ defmodule Algora.ContractsTest do
 
       assert [contract_activity | _rest] = Enum.reverse(Activities.all())
       assert contract_activity.assoc.id == contract_a_0.id
+
+      assert Activities.get(contract_activity.assoc_name, contract_activity.id).assoc.__meta__.schema == Contract
     end
 
     test "prepayment fails when payment method is invalid" do

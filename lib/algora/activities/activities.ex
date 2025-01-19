@@ -52,8 +52,25 @@ defmodule Algora.Activities do
     transactions: "transaction_activities"
   }
 
+  @table_from_schema Map.new(@schema_from_table, &{elem(&1, 1), elem(&1, 0)})
   @tables Map.keys(@schema_from_table)
   @user_attributes Map.keys(@table_from_user_relation)
+
+  def schema_from_table(name) when is_binary(name), do: name |> String.to_atom() |> schema_from_table()
+
+  def schema_from_table(name) when is_atom(name) do
+    Map.fetch!(@schema_from_table, name)
+  end
+
+  def table_from_schema(name) when is_binary(name), do: name |> String.to_atom() |> table_from_schema()
+
+  def table_from_schema(name) when is_atom(name) do
+    Map.fetch!(@table_from_schema, name)
+  end
+
+  def table_from_user_relation(table) do
+    Map.fetch!(@table_from_user_relation, table)
+  end
 
   def tables, do: @tables
   def user_attributes, do: @user_attributes
@@ -167,14 +184,21 @@ defmodule Algora.Activities do
   end
 
   def get(table, id) do
+    assoc_query =
+      from t in schema_from_table(table),
+        where: parent_as(:activity).assoc_id == t.id
+
     query =
       from a in table,
+        as: :activity,
         where: a.id == ^id,
+        inner_lateral_join: t in subquery(assoc_query),
         select: %{
           id: a.id,
           type: a.type,
           assoc_id: a.assoc_id,
           assoc_name: ^table,
+          assoc: t,
           inserted_at: a.inserted_at
         }
 
@@ -210,16 +234,6 @@ defmodule Algora.Activities do
   def assoc_url(table, id) do
     activity = get_with_assoc(table, id)
     build_url(activity)
-  end
-
-  def schema_from_table(name) when is_binary(name), do: name |> String.to_atom() |> schema_from_table()
-
-  def schema_from_table(name) when is_atom(name) do
-    Map.fetch!(@schema_from_table, name)
-  end
-
-  def table_from_user_relation(table) do
-    Map.fetch!(@table_from_user_relation, table)
   end
 
   def build_url(%{assoc: %Bounty{owner: user}}), do: {:ok, "/org/#{user.handle}/bounties"}

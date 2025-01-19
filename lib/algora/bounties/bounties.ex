@@ -284,6 +284,101 @@ defmodule Algora.Bounties do
     )
   end
 
+  # TODO: move to separate module
+  defmodule LineItem do
+    @moduledoc false
+    defstruct [:amount, :title, :description, :image, :type]
+
+    @type t :: %__MODULE__{
+            amount: Money.t(),
+            title: String.t(),
+            description: String.t() | nil,
+            image: String.t() | nil,
+            type: :payment | :fee
+          }
+
+    def to_stripe(line_item) do
+      %{
+        price_data: %{
+          unit_amount: MoneyUtils.to_minor_units(line_item.amount),
+          currency: to_string(line_item.amount.currency),
+          product_data: %{
+            name: line_item.title,
+            description: line_item.description,
+            images: if(line_item.image, do: [line_item.image])
+          }
+        },
+        quantity: 1
+      }
+    end
+
+    def gross_amount(line_items) do
+      Enum.reduce(line_items, Money.zero(:USD), fn item, acc -> Money.add!(acc, item.amount) end)
+    end
+
+    def total_fee(line_items) do
+      Enum.reduce(line_items, Money.zero(:USD), fn item, acc ->
+        if item.type == :fee, do: Money.add!(acc, item.amount), else: acc
+      end)
+    end
+  end
+
+  @spec generate_line_items(
+          %{amount: Money.t()},
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            claims: [Claim.t()],
+            recipient: User.t()
+          ]
+        ) ::
+          [LineItem.t()]
+  def generate_line_items(%{amount: amount}, opts \\ []) do
+    ticket_ref = opts[:ticket_ref]
+    recipient = opts[:recipient]
+    claims = opts[:claims]
+
+    description = if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}")
+
+    platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
+    transaction_fee_pct = Payments.get_transaction_fee_pct()
+
+    if recipient do
+      [
+        %LineItem{
+          amount: amount,
+          title: "Payment to @#{recipient.provider_login}",
+          description: description,
+          image: recipient.avatar_url,
+          type: :payment
+        }
+      ]
+    else
+      []
+    end ++
+      Enum.map(claims, fn claim ->
+        %LineItem{
+          # TODO: ensure shares are normalized
+          amount: Money.mult!(amount, claim.group_share),
+          title: "Payment to @#{claim.user.provider_login}",
+          description: description,
+          image: claim.user.avatar_url,
+          type: :payment
+        }
+      end) ++
+      [
+        %LineItem{
+          amount: Money.mult!(amount, platform_fee_pct),
+          title: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})",
+          type: :fee
+        },
+        %LineItem{
+          amount: Money.mult!(amount, transaction_fee_pct),
+          title: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})",
+          type: :fee
+        }
+      ]
+  end
+
   @spec create_payment_session(
           %{creator: User.t(), amount: Money.t(), description: String.t()},
           opts :: [
@@ -296,74 +391,16 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_payment_session(%{creator: creator, amount: amount, description: description}, opts \\ []) do
-    ticket_ref = opts[:ticket_ref]
-    recipient = opts[:recipient]
-    claims = opts[:claims]
-
     tx_group_id = Nanoid.generate()
 
-    # Calculate fees
-    currency = to_string(amount.currency)
-    platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
-    transaction_fee_pct = Payments.get_transaction_fee_pct()
-
-    platform_fee = Money.mult!(amount, platform_fee_pct)
-    transaction_fee = Money.mult!(amount, transaction_fee_pct)
-    total_fee = Money.add!(platform_fee, transaction_fee)
-    gross_amount = Money.add!(amount, total_fee)
-
     line_items =
-      if recipient do
-        [
-          %{
-            price_data: %{
-              unit_amount: MoneyUtils.to_minor_units(amount),
-              currency: currency,
-              product_data: %{
-                name: "Payment to @#{recipient.provider_login}",
-                description: if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"),
-                images: [recipient.avatar_url]
-              }
-            },
-            quantity: 1
-          }
-        ]
-      else
-        []
-      end ++
-        Enum.map(claims, fn claim ->
-          %{
-            price_data: %{
-              # TODO: ensure shares are normalized
-              unit_amount: amount |> Money.mult!(claim.group_share) |> MoneyUtils.to_minor_units(),
-              currency: currency,
-              product_data: %{
-                name: "Payment to @#{claim.user.provider_login}",
-                description: if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"),
-                images: [claim.user.avatar_url]
-              }
-            },
-            quantity: 1
-          }
-        end) ++
-        [
-          %{
-            price_data: %{
-              unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, platform_fee_pct)),
-              currency: currency,
-              product_data: %{name: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})"}
-            },
-            quantity: 1
-          },
-          %{
-            price_data: %{
-              unit_amount: MoneyUtils.to_minor_units(Money.mult!(amount, transaction_fee_pct)),
-              currency: currency,
-              product_data: %{name: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})"}
-            },
-            quantity: 1
-          }
-        ]
+      generate_line_items(%{amount: amount},
+        ticket_ref: opts[:ticket_ref],
+        recipient: opts[:recipient],
+        claims: opts[:claims]
+      )
+
+    gross_amount = LineItem.gross_amount(line_items)
 
     Repo.transact(fn ->
       with {:ok, _charge} <-
@@ -375,7 +412,7 @@ defmodule Algora.Bounties do
                user_id: creator.id,
                gross_amount: gross_amount,
                net_amount: amount,
-               total_fee: total_fee,
+               total_fee: Money.sub!(gross_amount, amount),
                line_items: line_items,
                group_id: tx_group_id
              }),
@@ -389,7 +426,7 @@ defmodule Algora.Bounties do
                group_id: tx_group_id
              }),
            {:ok, session} <-
-             Payments.create_stripe_session(line_items, %{
+             Payments.create_stripe_session(LineItem.to_stripe(line_items), %{
                description: description,
                metadata: %{"version" => "2", "group_id" => tx_group_id}
              }) do

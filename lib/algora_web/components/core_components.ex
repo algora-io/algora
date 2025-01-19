@@ -13,6 +13,7 @@ defmodule AlgoraWeb.CoreComponents do
   use Gettext, backend: AlgoraWeb.Gettext
 
   alias AlgoraWeb.Components.UI.Accordion
+  alias AlgoraWeb.Components.UI.Alert
   alias AlgoraWeb.Components.UI.Avatar
   alias AlgoraWeb.Components.UI.Card
   alias AlgoraWeb.Components.UI.Dialog
@@ -231,6 +232,7 @@ defmodule AlgoraWeb.CoreComponents do
   slot :link do
     attr :navigate, :string
     attr :href, :string
+    attr :patch, :string
     attr :method, :any
   end
 
@@ -238,11 +240,11 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <!-- User account dropdown -->
     <div class={classes(["relative w-full text-left", @class])}>
-      <div>
+      <div class="overflow-visible relative">
         <button
           id={@id}
           type="button"
-          class="group w-full rounded-md px-3.5 py-2 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+          class="group w-full rounded-md p-3 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring border border-input"
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
           data-active-class="bg-accent"
@@ -265,7 +267,7 @@ defmodule AlgoraWeb.CoreComponents do
             </span>
             <.icon
               name="tabler-selector"
-              class="ml-2 h-5 w-5 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
+              class="ml-2 h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
             />
           </span>
         </button>
@@ -282,7 +284,8 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+              class="block p-3 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+              phx-click={hide_dropdown("##{@id}-dropdown")}
               {link}
             >
               {render_slot(link)}
@@ -857,8 +860,8 @@ defmodule AlgoraWeb.CoreComponents do
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
             "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-            "text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-            "border-input focus:border-ring focus:ring-ring/5",
+            "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
+            "border-input focus:border-ring focus:ring-ring",
             @errors != [] &&
               "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
             @icon && "pl-10",
@@ -1258,7 +1261,9 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate accordion_item(assigns), to: Accordion
   defdelegate accordion_trigger(assigns), to: Accordion
   defdelegate accordion(assigns), to: Accordion
-  defdelegate alert(assigns), to: AlgoraWeb.Components.UI.Alert
+  defdelegate alert_description(assigns), to: Alert
+  defdelegate alert_title(assigns), to: Alert
+  defdelegate alert(assigns), to: Alert
   defdelegate avatar_fallback(assigns), to: Avatar
   defdelegate avatar_image(assigns), to: Avatar
   defdelegate avatar(assigns), to: Avatar
@@ -1305,7 +1310,6 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate popover_content(assigns), to: Popover
   defdelegate popover_trigger(assigns), to: Popover
   defdelegate popover(assigns), to: Popover
-  defdelegate radio_group_item(assigns), to: RadioGroup
   defdelegate radio_group(assigns), to: RadioGroup
   defdelegate scroll_area(assigns), to: AlgoraWeb.Components.UI.ScrollArea
   defdelegate select_content(assigns), to: Select

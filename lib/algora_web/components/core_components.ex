@@ -574,7 +574,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed right-4 bottom-4 z-50 hidden w-80 rounded-lg p-3 pr-8 shadow-md ring-1 sm:w-96",
+        "fixed right-4 bottom-4 z-[1000] hidden w-80 rounded-lg p-3 pr-8 shadow-md ring-1 sm:w-96",
         @kind == :info &&
           "bg-emerald-950 fill-success-foreground text-success-foreground ring ring-success/70",
         @kind == :warning &&
@@ -733,10 +733,7 @@ defmodule AlgoraWeb.CoreComponents do
   slot :inner_block
 
   def input(%{field: %FormField{} = field} = assigns) do
-    errors =
-      if Phoenix.Component.used_input?(field) and not assigns.hide_errors,
-        do: field.errors,
-        else: []
+    errors = if assigns.hide_errors, do: [], else: field.errors
 
     value =
       with %Money{} <- field.value,

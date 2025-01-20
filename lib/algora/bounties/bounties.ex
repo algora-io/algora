@@ -8,10 +8,10 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs
+  alias Algora.Bounties.LineItem
   alias Algora.Bounties.Tip
   alias Algora.FeeTier
   alias Algora.Github
-  alias Algora.MoneyUtils
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -284,45 +284,6 @@ defmodule Algora.Bounties do
     )
   end
 
-  # TODO: move to separate module
-  defmodule LineItem do
-    @moduledoc false
-    defstruct [:amount, :title, :description, :image, :type]
-
-    @type t :: %__MODULE__{
-            amount: Money.t(),
-            title: String.t(),
-            description: String.t() | nil,
-            image: String.t() | nil,
-            type: :payment | :fee
-          }
-
-    def to_stripe(line_item) do
-      %{
-        price_data: %{
-          unit_amount: MoneyUtils.to_minor_units(line_item.amount),
-          currency: to_string(line_item.amount.currency),
-          product_data: %{
-            name: line_item.title,
-            description: line_item.description,
-            images: if(line_item.image, do: [line_item.image])
-          }
-        },
-        quantity: 1
-      }
-    end
-
-    def gross_amount(line_items) do
-      Enum.reduce(line_items, Money.zero(:USD), fn item, acc -> Money.add!(acc, item.amount) end)
-    end
-
-    def total_fee(line_items) do
-      Enum.reduce(line_items, Money.zero(:USD), fn item, acc ->
-        if item.type == :fee, do: Money.add!(acc, item.amount), else: acc
-      end)
-    end
-  end
-
   @spec generate_line_items(
           %{amount: Money.t()},
           opts :: [
@@ -349,7 +310,7 @@ defmodule Algora.Bounties do
           title: "Payment to @#{recipient.provider_login}",
           description: description,
           image: recipient.avatar_url,
-          type: :payment
+          type: :payout
         }
       ]
     else
@@ -362,7 +323,7 @@ defmodule Algora.Bounties do
           title: "Payment to @#{claim.user.provider_login}",
           description: description,
           image: claim.user.avatar_url,
-          type: :payment
+          type: :payout
         }
       end) ++
       [
@@ -426,7 +387,9 @@ defmodule Algora.Bounties do
                group_id: tx_group_id
              }),
            {:ok, session} <-
-             Payments.create_stripe_session(LineItem.to_stripe(line_items), %{
+             line_items
+             |> Enum.map(&LineItem.to_stripe/1)
+             |> Payments.create_stripe_session(%{
                description: description,
                metadata: %{"version" => "2", "group_id" => tx_group_id}
              }) do
@@ -458,7 +421,7 @@ defmodule Algora.Bounties do
       gross_amount: gross_amount,
       net_amount: net_amount,
       total_fee: total_fee,
-      line_items: line_items,
+      line_items: Util.normalize_struct(line_items),
       group_id: group_id
     })
     |> Algora.Validations.validate_positive(:gross_amount)

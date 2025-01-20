@@ -7,18 +7,20 @@ defmodule AlgoraWeb.ClaimLive do
 
   alias Algora.Bounties
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.LineItem
   alias Algora.Github
+  alias Algora.Organizations
   alias Algora.Repo
-  alias Algora.Types.USD
   alias Algora.Util
-  alias Algora.Validations
+
+  require Logger
 
   defp tip_options do
     [
+      {"None", 0},
       {"10%", 10},
       {"20%", 20},
-      {"50%", 50},
-      {"None", 0}
+      {"50%", 50}
     ]
   end
 
@@ -30,17 +32,16 @@ defmodule AlgoraWeb.ClaimLive do
 
     @primary_key false
     embedded_schema do
-      field :owner_id, :string
-      field :amount, USD
-      field :tip_percentage, :integer
+      field :amount, :decimal
+      field :tip_percentage, :decimal
     end
 
     def changeset(form, attrs) do
       form
-      |> cast(attrs, [:owner_id, :amount, :tip_percentage])
-      |> validate_required([:owner_id, :amount, :tip_percentage])
+      |> cast(attrs, [:amount, :tip_percentage])
+      |> validate_required([:amount, :tip_percentage])
       |> validate_number(:tip_percentage, greater_than_or_equal_to: 0)
-      |> Validations.validate_money_positive(:amount)
+      |> validate_number(:amount, greater_than: 0)
     end
   end
 
@@ -136,7 +137,7 @@ defmodule AlgoraWeb.ClaimLive do
 
         contexts =
           if socket.assigns.current_user do
-            Algora.Organizations.get_user_orgs(socket.assigns.current_user) ++ [socket.assigns.current_user]
+            Organizations.get_user_orgs(socket.assigns.current_user) ++ [socket.assigns.current_user]
           else
             []
           end
@@ -144,10 +145,13 @@ defmodule AlgoraWeb.ClaimLive do
         context_ids = MapSet.new(contexts, & &1.id)
         available_bounties = Enum.filter(primary_claim.target.bounties, &MapSet.member?(context_ids, &1.owner_id))
 
-        changeset =
-          %RewardBountyForm{}
-          |> RewardBountyForm.changeset(%{tip_percentage: 0})
-          |> maybe_set_amount(available_bounties)
+        amount =
+          case available_bounties do
+            [] -> nil
+            [bounty | _] -> Money.to_decimal(bounty.amount)
+          end
+
+        changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0, amount: amount})
 
         {:ok,
          socket
@@ -163,7 +167,7 @@ defmodule AlgoraWeb.ClaimLive do
          |> assign(:source_body_html, source_body_html)
          |> assign(:sponsors, sponsors)
          |> assign(:contexts, contexts)
-         |> assign(:show_reward_bounty_modal, true)
+         |> assign(:show_reward_bounty_modal, false)
          |> assign(:available_bounties, available_bounties)
          |> assign(:reward_bounty_form, to_form(changeset))}
     end
@@ -171,25 +175,11 @@ defmodule AlgoraWeb.ClaimLive do
 
   @impl true
   def handle_params(%{"context" => context_id}, _url, socket) do
-    line_items =
-      if amount = get_field(socket.assigns.reward_bounty_form.source, :amount) do
-        Bounties.generate_line_items(%{amount: amount},
-          ticket_ref: %{
-            owner: socket.assigns.target.repository.user.provider_login,
-            repo: socket.assigns.target.repository.name,
-            number: socket.assigns.target.number
-          },
-          claims: socket.assigns.claims
-        )
-      else
-        []
-      end
-
-    {:noreply, socket |> assign_selected_context(context_id) |> assign(:line_items, line_items)}
+    {:noreply, socket |> assign_selected_context(context_id) |> assign_line_items()}
   end
 
   def handle_params(_params, _url, socket) do
-    {:noreply, assign_selected_context(socket)}
+    {:noreply, socket |> assign_selected_context(default_context_id(socket)) |> assign_line_items()}
   end
 
   @impl true
@@ -207,55 +197,24 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   def handle_event("validate_reward_bounty", %{"reward_bounty_form" => params}, socket) do
-    case %RewardBountyForm{}
-         |> RewardBountyForm.changeset(params)
-         |> apply_action(:validate) do
-      {:ok, data} ->
-        dbg(data)
-
-        line_items =
-          Bounties.generate_line_items(%{amount: data.amount},
-            ticket_ref: %{
-              owner: socket.assigns.target.repository.user.provider_login,
-              repo: socket.assigns.target.repository.name,
-              number: socket.assigns.target.number
-            },
-            claims: socket.assigns.claims
-          )
-
-        {:noreply, assign(socket, :line_items, line_items)}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, :reward_bounty_form, to_form(changeset))}
-    end
+    {:noreply,
+     socket
+     |> assign(:reward_bounty_form, to_form(RewardBountyForm.changeset(%RewardBountyForm{}, params)))
+     |> assign_line_items()}
   end
 
-  def handle_event("save_reward_bounty", params, socket) do
-    case %RewardBountyForm{}
-         |> RewardBountyForm.changeset(params)
-         |> apply_action(:save) do
+  def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
+    changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
+
+    case apply_action(changeset, :save) do
       {:ok, data} ->
-        bounty = get_or_create_bounty(socket, data)
-        final_amount = calculate_final_amount(data.amount || bounty.amount, data.tip_percentage)
-
-        case Algora.Bounties.reward_bounty(
-               %{
-                 creator: socket.assigns.current_user,
-                 amount: final_amount,
-                 bounty_id: bounty.id,
-                 claims: socket.assigns.claims
-               },
-               ticket_ref: %{
-                 owner: socket.assigns.target.repository.user.provider_login,
-                 repo: socket.assigns.target.repository.name,
-                 number: socket.assigns.target.number
-               }
-             ) do
-          {:ok, session_url} ->
-            {:noreply, redirect(socket, external: session_url)}
-
+        with {:ok, bounty} <- get_or_create_bounty(socket, data),
+             {:ok, session_url} <- reward_bounty(socket, bounty, changeset) do
+          {:noreply, redirect(socket, external: session_url)}
+        else
           {:error, reason} ->
-            {:noreply, put_flash(socket, :error, "Failed to create payment session: #{inspect(reason)}")}
+            Logger.error("Failed to create payment session: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
         end
 
       {:error, changeset} ->
@@ -263,49 +222,80 @@ defmodule AlgoraWeb.ClaimLive do
     end
   end
 
-  defp assign_selected_context(socket, context_id \\ nil)
-
-  defp assign_selected_context(socket, nil) do
-    context_id =
-      case List.first(socket.assigns.available_bounties) do
-        nil -> socket.assigns.current_user.id
-        bounty -> bounty.owner_id
-      end
-
-    assign_selected_context(socket, context_id)
+  defp default_context_id(socket) do
+    case socket.assigns.available_bounties do
+      [] -> socket.assigns.current_user.id
+      [bounty | _] -> bounty.owner_id
+    end
   end
 
   defp assign_selected_context(socket, context_id) do
-    changeset = put_change(socket.assigns.reward_bounty_form.source, :owner_id, context_id)
+    case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
+      nil ->
+        push_patch(socket, to: "/claims/#{socket.assigns.primary_claim.group_id}?context=#{default_context_id(socket)}")
 
-    context = Enum.find(socket.assigns.contexts, &(&1.id == get_field(changeset, :owner_id)))
-
-    socket
-    |> assign(:reward_bounty_form, to_form(changeset))
-    |> assign(:selected_context, context)
+      context ->
+        assign(socket, :selected_context, context)
+    end
   end
 
-  defp maybe_set_amount(changeset, [bounty | _]) do
-    put_change(changeset, :amount, bounty.amount)
+  defp assign_line_items(socket) do
+    line_items =
+      Bounties.generate_line_items(%{amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)},
+        ticket_ref: %{
+          owner: socket.assigns.target.repository.user.provider_login,
+          repo: socket.assigns.target.repository.name,
+          number: socket.assigns.target.number
+        },
+        claims: socket.assigns.claims
+      )
+
+    assign(socket, :line_items, line_items)
   end
 
-  defp maybe_set_amount(changeset, _), do: changeset
-
-  defp get_or_create_bounty(socket, %{owner_id: nil} = data) do
-    # TODO: Create new bounty logic here
-    Bounties.create_bounty(%{
-      owner: socket.assigns.current_user,
-      amount: data.amount,
-      target: socket.assigns.target
-    })
+  defp ticket_ref(socket) do
+    %{
+      owner: socket.assigns.target.repository.user.provider_login,
+      repo: socket.assigns.target.repository.name,
+      number: socket.assigns.target.number
+    }
   end
 
   defp get_or_create_bounty(socket, data) do
-    Enum.find(socket.assigns.available_bounties, &(&1.owner_id == data.owner_id))
+    case Enum.find(socket.assigns.available_bounties, &(&1.owner_id == socket.assigns.selected_context.id)) do
+      nil ->
+        Bounties.create_bounty(%{
+          creator: socket.assigns.current_user,
+          owner: socket.assigns.selected_context,
+          amount: data.amount,
+          ticket_ref: ticket_ref(socket)
+        })
+
+      bounty ->
+        {:ok, bounty}
+    end
   end
 
-  defp calculate_final_amount(base_amount, tip_percentage) do
-    base_amount * (100 + tip_percentage) / 100
+  defp reward_bounty(socket, bounty, changeset) do
+    final_amount = calculate_final_amount(changeset)
+
+    Bounties.reward_bounty(
+      %{
+        creator: socket.assigns.current_user,
+        amount: final_amount,
+        bounty_id: bounty.id,
+        claims: socket.assigns.claims
+      },
+      ticket_ref: ticket_ref(socket)
+    )
+  end
+
+  defp calculate_final_amount(changeset) do
+    tip_percentage = get_field(changeset, :tip_percentage) || Decimal.new(0)
+    amount = get_field(changeset, :amount) || Decimal.new(0)
+
+    multiplier = tip_percentage |> Decimal.div(100) |> Decimal.add(1)
+    amount |> Money.new!(:USD) |> Money.mult!(multiplier)
   end
 
   @impl true
@@ -510,120 +500,136 @@ defmodule AlgoraWeb.ClaimLive do
     <.drawer show={@show_reward_bounty_modal} on_cancel="close_drawer">
       <.drawer_header>
         <.drawer_title>Reward Bounty</.drawer_title>
+        <.drawer_description>
+          You can pay the full bounty now or start with a partial amount - it's up to you!
+        </.drawer_description>
       </.drawer_header>
       <.drawer_content class="mt-4">
-        <div class="grid grid-cols-2 gap-8">
-          <div :if={@reward_bounty_form} class="grid gap-8">
-            <.form for={@reward_bounty_form} phx-submit="validate_reward_bounty">
-              <div class="space-y-4">
-                <%= if Enum.empty?(@available_bounties) do %>
-                  <div class="flex flex-col gap-4">
-                    <.alert variant="destructive">
-                      <.alert_title>No bounties available</.alert_title>
-                      <.alert_description>
-                        You don't have any bounties available. Would you like to create one?
-                      </.alert_description>
-                    </.alert>
+        <.form
+          for={@reward_bounty_form}
+          phx-change="validate_reward_bounty"
+          phx-submit="pay_with_stripe"
+        >
+          <div class="flex flex-col gap-8">
+            <div class="grid grid-cols-2 gap-8">
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Details</.card_title>
+                </.card_header>
+                <.card_content>
+                  <div class="space-y-4">
+                    <%= if Enum.empty?(@available_bounties) do %>
+                      <div class="flex flex-col gap-4">
+                        <.alert variant="destructive">
+                          <.alert_title>No bounties available</.alert_title>
+                          <.alert_description>
+                            You don't have any bounties available. Would you like to create one?
+                          </.alert_description>
+                        </.alert>
 
-                    <div>
+                        <.input
+                          label="Amount"
+                          icon="tabler-currency-dollar"
+                          field={@reward_bounty_form[:amount]}
+                        />
+                      </div>
+                    <% else %>
                       <.input
                         label="Amount"
                         icon="tabler-currency-dollar"
                         field={@reward_bounty_form[:amount]}
                       />
+                    <% end %>
+
+                    <div>
+                      <.label>On behalf of</.label>
+                      <.dropdown2 id="context-dropdown" class="mt-2">
+                        <:img src={@selected_context.avatar_url} />
+                        <:title>{@selected_context.name}</:title>
+                        <:subtitle>@{@selected_context.handle}</:subtitle>
+
+                        <:link
+                          :for={context <- @contexts |> Enum.reject(&(&1.id == @selected_context.id))}
+                          patch={"?context=#{context.id}"}
+                        >
+                          <div class="flex items-center whitespace-nowrap">
+                            <img
+                              src={context.avatar_url}
+                              alt={context.name}
+                              class="mr-3 h-10 w-10 rounded-full"
+                            />
+                            <div>
+                              <div class="font-semibold">{context.name}</div>
+                              <div class="text-sm text-gray-500">@{context.handle}</div>
+                            </div>
+                          </div>
+                        </:link>
+                      </.dropdown2>
+                    </div>
+
+                    <div>
+                      <.label>Tip</.label>
+                      <div class="mt-2">
+                        <.radio_group
+                          class="grid grid-cols-4 gap-4"
+                          field={@reward_bounty_form[:tip_percentage]}
+                          options={tip_options()}
+                        />
+                      </div>
                     </div>
                   </div>
-                <% else %>
-                  <div>
-                    <.input
-                      label="Amount"
-                      icon="tabler-currency-dollar"
-                      field={@reward_bounty_form[:amount]}
-                    />
-                  </div>
-                <% end %>
-
-                <div>
-                  <.label>On behalf of</.label>
-                  <.dropdown2 id="context-dropdown" class="mt-2">
-                    <:img src={@selected_context.avatar_url} />
-                    <:title>{@selected_context.name}</:title>
-
-                    <:link
-                      :for={context <- @contexts |> Enum.reject(&(&1.id == @selected_context.id))}
-                      patch={"?context=#{context.id}"}
-                    >
-                      <div class="flex items-center whitespace-nowrap">
-                        <img
-                          src={context.avatar_url}
-                          alt={context.name}
-                          class="mr-3 h-10 w-10 rounded-full"
-                        />
-                        <div>
-                          <div class="font-semibold">{context.name}</div>
-                          <div class="text-sm text-gray-500">@{context.handle}</div>
-                        </div>
+                </.card_content>
+              </.card>
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Summary</.card_title>
+                </.card_header>
+                <.card_content>
+                  <dl class="space-y-4">
+                    <%= for line_item <- @line_items do %>
+                      <div class="flex justify-between">
+                        <dt class="flex items-center gap-4">
+                          <%= if line_item.image do %>
+                            <.avatar>
+                              <.avatar_image src={line_item.image} />
+                            </.avatar>
+                          <% else %>
+                            <div class="w-10" />
+                          <% end %>
+                          <div>
+                            <div class="font-medium">{line_item.title}</div>
+                            <div class="text-muted-foreground text-sm">{line_item.description}</div>
+                          </div>
+                        </dt>
+                        <dd class="font-display font-semibold tabular-nums">
+                          {Money.to_string!(line_item.amount)}
+                        </dd>
                       </div>
-                    </:link>
-                  </.dropdown2>
-                </div>
-
-                <div>
-                  <.label>Tip Amount</.label>
-                  <div class="mt-2">
-                    <.radio_group
-                      class="grid grid-cols-4 gap-4"
-                      field={@reward_bounty_form[:tip_percentage]}
-                      options={tip_options()}
-                    />
-                  </div>
-                </div>
-              </div>
-            </.form>
-          </div>
-          <div class="flex flex-col gap-8">
-            <.card class="mt-1">
-              <.card_header>
-                <.card_title>Payment Summary</.card_title>
-              </.card_header>
-              <.card_content>
-                <dl class="space-y-4">
-                  <%= for line_item <- @line_items do %>
+                    <% end %>
+                    <div class="h-px bg-border" />
                     <div class="flex justify-between">
                       <dt class="flex items-center gap-4">
-                        <.avatar :if={line_item.image}>
-                          <.avatar_image src={line_item.image} />
-                        </.avatar>
-                        <div>
-                          <div class="font-medium">{line_item.title}</div>
-                          <div class="text-muted-foreground text-sm">{line_item.description}</div>
-                        </div>
+                        <div class="w-10" />
+                        <div class="font-medium">Total due</div>
                       </dt>
                       <dd class="font-display font-semibold tabular-nums">
-                        {Money.to_string!(line_item.amount)}
+                        {LineItem.gross_amount(@line_items)}
                       </dd>
                     </div>
-                  <% end %>
-                  <div class="h-px bg-border" />
-                  <div class="flex justify-between">
-                    <dt class="font-medium">Total Due</dt>
-                    <dd class="font-display font-semibold tabular-nums">
-                      {Bounties.LineItem.gross_amount(@line_items)}
-                    </dd>
-                  </div>
-                </dl>
-              </.card_content>
-            </.card>
+                  </dl>
+                </.card_content>
+              </.card>
+            </div>
             <div class="ml-auto flex gap-4">
-              <.button variant="secondary" type="button">
+              <.button variant="secondary" phx-click="close_drawer" type="button">
                 Cancel
               </.button>
               <.button type="submit">
-                <.icon name="tabler-brand-stripe" class="-ml-1 mr-2 h-4 w-4" /> Pay with Stripe
+                Pay with Stripe <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
               </.button>
             </div>
           </div>
-        </div>
+        </.form>
       </.drawer_content>
     </.drawer>
     """

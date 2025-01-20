@@ -17,7 +17,6 @@ defmodule AlgoraWeb.Components.UI.RadioGroup do
 
   """
   attr :name, :string, default: nil
-  attr :value, :any, default: nil
   attr :options, :list, default: [], doc: "List of {label, value} tuples"
   attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form"
   attr :class, :string, default: nil
@@ -32,7 +31,12 @@ defmodule AlgoraWeb.Components.UI.RadioGroup do
           "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
         ]}>
           <div class="sr-only">
-            <.input field={@field} type="radio" value={value} checked={to_string(@value) == value} />
+            <.input
+              field={@field}
+              type="radio"
+              value={value}
+              checked={to_string(@field.value) == to_string(value)}
+            />
           </div>
           <span class="flex flex-1 items-center justify-between">
             <span class="text-sm font-medium">{label}</span>
@@ -44,6 +48,7 @@ defmodule AlgoraWeb.Components.UI.RadioGroup do
         </label>
       <% end %>
     </div>
+    <.error :for={msg <- @field.errors}>{translate_error(msg)}</.error>
     """
   end
 end

@@ -50,7 +50,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
-  defp execute_command({:bounty, args}, author, params) do
+  defp execute_command(event_action, {:bounty, args}, author, params)
+       when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
     repo = params["repository"]
     issue = params["issue"]
@@ -81,7 +82,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({:tip, args}, author, params) when not is_nil(args) do
+  defp execute_command(event_action, {:tip, args}, author, params)
+       when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
     recipient = args[:recipient]
     repo = params["repository"]
@@ -112,7 +114,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({:claim, args}, author, params) when not is_nil(args) do
+  defp execute_command(event_action, {:claim, args}, author, params)
+       when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
     installation_id = params["installation"]["id"]
     pull_request = params["pull_request"]
     repo = params["repository"]
@@ -145,7 +148,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(_command, _author, _params) do
+  defp execute_command(_event_action, _command, _author, _params) do
     {:error, :unhandled_command}
   end
 
@@ -153,15 +156,20 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     author = get_author(event, params)
     body = get_body(event, params)
 
+    event_action = event <> "." <> params["action"]
+
     case Github.Command.parse(body) do
       {:ok, commands} ->
         Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
-          case execute_command(command, author, params) do
+          case execute_command(event_action, command, author, params) do
             {:ok, result} ->
               {:cont, {:ok, [result | results]}}
 
             error ->
-              Logger.error("Command execution failed for #{inspect(command)}: #{inspect(error)}")
+              Logger.error(
+                "Command execution failed for #{event_action}(#{event["id"]}): #{inspect(command)}: #{inspect(error)}"
+              )
+
               {:halt, error}
           end
         end)

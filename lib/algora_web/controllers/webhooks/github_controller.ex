@@ -13,24 +13,23 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: auto-retry failed deliveries with exponential backoff
 
   def new(conn, params) do
-    case Webhook.new(conn) do
-      {:ok, %Webhook{delivery: _delivery, event: event, installation_id: _installation_id}} ->
-        author = get_author(event, params)
-        body = get_body(event, params)
-        process_commands(body, author, params)
-
-        conn |> put_status(:accepted) |> json(%{status: "ok"})
-
+    with {:ok, webhook} <- Webhook.new(conn),
+         {:ok, _} <- process_commands(webhook, params) do
+      conn |> put_status(:accepted) |> json(%{status: "ok"})
+    else
       {:error, :missing_header} ->
         conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
 
       {:error, :signature_mismatch} ->
         conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
+
+      {:error, reason} ->
+        Logger.error("Error processing webhook: #{inspect(reason)}")
+        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
     end
   rescue
     e ->
       Logger.error("Unexpected error: #{inspect(e)}")
-
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
   end
 
@@ -51,7 +50,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
-  defp execute_command({:bounty, args}, author, params) do
+  defp execute_command(event_action, {:bounty, args}, author, params)
+       when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
     repo = params["repository"]
     issue = params["issue"]
@@ -82,7 +82,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({:tip, args}, author, params) when not is_nil(args) do
+  defp execute_command(event_action, {:tip, args}, author, params)
+       when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
     recipient = args[:recipient]
     repo = params["repository"]
@@ -113,26 +114,71 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command({:claim, args}, _author, _params) when not is_nil(args) do
-    owner = Keyword.get(args, :owner)
-    repo = Keyword.get(args, :repo)
-    number = Keyword.get(args, :number)
+  defp execute_command(event_action, {:claim, args}, author, params)
+       when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
+    installation_id = params["installation"]["id"]
+    pull_request = params["pull_request"]
+    repo = params["repository"]
 
-    Logger.info("Claim #{owner}/#{repo}##{number}")
-  end
+    source_ticket_ref = %{
+      owner: repo["owner"]["login"],
+      repo: repo["name"],
+      number: pull_request["number"]
+    }
 
-  defp execute_command({command, _} = args, _author, _params),
-    do: Logger.info("Unhandled command: #{command} #{inspect(args)}")
+    target_ticket_ref =
+      %{
+        owner: args[:ticket_ref][:owner] || source_ticket_ref.owner,
+        repo: args[:ticket_ref][:repo] || source_ticket_ref.repo,
+        number: args[:ticket_ref][:number]
+      }
 
-  def process_commands(body, author, params) when is_binary(body) do
-    case Github.Command.parse(body) do
-      {:ok, commands} -> Enum.map(commands, &execute_command(&1, author, params))
-      # TODO: handle errors
-      {:error, error} -> Logger.error("Error parsing commands: #{inspect(error)}")
+    with {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
+      Bounties.claim_bounty(
+        %{
+          user: user,
+          target_ticket_ref: target_ticket_ref,
+          source_ticket_ref: source_ticket_ref,
+          status: if(pull_request["merged_at"], do: :approved, else: :pending),
+          type: :pull_request
+        },
+        installation_id: installation_id
+      )
     end
   end
 
-  def process_commands(_body, _author, _params), do: nil
+  defp execute_command(_event_action, _command, _author, _params) do
+    {:ok, nil}
+  end
+
+  def process_commands(%Webhook{event: event, hook_id: hook_id}, params) do
+    author = get_author(event, params)
+    body = get_body(event, params)
+
+    event_action = event <> "." <> params["action"]
+
+    case Github.Command.parse(body) do
+      {:ok, commands} ->
+        Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
+          case execute_command(event_action, command, author, params) do
+            {:ok, result} ->
+              {:cont, {:ok, [result | results]}}
+
+            error ->
+              Logger.error(
+                "Command execution failed for #{event_action}(#{hook_id}): #{inspect(command)}: #{inspect(error)}"
+              )
+
+              {:halt, error}
+          end
+        end)
+
+      {:error, reason} = error ->
+        Logger.error("Error parsing commands: #{inspect(reason)}")
+        error
+    end
+  end
 
   defp get_author("issues", params), do: params["issue"]["user"]
   defp get_author("issue_comment", params), do: params["comment"]["user"]

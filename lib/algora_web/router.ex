@@ -114,6 +114,7 @@ defmodule AlgoraWeb.Router do
       live "/payment/success", Payment.SuccessLive, :index
       live "/payment/canceled", Payment.CanceledLive, :index
       live "/@/:handle", User.ProfileLive, :index
+      live "/claims/:group_id", ClaimLive
     end
 
     live "/orgs/new", Org.CreateLive

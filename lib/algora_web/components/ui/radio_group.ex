@@ -2,93 +2,53 @@ defmodule AlgoraWeb.Components.UI.RadioGroup do
   @moduledoc false
   use AlgoraWeb.Component
 
+  import AlgoraWeb.CoreComponents
+
   @doc """
-  Radio input group component
+  Radio input group component styled with a modern card-like appearance.
 
   ## Examples:
 
-      <.radio_group name="question-1" value="option-2">
-      <div class="flex items-center space-x-2">
-        <.radio_group_item builder={builder} value="option-one" id="option-one"></.radio_group_item>
-        <.label for="option-one">
-          Option One
-        </.label>
-      </div>
-      <div class="flex items-center space-x-2">
-        <.radio_group_item builder={builder} value="option-two" id="option-two"></.radio_group_item>
-        <.label for="option-two">
-          Option Two
-        </.label>
-      </div>
-    </.radio_group>
+      <.radio_group
+        name="hiring"
+        options={[{"Yes", "true"}, {"No", "false"}]}
+        field={@form[:hiring]}
+      />
 
   """
   attr :name, :string, default: nil
-  attr :value, :any, default: nil
-  attr :"default-value", :any
-
-  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
-
+  attr :options, :list, default: [], doc: "List of {label, value} tuples"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form"
   attr :class, :string, default: nil
-  slot :inner_block, required: true
 
   def radio_group(assigns) do
-    assigns = prepare_assign(assigns)
-    assigns = assign(assigns, :builder, %{name: assigns.name, value: assigns.value})
-
     ~H"""
-    <div
-      role="radiogroup"
-      aria-required="false"
-      dir="ltr"
-      class={classes(["grid gap-2", @class])}
-      tabindex="0"
-      style="outline: none;"
-    >
-      {render_slot(@inner_block, @builder)}
+    <div class={classes([@class])}>
+      <%= for {label, value} <- @options do %>
+        <label class={[
+          "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+          "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+          "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+        ]}>
+          <div class="sr-only">
+            <.input
+              field={@field}
+              type="radio"
+              value={value}
+              checked={to_string(@field.value) == to_string(value)}
+            />
+          </div>
+          <span class="flex flex-1 items-center justify-between">
+            <span class="text-sm font-medium">{label}</span>
+            <.icon
+              name="tabler-check"
+              class="invisible size-5 text-primary group-has-[:checked]:visible"
+            />
+          </span>
+        </label>
+      <% end %>
     </div>
-    """
-  end
-
-  attr :builder, :map, required: true
-  attr :class, :string, default: nil
-  attr :checked, :any, default: false
-  attr :value, :string, default: nil
-  attr :rest, :global
-
-  def radio_group_item(assigns) do
-    ~H"""
-    <label class={
-      classes([
-        "inline-grid aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        @class
-      ])
-    }>
-      <input
-        type="radio"
-        class="peer/radio hidden"
-        name={@builder.name}
-        value={@value}
-        checked={normalize_boolean(@checked) || @builder.value == @value}
-        {@rest}
-      />
-      <span class="hidden items-center justify-center peer-checked/radio:flex">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-circle h-2.5 w-2.5 fill-current text-current"
-        >
-          <circle cx="12" cy="12" r="10"></circle>
-        </svg>
-      </span>
-    </label>
+    <.error :for={msg <- @field.errors}>{translate_error(msg)}</.error>
     """
   end
 end

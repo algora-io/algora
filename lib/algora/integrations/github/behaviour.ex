@@ -1,5 +1,6 @@
 defmodule Algora.Github.Behaviour do
   @moduledoc false
+
   @type token :: String.t()
   @type response :: {:ok, map()} | {:error, any()}
 
@@ -15,9 +16,9 @@ defmodule Algora.Github.Behaviour do
   @callback list_installations(token(), integer()) :: response
   @callback find_installation(token(), integer(), integer()) :: response
   @callback get_installation_token(integer()) :: response
-  @callback create_issue_comment(token(), String.t(), String.t(), integer(), String.t()) ::
-              response
-
+  @callback create_issue_comment(token(), String.t(), String.t(), integer(), String.t()) :: response
   @callback list_repository_events(token(), String.t(), String.t(), keyword()) :: response
   @callback list_repository_comments(token(), String.t(), String.t(), keyword()) :: response
+  @callback add_labels(token(), String.t(), String.t(), integer(), [String.t()]) :: response
+  @callback render_markdown(token(), String.t(), keyword()) :: response
 end

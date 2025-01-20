@@ -19,16 +19,16 @@ defmodule Algora.Activities.Notifier do
   end
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: args} = job) do
+  def perform(%Oban.Job{args: args}) do
     case args do
       %{
         "activity_id" => activity_id,
-        "target_id" => target_id,
         "table_name" => table
-      } = args
+      }
       when is_binary(table) ->
-        _activity = Activities.get(table, activity_id)
-
+        activity = Activities.get_with_preloaded_assoc(table, activity_id)
+        users_to_notify = Activities.broadcast(activity)
+        Activities.notify_users(activity, users_to_notify)
         :ok
 
       _args ->

@@ -1,0 +1,1 @@
+A Bounty for <%= bounty.amount %> was added to <%= bounty.ticket.repository.name %>

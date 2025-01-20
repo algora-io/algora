@@ -9,10 +9,6 @@ defmodule Algora.Activities.Activity do
     contract_prepaid
     contract_created
     contract_renewed
-    transaction_status_change
-    transaction_created
-    transaction_failed
-    transaction_processed
     identity_created
     bounty_awarded
     bounty_posted
@@ -32,6 +28,7 @@ defmodule Algora.Activities.Activity do
     field :trace_id, :string
     field :notify_users, {:array, :string}, default: []
     field :assoc_name, :string, virtual: true
+    field :assoc, :map, virtual: true
 
     belongs_to :user, Algora.Accounts.User
     belongs_to :previous_event, __MODULE__
@@ -39,10 +36,22 @@ defmodule Algora.Activities.Activity do
     timestamps()
   end
 
+  def types, do: @activity_types
+
   @doc false
   def changeset(activity, attrs) do
     activity
-    |> cast(attrs, [:type, :visibility, :template, :meta, :changes, :trace_id, :user_id, :previous_event_id])
+    |> cast(attrs, [
+      :type,
+      :visibility,
+      :template,
+      :meta,
+      :changes,
+      :trace_id,
+      :user_id,
+      :previous_event_id,
+      :notify_users
+    ])
     |> validate_required([:type])
     |> foreign_key_constraint(:assoc_id)
     |> foreign_key_constraint(:user_id)

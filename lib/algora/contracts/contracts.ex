@@ -522,7 +522,8 @@ defmodule Algora.Contracts do
     contract
     |> change(%{status: :paid})
     |> Repo.update_with_activity(%{
-      type: :contract_paid
+      type: :contract_paid,
+      notify_users: [contract.client_id, contract.contractor_id]
     })
   end
 
@@ -542,7 +543,7 @@ defmodule Algora.Contracts do
     })
     |> Repo.insert_with_activity(%{
       type: :contract_renewed,
-      trace_id: Nanoid.generate()
+      notify_users: [contract.client_id, contract.contractor_id]
     })
   end
 

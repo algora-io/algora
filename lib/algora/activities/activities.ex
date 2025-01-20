@@ -5,6 +5,8 @@ defmodule Algora.Activities do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Activities.Activity
+  alias Algora.Activities.Router
+  alias Algora.Activities.Views
   alias Algora.Bounties.Bounty
   alias Algora.Repo
 
@@ -199,48 +201,130 @@ defmodule Algora.Activities do
           assoc_id: a.assoc_id,
           assoc_name: ^table,
           assoc: t,
-          inserted_at: a.inserted_at
+          notify_users: a.notify_users,
+          visibility: a.visibility,
+          template: a.template,
+          meta: a.meta,
+          changes: a.changes,
+          trace_id: a.trace_id,
+          previous_event_id: a.previous_event_id,
+          inserted_at: a.inserted_at,
+          updated_at: a.updated_at
         }
 
-    Algora.Repo.one(query)
+    struct(Activity, Algora.Repo.one(query))
   end
 
-  def get_assoc(prefix, assoc_id) when prefix in ["bounty_activities"] do
-    get_assoc(prefix, assoc_id, [:owner])
-  end
+  def get_with_preloaded_assoc(table, id) do
+    schema = schema_from_table(table)
 
-  def get_assoc(prefix, assoc_id) when prefix in ["identity_activities"] do
-    get_assoc(prefix, assoc_id, [:user])
-  end
-
-  def get_assoc(prefix, assoc_id, preload) do
-    assoc_table = schema_from_table(prefix)
-
-    query =
-      from a in assoc_table,
-        preload: ^preload,
-        where: a.id == ^assoc_id
-
-    Algora.Repo.one(query)
-  end
-
-  def get_with_assoc(table, id) do
     with %{assoc_id: assoc_id} = activity <- get(table, id),
-         assoc when is_map(assoc) <- get_assoc(table, assoc_id) do
+         assoc when is_map(assoc) <- get_preloaded_assoc(schema, assoc_id) do
       Map.put(activity, :assoc, assoc)
     end
   end
 
-  def assoc_url(table, id) do
-    activity = get_with_assoc(table, id)
-    build_url(activity)
+  def get_preloaded_assoc(schema, assoc_id) do
+    query =
+      if Kernel.function_exported?(schema, :query, 1) do
+        schema.query(assoc_id)
+      else
+        from a in schema, where: a.id == ^assoc_id
+      end
+
+    Algora.Repo.one(query)
   end
 
-  def build_url(%{assoc: %Bounty{owner: user}}), do: {:ok, "/org/#{user.handle}/bounties"}
-  def build_url(%{assoc: %Identity{user: %{type: :individual} = user}}), do: {:ok, "/@/#{user.handle}"}
-  def build_url(%{assoc: %Identity{user: %{type: :organization} = user}}), do: {:ok, "/org/#{user.handle}"}
+  def assoc_url(table, id) do
+    table |> get(id) |> Router.route()
+  end
 
-  def build_url(_activity) do
-    {:error, :not_found}
+  def subscribe do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "activities")
+  end
+
+  def subscribe(schema) when is_atom(schema) do
+    schema |> schema_from_table() |> subscribe()
+  end
+
+  def subscribe_table(table) when is_binary(table) do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "activity:table:#{table}")
+  end
+
+  def subscribe_user(user_id) when is_binary(user_id) do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "activity:users:#{user_id}")
+  end
+
+  def broadcast(%{notify_users: []}), do: []
+
+  def broadcast(%{notify_users: user_ids} = activity) do
+    :ok = Phoenix.PubSub.broadcast(Algora.PubSub, "activities", activity)
+    :ok = Phoenix.PubSub.broadcast(Algora.PubSub, "activity:table:#{activity.assoc_name}", activity)
+
+    users_query =
+      from u in Algora.Accounts.User,
+        where: u.id in ^user_ids,
+        select: u
+
+    users_query
+    |> Algora.Repo.all()
+    |> Enum.reduce([], fn user, not_online ->
+      # TODO setup notification preferences
+      :ok = Phoenix.PubSub.broadcast(Algora.PubSub, "activity:users:#{user.id}", activity)
+      [user | not_online]
+    end)
+  end
+
+  def notify_users(_activity, []), do: :ok
+
+  def notify_users(activity, users_to_notify) do
+    title = activity_email_title(activity)
+    body = activity_email_body(activity)
+
+    users_to_notify
+    |> Enum.reduce([], fn
+      %{name: display_name, email: email, id: id}, acc ->
+        changeset =
+          Algora.Activities.SendEmail.changeset(%{
+            title: title,
+            body: body,
+            user_id: id,
+            activity_id: activity.id,
+            activity_type: activity.type,
+            activity_table: activity.assoc_name,
+            name: display_name,
+            email: email
+          })
+
+        [changeset | acc]
+
+      _user, acc ->
+        acc
+    end)
+    |> Oban.insert_all()
+  end
+
+  def activity_email_title(activity) do
+    apply(Views, :"#{activity.type}_title", [activity, activity.assoc])
+  end
+
+  def activity_email_body(activity) do
+    apply(Views, :"#{activity.type}_txt", [activity, activity.assoc])
+  end
+
+  def redirect_url_for_activity(activity) do
+    slug =
+      activity.assoc_name
+      |> to_string()
+      |> String.replace("_activities", "")
+
+    "/a/#{slug}/#{activity.id}"
+  end
+
+  def activity_type_to_name(type) do
+    type
+    |> to_string()
+    |> String.split("_")
+    |> Enum.map_join(" ", &String.capitalize(&1))
   end
 end

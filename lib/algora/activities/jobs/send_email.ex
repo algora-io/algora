@@ -1,14 +1,14 @@
 defmodule Algora.Activities.SendEmail do
   @moduledoc false
   use Oban.Worker,
-    queue: :activities,
-    max_attempts: 3,
-    tags: ["mail", "activities"]
+    queue: :activity_mailer,
+    max_attempts: 1,
+    tags: ["email", "activities"]
 
   # unique: [period: 30]
 
-  def changeset(activity, target) do
-    new(%{activity_id: activity.id, target_id: target.id})
+  def changeset(attrs) do
+    new(attrs)
   end
 
   @impl Oban.Worker

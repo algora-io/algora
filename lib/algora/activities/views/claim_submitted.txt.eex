@@ -1,0 +1,3 @@
+A claim for <%= claim.bounty.ticket.repository.name %> has been submitted
+
+<%= claim.url %>

@@ -4,16 +4,23 @@ defmodule AlgoraWeb.Components.Activity do
 
   import AlgoraWeb.CoreComponents
 
+  alias Algora.Activities
+
   attr :activities, :list, required: true
+  attr :id, :string, required: true
 
   def activities_timeline(assigns) do
     ~H"""
-    <div class="space-y-2 h-[400px] overflow-y-auto">
-      <%= for {_id, activity} <- assigns[:activities] do %>
+    <div
+      id={assigns[:id]}
+      class="row-reversed space-y-2 h-[400px] overflow-y-auto"
+      phx-update="stream"
+    >
+      <div :for={{id, activity} <- assigns[:activities]} id={id}>
         <div class="flex-grow hover:bg-accent">
           <.activity_card activity={activity} />
         </div>
-      <% end %>
+      </div>
     </div>
     """
   end
@@ -23,9 +30,15 @@ defmodule AlgoraWeb.Components.Activity do
   def activity_card(assigns) do
     ~H"""
     <.link
-      href={url_for_activity(assigns[:activity])}
+      href={Activities.redirect_url_for_activity(assigns[:activity])}
       class="flex flex-grow items-center gap-4 mt-4 mb-4 p-4 pb-4 border-b w-full last:border-none first:border-t first:mt-0 first:pt-4"
       tabindex="-1"
+      phx-mounted={
+        JS.transition(
+          {"first:ease-in duration-500", "first:opacity-0 first:p-0 first:h-0", "first:opacity-100"},
+          time: 500
+        )
+      }
     >
       <div class={[
         "flex h-9 w-9 items-center justify-center rounded-full",
@@ -48,7 +61,7 @@ defmodule AlgoraWeb.Components.Activity do
   attr :type, :atom, required: true
 
   def activity_name(%{type: type} = assigns) do
-    assigns = assign(assigns, :name, activity_type_to_name(type))
+    assigns = assign(assigns, :name, Activities.activity_type_to_name(type))
 
     ~H"""
     <div class="">{@name}</div>
@@ -91,30 +104,18 @@ defmodule AlgoraWeb.Components.Activity do
         aria-labelledby={@id}
       >
         <div class="py-1 w-full overflow-y-auto" role="none">
-          <.activities_timeline activities={@activities} />
+          <.activities_timeline id={"#{@id}-activities-timeline"} activities={@activities} />
         </div>
       </div>
     </div>
     """
   end
 
-  defp url_for_activity(activity) do
-    slug = activity.assoc_name |> to_string() |> String.replace("_activities", "")
-    "/a/#{slug}/#{activity.id}"
-  end
-
-  defp activity_type_to_name(type) do
-    type
-    |> to_string()
-    |> String.split("_")
-    |> Enum.map_join(" ", &String.capitalize(&1))
-  end
-
-  defp activity_icon(type) do
+  defp activity_icon(_type) do
     "tabler-file-check"
   end
 
-  defp activity_background_class(type) do
+  defp activity_background_class(_type) do
     "bg-primary/20"
   end
 end

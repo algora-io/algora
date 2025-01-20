@@ -53,6 +53,14 @@ defmodule Algora.BountiesTest do
       assert_activity_names([:bounty_posted, :tip_awarded])
       assert_activity_names_for_user(creator.id, [:bounty_posted, :tip_awarded])
       assert_activity_names_for_user(recipient.id, [:tip_awarded])
+
+      assert [_activity, activity] = Enum.reverse(Algora.Activities.all())
+      assert "tip_activities" == activity.assoc_name
+      assert activity.notify_users == [recipient.id]
+
+      assert activity = Algora.Activities.get_with_preloaded_assoc(activity.assoc_name, activity.id)
+      assert activity.assoc.__meta__.schema == Algora.Bounties.Tip
+      assert activity.assoc.creator.id == creator.id
     end
 
     test "query" do

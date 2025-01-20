@@ -31,4 +31,10 @@ defmodule Algora.Bounties.Tip do
     |> foreign_key_constraint(:recipient)
     |> Algora.Validations.validate_money_positive(:amount)
   end
+
+  def query(id) do
+    from a in __MODULE__,
+      preload: [:ticket, :owner, :creator, :recipient],
+      where: a.id == ^id
+  end
 end

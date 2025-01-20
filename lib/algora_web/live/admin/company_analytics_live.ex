@@ -10,6 +10,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   def mount(_params, _session, socket) do
     {:ok, analytics} = Analytics.get_company_analytics()
     funnel_data = Analytics.get_funnel_data()
+    :ok = Activities.subscribe()
 
     {:ok,
      socket
@@ -55,7 +56,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
             <.card_header>
               <.card_title>Recent Activities</.card_title>
             </.card_header>
-            <.activities_timeline activities={@streams.activities} />
+            <.activities_timeline id="admin-activities-timeline" activities={@streams.activities} />
           </.card>
         </.scroll_area>
       </div>
@@ -163,5 +164,9 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
 
   def handle_async(:get_activities, {:ok, fetched}, socket) do
     {:noreply, stream(socket, :activities, fetched)}
+  end
+
+  def handle_info(%Activities.Activity{} = activity, socket) do
+    {:noreply, stream_insert(socket, :activities, activity, at: 0)}
   end
 end

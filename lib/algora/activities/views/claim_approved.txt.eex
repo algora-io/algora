@@ -1,0 +1,3 @@
+A claim for <%= claim.bounty.amount %> was accepted for <%= claim.bounty.ticket.repository.name %>
+
+<%= claim.url %>

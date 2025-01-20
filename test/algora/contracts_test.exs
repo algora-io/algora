@@ -252,10 +252,11 @@ defmodule Algora.ContractsTest do
 
       assert_enqueued(worker: Activities.Notifier, worker: "Algora.Activities.Notifier")
 
-      assert [contract_activity | _rest] = Enum.reverse(Activities.all())
+      assert [contract_activity | activities] = Enum.reverse(Activities.all())
       assert contract_activity.assoc.id == contract_a_0.id
-
-      assert Activities.get(contract_activity.assoc_name, contract_activity.id).assoc.__meta__.schema == Contract
+      activity = Activities.get(contract_activity.assoc_name, contract_activity.id)
+      assert activity.assoc.__meta__.schema == Contract
+      assert List.last(activities).notify_users == [contract_b_1.client.id, contract_b_1.contractor_id]
     end
 
     test "prepayment fails when payment method is invalid" do

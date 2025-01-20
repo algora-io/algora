@@ -15,7 +15,7 @@ defmodule Algora.Repo.Migrations.CreateActivities do
         add :changes, :map, null: false
         add :trace_id, :string
         add :previous_event_id, references(table_name)
-        add :notify_users, {:array, :id}, default: []
+        add :notify_users, {:array, :string}, default: []
 
         timestamps()
       end

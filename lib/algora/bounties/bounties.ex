@@ -256,7 +256,7 @@ defmodule Algora.Bounties do
     Repo.transact(fn ->
       with {:ok, tip} <- Repo.insert(changeset) do
         create_payment_session(
-          %{creator: creator, amount: amount, description: "Tip payment for OSS contributions"},
+          %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
           ticket_ref: opts[:ticket_ref],
           tip_id: tip.id,
           recipient: recipient
@@ -267,7 +267,7 @@ defmodule Algora.Bounties do
 
   @spec reward_bounty(
           %{
-            creator: User.t(),
+            owner: User.t(),
             amount: Money.t(),
             bounty_id: String.t(),
             claims: [Claim.t()]
@@ -275,9 +275,9 @@ defmodule Algora.Bounties do
           opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
         ) ::
           {:ok, String.t()} | {:error, atom()}
-  def reward_bounty(%{creator: creator, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
+  def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
     create_payment_session(
-      %{creator: creator, amount: amount, description: "Bounty payment for OSS contributions"},
+      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
       ticket_ref: opts[:ticket_ref],
       bounty_id: bounty_id,
       claims: claims
@@ -341,7 +341,7 @@ defmodule Algora.Bounties do
   end
 
   @spec create_payment_session(
-          %{creator: User.t(), amount: Money.t(), description: String.t()},
+          %{owner: User.t(), amount: Money.t(), description: String.t()},
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             tip_id: String.t(),
@@ -351,7 +351,7 @@ defmodule Algora.Bounties do
           ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
-  def create_payment_session(%{creator: creator, amount: amount, description: description}, opts \\ []) do
+  def create_payment_session(%{owner: owner, amount: amount, description: description}, opts \\ []) do
     tx_group_id = Nanoid.generate()
 
     line_items =
@@ -370,7 +370,7 @@ defmodule Algora.Bounties do
                tip_id: opts[:tip_id],
                bounty_id: opts[:bounty_id],
                claim_id: nil,
-               user_id: creator.id,
+               user_id: owner.id,
                gross_amount: gross_amount,
                net_amount: amount,
                total_fee: Money.sub!(gross_amount, amount),
@@ -383,7 +383,7 @@ defmodule Algora.Bounties do
                tip_id: opts[:tip_id],
                bounty_id: opts[:bounty_id],
                amount: amount,
-               creator_id: creator.id,
+               creator_id: owner.id,
                group_id: tx_group_id
              }),
            {:ok, session} <-

@@ -174,6 +174,10 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   @impl true
+  def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket}
+  end
+
   def handle_params(%{"context" => context_id}, _url, socket) do
     {:noreply, socket |> assign_selected_context(context_id) |> assign_line_items()}
   end
@@ -201,6 +205,15 @@ defmodule AlgoraWeb.ClaimLive do
      socket
      |> assign(:reward_bounty_form, to_form(RewardBountyForm.changeset(%RewardBountyForm{}, params)))
      |> assign_line_items()}
+  end
+
+  def handle_event("split_bounty", _params, socket) do
+    # TODO: Implement split bounty
+    Logger.error(
+      "Attempt to split bounty #{socket.assigns.target.repository.user.provider_login}/#{socket.assigns.target.repository.name}#{socket.assigns.target.number}"
+    )
+
+    {:noreply, socket}
   end
 
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
@@ -267,7 +280,7 @@ defmodule AlgoraWeb.ClaimLive do
         Bounties.create_bounty(%{
           creator: socket.assigns.current_user,
           owner: socket.assigns.selected_context,
-          amount: data.amount,
+          amount: Money.new!(:USD, data.amount),
           ticket_ref: ticket_ref(socket)
         })
 
@@ -281,7 +294,7 @@ defmodule AlgoraWeb.ClaimLive do
 
     Bounties.reward_bounty(
       %{
-        creator: socket.assigns.current_user,
+        owner: socket.assigns.selected_context,
         amount: final_amount,
         bounty_id: bounty.id,
         claims: socket.assigns.claims
@@ -383,7 +396,8 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_title>
                   Authors
                 </.card_title>
-                <.button variant="secondary">
+                <!-- TODO: hide if user is not an admin -->
+                <.button variant="secondary" phx-click="split_bounty">
                   Split bounty
                 </.button>
               </div>
@@ -497,7 +511,7 @@ defmodule AlgoraWeb.ClaimLive do
         </div>
       </div>
     </div>
-    <.drawer show={@show_reward_bounty_modal} on_cancel="close_drawer">
+    <.drawer :if={@current_user} show={@show_reward_bounty_modal} on_cancel="close_drawer">
       <.drawer_header>
         <.drawer_title>Reward Bounty</.drawer_title>
         <.drawer_description>
@@ -519,27 +533,18 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_content>
                   <div class="space-y-4">
                     <%= if Enum.empty?(@available_bounties) do %>
-                      <div class="flex flex-col gap-4">
-                        <.alert variant="destructive">
-                          <.alert_title>No bounties available</.alert_title>
-                          <.alert_description>
-                            You don't have any bounties available. Would you like to create one?
-                          </.alert_description>
-                        </.alert>
-
-                        <.input
-                          label="Amount"
-                          icon="tabler-currency-dollar"
-                          field={@reward_bounty_form[:amount]}
-                        />
-                      </div>
-                    <% else %>
-                      <.input
-                        label="Amount"
-                        icon="tabler-currency-dollar"
-                        field={@reward_bounty_form[:amount]}
-                      />
+                      <.alert variant="destructive">
+                        <.alert_title>No bounties available</.alert_title>
+                        <.alert_description>
+                          You didn't post a bounty for this issue. Would you like to create one now?
+                        </.alert_description>
+                      </.alert>
                     <% end %>
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@reward_bounty_form[:amount]}
+                    />
 
                     <div>
                       <.label>On behalf of</.label>

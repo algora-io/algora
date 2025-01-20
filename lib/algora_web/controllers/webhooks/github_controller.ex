@@ -13,8 +13,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: auto-retry failed deliveries with exponential backoff
 
   def new(conn, params) do
-    with {:ok, %Webhook{event: event}} <- Webhook.new(conn),
-         {:ok, _} <- process_commands(event, params) do
+    with {:ok, webhook} <- Webhook.new(conn),
+         {:ok, _} <- process_commands(webhook, params) do
       conn |> put_status(:accepted) |> json(%{status: "ok"})
     else
       {:error, :missing_header} ->
@@ -149,10 +149,10 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   defp execute_command(_event_action, _command, _author, _params) do
-    {:error, :unhandled_command}
+    {:ok, nil}
   end
 
-  def process_commands(event, params) do
+  def process_commands(%Webhook{event: event, hook_id: hook_id}, params) do
     author = get_author(event, params)
     body = get_body(event, params)
 
@@ -167,7 +167,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
             error ->
               Logger.error(
-                "Command execution failed for #{event_action}(#{event["id"]}): #{inspect(command)}: #{inspect(error)}"
+                "Command execution failed for #{event_action}(#{hook_id}): #{inspect(command)}: #{inspect(error)}"
               )
 
               {:halt, error}

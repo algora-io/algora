@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   import Money.Sigil
   import Mox
 
+  alias Algora.Github.Webhook
   alias AlgoraWeb.Webhooks.GithubController
 
   setup :verify_on_exit!
@@ -15,7 +16,20 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   @repo_name "repo"
   @installation_id 123
 
+  @webhook %Webhook{
+    event: "issue_comment",
+    hook_id: "123456789",
+    delivery: "00000000-0000-0000-0000-000000000000",
+    signature: "sha1=0000000000000000000000000000000000000000",
+    signature_256: "sha256=0000000000000000000000000000000000000000000000000000000000000000",
+    user_agent: "GitHub-Hookshot/0000000",
+    installation_type: "integration",
+    installation_id: "123456"
+  }
+
   @params %{
+    "id" => 123,
+    "action" => "created",
     "repository" => %{
       "owner" => %{"login" => @repo_owner},
       "name" => @repo_name
@@ -202,7 +216,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     """
 
     GithubController.process_commands(
-      "issue_comment",
+      @webhook,
       Map.put(@params, "comment", %{"user" => %{"login" => author}, "body" => body})
     )
   end

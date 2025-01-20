@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   import Money.Sigil
   import Mox
 
+  alias Algora.Github.Webhook
   alias AlgoraWeb.Webhooks.GithubController
 
   setup :verify_on_exit!
@@ -15,7 +16,20 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   @repo_name "repo"
   @installation_id 123
 
+  @webhook %Webhook{
+    event: "issue_comment",
+    hook_id: "123456789",
+    delivery: "00000000-0000-0000-0000-000000000000",
+    signature: "sha1=0000000000000000000000000000000000000000",
+    signature_256: "sha256=0000000000000000000000000000000000000000000000000000000000000000",
+    user_agent: "GitHub-Hookshot/0000000",
+    installation_type: "integration",
+    installation_id: "123456"
+  }
+
   @params %{
+    "id" => 123,
+    "action" => "created",
     "repository" => %{
       "owner" => %{"login" => @repo_owner},
       "name" => @repo_name
@@ -47,57 +61,66 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
     @tag user: @unauthorized_user
     test "handles bounty command with unauthorized user", %{user: user} do
-      assert process_bounty_command("/bounty $100", user)[:ok] == nil
-      assert process_bounty_command("/bounty $100", user)[:error] == :unauthorized
+      assert {:error, :unauthorized} = process_bounty_command("/bounty $100", user)
     end
 
     test "handles bounty command without amount" do
-      assert process_bounty_command("/bounty")[:ok] == nil
-      assert process_bounty_command("/bounty")[:error] == nil
+      assert {:ok, []} = process_bounty_command("/bounty")
     end
 
     test "handles valid bounty command with $ prefix" do
-      assert process_bounty_command("/bounty $100")[:ok].amount == ~M[100]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty $100")
+      assert bounty.amount == ~M[100]usd
     end
 
     test "handles invalid bounty command with $ suffix" do
-      assert process_bounty_command("/bounty 100$")[:ok].amount == ~M[100]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 100$")
+      assert bounty.amount == ~M[100]usd
     end
 
     test "handles bounty command without $ symbol" do
-      assert process_bounty_command("/bounty 100")[:ok].amount == ~M[100]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 100")
+      assert bounty.amount == ~M[100]usd
     end
 
     test "handles bounty command with decimal amount" do
-      assert process_bounty_command("/bounty 100.50")[:ok].amount == ~M[100.50]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.50")
+      assert bounty.amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount" do
-      assert process_bounty_command("/bounty 100.5")[:ok].amount == ~M[100.5]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.5")
+      assert bounty.amount == ~M[100.5]usd
     end
 
     test "handles bounty command with decimal amount and $ prefix" do
-      assert process_bounty_command("/bounty $100.50")[:ok].amount == ~M[100.50]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty $100.50")
+      assert bounty.amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount and $ prefix" do
-      assert process_bounty_command("/bounty $100.5")[:ok].amount == ~M[100.5]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty $100.5")
+      assert bounty.amount == ~M[100.5]usd
     end
 
     test "handles bounty command with decimal amount and $ suffix" do
-      assert process_bounty_command("/bounty 100.50$")[:ok].amount == ~M[100.50]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.50$")
+      assert bounty.amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount and $ suffix" do
-      assert process_bounty_command("/bounty 100.5$")[:ok].amount == ~M[100.5]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.5$")
+      assert bounty.amount == ~M[100.5]usd
     end
 
     test "handles bounty command with comma separator" do
-      assert process_bounty_command("/bounty 1,000")[:ok].amount == ~M[1000]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 1,000")
+      assert bounty.amount == ~M[1000]usd
     end
 
     test "handles bounty command with comma separator and decimal amount" do
-      assert process_bounty_command("/bounty 1,000.50")[:ok].amount == ~M[1000.50]usd
+      assert {:ok, [bounty]} = process_bounty_command("/bounty 1,000.50")
+      assert bounty.amount == ~M[1000.50]usd
     end
   end
 
@@ -184,14 +207,17 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   # Helper function to process bounty commands
-  defp process_bounty_command(body, author \\ @admin_user) do
-    full_body = """
+  defp process_bounty_command(command, author \\ @admin_user) do
+    body = """
     Lorem
-    ipsum #{body} dolor
+    ipsum #{command} dolor
     sit
     amet
     """
 
-    GithubController.process_commands(full_body, %{"login" => author}, @params)
+    GithubController.process_commands(
+      @webhook,
+      Map.put(@params, "comment", %{"user" => %{"login" => author}, "body" => body})
+    )
   end
 end

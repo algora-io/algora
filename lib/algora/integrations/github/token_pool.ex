@@ -3,6 +3,7 @@ defmodule Algora.Github.TokenPool do
   use GenServer
 
   alias Algora.Accounts
+  alias Algora.Github
 
   require Logger
 
@@ -38,7 +39,7 @@ defmodule Algora.Github.TokenPool do
     token = Enum.at(tokens, index)
 
     if token == nil do
-      {:reply, nil, state}
+      {:reply, Github.pat(), state}
     else
       next_index = rem(index + 1, length(tokens))
       if next_index == 0, do: refresh_tokens()

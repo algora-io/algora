@@ -66,7 +66,10 @@ defmodule Algora.Factory do
       twitter_url: "https://twitter.com/piedpiper",
       github_url: "https://github.com/piedpiper",
       discord_url: "https://discord.gg/piedpiper",
-      slack_url: "https://piedpiper.slack.com"
+      slack_url: "https://piedpiper.slack.com",
+      provider: "github",
+      provider_login: "piedpiper",
+      provider_id: sequence(:provider_id, &"#{&1}")
     }
   end
 
@@ -195,16 +198,13 @@ defmodule Algora.Factory do
   end
 
   def claim_factory do
+    id = Nanoid.generate()
+
     %Algora.Bounties.Claim{
-      id: Nanoid.generate(),
-      provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
-      type: :code,
-      status: :pending,
-      title: "Implemented compression optimization",
-      description: "Added parallel processing for large files",
-      url: "https://github.com/piedpiper/middle-out/pull/2",
-      provider_meta: %{}
+      id: id,
+      group_id: id,
+      type: :pull_request,
+      status: :pending
     }
   end
 

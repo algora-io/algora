@@ -45,6 +45,15 @@ defmodule Algora.Util do
     date |> DateTime.shift_zone!(timezone) |> Calendar.strftime("%Y-%m-%d %I:%M %p")
   end
 
+  def to_date(nil), do: nil
+
+  def to_date(date) do
+    case DateTime.from_iso8601(date) do
+      {:ok, datetime, _offset} -> datetime
+      {:error, _reason} = error -> error
+    end
+  end
+
   def format_pct(percentage) do
     percentage
     |> Decimal.mult(100)

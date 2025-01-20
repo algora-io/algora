@@ -42,7 +42,8 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
     with {:ok, token} <- Github.get_installation_token(installation_id),
          {:ok, installation} <-
            Workspace.fetch_installation_by(provider: "github", provider_id: to_string(installation_id)),
-         {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id) do
+         {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
+         {:ok, _} <- Github.add_labels(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], ["💎 Bounty"]) do
       body = """
       ## 💎 #{amount} bounty [• #{owner.name}](#{User.url(owner)})
       ### Steps to solve:

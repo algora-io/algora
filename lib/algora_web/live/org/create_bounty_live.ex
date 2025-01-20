@@ -468,9 +468,6 @@ defmodule AlgoraWeb.Org.CreateBountyLive do
         {:error, :already_exists} ->
           {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
-        {:error, :internal_server_error} ->
-          {:noreply, put_flash(socket, :error, "Something went wrong")}
-
         {:error, _reason} ->
           changeset = add_error(socket.assigns.new_bounty_form.changeset, :github_issue_url, "Invalid URL")
           {:noreply, assign(socket, :new_bounty_form, to_form(changeset))}

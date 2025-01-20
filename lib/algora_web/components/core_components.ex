@@ -240,7 +240,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <!-- User account dropdown -->
     <div class={classes(["relative w-full text-left", @class])}>
-      <div class="overflow-visible relative">
+      <div>
         <button
           id={@id}
           type="button"

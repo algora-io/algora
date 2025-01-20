@@ -32,6 +32,7 @@ config :algora, Oban,
     comment_consumers: 1,
     github_og_image: 5,
     notify_bounty: 1,
+    notify_tip_intent: 1,
     activity_notifier: 1,
     activity_mailer: 1
   ]

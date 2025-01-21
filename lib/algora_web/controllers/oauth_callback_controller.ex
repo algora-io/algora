@@ -52,7 +52,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
       end
     else
       {:error, reason} ->
-        Logger.debug("failed GitHub exchange #{inspect(reason)}")
+        Logger.error("failed GitHub exchange #{inspect(reason)}")
         conn = put_flash(conn, :error, translate_error(reason))
 
         case type do

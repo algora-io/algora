@@ -4,6 +4,8 @@ defmodule Algora.Github.Client do
 
   alias Algora.Github.Crypto
 
+  require Logger
+
   @type token :: String.t()
 
   # TODO: move to a separate module and use only for data migration between databases
@@ -141,8 +143,9 @@ defmodule Algora.Github.Client do
       {:ok, %{"installations" => installations}} ->
         find_installation_in_list(token, installation_id, installations, page)
 
-      {:error, _reason} = error ->
-        error
+      {:error, reason} ->
+        Logger.error("❌ Failed to find installation #{installation_id}: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 

@@ -303,15 +303,14 @@ defmodule Algora.Accounts.User do
   defp type_from_provider(:github, "Organization"), do: :organization
   defp type_from_provider(:github, _), do: :individual
 
-  def handle(%{handle: handle}), do: handle
+  def handle(%{handle: handle}) when is_binary(handle), do: handle
   def handle(%{provider_login: handle}), do: handle
 
-  def url(%{handle: handle, type: :individual}), do: "/@/#{handle}"
+  def url(%{handle: handle, type: :individual}) when is_binary(handle), do: "/@/#{handle}"
   def url(%{handle: handle, type: :organization}), do: "/org/#{handle}"
   def url(%{provider_login: handle}), do: "https://github.com/#{handle}"
 
-  def last_context(%{last_context: nil}), do: default_context()
-  def last_context(%{last_context: last_context}), do: last_context
+  def last_context(%{last_context: last_context}), do: last_context || default_context()
 
   def default_context, do: "personal"
 end

@@ -306,7 +306,7 @@ defmodule Algora.Activities do
   end
 
   def activity_email_title(activity) do
-    apply(Views, :"#{activity.type}_title", [activity, activity.assoc])
+    apply(Views, :"#{activity.type}_title", [])
   end
 
   def activity_email_body(activity) do

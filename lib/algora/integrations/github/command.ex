@@ -76,13 +76,10 @@ defmodule Algora.Github.Command do
   def parse(input) when is_binary(input) do
     case parse_raw(input) do
       {:ok, [], _, _, _, _} ->
-        {:ok, %{}}
+        {:ok, []}
 
       {:ok, parsed, _, _, _, _} ->
-        {:ok,
-         parsed
-         |> Enum.reject(&is_nil/1)
-         |> Map.new()}
+        {:ok, Enum.reject(parsed, &is_nil/1)}
 
       {:error, reason, _, _, _, _} ->
         {:error, reason}

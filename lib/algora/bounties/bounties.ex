@@ -256,7 +256,7 @@ defmodule Algora.Bounties do
         owner_id: owner.id,
         creator_id: creator.id,
         recipient_id: recipient.id
-      }
+      })
 
     activity_attrs =
       %{

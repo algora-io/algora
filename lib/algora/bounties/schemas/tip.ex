@@ -32,7 +32,7 @@ defmodule Algora.Bounties.Tip do
     |> Algora.Validations.validate_money_positive(:amount)
   end
 
-  def query(id) do
+  def preload(id) do
     from a in __MODULE__,
       preload: [:ticket, :owner, :creator, :recipient],
       where: a.id == ^id

@@ -227,8 +227,8 @@ defmodule Algora.Activities do
 
   def get_preloaded_assoc(schema, assoc_id) do
     query =
-      if Kernel.function_exported?(schema, :query, 1) do
-        schema.query(assoc_id)
+      if Kernel.function_exported?(schema, :preload, 1) do
+        schema.preload(assoc_id)
       else
         from a in schema, where: a.id == ^assoc_id
       end

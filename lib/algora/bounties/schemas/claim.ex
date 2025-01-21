@@ -34,6 +34,12 @@ defmodule Algora.Bounties.Claim do
     |> unique_constraint([:target_id, :user_id])
   end
 
+  def preload(id) do
+    from a in __MODULE__,
+      preload: [:source, :target, :user],
+      where: a.id == ^id
+  end
+
   def put_group_id(changeset) do
     case get_field(changeset, :group_id) do
       nil -> put_change(changeset, :group_id, get_field(changeset, :id))

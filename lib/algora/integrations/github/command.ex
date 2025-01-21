@@ -71,7 +71,7 @@ defmodule Algora.Github.Command do
 
   defparsec(:parse_raw, Helper.commands())
 
-  def parse(nil), do: {:ok, %{}}
+  def parse(nil), do: {:ok, []}
 
   def parse(input) when is_binary(input) do
     case parse_raw(input) do

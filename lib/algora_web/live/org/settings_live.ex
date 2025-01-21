@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Github
   alias AlgoraWeb.Components.Logos
 
   def render(assigns) do
@@ -36,19 +37,15 @@ defmodule AlgoraWeb.Org.SettingsLive do
                   </div>
                 </div>
               <% end %>
-              <.link href={Algora.Github.install_url()} rel="noopener" class="ml-auto gap-2">
-                <.button>
-                  <Logos.github class="w-4 h-4 mr-2 -ml-1" />
-                  Manage {ngettext("installation", "installations", length(@installations))}
-                </.button>
-              </.link>
+              <.button phx-click="install_app" class="ml-auto gap-2">
+                <Logos.github class="w-4 h-4 mr-2 -ml-1" />
+                Manage {ngettext("installation", "installations", length(@installations))}
+              </.button>
             <% else %>
               <div class="flex flex-col gap-2">
-                <.link href={Algora.Github.install_url()} rel="noopener" class="ml-auto gap-2">
-                  <.button>
-                    <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
-                  </.button>
-                </.link>
+                <.button phx-click="install_app" class="ml-auto gap-2">
+                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+                </.button>
               </div>
             <% end %>
           </div>
@@ -102,6 +99,10 @@ defmodule AlgoraWeb.Org.SettingsLive do
   end
 
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+    end
+
     %{current_org: current_org} = socket.assigns
 
     changeset = User.settings_changeset(current_org, %{})
@@ -110,7 +111,18 @@ defmodule AlgoraWeb.Org.SettingsLive do
     {:ok,
      socket
      |> assign(:installations, installations)
+     |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign_form(changeset)}
+  end
+
+  def handle_info({:authenticated, user}, socket) do
+    # TODO: skip auth step in installation flow
+    {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url())}
+  end
+
+  def handle_event("install_app", _params, socket) do
+    # TODO: immediately redirect to install_url if user has valid token
+    {:noreply, push_event(socket, "open_popup", %{url: socket.assigns.oauth_url})}
   end
 
   def handle_event("validate", %{"user" => params}, socket) do

@@ -122,40 +122,94 @@ defmodule Algora.Bounties do
   end
 
   @spec do_claim_bounty(%{
-          user: User.t(),
+          provider_login: String.t(),
+          token: String.t(),
+          target: Ticket.t(),
+          source: Ticket.t(),
+          group_id: String.t() | nil,
+          group_share: Decimal.t(),
+          status: :pending | :approved | :rejected | :paid,
+          type: :pull_request | :review | :video | :design | :article
+        }) ::
+          {:ok, Claim.t()} | {:error, atom()}
+  defp do_claim_bounty(%{
+         provider_login: provider_login,
+         token: token,
+         target: target,
+         source: source,
+         group_id: group_id,
+         group_share: group_share,
+         status: status,
+         type: type
+       }) do
+    with {:ok, user} <- Workspace.ensure_user(token, provider_login),
+         {:ok, claim} <-
+           Repo.insert(
+             Claim.changeset(%Claim{}, %{
+               target_id: target.id,
+               source_id: source.id,
+               user_id: user.id,
+               type: type,
+               status: status,
+               url: source.url,
+               group_id: group_id,
+               group_share: group_share
+             })
+           ) do
+      {:ok, claim}
+    else
+      {:error, %{errors: [target_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
+        {:error, :already_exists}
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
+
+  @spec do_claim_bounties(%{
+          provider_logins: [String.t()],
+          token: String.t(),
           target: Ticket.t(),
           source: Ticket.t(),
           status: :pending | :approved | :rejected | :paid,
           type: :pull_request | :review | :video | :design | :article
         }) ::
           {:ok, Claim.t()} | {:error, atom()}
-  defp do_claim_bounty(%{user: user, target: target, source: source, status: status, type: type}) do
-    # TODO: ensure user is pull request author
-    changeset =
-      Claim.changeset(%Claim{}, %{
-        target_id: target.id,
-        source_id: source.id,
-        user_id: user.id,
-        type: type,
-        status: status,
-        url: source.url
-      })
+  defp do_claim_bounties(%{
+         provider_logins: provider_logins,
+         token: token,
+         target: target,
+         source: source,
+         status: status,
+         type: type
+       }) do
+    Enum.reduce_while(provider_logins, {:ok, []}, fn provider_login, {:ok, acc} ->
+      group_id =
+        case List.last(acc) do
+          nil -> nil
+          primary_claim -> primary_claim.group_id
+        end
 
-    case Repo.insert(changeset) do
-      {:ok, claim} ->
-        {:ok, claim}
-
-      {:error, %{errors: [target_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
-        {:error, :already_exists}
-
-      {:error, _changeset} = error ->
-        error
-    end
+      case do_claim_bounty(%{
+             provider_login: provider_login,
+             token: token,
+             target: target,
+             source: source,
+             status: status,
+             type: type,
+             group_id: group_id,
+             group_share: Decimal.div(1, length(provider_logins))
+           }) do
+        {:ok, claim} -> {:cont, {:ok, [claim | acc]}}
+        error -> {:halt, error}
+      end
+    end)
   end
 
   @spec claim_bounty(
           %{
             user: User.t(),
+            coauthor_provider_logins: [String.t()],
             target_ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             source_ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             status: :pending | :approved | :rejected | :paid,
@@ -167,6 +221,7 @@ defmodule Algora.Bounties do
   def claim_bounty(
         %{
           user: user,
+          coauthor_provider_logins: coauthor_provider_logins,
           target_ticket_ref: %{owner: target_repo_owner, repo: target_repo_name, number: target_number},
           source_ticket_ref: %{owner: source_repo_owner, repo: source_repo_name, number: source_number},
           status: status,
@@ -185,7 +240,15 @@ defmodule Algora.Bounties do
       with {:ok, token} <- token_res,
            {:ok, target} <- Workspace.ensure_ticket(token, target_repo_owner, target_repo_name, target_number),
            {:ok, source} <- Workspace.ensure_ticket(token, source_repo_owner, source_repo_name, source_number),
-           {:ok, claim} <- do_claim_bounty(%{user: user, target: target, source: source, status: status, type: type}),
+           {:ok, [claim | _]} <-
+             do_claim_bounties(%{
+               provider_logins: [user.provider_login | coauthor_provider_logins],
+               token: token,
+               target: target,
+               source: source,
+               status: status,
+               type: type
+             }),
            {:ok, _job} <- notify_claim(%{claim: claim}, installation_id: installation_id) do
         broadcast()
         {:ok, claim}
@@ -201,7 +264,7 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, Oban.Job.t()} | {:error, atom()}
   def notify_claim(%{claim: claim}, opts \\ []) do
-    %{claim_id: claim.id, installation_id: opts[:installation_id]}
+    %{claim_group_id: claim.group_id, installation_id: opts[:installation_id]}
     |> Jobs.NotifyClaim.new()
     |> Oban.insert()
   end

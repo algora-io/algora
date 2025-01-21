@@ -397,10 +397,6 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_title>
                   Authors
                 </.card_title>
-                <!-- TODO: hide if user is not an admin -->
-                <.button variant="secondary" phx-click="split_bounty">
-                  Split bounty
-                </.button>
               </div>
             </.card_header>
             <.card_content>

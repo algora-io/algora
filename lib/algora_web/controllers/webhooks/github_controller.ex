@@ -138,6 +138,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       Bounties.claim_bounty(
         %{
           user: user,
+          coauthor_provider_logins: (args[:splits] || []) |> Enum.map(& &1[:recipient]) |> Enum.uniq(),
           target_ticket_ref: target_ticket_ref,
           source_ticket_ref: source_ticket_ref,
           status: if(pull_request["merged_at"], do: :approved, else: :pending),
@@ -152,13 +153,36 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     {:ok, nil}
   end
 
+  def build_command({:claim, args}, commands) do
+    splits = Keyword.get_values(commands, :split)
+    {:claim, Keyword.put(args, :splits, splits)}
+  end
+
+  def build_command({:split, _args}, _commands), do: nil
+
+  def build_command(command, _commands), do: command
+
+  def build_commands(body) do
+    case Github.Command.parse(body) do
+      {:ok, commands} ->
+        {:ok,
+         commands
+         |> Enum.map(&build_command(&1, commands))
+         |> Enum.reject(&is_nil/1)}
+
+      {:error, reason} = error ->
+        Logger.error("Error parsing commands: #{inspect(reason)}")
+        error
+    end
+  end
+
   def process_commands(%Webhook{event: event, hook_id: hook_id}, params) do
     author = get_author(event, params)
     body = get_body(event, params)
 
     event_action = event <> "." <> params["action"]
 
-    case Github.Command.parse(body) do
+    case build_commands(body) do
       {:ok, commands} ->
         Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
           case execute_command(event_action, command, author, params) do

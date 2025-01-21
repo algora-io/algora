@@ -630,11 +630,12 @@ defmodule Algora.Bounties do
   end
 
   # Helper function to create transaction pairs
-  defp create_transaction_pairs(%{claims: claims} = params) when length(claims) > 0 do
+  defp create_transaction_pairs(%{amount: amount, claims: claims} = params) when length(claims) > 0 do
     Enum.reduce_while(claims, {:ok, []}, fn claim, {:ok, acc} ->
       params
       |> Map.put(:claim_id, claim.id)
       |> Map.put(:recipient_id, claim.user.id)
+      |> Map.put(:amount, Money.mult!(amount, claim.group_share))
       |> create_single_transaction_pair()
       |> case do
         {:ok, transactions} -> {:cont, {:ok, transactions ++ acc}}

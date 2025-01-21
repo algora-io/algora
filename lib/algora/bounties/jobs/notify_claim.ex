@@ -60,18 +60,18 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
   end
 
   defp names([claim]) do
-    claim.user.provider_login
+    "@#{claim.user.provider_login}"
   end
 
   defp names([c1, c2]) do
-    "#{c1.user.provider_login} and #{c2.user.provider_login}"
+    "@#{c1.user.provider_login} and @#{c2.user.provider_login}"
   end
 
   defp names([c1, c2, c3]) do
-    "#{c1.user.provider_login}, #{c2.user.provider_login} and #{c3.user.provider_login}"
+    "@#{c1.user.provider_login}, @#{c2.user.provider_login} and @#{c3.user.provider_login}"
   end
 
   defp names([c1, c2 | claims]) do
-    "#{c1.user.provider_login}, #{c2.user.provider_login} and #{length(claims)} others"
+    "@#{c1.user.provider_login}, @#{c2.user.provider_login} and #{length(claims)} others"
   end
 end

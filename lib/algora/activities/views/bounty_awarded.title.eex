@@ -1,1 +1,1 @@
-You have been rewarded a bounty on Algora!
+🎉 <%= bounty.amount %> bounty awarded by <%= bounty.creator.display_name %>

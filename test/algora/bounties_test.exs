@@ -5,6 +5,10 @@ defmodule Algora.BountiesTest do
   import Algora.Factory
   import Money.Sigil
 
+  alias Algora.Activities.Notifier
+  alias Algora.Activities.SendEmail
+  alias Algora.Activities.Views
+
   def setup_github_mocks(_context) do
     import Algora.Mocks.GithubMock
 
@@ -96,12 +100,21 @@ defmodule Algora.BountiesTest do
       assert_activity_names_for_user(creator.id, [:bounty_posted, :bounty_awarded, :tip_awarded])
       assert_activity_names_for_user(recipient.id, [:claim_submitted, :tip_awarded])
 
-      assert [_bounty, _claim, _awarded, activity] = Enum.reverse(Algora.Activities.all())
-      assert "tip_activities" == activity.assoc_name
-      assert activity.notify_users == [recipient.id]
-      assert activity = Algora.Activities.get_with_preloaded_assoc(activity.assoc_name, activity.id)
+      assert [bounty, claim, awarded, tip] = Enum.reverse(Algora.Activities.all())
+      assert "tip_activities" == tip.assoc_name
+      assert tip.notify_users == [recipient.id]
+      assert activity = Algora.Activities.get_with_preloaded_assoc(tip.assoc_name, tip.id)
       assert activity.assoc.__meta__.schema == Algora.Bounties.Tip
       assert activity.assoc.creator.id == creator.id
+
+      assert_enqueued(worker: Notifier, args: %{"activity_id" => bounty.id})
+      refute_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})
+
+      Enum.map(all_enqueued(worker: Notifier), fn job ->
+        perform_job(Notifier, job.args)
+      end)
+
+      assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})
     end
 
     test "query" do

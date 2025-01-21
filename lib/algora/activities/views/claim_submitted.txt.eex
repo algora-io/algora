@@ -1,3 +1,5 @@
-A claim for <%= claim.bounty.ticket.repository.name %> has been submitted
+A claim for the issue "<%= claim.target.title %>" was submitted.
+
+<%= claim.url %>
 
 <%= Algora.Activities.external_url(activity) %>

@@ -1,1 +1,1 @@
-New bounty posted to Algora
+<%= bounty.amount %> bounty posted by <%= bounty.creator.display_name %>

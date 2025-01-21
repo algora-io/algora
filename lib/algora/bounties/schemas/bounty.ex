@@ -20,6 +20,12 @@ defmodule Algora.Bounties.Bounty do
     timestamps()
   end
 
+  def preload(id) do
+    from a in __MODULE__,
+      preload: [:ticket, :owner, :creator],
+      where: a.id == ^id
+  end
+
   def changeset(bounty, attrs) do
     bounty
     |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id])

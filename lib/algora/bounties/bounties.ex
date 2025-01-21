@@ -307,7 +307,7 @@ defmodule Algora.Bounties do
   def generate_line_items(%{amount: amount}, opts \\ []) do
     ticket_ref = opts[:ticket_ref]
     recipient = opts[:recipient]
-    claims = opts[:claims]
+    claims = opts[:claims] || []
 
     description = if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
@@ -393,6 +393,7 @@ defmodule Algora.Bounties do
                claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
                bounty_id: opts[:bounty_id],
+               claim_id: nil,
                amount: amount,
                creator_id: owner.id,
                group_id: tx_group_id
@@ -678,9 +679,9 @@ defmodule Algora.Bounties do
              id: credit_id,
              tip_id: params.tip_id,
              bounty_id: params.bounty_id,
-             claim_id: params.claim_id,
+             claim_id: params[:claim_id],
              amount: params.amount,
-             user_id: params.recipient_id,
+             user_id: params[:recipient_id],
              linked_transaction_id: debit_id,
              group_id: params.group_id
            }) do

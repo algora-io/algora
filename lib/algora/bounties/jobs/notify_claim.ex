@@ -21,7 +21,7 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
          claims =
            from(c in Claim,
              where: c.group_id == ^claim_group_id,
-             order_by: [asc: c.created_at]
+             order_by: [asc: c.inserted_at]
            )
            |> Repo.all()
            |> Repo.preload([:user, source: [repository: [:user]], target: [repository: [:user]]]),

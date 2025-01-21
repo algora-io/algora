@@ -279,8 +279,8 @@ defmodule Algora.Activities do
   def notify_users(_activity, []), do: :ok
 
   def notify_users(activity, users_to_notify) do
-    title = activity_email_title(activity)
-    body = activity_email_body(activity)
+    title = Views.render(activity, :title)
+    body = Views.render(activity, :txt)
 
     users_to_notify
     |> Enum.reduce([], fn
@@ -305,21 +305,13 @@ defmodule Algora.Activities do
     |> Oban.insert_all()
   end
 
-  def activity_email_title(activity) do
-    apply(Views, :"#{activity.type}_title", [])
-  end
-
-  def activity_email_body(activity) do
-    apply(Views, :"#{activity.type}_txt", [activity, activity.assoc])
-  end
-
   def redirect_url_for_activity(activity) do
     slug =
       activity.assoc_name
       |> to_string()
       |> String.replace("_activities", "")
 
-    "/a/#{slug}/#{activity.id}"
+    "a/#{slug}/#{activity.id}"
   end
 
   def external_url(activity) do

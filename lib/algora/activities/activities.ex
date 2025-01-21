@@ -195,6 +195,7 @@ defmodule Algora.Activities do
         as: :activity,
         where: a.id == ^id,
         inner_lateral_join: t in subquery(assoc_query),
+        on: true,
         select: %{
           id: a.id,
           type: a.type,

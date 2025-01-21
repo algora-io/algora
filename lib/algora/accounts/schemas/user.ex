@@ -301,6 +301,10 @@ defmodule Algora.Accounts.User do
     |> unique_constraint([:provider, :provider_id])
   end
 
+  def is_admin_changeset(user, is_admin) do
+    cast(user, %{is_admin: is_admin}, [:is_admin])
+  end
+
   def validate_timezone(changeset) do
     validate_inclusion(changeset, :timezone, Tzdata.zone_list())
   end

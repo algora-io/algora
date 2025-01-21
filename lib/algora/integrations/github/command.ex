@@ -15,7 +15,7 @@ defmodule Algora.Github.Command do
       repeat(
         choice([
           # Any text that is not a command
-          [not: ?/] |> ascii_string(min: 1) |> ignore(),
+          [not: ?/] |> utf8_string(min: 1) |> ignore(),
 
           # Known command
           choice([
@@ -28,7 +28,7 @@ defmodule Algora.Github.Command do
           "/"
           |> string()
           |> ignore()
-          |> concat(ascii_string([?a..?z, ?A..?Z, ?_, ?-], min: 1))
+          |> concat(utf8_string([?a..?z, ?A..?Z, ?_, ?-], min: 1))
           |> ignore()
         ])
       )

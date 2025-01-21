@@ -99,6 +99,7 @@ defmodule AlgoraWeb.Router do
       # live "/org/:org_handle/projects/:id", Project.ViewLive
       live "/org/:org_handle/jobs", Org.JobsLive, :index
       live "/org/:org_handle/jobs/:id", Org.JobLive, :index
+      live "/org/:org_handle/transactions", Org.TransactionsLive, :index
       live "/org/:org_handle/analytics", Org.AnalyticsLive, :index
       live "/org/:org_handle/chat", ChatLive, :index
       live "/org/:org_handle/settings", Org.SettingsLive, :edit

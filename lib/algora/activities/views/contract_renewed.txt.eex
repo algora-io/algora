@@ -1,0 +1,2 @@
+
+<%= Algora.Activities.external_url(activity) %>

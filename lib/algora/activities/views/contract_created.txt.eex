@@ -1,1 +1,3 @@
 A contract between <%= contract.client.display_name %> and <%= contract.contractor.display_name %> has been created.
+
+<%= Algora.Activities.external_url(activity) %>

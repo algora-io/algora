@@ -1,1 +1,3 @@
 <%= bounty.creator.display_name %> awarded you a Bounty for <% bounty.amount %>
+
+<%= Algora.Activities.external_url(activity) %>

@@ -322,6 +322,11 @@ defmodule Algora.Activities do
     "/a/#{slug}/#{activity.id}"
   end
 
+  def external_url(activity) do
+    path = redirect_url_for_activity(activity)
+    "#{AlgoraWeb.Endpoint.url()}/#{path}"
+  end
+
   def activity_type_to_name(type) do
     type
     |> to_string()

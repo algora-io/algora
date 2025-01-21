@@ -221,7 +221,8 @@ defmodule Algora.Accounts.User do
       :domain,
       :tech_stack,
       :hourly_rate_min,
-      :hourly_rate_max
+      :hourly_rate_max,
+      :last_context
     ])
     |> generate_id()
     |> validate_required([:type, :handle, :email, :display_name])

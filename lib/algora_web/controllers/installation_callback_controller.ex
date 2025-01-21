@@ -2,6 +2,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
   use AlgoraWeb, :controller
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Organizations
   alias Algora.Workspace
@@ -77,5 +78,5 @@ defmodule AlgoraWeb.InstallationCallbackController do
     end
   end
 
-  defp redirect_url(conn), do: ~p"/org/#{conn.assigns.current_user.last_context}/settings"
+  defp redirect_url(conn), do: ~p"/org/#{User.last_context(conn.assigns.current_user)}/settings"
 end

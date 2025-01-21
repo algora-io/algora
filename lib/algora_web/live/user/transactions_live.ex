@@ -7,9 +7,6 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   alias Algora.Accounts.User
   alias Algora.Payments
-  alias Algora.Payments.StripeAccountCreateError
-  alias Algora.Payments.StripeAccountDeleteError
-  alias Algora.Payments.StripeAccountLinkError
   alias Algora.Stripe.ConnectCountries
   alias Algora.Util
 

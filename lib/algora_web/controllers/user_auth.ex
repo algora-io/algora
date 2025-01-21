@@ -6,6 +6,7 @@ defmodule AlgoraWeb.UserAuth do
   import Plug.Conn
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Phoenix.LiveView
 
   def on_mount(:current_user, _params, session, socket) do
@@ -185,12 +186,15 @@ defmodule AlgoraWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
+  def signed_in_path_from_context("personal"), do: ~p"/home"
+  def signed_in_path_from_context(org_handle), do: ~p"/org/#{org_handle}"
+
+  def signed_in_path(%User{} = user) do
+    signed_in_path_from_context(User.last_context(user))
+  end
+
   def signed_in_path(conn) do
-    case get_session(conn, :last_context) do
-      nil -> ~p"/home"
-      "personal" -> ~p"/home"
-      org_handle -> ~p"/org/#{org_handle}"
-    end
+    signed_in_path_from_context(get_session(conn, :last_context, User.default_context()))
   end
 
   defp login_code_ttl, do: 3600

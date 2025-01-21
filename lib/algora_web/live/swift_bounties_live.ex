@@ -15,6 +15,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   alias Algora.Validations
   alias Algora.Workspace
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.UserAuth
 
   require Logger
 
@@ -71,19 +72,21 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     end
 
     socket =
-      if socket.assigns[:current_user] do
-        push_navigate(socket, to: ~p"/home")
-      else
-        socket
-        |> assign(:page_title, "Fund Swift Together")
-        |> assign(:page_description, "Help grow the Swift ecosystem by funding the work we all depend on.")
-        |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/swift.png")
-        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
-        |> assign(:pending_action, nil)
-        |> assign_tickets()
-        |> assign_active_repos()
+      case socket.assigns[:current_user] do
+        nil ->
+          socket
+          |> assign(:page_title, "Fund Swift Together")
+          |> assign(:page_description, "Help grow the Swift ecosystem by funding the work we all depend on.")
+          |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/swift.png")
+          |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+          |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+          |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+          |> assign(:pending_action, nil)
+          |> assign_tickets()
+          |> assign_active_repos()
+
+        current_user ->
+          push_navigate(socket, to: UserAuth.signed_in_path(current_user))
       end
 
     {:ok, socket}

@@ -75,6 +75,12 @@ defmodule AlgoraWeb.Org.Nav do
             label: "Team"
           },
           %{
+            href: "/org/#{org_handle}/transactions",
+            tab: :transactions,
+            icon: "tabler-credit-card",
+            label: "Transactions"
+          },
+          %{
             href: "/org/#{org_handle}/analytics",
             tab: :analytics,
             icon: "tabler-chart-bar",

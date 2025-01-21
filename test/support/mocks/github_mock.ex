@@ -6,7 +6,7 @@ defmodule Algora.Mocks.GithubMock do
     stub(
       Algora.GithubMock,
       :get_installation_token,
-      fn _installation_id -> {:ok, %{"token" => "test_token"}} end
+      fn _installation_id -> {:ok, "mock-token"} end
     )
   end
 

@@ -146,7 +146,9 @@ defmodule Algora.Bounties do
         url: source.url
       })
 
-    case Repo.insert(changeset) do
+    activity_attrs = %{type: :claim_submitted, notify_users: [user.id]}
+
+    case Repo.insert_with_activity(changeset, activity_attrs) do
       {:ok, claim} ->
         {:ok, claim}
 
@@ -287,12 +289,18 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
-    create_payment_session(
-      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
-      ticket_ref: opts[:ticket_ref],
-      bounty_id: bounty_id,
-      claims: claims
-    )
+    Repo.transact(fn ->
+      activity_attrs = %{type: :bounty_awarded}
+
+      with {:ok, _activity} <- Algora.Activities.insert(%Bounty{id: bounty_id}, activity_attrs) do
+        create_payment_session(
+          %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
+          ticket_ref: opts[:ticket_ref],
+          bounty_id: bounty_id,
+          claims: claims
+        )
+      end
+    end)
   end
 
   @spec generate_line_items(

@@ -67,6 +67,19 @@ defmodule Algora.BountiesTest do
                  installation_id: installation.id
                )
 
+      claim = Algora.Repo.one(Algora.Bounties.Claim.preload(claim.id))
+
+      assert {:ok, _bounty} =
+               Algora.Bounties.reward_bounty(
+                 %{
+                   owner: owner,
+                   amount: ~M[4000]usd,
+                   bounty_id: bounty.id,
+                   claims: [claim]
+                 },
+                 installation_id: installation.id
+               )
+
       assert {:ok, _stripe_session_url} =
                Algora.Bounties.create_tip(
                  %{
@@ -79,22 +92,21 @@ defmodule Algora.BountiesTest do
                  claims: [claim]
                )
 
-      assert_activity_names([:bounty_posted, :tip_awarded])
-      assert_activity_names_for_user(creator.id, [:bounty_posted, :tip_awarded])
-      assert_activity_names_for_user(recipient.id, [:tip_awarded])
+      assert_activity_names([:bounty_posted, :claim_submitted, :bounty_awarded, :tip_awarded])
+      assert_activity_names_for_user(creator.id, [:bounty_posted, :bounty_awarded, :tip_awarded])
+      assert_activity_names_for_user(recipient.id, [:claim_submitted, :tip_awarded])
 
-      assert [_activity, activity] = Enum.reverse(Algora.Activities.all())
+      assert [_bounty, _claim, _awarded, activity] = Enum.reverse(Algora.Activities.all())
       assert "tip_activities" == activity.assoc_name
       assert activity.notify_users == [recipient.id]
-
       assert activity = Algora.Activities.get_with_preloaded_assoc(activity.assoc_name, activity.id)
       assert activity.assoc.__meta__.schema == Algora.Bounties.Tip
       assert activity.assoc.creator.id == creator.id
     end
 
     test "query" do
-      [bounty | _] =
-        Enum.map(1..10, fn _n ->
+      {:ok, bounty} =
+        Enum.reduce(1..10, nil, fn _n, _acc ->
           creator = insert!(:user)
           owner = insert!(:user)
           _installation = insert!(:installation, owner: creator)
@@ -111,8 +123,7 @@ defmodule Algora.BountiesTest do
               amount: amount
             }
 
-          {:ok, bounty} = Algora.Bounties.create_bounty(bounty_params, [])
-          bounty
+          Algora.Bounties.create_bounty(bounty_params, [])
         end)
 
       assert Algora.Bounties.list_bounties(

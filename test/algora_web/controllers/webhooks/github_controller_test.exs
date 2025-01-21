@@ -61,65 +61,65 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
     @tag user: @unauthorized_user
     test "handles bounty command with unauthorized user", %{user: user} do
-      assert {:error, :unauthorized} = process_bounty_command("/bounty $100", user)
+      assert {:error, :unauthorized} = process_commands("issue_comment.created", "/bounty $100", user)
     end
 
     test "handles bounty command without amount" do
-      assert {:ok, []} = process_bounty_command("/bounty")
+      assert {:ok, []} = process_commands("issue_comment.created", "/bounty")
     end
 
     test "handles valid bounty command with $ prefix" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty $100")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty $100")
       assert bounty.amount == ~M[100]usd
     end
 
     test "handles invalid bounty command with $ suffix" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 100$")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100$")
       assert bounty.amount == ~M[100]usd
     end
 
     test "handles bounty command without $ symbol" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 100")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100")
       assert bounty.amount == ~M[100]usd
     end
 
     test "handles bounty command with decimal amount" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.50")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.50")
       assert bounty.amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.5")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.5")
       assert bounty.amount == ~M[100.5]usd
     end
 
     test "handles bounty command with decimal amount and $ prefix" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty $100.50")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty $100.50")
       assert bounty.amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount and $ prefix" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty $100.5")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty $100.5")
       assert bounty.amount == ~M[100.5]usd
     end
 
     test "handles bounty command with decimal amount and $ suffix" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.50$")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.50$")
       assert bounty.amount == ~M[100.50]usd
     end
 
     test "handles bounty command with partial decimal amount and $ suffix" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 100.5$")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.5$")
       assert bounty.amount == ~M[100.5]usd
     end
 
     test "handles bounty command with comma separator" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 1,000")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 1,000")
       assert bounty.amount == ~M[1000]usd
     end
 
     test "handles bounty command with comma separator and decimal amount" do
-      assert {:ok, [bounty]} = process_bounty_command("/bounty 1,000.50")
+      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 1,000.50")
       assert bounty.amount == ~M[1000.50]usd
     end
   end
@@ -206,8 +206,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     )
   end
 
-  # Helper function to process bounty commands
-  defp process_bounty_command(command, author \\ @admin_user) do
+  defp process_commands(event_action, command, author \\ @admin_user) do
     body = """
     Lorem
     ipsum #{command} dolor
@@ -215,9 +214,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     amet
     """
 
+    [event, action] = String.split(event_action, ".")
+
     GithubController.process_commands(
-      @webhook,
-      Map.put(@params, "comment", %{"user" => %{"login" => author}, "body" => body})
+      Map.put(@webhook, :event, event),
+      @params
+      |> Map.put("comment", %{"user" => %{"login" => author}, "body" => body})
+      |> Map.put("action", action)
     )
   end
 end

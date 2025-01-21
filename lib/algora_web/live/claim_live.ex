@@ -5,6 +5,7 @@ defmodule AlgoraWeb.ClaimLive do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Claim
   alias Algora.Bounties.LineItem
@@ -414,7 +415,7 @@ defmodule AlgoraWeb.ClaimLive do
                         </.avatar>
                         <div>
                           <p class="font-medium">{claim.user.name}</p>
-                          <p class="text-sm text-muted-foreground">@{claim.user.handle}</p>
+                          <p class="text-sm text-muted-foreground">@{User.handle(claim.user)}</p>
                         </div>
                       </div>
                     </span>
@@ -448,7 +449,7 @@ defmodule AlgoraWeb.ClaimLive do
                       </.avatar>
                       <div>
                         <p class="font-medium">{sponsor.sponsor.name}</p>
-                        <p class="text-sm text-muted-foreground">@{sponsor.sponsor.handle}</p>
+                        <p class="text-sm text-muted-foreground">@{User.handle(sponsor.sponsor)}</p>
                       </div>
                     </div>
                     <div class="text-right">

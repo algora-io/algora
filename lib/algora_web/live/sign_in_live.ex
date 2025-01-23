@@ -79,6 +79,7 @@ defmodule AlgoraWeb.SignInLive do
     case Algora.Accounts.get_user_by_email(email) do
       %User{} = user ->
         changeset = User.login_changeset(%User{}, %{})
+
         case send_login_code_to_user!(user, code) do
           {:ok, _id} ->
             {:noreply,
@@ -111,7 +112,7 @@ defmodule AlgoraWeb.SignInLive do
        |> put_flash(:info, "Logged in successfully!")}
     else
       throttle()
-      {:noreply, put_flash(socket, :info, "Invalid login code")}
+      {:noreply, put_flash(socket, :error, "Invalid login code")}
     end
   end
 

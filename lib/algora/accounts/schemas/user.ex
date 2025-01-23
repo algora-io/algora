@@ -71,6 +71,8 @@ defmodule Algora.Accounts.User do
     field :og_title, :string
     field :og_image_url, :string
 
+    field :login_token, :string, virtual: true
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id
@@ -245,6 +247,10 @@ defmodule Algora.Accounts.User do
     |> validate_required([:handle, :display_name])
     |> validate_handle()
     |> validate_timezone()
+  end
+
+  def login_changeset(%User{} = user, params) do
+    cast(user, params, [:email, :login_token])
   end
 
   defp validate_email(changeset) do

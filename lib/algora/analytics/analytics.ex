@@ -8,6 +8,13 @@ defmodule Algora.Analytics do
 
   require Algora.SQL
 
+  # TODO
+  #
+  # active org: org who triggered a GMV event in given period
+  # GMV events: bounty.created, bounty.rewarded, contract.payment_escrowed, contract.payment_released etc.
+  # successful contract: currently active or paid contract
+  # avg time to fill: time from published to accepted, avg over all successful contracts (excl. renewals)
+
   def get_company_analytics(period \\ "30d", from \\ DateTime.utc_now()) do
     days = period |> String.replace("d", "") |> String.to_integer()
     period_start = DateTime.add(from, -days * 24 * 3600)
@@ -99,6 +106,9 @@ defmodule Algora.Analytics do
            active_change: orgs.active_current,
            active_trend: calculate_trend(orgs.active_current, orgs.active_previous),
            # TODO track time when contract is filled
+           #
+           # in open contracts (contracts w/o contractor_id) we track :published_at
+           # in filled contracts (contracts w/ contractor_id) we track both :published_at (inherited) and :accepted_at
            avg_time_to_fill: 0.0,
            time_to_fill_change: -0.0,
            time_to_fill_trend: :down,

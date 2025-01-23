@@ -80,7 +80,7 @@ defmodule AlgoraWeb.SignInLive do
       %User{} = user ->
         changeset = User.login_changeset(%User{}, %{})
 
-        case send_login_code_to_user!(user, code) do
+        case send_login_code_to_user(user, code) do
           {:ok, _id} ->
             {:noreply,
              socket
@@ -123,7 +123,7 @@ defmodule AlgoraWeb.SignInLive do
   @from_name "Algora"
   @from_email "info@algora.io"
 
-  defp send_login_code_to_user!(user, code) do
+  defp send_login_code_to_user(user, code) do
     email =
       Email.new()
       |> Email.to({user.display_name, user.email})

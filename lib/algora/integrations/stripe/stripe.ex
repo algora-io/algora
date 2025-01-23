@@ -23,6 +23,11 @@ defmodule Algora.Stripe do
     impl().create_transfer(params)
   end
 
+  @impl true
+  def create_session(params) do
+    impl().create_session(params)
+  end
+
   def field_to_id(nil), do: nil
   def field_to_id(field) when is_binary(field), do: field
   def field_to_id(field), do: field.id

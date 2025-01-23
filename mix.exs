@@ -14,6 +14,14 @@ defmodule Algora.MixProject do
         plt_local_path: "priv/plts/project.plt",
         plt_core_path: "priv/plts/core.plt",
         ignore_warnings: ".dialyzer_ignore.exs"
+      ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.cobertura": :test
       ]
     ]
   end
@@ -67,7 +75,7 @@ defmodule Algora.MixProject do
       {:salad_ui, "~> 0.14.0"},
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
-      {:mox, "~> 1.0", only: :test},
+      {:mox, "~> 1.0", only: [:dev, :test]},
       {:tzdata, "~> 1.1"},
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},
@@ -77,6 +85,8 @@ defmodule Algora.MixProject do
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:chameleon, "~> 2.2.0"},
       {:ex_machina, "~> 2.8.0", only: [:dev, :test]},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:dataloader, "~> 2.0.0"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

@@ -65,6 +65,13 @@ defmodule Algora.Admin do
     end
   end
 
+  def make_admin!(user_handle, is_admin) when is_boolean(is_admin) do
+    user_handle
+    |> Algora.Accounts.get_user_by_handle()
+    |> Algora.Accounts.User.is_admin_changeset(is_admin)
+    |> Algora.Repo.update()
+  end
+
   defp update_tickets(url, repo_id) do
     Repo.update_all(from(t in Ticket, where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)),
       set: [repository_id: repo_id]

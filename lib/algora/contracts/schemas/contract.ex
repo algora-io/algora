@@ -3,6 +3,7 @@ defmodule Algora.Contracts.Contract do
   use Algora.Schema
 
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
 
@@ -35,6 +36,8 @@ defmodule Algora.Contracts.Contract do
     has_many :transactions, Algora.Payments.Transaction
     has_many :reviews, Algora.Reviews.Review
     has_one :timesheet, Algora.Contracts.Timesheet
+
+    has_many :activities, {"contract_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end

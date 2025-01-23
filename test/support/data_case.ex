@@ -13,7 +13,6 @@ defmodule Algora.DataCase do
   by setting `use Algora.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
-
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
@@ -21,9 +20,11 @@ defmodule Algora.DataCase do
   using do
     quote do
       import Algora.DataCase
+      import Algora.Factory
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
+      import Money.Sigil
 
       alias Algora.Repo
     end
@@ -56,5 +57,25 @@ defmodule Algora.DataCase do
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)
     end)
+  end
+
+  def assert_activity_names(names) do
+    assert Algora.Activities.all()
+           |> Enum.reverse()
+           |> Enum.map(&Map.get(&1, :type)) == names
+  end
+
+  def assert_activity_names(target, names) do
+    assert target
+           |> Algora.Activities.all()
+           |> Enum.reverse()
+           |> Enum.map(&Map.get(&1, :type)) == names
+  end
+
+  def assert_activity_names_for_user(user_id, names) do
+    assert user_id
+           |> Algora.Activities.all_for_user()
+           |> Enum.reverse()
+           |> Enum.map(&Map.get(&1, :type)) == names
   end
 end

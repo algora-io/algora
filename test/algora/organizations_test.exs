@@ -1,4 +1,4 @@
-defmodule Algora.OnboardingTest do
+defmodule Algora.OrganizationsTest do
   use Algora.DataCase
 
   @params %{
@@ -72,8 +72,8 @@ defmodule Algora.OnboardingTest do
     }
   }
 
-  describe "onboarding" do
-    test "create" do
+  describe "organizations" do
+    test "onboard" do
       assert {:ok, %{user: user, org: org, member: member, contract: contract}} =
                Algora.Organizations.onboard_organization(@params)
 
@@ -88,7 +88,7 @@ defmodule Algora.OnboardingTest do
       assert org.display_name == "Algora"
     end
 
-    test "create with crawler" do
+    test "onboard with crawler" do
       assert {:ok, %{user: user, org: org, member: _member, contract: _contract}} =
                Algora.Organizations.onboard_organization(@params_crawler)
 

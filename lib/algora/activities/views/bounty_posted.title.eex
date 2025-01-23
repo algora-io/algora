@@ -1,0 +1,1 @@
+<%= bounty.amount %> bounty posted by <%= bounty.creator.display_name %>

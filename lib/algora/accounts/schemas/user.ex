@@ -4,7 +4,9 @@ defmodule Algora.Accounts.User do
 
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Tip
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
@@ -78,6 +80,9 @@ defmodule Algora.Accounts.User do
     has_many :members, Member, foreign_key: :org_id
     has_many :owned_bounties, Bounty, foreign_key: :owner_id
     has_many :created_bounties, Bounty, foreign_key: :creator_id
+    has_many :owned_tips, Tip, foreign_key: :owner_id
+    has_many :created_tips, Tip, foreign_key: :creator_id
+    has_many :received_tips, Tip, foreign_key: :recipient_id
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
     has_many :projects, Algora.Projects.Project
@@ -87,6 +92,7 @@ defmodule Algora.Accounts.User do
     has_many :connected_installations, Installation, foreign_key: :connected_user_id
     has_many :contractor_contracts, Contract, foreign_key: :contractor_id
     has_many :client_contracts, Contract, foreign_key: :client_id
+    has_many :activities, {"user_activities", Activity}, foreign_key: :assoc_id
 
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
 
@@ -300,6 +306,10 @@ defmodule Algora.Accounts.User do
     |> generate_id()
     |> validate_required([:provider_id, :provider_login, :type])
     |> unique_constraint([:provider, :provider_id])
+  end
+
+  def is_admin_changeset(user, is_admin) do
+    cast(user, %{is_admin: is_admin}, [:is_admin])
   end
 
   def validate_timezone(changeset) do

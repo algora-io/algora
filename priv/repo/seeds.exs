@@ -39,6 +39,11 @@ defmodule Algora.Stripe.SeedImpl do
   def create_transfer(_params) do
     {:ok, %{id: "tr_#{Nanoid.generate()}"}}
   end
+
+  @impl true
+  def create_session(_params) do
+    {:ok, %{url: "https://#{Nanoid.generate()}.example.com"}}
+  end
 end
 
 github_id =

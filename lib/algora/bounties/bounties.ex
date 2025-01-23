@@ -49,7 +49,12 @@ defmodule Algora.Bounties do
         creator_id: creator.id
       })
 
-    case Repo.insert(changeset) do
+    changeset
+    |> Repo.insert_with_activity(%{
+      type: :bounty_posted,
+      notify_users: [creator.id]
+    })
+    |> case do
       {:ok, bounty} ->
         {:ok, bounty}
 
@@ -141,7 +146,9 @@ defmodule Algora.Bounties do
         url: source.url
       })
 
-    case Repo.insert(changeset) do
+    activity_attrs = %{type: :claim_submitted, notify_users: [user.id]}
+
+    case Repo.insert_with_activity(changeset, activity_attrs) do
       {:ok, claim} ->
         {:ok, claim}
 
@@ -253,8 +260,14 @@ defmodule Algora.Bounties do
         recipient_id: recipient.id
       })
 
+    activity_attrs =
+      %{
+        type: :tip_awarded,
+        notify_users: [recipient.id]
+      }
+
     Repo.transact(fn ->
-      with {:ok, tip} <- Repo.insert(changeset) do
+      with {:ok, tip} <- Repo.insert_with_activity(changeset, activity_attrs) do
         create_payment_session(
           %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
           ticket_ref: opts[:ticket_ref],
@@ -276,12 +289,18 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
-    create_payment_session(
-      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
-      ticket_ref: opts[:ticket_ref],
-      bounty_id: bounty_id,
-      claims: claims
-    )
+    Repo.transact(fn ->
+      activity_attrs = %{type: :bounty_awarded}
+
+      with {:ok, _activity} <- Algora.Activities.insert(%Bounty{id: bounty_id}, activity_attrs) do
+        create_payment_session(
+          %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
+          ticket_ref: opts[:ticket_ref],
+          bounty_id: bounty_id,
+          claims: claims
+        )
+      end
+    end)
   end
 
   @spec generate_line_items(
@@ -296,7 +315,7 @@ defmodule Algora.Bounties do
   def generate_line_items(%{amount: amount}, opts \\ []) do
     ticket_ref = opts[:ticket_ref]
     recipient = opts[:recipient]
-    claims = opts[:claims]
+    claims = opts[:claims] || []
 
     description = if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
@@ -382,6 +401,7 @@ defmodule Algora.Bounties do
                claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
                bounty_id: opts[:bounty_id],
+               claim_id: nil,
                amount: amount,
                creator_id: owner.id,
                group_id: tx_group_id
@@ -668,9 +688,9 @@ defmodule Algora.Bounties do
              id: credit_id,
              tip_id: params.tip_id,
              bounty_id: params.bounty_id,
-             claim_id: params.claim_id,
+             claim_id: params[:claim_id],
              amount: params.amount,
-             user_id: params.recipient_id,
+             user_id: params[:recipient_id],
              linked_transaction_id: debit_id,
              group_id: params.group_id
            }) do

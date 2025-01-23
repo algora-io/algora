@@ -1,0 +1,1 @@
+🎉 <%= bounty.amount %> bounty awarded by <%= bounty.creator.display_name %>

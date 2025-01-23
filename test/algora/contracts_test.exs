@@ -1,10 +1,13 @@
 defmodule Algora.ContractsTest do
   use Algora.DataCase
+  use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
   import Money.Sigil
 
+  alias Algora.Activities
   alias Algora.Contracts
+  alias Algora.Contracts.Contract
   alias Algora.Payments
   alias Algora.Payments.Transaction
 
@@ -173,6 +176,87 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(contract3.total_debited, ~M[9_000]usd)
       assert Money.equal?(contract3.total_credited, ~M[9_000]usd)
       assert Money.equal?(contract3.total_transferred, ~M[9_000]usd)
+    end
+
+    test "produces activities" do
+      # Group a
+      contract_a_0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
+      {:ok, _txs0} = Contracts.prepay_contract(contract_a_0)
+
+      # First cycle
+      insert!(:timesheet, %{contract_id: contract_a_0.id, hours_worked: 30})
+      {:ok, contract_a_0} = Contracts.fetch_contract(contract_a_0.id)
+      {:ok, {_txs1, contract_a_1}} = Contracts.release_and_renew_contract(contract_a_0)
+
+      # Second cycle
+      insert!(:timesheet, %{contract_id: contract_a_1.id, hours_worked: 20})
+      {:ok, contract_a_1} = Contracts.fetch_contract(contract_a_1.id)
+      {:ok, {_txs2, _contract_a_2}} = Contracts.release_and_renew_contract(contract_a_1)
+
+      # Group b
+      contract_b_0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
+      {:ok, _txs0} = Contracts.prepay_contract(contract_b_0)
+
+      # First cycle
+      insert!(:timesheet, %{contract_id: contract_b_0.id, hours_worked: 30})
+      {:ok, contract_b_0} = Contracts.fetch_contract(contract_b_0.id)
+      {:ok, {_txs1, contract_b_1}} = Contracts.release_and_renew_contract(contract_b_0)
+
+      # Second cycle
+      insert!(:timesheet, %{contract_id: contract_b_1.id, hours_worked: 20})
+      {:ok, contract_b_1} = Contracts.fetch_contract(contract_b_1.id)
+      {:ok, {_txs2, _contract_b_2}} = Contracts.release_and_renew_contract(contract_b_1)
+
+      assert_activity_names(
+        contract_a_0,
+        [:contract_prepaid, :contract_paid]
+      )
+
+      assert_activity_names(
+        contract_a_1,
+        [:contract_renewed, :contract_paid]
+      )
+
+      assert_activity_names(
+        "contract_activities",
+        [
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed,
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed
+        ]
+      )
+
+      assert_activity_names_for_user(
+        contract_a_0.contractor_id,
+        [
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed
+        ]
+      )
+
+      assert Activities.all_for_user(contract_a_0.client_id) !=
+               Activities.all_for_user(contract_b_0.client_id)
+
+      assert Activities.all_for_user(contract_a_0.contractor_id) !=
+               Activities.all_for_user(contract_b_0.contractor_id)
+
+      assert_enqueued(worker: Activities.Notifier, worker: "Algora.Activities.Notifier")
+
+      assert [contract_activity | activities] = Enum.reverse(Activities.all())
+      assert contract_activity.assoc.id == contract_a_0.id
+      activity = Activities.get(contract_activity.assoc_name, contract_activity.id)
+      assert activity.assoc.__meta__.schema == Contract
+      assert List.last(activities).notify_users == [contract_b_1.client.id, contract_b_1.contractor_id]
     end
 
     test "prepayment fails when payment method is invalid" do

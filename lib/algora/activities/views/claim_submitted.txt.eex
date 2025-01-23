@@ -1,0 +1,5 @@
+A claim for the issue "<%= claim.target.title %>" was submitted.
+
+<%= claim.url %>
+
+<%= Algora.Activities.external_url(activity) %>

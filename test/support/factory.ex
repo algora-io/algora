@@ -10,7 +10,10 @@ defmodule Algora.Factory do
     %Algora.Accounts.Identity{
       id: Nanoid.generate(),
       provider: "github",
-      provider_token: ""
+      provider_id: sequence(:provider_id, &"identity#{&1}"),
+      provider_token: sequence(:provider_token, &"token#{&1}"),
+      provider_email: sequence(:provider_email, &"identity#{&1}@example.com"),
+      provider_login: sequence(:provider_login, &"identity#{&1}")
     }
   end
 
@@ -127,7 +130,8 @@ defmodule Algora.Factory do
       hours_per_week: 40,
       sequence_number: 1,
       start_date: days_from_now(0),
-      end_date: days_from_now(7)
+      end_date: days_from_now(7),
+      activities: []
     }
   end
 
@@ -169,7 +173,7 @@ defmodule Algora.Factory do
     %Algora.Workspace.Repository{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"repository#{&1}"),
       name: "middle-out",
       url: "https://github.com/piedpiper/middle-out",
       og_image_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-banner.jpg",
@@ -181,7 +185,7 @@ defmodule Algora.Factory do
     %Algora.Workspace.Ticket{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"ticket#{&1}"),
       type: :issue,
       title: "Optimize compression algorithm for large files",
       description: "We need to improve performance when handling files over 1GB",
@@ -220,8 +224,8 @@ defmodule Algora.Factory do
     %Installation{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
-      provider_user_id: sequence(:provider_user_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"installation#{&1}"),
+      provider_user_id: sequence(:provider_user_id, &"installation#{&1}"),
       provider_meta: %{
         "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
         "repository_selection" => "selected"

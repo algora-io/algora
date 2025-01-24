@@ -24,7 +24,7 @@ defmodule Algora.Bounties.Claim do
 
   def changeset(claim, attrs) do
     claim
-    |> cast(attrs, [:source_id, :target_id, :user_id, :status, :type, :url, :group_id])
+    |> cast(attrs, [:source_id, :target_id, :user_id, :status, :type, :url, :group_id, :group_share])
     |> validate_required([:target_id, :user_id, :status, :type, :url])
     |> generate_id()
     |> put_group_id()
@@ -54,7 +54,7 @@ defmodule Algora.Bounties.Claim do
   def type_label(:article), do: "an article"
   def type_label(nil), do: "a URL"
 
-  def reward_url(claim), do: "#{AlgoraWeb.Endpoint.url()}/claims/#{claim.id}"
+  def reward_url(claim), do: "#{AlgoraWeb.Endpoint.url()}/claims/#{claim.group_id}"
 
   def rewarded(query \\ Claim) do
     from c in query,

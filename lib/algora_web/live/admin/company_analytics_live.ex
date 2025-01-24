@@ -2,17 +2,23 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import AlgoraWeb.Components.Activity
+
+  alias Algora.Activities
   alias Algora.Analytics
 
   def mount(_params, _session, socket) do
-    analytics = Analytics.get_company_analytics()
+    {:ok, analytics} = Analytics.get_company_analytics()
     funnel_data = Analytics.get_funnel_data()
+    :ok = Activities.subscribe()
 
     {:ok,
      socket
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
-     |> assign(:selected_period, "30d")}
+     |> assign(:selected_period, "30d")
+     |> stream(:activities, [])
+     |> start_async(:get_activities, fn -> Activities.all() end)}
   end
 
   def render(assigns) do
@@ -31,17 +37,29 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
           </.button>
         </div>
       </div>
-      <!-- Funnel Chart -->
-      <.card>
-        <.card_header>
-          <.card_title>Company Funnel</.card_title>
-        </.card_header>
-        <.card_content>
-          <div class="h-[400px]" phx-update="ignore" id="funnel-chart">
-            <canvas id="funnelChart"></canvas>
-          </div>
-        </.card_content>
-      </.card>
+
+      <div class="mx-auto h-500 flex">
+        <div class="w-3/4 p-0">
+          <.card>
+            <.card_header>
+              <.card_title>Company Funnel</.card_title>
+            </.card_header>
+            <.card_content>
+              <div class="h-[400px]" phx-update="ignore" id="funnel-chart">
+                <canvas id="funnelChart"></canvas>
+              </div>
+            </.card_content>
+          </.card>
+        </div>
+        <.scroll_area class="w-1/4 ml-4 pr-4">
+          <.card class="h-[500px]">
+            <.card_header>
+              <.card_title>Recent Activities</.card_title>
+            </.card_header>
+            <.activities_timeline id="admin-activities-timeline" activities={@streams.activities} />
+          </.card>
+        </.scroll_area>
+      </div>
       <!-- Key Metrics -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <.stat_card
@@ -134,7 +152,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   def status_color(_), do: "secondary"
 
   def handle_event("select_period", %{"period" => period}, socket) do
-    analytics = Analytics.get_company_analytics(period)
+    {:ok, analytics} = Analytics.get_company_analytics(period)
     funnel_data = Analytics.get_funnel_data(period)
 
     {:noreply,
@@ -142,5 +160,13 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
      |> assign(:selected_period, period)}
+  end
+
+  def handle_async(:get_activities, {:ok, fetched}, socket) do
+    {:noreply, stream(socket, :activities, fetched)}
+  end
+
+  def handle_info(%Activities.Activity{} = activity, socket) do
+    {:noreply, stream_insert(socket, :activities, activity, at: 0)}
   end
 end

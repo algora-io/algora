@@ -32,7 +32,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     <div
       class={
         classes([
-          "fixed inset-0 z-50 bg-black/90 transition-all duration-300",
+          "fixed inset-0 z-10 bg-black/90 transition-all duration-300",
           "#{if @show, do: "opacity-100", else: "pointer-events-none opacity-0"}"
         ])
       }
@@ -42,7 +42,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     <div
       class={
         classes([
-          "fixed z-50 transform border bg-background transition-transform duration-300 ease-in-out",
+          "fixed z-10 transform border bg-background transition-transform duration-300 ease-in-out",
           case @direction do
             "bottom" -> "inset-x-0 bottom-0 rounded-t-xl"
             "right" -> "inset-y-0 right-0 h-full max-w-lg w-full"
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
         <button
           phx-click={@on_cancel}
           type="button"
-          class="absolute top-4 right-4 z-50 flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground"
+          class="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-foreground"
         >
           <AlgoraWeb.CoreComponents.icon name="tabler-x" class="h-5 w-5" />
         </button>

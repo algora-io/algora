@@ -33,7 +33,9 @@ config :algora, Oban,
     github_og_image: 5,
     notify_bounty: 1,
     notify_tip_intent: 1,
-    notify_claim: 1
+    notify_claim: 1,
+    activity_notifier: 1,
+    activity_mailer: 1
   ]
 
 # Configures the mailer

@@ -79,8 +79,16 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   def handle_event("setup_payout_account", _params, socket) do
     case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url()) do
-      {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
-      {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
+      {:ok, %{url: url}} ->
+        {:noreply, redirect(socket, external: url)}
+
+      # {:error, %Stripe.Error{} = error} ->
+      #  Algora.Notifier.notify_stripe_account_link_error(socket.assigns.current_user, error)
+      #  Algora.Signal.send_error(error, %StripeAccountLinkError{})
+      #  {:noreply, put_flash(socket, :error, "Failed to link payout account for your country")}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 
@@ -98,8 +106,13 @@ defmodule AlgoraWeb.User.TransactionsLive do
            {:ok, %{url: url}} <- Payments.create_account_link(account, AlgoraWeb.Endpoint.url()) do
         {:noreply, redirect(socket, external: url)}
       else
+        # {:error, %Stripe.Error{} = error} ->
+        #  Algora.Notifier.notify_stripe_account_link_error(socket.assigns.current_user, error)
+        #  Algora.Signal.send_error(error, %StripeAccountCreateError{})
+        #  {:noreply, put_flash(socket, :error, "Failed to create payout account")}
+
         {:error, _reason} ->
-          {:noreply, put_flash(socket, :error, "Failed to create payout account")}
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
       end
     else
       {:noreply, assign(socket, :payout_account_form, to_form(changeset))}
@@ -124,11 +137,15 @@ defmodule AlgoraWeb.User.TransactionsLive do
          |> assign(:show_manage_payout_drawer, false)
          |> put_flash(:info, "Payout account deleted successfully")}
 
+      # {:error, %Stripe.Error{} = error} ->
+      #  Algora.Signal.send_error(error, %StripeAccountDeleteError{})
+      #  {:noreply, put_flash(socket, :error, "Failed to delete payout account")}
+
       {:error, _reason} ->
         {:noreply,
          socket
          |> assign(:show_delete_confirmation, false)
-         |> put_flash(:error, "Failed to delete payout account")}
+         |> put_flash(:error, "Something went wrong")}
     end
   end
 

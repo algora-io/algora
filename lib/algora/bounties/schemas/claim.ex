@@ -2,6 +2,7 @@ defmodule Algora.Bounties.Claim do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
   alias Algora.Bounties.Claim
   alias Algora.Workspace.Ticket
 
@@ -17,6 +18,7 @@ defmodule Algora.Bounties.Claim do
     belongs_to :user, Algora.Accounts.User, null: false
     has_many :transactions, Algora.Payments.Transaction
 
+    has_many :activities, {"claim_activities", Activity}, foreign_key: :assoc_id
     timestamps()
   end
 
@@ -30,6 +32,12 @@ defmodule Algora.Bounties.Claim do
     |> foreign_key_constraint(:target_id)
     |> foreign_key_constraint(:user_id)
     |> unique_constraint([:target_id, :user_id])
+  end
+
+  def preload(id) do
+    from a in __MODULE__,
+      preload: [:source, :target, :user],
+      where: a.id == ^id
   end
 
   def put_group_id(changeset) do

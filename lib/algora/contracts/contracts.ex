@@ -3,6 +3,7 @@ defmodule Algora.Contracts do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Activities
   alias Algora.Contracts.Contract
   alias Algora.Contracts.Timesheet
   alias Algora.FeeTier
@@ -377,7 +378,16 @@ defmodule Algora.Contracts do
     with {:ok, txs} <- initialize_prepayment_transaction(contract),
          {:ok, invoice} <- maybe_generate_invoice(contract, txs.charge),
          {:ok, _invoice} <- maybe_pay_invoice(contract, invoice, txs) do
+      Activities.insert(contract, %{type: :contract_prepaid})
+
       {:ok, txs}
+    else
+      error ->
+        Activities.insert(contract, %{
+          type: :contract_prepayment_failed
+        })
+
+        error
     end
   end
 
@@ -483,6 +493,7 @@ defmodule Algora.Contracts do
 
       {:error, error} ->
         update_transaction_status(transaction, {:error, error})
+        Activities.insert(contract, %{type: :contract_prepayment_failed})
         {:error, error}
     end
   end
@@ -510,7 +521,10 @@ defmodule Algora.Contracts do
   defp mark_contract_as_paid(contract) do
     contract
     |> change(%{status: :paid})
-    |> Repo.update()
+    |> Repo.update_with_activity(%{
+      type: :contract_paid,
+      notify_users: [contract.client_id, contract.contractor_id]
+    })
   end
 
   defp renew_contract(contract) do
@@ -527,7 +541,10 @@ defmodule Algora.Contracts do
       hourly_rate: contract.hourly_rate,
       hours_per_week: contract.hours_per_week
     })
-    |> Repo.insert()
+    |> Repo.insert_with_activity(%{
+      type: :contract_renewed,
+      notify_users: [contract.client_id, contract.contractor_id]
+    })
   end
 
   def calculate_transfer_amount(contract) do
@@ -601,6 +618,7 @@ defmodule Algora.Contracts do
       on: tt.original_contract_id == c.original_contract_id,
       as: :tt
     )
+    |> join(:left, [c], act in assoc(c, :activities), as: :act)
     |> select_merge([ta: ta, tt: tt], %{
       amount_credited: Algora.SQL.money_or_zero(ta.amount_credited),
       amount_debited: Algora.SQL.money_or_zero(ta.amount_debited),
@@ -611,11 +629,12 @@ defmodule Algora.Contracts do
       total_transferred: Algora.SQL.money_or_zero(tt.total_transferred),
       total_withdrawn: Algora.SQL.money_or_zero(tt.total_withdrawn)
     })
-    |> preload([ts: ts, txs: txs, cl: cl, ct: ct, cu: cu, dpm: dpm],
+    |> preload([ts: ts, txs: txs, cl: cl, ct: ct, cu: cu, dpm: dpm, act: act],
       timesheet: ts,
       transactions: txs,
       client: {cl, customer: {cu, default_payment_method: dpm}},
-      contractor: ct
+      contractor: ct,
+      activities: act
     )
     |> Repo.all()
     |> Enum.map(&Contract.after_load/1)

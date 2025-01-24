@@ -14,6 +14,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     bounties =
       [status: :paid, limit: 50, solver_country: socket.assigns.current_country]
       |> Bounties.list_bounties()
+      |> Enum.filter(&Map.get(&1, :solver))
       |> Enum.uniq_by(& &1.solver.id)
 
     {:ok,

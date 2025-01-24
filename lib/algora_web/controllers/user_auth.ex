@@ -200,8 +200,15 @@ defmodule AlgoraWeb.UserAuth do
   defp login_code_ttl, do: 3600
   defp login_code_salt, do: "algora-login-code"
 
-  def generate_login_code(email, domain \\ nil, tech_stack) do
-    payload = "#{email}:#{domain || ""}:#{Enum.join(tech_stack, ":")}"
+  def generate_login_code(email) do
+    sign_login_code(email)
+  end
+
+  def generate_login_code(email, domain, tech_stack) do
+    sign_login_code("#{email}:#{domain || ""}:#{Enum.join(tech_stack, ":")}")
+  end
+
+  def sign_login_code(payload) do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
   end
 
@@ -261,7 +268,7 @@ defmodule AlgoraWeb.UserAuth do
 
     For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
 
-    © 2023 Algora PBC.
+    © 2025 Algora PBC.
     """
   end
 end

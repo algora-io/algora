@@ -22,4 +22,9 @@ defmodule Algora.Stripe.Impl do
   def create_transfer(params) do
     Stripe.Transfer.create(params)
   end
+
+  @impl true
+  def create_session(params) do
+    Stripe.Session.create(params)
+  end
 end

@@ -15,8 +15,15 @@ defmodule Algora.Bounties.Bounty do
     belongs_to :creator, User
     has_many :attempts, Algora.Bounties.Attempt
     has_many :transactions, Algora.Payments.Transaction
+    has_many :activities, {"bounty_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
 
     timestamps()
+  end
+
+  def preload(id) do
+    from a in __MODULE__,
+      preload: [:ticket, :owner, :creator],
+      where: a.id == ^id
   end
 
   def changeset(bounty, attrs) do

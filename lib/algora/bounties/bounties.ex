@@ -181,7 +181,7 @@ defmodule Algora.Bounties do
           status: :pending | :approved | :rejected | :paid,
           type: :pull_request | :review | :video | :design | :article
         }) ::
-          {:ok, Claim.t()} | {:error, atom()}
+          {:ok, [Claim.t()]} | {:error, atom()}
   defp do_claim_bounties(%{
          provider_logins: provider_logins,
          token: token,

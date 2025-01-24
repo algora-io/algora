@@ -8,7 +8,8 @@ defmodule Algora.Github.Command do
     @usage %{
       bounty: "/bounty <amount>",
       tip: "/tip <amount> @username or /tip @username <amount>",
-      claim: "/claim <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)"
+      claim: "/claim <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)",
+      split: "/split @username"
     }
 
     def commands do
@@ -21,7 +22,8 @@ defmodule Algora.Github.Command do
           choice([
             bounty_command(),
             tip_command(),
-            claim_command()
+            claim_command(),
+            split_command()
           ]),
 
           # Unknown command
@@ -56,6 +58,16 @@ defmodule Algora.Github.Command do
       ])
       |> tag(:tip)
       |> label(@usage.tip)
+    end
+
+    def split_command do
+      "/split"
+      |> string()
+      |> ignore()
+      |> concat(ignore(whitespace()))
+      |> concat(recipient())
+      |> tag(:split)
+      |> label(@usage.split)
     end
 
     def claim_command do

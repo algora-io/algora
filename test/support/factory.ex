@@ -37,7 +37,8 @@ defmodule Algora.Factory do
       twitter_url: "https://twitter.com/erich",
       github_url: "https://github.com/erich",
       linkedin_url: "https://linkedin.com/in/erich",
-      provider: "github"
+      provider: "github",
+      provider_login: sequence(:provider_login, &"erlich#{&1}")
     }
   end
 

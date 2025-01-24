@@ -63,6 +63,7 @@ defmodule Algora.BountiesTest do
                Algora.Bounties.claim_bounty(
                  %{
                    user: recipient,
+                   coauthor_provider_logins: [],
                    target_ticket_ref: ticket_ref,
                    source_ticket_ref: ticket_ref,
                    status: :approved,

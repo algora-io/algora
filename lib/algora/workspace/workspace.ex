@@ -155,12 +155,11 @@ defmodule Algora.Workspace do
     Repo.all(from(i in Installation, where: i.owner_id == ^user_id, preload: [:connected_user]))
   end
 
-  def fetch_command_response(provider, command_id, command_source) do
+  def fetch_command_response(ticket_id, command_type) do
     Repo.fetch_one(
       from cr in CommandResponse,
-        where: cr.provider == ^provider,
-        where: cr.provider_command_id == ^to_string(command_id),
-        where: cr.command_source == ^command_source
+        where: cr.ticket_id == ^ticket_id,
+        where: cr.command_type == ^command_type
     )
   end
 

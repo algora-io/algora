@@ -87,7 +87,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
   end
 
   defp ensure_command_response(token, ticket_ref, command_id, command_source, ticket, body) do
-    case Workspace.fetch_command_response("github", command_id, command_source) do
+    case Workspace.fetch_command_response(ticket.id, :bounty) do
       {:ok, response} ->
         case Github.update_issue_comment(
                token,

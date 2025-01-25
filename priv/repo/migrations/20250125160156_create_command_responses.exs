@@ -14,7 +14,6 @@ defmodule Algora.Repo.Migrations.CreateCommandResponses do
       timestamps()
     end
 
-    create unique_index(:command_responses, [:provider, :provider_command_id, :command_source])
-    create index(:command_responses, [:ticket_id])
+    create unique_index(:command_responses, [:ticket_id, :command_type])
   end
 end

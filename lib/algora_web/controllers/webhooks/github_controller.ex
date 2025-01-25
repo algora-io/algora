@@ -67,8 +67,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           {:ticket, issue["id"]}
       end
 
-    dbg({command_source, command_id})
-
     # TODO: community bounties?
     with {:ok, "admin"} <- get_permissions(author, params),
          {:ok, token} <- Github.get_installation_token(installation_id),

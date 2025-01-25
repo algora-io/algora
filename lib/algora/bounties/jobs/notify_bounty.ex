@@ -42,17 +42,8 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
              ),
            {:ok, ticket} <-
              Workspace.ensure_ticket(Github.pat(), ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"]) do
-        %CommandResponse{}
-        |> CommandResponse.changeset(%{
-          provider: "github",
-          provider_meta: Util.normalize_struct(response),
-          provider_command_id: to_string(command_id),
-          provider_response_id: to_string(response["id"]),
-          command_source: command_source,
-          command_type: :bounty,
-          ticket_id: ticket.id
-        })
-        |> Repo.insert()
+        # TODO: update existing command response if it exists
+        create_command_response(response, command_source, command_id, ticket.id)
       end
     else
       Logger.info("""
@@ -91,26 +82,69 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
       Thank you for contributing to #{ticket_ref["owner"]}/#{ticket_ref["repo"]}!
       """
 
-      with {:ok, response} <-
-             Github.create_issue_comment(
+      ensure_command_response(token, ticket_ref, command_id, command_source, ticket, body)
+    end
+  end
+
+  defp ensure_command_response(token, ticket_ref, command_id, command_source, ticket, body) do
+    case Workspace.fetch_command_response("github", command_id, command_source) do
+      {:ok, response} ->
+        case Github.update_issue_comment(
                token,
                ticket_ref["owner"],
                ticket_ref["repo"],
-               ticket_ref["number"],
+               response.provider_response_id,
                body
              ) do
-        %CommandResponse{}
-        |> CommandResponse.changeset(%{
-          provider: "github",
-          provider_meta: Util.normalize_struct(response),
-          provider_command_id: to_string(command_id),
-          provider_response_id: to_string(response["id"]),
-          command_source: command_source,
-          command_type: :bounty,
-          ticket_id: ticket.id
-        })
-        |> Repo.insert()
-      end
+          {:ok, _comment} ->
+            try_update_command_response(response, body)
+
+          {:error, "404 Not Found"} ->
+            with {:ok, _} <- Workspace.delete_command_response(response.id) do
+              post_response(token, ticket_ref, command_id, command_source, ticket, body)
+            end
+
+          {:error, reason} ->
+            Logger.error("Failed to update command response #{response.id} with body #{body}")
+            {:error, reason}
+        end
+
+      {:error, _reason} ->
+        post_response(token, ticket_ref, command_id, command_source, ticket, body)
+    end
+  end
+
+  defp post_response(token, ticket_ref, command_id, command_source, ticket, body) do
+    with {:ok, comment} <-
+           Github.create_issue_comment(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], body) do
+      create_command_response(comment, command_source, command_id, ticket.id)
+    end
+  end
+
+  defp create_command_response(comment, command_source, command_id, ticket_id) do
+    %CommandResponse{}
+    |> CommandResponse.changeset(%{
+      provider: "github",
+      provider_meta: Util.normalize_struct(comment),
+      provider_command_id: to_string(command_id),
+      provider_response_id: to_string(comment["id"]),
+      command_source: command_source,
+      command_type: :bounty,
+      ticket_id: ticket_id
+    })
+    |> Repo.insert()
+  end
+
+  defp try_update_command_response(command_response, body) do
+    case command_response
+         |> CommandResponse.changeset(%{provider_meta: Util.normalize_struct(body)})
+         |> Repo.update() do
+      {:ok, command_response} ->
+        {:ok, command_response}
+
+      {:error, _reason} ->
+        Logger.error("Failed to update command response #{command_response.id}")
+        {:ok, command_response}
     end
   end
 end

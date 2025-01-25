@@ -52,10 +52,22 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp execute_command(event_action, {:bounty, args}, author, params)
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
+    [event, _action] = String.split(event_action, ".")
     amount = args[:amount]
     repo = params["repository"]
     issue = params["issue"]
     installation_id = params["installation"]["id"]
+
+    {command_source, command_id} =
+      case event do
+        "issue_comment" ->
+          {:comment, params["comment"]["id"]}
+
+        _ ->
+          {:ticket, issue["id"]}
+      end
+
+    dbg({command_source, command_id})
 
     # TODO: community bounties?
     with {:ok, "admin"} <- get_permissions(author, params),
@@ -71,7 +83,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           amount: amount,
           ticket_ref: %{owner: repo["owner"]["login"], repo: repo["name"], number: issue["number"]}
         },
-        installation_id: installation_id
+        installation_id: installation_id,
+        command_id: command_id,
+        command_source: command_source
       )
     else
       {:ok, _permission} ->

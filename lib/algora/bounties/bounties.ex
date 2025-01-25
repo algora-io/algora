@@ -73,7 +73,7 @@ defmodule Algora.Bounties do
             amount: Money.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
           },
-          opts :: [installation_id: integer()]
+          opts :: [installation_id: integer(), command_id: integer(), command_source: :ticket | :comment]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
   def create_bounty(
@@ -86,6 +86,7 @@ defmodule Algora.Bounties do
         opts \\ []
       ) do
     installation_id = opts[:installation_id]
+    command_id = opts[:command_id]
 
     token_res =
       if installation_id,
@@ -97,7 +98,11 @@ defmodule Algora.Bounties do
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
            {:ok, bounty} <- do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}),
            {:ok, _job} <-
-             notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, installation_id: installation_id) do
+             notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref},
+               installation_id: installation_id,
+               command_id: command_id,
+               command_source: opts[:command_source]
+             ) do
         broadcast()
         {:ok, bounty}
       else
@@ -112,7 +117,7 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
           },
-          opts :: [installation_id: integer()]
+          opts :: [installation_id: integer(), command_id: integer(), command_source: :ticket | :comment]
         ) ::
           {:ok, Oban.Job.t()} | {:error, atom()}
   def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, opts \\ []) do
@@ -120,7 +125,9 @@ defmodule Algora.Bounties do
       owner_login: owner.provider_login,
       amount: Money.to_string!(bounty.amount, no_fraction_if_integer: true),
       ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
-      installation_id: opts[:installation_id]
+      installation_id: opts[:installation_id],
+      command_id: opts[:command_id],
+      command_source: opts[:command_source]
     }
     |> Jobs.NotifyBounty.new()
     |> Oban.insert()

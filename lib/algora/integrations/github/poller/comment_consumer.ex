@@ -34,12 +34,16 @@ defmodule Algora.Github.Poller.CommentConsumer do
   defp run_command({:bounty, args}, ticket_ref, comment) do
     case Accounts.fetch_user_by(provider_id: to_string(comment["user"]["id"])) do
       {:ok, user} ->
-        Bounties.create_bounty(%{
-          creator: user,
-          owner: user,
-          amount: args[:amount],
-          ticket_ref: %{owner: ticket_ref[:owner], repo: ticket_ref[:repo], number: ticket_ref[:number]}
-        })
+        Bounties.create_bounty(
+          %{
+            creator: user,
+            owner: user,
+            amount: args[:amount],
+            ticket_ref: %{owner: ticket_ref[:owner], repo: ticket_ref[:repo], number: ticket_ref[:number]}
+          },
+          command_id: comment["id"],
+          command_source: :comment
+        )
 
       {:error, _reason} = error ->
         Logger.error("Failed to create bounty: #{inspect(error)}")

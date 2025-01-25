@@ -5,6 +5,7 @@ defmodule Algora.Workspace do
   alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Repo
+  alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
@@ -153,4 +154,14 @@ defmodule Algora.Workspace do
   def list_user_installations(user_id) do
     Repo.all(from(i in Installation, where: i.owner_id == ^user_id, preload: [:connected_user]))
   end
+
+  def fetch_command_response(ticket_id, command_type) do
+    Repo.fetch_one(
+      from cr in CommandResponse,
+        where: cr.ticket_id == ^ticket_id,
+        where: cr.command_type == ^command_type
+    )
+  end
+
+  def delete_command_response(id), do: Repo.delete(Repo.get(CommandResponse, id))
 end

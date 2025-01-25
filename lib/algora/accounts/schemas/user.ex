@@ -12,6 +12,7 @@ defmodule Algora.Accounts.User do
   alias Algora.Organizations.Member
   alias Algora.Types.Money
   alias Algora.Workspace.Installation
+  alias AlgoraWeb.Endpoint
 
   @derive {Inspect, except: [:provider_meta]}
   typed_schema "users" do
@@ -322,8 +323,9 @@ defmodule Algora.Accounts.User do
   def handle(%{handle: handle}) when is_binary(handle), do: handle
   def handle(%{provider_login: handle}), do: handle
 
-  def url(%{handle: handle, type: :individual}) when is_binary(handle), do: "/@/#{handle}"
-  def url(%{handle: handle, type: :organization}), do: "/org/#{handle}"
+  def url(%{handle: handle, type: :individual}) when is_binary(handle), do: "#{Endpoint.url()}/@/#{handle}"
+  def url(%{handle: handle, type: :organization}), do: "#{Endpoint.url()}/org/#{handle}"
+  def url(%{handle: handle}) when is_binary(handle), do: "#{Endpoint.url()}/org/#{handle}"
   def url(%{provider_login: handle}), do: "https://github.com/#{handle}"
 
   def last_context(%{last_context: last_context}), do: last_context || default_context()

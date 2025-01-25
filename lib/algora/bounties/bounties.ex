@@ -26,7 +26,8 @@ defmodule Algora.Bounties do
 
   @type criterion ::
           {:limit, non_neg_integer()}
-          | {:owner_id, integer()}
+          | {:ticket_id, String.t()}
+          | {:owner_id, String.t()}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
 
@@ -66,6 +67,18 @@ defmodule Algora.Bounties do
     end
   end
 
+  @type strategy :: :create | :set | :increase
+
+  @spec strategy_to_action(Bounty.t() | nil, strategy() | nil) :: {:ok, strategy()} | {:error, atom()}
+  defp strategy_to_action(bounty, strategy) do
+    case {bounty, strategy} do
+      {_, nil} -> strategy_to_action(bounty, :increase)
+      {nil, _} -> {:ok, :create}
+      {_existing, :create} -> {:error, :already_exists}
+      {_existing, strategy} -> {:ok, strategy}
+    end
+  end
+
   @spec create_bounty(
           %{
             creator: User.t(),
@@ -73,7 +86,12 @@ defmodule Algora.Bounties do
             amount: Money.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
           },
-          opts :: [installation_id: integer()]
+          opts :: [
+            strategy: strategy(),
+            installation_id: integer(),
+            command_id: integer(),
+            command_source: :ticket | :comment
+          ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
   def create_bounty(
@@ -86,6 +104,7 @@ defmodule Algora.Bounties do
         opts \\ []
       ) do
     installation_id = opts[:installation_id]
+    command_id = opts[:command_id]
 
     token_res =
       if installation_id,
@@ -95,9 +114,20 @@ defmodule Algora.Bounties do
     Repo.transact(fn ->
       with {:ok, token} <- token_res,
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
-           {:ok, bounty} <- do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}),
+           existing = Repo.get_by(Bounty, owner_id: owner.id, ticket_id: ticket.id),
+           {:ok, strategy} <- strategy_to_action(existing, opts[:strategy]),
+           {:ok, bounty} <-
+             (case strategy do
+                :create -> do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
+                :set -> existing |> Bounty.changeset(%{amount: amount}) |> Repo.update()
+                :increase -> existing |> Bounty.changeset(%{amount: Money.add!(existing.amount, amount)}) |> Repo.update()
+              end),
            {:ok, _job} <-
-             notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, installation_id: installation_id) do
+             notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref},
+               installation_id: installation_id,
+               command_id: command_id,
+               command_source: opts[:command_source]
+             ) do
         broadcast()
         {:ok, bounty}
       else
@@ -112,7 +142,7 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
           },
-          opts :: [installation_id: integer()]
+          opts :: [installation_id: integer(), command_id: integer(), command_source: :ticket | :comment]
         ) ::
           {:ok, Oban.Job.t()} | {:error, atom()}
   def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, opts \\ []) do
@@ -120,7 +150,9 @@ defmodule Algora.Bounties do
       owner_login: owner.provider_login,
       amount: Money.to_string!(bounty.amount, no_fraction_if_integer: true),
       ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
-      installation_id: opts[:installation_id]
+      installation_id: opts[:installation_id],
+      command_id: opts[:command_id],
+      command_source: opts[:command_source]
     }
     |> Jobs.NotifyBounty.new()
     |> Oban.insert()
@@ -592,6 +624,9 @@ defmodule Algora.Bounties do
     Enum.reduce(criteria, query, fn
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
+
+      {:ticket_id, ticket_id}, query ->
+        from([b] in query, where: b.ticket_id == ^ticket_id)
 
       {:owner_id, owner_id}, query ->
         from([b] in query, where: b.owner_id == ^owner_id)

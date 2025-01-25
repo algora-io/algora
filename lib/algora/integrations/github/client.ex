@@ -177,6 +177,16 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def update_issue_comment(access_token, owner, repo, comment_id, body) do
+    fetch(
+      access_token,
+      "/repos/#{owner}/#{repo}/issues/comments/#{comment_id}",
+      "PATCH",
+      %{body: body}
+    )
+  end
+
+  @impl true
   def list_repository_events(access_token, owner, repo, opts \\ []) do
     fetch(access_token, "/repos/#{owner}/#{repo}/events#{build_query(opts)}")
   end

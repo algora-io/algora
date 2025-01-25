@@ -4,8 +4,8 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
     queue: :notify_bounty,
     max_attempts: 1
 
-  alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Bounties
   alias Algora.Github
   alias Algora.Repo
   alias Algora.Util
@@ -58,7 +58,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
   @impl Oban.Worker
   def perform(%Oban.Job{
         args: %{
-          "amount" => amount,
+          "amount" => _amount,
           "ticket_ref" => ticket_ref,
           "installation_id" => installation_id,
           "command_id" => command_id,
@@ -66,14 +66,16 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
         }
       }) do
     with {:ok, token} <- Github.get_installation_token(installation_id),
-         {:ok, installation} <-
-           Workspace.fetch_installation_by(provider: "github", provider_id: to_string(installation_id)),
-         {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
-         {:ok, _} <-
-           Github.add_labels(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], ["💎 Bounty"]),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"]) do
+         {:ok, ticket} <- Workspace.ensure_ticket(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"]),
+         bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
+         {:ok, _} <- Github.add_labels(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], ["💎 Bounty"]) do
+      header =
+        Enum.map_join(bounties, "\n", fn bounty ->
+          "## 💎 #{bounty.amount} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
+        end)
+
       body = """
-      ## 💎 #{amount} bounty [• #{owner.name}](#{User.url(owner)})
+      #{header}
       ### Steps to solve:
       1. **Start working**: Comment `/attempt ##{ticket_ref["number"]}` with your implementation plan
       2. **Submit work**: Create a pull request including `/claim ##{ticket_ref["number"]}` in the PR body to claim the bounty
@@ -96,8 +98,8 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
                response.provider_response_id,
                body
              ) do
-          {:ok, _comment} ->
-            try_update_command_response(response, body)
+          {:ok, comment} ->
+            try_update_command_response(response, comment)
 
           {:error, "404 Not Found"} ->
             with {:ok, _} <- Workspace.delete_command_response(response.id) do
@@ -105,7 +107,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
             end
 
           {:error, reason} ->
-            Logger.error("Failed to update command response #{response.id} with body #{body}")
+            Logger.error("Failed to update command response #{response.id}: #{inspect(reason)}")
             {:error, reason}
         end
 
@@ -142,8 +144,8 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
       {:ok, command_response} ->
         {:ok, command_response}
 
-      {:error, _reason} ->
-        Logger.error("Failed to update command response #{command_response.id}")
+      {:error, reason} ->
+        Logger.error("Failed to update command response #{command_response.id}: #{inspect(reason)}")
         {:ok, command_response}
     end
   end

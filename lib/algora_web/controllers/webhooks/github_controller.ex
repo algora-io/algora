@@ -5,7 +5,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Github.Webhook
+  alias Algora.Repo
   alias Algora.Workspace
+  alias Algora.Workspace.CommandResponse
 
   require Logger
 
@@ -53,6 +55,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command(event_action, {:bounty, args}, author, params)
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
     [event, _action] = String.split(event_action, ".")
+
     amount = args[:amount]
     repo = params["repository"]
     issue = params["issue"]
@@ -60,11 +63,21 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
     {command_source, command_id} =
       case event do
-        "issue_comment" ->
-          {:comment, params["comment"]["id"]}
+        "issue_comment" -> {:comment, params["comment"]["id"]}
+        _ -> {:ticket, issue["id"]}
+      end
 
-        _ ->
-          {:ticket, issue["id"]}
+    # TODO: perform compensating action if needed
+    # ❌ comment1.created (:set) -> comment2.created (:increase) -> comment2.edited (:increase)
+    # ✅ comment1.created (:set) -> comment2.created (:increase) -> comment2.edited (:decrease + :increase)
+    strategy =
+      case Repo.get_by(CommandResponse,
+             provider: "github",
+             provider_command_id: to_string(command_id),
+             command_source: command_source
+           ) do
+        nil -> :increase
+        _ -> :set
       end
 
     # TODO: community bounties?
@@ -81,6 +94,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           amount: amount,
           ticket_ref: %{owner: repo["owner"]["login"], repo: repo["name"], number: issue["number"]}
         },
+        strategy: strategy,
         installation_id: installation_id,
         command_id: command_id,
         command_source: command_source

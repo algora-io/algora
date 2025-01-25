@@ -26,7 +26,8 @@ defmodule Algora.Bounties do
 
   @type criterion ::
           {:limit, non_neg_integer()}
-          | {:owner_id, integer()}
+          | {:ticket_id, String.t()}
+          | {:owner_id, String.t()}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
 
@@ -113,7 +114,7 @@ defmodule Algora.Bounties do
     Repo.transact(fn ->
       with {:ok, token} <- token_res,
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
-           existing = Repo.get_by(Bounty, ticket_id: ticket.id),
+           existing = Repo.get_by(Bounty, owner_id: owner.id, ticket_id: ticket.id),
            {:ok, strategy} <- strategy_to_action(existing, opts[:strategy]),
            {:ok, bounty} <-
              (case strategy do
@@ -623,6 +624,9 @@ defmodule Algora.Bounties do
     Enum.reduce(criteria, query, fn
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
+
+      {:ticket_id, ticket_id}, query ->
+        from([b] in query, where: b.ticket_id == ^ticket_id)
 
       {:owner_id, owner_id}, query ->
         from([b] in query, where: b.owner_id == ^owner_id)

@@ -66,6 +66,18 @@ defmodule Algora.Bounties do
     end
   end
 
+  @type strategy :: :create | :set | :increase
+
+  @spec strategy_to_action(Bounty.t() | nil, strategy() | nil) :: {:ok, strategy()} | {:error, atom()}
+  defp strategy_to_action(bounty, strategy) do
+    case {bounty, strategy} do
+      {_, nil} -> strategy_to_action(bounty, :increase)
+      {nil, _} -> {:ok, :create}
+      {_existing, :create} -> {:error, :already_exists}
+      {_existing, strategy} -> {:ok, strategy}
+    end
+  end
+
   @spec create_bounty(
           %{
             creator: User.t(),
@@ -73,7 +85,12 @@ defmodule Algora.Bounties do
             amount: Money.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
           },
-          opts :: [installation_id: integer(), command_id: integer(), command_source: :ticket | :comment]
+          opts :: [
+            strategy: strategy(),
+            installation_id: integer(),
+            command_id: integer(),
+            command_source: :ticket | :comment
+          ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
   def create_bounty(
@@ -96,7 +113,14 @@ defmodule Algora.Bounties do
     Repo.transact(fn ->
       with {:ok, token} <- token_res,
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
-           {:ok, bounty} <- do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}),
+           existing = Repo.get_by(Bounty, ticket_id: ticket.id),
+           {:ok, strategy} <- strategy_to_action(existing, opts[:strategy]),
+           {:ok, bounty} <-
+             (case strategy do
+                :create -> do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
+                :set -> existing |> Bounty.changeset(%{amount: amount}) |> Repo.update()
+                :increase -> existing |> Bounty.changeset(%{amount: Money.add!(existing.amount, amount)}) |> Repo.update()
+              end),
            {:ok, _job} <-
              notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref},
                installation_id: installation_id,

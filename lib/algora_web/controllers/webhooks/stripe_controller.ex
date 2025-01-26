@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Query
 
   alias Algora.Payments
+  alias Algora.Payments.Jobs.ExecuteTransfer
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
@@ -22,10 +23,14 @@ defmodule AlgoraWeb.Webhooks.StripeController do
             set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
           )
 
-        # TODO: initiate pending transfers if any recipient has a payout account
-        # %{transfer_id: transfer_id, user_id: user_id}
-        # |> Algora.Workers.InitiateTransfer.new()
-        # |> Oban.insert()
+        # TODO: get pending transfers (recipient with active payout accounts)
+        transfers = []
+
+        Enum.map(transfers, fn %{transfer_id: transfer_id, user_id: user_id} ->
+          %{transfer_id: transfer_id, user_id: user_id}
+          |> ExecuteTransfer.new()
+          |> Oban.insert()
+        end)
 
         {:ok, count}
       end)

@@ -5,6 +5,7 @@ defmodule Algora.Bounties do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs
@@ -138,23 +139,51 @@ defmodule Algora.Bounties do
 
   @spec get_response_body(
           bounties :: list(Bounty.t()),
-          ticket_ref :: %{owner: String.t(), repo: String.t(), number: integer()}
+          ticket_ref :: %{owner: String.t(), repo: String.t(), number: integer()},
+          attempts :: list(Attempt.t())
         ) :: String.t()
-  def get_response_body(bounties, ticket_ref) do
+  def get_response_body(bounties, ticket_ref, attempts) do
     header =
       Enum.map_join(bounties, "\n", fn bounty ->
         "## 💎 #{bounty.amount} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
       end)
 
+    attempts_table =
+      if Enum.empty?(attempts) do
+        ""
+      else
+        """
+
+        | Attempt | Started (UTC) |
+        | --- | --- |
+        #{Enum.map_join(attempts, "\n", fn attempt -> "| #{get_attempt_emoji(attempt)} @#{attempt.user.provider_login} | #{Calendar.strftime(attempt.inserted_at, "%b %d, %Y, %I:%M:%S %p")} |" end)}
+        """
+      end
+
     """
     #{header}
     ### Steps to solve:
-    1. **Start working**: Comment `/attempt ##{ticket_ref["number"]}` with your implementation plan
-    2. **Submit work**: Create a pull request including `/claim ##{ticket_ref["number"]}` in the PR body to claim the bounty
+    1. **Start working**: Comment `/attempt ##{ticket_ref[:number]}` with your implementation plan
+    2. **Submit work**: Create a pull request including `/claim ##{ticket_ref[:number]}` in the PR body to claim the bounty
     3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
 
-    Thank you for contributing to #{ticket_ref["owner"]}/#{ticket_ref["repo"]}!
+    Thank you for contributing to #{ticket_ref[:owner]}/#{ticket_ref[:repo]}!
+    #{attempts_table}
     """
+  end
+
+  def refresh_bounty_response(token, ticket_ref, ticket) do
+    bounties = list_bounties(ticket_id: ticket.id)
+    attempts = list_attempts_for_ticket(ticket.id)
+    body = get_response_body(bounties, ticket_ref, attempts)
+
+    Workspace.refresh_command_response(%{
+      token: token,
+      ticket_ref: ticket_ref,
+      ticket: ticket,
+      body: body,
+      command_type: :bounty
+    })
   end
 
   @spec notify_bounty(
@@ -816,4 +845,42 @@ defmodule Algora.Bounties do
       {:ok, [debit, credit]}
     end
   end
+
+  @spec create_attempt(%{ticket: Ticket.t(), user: User.t()}) ::
+          {:ok, Attempt.t()} | {:error, Ecto.Changeset.t()}
+  def create_attempt(%{ticket: ticket, user: user}) do
+    %Attempt{}
+    |> Attempt.changeset(%{
+      ticket_id: ticket.id,
+      user_id: user.id
+    })
+    |> Repo.insert()
+  end
+
+  @spec get_or_create_attempt(%{ticket: Ticket.t(), user: User.t()}) ::
+          {:ok, Attempt.t()} | {:error, Ecto.Changeset.t()}
+  def get_or_create_attempt(%{ticket: ticket, user: user}) do
+    case Repo.fetch_by(Attempt, ticket_id: ticket.id, user_id: user.id) do
+      {:ok, attempt} -> {:ok, attempt}
+      {:error, _reason} -> create_attempt(%{ticket: ticket, user: user})
+    end
+  end
+
+  @spec list_attempts_for_ticket(String.t()) :: [Attempt.t()]
+  def list_attempts_for_ticket(ticket_id) do
+    Repo.all(
+      from(a in Attempt,
+        join: u in assoc(a, :user),
+        where: a.ticket_id == ^ticket_id,
+        order_by: [desc: a.inserted_at],
+        select_merge: %{
+          user: u
+        }
+      )
+    )
+  end
+
+  def get_attempt_emoji(%Attempt{status: :inactive}), do: "🔴"
+  def get_attempt_emoji(%Attempt{warnings_count: count}) when count > 0, do: "🟡"
+  def get_attempt_emoji(%Attempt{status: :active}), do: "🟢"
 end

@@ -13,29 +13,14 @@ defmodule Algora.Github.Command do
       attempt: "/attempt <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)"
     }
 
-    def commands do
-      repeat(
-        choice([
-          # Any text that is not a command
-          [not: ?/] |> utf8_string(min: 1) |> ignore(),
-
-          # Known command
-          choice([
-            bounty_command(),
-            tip_command(),
-            claim_command(),
-            split_command(),
-            attempt_command()
-          ]),
-
-          # Unknown command
-          "/"
-          |> string()
-          |> ignore()
-          |> concat(utf8_string([?a..?z, ?A..?Z, ?_, ?-], min: 1))
-          |> ignore()
-        ])
-      )
+    def command do
+      choice([
+        bounty_command(),
+        tip_command(),
+        claim_command(),
+        split_command(),
+        attempt_command()
+      ])
     end
 
     def bounty_command do
@@ -91,6 +76,16 @@ defmodule Algora.Github.Command do
       |> tag(:attempt)
       |> label(@usage.attempt)
     end
+
+    def commands do
+      repeat(
+        choice([
+          ignore(utf8_string([not: ?/], min: 1)),
+          command(),
+          ignore(string("/"))
+        ])
+      )
+    end
   end
 
   defparsec(:parse_raw, Helper.commands())
@@ -99,14 +94,8 @@ defmodule Algora.Github.Command do
 
   def parse(input) when is_binary(input) do
     case parse_raw(input) do
-      {:ok, parsed, _, _, _, _} ->
-        {:ok, Enum.reject(parsed, &is_nil/1)}
-
-      {:error, reason, _, _, _, _} ->
-        {:error, reason}
+      {:ok, parsed, _, _, _, _} -> {:ok, Enum.reject(parsed, &is_nil/1)}
+      {:error, reason, _, _, _, _} -> {:error, reason}
     end
-  rescue
-    ArgumentError ->
-      {:error, "Failed to parse commands"}
   end
 end

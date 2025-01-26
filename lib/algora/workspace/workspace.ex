@@ -5,6 +5,7 @@ defmodule Algora.Workspace do
   alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs
@@ -164,4 +165,136 @@ defmodule Algora.Workspace do
   end
 
   def delete_command_response(id), do: Repo.delete(Repo.get(CommandResponse, id))
+
+  @spec ensure_command_response(%{
+          token: String.t(),
+          ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+          command_id: integer(),
+          command_type: :bounty | :attempt | :claim,
+          command_source: :ticket | :comment,
+          ticket: Ticket.t(),
+          body: String.t()
+        }) :: {:ok, CommandResponse.t()} | {:error, any()}
+  def ensure_command_response(%{
+        token: token,
+        ticket_ref: ticket_ref,
+        command_id: command_id,
+        command_type: command_type,
+        command_source: command_source,
+        ticket: ticket,
+        body: body
+      }) do
+    case refresh_command_response(%{
+           token: token,
+           ticket_ref: ticket_ref,
+           ticket: ticket,
+           body: body,
+           command_type: command_type
+         }) do
+      {:ok, response} ->
+        {:ok, response}
+
+      {:error, :command_response_not_found} ->
+        post_response(token, ticket_ref, command_id, command_source, ticket, body)
+
+      {:error, {:comment_not_found, response_id}} ->
+        with {:ok, _} <- delete_command_response(response_id) do
+          post_response(token, ticket_ref, command_id, command_source, ticket, body)
+        end
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @spec refresh_command_response(%{
+          token: String.t(),
+          command_type: :bounty | :attempt | :claim,
+          ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+          ticket: Ticket.t(),
+          body: String.t()
+        }) :: {:ok, CommandResponse.t()} | {:error, any()}
+  defp refresh_command_response(%{
+         token: token,
+         command_type: command_type,
+         ticket_ref: ticket_ref,
+         ticket: ticket,
+         body: body
+       }) do
+    case fetch_command_response(ticket.id, command_type) do
+      {:ok, response} ->
+        case Github.update_issue_comment(
+               token,
+               ticket_ref["owner"],
+               ticket_ref["repo"],
+               response.provider_response_id,
+               body
+             ) do
+          {:ok, comment} ->
+            try_update_command_response(response, comment)
+
+          # TODO: don't rely on string matching
+          {:error, "404 Not Found"} ->
+            Logger.error("Command response #{response.id} not found")
+            {:error, {:comment_not_found, response.id}}
+
+          {:error, reason} ->
+            Logger.error("Failed to update command response #{response.id}: #{inspect(reason)}")
+            {:error, reason}
+        end
+
+      {:error, _reason} ->
+        {:error, :command_response_not_found}
+    end
+  end
+
+  defp post_response(token, ticket_ref, command_id, command_source, ticket, body) do
+    with {:ok, comment} <-
+           Github.create_issue_comment(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], body) do
+      create_command_response(%{
+        comment: comment,
+        command_source: command_source,
+        command_id: command_id,
+        ticket_id: ticket.id
+      })
+    end
+  end
+
+  @spec create_command_response(%{
+          comment: map(),
+          command_source: :ticket | :comment,
+          command_id: integer(),
+          ticket_id: integer()
+        }) :: {:ok, CommandResponse.t()} | {:error, any()}
+  def create_command_response(%{
+        comment: comment,
+        command_source: command_source,
+        command_id: command_id,
+        ticket_id: ticket_id
+      }) do
+    %CommandResponse{}
+    |> CommandResponse.changeset(%{
+      provider: "github",
+      provider_meta: Util.normalize_struct(comment),
+      provider_command_id: to_string(command_id),
+      provider_response_id: to_string(comment["id"]),
+      command_source: command_source,
+      command_type: :bounty,
+      ticket_id: ticket_id
+    })
+    |> Repo.insert()
+  end
+
+  defp try_update_command_response(command_response, body) do
+    case command_response
+         |> CommandResponse.changeset(%{provider_meta: Util.normalize_struct(body)})
+         |> Repo.update() do
+      {:ok, command_response} ->
+        {:ok, command_response}
+
+      {:error, reason} ->
+        Logger.error("Failed to update command response #{command_response.id}: #{inspect(reason)}")
+        {:ok, command_response}
+    end
+  end
 end

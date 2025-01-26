@@ -24,7 +24,8 @@ defmodule Algora.Github.Command do
             bounty_command(),
             tip_command(),
             claim_command(),
-            split_command()
+            split_command(),
+            attempt_command()
           ]),
 
           # Unknown command

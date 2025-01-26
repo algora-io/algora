@@ -66,10 +66,18 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
           "command_source" => command_source
         }
       }) do
+    ticket_ref = %{
+      owner: ticket_ref["owner"],
+      repo: ticket_ref["repo"],
+      number: ticket_ref["number"]
+    }
+
     with {:ok, token} <- Github.get_installation_token(installation_id),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"]),
+         {:ok, ticket} <- Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number),
          bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
-         {:ok, _} <- Github.add_labels(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], ["💎 Bounty"]) do
+         {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💎 Bounty"]) do
+      attempts = Bounties.list_attempts_for_ticket(ticket.id)
+
       Workspace.ensure_command_response(%{
         token: token,
         ticket_ref: ticket_ref,
@@ -77,7 +85,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
         command_type: :bounty,
         command_source: command_source,
         ticket: ticket,
-        body: Bounties.get_response_body(bounties, ticket_ref)
+        body: Bounties.get_response_body(bounties, ticket_ref, attempts)
       })
     end
   end

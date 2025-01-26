@@ -136,6 +136,27 @@ defmodule Algora.Bounties do
     end)
   end
 
+  @spec get_response_body(
+          bounties :: list(Bounty.t()),
+          ticket_ref :: %{owner: String.t(), repo: String.t(), number: integer()}
+        ) :: String.t()
+  def get_response_body(bounties, ticket_ref) do
+    header =
+      Enum.map_join(bounties, "\n", fn bounty ->
+        "## 💎 #{bounty.amount} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
+      end)
+
+    """
+    #{header}
+    ### Steps to solve:
+    1. **Start working**: Comment `/attempt ##{ticket_ref["number"]}` with your implementation plan
+    2. **Submit work**: Create a pull request including `/claim ##{ticket_ref["number"]}` in the PR body to claim the bounty
+    3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+
+    Thank you for contributing to #{ticket_ref["owner"]}/#{ticket_ref["repo"]}!
+    """
+  end
+
   @spec notify_bounty(
           %{
             owner: User.t(),

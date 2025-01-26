@@ -140,6 +140,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
+  defp execute_command(event_action, {:attempt, args}, author, _params)
+       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+    ticket_ref = args[:ticket_ref]
+
+    # TODO: implement
+    dbg("#{author["login"]} is attempting #{ticket_ref}")
+  end
+
   defp execute_command(event_action, {:claim, args}, author, params)
        when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
     installation_id = params["installation"]["id"]

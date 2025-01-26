@@ -9,7 +9,8 @@ defmodule Algora.Github.Command do
       bounty: "/bounty <amount>",
       tip: "/tip <amount> @username or /tip @username <amount>",
       claim: "/claim <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)",
-      split: "/split @username"
+      split: "/split @username",
+      attempt: "/attempt <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)"
     }
 
     def commands do
@@ -78,6 +79,16 @@ defmodule Algora.Github.Command do
       |> concat(ticket_ref())
       |> tag(:claim)
       |> label(@usage.claim)
+    end
+
+    def attempt_command do
+      "/attempt"
+      |> string()
+      |> ignore()
+      |> concat(ignore(whitespace()))
+      |> concat(ticket_ref())
+      |> tag(:attempt)
+      |> label(@usage.attempt)
     end
   end
 

@@ -140,6 +140,35 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
+  defp execute_command(event_action, {:attempt, args}, author, params)
+       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+    installation_id = params["installation"]["id"]
+    repo = params["repository"]
+    issue = params["issue"]
+
+    source_ticket_ref = %{
+      owner: repo["owner"]["login"],
+      repo: repo["name"],
+      number: issue["number"]
+    }
+
+    target_ticket_ref =
+      %{
+        owner: args[:ticket_ref][:owner] || source_ticket_ref.owner,
+        repo: args[:ticket_ref][:repo] || source_ticket_ref.repo,
+        number: args[:ticket_ref][:number]
+      }
+
+    with true <- source_ticket_ref == target_ticket_ref,
+         {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, ticket} <- Workspace.ensure_ticket(token, repo["owner"]["login"], repo["name"], issue["number"]),
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]),
+         {:ok, attempt} <- Bounties.get_or_create_attempt(%{ticket: ticket, user: user}),
+         {:ok, _} <- Bounties.refresh_bounty_response(token, target_ticket_ref, ticket) do
+      {:ok, attempt}
+    end
+  end
+
   defp execute_command(event_action, {:claim, args}, author, params)
        when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
     installation_id = params["installation"]["id"]

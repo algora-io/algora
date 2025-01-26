@@ -15,6 +15,8 @@ defmodule Algora.Workspace do
   require Logger
 
   @type ticket_type :: :issue | :pull_request
+  @type command_type :: :bounty | :attempt | :claim
+  @type command_source :: :ticket | :comment
 
   def ensure_ticket(token, owner, repo, number) do
     ticket_query =
@@ -170,8 +172,8 @@ defmodule Algora.Workspace do
           token: String.t(),
           ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
           command_id: integer(),
-          command_type: :bounty | :attempt | :claim,
-          command_source: :ticket | :comment,
+          command_type: command_type(),
+          command_source: command_source(),
           ticket: Ticket.t(),
           body: String.t()
         }) :: {:ok, CommandResponse.t()} | {:error, any()}
@@ -209,24 +211,24 @@ defmodule Algora.Workspace do
 
   @spec refresh_command_response(%{
           token: String.t(),
-          command_type: :bounty | :attempt | :claim,
+          command_type: command_type(),
           ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
           ticket: Ticket.t(),
           body: String.t()
         }) :: {:ok, CommandResponse.t()} | {:error, any()}
-  defp refresh_command_response(%{
-         token: token,
-         command_type: command_type,
-         ticket_ref: ticket_ref,
-         ticket: ticket,
-         body: body
-       }) do
+  def refresh_command_response(%{
+        token: token,
+        command_type: command_type,
+        ticket_ref: ticket_ref,
+        ticket: ticket,
+        body: body
+      }) do
     case fetch_command_response(ticket.id, command_type) do
       {:ok, response} ->
         case Github.update_issue_comment(
                token,
-               ticket_ref["owner"],
-               ticket_ref["repo"],
+               ticket_ref[:owner],
+               ticket_ref[:repo],
                response.provider_response_id,
                body
              ) do
@@ -235,7 +237,7 @@ defmodule Algora.Workspace do
 
           # TODO: don't rely on string matching
           {:error, "404 Not Found"} ->
-            Logger.error("Command response #{response.id} not found")
+            Logger.error("Github comment for command response #{response.id} not found")
             {:error, {:comment_not_found, response.id}}
 
           {:error, reason} ->
@@ -250,7 +252,7 @@ defmodule Algora.Workspace do
 
   defp post_response(token, ticket_ref, command_id, command_source, ticket, body) do
     with {:ok, comment} <-
-           Github.create_issue_comment(token, ticket_ref["owner"], ticket_ref["repo"], ticket_ref["number"], body) do
+           Github.create_issue_comment(token, ticket_ref[:owner], ticket_ref[:repo], ticket_ref[:number], body) do
       create_command_response(%{
         comment: comment,
         command_source: command_source,
@@ -262,7 +264,7 @@ defmodule Algora.Workspace do
 
   @spec create_command_response(%{
           comment: map(),
-          command_source: :ticket | :comment,
+          command_source: command_source(),
           command_id: integer(),
           ticket_id: integer()
         }) :: {:ok, CommandResponse.t()} | {:error, any()}

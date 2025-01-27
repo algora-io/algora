@@ -18,7 +18,7 @@ defmodule Algora.PaymentsTest do
       {:ok, user: user, account: account}
     end
 
-    test "executes transfer when there are pending credits", %{user: user, account: account} do
+    test "executes transfer when user has positive balance", %{user: user, account: account} do
       insert(:transaction,
         user: user,
         type: :credit,
@@ -61,9 +61,20 @@ defmodule Algora.PaymentsTest do
       assert Money.equal?(transfer_tx.total_fee, Money.new(0, :USD))
     end
 
-    test "does nothing when user has no pending credits", %{user: user} do
-      assert {:ok, nil} = Payments.execute_pending_transfers(user.id)
+    test "does nothing when user has positive unconfirmed balance", %{user: user} do
+      insert(:transaction,
+        user: user,
+        type: :credit,
+        status: :processing,
+        net_amount: Money.new(1, :USD)
+      )
 
+      assert {:ok, nil} = Payments.execute_pending_transfers(user.id)
+      assert Transaction |> where([t], t.type == :transfer) |> Repo.aggregate(:count) == 0
+    end
+
+    test "does nothing when user has zero balance", %{user: user} do
+      assert {:ok, nil} = Payments.execute_pending_transfers(user.id)
       assert Repo.aggregate(Transaction, :count) == 0
     end
 

@@ -1,21 +1,23 @@
 defmodule AlgoraWeb.Webhooks.StripeController do
   @behaviour Stripe.WebhookHandler
 
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Payments
   alias Algora.Payments.Jobs.ExecutePendingTransfers
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Util
 
   require Logger
 
-  @metadata_version "2"
+  @metadata_version Payments.metadata_version()
 
   @impl true
   def handle_event(%Stripe.Event{
         type: "charge.succeeded",
-        data: %{object: %{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
+        data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
       })
       when is_binary(group_id) do
     Repo.transact(fn ->
@@ -62,11 +64,20 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   @impl true
-  def handle_event(%Stripe.Event{type: "transfer.created"} = event) do
-    # TODO: update transaction
-    # TODO: broadcast
-    # TODO: notify user
-    Logger.info("Stripe #{event.type} event: #{event.id}")
+  def handle_event(%Stripe.Event{
+        type: "transfer.created",
+        data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
+      }) do
+    with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
+         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer) do
+      # TODO: notify user
+      Payments.broadcast()
+      {:ok, nil}
+    else
+      error ->
+        Logger.error("Failed to update transaction: #{inspect(error)}")
+        {:error, :failed_to_update_transaction}
+    end
   end
 
   @impl true
@@ -76,4 +87,18 @@ defmodule AlgoraWeb.Webhooks.StripeController do
 
   @impl true
   def handle_event(_event), do: :ok
+
+  defp maybe_update_transaction(transaction, transfer) do
+    if transaction.status == :succeeded do
+      {:ok, transaction}
+    else
+      transaction
+      |> change(%{
+        status: :succeeded,
+        succeeded_at: DateTime.utc_now(),
+        provider_meta: Util.normalize_struct(transfer)
+      })
+      |> Repo.update()
+    end
+  end
 end

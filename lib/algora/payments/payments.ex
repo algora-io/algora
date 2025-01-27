@@ -16,6 +16,8 @@ defmodule Algora.Payments do
 
   require Logger
 
+  def metadata_version, do: "2"
+
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "payments:all", :payments_updated)
   end
@@ -322,12 +324,18 @@ defmodule Algora.Payments do
     case Algora.Stripe.create_transfer(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
            currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
-           destination: account.provider_id
+           destination: account.provider_id,
+           metadata: %{"version" => metadata_version()}
          }) do
       {:ok, transfer} ->
         # it's fine if this fails since we'll receive a webhook
         transaction
-        |> change(%{status: :succeeded, provider_id: transfer.id, provider_meta: Util.normalize_struct(transfer)})
+        |> change(%{
+          status: :succeeded,
+          succeeded_at: DateTime.utc_now(),
+          provider_id: transfer.id,
+          provider_meta: Util.normalize_struct(transfer)
+        })
         |> Repo.update()
 
         {:ok, transfer}

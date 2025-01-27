@@ -320,26 +320,24 @@ defmodule Algora.Payments do
     # TODO: provide idempotency key
     case Algora.Stripe.create_transfer(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
-           currency: to_string(transaction.net_amount.currency),
+           currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
            destination: account.provider_id
          }) do
       {:ok, transfer} ->
         # it's fine if this fails since we'll receive a webhook
-        _result = try_update_transaction(transaction, transfer)
+        transaction
+        |> change(%{status: :succeeded, provider_id: transfer.id, provider_meta: Util.normalize_struct(transfer)})
+        |> Repo.update()
+
         {:ok, transfer}
 
       {:error, error} ->
+        # TODO: inconsistent state if this fails
+        transaction
+        |> change(%{status: :failed})
+        |> Repo.update()
+
         {:error, error}
     end
-  end
-
-  defp try_update_transaction(transaction, transfer) do
-    transaction
-    |> change(%{
-      status: if(transfer.status == :succeeded, do: :succeeded, else: :failed),
-      provider_id: transfer.id,
-      provider_meta: Util.normalize_struct(transfer)
-    })
-    |> Repo.update()
   end
 end

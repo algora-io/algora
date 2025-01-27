@@ -34,6 +34,7 @@ config :algora, Oban,
     notify_bounty: 1,
     notify_tip_intent: 1,
     notify_claim: 1,
+    transfers: 1,
     activity_notifier: 1,
     activity_mailer: 1
   ]

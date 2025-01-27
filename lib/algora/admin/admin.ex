@@ -78,7 +78,7 @@ defmodule Algora.Admin do
     with account_id when is_binary(account_id) <- Algora.config([:stripe, :test_account_id]),
          {:ok, user} <- Repo.fetch_by(User, handle: user_handle),
          {:ok, acct} <- Payments.create_account(user, "US"),
-         {:ok, stripe_acct} <- Stripe.Account.retrieve(account_id) do
+         {:ok, stripe_acct} <- Stripe.Account.retrieve(account_id, []) do
       Payments.update_account(acct, stripe_acct)
     end
   end

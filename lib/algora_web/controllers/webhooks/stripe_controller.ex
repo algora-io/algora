@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         |> Enum.map(fn %{user_id: user_id} -> user_id end)
         |> Enum.uniq()
         |> Enum.reduce_while(:ok, fn user_id, :ok ->
-          case %{user_id: user_id, group_id: group_id}
+          case %{user_id: user_id}
                |> ExecutePendingTransfers.new()
                |> Oban.insert() do
             {:ok, _job} -> {:cont, :ok}

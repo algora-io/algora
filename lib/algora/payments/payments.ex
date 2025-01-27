@@ -1,9 +1,11 @@
 defmodule Algora.Payments do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.MoneyUtils
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
@@ -13,6 +15,8 @@ defmodule Algora.Payments do
   alias Algora.Util
 
   require Logger
+
+  def metadata_version, do: "2"
 
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "payments:all", :payments_updated)
@@ -246,6 +250,103 @@ defmodule Algora.Payments do
   def delete_account(account) do
     with {:ok, _stripe_account} <- Stripe.Account.delete(account.provider_id) do
       Repo.delete(account)
+    end
+  end
+
+  def execute_pending_transfers(user_id) do
+    pending_amount = get_pending_amount(user_id)
+
+    with {:ok, account} <- Repo.fetch_by(Account, user_id: user_id, provider: "stripe", payouts_enabled: true),
+         true <- Money.positive?(pending_amount) do
+      initialize_and_execute_transfer(user_id, pending_amount, account)
+    else
+      _ -> {:ok, nil}
+    end
+  end
+
+  defp get_pending_amount(user_id) do
+    total_credits =
+      Repo.one(
+        from(t in Transaction,
+          where: t.user_id == ^user_id,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          select: sum(t.net_amount)
+        )
+      ) || Money.zero(:USD)
+
+    total_transfers =
+      Repo.one(
+        from(t in Transaction,
+          where: t.user_id == ^user_id,
+          where: t.type == :transfer,
+          where: t.status == :succeeded or t.status == :processing or t.status == :initialized,
+          select: sum(t.net_amount)
+        )
+      ) || Money.zero(:USD)
+
+    Money.sub!(total_credits, total_transfers)
+  end
+
+  defp initialize_and_execute_transfer(user_id, pending_amount, account) do
+    with {:ok, transaction} <- initialize_transfer(user_id, pending_amount),
+         {:ok, transfer} <- execute_transfer(transaction, account) do
+      broadcast()
+      {:ok, transfer}
+    else
+      error ->
+        Logger.error("Failed to execute transfer: #{inspect(error)}")
+        error
+    end
+  end
+
+  defp initialize_transfer(user_id, pending_amount) do
+    %Transaction{}
+    |> change(%{
+      id: Nanoid.generate(),
+      provider: "stripe",
+      type: :transfer,
+      status: :initialized,
+      user_id: user_id,
+      gross_amount: pending_amount,
+      net_amount: pending_amount,
+      total_fee: Money.zero(:USD)
+    })
+    |> Algora.Validations.validate_positive(:gross_amount)
+    |> Algora.Validations.validate_positive(:net_amount)
+    |> foreign_key_constraint(:user_id)
+    |> Repo.insert()
+  end
+
+  defp execute_transfer(transaction, account) do
+    # TODO: set other params
+    # TODO: provide idempotency key
+    case Algora.Stripe.create_transfer(%{
+           amount: MoneyUtils.to_minor_units(transaction.net_amount),
+           currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
+           destination: account.provider_id,
+           metadata: %{"version" => metadata_version()}
+         }) do
+      {:ok, transfer} ->
+        # it's fine if this fails since we'll receive a webhook
+        transaction
+        |> change(%{
+          status: :succeeded,
+          succeeded_at: DateTime.utc_now(),
+          provider_id: transfer.id,
+          provider_meta: Util.normalize_struct(transfer)
+        })
+        |> Repo.update()
+
+        {:ok, transfer}
+
+      {:error, error} ->
+        # TODO: inconsistent state if this fails
+        transaction
+        |> change(%{status: :failed})
+        |> Repo.update()
+
+        {:error, error}
     end
   end
 end

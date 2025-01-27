@@ -289,6 +289,7 @@ defmodule Algora.Payments do
   defp initialize_and_execute_transfer(user_id, pending_amount, account) do
     with {:ok, transaction} <- initialize_transfer(user_id, pending_amount),
          {:ok, transfer} <- execute_transfer(transaction, account) do
+      broadcast()
       {:ok, transfer}
     else
       error ->

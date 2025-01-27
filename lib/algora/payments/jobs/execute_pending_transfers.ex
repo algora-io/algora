@@ -7,7 +7,7 @@ defmodule Algora.Payments.Jobs.ExecutePendingTransfers do
   alias Algora.Payments
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{user_id: user_id}}) do
+  def perform(%Oban.Job{args: %{"user_id" => user_id}}) do
     Payments.execute_pending_transfers(user_id)
   end
 end

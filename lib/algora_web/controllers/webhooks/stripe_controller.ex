@@ -48,6 +48,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       with {count, _} when count > 0 <- update_result,
            :ok <- jobs_result do
         Payments.broadcast()
+        {:ok, nil}
       else
         {:error, reason} ->
           Logger.error("Failed to update transactions: #{inspect(reason)}")

@@ -319,15 +319,21 @@ defmodule Algora.Payments do
     end
   end
 
+  @spec execute_pending_transfers(user_id :: String.t()) :: {:ok, Stripe.Transfer.t()} | {:error, :not_found}
   def execute_pending_transfers(user_id) do
     pending_amount = get_pending_amount(user_id)
 
-    with {:ok, account} <- Repo.fetch_by(Account, user_id: user_id, provider: "stripe", payouts_enabled: true),
+    with {:ok, account} <- fetch_active_account(user_id),
          true <- Money.positive?(pending_amount) do
       initialize_and_execute_transfer(user_id, pending_amount, account)
     else
       _ -> {:ok, nil}
     end
+  end
+
+  @spec fetch_active_account(user_id :: String.t()) :: {:ok, Account.t()} | {:error, :not_found}
+  def fetch_active_account(user_id) do
+    Repo.fetch_by(Account, user_id: user_id, provider: "stripe", payouts_enabled: true)
   end
 
   defp get_pending_amount(user_id) do

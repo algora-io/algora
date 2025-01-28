@@ -27,9 +27,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
         )
 
-      # TODO: split into two groups:
-      #     - has active payout account -> execute pending transfers
-      #     - has no active payout account -> notify user to connect payout account
       jobs_result =
         from(t in Transaction,
           where: t.group_id == ^group_id,
@@ -40,11 +37,18 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         |> Enum.map(fn %{user_id: user_id} -> user_id end)
         |> Enum.uniq()
         |> Enum.reduce_while(:ok, fn user_id, :ok ->
-          case %{user_id: user_id}
-               |> ExecutePendingTransfers.new()
-               |> Oban.insert() do
-            {:ok, _job} -> {:cont, :ok}
-            error -> {:halt, error}
+          case Payments.fetch_active_account(user_id) do
+            {:ok, _account} ->
+              case %{user_id: user_id}
+                   |> ExecutePendingTransfers.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
+
+            {:error, :not_found} ->
+              # TODO: notify user to connect payout account
+              {:cont, :ok}
           end
         end)
 

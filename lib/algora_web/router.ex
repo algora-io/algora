@@ -29,19 +29,13 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
-    if Application.compile_env(:algora, :swift_mode) do
-      live_session :root,
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-        live "/", SwiftBountiesLive
-      end
-    else
-      get "/", RootController, :index
+    # if Application.compile_env(:algora, :swift_mode) do
+    #   live_session :root,
+    #     on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+    #     live "/", SwiftBountiesLive
+    #   end
 
-      live_session :root,
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-        live "/:country_code", HomeLive, :index
-      end
-    end
+    get "/", RootController, :index
 
     get "/set_context/:context", ContextController, :set
     get "/a/:table_prefix/:activity_id", ActivityController, :get
@@ -72,7 +66,7 @@ defmodule AlgoraWeb.Router do
     live_session :community,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/home", Community.DashboardLive, :index
+      live "/home", User.DashboardLive, :index
     end
 
     live_session :authenticated,
@@ -143,6 +137,11 @@ defmodule AlgoraWeb.Router do
     live "/trotw", TROTWLive
 
     live "/open-source", OpenSourceLive, :index
+
+    live_session :root,
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+      live "/:country_code", HomeLive, :index
+    end
   end
 
   # Other scopes may use custom stacks.

@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias Algora.Accounts.User
   alias AlgoraWeb.Components.Wordmarks
   alias Phoenix.LiveView.AsyncResult
+  alias Swoosh.Email
 
   require Logger
 
@@ -311,10 +312,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
         login_code = AlgoraWeb.UserAuth.generate_login_code(email, domain, tech_stack)
 
-        # TODO: Send email
-        Logger.info("Login code for #{email}: #{login_code}")
+        name = email |> String.split("@") |> List.first() |> String.capitalize()
 
-        Logger.info(AlgoraWeb.UserAuth.login_email(email, login_code))
+        {:ok, _} =
+          Email.new()
+          |> Email.to({name, email})
+          |> Email.from({"Algora", "info@algora.io"})
+          |> Email.subject("Algora sign-in verification code")
+          |> Email.text_body(AlgoraWeb.UserAuth.login_email(email, name, login_code))
+          |> Algora.Mailer.deliver()
 
         {:noreply,
          socket

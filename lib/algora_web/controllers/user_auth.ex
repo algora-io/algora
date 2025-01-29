@@ -242,14 +242,8 @@ defmodule AlgoraWeb.UserAuth do
   def login_path(email, token, return_to),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"
 
-  def login_email(email, token) do
-    name = email |> String.split("@") |> List.first() |> String.capitalize()
-
+  def login_email(email, name, token) do
     """
-    From: "Algora <info@algora.io>"
-    To: "#{email}",
-    Subject: "Algora sign-in verification code"
-
     Hi #{name},
 
     We have received a login attempt and generated the following verification code:

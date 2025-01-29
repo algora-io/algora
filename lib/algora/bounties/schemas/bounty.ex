@@ -13,7 +13,6 @@ defmodule Algora.Bounties.Bounty do
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
     belongs_to :creator, User
-    has_many :attempts, Algora.Bounties.Attempt
     has_many :transactions, Algora.Payments.Transaction
     has_many :activities, {"bounty_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
 

@@ -254,7 +254,7 @@ defmodule AlgoraWeb.UserAuth do
 
     Or copy and paste this URL into your browser:
 
-    #{AlgoraWeb.Endpoint.url()}/#{login_path(email, token, ~p"/onboarding/org")}
+    #{AlgoraWeb.Endpoint.url()}#{login_path(email, token, ~p"/onboarding/org")}
 
     If you didn't request this link, you can safely ignore this email.
 

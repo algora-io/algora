@@ -93,7 +93,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
          {:ok, user} <- get_or_register_user(email) do
       conn =
         if params["return_to"] do
-          put_session(conn, :user_return_to, params["return_to"])
+          put_session(conn, :user_return_to, String.trim_leading(params["return_to"], AlgoraWeb.Endpoint.url()))
         else
           conn
         end

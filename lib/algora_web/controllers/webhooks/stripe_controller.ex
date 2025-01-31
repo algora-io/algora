@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Bounties
   alias Algora.Payments
   alias Algora.Payments.Customer
   alias Algora.Payments.Jobs.ExecutePendingTransfers
@@ -40,15 +41,24 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           case Payments.fetch_active_account(user_id) do
             {:ok, _account} ->
               case %{user_id: user_id}
-                   |> ExecutePendingTransfers.new()
+                   |> Payments.Jobs.ExecutePendingTransfers.new()
                    |> Oban.insert() do
                 {:ok, _job} -> {:cont, :ok}
                 error -> {:halt, error}
               end
 
             {:error, :not_found} ->
-              # TODO: notify user to connect payout account
-              {:cont, :ok}
+              # TODO:
+              installation_id = 0
+              # TODO:
+              ticket_ref = %{"owner" => "", "repo" => "", "number" => 0}
+
+              case %{installation_id: installation_id, ticket_ref: ticket_ref}
+                   |> Bounties.Jobs.PromptPayoutConnect.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
           end
         end)
 

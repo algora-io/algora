@@ -16,9 +16,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   def new(conn, params) do
     with {:ok, webhook} <- Webhook.new(conn),
+         :ok <- ensure_human_author(webhook, params),
          {:ok, _} <- process_commands(webhook, params) do
       conn |> put_status(:accepted) |> json(%{status: "ok"})
     else
+      {:error, :bot_event} ->
+        conn |> put_status(:ok) |> json(%{status: "ok"})
+
       {:error, :missing_header} ->
         conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
 
@@ -33,6 +37,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     e ->
       Logger.error("Unexpected error: #{inspect(e)}")
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
+  end
+
+  defp ensure_human_author(%Webhook{event: event}, params) do
+    case get_author(event, params) do
+      %{"type" => "Bot"} -> {:error, :bot_event}
+      _ -> :ok
+    end
   end
 
   # TODO: cache installation tokens

@@ -116,8 +116,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
   end
 
   def handle_info({:authenticated, user}, socket) do
-    # TODO: skip auth step in installation flow
-    {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url())}
+    {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
   end
 
   def handle_event("install_app", _params, socket) do

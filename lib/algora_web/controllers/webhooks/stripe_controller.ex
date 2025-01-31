@@ -7,7 +7,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   alias Algora.Bounties
   alias Algora.Payments
   alias Algora.Payments.Customer
-  alias Algora.Payments.Jobs.ExecutePendingTransfers
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Util
@@ -35,21 +34,20 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           where: t.status == :succeeded
         )
         |> Repo.all()
-        |> Enum.map(fn %{user_id: user_id} -> user_id end)
-        |> Enum.uniq()
-        |> Enum.reduce_while(:ok, fn user_id, :ok ->
-          case Payments.fetch_active_account(user_id) do
+        |> Enum.reduce_while(:ok, fn credit, :ok ->
+          case Payments.fetch_active_account(credit.user_id) do
             {:ok, _account} ->
-              case %{user_id: user_id}
-                   |> Payments.Jobs.ExecutePendingTransfers.new()
+              case %{credit_id: credit.id}
+                   |> Payments.Jobs.ExecutePendingTransfer.new()
                    |> Oban.insert() do
                 {:ok, _job} -> {:cont, :ok}
                 error -> {:halt, error}
               end
 
-            {:error, :not_found} ->
+            {:error, :no_active_account} ->
               # TODO:
               installation_id = 0
+
               # TODO:
               ticket_ref = %{"owner" => "", "repo" => "", "number" => 0}
 

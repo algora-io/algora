@@ -13,9 +13,9 @@ defmodule Algora.Github do
   def pat, do: Algora.config([:github, :pat])
   def pat_enabled, do: Algora.config([:github, :pat_enabled])
 
-  def install_url do
-    "https://github.com/apps/#{app_handle()}/installations/new"
-  end
+  def install_url_base, do: "https://github.com/apps/#{app_handle()}/installations"
+  def install_url_new, do: "#{install_url_base()}/new"
+  def install_url_select_target, do: "#{install_url_base()}/select_target"
 
   defp oauth_state_ttl, do: 600
   defp oauth_state_salt, do: "github-oauth-state"

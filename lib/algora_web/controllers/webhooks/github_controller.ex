@@ -273,10 +273,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp get_author("issues", params), do: params["issue"]["user"]
   defp get_author("issue_comment", params), do: params["comment"]["user"]
   defp get_author("pull_request", params), do: params["pull_request"]["user"]
+  defp get_author("pull_request_review", params), do: params["review"]["user"]
+  defp get_author("pull_request_review_comment", params), do: params["comment"]["user"]
   defp get_author(_event, _params), do: nil
 
   defp get_body("issues", params), do: params["issue"]["body"]
   defp get_body("issue_comment", params), do: params["comment"]["body"]
   defp get_body("pull_request", params), do: params["pull_request"]["body"]
+  defp get_body("pull_request_review", params), do: params["review"]["body"]
+  defp get_body("pull_request_review_comment", params), do: params["comment"]["body"]
   defp get_body(_event, _params), do: nil
 end

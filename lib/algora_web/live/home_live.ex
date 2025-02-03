@@ -217,7 +217,7 @@ defmodule AlgoraWeb.HomeLive do
                   <h2 class="text-sm font-semibold leading-8 text-foreground">
                     Trusted by the world's most innovative teams
                   </h2>
-                  <div class="mt-6 grid grid-cols-5 gap-x-6 gap-y-4">
+                  <div class="mt-6 grid grid-cols-3 sm:grid-cols-5 gap-6 -ml-[5%] sm:-ml-[2.5%]">
                     <.logo_cloud />
                   </div>
                 </div>
@@ -349,7 +349,7 @@ defmodule AlgoraWeb.HomeLive do
             %{
               name: "ZIO",
               url: "https://zio.dev",
-              args: %{src: ~p"/images/wordmarks/zio.png", class: "mt-4 aspect-[67/20] max-h-10 brightness-0 invert"}
+              args: %{src: ~p"/images/wordmarks/zio.png", class: "mt-4 max-h-10 brightness-0 invert"}
             },
             %{
               name: "Tailcall",
@@ -364,6 +364,14 @@ defmodule AlgoraWeb.HomeLive do
               url: "https://www.golem.cloud",
               component: &Wordmarks.golemcloud/1,
               args: %{class: "max-h-9"}
+            },
+            %{
+              name: "Remotion",
+              url: "https://remotion.dev",
+              args: %{
+                src: "https://algora.io/banners/remotion.png",
+                class: "max-h-10 brightness-0 invert sm:hidden"
+              }
             }
           ],
           fn org ->

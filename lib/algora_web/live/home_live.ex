@@ -177,9 +177,9 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 lg:pt-20">
+          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-16">
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="relative w-full lg:-mt-12 lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
+              <div class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl 2xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
                   The open source UpWork alternative.
                 </h1>
@@ -202,10 +202,12 @@ defmodule AlgoraWeb.HomeLive do
                   </.link>
                 </div>
                 <!-- Stats -->
-                <dl class="mt-16 grid grid-cols-2 gap-8 lg:grid-cols-4">
+                <dl class="mt-16 grid grid-cols-2 gap-8 sm:grid-cols-4">
                   <%= for stat <- @stats do %>
                     <div class="flex flex-col gap-y-2">
-                      <dt class="text-sm leading-6 text-muted-foreground">{stat.label}</dt>
+                      <dt class="text-sm leading-6 text-muted-foreground whitespace-nowrap">
+                        {stat.label}
+                      </dt>
                       <dd class="font-display text-3xl font-semibold tracking-tight text-foreground">
                         {stat.value}
                       </dd>

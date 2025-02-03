@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
 
   on_mount AlgoraWeb.Org.BountyHook
 
@@ -21,7 +22,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   def render(assigns) do
     ~H"""
-    <div class="max-w-7xl p-6">
+    <div class="max-w-7xl mx-auto p-6">
       <div class="mb-6">
         <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
           <div>
@@ -119,19 +120,19 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           <div class="flex items-start justify-between">
                             <div class="cursor-pointer font-mono text-2xl">
                               <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
-                                ${bounty.amount}
+                                {Money.to_string!(bounty.amount)}
                               </div>
                             </div>
                           </div>
                           <.link
                             rel="noopener"
                             class="group/issue inline-flex flex-col"
-                            href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
+                            href={Bounty.url(bounty)}
                           >
                             <div class="flex items-center gap-4">
                               <div class="truncate">
                                 <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
-                                  {bounty.ticket.owner}/{bounty.ticket.repo}#{bounty.ticket.number}
+                                  {Bounty.path(bounty)}
                                 </p>
                               </div>
                             </div>

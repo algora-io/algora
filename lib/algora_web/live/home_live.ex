@@ -177,7 +177,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:pt-20">
+          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 lg:pt-20">
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="relative w-full lg:-mt-12 lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
@@ -225,17 +225,17 @@ defmodule AlgoraWeb.HomeLive do
               <!-- Featured devs -->
               <div class="mt-14 flex justify-start sm:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0">
                 <%= if length(@featured_devs) > 0 do %>
-                  <div class="ml-auto w-28 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                  <div class="ml-auto w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                     <.dev_card dev={List.first(@featured_devs)} />
                   </div>
-                  <div class="mr-auto w-28 sm:w-56 lg:w-44 flex-none space-y-8 sm:mr-0 lg:pt-36">
+                  <div class="mr-auto w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 sm:mr-0 lg:pt-36">
                     <%= if length(@featured_devs) >= 3 do %>
                       <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
                         <.dev_card dev={dev} />
                       <% end %>
                     <% end %>
                   </div>
-                  <div class="w-28 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 lg:pt-0">
+                  <div class="w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 lg:pt-0">
                     <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
                       <.dev_card dev={dev} />
                     <% end %>
@@ -293,10 +293,10 @@ defmodule AlgoraWeb.HomeLive do
             <% end %>
           </div>
         </div>
-        <div class="mt-1 text-xs text-muted-foreground">
+        <div class="mt-3 text-xs text-muted-foreground">
           <span class="font-medium">Total Earned:</span>
           <span class="text-sm font-bold text-foreground">
-            {Money.to_string!(@dev.total_earned)}
+            {Money.to_string!(@dev.total_earned, no_fraction_if_integer: true)}
           </span>
         </div>
       </div>

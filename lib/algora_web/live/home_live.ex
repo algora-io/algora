@@ -177,7 +177,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-16">
+          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-16 2xl:pt-28">
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl 2xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">

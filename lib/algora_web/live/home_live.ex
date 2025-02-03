@@ -54,24 +54,38 @@ defmodule AlgoraWeb.HomeLive do
           </div>
           <!-- Desktop nav -->
           <div class="hidden lg:flex lg:gap-x-12">
-            <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Companies
-            </a>
-            <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Developers
-            </a>
-            <a href="#" class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground">
-              Open source
-            </a>
+            <.link
+              href={AlgoraWeb.Constants.get(:docs_url)}
+              class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            >
+              Docs
+            </.link>
+            <.link
+              href={AlgoraWeb.Constants.get(:blog_url)}
+              class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            >
+              Blog
+            </.link>
+            <.link
+              navigate={~p"/pricing"}
+              class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            >
+              Pricing
+            </.link>
+            <.link
+              href={AlgoraWeb.Constants.get(:github_url)}
+              class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            >
+              GitHub
+            </.link>
           </div>
 
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-            <.link
-              navigate={~p"/auth/login"}
-              class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
-            >
-              Log in <span aria-hidden="true">&rarr;</span>
-            </.link>
+            <.button variant="subtle">
+              <.link navigate={~p"/auth/login"}>
+                Sign in
+              </.link>
+            </.button>
           </div>
         </nav>
         <!-- Mobile menu -->
@@ -94,37 +108,37 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mt-6 flow-root">
               <div class="-my-6 divide-y divide-border">
                 <div class="space-y-2 py-6">
-                  <a
-                    href="#"
+                  <.link
+                    href={AlgoraWeb.Constants.get(:docs_url)}
                     class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                   >
-                    Product
-                  </a>
-                  <a
-                    href="#"
+                    Docs
+                  </.link>
+                  <.link
+                    href={AlgoraWeb.Constants.get(:blog_url)}
                     class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                   >
-                    Features
-                  </a>
-                  <a
-                    href="#"
+                    Blog
+                  </.link>
+                  <.link
+                    navigate={~p"/pricing"}
                     class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                   >
-                    Marketplace
-                  </a>
-                  <a
-                    href="#"
+                    Pricing
+                  </.link>
+                  <.link
+                    href={AlgoraWeb.Constants.get(:github_url)}
                     class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                   >
-                    Company
-                  </a>
+                    GitHub
+                  </.link>
                 </div>
                 <div class="py-6">
                   <.link
                     navigate={~p"/auth/login"}
                     class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                   >
-                    Log in
+                    Sign in
                   </.link>
                 </div>
               </div>
@@ -177,7 +191,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-16 2xl:pt-28">
+          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20 2xl:pt-28">
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl 2xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
@@ -188,18 +202,16 @@ defmodule AlgoraWeb.HomeLive do
                 </p>
                 <!-- CTA buttons -->
                 <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
-                  <.link
-                    navigate={~p"/onboarding/org"}
-                    class="rounded-md bg-primary px-12 py-5 text-xl font-semibold text-primary-foreground shadow hover:bg-primary/90"
-                  >
-                    Companies
-                  </.link>
-                  <.link
-                    navigate={~p"/onboarding/dev"}
-                    class="rounded-md bg-secondary px-12 py-5 text-xl font-semibold text-secondary-foreground shadow hover:bg-secondary/90"
-                  >
-                    Developers
-                  </.link>
+                  <.button variant="default" class="px-12 py-8 text-xl font-semibold">
+                    <.link navigate={~p"/onboarding/org"}>
+                      Companies
+                    </.link>
+                  </.button>
+                  <.button variant="secondary" class="px-12 py-8 text-xl font-semibold">
+                    <.link navigate={~p"/onboarding/dev"}>
+                      Developers
+                    </.link>
+                  </.button>
                 </div>
                 <!-- Stats -->
                 <dl class="mt-16 grid grid-cols-2 gap-8 sm:grid-cols-4">
@@ -250,22 +262,31 @@ defmodule AlgoraWeb.HomeLive do
           <footer class="border-t">
             <div class="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
               <div class="flex justify-center space-x-6 md:order-2">
-                <a href="#" class="text-muted-foreground hover:text-foreground">
+                <.link
+                  href={AlgoraWeb.Constants.get(:twitter_url)}
+                  class="text-muted-foreground hover:text-foreground"
+                >
                   <span class="sr-only">Twitter</span>
                   <.icon name="tabler-brand-twitter" class="h-6 w-6" />
-                </a>
-                <a href="#" class="text-muted-foreground hover:text-foreground">
+                </.link>
+                <.link
+                  href={AlgoraWeb.Constants.get(:github_url)}
+                  class="text-muted-foreground hover:text-foreground"
+                >
                   <span class="sr-only">GitHub</span>
                   <.icon name="tabler-brand-github" class="h-6 w-6" />
-                </a>
-                <a href="#" class="text-muted-foreground hover:text-foreground">
+                </.link>
+                <.link
+                  href={AlgoraWeb.Constants.get(:discord_url)}
+                  class="text-muted-foreground hover:text-foreground"
+                >
                   <span class="sr-only">Discord</span>
                   <.icon name="tabler-brand-discord" class="h-6 w-6" />
-                </a>
+                </.link>
               </div>
               <div class="mt-8 md:order-1 md:mt-0">
-                <p class="text-center text-xs leading-5 text-muted-foreground">
-                  &copy; {DateTime.utc_now().year} Algora. All rights reserved.
+                <p class="text-center text-sm leading-5 text-muted-foreground">
+                  &copy; {DateTime.utc_now().year} Algora, Public Benefit Corporation
                 </p>
               </div>
             </div>

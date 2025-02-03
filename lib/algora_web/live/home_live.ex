@@ -134,7 +134,7 @@ defmodule AlgoraWeb.HomeLive do
       </header>
 
       <main>
-        <div class="relative isolate overflow-hidden">
+        <div class="relative isolate overflow-hidden min-h-screen">
           <!-- Background pattern -->
           <div
             class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
@@ -177,8 +177,8 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- Hero content -->
-          <div class="mx-auto max-w-7xl px-6 pt-36 pb-24 sm:pt-60 lg:px-8 lg:pt-16">
-            <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
+          <div class="mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:pt-20">
+            <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="relative w-full lg:-mt-12 lg:max-w-xl lg:shrink-0 xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
                   The open source UpWork alternative.
@@ -223,19 +223,19 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
               <!-- Featured devs -->
-              <div class="mt-14 flex min-h-screen justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
+              <div class="mt-14 flex justify-start sm:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0">
                 <%= if length(@featured_devs) > 0 do %>
-                  <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                  <div class="ml-auto w-28 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                     <.dev_card dev={List.first(@featured_devs)} />
                   </div>
-                  <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
+                  <div class="mr-auto w-28 sm:w-56 lg:w-44 flex-none space-y-8 sm:mr-0 lg:pt-36">
                     <%= if length(@featured_devs) >= 3 do %>
                       <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
                         <.dev_card dev={dev} />
                       <% end %>
                     <% end %>
                   </div>
-                  <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
+                  <div class="w-28 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 lg:pt-0">
                     <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
                       <.dev_card dev={dev} />
                     <% end %>

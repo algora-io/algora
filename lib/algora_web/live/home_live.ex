@@ -187,7 +187,7 @@ defmodule AlgoraWeb.HomeLive do
                   GitHub bounties, freelancing and full-time jobs.
                 </p>
                 <!-- CTA buttons -->
-                <div class="mt-10 flex items-center gap-x-6">
+                <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
                   <.link
                     navigate={~p"/onboarding/org"}
                     class="rounded-md bg-primary px-12 py-5 text-xl font-semibold text-primary-foreground shadow hover:bg-primary/90"

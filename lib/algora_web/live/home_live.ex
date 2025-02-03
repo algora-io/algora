@@ -43,7 +43,11 @@ defmodule AlgoraWeb.HomeLive do
           </div>
           <!-- Mobile menu button -->
           <div class="flex lg:hidden">
-            <button type="button" class="rounded-md p-2.5 text-muted-foreground hover:text-foreground">
+            <button
+              type="button"
+              class="rounded-md p-2.5 text-muted-foreground hover:text-foreground"
+              phx-click={JS.show(to: "#mobile-menu")}
+            >
               <span class="sr-only">Open main menu</span>
               <.icon name="tabler-menu" class="h-6 w-6" />
             </button>
@@ -71,7 +75,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </nav>
         <!-- Mobile menu -->
-        <div class="lg:hidden" role="dialog" aria-modal="true">
+        <div id="mobile-menu" class="lg:hidden hidden" role="dialog" aria-modal="true">
           <div class="fixed inset-0 z-50"></div>
           <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border">
             <!-- Mobile menu content -->
@@ -80,6 +84,7 @@ defmodule AlgoraWeb.HomeLive do
               <button
                 type="button"
                 class="rounded-md p-2.5 text-muted-foreground hover:text-foreground"
+                phx-click={JS.hide(to: "#mobile-menu")}
               >
                 <span class="sr-only">Close menu</span>
                 <.icon name="tabler-x" class="h-6 w-6" />

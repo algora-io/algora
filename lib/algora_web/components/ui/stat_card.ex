@@ -44,7 +44,9 @@ defmodule AlgoraWeb.Components.UI.StatCard do
             {render_slot(@inner_block)}
           <% end %>
         </div>
-        <p :if={@subtext} class="text-xs text-muted-foreground">{@subtext}</p>
+        <p :if={@subtext} class="text-xs text-muted-foreground">
+          {if @subtext == "", do: {:safe, "&nbsp;"}, else: @subtext}
+        </p>
       </div>
     </div>
     """

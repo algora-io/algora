@@ -40,8 +40,8 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
     ]
   end
 
-  defp social_link(user, :github), do: if(login = user[:provider_login], do: "https://github.com/#{login}")
-  defp social_link(user, platform), do: user[:"#{platform}_url"]
+  defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
+  defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
 
   def render(assigns) do
     ~H"""

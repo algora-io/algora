@@ -41,7 +41,6 @@ defmodule AlgoraWeb.Org.Nav do
         {AlgoraWeb.Org.BountiesLive, _} -> :bounties
         {AlgoraWeb.Org.ProjectsLive, _} -> :projects
         {AlgoraWeb.Project.ViewLive, _} -> :projects
-        {AlgoraWeb.Org.JobsLive, _} -> :jobs
         {AlgoraWeb.Org.SettingsLive, _} -> :settings
         {AlgoraWeb.Org.MembersLive, _} -> :members
         {_, _} -> nil
@@ -67,7 +66,6 @@ defmodule AlgoraWeb.Org.Nav do
             icon: "tabler-diamond",
             label: "Bounties"
           },
-          %{href: "/org/#{org_handle}/jobs", tab: :jobs, icon: "tabler-briefcase", label: "Jobs"},
           %{
             href: "/org/#{org_handle}/team",
             tab: :team,

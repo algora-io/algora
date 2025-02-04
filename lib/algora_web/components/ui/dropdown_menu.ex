@@ -134,4 +134,16 @@ defmodule AlgoraWeb.Components.UI.DropdownMenu do
     <div class={classes(["my-1 h-px bg-border", @class])} {@rest} role="separator" />
     """
   end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+  attr :rest, :global
+
+  def dropdown_menu_label(assigns) do
+    ~H"""
+    <div class={classes(["px-2 py-1.5 text-sm font-semibold", @class])} {@rest}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
 end

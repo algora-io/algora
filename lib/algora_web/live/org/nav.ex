@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Org.Nav do
     # TODO: restore once chat is implemented
     contacts = []
 
-    # members = Organizations.list_org_members(current_org)
+    # members = Organizations.list_org_members(current_org) |> Enum.map(& &1.user)
     # contractors = Organizations.list_org_contractors(current_org)
     # contacts =
     #   (contractors ++ members)

@@ -88,9 +88,12 @@ defmodule Algora.Organizations do
 
   def list_org_members(org) do
     Repo.all(
-      from u in User,
-        join: m in assoc(u, :memberships),
-        where: m.org_id == ^org.id and m.user_id == u.id
+      from m in Member,
+        join: u in assoc(m, :user),
+        where: m.org_id == ^org.id and m.user_id == u.id,
+        select_merge: %{
+          user: u
+        }
     )
   end
 

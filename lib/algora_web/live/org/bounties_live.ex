@@ -8,15 +8,19 @@ defmodule AlgoraWeb.Org.BountiesLive do
   on_mount AlgoraWeb.Org.BountyHook
 
   def mount(_params, _session, socket) do
-    bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10)
+    open_bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10, status: :open)
+    paid_bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10, status: :paid)
+
+    # TODO:
     claims = []
 
     {:ok,
      socket
-     |> assign(:bounties, bounties)
+     |> assign(:open_bounties, open_bounties)
+     |> assign(:paid_bounties, paid_bounties)
      |> assign(:claims, claims)
-     |> assign(:open_count, length(bounties))
-     |> assign(:completed_count, 0)
+     |> assign(:open_count, length(open_bounties))
+     |> assign(:completed_count, length(paid_bounties))
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))}
   end
 
@@ -49,9 +53,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 <button
                   type="button"
                   role="tab"
-                  aria-selected="true"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
-                  data-state="active"
+                  aria-selected={@current_tab == :open}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :open, do: "bg-indigo-600 text-white", else: "hover:bg-indigo-600/50"}"}
+                  data-state={if @current_tab == :open, do: "active", else: "inactive"}
+                  phx-click="change-tab"
+                  phx-value-tab="open"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
@@ -63,9 +69,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 <button
                   type="button"
                   role="tab"
-                  aria-selected="false"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-indigo-600/50"
-                  data-state="inactive"
+                  aria-selected={@current_tab == :completed}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :completed, do: "bg-indigo-600 text-white", else: "hover:bg-indigo-600/50"}"}
+                  data-state={if @current_tab == :completed, do: "active", else: "inactive"}
+                  phx-click="change-tab"
+                  phx-value-tab="completed"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
@@ -76,31 +84,6 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 </button>
               </div>
             </div>
-            <!-- Checkboxes for hiding claimed and attempted bounties -->
-            <div class="mt-3 flex items-center space-x-4">
-              <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="hide-claimed"
-                    class="h-6 w-6 rounded-sm border bg-gray-600"
-                  />
-                  <label for="hide-claimed" class="text-sm font-medium leading-none">
-                    Hide claimed
-                  </label>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="hide-attempted"
-                    class="h-6 w-6 rounded-sm border bg-gray-600"
-                  />
-                  <label for="hide-attempted" class="text-sm font-medium leading-none">
-                    Hide attempted
-                  </label>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -108,7 +91,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
         <div class="scrollbar-thin w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <tbody class="[&_tr:last-child]:border-0">
-              <%= for bounty  <- @bounties do %>
+              <%= for bounty <- (if @current_tab == :open, do: @open_bounties, else: @paid_bounties) do %>
                 <tr
                   class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                   data-state="false"
@@ -256,5 +239,25 @@ defmodule AlgoraWeb.Org.BountiesLive do
       </div>
     </div>
     """
+  end
+
+  def handle_event("change-tab", %{"tab" => "completed"}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=completed")}
+  end
+
+  def handle_event("change-tab", %{"tab" => "open"}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=open")}
+  end
+
+  def handle_params(params, _uri, socket) do
+    {:noreply, assign(socket, :current_tab, get_current_tab(params))}
+  end
+
+  defp get_current_tab(params) do
+    case params["status"] do
+      "open" -> :open
+      "completed" -> :completed
+      _ -> :open
+    end
   end
 end

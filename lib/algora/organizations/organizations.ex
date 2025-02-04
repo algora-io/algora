@@ -100,6 +100,7 @@ defmodule Algora.Organizations do
   def list_org_contractors(org) do
     Repo.all(
       from u in User,
+        distinct: true,
         join: c in assoc(u, :contractor_contracts),
         where: c.client_id == ^org.id and c.contractor_id == u.id
     )

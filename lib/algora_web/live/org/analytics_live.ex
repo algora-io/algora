@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
 
   def mount(_params, _session, socket) do
     org_id = socket.assigns.current_org.id
@@ -82,7 +83,7 @@ defmodule AlgoraWeb.Org.AnalyticsLive do
               <.link
                 class="group relative flex flex-col items-start gap-x-4 gap-y-2 py-4 sm:flex-row sm:items-center"
                 rel="noopener"
-                href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
+                href={Bounty.url(bounty)}
               >
                 <div class="min-w-0 flex-auto">
                   <div class="flex items-center gap-x-3">

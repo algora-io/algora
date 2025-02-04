@@ -58,14 +58,18 @@ defmodule Algora.Bounties.Claim do
 
   def rewarded(query \\ Claim) do
     from c in query,
-      where: c.state == :approved and not is_nil(c.charged_at)
+      join: t in assoc(c, :transactions),
+      where: c.status == :approved,
+      where: t.type == :credit,
+      where: t.status == :succeeded
   end
 
   def filter_by_org_id(query, nil), do: query
 
   def filter_by_org_id(query, org_id) do
     from c in query,
-      join: b in assoc(c, :bounty),
+      join: t in assoc(c, :target),
+      join: b in assoc(t, :bounties),
       join: u in assoc(b, :owner),
       where: u.id == ^org_id
   end

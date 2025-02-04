@@ -29,22 +29,23 @@
         </ul>
 
         <.separator class="mx-auto my-4 w-2/3" />
-        <!-- Online users section -->
+        <!-- Chat section -->
         <ul role="list" class="space-y-1">
-          <%= for user <- @online_users do %>
+          <%= for contact <- @contacts do %>
             <li>
+              <!-- TODO: navigate to chat -->
               <.link
                 class="flex justify-center p-2"
-                navigate={Algora.Accounts.User.url(user)}
-                title={Algora.Accounts.User.handle(user)}
+                navigate={Algora.Accounts.User.url(contact)}
+                title={Algora.Accounts.User.handle(contact)}
               >
                 <div class="relative inline-block">
                   <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                     <img
-                      alt={Algora.Accounts.User.handle(user)}
+                      alt={Algora.Accounts.User.handle(contact)}
                       loading="lazy"
                       decoding="async"
-                      src={user.avatar_url}
+                      src={contact.avatar_url}
                       class="h-full w-full object-cover"
                     />
                   </div>

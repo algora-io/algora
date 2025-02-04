@@ -98,6 +98,7 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/analytics", Org.AnalyticsLive, :index
       live "/org/:org_handle/chat", ChatLive, :index
       live "/org/:org_handle/settings", Org.SettingsLive, :edit
+      live "/org/:org_handle/team", Org.TeamLive, :index
     end
 
     live_session :org2,

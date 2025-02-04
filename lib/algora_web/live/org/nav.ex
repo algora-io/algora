@@ -40,7 +40,8 @@ defmodule AlgoraWeb.Org.Nav do
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
-        {AlgoraWeb.Org.DashboardLive, _} -> :dashboard
+        {AlgoraWeb.Org.DashboardLive, _} -> :quickstart
+        {AlgoraWeb.Org.DashboardPublicLive, _} -> :home
         {AlgoraWeb.Org.BountiesLive, _} -> :bounties
         {AlgoraWeb.Org.ProjectsLive, _} -> :projects
         {AlgoraWeb.Project.ViewLive, _} -> :projects
@@ -59,9 +60,15 @@ defmodule AlgoraWeb.Org.Nav do
         items: [
           %{
             href: "/org/#{org_handle}",
-            tab: :dashboard,
+            tab: :quickstart,
+            icon: "tabler-sparkles",
+            label: "Quickstart"
+          },
+          %{
+            href: "/org/#{org_handle}/home",
+            tab: :home,
             icon: "tabler-home",
-            label: "Dashboard"
+            label: "Home"
           },
           %{
             href: "/org/#{org_handle}/bounties",

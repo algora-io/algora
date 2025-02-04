@@ -257,9 +257,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <div class="flex -space-x-1 pt-6">
                       <%= for member <- @org_members do %>
                         <.avatar class="h-9 w-9 ring-2 ring-background">
-                          <.avatar_image src={member.avatar_url} />
+                          <.avatar_image src={member.user.avatar_url} />
                           <.avatar_fallback>
-                            {String.slice(member.name, 0, 2)}
+                            {String.slice(member.user.name, 0, 2)}
                           </.avatar_fallback>
                         </.avatar>
                       <% end %>

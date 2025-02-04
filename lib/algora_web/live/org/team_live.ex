@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Org.TeamLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-6xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <div class="space-y-1">
         <h1 class="text-2xl font-bold">Team</h1>
         <p class="text-muted-foreground">Manage your organization's team members and contractors</p>

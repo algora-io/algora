@@ -741,6 +741,18 @@ defmodule Algora.Bounties do
     |> Repo.all()
   end
 
+  @spec list_claims(list(String.t())) :: [Claim.t()]
+  def list_claims(ticket_ids) do
+    Repo.all(
+      from c in Claim,
+        join: t in assoc(c, :target),
+        join: user in assoc(c, :user),
+        left_join: s in assoc(c, :source),
+        where: t.id in ^ticket_ids,
+        select_merge: %{user: user, source: s}
+    )
+  end
+
   def awarded_to_user(user_id) do
     from b in Bounty,
       join: t in Transaction,

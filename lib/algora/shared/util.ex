@@ -29,11 +29,28 @@ defmodule Algora.Util do
     diff = NaiveDateTime.diff(now, datetime, :second)
 
     cond do
-      diff < 60 -> "just now"
-      diff < 3600 -> "#{div(diff, 60)} minutes ago"
-      diff < 86_400 -> "#{div(diff, 3600)} hours ago"
-      diff < 2_592_000 -> "#{div(diff, 86_400)} days ago"
-      true -> "#{div(diff, 2_592_000)} months ago"
+      diff < 60 ->
+        "just now"
+
+      diff < 3600 ->
+        count = div(diff, 60)
+        unit = Gettext.ngettext(AlgoraWeb.Gettext, "minute", "minutes", count)
+        "#{count} #{unit} ago"
+
+      diff < 86_400 ->
+        count = div(diff, 3600)
+        unit = Gettext.ngettext(AlgoraWeb.Gettext, "hour", "hours", count)
+        "#{count} #{unit} ago"
+
+      diff < 2_592_000 ->
+        count = div(diff, 86_400)
+        unit = Gettext.ngettext(AlgoraWeb.Gettext, "day", "days", count)
+        "#{count} #{unit} ago"
+
+      true ->
+        count = div(diff, 2_592_000)
+        unit = Gettext.ngettext(AlgoraWeb.Gettext, "month", "months", count)
+        "#{count} #{unit} ago"
     end
   end
 

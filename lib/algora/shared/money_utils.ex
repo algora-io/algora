@@ -26,7 +26,7 @@ defmodule Algora.MoneyUtils do
   # Why does ecto return {currency, amount} instead of Money.t()?
   def ensure_money_field(struct, field) do
     case Map.get(struct, field) do
-      {currency, amount} -> Map.put(struct, field, Money.new!(currency, amount))
+      {currency, amount} -> Map.put(struct, field, Money.new!(currency, amount, no_fraction_if_integer: true))
       _ -> struct
     end
   end

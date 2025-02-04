@@ -89,12 +89,6 @@ defmodule AlgoraWeb.Org.Nav do
             label: "Transactions"
           },
           %{
-            href: "/org/#{org_handle}/analytics",
-            tab: :analytics,
-            icon: "tabler-chart-bar",
-            label: "Analytics"
-          },
-          %{
             href: "/org/#{org_handle}/settings",
             tab: :settings,
             icon: "tabler-settings",

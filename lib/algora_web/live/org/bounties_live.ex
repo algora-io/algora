@@ -30,8 +30,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
             <h2 class="text-2xl font-bold dark:text-white">Bounties</h2>
             <p class="text-sm dark:text-gray-300">
               Create new bounties using the
-              <code class="text-base font-semibold text-cyan-300">
-                <span>/bounty</span> <span class="text-emerald-300">$AMOUNT</span>
+              <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
+                /bounty $1000
               </code>
               command on Github.
             </p>
@@ -51,14 +51,14 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   type="button"
                   role="tab"
                   aria-selected={@current_tab == :open}
-                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :open, do: "bg-indigo-600 text-white", else: "hover:bg-indigo-600/50"}"}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :open, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
                   data-state={if @current_tab == :open, do: "active", else: "inactive"}
                   phx-click="change-tab"
                   phx-value-tab="open"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
-                    <span class="min-w-[1ch] font-mono text-indigo-200 transition duration-300 ease-out">
+                    <span class={"min-w-[1ch] font-mono #{if @current_tab == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
                       {@open_count}
                     </span>
                   </div>
@@ -67,14 +67,14 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   type="button"
                   role="tab"
                   aria-selected={@current_tab == :completed}
-                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :completed, do: "bg-indigo-600 text-white", else: "hover:bg-indigo-600/50"}"}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :completed, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
                   data-state={if @current_tab == :completed, do: "active", else: "inactive"}
                   phx-click="change-tab"
                   phx-value-tab="completed"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
-                    <span class="min-w-[1ch] font-mono text-gray-400 transition duration-300 ease-out group-hover:text-indigo-200">
+                    <span class={"min-w-[1ch] font-mono #{if @current_tab == :completed, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
                       {@completed_count}
                     </span>
                   </div>
@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                             View
                           </.link>
                           <.link
-                            class="inline-flex h-10 items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600/90"
+                            class="inline-flex h-10 items-center justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600/90"
                             href="#"
                           >
                             Reward

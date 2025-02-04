@@ -5,8 +5,6 @@ defmodule AlgoraWeb.Org.BountiesLive do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
 
-  on_mount AlgoraWeb.Org.BountyHook
-
   def mount(_params, _session, socket) do
     open_bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10, status: :open)
     paid_bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10, status: :paid)
@@ -20,8 +18,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
      |> assign(:paid_bounties, paid_bounties)
      |> assign(:claims, claims)
      |> assign(:open_count, length(open_bounties))
-     |> assign(:completed_count, length(paid_bounties))
-     |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))}
+     |> assign(:completed_count, length(paid_bounties))}
   end
 
   def render(assigns) do

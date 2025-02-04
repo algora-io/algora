@@ -1288,6 +1288,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate drawer(assigns), to: Drawer
   defdelegate dropdown_menu_content(assigns), to: DropdownMenu
   defdelegate dropdown_menu_item(assigns), to: DropdownMenu
+  defdelegate dropdown_menu_label(assigns), to: DropdownMenu
   defdelegate dropdown_menu_separator(assigns), to: DropdownMenu
   defdelegate dropdown_menu_trigger(assigns), to: DropdownMenu
   defdelegate dropdown_menu(assigns), to: DropdownMenu

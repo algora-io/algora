@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
 
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-6xl space-y-6 p-6">
+    <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <!-- Org Header -->
       <div class="rounded-xl border bg-card p-6 text-card-foreground">
         <div class="flex flex-col gap-6 md:flex-row">

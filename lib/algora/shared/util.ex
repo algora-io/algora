@@ -96,6 +96,11 @@ defmodule Algora.Util do
 
   def normalize_struct(value), do: value
 
+  def format_name_list([x]), do: x
+  def format_name_list([x1, x2]), do: "#{x1} and #{x2}"
+  def format_name_list([x1, x2, x3]), do: "#{x1}, #{x2} and #{x3}"
+  def format_name_list([x1, x2 | xs]), do: "#{x1}, #{x2} and #{length(xs)} others"
+
   # TODO: Implement this for all countries
   def locale_from_country_code("gr"), do: "el"
   def locale_from_country_code(country_code), do: country_code

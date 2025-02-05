@@ -34,12 +34,17 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
   defp add_comment(token, claims) do
     primary_claim = List.first(claims)
 
+    names =
+      claims
+      |> Enum.map(fn c -> c.user.provider_login end)
+      |> Algora.Util.format_name_list()
+
     Github.create_issue_comment(
       token,
       primary_claim.target.repository.user.provider_login,
       primary_claim.target.repository.name,
       primary_claim.target.number,
-      "💡 #{names(claims)} submitted [#{Claim.type_label(primary_claim.type)}](#{primary_claim.url}) that claims the bounty. You can visit [Algora](#{Claim.reward_url(primary_claim)}) to reward."
+      "💡 #{names} submitted [#{Claim.type_label(primary_claim.type)}](#{primary_claim.url}) that claims the bounty. You can visit [Algora](#{Claim.reward_url(primary_claim)}) to reward."
     )
   end
 
@@ -57,21 +62,5 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
     else
       {:ok, nil}
     end
-  end
-
-  defp names([claim]) do
-    "@#{claim.user.provider_login}"
-  end
-
-  defp names([c1, c2]) do
-    "@#{c1.user.provider_login} and @#{c2.user.provider_login}"
-  end
-
-  defp names([c1, c2, c3]) do
-    "@#{c1.user.provider_login}, @#{c2.user.provider_login} and @#{c3.user.provider_login}"
-  end
-
-  defp names([c1, c2 | claims]) do
-    "@#{c1.user.provider_login}, @#{c2.user.provider_login} and #{length(claims)} others"
   end
 end

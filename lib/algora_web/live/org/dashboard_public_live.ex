@@ -71,12 +71,6 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
               <% end %>
             </div>
           </div>
-
-          <div class="flex-shrink-0">
-            <.button class="w-full">
-              <.icon name="tabler-briefcase" class="mr-2 h-4 w-4" /> Apply
-            </.button>
-          </div>
         </div>
       </div>
 

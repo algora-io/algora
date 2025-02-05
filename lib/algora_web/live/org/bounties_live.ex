@@ -77,7 +77,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
         <div class="scrollbar-thin w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <tbody class="[&_tr:last-child]:border-0">
-              <%= for %{bounty: bounty, claims: claims} <- @bounties do %>
+              <%= for %{bounty: bounty, claim_groups: claim_groups} <- @bounties do %>
                 <tr
                   class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                   data-state="false"
@@ -117,17 +117,17 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     </div>
                   </td>
                   <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <%= if length(claims) > 0 do %>
+                    <%= if map_size(claim_groups) > 0 do %>
                       <div class="group flex cursor-pointer flex-col items-center gap-1">
                         <div class="flex cursor-pointer justify-center -space-x-3">
-                          <%= for claim <- claims do %>
+                          <%= for {_group_id, claims} <- claim_groups do %>
                             <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
                               <img
-                                alt={User.handle(claim.user)}
+                                alt={User.handle(hd(claims).user)}
                                 loading="lazy"
                                 decoding="async"
                                 class="rounded-full"
-                                src={claim.user.avatar_url}
+                                src={hd(claims).user.avatar_url}
                                 style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                               />
                             </div>
@@ -135,7 +135,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                         <div class="flex items-center gap-0.5">
                           <div class="whitespace-nowrap text-sm font-medium text-gray-300 group-hover:text-gray-100">
-                            {length(claims)} {ngettext("claim", "claims", length(claims))}
+                            {map_size(claim_groups)} {ngettext(
+                              "claim",
+                              "claims",
+                              map_size(claim_groups)
+                            )}
                           </div>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +160,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     <% end %>
                   </td>
                 </tr>
-                <%= for claim <- claims do %>
+                <%= for {_group_id, claims} <- claim_groups do %>
                   <tr
                     class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
                     data-state="false"
@@ -165,23 +169,27 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       <div class="min-w-[250px]">
                         <div class="flex items-center gap-3">
                           <div class="flex -space-x-3">
-                            <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800">
-                              <img
-                                alt={User.handle(claim.user)}
-                                loading="lazy"
-                                decoding="async"
-                                class="rounded-full"
-                                src={claim.user.avatar_url}
-                                style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                              />
-                            </div>
+                            <%= for claim <- claims do %>
+                              <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
+                                <img
+                                  alt={User.handle(claim.user)}
+                                  loading="lazy"
+                                  decoding="async"
+                                  class="rounded-full"
+                                  src={claim.user.avatar_url}
+                                  style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                                />
+                              </div>
+                            <% end %>
                           </div>
                           <div>
                             <div class="text-sm font-medium text-gray-200">
-                              {User.handle(claim.user)}
+                              {claims
+                              |> Enum.map(fn c -> User.handle(c.user) end)
+                              |> Algora.Util.format_name_list()}
                             </div>
                             <div class="text-xs text-gray-400">
-                              {Algora.Util.time_ago(claim.inserted_at)}
+                              {Algora.Util.time_ago(hd(claims).inserted_at)}
                             </div>
                           </div>
                         </div>
@@ -191,10 +199,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       <div class="min-w-[180px]">
                         <div class="flex items-center justify-end gap-4">
                           <.button variant="secondary">
-                            <.link href={claim.source.url}>View</.link>
+                            <.link href={hd(claims).source.url}>View</.link>
                           </.button>
                           <.button>
-                            <.link href={~p"/claims/#{claim.group_id}"}>Reward</.link>
+                            <.link href={~p"/claims/#{hd(claims).group_id}"}>Reward</.link>
                           </.button>
                         </div>
                       </div>
@@ -242,11 +250,13 @@ defmodule AlgoraWeb.Org.BountiesLive do
       |> Enum.map(& &1.ticket.id)
       |> Bounties.list_claims()
       |> Enum.group_by(& &1.target_id)
+      |> Map.new(fn {ticket_id, claims} ->
+        {ticket_id, Enum.group_by(claims, & &1.group_id)}
+      end)
 
     bounties =
       Enum.map(bounties, fn bounty ->
-        # TODO: group claims by group_id
-        %{bounty: bounty, claims: Map.get(claims_by_ticket, bounty.ticket.id, [])}
+        %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
       end)
 
     {:noreply,

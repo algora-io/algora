@@ -9,9 +9,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Contracts
+  alias Algora.Github
   alias Algora.Types.USD
   alias Algora.Validations
   alias Algora.Workspace
+  alias AlgoraWeb.Components.Logos
 
   require Logger
 
@@ -61,19 +63,27 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  @impl true
   def mount(_params, _session, socket) do
+    %{current_org: current_org} = socket.assigns
+
     experts =
-      socket.assigns.current_user.tech_stack
+      current_org.tech_stack
       |> List.first()
       |> Accounts.list_experts()
       |> Enum.take(6)
 
+    installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
+
     if connected?(socket) do
+      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
       Bounties.subscribe()
     end
 
     {:ok,
      socket
+     |> assign(:installations, installations)
+     |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:experts, experts)
@@ -81,11 +91,52 @@ defmodule AlgoraWeb.Org.DashboardLive do
      |> assign_achievements()}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
       <div class="container mx-auto max-w-7xl space-y-8 p-8">
-        <.section>
+        <.section :if={@installations == []}>
+          <.card>
+            <.card_header>
+              <.card_title>GitHub Integration</.card_title>
+              <.card_description :if={@installations == []}>
+                Install the Algora app to enable slash commands in your GitHub repositories
+              </.card_description>
+            </.card_header>
+            <.card_content>
+              <div class="flex flex-col gap-3">
+                <%= if @installations != [] do %>
+                  <%= for installation <- @installations do %>
+                    <div class="flex items-center gap-2">
+                      <img src={installation.avatar_url} class="w-9 h-9 rounded-lg" />
+                      <div>
+                        <p class="font-medium">{installation.provider_meta["account"]["login"]}</p>
+                        <p class="text-sm text-muted-foreground">
+                          Algora app is installed in
+                          <strong>{installation.repository_selection}</strong>
+                          repositories
+                        </p>
+                      </div>
+                    </div>
+                  <% end %>
+                  <.button phx-click="install_app" class="ml-auto gap-2">
+                    <Logos.github class="w-4 h-4 mr-2 -ml-1" />
+                    Manage {ngettext("installation", "installations", length(@installations))}
+                  </.button>
+                <% else %>
+                  <div class="flex flex-col gap-2">
+                    <.button phx-click="install_app" class="ml-auto gap-2">
+                      <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+                    </.button>
+                  </div>
+                <% end %>
+              </div>
+            </.card_content>
+          </.card>
+        </.section>
+
+        <.section :if={@installations != []}>
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
             {create_bounty(assigns)}
             {create_tip(assigns)}
@@ -191,6 +242,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
     """
   end
 
+  @impl true
+  def handle_info(:bounties_updated, socket) do
+    {:noreply, assign_tickets(socket)}
+  end
+
+  def handle_info({:authenticated, user}, socket) do
+    {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
+  end
+
+  @impl true
+  def handle_event("install_app", _params, socket) do
+    # TODO: immediately redirect to install_url if user has valid token
+    {:noreply, push_event(socket, "open_popup", %{url: socket.assigns.oauth_url})}
+  end
+
   def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
     changeset =
       %BountyForm{}
@@ -251,10 +317,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
-  def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
-  end
-
   defp assign_tickets(socket) do
     tickets =
       Bounties.PrizePool.list(
@@ -271,6 +333,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     status_fns = [
       {&personalize_status/1, "Personalize Algora"},
+      {&install_app_status/1, "Install the Algora app"},
       {&create_bounty_status/1, "Create a bounty"},
       {&reward_bounty_status/1, "Reward a bounty"},
       {&begin_collaboration_status/1, "Contract a #{tech} developer"},
@@ -279,7 +342,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {achievements, _} =
       Enum.reduce_while(status_fns, {[], false}, fn {status_fn, name}, {acc, found_current} ->
-        status = status_fn.(socket.assigns.current_user)
+        status = status_fn.(socket)
 
         result =
           cond do
@@ -296,29 +359,36 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp personalize_status(_socket), do: :completed
 
-  defp create_bounty_status(user) do
-    case Bounties.list_bounties(owner_id: user.id, limit: 1) do
+  defp install_app_status(socket) do
+    case socket.assigns.installations do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
-  defp reward_bounty_status(user) do
-    case Bounties.list_bounties(owner_id: user.id, status: :paid, limit: 1) do
+  defp create_bounty_status(socket) do
+    case Bounties.list_bounties(owner_id: socket.assigns.current_user.id, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
-  defp begin_collaboration_status(user) do
-    case Contracts.list_contracts(client_id: user.id, active_or_paid?: true, limit: 1) do
+  defp reward_bounty_status(socket) do
+    case Bounties.list_bounties(owner_id: socket.assigns.current_user.id, status: :paid, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
-  defp complete_first_contract_status(user) do
-    case Contracts.list_contracts(client_id: user.id, status: :paid, limit: 1) do
+  defp begin_collaboration_status(socket) do
+    case Contracts.list_contracts(client_id: socket.assigns.current_user.id, active_or_paid?: true, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp complete_first_contract_status(socket) do
+    case Contracts.list_contracts(client_id: socket.assigns.current_user.id, status: :paid, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end

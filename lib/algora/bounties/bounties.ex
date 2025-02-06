@@ -771,8 +771,18 @@ defmodule Algora.Bounties do
   end
 
   def fetch_stats(org_id \\ nil) do
-    open_bounties_query = Bounty.filter_by_org_id(Bounty.open(), org_id)
-    rewarded_bounties_query = Bounty.filter_by_org_id(Bounty.completed(), org_id)
+    open_bounties_query =
+      from b in Bounty,
+        join: u in assoc(b, :owner),
+        where: u.id == ^org_id,
+        where: b.status == :open
+
+    rewarded_bounties_query =
+      from b in Bounty,
+        join: u in assoc(b, :owner),
+        where: u.id == ^org_id,
+        where: b.status == :paid
+
     rewarded_claims_query = Claim.filter_by_org_id(Claim.rewarded(), org_id)
     members_query = Member.filter_by_org_id(Member, org_id)
 

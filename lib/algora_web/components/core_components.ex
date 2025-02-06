@@ -1235,10 +1235,8 @@ defmodule AlgoraWeb.CoreComponents do
           <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
           <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>
         </div>
-        <.button :if={@link} variant="outline">
-          <.link navigate={@link}>
-            View all
-          </.link>
+        <.button :if={@link} navigate={@link} variant="outline">
+          View all
         </.button>
       </div>
       {render_slot(@inner_block)}

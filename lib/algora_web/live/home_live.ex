@@ -81,10 +81,8 @@ defmodule AlgoraWeb.HomeLive do
           </div>
 
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-            <.button variant="subtle">
-              <.link navigate={~p"/auth/login"}>
-                Sign in
-              </.link>
+            <.button navigate={~p"/auth/login"} variant="subtle">
+              Sign in
             </.button>
           </div>
         </nav>
@@ -202,15 +200,19 @@ defmodule AlgoraWeb.HomeLive do
                 </p>
                 <!-- CTA buttons -->
                 <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
-                  <.button variant="default" class="px-12 py-8 text-xl font-semibold">
-                    <.link navigate={~p"/onboarding/org"}>
-                      Companies
-                    </.link>
+                  <.button
+                    navigate={~p"/onboarding/org"}
+                    variant="default"
+                    class="px-12 py-8 text-xl font-semibold"
+                  >
+                    Companies
                   </.button>
-                  <.button variant="secondary" class="px-12 py-8 text-xl font-semibold">
-                    <.link navigate={~p"/onboarding/dev"}>
-                      Developers
-                    </.link>
+                  <.button
+                    navigate={~p"/onboarding/dev"}
+                    variant="secondary"
+                    class="px-12 py-8 text-xl font-semibold"
+                  >
+                    Developers
                   </.button>
                 </div>
                 <!-- Stats -->

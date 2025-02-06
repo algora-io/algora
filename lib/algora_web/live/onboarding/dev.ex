@@ -55,14 +55,12 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                   Next
                 </.button>
               <% else %>
-                <.button>
-                  <.link
-                    href={Algora.Github.authorize_url()}
-                    rel="noopener"
-                    class="inline-flex items-center"
-                  >
-                    <.icon name="tabler-brand-github" class="mr-2 h-5 w-5" /> Sign in with GitHub
-                  </.link>
+                <.button
+                  href={Algora.Github.authorize_url()}
+                  rel="noopener"
+                  class="inline-flex items-center"
+                >
+                  <.icon name="tabler-brand-github" class="mr-2 h-5 w-5" /> Sign in with GitHub
                 </.button>
               <% end %>
             </div>

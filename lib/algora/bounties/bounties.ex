@@ -814,9 +814,7 @@ defmodule Algora.Bounties do
       completed_bounties_count: completed_bounties,
       solvers_count: solvers_count,
       solvers_diff: solvers_count - solvers_count_last_month,
-      members_count: members_count,
-      # TODO
-      reviews_count: 4
+      members_count: members_count
     }
   end
 

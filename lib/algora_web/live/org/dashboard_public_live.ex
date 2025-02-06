@@ -97,11 +97,11 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           icon="tabler-user-code"
         />
         <.stat_card
-          title="Reviews"
-          value={@stats.reviews_count}
-          subtext="reviews"
+          title="Members"
+          value={@stats.members_count}
+          subtext=""
           href="#"
-          icon="tabler-star"
+          icon="tabler-users"
         />
       </div>
 

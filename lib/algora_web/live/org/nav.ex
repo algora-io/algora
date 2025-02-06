@@ -77,6 +77,12 @@ defmodule AlgoraWeb.Org.Nav do
             label: "Bounties"
           },
           %{
+            href: "/org/#{org_handle}/leaderboard",
+            tab: :leaderboard,
+            icon: "tabler-trophy",
+            label: "Leaderboard"
+          },
+          %{
             href: "/org/#{org_handle}/team",
             tab: :team,
             icon: "tabler-users",

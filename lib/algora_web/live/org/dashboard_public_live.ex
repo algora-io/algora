@@ -93,6 +93,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           title="Solvers"
           value={@stats.solvers_count}
           subtext={"+#{@stats.solvers_diff} from last month"}
+          navigate={~p"/org/#{@org.handle}/leaderboard"}
           icon="tabler-user-code"
         />
         <.stat_card

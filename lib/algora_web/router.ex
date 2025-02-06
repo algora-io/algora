@@ -29,12 +29,6 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
-    # if Application.compile_env(:algora, :swift_mode) do
-    #   live_session :root,
-    #     on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-    #     live "/", SwiftBountiesLive
-    #   end
-
     get "/", RootController, :index
 
     get "/set_context/:context", ContextController, :set
@@ -140,6 +134,7 @@ defmodule AlgoraWeb.Router do
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+      live "/swift", SwiftBountiesLive
       live "/:country_code", HomeLive, :index
     end
   end

@@ -791,11 +791,12 @@ defmodule Algora.Bounties do
     rewarded_bounties_query = distinct(rewards_query, :bounty_id)
     rewarded_tips_query = distinct(rewards_query, :tip_id)
     rewarded_contracts_query = distinct(rewards_query, :contract_id)
-    rewarded_users_query = distinct(rewards_query, :user_id)
+    rewarded_users_query = rewards_query |> distinct(true) |> select([:user_id])
 
-    # TODO: this is not correct, we need to get the users who have received rewards only in the last month
     rewarded_users_last_month_query =
-      where(rewarded_users_query, [t], t.succeeded_at >= fragment("NOW() - INTERVAL '1 month'"))
+      from t in rewarded_users_query,
+        where: t.succeeded_at >= fragment("NOW() - INTERVAL '1 month'"),
+        except_all: ^from(t in rewarded_users_query, where: t.succeeded_at < fragment("NOW() - INTERVAL '1 month'"))
 
     members_query = Member.filter_by_org_id(Member, org_id)
     open_bounties = Repo.aggregate(open_bounties_query, :count, :id)

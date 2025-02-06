@@ -84,8 +84,8 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
         />
         <.stat_card
           title="Total Awarded"
-          value={Money.to_string!(@stats.total_awarded)}
-          subtext={"#{@stats.completed_bounties_count} bounties"}
+          value={Money.to_string!(@stats.total_awarded_amount)}
+          subtext={"#{@stats.rewarded_bounties_count} #{ngettext("bounty", "bounties", @stats.rewarded_bounties_count)} / #{@stats.rewarded_tips_count} #{ngettext("tip", "tips", @stats.rewarded_tips_count)} / #{@stats.rewarded_contracts_count} #{ngettext("contract", "contracts", @stats.rewarded_contracts_count)}"}
           navigate={~p"/org/#{@org.handle}/bounties?status=completed"}
           icon="tabler-gift"
         />

@@ -29,7 +29,7 @@ defmodule AlgoraWeb.Project.ViewLive do
         limit: 6,
         sort_by_country: project.country,
         sort_by_tech_stack: project.tech_stack,
-        min_earnings: Money.new!(200, "USD")
+        earnings_gt: Money.new!(200, "USD")
       )
 
     {:ok,

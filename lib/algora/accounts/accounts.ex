@@ -18,7 +18,7 @@ defmodule Algora.Accounts do
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
           | {:handles, [String.t()]}
-          | {:min_earnings, non_neg_integer()}
+          | {:earnings_gt, non_neg_integer()}
           | {:sort_by_country, String.t()}
           | {:sort_by_tech_stack, [String.t()]}
 
@@ -37,7 +37,7 @@ defmodule Algora.Accounts do
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)
 
-      {:min_earnings, min_amount}, query ->
+      {:earnings_gt, min_amount}, query ->
         from([b, earnings: e] in query,
           where:
             fragment(

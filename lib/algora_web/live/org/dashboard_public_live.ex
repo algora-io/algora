@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
     org = Organizations.get_org_by_handle!(handle)
     open_bounties = Bounties.list_bounties(owner_id: org.id, status: :open, limit: 5)
     completed_bounties = Bounties.list_bounties(owner_id: org.id, status: :paid, limit: 5)
-    top_earners = Accounts.list_developers(org_id: org.id, limit: 10, min_earnings: Money.zero(:USD))
+    top_earners = Accounts.list_developers(org_id: org.id, limit: 10, earnings_gt: Money.zero(:USD))
     stats = Bounties.fetch_stats(org.id)
 
     socket =

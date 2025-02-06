@@ -335,7 +335,7 @@ defmodule AlgoraWeb.Project.CreateLive do
       limit: 5,
       sort_by_country: project.country,
       sort_by_tech_stack: project.tech_stack,
-      min_earnings: Money.new!(200, "USD")
+      earnings_gt: Money.new!(200, "USD")
     )
   end
 end

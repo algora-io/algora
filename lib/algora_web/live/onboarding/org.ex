@@ -537,7 +537,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         limit: 5,
         sort_by_tech_stack: tech_stack,
         sort_by_country: socket.assigns.current_country,
-        min_earnings: Money.new!(200, "USD")
+        earnings_gt: Money.new!(200, "USD")
       )
 
     assign(socket, :matching_devs, matching_devs)

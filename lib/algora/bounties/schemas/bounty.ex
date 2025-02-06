@@ -68,65 +68,12 @@ defmodule Algora.Bounties.Bounty do
     |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
   end
 
-  def open(query \\ Bounty) do
-    from b in query,
-      as: :bounties,
-      where:
-        not exists(
-          from(
-            t in Transaction,
-            where:
-              parent_as(:bounties).id == t.bounty_id and
-                not is_nil(t.succeeded_at) and
-                t.type == :transfer
-          )
-        )
-  end
-
-  def completed(query \\ Bounty) do
-    from b in query,
-      as: :bounties,
-      where:
-        exists(
-          from(
-            t in Transaction,
-            where:
-              parent_as(:bounties).id == t.bounty_id and
-                not is_nil(t.succeeded_at) and
-                t.type == :transfer
-          )
-        )
-  end
-
-  def rewarded(query \\ Bounty) do
-    from b in query,
-      as: :bounties,
-      where:
-        exists(
-          from(
-            t in Transaction,
-            where:
-              parent_as(:bounties).id == t.bounty_id and
-                not is_nil(t.succeeded_at) and
-                t.type == :transfer
-          )
-        )
-  end
-
   def order_by_most_recent(query \\ Bounty) do
     from(b in query, order_by: [desc: b.inserted_at])
   end
 
   def limit(query \\ Bounty, limit) do
     from(b in query, limit: ^limit)
-  end
-
-  def filter_by_org_id(query, nil), do: query
-
-  def filter_by_org_id(query, org_id) do
-    from b in query,
-      join: u in assoc(b, :owner),
-      where: u.id == ^org_id
   end
 
   def filter_by_tech_stack(query, []), do: query

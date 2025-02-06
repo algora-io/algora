@@ -771,6 +771,8 @@ defmodule Algora.Bounties do
   end
 
   def fetch_stats(org_id \\ nil) do
+    zero_money = Money.zero(:USD, no_fraction_if_integer: true)
+
     open_bounties_query =
       from b in Bounty,
         join: u in assoc(b, :owner),
@@ -783,27 +785,26 @@ defmodule Algora.Bounties do
         where: u.id == ^org_id,
         where: b.status == :paid
 
-    rewarded_claims_query = Claim.filter_by_org_id(Claim.rewarded(), org_id)
+    rewarded_users_query =
+      from t in Transaction,
+        where: t.type == :credit,
+        where: t.status == :succeeded,
+        join: lt in assoc(t, :linked_transaction),
+        where: lt.type == :debit,
+        where: lt.status == :succeeded,
+        where: lt.user_id == ^org_id,
+        distinct: :user_id
+
+    rewarded_users_last_month_query =
+      where(rewarded_users_query, [t], t.succeeded_at >= fragment("NOW() - INTERVAL '1 month'"))
+
     members_query = Member.filter_by_org_id(Member, org_id)
-
     open_bounties = Repo.aggregate(open_bounties_query, :count, :id)
-    open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || Money.zero(:USD)
-
-    total_awarded = Repo.aggregate(rewarded_bounties_query, :sum, :amount) || Money.zero(:USD)
+    open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || zero_money
+    total_awarded = Repo.aggregate(rewarded_bounties_query, :sum, :amount) || zero_money
     completed_bounties = Repo.aggregate(rewarded_bounties_query, :count, :id)
-
-    solvers_count_last_month =
-      rewarded_claims_query
-      |> where([c], c.inserted_at >= fragment("NOW() - INTERVAL '1 month'"))
-      |> Repo.aggregate(
-        :count,
-        :user_id,
-        distinct: true
-      )
-
-    solvers_count = Repo.aggregate(rewarded_claims_query, :count, :user_id, distinct: true)
-    solvers_diff = solvers_count - solvers_count_last_month
-
+    solvers_count_last_month = Repo.aggregate(rewarded_users_last_month_query, :count, :user_id)
+    solvers_count = Repo.aggregate(rewarded_users_query, :count, :user_id)
     members_count = Repo.aggregate(members_query, :count, :id)
 
     %{
@@ -812,7 +813,7 @@ defmodule Algora.Bounties do
       total_awarded: total_awarded,
       completed_bounties_count: completed_bounties,
       solvers_count: solvers_count,
-      solvers_diff: solvers_diff,
+      solvers_diff: solvers_count - solvers_count_last_month,
       members_count: members_count,
       # TODO
       reviews_count: 4

@@ -55,22 +55,4 @@ defmodule Algora.Bounties.Claim do
   def type_label(nil), do: "a URL"
 
   def reward_url(claim), do: "#{AlgoraWeb.Endpoint.url()}/claims/#{claim.group_id}"
-
-  def rewarded(query \\ Claim) do
-    from c in query,
-      join: t in assoc(c, :transactions),
-      where: c.status == :approved,
-      where: t.type == :credit,
-      where: t.status == :succeeded
-  end
-
-  def filter_by_org_id(query, nil), do: query
-
-  def filter_by_org_id(query, org_id) do
-    from c in query,
-      join: t in assoc(c, :target),
-      join: b in assoc(t, :bounties),
-      join: u in assoc(b, :owner),
-      where: u.id == ^org_id
-  end
 end

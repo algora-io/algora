@@ -14,6 +14,7 @@ defmodule Algora.Accounts do
 
   @type criterion ::
           {:id, binary()}
+          | {:org_id, binary()}
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
           | {:handles, [String.t()]}
@@ -76,9 +77,17 @@ defmodule Algora.Accounts do
       |> where([u], u.type == :individual)
       |> select([b], b.id)
 
+    filter_org_id =
+      if org_id = criteria[:org_id],
+        do: dynamic([linked_transaction: lt], lt.user_id == ^org_id),
+        else: true
+
     earnings_query =
       from t in Transaction,
         where: t.type == :credit and t.status == :succeeded,
+        left_join: lt in assoc(t, :linked_transaction),
+        as: :linked_transaction,
+        where: ^filter_org_id,
         group_by: t.user_id,
         select: %{
           user_id: t.user_id,

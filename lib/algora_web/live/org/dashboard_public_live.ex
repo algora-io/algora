@@ -79,28 +79,27 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           title="Open Bounties"
           value={Money.to_string!(@stats.open_bounties_amount)}
           subtext={"#{@stats.open_bounties_count} bounties"}
-          href={~p"/org/#{@org.handle}/bounties?status=open"}
+          navigate={~p"/org/#{@org.handle}/bounties?status=open"}
           icon="tabler-diamond"
         />
         <.stat_card
           title="Total Awarded"
           value={Money.to_string!(@stats.total_awarded)}
           subtext={"#{@stats.completed_bounties_count} bounties"}
-          href={~p"/org/#{@org.handle}/bounties?status=completed"}
+          navigate={~p"/org/#{@org.handle}/bounties?status=completed"}
           icon="tabler-gift"
         />
         <.stat_card
           title="Solvers"
           value={@stats.solvers_count}
           subtext={"+#{@stats.solvers_diff} from last month"}
-          href="#"
           icon="tabler-user-code"
         />
         <.stat_card
           title="Members"
           value={@stats.members_count}
           subtext=""
-          href="#"
+          navigate={~p"/org/#{@org.handle}/team"}
           icon="tabler-users"
         />
       </div>

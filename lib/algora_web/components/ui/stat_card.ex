@@ -5,6 +5,9 @@ defmodule AlgoraWeb.Components.UI.StatCard do
   import AlgoraWeb.CoreComponents
 
   attr :href, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
+  attr :replace, :boolean, default: false
   attr :title, :string
   attr :value, :string, default: nil
   attr :subtext, :string, default: nil
@@ -14,8 +17,8 @@ defmodule AlgoraWeb.Components.UI.StatCard do
 
   def stat_card(assigns) do
     ~H"""
-    <%= if @href do %>
-      <.link href={@href}>
+    <%= if link?(assigns) do %>
+      <.link href={@href} navigate={@navigate} patch={@patch} replace={@replace}>
         <.stat_card_content {assigns} />
       </.link>
     <% else %>
@@ -29,7 +32,7 @@ defmodule AlgoraWeb.Components.UI.StatCard do
     <div class={
       classes([
         "group/card relative rounded-lg border bg-card text-card-foreground transition-colors duration-75",
-        @href && "hover:bg-accent"
+        link?(assigns) && "hover:bg-accent"
       ])
     }>
       <div class="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
@@ -50,5 +53,9 @@ defmodule AlgoraWeb.Components.UI.StatCard do
       </div>
     </div>
     """
+  end
+
+  defp link?(assigns) do
+    Enum.any?([assigns[:href], assigns[:navigate], assigns[:patch]])
   end
 end

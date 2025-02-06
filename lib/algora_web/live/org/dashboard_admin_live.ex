@@ -802,7 +802,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
       Accounts.list_developers(
         sort_by_tech_stack: tech_stack,
         limit: 3,
-        min_earnings: Money.new!(200, "USD")
+        earnings_gt: Money.new!(200, "USD")
       )
 
     reviews = developers |> Enum.map(& &1.id) |> Reviews.get_top_reviews_for_users()

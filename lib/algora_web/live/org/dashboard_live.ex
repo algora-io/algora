@@ -77,7 +77,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     if connected?(socket) do
       Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
-      Bounties.subscribe()
     end
 
     {:ok,
@@ -87,7 +86,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:experts, experts)
-     |> assign_tickets()
      |> assign_achievements()}
   end
 
@@ -243,10 +241,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
-  end
-
   def handle_info({:authenticated, user}, socket) do
     {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
   end
@@ -315,17 +309,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Logger.error("Failed to create tip: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
-  end
-
-  defp assign_tickets(socket) do
-    tickets =
-      Bounties.PrizePool.list(
-        status: :open,
-        tech_stack: socket.assigns.current_user.tech_stack,
-        limit: 100
-      )
-
-    assign(socket, :tickets, Enum.take(tickets, 6))
   end
 
   defp assign_achievements(socket) do

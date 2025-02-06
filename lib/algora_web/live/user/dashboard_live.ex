@@ -359,10 +359,13 @@ defmodule AlgoraWeb.User.DashboardLive do
                 {Money.to_string!(Money.mult!(@contract.hourly_rate, @contract.hours_per_week))} / wk
               </div>
             </div>
-            <.button phx-click="accept_contract" phx-value-org={@contract.client.handle} size="sm">
-              <.link navigate={~p"/org/#{@contract.client.handle}/contracts/#{@contract.id}"}>
-                Accept contract
-              </.link>
+            <.button
+              navigate={~p"/org/#{@contract.client.handle}/contracts/#{@contract.id}"}
+              phx-click="accept_contract"
+              phx-value-org={@contract.client.handle}
+              size="sm"
+            >
+              Accept contract
             </.button>
           </div>
         </div>

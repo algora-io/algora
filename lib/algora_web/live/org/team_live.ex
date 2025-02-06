@@ -104,8 +104,8 @@ defmodule AlgoraWeb.Org.TeamLive do
                 </div>
               </.card_content>
               <.card_footer>
-                <.button variant="outline" class="w-full">
-                  <.link navigate={User.url(contractor)}>View Profile</.link>
+                <.button navigate={User.url(contractor)} variant="outline" class="w-full">
+                  View Profile
                 </.button>
               </.card_footer>
             </.card>

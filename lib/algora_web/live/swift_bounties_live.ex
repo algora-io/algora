@@ -161,10 +161,13 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             Anyone can contribute whether you're a company or an individual.
           </p>
           <div class="mt-10 flex items-center gap-x-6">
-            <.button variant="subtle" class="h-12 px-6 text-lg font-semibold">
-              <.link href={Algora.Github.authorize_url()} rel="noopener">
-                Start Contributing
-              </.link>
+            <.button
+              href={Algora.Github.authorize_url()}
+              rel="noopener"
+              variant="subtle"
+              class="h-12 px-6 text-lg font-semibold"
+            >
+              Start Contributing
             </.button>
           </div>
         </div>
@@ -511,14 +514,13 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           You can create bounties and send tips in any of the Swift repos below once you've connected your GitHub account.
         </p>
         <div class="mt-6 flex items-center justify-center gap-x-6">
-          <.button variant="subtle" class="h-12 px-6 text-lg font-semibold">
-            <.link
-              href={Algora.Github.authorize_url()}
-              rel="noopener"
-              class="inline-flex items-center"
-            >
-              <Logos.github class="-ml-1 mr-2 h-6 w-6 sm:h-8 sm:w-8" /> Connect with GitHub
-            </.link>
+          <.button
+            href={Algora.Github.authorize_url()}
+            rel="noopener"
+            variant="subtle"
+            class="h-12 px-6 text-lg font-semibold inline-flex items-center"
+          >
+            <Logos.github class="-ml-1 mr-2 h-6 w-6 sm:h-8 sm:w-8" /> Connect with GitHub
           </.button>
         </div>
         <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

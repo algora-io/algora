@@ -12,6 +12,10 @@ defmodule AlgoraWeb.Components.UI.Button do
   """
   attr :type, :string, default: nil
   attr :class, :string, default: nil
+  attr :href, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
+  attr :replace, :boolean, default: false
 
   attr :variant, :string,
     values: ~w(default secondary destructive outline ghost link),
@@ -23,24 +27,34 @@ defmodule AlgoraWeb.Components.UI.Button do
 
   slot :inner_block, required: true
 
-  def(button(assigns)) do
-    assigns = assign(assigns, :variant_class, variant(assigns))
+  def button(assigns) do
+    assigns =
+      assigns
+      |> assign(:is_link, link?(assigns))
+      |> assign(:common_classes, [
+        "disabled:opacity-75 phx-submit-loading:opacity-75",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+        variant(assigns),
+        assigns.class
+      ])
 
     ~H"""
-    <button
-      type={@type}
-      class={
-        classes([
-          "disabled:opacity-75 phx-submit-loading:opacity-75",
-          "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
-          @variant_class,
-          @class
-        ])
-      }
-      {@rest}
-    >
-      {render_slot(@inner_block)}
-    </button>
+    <%= if @is_link do %>
+      <.link
+        href={@href}
+        navigate={@navigate}
+        patch={@patch}
+        replace={@replace}
+        class={classes(@common_classes)}
+        {@rest}
+      >
+        {render_slot(@inner_block)}
+      </.link>
+    <% else %>
+      <button type={@type} class={classes(@common_classes)} {@rest}>
+        {render_slot(@inner_block)}
+      </button>
+    <% end %>
     """
   end
 
@@ -79,5 +93,9 @@ defmodule AlgoraWeb.Components.UI.Button do
     variants = Map.merge(@default_variants, variants)
 
     Enum.map_join(variants, " ", fn {key, value} -> @variants[key][value] end)
+  end
+
+  defp link?(assigns) do
+    Enum.any?([assigns[:href], assigns[:navigate], assigns[:patch]])
   end
 end

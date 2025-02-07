@@ -66,35 +66,53 @@ defmodule DatabaseMigration do
     row =
       cond do
         github_issue ->
-          row
-          |> Map.put("type", "issue")
-          |> Map.put("title", github_issue["title"])
-          |> Map.put("description", github_issue["body"])
-          |> Map.put("inserted_at", github_issue["created_at"])
-          |> Map.put("updated_at", github_issue["updated_at"])
-          |> Map.put("url", github_issue["html_url"])
-          |> Map.put("provider", "github")
-          |> Map.put("provider_id", github_issue["id"])
-          |> Map.put("provider_meta", deserialize_value(github_issue))
+          %{
+            "id" => row["id"],
+            "provider" => "github",
+            "provider_id" => github_issue["id"],
+            "provider_meta" => deserialize_value(github_issue),
+            "type" => "issue",
+            "title" => github_issue["title"],
+            "description" => github_issue["body"],
+            "number" => github_issue["number"],
+            "url" => github_issue["html_url"],
+            "inserted_at" => github_issue["created_at"],
+            "updated_at" => github_issue["updated_at"]
+          }
 
         github_pull_request ->
-          row
-          |> Map.put("type", "pull_request")
-          |> Map.put("title", github_pull_request["title"])
-          |> Map.put("description", github_pull_request["body"])
-          |> Map.put("inserted_at", github_pull_request["created_at"])
-          |> Map.put("updated_at", github_pull_request["updated_at"])
-          |> Map.put("url", github_pull_request["html_url"])
-          |> Map.put("provider", "github")
-          |> Map.put("provider_id", github_pull_request["id"])
-          |> Map.put("provider_meta", deserialize_value(github_pull_request))
+          %{
+            "id" => row["id"],
+            "provider" => "github",
+            "provider_id" => github_pull_request["id"],
+            "provider_meta" => deserialize_value(github_pull_request),
+            "type" => "pull_request",
+            "title" => github_pull_request["title"],
+            "description" => github_pull_request["body"],
+            "number" => github_pull_request["number"],
+            "url" => github_pull_request["html_url"],
+            "inserted_at" => github_pull_request["created_at"],
+            "updated_at" => github_pull_request["updated_at"]
+          }
 
         true ->
-          row
-          # TODO: maybe discard altogther?
-          |> Map.put("url", "https://github.com/#{row["repo_owner"]}/#{row["repo_name"]}/issues/#{row["number"]}")
-          |> Map.put("inserted_at", "1970-01-01 00:00:00")
-          |> Map.put("updated_at", "1970-01-01 00:00:00")
+          if row["forge"] != "github" do
+            raise "Unknown forge: #{row["forge"]}"
+          end
+
+          %{
+            "id" => row["id"],
+            "provider" => row["forge"],
+            "provider_id" => nil,
+            "provider_meta" => nil,
+            "type" => "issue",
+            "title" => row["title"],
+            "description" => row["body"],
+            "number" => row["number"],
+            "url" => "https://github.com/#{row["repo_owner"]}/#{row["repo_name"]}/issues/#{row["number"]}",
+            "inserted_at" => row["created_at"],
+            "updated_at" => row["updated_at"]
+          }
       end
 
     row

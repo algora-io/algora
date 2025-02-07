@@ -12,7 +12,7 @@ defmodule ProgressAnalyzer do
 
   defp count_statuses(yaml) do
     # Initialize counters
-    initial_counts = %{completed: 0, wontdo: 0, remaining: 0, undecided: 0}
+    initial_counts = %{completed: 0, skipped: 0, remaining: 0, undecided: 0}
 
     # Flatten and count all column statuses
     Enum.reduce(yaml, initial_counts, fn table, acc ->
@@ -24,17 +24,17 @@ defmodule ProgressAnalyzer do
         case status do
           1 -> Map.update!(inner_acc, :completed, &(&1 + 1))
           -2 -> Map.update!(inner_acc, :undecided, &(&1 + 1))
-          -1 -> Map.update!(inner_acc, :wontdo, &(&1 + 1))
+          -1 -> Map.update!(inner_acc, :skipped, &(&1 + 1))
           0 -> Map.update!(inner_acc, :remaining, &(&1 + 1))
         end
       end)
     end)
   end
 
-  defp display_stats(%{completed: done, wontdo: wont, remaining: todo, undecided: undecided}) do
-    total = done + wont + todo + undecided
+  defp display_stats(%{completed: done, skipped: skipped, remaining: todo, undecided: undecided}) do
+    total = done + skipped + todo + undecided
     done_pct = percentage(done, total)
-    wont_pct = percentage(wont, total)
+    skipped_pct = percentage(skipped, total)
     todo_pct = percentage(todo, total)
     undecided_pct = percentage(undecided, total)
 
@@ -48,28 +48,29 @@ defmodule ProgressAnalyzer do
 
     Status Breakdown:
     ----------------
-    ✅ Completed:  #{done} (#{done_pct}%)
-    ⏳ Remaining:  #{todo} (#{todo_pct}%)
-    ❌ Won't Do:   #{wont} (#{wont_pct}%)
-    ❓ Undecided: #{undecided} (#{undecided_pct}%)
+    ✅ Completed: #{done_pct}% (#{done})
+    ⏳ Remaining: #{todo_pct}% (#{todo})
+    ❌ Skipped:   #{skipped_pct}% (#{skipped})
+    ❓ Undecided:  #{undecided_pct}% (#{undecided})
+
     Progress:
     ---------
-    [#{progress_bar(done_pct, wont_pct, todo_pct, undecided_pct)}]
+    [#{progress_bar(done_pct, skipped_pct, todo_pct, undecided_pct)}]
     """)
   end
 
   defp percentage(part, total) when total > 0 do
-    Float.round(part / total * 100, 1)
+    trunc(part / total * 100)
   end
 
-  defp progress_bar(done_pct, wont_pct, todo_pct, undecided_pct) do
+  defp progress_bar(done_pct, skipped_pct, todo_pct, undecided_pct) do
     done_chars = round(done_pct / 2)
-    wont_chars = round(wont_pct / 2)
+    skipped_chars = round(skipped_pct / 2)
     todo_chars = round(todo_pct / 2)
     undecided_chars = round(undecided_pct / 2)
 
     String.duplicate("=", done_chars) <>
-      String.duplicate("x", wont_chars) <>
+      String.duplicate("x", skipped_chars) <>
       String.duplicate("?", undecided_chars) <>
       String.duplicate(".", todo_chars)
   end

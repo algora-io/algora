@@ -94,7 +94,9 @@ defmodule Algora.MixProject do
       # monitoring, logging
       {:appsignal_phoenix, "~> 2.6"},
       {:logfmt_ex, "~> 0.4"},
-      {:oban_live_dashboard, "~> 0.1.0"}
+      {:oban_live_dashboard, "~> 0.1.0"},
+      # TODO: delete after migration
+      {:yaml_elixir, "~> 2.9"}
     ]
   end
 

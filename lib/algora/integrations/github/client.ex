@@ -9,7 +9,7 @@ defmodule Algora.Github.Client do
   @type token :: String.t()
 
   # TODO: move to a separate module and use only for data migration between databases
-  def http_cached(host, method, path, headers, body, opts \\ []) do
+  def http(host, method, path, headers, body, opts \\ []) do
     cache_path = ".local/github/#{path}.json"
 
     with :error <- read_from_cache(cache_path),
@@ -22,7 +22,7 @@ defmodule Algora.Github.Client do
     end
   end
 
-  def http(host, method, path, headers, body, opts \\ []) do
+  def http0(host, method, path, headers, body, opts \\ []) do
     do_http_request(host, method, path, headers, body, opts)
   end
 

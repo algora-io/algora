@@ -92,6 +92,7 @@ defmodule DatabaseMigration do
         true ->
           row
           # TODO: maybe discard altogther?
+          |> Map.put("url", "https://github.com/#{row["repo_owner"]}/#{row["repo_name"]}/issues/#{row["number"]}")
           |> Map.put("inserted_at", "1970-01-01 00:00:00")
           |> Map.put("updated_at", "1970-01-01 00:00:00")
       end
@@ -100,43 +101,161 @@ defmodule DatabaseMigration do
   end
 
   defp transform("User", row, db) do
-    github_user =
-      db |> Map.get("GithubUser", []) |> Enum.find(&(&1["user_id"] == row["id"]))
+    # TODO: reenable
+    # if !row["\"emailVerified\""] || String.length(row["\"emailVerified\""]) < 10 do
+    #   raise "Email not verified: #{inspect(row)}"
+    # end
 
-    row =
-      if github_user do
-        row
-        |> Map.put("provider", "github")
-        |> Map.put("provider_id", github_user["id"])
-        |> Map.put("provider_login", github_user["login"])
-        |> Map.put("provider_meta", deserialize_value(github_user))
-      else
-        row
-      end
+    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["user_id"] == row["id"]))
 
-    row
-    |> Map.put("type", "individual")
-    |> rename_column("tech", "tech_stack")
-    |> rename_column("stars_earned", "stargazers_count")
-    |> rename_column("image", "avatar_url")
-    |> update_url_field("avatar_url")
+    %{
+      "id" => row["id"],
+      "provider" => github_user && "github",
+      "provider_id" => github_user && github_user["id"],
+      "provider_login" => github_user && github_user["login"],
+      "provider_meta" => github_user && deserialize_value(github_user),
+      "email" => row["email"],
+      "display_name" => row["name"],
+      "handle" => row["handle"],
+      "avatar_url" => update_url(row["image"]),
+      "external_homepage_url" => nil,
+      "type" => "individual",
+      "bio" => github_user && github_user["bio"],
+      "location" => row["loc"],
+      "country" => row["country"],
+      "timezone" => nil,
+      "stargazers_count" => row["stars_earned"],
+      "domain" => nil,
+      "tech_stack" => row["tech"],
+      "featured" => nil,
+      "priority" => nil,
+      "fee_pct" => nil,
+      "seeded" => nil,
+      "activated" => nil,
+      "max_open_attempts" => nil,
+      "manual_assignment" => nil,
+      "bounty_mode" => nil,
+      "hourly_rate_min" => nil,
+      "hourly_rate_max" => nil,
+      "hours_per_week" => nil,
+      "website_url" => nil,
+      "twitter_url" => nil,
+      "github_url" => nil,
+      "youtube_url" => row["youtube_handle"] && "https://www.youtube.com/#{row["youtube_handle"]}",
+      "twitch_url" => row["twitch_handle"] && "https://www.twitch.tv/#{row["twitch_handle"]}",
+      "discord_url" => nil,
+      "slack_url" => nil,
+      "linkedin_url" => nil,
+      "og_title" => nil,
+      "og_image_url" => nil,
+      "last_context" => row["handle"],
+      "need_avatar" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "is_admin" => row["is_admin"]
+    }
   end
 
   defp transform("Org", row, _db) do
-    row
-    |> Map.put("type", "organization")
-    |> Map.put("provider", row["github_handle"] && "github")
-    |> rename_column("github_handle", "provider_login")
-    |> rename_column("tech", "tech_stack")
-    |> update_url_field("avatar_url")
+    %{
+      "id" => row["id"],
+      "provider" => row["github_handle"] && "github",
+      "provider_id" => row["github_id"],
+      "provider_login" => row["github_handle"],
+      "provider_meta" => row["github_data"] && deserialize_value(row["github_data"]),
+      "email" => nil,
+      "display_name" => row["name"],
+      "handle" => row["handle"],
+      "avatar_url" => update_url(row["avatar_url"]),
+      "external_homepage_url" => nil,
+      "type" => "organization",
+      "bio" => row["description"],
+      "location" => nil,
+      "country" => nil,
+      "timezone" => nil,
+      "stargazers_count" => row["stargazers_count"],
+      "domain" => row["domain"],
+      "tech_stack" => row["tech"],
+      "featured" => row["featured"],
+      "priority" => row["priority"],
+      "fee_pct" => row["fee_pct"],
+      "seeded" => row["seeded"],
+      "activated" => row["active"],
+      "max_open_attempts" => row["max_open_attempts"],
+      "manual_assignment" => row["manual_assignment"],
+      "bounty_mode" => nil,
+      "hourly_rate_min" => nil,
+      "hourly_rate_max" => nil,
+      "hours_per_week" => nil,
+      "website_url" => row["website_url"],
+      "twitter_url" => row["twitter_url"],
+      "github_url" => nil,
+      "youtube_url" => row["youtube_url"],
+      "twitch_url" => nil,
+      "discord_url" => row["discord_url"],
+      "slack_url" => row["slack_url"],
+      "linkedin_url" => nil,
+      "og_title" => nil,
+      "og_image_url" => nil,
+      "last_context" => nil,
+      "need_avatar" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "is_admin" => false
+    }
   end
 
   defp transform("GithubUser", %{user_id: nil} = row, _db) do
-    row
-    |> Map.put("type", "individual")
-    |> Map.put("provider", "github")
-    |> Map.put("provider_id", row["id"])
-    |> Map.put("provider_meta", deserialize_value(row))
+    if row["type"] != "User" do
+      raise "GithubUser is not a User: #{inspect(row)}"
+    end
+
+    %{
+      "id" => row["id"],
+      "provider" => "github",
+      "provider_id" => row["id"],
+      "provider_login" => row["login"],
+      "provider_meta" => deserialize_value(row),
+      "email" => nil,
+      "display_name" => row["name"],
+      "handle" => nil,
+      "avatar_url" => row["avatar_url"],
+      "external_homepage_url" => nil,
+      "type" => "individual",
+      "bio" => row["bio"],
+      "location" => row["location"],
+      "country" => nil,
+      "timezone" => nil,
+      "stargazers_count" => nil,
+      "domain" => nil,
+      "tech_stack" => nil,
+      "featured" => nil,
+      "priority" => nil,
+      "fee_pct" => nil,
+      "seeded" => nil,
+      "activated" => nil,
+      "max_open_attempts" => nil,
+      "manual_assignment" => nil,
+      "bounty_mode" => nil,
+      "hourly_rate_min" => nil,
+      "hourly_rate_max" => nil,
+      "hours_per_week" => nil,
+      "website_url" => nil,
+      "twitter_url" => row["twitter_username"] && "https://www.twitter.com/#{row["twitter_username"]}",
+      "github_url" => nil,
+      "youtube_url" => nil,
+      "twitch_url" => nil,
+      "discord_url" => nil,
+      "slack_url" => nil,
+      "linkedin_url" => nil,
+      "og_title" => nil,
+      "og_image_url" => nil,
+      "last_context" => nil,
+      "need_avatar" => nil,
+      "inserted_at" => row["retrieved_at"],
+      "updated_at" => row["retrieved_at"],
+      "is_admin" => nil
+    }
   end
 
   defp transform("GithubUser", _row, _db), do: nil
@@ -274,14 +393,14 @@ defmodule DatabaseMigration do
     transformed_data =
       data
       |> Enum.map(fn row ->
-        try do
-          transform(table, row, db)
-        rescue
-          e ->
-            IO.puts("Error transforming row in table #{table}: #{inspect(row)}")
-            IO.puts("Error: #{inspect(e)}")
-            nil
-        end
+        # try do
+        transform(table, row, db)
+        # rescue
+        #   e ->
+        #     IO.puts("Error transforming row in table #{table}: #{inspect(row)}")
+        #     IO.puts("Error: #{inspect(e)}")
+        #     nil
+        # end
       end)
       |> Enum.reject(&is_nil/1)
       |> Enum.map(&post_transform(table, &1))
@@ -306,9 +425,17 @@ defmodule DatabaseMigration do
       |> Map.from_struct()
       |> Map.take(schema.__schema__(:fields))
 
+    default_fields =
+      if schema == User do
+        Map.delete(default_fields, :name)
+      else
+        default_fields
+      end
+
     fields =
       row
       |> Enum.reject(fn {_, v} -> v == "\\N" end)
+      |> Enum.reject(fn {_, v} -> v == nil end)
       |> Map.new(fn {k, v} -> {k, v} end)
       |> conditionally_rename_created_at()
       |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
@@ -352,14 +479,6 @@ defmodule DatabaseMigration do
     Process.put(:handles, Map.put(handles, downcased_handle, count + 1))
 
     new_handle
-  end
-
-  defp rename_column(row, from, to) do
-    value = Map.get(row, from)
-
-    row
-    |> Map.put(to, value)
-    |> Map.delete(from)
   end
 
   defp load_copy_section(nil), do: []
@@ -442,13 +561,10 @@ defmodule DatabaseMigration do
   #   |> Enum.into(%{})
   # end
 
-  defp update_url_field(fields, field) do
-    case Map.get(fields, field) do
-      "/" <> rest ->
-        Map.put(fields, field, "https://console.algora.io/" <> rest)
-
-      _ ->
-        fields
+  defp update_url(url) do
+    case url do
+      "/" <> rest -> "https://console.algora.io/" <> rest
+      _ -> url
     end
   end
 
@@ -565,8 +681,8 @@ defmodule DatabaseMigration do
     output_file = ".local/prod_db_new.sql"
 
     if File.exists?(input_file) or File.exists?(output_file) do
-      IO.puts("Processing dump...")
-      :ok = process_dump(input_file, output_file)
+      # IO.puts("Processing dump...")
+      # :ok = process_dump(input_file, output_file)
 
       IO.puts("Clearing tables...")
       :ok = clear_tables!()

@@ -40,7 +40,8 @@ defmodule DatabaseMigration do
     "BountyCharge" => "transactions",
     "BountyTransfer" => "transactions",
     "GithubInstallation" => "installations",
-    "StripeAccount" => "accounts"
+    "StripeAccount" => "accounts",
+    "StripeCustomer" => "customers"
   }
 
   @schema_mappings %{
@@ -56,11 +57,13 @@ defmodule DatabaseMigration do
     "BountyCharge" => Transaction,
     "BountyTransfer" => Transaction,
     "GithubInstallation" => Installation,
-    "StripeAccount" => Account
+    "StripeAccount" => Account,
+    "StripeCustomer" => Customer
   }
 
   @backfilled_tables [
     "accounts",
+    "customers",
     "installations",
     "repositories",
     "transactions",
@@ -470,6 +473,19 @@ defmodule DatabaseMigration do
       "payout_interval" => nil,
       "payout_speed" => nil,
       "default_currency" => nil
+    }
+  end
+
+  defp transform("StripeCustomer", row, _db) do
+    %{
+      "id" => row["id"],
+      "provider" => "stripe",
+      "provider_id" => row["stripe_id"],
+      "provider_meta" => nil,
+      "name" => row["name"],
+      "user_id" => row["org_id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"]
     }
   end
 

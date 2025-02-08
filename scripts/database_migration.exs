@@ -737,7 +737,6 @@ defmodule DatabaseMigration do
       |> Enum.reject(fn {_, v} -> v == "\\N" end)
       |> Enum.reject(fn {_, v} -> v == nil end)
       |> Map.new(fn {k, v} -> {k, v} end)
-      |> conditionally_rename_created_at()
       |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
       |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
@@ -745,18 +744,6 @@ defmodule DatabaseMigration do
     fields = ensure_unique_handle(fields)
 
     Map.merge(default_fields, fields)
-  end
-
-  defp conditionally_rename_created_at(fields) do
-    case {Map.get(fields, "inserted_at"), Map.get(fields, "created_at")} do
-      {nil, created_at} when not is_nil(created_at) ->
-        fields
-        |> Map.put("inserted_at", created_at)
-        |> Map.delete("created_at")
-
-      _ ->
-        fields
-    end
   end
 
   defp ensure_unique_handle(fields) do

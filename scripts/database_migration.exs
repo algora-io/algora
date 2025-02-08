@@ -35,6 +35,7 @@ defmodule DatabaseMigration do
     "GithubPullRequest" => nil,
     "Bounty" => "bounties",
     "Reward" => nil,
+    "BountyCharge" => "transactions",
     "BountyTransfer" => "transactions",
     "Claim" => nil
   }
@@ -48,6 +49,7 @@ defmodule DatabaseMigration do
     "GithubPullRequest" => nil,
     "Bounty" => Bounty,
     "Reward" => nil,
+    "BountyCharge" => Transaction,
     "BountyTransfer" => Transaction,
     "Claim" => nil
   }
@@ -289,6 +291,51 @@ defmodule DatabaseMigration do
       "creator_id" => row["poster_id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
+    }
+  end
+
+  defp transform("BountyCharge", row, db) do
+    user = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == row["org_id"]))
+
+    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+
+    if !user || row["succeeded_at"] == nil do
+      raise "User not found: #{inspect(row)}"
+    end
+
+    %{
+      "id" => row["id"],
+      "provider" => "stripe",
+      "provider_id" => row["charge_id"],
+      "provider_charge_id" => row["charge_id"],
+      "provider_payment_intent_id" => nil,
+      "provider_transfer_id" => nil,
+      "provider_invoice_id" => nil,
+      "provider_balance_transaction_id" => nil,
+      "provider_meta" => nil,
+      # TODO: incorrect
+      "gross_amount" => amount,
+      "net_amount" => amount,
+      # TODO: incorrect
+      "total_fee" => Money.zero(:USD),
+      "provider_fee" => nil,
+      "line_items" => nil,
+      "type" => "charge",
+      "status" => if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded),
+      "succeeded_at" => row["succeeded_at"],
+      "reversed_at" => nil,
+      "group_id" => nil,
+      ## TODO: this might be null but shouldn't
+      "user_id" => user["id"],
+      "contract_id" => nil,
+      "original_contract_id" => nil,
+      "timesheet_id" => nil,
+      "bounty_id" => nil,
+      "tip_id" => nil,
+      "linked_transaction_id" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "claim_id" => nil
     }
   end
 

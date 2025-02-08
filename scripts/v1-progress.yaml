@@ -45,17 +45,17 @@
     - currency: -1
     - status: -1
 - "Bonus":
-    - id: 0
-    - created_at: 0
-    - updated_at: 0
-    - amount: 0
-    - currency: 0
-    - poster_id: 0
-    - org_id: 0
-    - claim_id: 0
-    - github_req_comment_id: 0
-    - github_res_comment_id: 0
-    - type: 0
+    - id: -1
+    - created_at: -1
+    - updated_at: -1
+    - amount: -1
+    - currency: -1
+    - poster_id: -1
+    - org_id: -1
+    - claim_id: -1
+    - github_req_comment_id: -1
+    - github_res_comment_id: -1
+    - type: -1
 - "BotMessage":
     - id: -1
     - created_at: -1

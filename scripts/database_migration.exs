@@ -49,8 +49,8 @@ defmodule DatabaseMigration do
     {"Attempt", Attempt},
     {"Claim", Claim},
     {"BountyCharge", Transaction},
-    {"BountyTransfer", Transaction},
     {"BountyTransfer", Tip},
+    {"BountyTransfer", Transaction},
     {"GithubInstallation", Installation},
     {"StripeAccount", Account},
     {"StripeCustomer", Customer},
@@ -441,8 +441,44 @@ defmodule DatabaseMigration do
     }
   end
 
+  defp transform({"BountyTransfer", Tip}, row, db) do
+    claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
+
+    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
+
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+
+    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
+
+    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+
+    if !bounty do
+      raise "Bounty not found: #{inspect(row)}"
+    end
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
+    end
+
+    if bounty["type"] == "tip" do
+      %{
+        "id" => bounty["id"] <> user["id"],
+        "amount" => amount,
+        "status" => nil,
+        "ticket_id" => bounty["task_id"],
+        "owner_id" => bounty["org_id"],
+        "creator_id" => bounty["poster_id"],
+        "recipient_id" => user["id"],
+        "inserted_at" => bounty["created_at"],
+        "updated_at" => bounty["updated_at"]
+      }
+    end
+  end
+
   defp transform({"BountyTransfer", Transaction}, row, db) do
     claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
+
+    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
 
@@ -450,12 +486,16 @@ defmodule DatabaseMigration do
 
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
-    if !claim || !user do
-      raise "Claim or User not found: #{inspect(row)}"
+    if !bounty do
+      raise "Bounty not found: #{inspect(row)}"
+    end
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
     end
 
     # TODO: add corresponding credit & debit transactions
-    %{
+    row = %{
       "id" => row["id"],
       "provider" => "stripe",
       "provider_id" => row["transfer_id"],
@@ -481,46 +521,20 @@ defmodule DatabaseMigration do
       "contract_id" => nil,
       "original_contract_id" => nil,
       "timesheet_id" => nil,
-      "bounty_id" => claim["bounty_id"],
+      "bounty_id" => nil,
       "tip_id" => nil,
       "linked_transaction_id" => nil,
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
-      "claim_id" => claim["id"]
+      "claim_id" => nil
     }
-  end
-
-  defp transform({"BountyTransfer", Tip}, row, db) do
-    claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
-
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
-
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
-
-    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
-
-    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
-
-    if !bounty do
-      raise "Bounty not found: #{inspect(row)}"
-    end
-
-    if !user do
-      raise "User not found: #{inspect(row)}"
-    end
 
     if bounty["type"] == "tip" do
-      %{
-        "id" => row["id"],
-        "amount" => amount,
-        "status" => nil,
-        "ticket_id" => bounty["task_id"],
-        "owner_id" => bounty["org_id"],
-        "creator_id" => bounty["poster_id"],
-        "recipient_id" => user["id"],
-        "inserted_at" => bounty["created_at"],
-        "updated_at" => bounty["updated_at"]
-      }
+      Map.put(row, "tip_id", bounty["id"] <> user["id"])
+    else
+      row
+      |> Map.put("bounty_id", claim["bounty_id"])
+      |> Map.put("claim_id", claim["id"])
     end
   end
 

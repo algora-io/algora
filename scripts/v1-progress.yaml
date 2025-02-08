@@ -72,8 +72,8 @@
     - org_id: 1
     - task_id: 1
     - status: 0
-    - github_req_comment_id: 0
-    - github_res_comment_id: 0
+    - github_req_comment_id: 1
+    - github_res_comment_id: 1
     - type: 0
     - kind: 0
     - visibility: 0

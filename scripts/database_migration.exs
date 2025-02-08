@@ -30,6 +30,7 @@ defmodule DatabaseMigration do
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
+  alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 
@@ -45,6 +46,7 @@ defmodule DatabaseMigration do
     {"GithubIssue", nil},
     {"GithubPullRequest", nil},
     {"Bounty", Bounty},
+    {"Bounty", CommandResponse},
     {"Reward", nil},
     {"Attempt", Attempt},
     {"Claim", Claim},
@@ -336,6 +338,23 @@ defmodule DatabaseMigration do
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
     }
+  end
+
+  defp transform({"Bounty", CommandResponse}, row, _db) do
+    if row["github_res_comment_id"] != nil do
+      %{
+        "id" => row["id"],
+        "provider" => "github",
+        "provider_meta" => nil,
+        "provider_command_id" => row["github_req_comment_id"],
+        "provider_response_id" => row["github_res_comment_id"],
+        "command_source" => "comment",
+        "command_type" => "bounty",
+        "ticket_id" => row["task_id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"]
+      }
+    end
   end
 
   defp transform({"Attempt", Attempt}, row, db) do
@@ -740,7 +759,7 @@ defmodule DatabaseMigration do
       |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
       |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
-    # Ensure handle is unique
+    # TODO: do we need this?
     fields = ensure_unique_handle(fields)
 
     Map.merge(default_fields, fields)

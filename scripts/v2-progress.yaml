@@ -54,16 +54,16 @@
     - inserted_at: 1
     - updated_at: 1
 - command_responses:
-    - id: 0
-    - provider: 0
-    - provider_meta: 0
-    - provider_command_id: 0
-    - provider_response_id: 0
-    - command_source: 0
-    - command_type: 0
-    - ticket_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: 1
+    - provider: 1
+    - provider_meta: -1
+    - provider_command_id: 1
+    - provider_response_id: 1
+    - command_source: 1
+    - command_type: 1
+    - ticket_id: 1
+    - inserted_at: 1
+    - updated_at: 1
 - comment_cursors:
     - id: -1
     - provider: -1

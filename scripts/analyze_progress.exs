@@ -48,10 +48,10 @@ defmodule ProgressAnalyzer do
 
     Status Breakdown:
     ----------------
-    ✅ Completed: #{done_pct}% (#{done})
-    ⏳ Remaining: #{todo_pct}% (#{todo})
-    ❌ Skipped:   #{skipped_pct}% (#{skipped})
-    ❓ Undecided:  #{undecided_pct}% (#{undecided})
+    ✅ Completed: #{String.pad_leading("#{done_pct}", 2)}% #{String.pad_leading("(#{done})", 5)}
+    ⏳ Remaining: #{String.pad_leading("#{todo_pct}", 2)}% #{String.pad_leading("(#{todo})", 5)}
+    ❌ Skipped:   #{String.pad_leading("#{skipped_pct}", 2)}% #{String.pad_leading("(#{skipped})", 5)}
+    ❓ Undecided: #{String.pad_leading("#{undecided_pct}", 2)}% #{String.pad_leading("(#{undecided})", 5)}
 
     Progress:
     ---------

@@ -24,6 +24,7 @@ defmodule DatabaseMigration do
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Tip
   alias Algora.Organizations.Member
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
@@ -49,6 +50,7 @@ defmodule DatabaseMigration do
     {"Claim", Claim},
     {"BountyCharge", Transaction},
     {"BountyTransfer", Transaction},
+    {"BountyTransfer", Tip},
     {"GithubInstallation", Installation},
     {"StripeAccount", Account},
     {"StripeCustomer", Customer},
@@ -65,6 +67,7 @@ defmodule DatabaseMigration do
     "claims",
     "attempts",
     "bounties",
+    "tips",
     "tickets",
     "members",
     "identities",
@@ -485,6 +488,40 @@ defmodule DatabaseMigration do
       "updated_at" => row["updated_at"],
       "claim_id" => claim["id"]
     }
+  end
+
+  defp transform({"BountyTransfer", Tip}, row, db) do
+    claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
+
+    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
+
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+
+    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
+
+    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+
+    if !bounty do
+      raise "Bounty not found: #{inspect(row)}"
+    end
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
+    end
+
+    if bounty["type"] == "tip" do
+      %{
+        "id" => row["id"],
+        "amount" => amount,
+        "status" => nil,
+        "ticket_id" => bounty["task_id"],
+        "owner_id" => bounty["org_id"],
+        "creator_id" => bounty["poster_id"],
+        "recipient_id" => user["id"],
+        "inserted_at" => bounty["created_at"],
+        "updated_at" => bounty["updated_at"]
+      }
+    end
   end
 
   defp transform({"GithubInstallation", Installation}, row, _db) do
@@ -928,8 +965,8 @@ defmodule DatabaseMigration do
     output_file = ".local/prod_db_new.sql"
 
     if File.exists?(input_file) or File.exists?(output_file) do
-      # IO.puts("Processing dump...")
-      # :ok = process_dump(input_file, output_file)
+      IO.puts("Processing dump...")
+      :ok = process_dump(input_file, output_file)
 
       IO.puts("Clearing tables...")
       :ok = clear_tables!()

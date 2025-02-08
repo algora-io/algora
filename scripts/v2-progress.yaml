@@ -205,15 +205,15 @@
     - inserted_at: -1
     - updated_at: -1
 - tips:
-    - id: 0
-    - amount: 0
-    - status: 0
-    - ticket_id: 0
-    - owner_id: 0
-    - creator_id: 0
-    - recipient_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: 1
+    - amount: 1
+    - status: -2
+    - ticket_id: 1
+    - owner_id: 1
+    - creator_id: 1
+    - recipient_id: 1
+    - inserted_at: 1
+    - updated_at: 1
 - transactions:
     - id: 1
     - provider: 1

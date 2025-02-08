@@ -36,5 +36,12 @@ defmodule Algora.Repo.Migrations.MakeProviderMetaNullable do
     alter table(:tips) do
       modify :creator_id, :string, null: true
     end
+
+    alter table(:bounties) do
+      add :number, :integer, null: false, default: 0
+    end
+
+    drop unique_index(:bounties, [:ticket_id, :owner_id])
+    create unique_index(:bounties, [:ticket_id, :owner_id, :number])
   end
 end

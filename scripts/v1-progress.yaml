@@ -77,7 +77,7 @@
     - type: 0
     - kind: 0
     - visibility: 0
-    - number: 0
+    - number: 1
     - deleted: 0
     - reward_type: 0
     - autopay_disabled: 0

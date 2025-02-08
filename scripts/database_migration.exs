@@ -244,10 +244,6 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"GithubUser", User}, row, _db) do
-    if row["type"] != "User" do
-      Logger.warning("GithubUser is not a User: #{inspect(row["login"])}")
-    end
-
     if nullish?(row["user_id"]) do
       %{
         "id" => row["id"],
@@ -335,15 +331,18 @@ defmodule DatabaseMigration do
 
     amount = if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
 
-    %{
-      "id" => row["id"],
-      "amount" => amount,
-      "ticket_id" => row["task_id"],
-      "owner_id" => row["org_id"],
-      "creator_id" => row["poster_id"],
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"]
-    }
+    if row["type"] != "tip" do
+      %{
+        "id" => row["id"],
+        "amount" => amount,
+        "ticket_id" => row["task_id"],
+        "owner_id" => row["org_id"],
+        "creator_id" => row["poster_id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"],
+        "number" => row["number"]
+      }
+    end
   end
 
   defp transform({"Bounty", CommandResponse}, row, _db) do
@@ -547,13 +546,15 @@ defmodule DatabaseMigration do
           bounty_transfer: row,
           bounty: bounty,
           claim: claim,
-          user_id: org["id"]
+          org: org,
+          user_id: user_id
         }),
         maybe_create_transaction("credit", %{
           bounty_charge: bounty_charge,
           bounty_transfer: row,
           bounty: bounty,
           claim: claim,
+          org: org,
           user_id: user_id
         }),
         maybe_create_transaction("transfer", %{
@@ -561,6 +562,7 @@ defmodule DatabaseMigration do
           bounty_transfer: row,
           bounty: bounty,
           claim: claim,
+          org: org,
           user_id: user_id
         })
       ],
@@ -647,6 +649,7 @@ defmodule DatabaseMigration do
          bounty_transfer: bounty_transfer,
          bounty: bounty,
          claim: claim,
+         org: org,
          user_id: user_id
        }) do
     amount = Money.from_integer(String.to_integer(bounty_transfer["amount"]), bounty_transfer["currency"])
@@ -671,7 +674,7 @@ defmodule DatabaseMigration do
       "succeeded_at" => nil,
       "reversed_at" => nil,
       "group_id" => bounty_charge["id"],
-      "user_id" => user_id,
+      "user_id" => nil,
       "contract_id" => nil,
       "original_contract_id" => nil,
       "timesheet_id" => nil,
@@ -695,13 +698,22 @@ defmodule DatabaseMigration do
     res =
       case type do
         "transfer" ->
-          Map.put(res, "provider_id", bounty_transfer["transfer_id"])
+          Map.merge(res, %{
+            "user_id" => user_id,
+            "provider_id" => bounty_transfer["transfer_id"]
+          })
 
         "debit" ->
-          Map.put(res, "linked_transaction_id", "cr_" <> bounty_transfer["id"])
+          Map.merge(res, %{
+            "user_id" => org["id"],
+            "linked_transaction_id" => "cr_" <> bounty_transfer["id"]
+          })
 
         "credit" ->
-          Map.put(res, "linked_transaction_id", "de_" <> bounty_transfer["id"])
+          Map.merge(res, %{
+            "user_id" => user_id,
+            "linked_transaction_id" => "de_" <> bounty_transfer["id"]
+          })
 
         _ ->
           res

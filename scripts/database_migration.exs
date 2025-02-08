@@ -243,60 +243,60 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform({"GithubUser", User}, %{user_id: nil} = row, _db) do
+  defp transform({"GithubUser", User}, row, _db) do
     if row["type"] != "User" do
-      raise "GithubUser is not a User: #{inspect(row)}"
+      Logger.warning("GithubUser is not a User: #{inspect(row["login"])}")
     end
 
-    %{
-      "id" => row["id"],
-      "provider" => "github",
-      "provider_id" => row["id"],
-      "provider_login" => row["login"],
-      "provider_meta" => deserialize_value(row),
-      "email" => nil,
-      "display_name" => row["name"],
-      "handle" => nil,
-      "avatar_url" => row["avatar_url"],
-      "external_homepage_url" => nil,
-      "type" => "individual",
-      "bio" => row["bio"],
-      "location" => row["location"],
-      "country" => nil,
-      "timezone" => nil,
-      "stargazers_count" => nil,
-      "domain" => nil,
-      "tech_stack" => nil,
-      "featured" => nil,
-      "priority" => nil,
-      "fee_pct" => nil,
-      "seeded" => nil,
-      "activated" => nil,
-      "max_open_attempts" => nil,
-      "manual_assignment" => nil,
-      "bounty_mode" => nil,
-      "hourly_rate_min" => nil,
-      "hourly_rate_max" => nil,
-      "hours_per_week" => nil,
-      "website_url" => nil,
-      "twitter_url" => row["twitter_username"] && "https://www.twitter.com/#{row["twitter_username"]}",
-      "github_url" => nil,
-      "youtube_url" => nil,
-      "twitch_url" => nil,
-      "discord_url" => nil,
-      "slack_url" => nil,
-      "linkedin_url" => nil,
-      "og_title" => nil,
-      "og_image_url" => nil,
-      "last_context" => nil,
-      "need_avatar" => nil,
-      "inserted_at" => row["retrieved_at"],
-      "updated_at" => row["retrieved_at"],
-      "is_admin" => nil
-    }
+    if nullish?(row["user_id"]) do
+      %{
+        "id" => row["id"],
+        "provider" => "github",
+        "provider_id" => row["id"],
+        "provider_login" => row["login"],
+        "provider_meta" => deserialize_value(row),
+        "email" => nil,
+        "display_name" => row["name"],
+        "handle" => nil,
+        "avatar_url" => row["avatar_url"],
+        "external_homepage_url" => nil,
+        "type" => "individual",
+        "bio" => row["bio"],
+        "location" => row["location"],
+        "country" => nil,
+        "timezone" => nil,
+        "stargazers_count" => nil,
+        "domain" => nil,
+        "tech_stack" => nil,
+        "featured" => nil,
+        "priority" => nil,
+        "fee_pct" => nil,
+        "seeded" => nil,
+        "activated" => nil,
+        "max_open_attempts" => nil,
+        "manual_assignment" => nil,
+        "bounty_mode" => nil,
+        "hourly_rate_min" => nil,
+        "hourly_rate_max" => nil,
+        "hours_per_week" => nil,
+        "website_url" => nil,
+        "twitter_url" => row["twitter_username"] && "https://www.twitter.com/#{row["twitter_username"]}",
+        "github_url" => nil,
+        "youtube_url" => nil,
+        "twitch_url" => nil,
+        "discord_url" => nil,
+        "slack_url" => nil,
+        "linkedin_url" => nil,
+        "og_title" => nil,
+        "og_image_url" => nil,
+        "last_context" => nil,
+        "need_avatar" => nil,
+        "inserted_at" => row["retrieved_at"],
+        "updated_at" => row["retrieved_at"],
+        "is_admin" => nil
+      }
+    end
   end
-
-  defp transform({"GithubUser", User}, _row, _db), do: nil
 
   defp transform({"Account", Identity}, row, db) do
     user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == row["\"userId\""]))
@@ -347,10 +347,6 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"Bounty", CommandResponse}, row, _db) do
-    if row["task_id"] == "clo0q1x540000mj0ghdgmezqw" do
-      IO.inspect(row, label: "transform(Bounty -> CommandResponse)")
-    end
-
     if !nullish?(row["github_res_comment_id"]) do
       %{
         "id" => row["id"],
@@ -372,13 +368,13 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
+    user_id = or_else(github_user["user_id"], github_user["id"])
 
     if !bounty do
       raise "Bounty not found: #{inspect(row)}"
     end
 
-    if !user do
+    if nullish?(user_id) do
       raise "User not found: #{inspect(row)}"
     end
 
@@ -387,7 +383,7 @@ defmodule DatabaseMigration do
       "status" => row["status"],
       "warnings_count" => row["warnings_count"],
       "ticket_id" => bounty["task_id"],
-      "user_id" => user["id"],
+      "user_id" => user_id,
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
     }
@@ -400,14 +396,18 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
+    user_id = or_else(github_user["user_id"], github_user["id"])
 
     # TODO: this might be null
     github_pull_request =
       db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["github_pull_request_id"]))
 
-    if !task || !user do
-      raise "Task or User not found: #{inspect(row)}"
+    if !task do
+      raise "Task not found: #{inspect(row)}"
+    end
+
+    if nullish?(user_id) do
+      raise "User not found: #{inspect(row)}"
     end
 
     %{
@@ -417,15 +417,15 @@ defmodule DatabaseMigration do
       "type" =>
         cond do
           !nullish?(row["github_pull_request_id"]) -> "pull_request"
-          String.match?(row["github_url"] || "", ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
+          String.match?(row["github_url"], ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
           true -> "pull_request"
         end,
-      "url" => row["github_url"],
+      "url" => or_else(row["github_url"], "https://algora.io"),
       "group_id" => row["id"],
       "group_share" => nil,
       "source_id" => github_pull_request["task_id"],
       "target_id" => task["id"],
-      "user_id" => user["id"],
+      "user_id" => user_id,
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
     }
@@ -436,44 +436,45 @@ defmodule DatabaseMigration do
 
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
-    if !user || row["succeeded_at"] == nil do
+    if !user do
       raise "User not found: #{inspect(row)}"
     end
 
-    %{
-      "id" => row["id"],
-      "provider" => "stripe",
-      "provider_id" => row["charge_id"],
-      "provider_charge_id" => row["charge_id"],
-      "provider_payment_intent_id" => nil,
-      "provider_transfer_id" => nil,
-      "provider_invoice_id" => nil,
-      "provider_balance_transaction_id" => nil,
-      "provider_meta" => nil,
-      # TODO: incorrect
-      "gross_amount" => amount,
-      "net_amount" => amount,
-      # TODO: incorrect
-      "total_fee" => Money.zero(:USD),
-      "provider_fee" => nil,
-      "line_items" => nil,
-      "type" => "charge",
-      "status" => if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded),
-      "succeeded_at" => row["succeeded_at"],
-      "reversed_at" => nil,
-      "group_id" => row["id"],
-      ## TODO: this might be null but shouldn't
-      "user_id" => user["id"],
-      "contract_id" => nil,
-      "original_contract_id" => nil,
-      "timesheet_id" => nil,
-      "bounty_id" => nil,
-      "tip_id" => nil,
-      "linked_transaction_id" => nil,
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"],
-      "claim_id" => nil
-    }
+    if !nullish?(row["succeeded_at"]) do
+      %{
+        "id" => row["id"],
+        "provider" => "stripe",
+        "provider_id" => row["charge_id"],
+        "provider_charge_id" => row["charge_id"],
+        "provider_payment_intent_id" => nil,
+        "provider_transfer_id" => nil,
+        "provider_invoice_id" => nil,
+        "provider_balance_transaction_id" => nil,
+        "provider_meta" => nil,
+        # TODO: incorrect
+        "gross_amount" => amount,
+        "net_amount" => amount,
+        # TODO: incorrect
+        "total_fee" => Money.zero(:USD),
+        "provider_fee" => nil,
+        "line_items" => nil,
+        "type" => "charge",
+        "status" => if(nullish?(row["succeeded_at"]), do: :initialized, else: :succeeded),
+        "succeeded_at" => row["succeeded_at"],
+        "reversed_at" => nil,
+        "group_id" => row["id"],
+        "user_id" => user["id"],
+        "contract_id" => nil,
+        "original_contract_id" => nil,
+        "timesheet_id" => nil,
+        "bounty_id" => nil,
+        "tip_id" => nil,
+        "linked_transaction_id" => nil,
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"],
+        "claim_id" => nil
+      }
+    end
   end
 
   defp transform({"BountyTransfer", Tip}, row, db) do
@@ -481,7 +482,7 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
+    user_id = or_else(github_user["user_id"], github_user["id"])
 
     bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
 
@@ -491,19 +492,19 @@ defmodule DatabaseMigration do
       raise "Bounty not found: #{inspect(row)}"
     end
 
-    if !user do
+    if nullish?(user_id) do
       raise "User not found: #{inspect(row)}"
     end
 
     if bounty["type"] == "tip" do
       %{
-        "id" => bounty["id"] <> user["id"],
+        "id" => bounty["id"] <> user_id,
         "amount" => amount,
         "status" => nil,
         "ticket_id" => bounty["task_id"],
         "owner_id" => bounty["org_id"],
         "creator_id" => bounty["poster_id"],
-        "recipient_id" => user["id"],
+        "recipient_id" => user_id,
         "inserted_at" => bounty["created_at"],
         "updated_at" => bounty["updated_at"]
       }
@@ -517,7 +518,7 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
+    user_id = or_else(github_user["user_id"], github_user["id"])
 
     org = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == bounty["org_id"]))
 
@@ -527,7 +528,7 @@ defmodule DatabaseMigration do
       raise "Bounty not found: #{inspect(row)}"
     end
 
-    if !user do
+    if nullish?(user_id) do
       raise "User not found: #{inspect(row)}"
     end
 
@@ -546,21 +547,21 @@ defmodule DatabaseMigration do
           bounty_transfer: row,
           bounty: bounty,
           claim: claim,
-          user: org
+          user_id: org["id"]
         }),
         maybe_create_transaction("credit", %{
           bounty_charge: bounty_charge,
           bounty_transfer: row,
           bounty: bounty,
           claim: claim,
-          user: user
+          user_id: user_id
         }),
         maybe_create_transaction("transfer", %{
           bounty_charge: bounty_charge,
           bounty_transfer: row,
           bounty: bounty,
           claim: claim,
-          user: user
+          user_id: user_id
         })
       ],
       &is_nil/1
@@ -646,7 +647,7 @@ defmodule DatabaseMigration do
          bounty_transfer: bounty_transfer,
          bounty: bounty,
          claim: claim,
-         user: user
+         user_id: user_id
        }) do
     amount = Money.from_integer(String.to_integer(bounty_transfer["amount"]), bounty_transfer["currency"])
 
@@ -670,8 +671,7 @@ defmodule DatabaseMigration do
       "succeeded_at" => nil,
       "reversed_at" => nil,
       "group_id" => bounty_charge["id"],
-      ## TODO: this might be null but shouldn't
-      "user_id" => user["id"],
+      "user_id" => user_id,
       "contract_id" => nil,
       "original_contract_id" => nil,
       "timesheet_id" => nil,
@@ -685,10 +685,10 @@ defmodule DatabaseMigration do
 
     res =
       if bounty["type"] == "tip" do
-        Map.put(res, "tip_id", bounty["id"] <> user["id"])
+        Map.put(res, "tip_id", bounty["id"] <> user_id)
       else
         res
-        |> Map.put("bounty_id", claim["bounty_id"])
+        |> Map.put("bounty_id", bounty["id"])
         |> Map.put("claim_id", claim["id"])
       end
 
@@ -1052,6 +1052,8 @@ defmodule DatabaseMigration do
   defp deserialize_value(value), do: value
 
   defp nullish?(value), do: is_nil(deserialize_value(value))
+
+  defp or_else(value, default), do: if(nullish?(value), do: default, else: value)
 
   defp clear_tables! do
     commands =

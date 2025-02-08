@@ -59,23 +59,6 @@ defmodule DatabaseMigration do
     {"StripePaymentMethod", PaymentMethod}
   ]
 
-  @backfilled_tables [
-    "accounts",
-    "payment_methods",
-    "customers",
-    "installations",
-    "repositories",
-    "transactions",
-    "claims",
-    "attempts",
-    "bounties",
-    "tips",
-    "tickets",
-    "members",
-    "identities",
-    "users"
-  ]
-
   @index_fields [
     {"GithubUser", ["id", "user_id"]},
     {"User", ["id"]},
@@ -90,7 +73,20 @@ defmodule DatabaseMigration do
     {"Reward", ["bounty_id"]}
   ]
 
-  defp relevant_tables, do: @schema_mappings |> Enum.map(fn {k, _v} -> k end) |> Enum.dedup()
+  defp relevant_tables do
+    @schema_mappings
+    |> Enum.map(fn {k, _v} -> k end)
+    |> Enum.dedup()
+  end
+
+  defp backfilled_tables do
+    @schema_mappings
+    |> Enum.map(fn {_, v} -> v end)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.dedup()
+    |> Enum.reverse()
+    |> Enum.map(& &1.__schema__(:source))
+  end
 
   defp transform({"Task", Ticket}, row, db) do
     if row["forge"] != "github" do
@@ -1098,7 +1094,7 @@ defmodule DatabaseMigration do
       [
         "BEGIN TRANSACTION;",
         "SET CONSTRAINTS ALL DEFERRED;",
-        Enum.map(@backfilled_tables, &"TRUNCATE TABLE #{&1} CASCADE;"),
+        Enum.map(backfilled_tables(), &"TRUNCATE TABLE #{&1} CASCADE;"),
         "SET CONSTRAINTS ALL IMMEDIATE;",
         "COMMIT;"
       ]

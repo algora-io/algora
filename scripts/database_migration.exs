@@ -34,26 +34,26 @@ defmodule DatabaseMigration do
 
   require Logger
 
-  @schema_mappings %{
-    "User" => User,
-    "Org" => User,
-    "GithubUser" => User,
-    "Account" => Identity,
-    "OrgMember" => Member,
-    "Task" => Ticket,
-    "GithubIssue" => nil,
-    "GithubPullRequest" => nil,
-    "Bounty" => Bounty,
-    "Reward" => nil,
-    "Attempt" => Attempt,
-    "Claim" => Claim,
-    "BountyCharge" => Transaction,
-    "BountyTransfer" => Transaction,
-    "GithubInstallation" => Installation,
-    "StripeAccount" => Account,
-    "StripeCustomer" => Customer,
-    "StripePaymentMethod" => PaymentMethod
-  }
+  @schema_mappings [
+    {"User", User},
+    {"Org", User},
+    {"GithubUser", User},
+    {"Account", Identity},
+    {"OrgMember", Member},
+    {"Task", Ticket},
+    {"GithubIssue", nil},
+    {"GithubPullRequest", nil},
+    {"Bounty", Bounty},
+    {"Reward", nil},
+    {"Attempt", Attempt},
+    {"Claim", Claim},
+    {"BountyCharge", Transaction},
+    {"BountyTransfer", Transaction},
+    {"GithubInstallation", Installation},
+    {"StripeAccount", Account},
+    {"StripeCustomer", Customer},
+    {"StripePaymentMethod", PaymentMethod}
+  ]
 
   @backfilled_tables [
     "accounts",
@@ -71,9 +71,9 @@ defmodule DatabaseMigration do
     "users"
   ]
 
-  @relevant_tables Map.keys(@schema_mappings)
+  defp relevant_tables, do: @schema_mappings |> Enum.map(fn {k, _v} -> k end) |> Enum.dedup()
 
-  defp transform("Task", row, db) do
+  defp transform({"Task", Ticket}, row, db) do
     if row["forge"] != "github" do
       raise "Unknown forge: #{row["forge"]}"
     end
@@ -133,7 +133,7 @@ defmodule DatabaseMigration do
     row
   end
 
-  defp transform("User", row, db) do
+  defp transform({"User", User}, row, db) do
     # TODO: reenable
     # if !row["\"emailVerified\""] || String.length(row["\"emailVerified\""]) < 10 do
     #   raise "Email not verified: #{inspect(row)}"
@@ -189,7 +189,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("Org", row, _db) do
+  defp transform({"Org", User}, row, _db) do
     %{
       "id" => row["id"],
       "provider" => row["github_handle"] && "github",
@@ -238,7 +238,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("GithubUser", %{user_id: nil} = row, _db) do
+  defp transform({"GithubUser", User}, %{user_id: nil} = row, _db) do
     if row["type"] != "User" do
       raise "GithubUser is not a User: #{inspect(row)}"
     end
@@ -291,9 +291,9 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("GithubUser", _row, _db), do: nil
+  defp transform({"GithubUser", User}, _row, _db), do: nil
 
-  defp transform("Account", row, _db) do
+  defp transform({"Account", Identity}, row, _db) do
     %{
       "id" => row["id"],
       "user_id" => row["\"userId\""],
@@ -308,7 +308,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("OrgMember", row, _db) do
+  defp transform({"OrgMember", Member}, row, _db) do
     %{
       "id" => row["id"],
       "org_id" => row["org_id"],
@@ -319,7 +319,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("Bounty", row, db) do
+  defp transform({"Bounty", Bounty}, row, db) do
     reward = db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
 
     amount = if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
@@ -335,7 +335,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("Attempt", row, db) do
+  defp transform({"Attempt", Attempt}, row, db) do
     bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == row["bounty_id"]))
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
@@ -361,7 +361,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("Claim", row, db) do
+  defp transform({"Claim", Claim}, row, db) do
     bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == row["bounty_id"]))
 
     task = db |> Map.get("Task", []) |> Enum.find(&(&1["id"] == bounty["task_id"]))
@@ -393,7 +393,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("BountyCharge", row, db) do
+  defp transform({"BountyCharge", Transaction}, row, db) do
     user = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == row["org_id"]))
 
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
@@ -438,7 +438,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("BountyTransfer", row, db) do
+  defp transform({"BountyTransfer", Transaction}, row, db) do
     claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
@@ -487,7 +487,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("GithubInstallation", row, _db) do
+  defp transform({"GithubInstallation", Installation}, row, _db) do
     %{
       "id" => row["id"],
       "provider" => "github",
@@ -503,7 +503,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("StripeAccount", row, _db) do
+  defp transform({"StripeAccount", Account}, row, _db) do
     %{
       "id" => row["id"],
       "provider" => "stripe",
@@ -526,7 +526,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("StripeCustomer", row, _db) do
+  defp transform({"StripeCustomer", Customer}, row, _db) do
     %{
       "id" => row["id"],
       "provider" => "stripe",
@@ -539,7 +539,7 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform("StripePaymentMethod", row, db) do
+  defp transform({"StripePaymentMethod", PaymentMethod}, row, db) do
     customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["id"] == row["customer_id"]))
 
     if !customer do
@@ -586,12 +586,13 @@ defmodule DatabaseMigration do
       &collect_after_fun/1
     )
     |> Enum.reduce(%{}, fn
-      {table, data}, acc when table in @relevant_tables ->
-        parsed_data = parse_copy_data(data)
-        Map.put(acc, table, parsed_data)
-
-      _, acc ->
-        acc
+      {table, data}, acc ->
+        if table in relevant_tables() do
+          parsed_data = parse_copy_data(data)
+          Map.put(acc, table, parsed_data)
+        else
+          acc
+        end
     end)
   end
 
@@ -628,24 +629,25 @@ defmodule DatabaseMigration do
   defp collect_after_fun({table, acc}), do: {:cont, {table, Enum.reverse(acc)}, nil}
 
   defp process_chunk(chunk, db) do
-    case_result =
-      case extract_copy_section(chunk) do
-        %{table: table} = section when table in @relevant_tables ->
-          transform_section(section, db)
+    case extract_copy_section(chunk) do
+      %{table: table} = section ->
+        @schema_mappings
+        |> Enum.filter(fn {k, _v} -> k == table end)
+        |> Enum.map(fn {_k, v} -> transform_section(section, v, db) end)
+        |> Enum.reject(&is_nil/1)
+        |> Enum.map(&load_copy_section/1)
 
-        _ ->
-          nil
-      end
-
-    load_copy_section(case_result)
+      _ ->
+        []
+    end
   end
 
-  defp transform_section(%{table: table, columns: _columns, data: data}, db) do
+  defp transform_section(%{table: table, columns: _columns, data: data}, schema, db) do
     transformed_data =
       data
       |> Enum.map(fn row ->
         # try do
-        transform(table, row, db)
+        transform({table, schema}, row, db)
         # rescue
         #   e ->
         #     IO.puts("Error transforming row in table #{table}: #{inspect(row)}")
@@ -654,9 +656,9 @@ defmodule DatabaseMigration do
         # end
       end)
       |> Enum.reject(&is_nil/1)
-      |> Enum.map(&post_transform(table, &1))
+      |> Enum.map(&post_transform(schema, &1))
 
-    transformed_table_name = transform_table_name(table)
+    transformed_table_name = schema.__schema__(:source)
 
     if Enum.empty?(transformed_data) do
       nil
@@ -666,11 +668,7 @@ defmodule DatabaseMigration do
     end
   end
 
-  defp transform_table_name(table_name), do: if(schema = @schema_mappings[table_name], do: schema.__schema__(:source))
-
-  defp post_transform(table_name, row) do
-    schema = @schema_mappings[table_name]
-
+  defp post_transform(schema, row) do
     default_fields =
       schema.__struct__()
       |> Map.from_struct()
@@ -731,8 +729,6 @@ defmodule DatabaseMigration do
 
     new_handle
   end
-
-  defp load_copy_section(nil), do: []
 
   defp load_copy_section(%{table: table_name, columns: columns, data: data}) do
     copy_statement = "COPY #{table_name} (#{Enum.join(columns, ", ")}) FROM stdin;\n"

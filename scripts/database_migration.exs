@@ -21,6 +21,7 @@ defmodule DatabaseMigration do
   """
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
   alias Algora.Payments.Transaction
   alias Algora.Workspace.Ticket
 
@@ -35,9 +36,9 @@ defmodule DatabaseMigration do
     "GithubPullRequest" => nil,
     "Bounty" => "bounties",
     "Reward" => nil,
+    "Claim" => "claims",
     "BountyCharge" => "transactions",
-    "BountyTransfer" => "transactions",
-    "Claim" => nil
+    "BountyTransfer" => "transactions"
   }
 
   @schema_mappings %{
@@ -49,9 +50,9 @@ defmodule DatabaseMigration do
     "GithubPullRequest" => nil,
     "Bounty" => Bounty,
     "Reward" => nil,
+    "Claim" => Claim,
     "BountyCharge" => Transaction,
-    "BountyTransfer" => Transaction,
-    "Claim" => nil
+    "BountyTransfer" => Transaction
   }
 
   @backfilled_tables ["repositories", "transactions", "bounties", "tickets", "users"]
@@ -289,6 +290,38 @@ defmodule DatabaseMigration do
       "ticket_id" => row["task_id"],
       "owner_id" => row["org_id"],
       "creator_id" => row["poster_id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"]
+    }
+  end
+
+  defp transform("Claim", row, db) do
+    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == row["bounty_id"]))
+
+    task = db |> Map.get("Task", []) |> Enum.find(&(&1["id"] == bounty["task_id"]))
+
+    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
+
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+
+    # TODO: this might be null
+    github_pull_request =
+      db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["github_pull_request_id"]))
+
+    if !task || !user do
+      raise "Task or User not found: #{inspect(row)}"
+    end
+
+    %{
+      "id" => row["id"],
+      "status" => nil,
+      "type" => nil,
+      "url" => row["github_url"],
+      "group_id" => nil,
+      "group_share" => nil,
+      "source_id" => github_pull_request["task_id"],
+      "target_id" => task["id"],
+      "user_id" => user["id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
     }

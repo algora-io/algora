@@ -34,27 +34,6 @@ defmodule DatabaseMigration do
 
   require Logger
 
-  @table_mappings %{
-    "User" => "users",
-    "Org" => "users",
-    "GithubUser" => "users",
-    "Account" => "identities",
-    "OrgMember" => "members",
-    "Task" => "tickets",
-    "GithubIssue" => nil,
-    "GithubPullRequest" => nil,
-    "Bounty" => "bounties",
-    "Reward" => nil,
-    "Attempt" => "attempts",
-    "Claim" => "claims",
-    "BountyCharge" => "transactions",
-    "BountyTransfer" => "transactions",
-    "GithubInstallation" => "installations",
-    "StripeAccount" => "accounts",
-    "StripeCustomer" => "customers",
-    "StripePaymentMethod" => "payment_methods"
-  }
-
   @schema_mappings %{
     "User" => User,
     "Org" => User,
@@ -92,7 +71,7 @@ defmodule DatabaseMigration do
     "users"
   ]
 
-  @relevant_tables Map.keys(@table_mappings)
+  @relevant_tables Map.keys(@schema_mappings)
 
   defp transform("Task", row, db) do
     if row["forge"] != "github" do
@@ -687,7 +666,7 @@ defmodule DatabaseMigration do
     end
   end
 
-  defp transform_table_name(table_name), do: @table_mappings[table_name]
+  defp transform_table_name(table_name), do: if(schema = @schema_mappings[table_name], do: schema.__schema__(:source))
 
   defp post_transform(table_name, row) do
     schema = @schema_mappings[table_name]

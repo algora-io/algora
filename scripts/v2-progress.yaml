@@ -35,12 +35,12 @@
     - inserted_at: 1
     - updated_at: 1
 - chat_participants:
-    - id: 0
-    - last_read_at: 0
-    - thread_id: 0
-    - user_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - last_read_at: -1
+    - thread_id: -1
+    - user_id: -1
+    - inserted_at: -1
+    - updated_at: -1
 - claims:
     - id: 1
     - status: 0
@@ -65,30 +65,30 @@
     - inserted_at: 0
     - updated_at: 0
 - comment_cursors:
-    - id: 0
-    - provider: 0
-    - repo_owner: 0
-    - repo_name: 0
-    - "timestamp": 0
-    - last_polled_at: 0
-    - last_comment_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - provider: -1
+    - repo_owner: -1
+    - repo_name: -1
+    - "timestamp": -1
+    - last_polled_at: -1
+    - last_comment_id: -1
+    - inserted_at: -1
+    - updated_at: -1
 - contracts:
-    - id: 0
-    - status: 0
-    - sequence_number: 0
-    - hourly_rate: 0
-    - hourly_rate_min: 0
-    - hourly_rate_max: 0
-    - hours_per_week: 0
-    - start_date: 0
-    - end_date: 0
-    - original_contract_id: 0
-    - client_id: 0
-    - contractor_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - status: -1
+    - sequence_number: -1
+    - hourly_rate: -1
+    - hourly_rate_min: -1
+    - hourly_rate_max: -1
+    - hours_per_week: -1
+    - start_date: -1
+    - end_date: -1
+    - original_contract_id: -1
+    - client_id: -1
+    - contractor_id: -1
+    - inserted_at: -1
+    - updated_at: -1
 - customers:
     - id: 1
     - provider: 1
@@ -99,14 +99,14 @@
     - inserted_at: 1
     - updated_at: 1
 - event_cursors:
-    - id: 0
-    - provider: 0
-    - repo_owner: 0
-    - repo_name: 0
-    - last_event_id: 0
-    - last_polled_at: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - provider: -1
+    - repo_owner: -1
+    - repo_name: -1
+    - last_event_id: -1
+    - last_polled_at: -1
+    - inserted_at: -1
+    - updated_at: -1
 - identities:
     - id: 0
     - user_id: 0
@@ -138,35 +138,12 @@
     - inserted_at: 1
     - updated_at: 1
 - messages:
-    - id: 0
-    - content: 0
-    - thread_id: 0
-    - sender_id: 0
-    - inserted_at: 0
-    - updated_at: 0
-- oban_jobs:
-    - id: 0
-    - state: 0
-    - queue: 0
-    - worker: 0
-    - args: 0
-    - errors: 0
-    - attempt: 0
-    - max_attempts: 0
-    - inserted_at: 0
-    - scheduled_at: 0
-    - attempted_at: 0
-    - completed_at: 0
-    - attempted_by: 0
-    - discarded_at: 0
-    - priority: 0
-    - tags: 0
-    - meta: 0
-    - cancelled_at: 0
-    - CONSTRAINT: 0
-    - CONSTRAINT: 0
-    - CONSTRAINT: 0
-    - CONSTRAINT: 0
+    - id: -1
+    - content: -1
+    - thread_id: -1
+    - sender_id: -1
+    - inserted_at: -1
+    - updated_at: -1
 - payment_methods:
     - id: 1
     - provider: 1
@@ -178,35 +155,35 @@
     - inserted_at: 1
     - updated_at: 1
 - repositories:
-    - id: 0
-    - provider: 0
-    - provider_id: 0
-    - provider_meta: 0
-    - name: 0
-    - url: 0
-    - user_id: 0
-    - inserted_at: 0
-    - updated_at: 0
-    - description: 0
-    - og_image_url: 0
-    - og_image_updated_at: 0
+    - id: -1
+    - provider: -1
+    - provider_id: -1
+    - provider_meta: -1
+    - name: -1
+    - url: -1
+    - user_id: -1
+    - inserted_at: -1
+    - updated_at: -1
+    - description: -1
+    - og_image_url: -1
+    - og_image_updated_at: -1
 - reviews:
-    - id: 0
-    - rating: 0
-    - content: 0
-    - visibility: 0
-    - contract_id: 0
-    - bounty_id: 0
-    - organization_id: 0
-    - reviewer_id: 0
-    - reviewee_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - rating: -1
+    - content: -1
+    - visibility: -1
+    - contract_id: -1
+    - bounty_id: -1
+    - organization_id: -1
+    - reviewer_id: -1
+    - reviewee_id: -1
+    - inserted_at: -1
+    - updated_at: -1
 - threads:
-    - id: 0
-    - title: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - title: -1
+    - inserted_at: -1
+    - updated_at: -1
 - tickets:
     - id: 1
     - provider: 1
@@ -221,12 +198,12 @@
     - inserted_at: 1
     - updated_at: 1
 - timesheets:
-    - id: 0
-    - hours_worked: 0
-    - description: 0
-    - contract_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: -1
+    - hours_worked: -1
+    - description: -1
+    - contract_id: -1
+    - inserted_at: -1
+    - updated_at: -1
 - tips:
     - id: 0
     - amount: 0

@@ -137,7 +137,7 @@
     - bounty_charge_id: -1
     - github_res_comment_id: 0
     - info: 0
-    - share: 0
+    - share: -1
 - "Company":
     - id: -1
     - created_at: -1

@@ -131,12 +131,12 @@
     - updated_at: 1
     - provider_user_id: 0
 - members:
-    - id: 0
-    - role: 0
-    - org_id: 0
-    - user_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: 1
+    - role: 1
+    - org_id: 1
+    - user_id: 1
+    - inserted_at: 1
+    - updated_at: 1
 - messages:
     - id: 0
     - content: 0

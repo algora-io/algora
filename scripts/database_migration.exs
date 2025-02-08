@@ -22,6 +22,7 @@ defmodule DatabaseMigration do
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Organizations.Member
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
   alias Algora.Payments.PaymentMethod
@@ -35,6 +36,7 @@ defmodule DatabaseMigration do
     "User" => "users",
     "Org" => "users",
     "GithubUser" => "users",
+    "OrgMember" => "members",
     "Task" => "tickets",
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
@@ -53,6 +55,7 @@ defmodule DatabaseMigration do
     "User" => User,
     "Org" => User,
     "GithubUser" => User,
+    "OrgMember" => Member,
     "Task" => Ticket,
     "GithubIssue" => nil,
     "GithubPullRequest" => nil,
@@ -77,6 +80,7 @@ defmodule DatabaseMigration do
     "claims",
     "bounties",
     "tickets",
+    "members",
     "users"
   ]
 
@@ -301,6 +305,21 @@ defmodule DatabaseMigration do
   end
 
   defp transform("GithubUser", _row, _db), do: nil
+
+  defp transform("OrgMember", row, _db) do
+    if row["role"] not in ["admin", "mod", "expert"] do
+      raise "OrgMember has unknown role: #{inspect(row)}"
+    end
+
+    %{
+      "id" => row["id"],
+      "org_id" => row["org_id"],
+      "role" => row["role"],
+      "user_id" => row["user_id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"]
+    }
+  end
 
   defp transform("Bounty", row, db) do
     reward = db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))

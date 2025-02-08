@@ -403,9 +403,14 @@ defmodule DatabaseMigration do
     %{
       "id" => row["id"],
       "status" => nil,
-      "type" => nil,
+      "type" =>
+        cond do
+          row["github_pull_request_id"] != nil -> "pull_request"
+          String.match?(row["github_url"] || "", ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
+          true -> "pull_request"
+        end,
       "url" => row["github_url"],
-      "group_id" => nil,
+      "group_id" => row["id"],
       "group_share" => nil,
       "source_id" => github_pull_request["task_id"],
       "target_id" => task["id"],

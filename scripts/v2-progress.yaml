@@ -44,10 +44,10 @@
 - claims:
     - id: 1
     - status: 0
-    - type: 0
+    - type: 1
     - url: 1
-    - group_id: 0
-    - group_share: 0
+    - group_id: 1
+    - group_share: -1
     - source_id: 1
     - target_id: 1
     - user_id: 1

@@ -76,6 +76,20 @@ defmodule DatabaseMigration do
     "users"
   ]
 
+  @index_fields [
+    {"GithubUser", ["id", "user_id"]},
+    {"User", ["id"]},
+    {"Org", ["id"]},
+    {"Bounty", ["id", "task_id"]},
+    {"Task", ["id"]},
+    {"Claim", ["id", "bounty_id"]},
+    {"BountyCharge", ["id"]},
+    {"StripeCustomer", ["org_id"]},
+    {"GithubIssue", ["id"]},
+    {"GithubPullRequest", ["id", "task_id"]},
+    {"Reward", ["bounty_id"]}
+  ]
+
   defp relevant_tables, do: @schema_mappings |> Enum.map(fn {k, _v} -> k end) |> Enum.dedup()
 
   defp transform({"Task", Ticket}, row, db) do
@@ -83,9 +97,8 @@ defmodule DatabaseMigration do
       raise "Unknown forge: #{row["forge"]}"
     end
 
-    github_issue = db |> Map.get("GithubIssue", []) |> Enum.find(&(&1["id"] == row["issue_id"]))
-
-    github_pull_request = db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["pull_request_id"]))
+    github_issue = find_by_index(db, "GithubIssue", "id", row["issue_id"])
+    github_pull_request = find_by_index(db, "GithubPullRequest", "id", row["pull_request_id"])
 
     row =
       cond do
@@ -144,7 +157,7 @@ defmodule DatabaseMigration do
     #   raise "Email not verified: #{inspect(row)}"
     # end
 
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["user_id"] == row["id"]))
+    github_user = find_by_index(db, "GithubUser", "user_id", row["id"])
 
     %{
       "id" => row["id"],
@@ -295,7 +308,7 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"Account", Identity}, row, db) do
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == row["\"userId\""]))
+    user = find_by_index(db, "User", "id", row["\"userId\""])
 
     if !user do
       raise "User not found: #{inspect(row)}"
@@ -327,7 +340,7 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"Bounty", Bounty}, row, db) do
-    reward = db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
+    reward = find_by_index(db, "Reward", "bounty_id", row["id"])
 
     amount = if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
 
@@ -363,9 +376,8 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"Attempt", Attempt}, row, db) do
-    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == row["bounty_id"]))
-
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
+    bounty = find_by_index(db, "Bounty", "id", row["bounty_id"])
+    github_user = find_by_index(db, "GithubUser", "id", row["github_user_id"])
 
     user_id = or_else(github_user["user_id"], github_user["id"])
 
@@ -389,17 +401,12 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"Claim", Claim}, row, db) do
-    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == row["bounty_id"]))
-
-    task = db |> Map.get("Task", []) |> Enum.find(&(&1["id"] == bounty["task_id"]))
-
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
+    bounty = find_by_index(db, "Bounty", "id", row["bounty_id"])
+    task = find_by_index(db, "Task", "id", bounty["task_id"])
+    github_user = find_by_index(db, "GithubUser", "id", row["github_user_id"])
+    github_pull_request = find_by_index(db, "GithubPullRequest", "id", row["github_pull_request_id"])
 
     user_id = or_else(github_user["user_id"], github_user["id"])
-
-    # TODO: this might be null
-    github_pull_request =
-      db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["github_pull_request_id"]))
 
     if !task do
       raise "Task not found: #{inspect(row)}"
@@ -431,7 +438,7 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"BountyCharge", Transaction}, row, db) do
-    user = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == row["org_id"]))
+    user = find_by_index(db, "Org", "id", row["org_id"])
 
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
@@ -477,14 +484,11 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"BountyTransfer", Tip}, row, db) do
-    claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
-
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
+    claim = find_by_index(db, "Claim", "id", row["claim_id"])
+    github_user = find_by_index(db, "GithubUser", "id", claim["github_user_id"])
+    bounty = find_by_index(db, "Bounty", "id", claim["bounty_id"])
 
     user_id = or_else(github_user["user_id"], github_user["id"])
-
-    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
-
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
     if !bounty do
@@ -511,17 +515,13 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"BountyTransfer", Transaction}, row, db) do
-    claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
-
-    bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
-
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
+    claim = find_by_index(db, "Claim", "id", row["claim_id"])
+    bounty = find_by_index(db, "Bounty", "id", claim["bounty_id"])
+    github_user = find_by_index(db, "GithubUser", "id", claim["github_user_id"])
+    org = find_by_index(db, "Org", "id", bounty["org_id"])
+    bounty_charge = find_by_index(db, "BountyCharge", "id", row["bounty_charge_id"])
 
     user_id = or_else(github_user["user_id"], github_user["id"])
-
-    org = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == bounty["org_id"]))
-
-    bounty_charge = db |> Map.get("BountyCharge", []) |> Enum.find(&(&1["id"] == row["bounty_charge_id"]))
 
     if !bounty do
       raise "Bounty not found: #{inspect(row)}"
@@ -626,7 +626,7 @@ defmodule DatabaseMigration do
 
   defp transform({"StripePaymentMethod", PaymentMethod}, row, db) do
     if row["org_id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
-      customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["org_id"] == row["org_id"]))
+      customer = find_by_index(db, "StripeCustomer", "org_id", row["org_id"])
 
       if !customer do
         raise "StripeCustomer not found: #{inspect(row)}"
@@ -770,22 +770,44 @@ defmodule DatabaseMigration do
   end
 
   defp collect_data(input_file) do
-    input_file
-    |> File.stream!()
-    |> Stream.chunk_while(
-      nil,
-      &collect_chunk_fun/2,
-      &collect_after_fun/1
-    )
-    |> Enum.reduce(%{}, fn
-      {table, data}, acc ->
-        if table in relevant_tables() do
-          parsed_data = parse_copy_data(data)
-          Map.put(acc, table, parsed_data)
-        else
-          acc
-        end
-    end)
+    db =
+      input_file
+      |> File.stream!()
+      |> Stream.chunk_while(
+        nil,
+        &collect_chunk_fun/2,
+        &collect_after_fun/1
+      )
+      |> Enum.reduce(%{}, fn
+        {table, data}, acc ->
+          if table in relevant_tables() do
+            parsed_data = parse_copy_data(data)
+            Map.put(acc, table, parsed_data)
+          else
+            acc
+          end
+      end)
+
+    indexes =
+      Enum.reduce(@index_fields, %{}, fn {table, columns}, acc ->
+        table_indexes = Map.new(columns, fn column -> {column, index_by_field(db[table], column)} end)
+        Map.put(acc, table, table_indexes)
+      end)
+
+    Map.put(db, :indexes, indexes)
+  end
+
+  defp index_by_field(data, field) do
+    data
+    |> Enum.group_by(&Map.get(&1, field))
+    |> Map.new(fn {k, v} -> {k, List.first(v)} end)
+  end
+
+  defp find_by_index(db, table, field, value) do
+    case get_in(db, [:indexes, table, field]) do
+      nil -> raise "Index not found for table #{table}.#{field}"
+      index -> index[value]
+    end
   end
 
   defp parse_copy_data([header | data]) do

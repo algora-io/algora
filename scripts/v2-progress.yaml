@@ -18,13 +18,13 @@
     - payout_speed: -1
     - default_currency: -1
 - attempts:
-    - id: 0
-    - status: 0
-    - warnings_count: 0
-    - ticket_id: 0
-    - user_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: 1
+    - status: 1
+    - warnings_count: 1
+    - ticket_id: 1
+    - user_id: 1
+    - inserted_at: 1
+    - updated_at: 1
 - bounties:
     - id: 1
     - amount: 1

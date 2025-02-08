@@ -28,13 +28,13 @@
     - github_user_id: -1
     - org_id: -1
 - "Attempt":
-    - id: 0
-    - created_at: 0
-    - updated_at: 0
-    - bounty_id: 0
-    - github_user_id: 0
-    - warnings_count: 0
-    - status: 0
+    - id: 1
+    - created_at: 1
+    - updated_at: 1
+    - bounty_id: 1
+    - github_user_id: 1
+    - warnings_count: 1
+    - status: 1
 - "Bid":
     - id: -1
     - created_at: -1

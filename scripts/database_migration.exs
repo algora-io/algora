@@ -610,36 +610,40 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"StripeCustomer", Customer}, row, _db) do
-    %{
-      "id" => row["id"],
-      "provider" => "stripe",
-      "provider_id" => row["stripe_id"],
-      "provider_meta" => nil,
-      "name" => row["name"],
-      "user_id" => row["org_id"],
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"]
-    }
+    if row["org_id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
+      %{
+        "id" => row["id"],
+        "provider" => "stripe",
+        "provider_id" => row["stripe_id"],
+        "provider_meta" => nil,
+        "name" => row["name"],
+        "user_id" => row["org_id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"]
+      }
+    end
   end
 
   defp transform({"StripePaymentMethod", PaymentMethod}, row, db) do
-    customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["org_id"] == row["org_id"]))
+    if row["org_id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
+      customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["org_id"] == row["org_id"]))
 
-    if !customer do
-      raise "StripeCustomer not found: #{inspect(row)}"
+      if !customer do
+        raise "StripeCustomer not found: #{inspect(row)}"
+      end
+
+      %{
+        "id" => row["id"],
+        "provider" => "stripe",
+        "provider_id" => row["stripe_id"],
+        "provider_meta" => nil,
+        "provider_customer_id" => customer["stripe_id"],
+        "is_default" => row["is_default"],
+        "customer_id" => customer["id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"]
+      }
     end
-
-    %{
-      "id" => row["id"],
-      "provider" => "stripe",
-      "provider_id" => row["stripe_id"],
-      "provider_meta" => nil,
-      "provider_customer_id" => customer["stripe_id"],
-      "is_default" => row["is_default"],
-      "customer_id" => customer["id"],
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"]
-    }
   end
 
   defp transform(_, _row, _db), do: nil

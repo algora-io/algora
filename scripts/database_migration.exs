@@ -38,7 +38,8 @@ defmodule DatabaseMigration do
     "Reward" => nil,
     "Claim" => "claims",
     "BountyCharge" => "transactions",
-    "BountyTransfer" => "transactions"
+    "BountyTransfer" => "transactions",
+    "GithubInstallation" => "installations"
   }
 
   @schema_mappings %{
@@ -52,10 +53,11 @@ defmodule DatabaseMigration do
     "Reward" => nil,
     "Claim" => Claim,
     "BountyCharge" => Transaction,
-    "BountyTransfer" => Transaction
+    "BountyTransfer" => Transaction,
+    "GithubInstallation" => Installation
   }
 
-  @backfilled_tables ["repositories", "transactions", "bounties", "tickets", "users"]
+  @backfilled_tables ["installations", "repositories", "transactions", "claims", "bounties", "tickets", "users"]
 
   @relevant_tables Map.keys(@table_mappings)
 
@@ -418,6 +420,22 @@ defmodule DatabaseMigration do
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
       "claim_id" => claim["id"]
+    }
+  end
+
+  defp transform("GithubInstallation", row, _db) do
+    %{
+      "id" => row["id"],
+      "provider" => "github",
+      "provider_id" => row["github_id"],
+      "provider_meta" => nil,
+      "avatar_url" => nil,
+      "repository_selection" => nil,
+      "owner_id" => nil,
+      "connected_user_id" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "provider_user_id" => nil
     }
   end
 

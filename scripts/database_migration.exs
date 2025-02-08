@@ -57,11 +57,13 @@ defmodule DatabaseMigration do
   @relevant_tables Map.keys(@table_mappings)
 
   defp transform("Task", row, db) do
-    github_issue =
-      db |> Map.get("GithubIssue", []) |> Enum.find(&(&1["id"] == row["issue_id"]))
+    if row["forge"] != "github" do
+      raise "Unknown forge: #{row["forge"]}"
+    end
 
-    github_pull_request =
-      db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["pull_request_id"]))
+    github_issue = db |> Map.get("GithubIssue", []) |> Enum.find(&(&1["id"] == row["issue_id"]))
+
+    github_pull_request = db |> Map.get("GithubPullRequest", []) |> Enum.find(&(&1["id"] == row["pull_request_id"]))
 
     row =
       cond do
@@ -96,10 +98,6 @@ defmodule DatabaseMigration do
           }
 
         true ->
-          if row["forge"] != "github" do
-            raise "Unknown forge: #{row["forge"]}"
-          end
-
           %{
             "id" => row["id"],
             "provider" => row["forge"],
@@ -281,49 +279,66 @@ defmodule DatabaseMigration do
   defp transform("Bounty", row, db) do
     reward = db |> Map.get("Reward", []) |> Enum.find(&(&1["bounty_id"] == row["id"]))
 
-    amount =
-      if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
+    amount = if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
 
-    row
-    |> Map.put("ticket_id", row["task_id"])
-    |> Map.put("owner_id", row["org_id"])
-    |> Map.put("creator_id", row["poster_id"])
-    |> Map.put("inserted_at", row["created_at"])
-    |> Map.put("updated_at", row["updated_at"])
-    |> Map.put("amount", amount)
+    %{
+      "id" => row["id"],
+      "amount" => amount,
+      "ticket_id" => row["task_id"],
+      "owner_id" => row["org_id"],
+      "creator_id" => row["poster_id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"]
+    }
   end
 
   defp transform("BountyTransfer", row, db) do
-    claim =
-      db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
+    claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
 
-    github_user =
-      db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
+    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
 
-    user =
-      db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
 
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
-    row =
-      if claim && user do
-        row
-        |> Map.put("type", "transfer")
-        |> Map.put("provider", "stripe")
-        |> Map.put("provider_id", row["transfer_id"])
-        |> Map.put("net_amount", amount)
-        |> Map.put("gross_amount", amount)
-        |> Map.put("total_fee", Money.zero(:USD))
-        |> Map.put("bounty_id", claim["bounty_id"])
-        ## TODO: this might be null but shouldn't
-        |> Map.put("user_id", user["id"])
-        |> Map.put("inserted_at", row["created_at"])
-        |> Map.put("updated_at", row["updated_at"])
-        |> Map.put("status", if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded))
-        |> Map.put("succeeded_at", row["succeeded_at"])
-      end
+    if !claim || !user do
+      raise "Claim or User not found: #{inspect(row)}"
+    end
 
-    row
+    # TODO: add corresponding credit & debit transactions
+    %{
+      "id" => row["id"],
+      "provider" => "stripe",
+      "provider_id" => row["transfer_id"],
+      "provider_charge_id" => nil,
+      "provider_payment_intent_id" => nil,
+      "provider_transfer_id" => row["transfer_id"],
+      "provider_invoice_id" => nil,
+      "provider_balance_transaction_id" => nil,
+      "provider_meta" => nil,
+      "gross_amount" => amount,
+      "net_amount" => amount,
+      "total_fee" => Money.zero(:USD),
+      "provider_fee" => nil,
+      "line_items" => nil,
+      "type" => "transfer",
+      # TODO: only add debit & credit transactions if not succeeded
+      "status" => if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded),
+      "succeeded_at" => row["succeeded_at"],
+      "reversed_at" => nil,
+      "group_id" => nil,
+      ## TODO: this might be null but shouldn't
+      "user_id" => user["id"],
+      "contract_id" => nil,
+      "original_contract_id" => nil,
+      "timesheet_id" => nil,
+      "bounty_id" => claim["bounty_id"],
+      "tip_id" => nil,
+      "linked_transaction_id" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "claim_id" => claim["id"]
+    }
   end
 
   defp transform(_, _row, _db), do: nil

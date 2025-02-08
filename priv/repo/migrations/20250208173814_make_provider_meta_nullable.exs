@@ -43,5 +43,8 @@ defmodule Algora.Repo.Migrations.MakeProviderMetaNullable do
 
     drop unique_index(:bounties, [:ticket_id, :owner_id])
     create unique_index(:bounties, [:ticket_id, :owner_id, :number])
+
+    drop unique_index(:command_responses, [:ticket_id, :command_type])
+    create unique_index(:command_responses, [:provider, :provider_command_id])
   end
 end

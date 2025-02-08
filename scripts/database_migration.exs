@@ -19,6 +19,7 @@ defmodule DatabaseMigration do
   - Set the output_file to your desired output file path.
   - Run the script using: elixir scripts/database_migration.exs
   """
+  alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
@@ -37,6 +38,7 @@ defmodule DatabaseMigration do
     "User" => "users",
     "Org" => "users",
     "GithubUser" => "users",
+    "Account" => "identities",
     "OrgMember" => "members",
     "Task" => "tickets",
     "GithubIssue" => nil,
@@ -57,6 +59,7 @@ defmodule DatabaseMigration do
     "User" => User,
     "Org" => User,
     "GithubUser" => User,
+    "Account" => Identity,
     "OrgMember" => Member,
     "Task" => Ticket,
     "GithubIssue" => nil,
@@ -85,6 +88,7 @@ defmodule DatabaseMigration do
     "bounties",
     "tickets",
     "members",
+    "identities",
     "users"
   ]
 
@@ -309,6 +313,21 @@ defmodule DatabaseMigration do
   end
 
   defp transform("GithubUser", _row, _db), do: nil
+
+  defp transform("Account", row, _db) do
+    %{
+      "id" => row["id"],
+      "user_id" => row["\"userId\""],
+      "provider" => row["provider"],
+      "provider_token" => row["access_token"],
+      "provider_email" => nil,
+      "provider_login" => nil,
+      "provider_id" => row["\"providerAccountId\""],
+      "provider_meta" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"]
+    }
+  end
 
   defp transform("OrgMember", row, _db) do
     %{

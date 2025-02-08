@@ -6,16 +6,16 @@
     - hash: -1
     - token_last_eight: -1
 - "Account":
-    - id: -1
-    - created_at: -1
-    - updated_at: -1
-    - "userId": -1
+    - id: 1
+    - created_at: 1
+    - updated_at: 1
+    - "userId": 1
     - type: -1
-    - provider: -1
-    - "providerAccountId": -1
+    - provider: 1
+    - "providerAccountId": 1
     - refresh_token: -1
-    - access_token: 0
-    - expires_at: 0
+    - access_token: 1
+    - expires_at: -1
     - token_type: -1
     - scope: -1
     - id_token: -1

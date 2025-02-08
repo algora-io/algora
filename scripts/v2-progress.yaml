@@ -108,16 +108,16 @@
     - inserted_at: -1
     - updated_at: -1
 - identities:
-    - id: 0
-    - user_id: 0
-    - provider: 0
-    - provider_token: 0
-    - provider_email: 0
-    - provider_login: 0
-    - provider_id: 0
-    - provider_meta: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: 1
+    - user_id: 1
+    - provider: 1
+    - provider_token: 1
+    - provider_email: 1
+    - provider_login: 1
+    - provider_id: 1
+    - provider_meta: 1
+    - inserted_at: 1
+    - updated_at: 1
 - installations:
     - id: 1
     - provider: 1

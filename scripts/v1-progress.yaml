@@ -90,7 +90,7 @@
     - updated_at: 1
     - succeeded_at: 1
     - charge_id: 1
-    - user_id: 0
+    - user_id: -1
     - org_id: 1
     - amount: 1
     - currency: 1
@@ -113,7 +113,7 @@
     - created_at: 1
     - updated_at: 1
     - succeeded_at: 1
-    - bounty_charge_id: 0
+    - bounty_charge_id: 1
     - claim_id: 1
     - transfer_id: 1
     - amount: 1
@@ -203,8 +203,8 @@
     - created_at: 1
     - updated_at: 1
     - github_id: 1
-    - org_id: 0
-    - github_org_handle: 0
+    - org_id: 1
+    - github_org_handle: -1
 - "GithubIssue":
     - id: 1
     - url: -1

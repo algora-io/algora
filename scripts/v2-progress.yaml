@@ -45,7 +45,7 @@
     - id: 1
     - status: 0
     - type: 0
-    - url: 0
+    - url: 1
     - group_id: 0
     - group_share: 0
     - source_id: 1
@@ -125,11 +125,11 @@
     - provider_meta: -1
     - avatar_url: -1
     - repository_selection: -1
-    - owner_id: 0
-    - connected_user_id: 0
+    - owner_id: -2
+    - connected_user_id: 1
     - inserted_at: 1
     - updated_at: 1
-    - provider_user_id: 0
+    - provider_user_id: -1
 - members:
     - id: 1
     - role: 1
@@ -194,7 +194,7 @@
     - description: 1
     - number: 1
     - url: 1
-    - repository_id: 0
+    - repository_id: -1
     - inserted_at: 1
     - updated_at: 1
 - timesheets:
@@ -233,14 +233,14 @@
     - status: 1
     - succeeded_at: 1
     - reversed_at: -1
-    - group_id: 0
-    - user_id: 0
+    - group_id: 1
+    - user_id: 1
     - contract_id: -1
     - original_contract_id: -1
     - timesheet_id: -1
     - bounty_id: 1
-    - tip_id: 0
-    - linked_transaction_id: 0
+    - tip_id: 1
+    - linked_transaction_id: 1
     - inserted_at: 1
     - updated_at: 1
     - claim_id: 1

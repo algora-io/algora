@@ -445,7 +445,7 @@ defmodule DatabaseMigration do
       "status" => if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded),
       "succeeded_at" => row["succeeded_at"],
       "reversed_at" => nil,
-      "group_id" => nil,
+      "group_id" => row["id"],
       ## TODO: this might be null but shouldn't
       "user_id" => user["id"],
       "contract_id" => nil,
@@ -503,7 +503,9 @@ defmodule DatabaseMigration do
 
     user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
 
-    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+    org = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == bounty["org_id"]))
+
+    bounty_charge = db |> Map.get("BountyCharge", []) |> Enum.find(&(&1["id"] == row["bounty_charge_id"]))
 
     if !bounty do
       raise "Bounty not found: #{inspect(row)}"
@@ -513,48 +515,37 @@ defmodule DatabaseMigration do
       raise "User not found: #{inspect(row)}"
     end
 
-    # TODO: add corresponding credit & debit transactions
-    row = %{
-      "id" => row["id"],
-      "provider" => "stripe",
-      "provider_id" => row["transfer_id"],
-      "provider_charge_id" => nil,
-      "provider_payment_intent_id" => nil,
-      "provider_transfer_id" => row["transfer_id"],
-      "provider_invoice_id" => nil,
-      "provider_balance_transaction_id" => nil,
-      "provider_meta" => nil,
-      "gross_amount" => amount,
-      "net_amount" => amount,
-      "total_fee" => Money.zero(:USD),
-      "provider_fee" => nil,
-      "line_items" => nil,
-      "type" => "transfer",
-      # TODO: only add debit & credit transactions if not succeeded
-      "status" => if(row["succeeded_at"] == nil, do: :initialized, else: :succeeded),
-      "succeeded_at" => row["succeeded_at"],
-      "reversed_at" => nil,
-      "group_id" => nil,
-      ## TODO: this might be null but shouldn't
-      "user_id" => user["id"],
-      "contract_id" => nil,
-      "original_contract_id" => nil,
-      "timesheet_id" => nil,
-      "bounty_id" => nil,
-      "tip_id" => nil,
-      "linked_transaction_id" => nil,
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"],
-      "claim_id" => nil
-    }
-
-    if bounty["type"] == "tip" do
-      Map.put(row, "tip_id", bounty["id"] <> user["id"])
-    else
-      row
-      |> Map.put("bounty_id", claim["bounty_id"])
-      |> Map.put("claim_id", claim["id"])
+    if !org do
+      raise "Org not found: #{inspect(row)}"
     end
+
+    if !bounty_charge do
+      raise "BountyCharge not found: #{inspect(row)}"
+    end
+
+    [
+      maybe_create_transaction("debit", %{
+        bounty_charge: bounty_charge,
+        bounty_transfer: row,
+        bounty: bounty,
+        claim: claim,
+        user: org
+      }),
+      maybe_create_transaction("credit", %{
+        bounty_charge: bounty_charge,
+        bounty_transfer: row,
+        bounty: bounty,
+        claim: claim,
+        user: user
+      }),
+      maybe_create_transaction("transfer", %{
+        bounty_charge: bounty_charge,
+        bounty_transfer: row,
+        bounty: bounty,
+        claim: claim,
+        user: user
+      })
+    ]
   end
 
   defp transform({"GithubInstallation", Installation}, row, _db) do
@@ -566,7 +557,7 @@ defmodule DatabaseMigration do
       "avatar_url" => nil,
       "repository_selection" => nil,
       "owner_id" => nil,
-      "connected_user_id" => nil,
+      "connected_user_id" => row["org_id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
       "provider_user_id" => nil
@@ -630,6 +621,102 @@ defmodule DatabaseMigration do
   end
 
   defp transform(_, _row, _db), do: nil
+
+  defp maybe_create_transaction(type, %{
+         bounty_charge: bounty_charge,
+         bounty_transfer: bounty_transfer,
+         bounty: bounty,
+         claim: claim,
+         user: user
+       }) do
+    amount = Money.from_integer(String.to_integer(bounty_transfer["amount"]), bounty_transfer["currency"])
+
+    res = %{
+      "id" => String.slice(type, 0, 2) <> "_" <> bounty_transfer["id"],
+      "provider" => "stripe",
+      "provider_id" => nil,
+      "provider_charge_id" => bounty_charge["charge_id"],
+      "provider_payment_intent_id" => nil,
+      "provider_transfer_id" => bounty_transfer["transfer_id"],
+      "provider_invoice_id" => nil,
+      "provider_balance_transaction_id" => nil,
+      "provider_meta" => nil,
+      "gross_amount" => amount,
+      "net_amount" => amount,
+      "total_fee" => Money.zero(:USD),
+      "provider_fee" => nil,
+      "line_items" => nil,
+      "type" => type,
+      "status" => nil,
+      "succeeded_at" => nil,
+      "reversed_at" => nil,
+      "group_id" => bounty_charge["id"],
+      ## TODO: this might be null but shouldn't
+      "user_id" => user["id"],
+      "contract_id" => nil,
+      "original_contract_id" => nil,
+      "timesheet_id" => nil,
+      "bounty_id" => nil,
+      "tip_id" => nil,
+      "linked_transaction_id" => nil,
+      "inserted_at" => nil,
+      "updated_at" => nil,
+      "claim_id" => nil
+    }
+
+    res =
+      if bounty["type"] == "tip" do
+        Map.put(res, "tip_id", bounty["id"] <> user["id"])
+      else
+        res
+        |> Map.put("bounty_id", claim["bounty_id"])
+        |> Map.put("claim_id", claim["id"])
+      end
+
+    res =
+      case type do
+        "transfer" ->
+          Map.put(res, "provider_id", bounty_transfer["transfer_id"])
+
+        "debit" ->
+          Map.put(res, "linked_transaction_id", "cr_" <> bounty_transfer["id"])
+
+        "credit" ->
+          Map.put(res, "linked_transaction_id", "de_" <> bounty_transfer["id"])
+
+        _ ->
+          res
+      end
+
+    cond do
+      type == "transfer" && bounty_transfer["succeeded_at"] != nil ->
+        Map.merge(res, %{
+          "status" => :succeeded,
+          "succeeded_at" => bounty_transfer["succeeded_at"],
+          "inserted_at" => bounty_transfer["created_at"],
+          "updated_at" => bounty_transfer["updated_at"]
+        })
+
+      type == "debit" && bounty_charge["succeeded_at"] != nil ->
+        Map.merge(res, %{
+          "status" => :succeeded,
+          "succeeded_at" => bounty_charge["succeeded_at"],
+          "inserted_at" => bounty_charge["succeeded_at"],
+          "updated_at" => bounty_charge["succeeded_at"]
+        })
+
+      type == "credit" && bounty_charge["succeeded_at"] != nil ->
+        Map.merge(res, %{
+          "status" => :succeeded,
+          "succeeded_at" => bounty_charge["succeeded_at"],
+          "inserted_at" => bounty_charge["succeeded_at"],
+          "updated_at" => bounty_charge["succeeded_at"]
+        })
+
+      true ->
+        nil
+    end
+  end
 
   def process_dump(input_file, output_file) do
     db = collect_data(input_file)
@@ -715,9 +802,14 @@ defmodule DatabaseMigration do
   defp transform_section(%{table: table, columns: _columns, data: data}, schema, db) do
     transformed_data =
       data
-      |> Enum.map(fn row ->
+      |> Enum.flat_map(fn row ->
         # try do
-        transform({table, schema}, row, db)
+        case transform({table, schema}, row, db) do
+          nil -> []
+          xs when is_list(xs) -> xs
+          x -> [x]
+        end
+
         # rescue
         #   e ->
         #     IO.puts("Error transforming row in table #{table}: #{inspect(row)}")
@@ -725,16 +817,12 @@ defmodule DatabaseMigration do
         #     nil
         # end
       end)
-      |> Enum.reject(&is_nil/1)
       |> Enum.map(&post_transform(schema, &1))
-
-    transformed_table_name = schema.__schema__(:source)
 
     if Enum.empty?(transformed_data) do
       nil
     else
-      transformed_columns = Map.keys(hd(transformed_data))
-      %{table: transformed_table_name, columns: transformed_columns, data: transformed_data}
+      %{table: schema.__schema__(:source), columns: Map.keys(hd(transformed_data)), data: transformed_data}
     end
   end
 

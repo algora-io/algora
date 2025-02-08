@@ -22,7 +22,10 @@ defmodule DatabaseMigration do
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Payments.Account
+  alias Algora.Payments.Customer
   alias Algora.Payments.Transaction
+  alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 
   require Logger

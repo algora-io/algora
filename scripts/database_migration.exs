@@ -39,7 +39,8 @@ defmodule DatabaseMigration do
     "Claim" => "claims",
     "BountyCharge" => "transactions",
     "BountyTransfer" => "transactions",
-    "GithubInstallation" => "installations"
+    "GithubInstallation" => "installations",
+    "StripeAccount" => "accounts"
   }
 
   @schema_mappings %{
@@ -54,10 +55,20 @@ defmodule DatabaseMigration do
     "Claim" => Claim,
     "BountyCharge" => Transaction,
     "BountyTransfer" => Transaction,
-    "GithubInstallation" => Installation
+    "GithubInstallation" => Installation,
+    "StripeAccount" => Account
   }
 
-  @backfilled_tables ["installations", "repositories", "transactions", "claims", "bounties", "tickets", "users"]
+  @backfilled_tables [
+    "accounts",
+    "installations",
+    "repositories",
+    "transactions",
+    "claims",
+    "bounties",
+    "tickets",
+    "users"
+  ]
 
   @relevant_tables Map.keys(@table_mappings)
 
@@ -436,6 +447,29 @@ defmodule DatabaseMigration do
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
       "provider_user_id" => nil
+    }
+  end
+
+  defp transform("StripeAccount", row, _db) do
+    %{
+      "id" => row["id"],
+      "provider" => "stripe",
+      "provider_id" => row["stripe_id"],
+      "provider_meta" => nil,
+      "name" => nil,
+      "details_submitted" => row["details_submitted"],
+      "charges_enabled" => row["charges_enabled"],
+      "service_agreement" => row["service_agreement"],
+      "country" => row["country"],
+      "type" => row["type"],
+      "stale" => row["needs_refresh"],
+      "user_id" => row["user_id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "payouts_enabled" => nil,
+      "payout_interval" => nil,
+      "payout_speed" => nil,
+      "default_currency" => nil
     }
   end
 

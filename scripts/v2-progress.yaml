@@ -1,22 +1,22 @@
 - accounts:
-    - id: 0
-    - provider: 0
-    - provider_id: 0
-    - provider_meta: 0
-    - name: 0
-    - details_submitted: 0
-    - charges_enabled: 0
-    - service_agreement: 0
-    - country: 0
-    - type: 0
-    - stale: 0
-    - user_id: 0
-    - inserted_at: 0
-    - updated_at: 0
-    - payouts_enabled: 0
-    - payout_interval: 0
-    - payout_speed: 0
-    - default_currency: 0
+    - id: 1
+    - provider: 1
+    - provider_id: 1
+    - provider_meta: -1
+    - name: -1
+    - details_submitted: 1
+    - charges_enabled: 1
+    - service_agreement: 1
+    - country: 1
+    - type: 1
+    - stale: 1
+    - user_id: 1
+    - inserted_at: 1
+    - updated_at: 1
+    - payouts_enabled: -1
+    - payout_interval: -1
+    - payout_speed: -1
+    - default_currency: -1
 - attempts:
     - id: 0
     - status: 0

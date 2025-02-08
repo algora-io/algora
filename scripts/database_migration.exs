@@ -130,8 +130,8 @@ defmodule DatabaseMigration do
             "description" => row["body"],
             "number" => row["number"],
             "url" => "https://github.com/#{row["repo_owner"]}/#{row["repo_name"]}/issues/#{row["number"]}",
-            "inserted_at" => row["created_at"],
-            "updated_at" => row["updated_at"]
+            "inserted_at" => "1970-01-01 00:00:00",
+            "updated_at" => "1970-01-01 00:00:00"
           }
       end
 
@@ -298,13 +298,19 @@ defmodule DatabaseMigration do
 
   defp transform({"GithubUser", User}, _row, _db), do: nil
 
-  defp transform({"Account", Identity}, row, _db) do
+  defp transform({"Account", Identity}, row, db) do
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == row["\"userId\""]))
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
+    end
+
     %{
       "id" => row["id"],
-      "user_id" => row["\"userId\""],
+      "user_id" => user["id"],
       "provider" => row["provider"],
       "provider_token" => row["access_token"],
-      "provider_email" => nil,
+      "provider_email" => user["email"],
       "provider_login" => nil,
       "provider_id" => row["\"providerAccountId\""],
       "provider_meta" => nil,
@@ -341,7 +347,11 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"Bounty", CommandResponse}, row, _db) do
-    if row["github_res_comment_id"] != nil do
+    if row["task_id"] == "clo0q1x540000mj0ghdgmezqw" do
+      IO.inspect(row, label: "transform(Bounty -> CommandResponse)")
+    end
+
+    if !nullish?(row["github_res_comment_id"]) do
       %{
         "id" => row["id"],
         "provider" => "github",
@@ -362,7 +372,7 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
 
     if !bounty do
       raise "Bounty not found: #{inspect(row)}"
@@ -390,7 +400,7 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
 
     # TODO: this might be null
     github_pull_request =
@@ -402,10 +412,11 @@ defmodule DatabaseMigration do
 
     %{
       "id" => row["id"],
-      "status" => nil,
+      # TODO:
+      "status" => :pending,
       "type" =>
         cond do
-          row["github_pull_request_id"] != nil -> "pull_request"
+          !nullish?(row["github_pull_request_id"]) -> "pull_request"
           String.match?(row["github_url"] || "", ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
           true -> "pull_request"
         end,
@@ -468,9 +479,9 @@ defmodule DatabaseMigration do
   defp transform({"BountyTransfer", Tip}, row, db) do
     claim = db |> Map.get("Claim", []) |> Enum.find(&(&1["id"] == row["claim_id"]))
 
-    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == row["github_user_id"]))
+    github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
 
     bounty = db |> Map.get("Bounty", []) |> Enum.find(&(&1["id"] == claim["bounty_id"]))
 
@@ -506,7 +517,7 @@ defmodule DatabaseMigration do
 
     github_user = db |> Map.get("GithubUser", []) |> Enum.find(&(&1["id"] == claim["github_user_id"]))
 
-    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"]))
+    user = db |> Map.get("User", []) |> Enum.find(&(&1["id"] == github_user["user_id"] || github_user["id"]))
 
     org = db |> Map.get("Org", []) |> Enum.find(&(&1["id"] == bounty["org_id"]))
 
@@ -528,29 +539,32 @@ defmodule DatabaseMigration do
       raise "BountyCharge not found: #{inspect(row)}"
     end
 
-    [
-      maybe_create_transaction("debit", %{
-        bounty_charge: bounty_charge,
-        bounty_transfer: row,
-        bounty: bounty,
-        claim: claim,
-        user: org
-      }),
-      maybe_create_transaction("credit", %{
-        bounty_charge: bounty_charge,
-        bounty_transfer: row,
-        bounty: bounty,
-        claim: claim,
-        user: user
-      }),
-      maybe_create_transaction("transfer", %{
-        bounty_charge: bounty_charge,
-        bounty_transfer: row,
-        bounty: bounty,
-        claim: claim,
-        user: user
-      })
-    ]
+    Enum.reject(
+      [
+        maybe_create_transaction("debit", %{
+          bounty_charge: bounty_charge,
+          bounty_transfer: row,
+          bounty: bounty,
+          claim: claim,
+          user: org
+        }),
+        maybe_create_transaction("credit", %{
+          bounty_charge: bounty_charge,
+          bounty_transfer: row,
+          bounty: bounty,
+          claim: claim,
+          user: user
+        }),
+        maybe_create_transaction("transfer", %{
+          bounty_charge: bounty_charge,
+          bounty_transfer: row,
+          bounty: bounty,
+          claim: claim,
+          user: user
+        })
+      ],
+      &is_nil/1
+    )
   end
 
   defp transform({"GithubInstallation", Installation}, row, _db) do
@@ -573,7 +587,7 @@ defmodule DatabaseMigration do
     %{
       "id" => row["id"],
       "provider" => "stripe",
-      "provider_id" => row["stripe_id"],
+      "provider_id" => row["id"],
       "provider_meta" => nil,
       "name" => nil,
       "details_submitted" => row["details_submitted"],
@@ -606,7 +620,7 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"StripePaymentMethod", PaymentMethod}, row, db) do
-    customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["id"] == row["customer_id"]))
+    customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["org_id"] == row["org_id"]))
 
     if !customer do
       raise "StripeCustomer not found: #{inspect(row)}"
@@ -619,7 +633,7 @@ defmodule DatabaseMigration do
       "provider_meta" => nil,
       "provider_customer_id" => customer["stripe_id"],
       "is_default" => row["is_default"],
-      "customer_id" => row["customer_id"],
+      "customer_id" => customer["id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
     }
@@ -694,7 +708,7 @@ defmodule DatabaseMigration do
       end
 
     cond do
-      type == "transfer" && bounty_transfer["succeeded_at"] != nil ->
+      type == "transfer" && !nullish?(bounty_transfer["succeeded_at"]) ->
         Map.merge(res, %{
           "status" => :succeeded,
           "succeeded_at" => bounty_transfer["succeeded_at"],
@@ -702,7 +716,7 @@ defmodule DatabaseMigration do
           "updated_at" => bounty_transfer["updated_at"]
         })
 
-      type == "debit" && bounty_charge["succeeded_at"] != nil ->
+      type == "debit" && !nullish?(bounty_charge["succeeded_at"]) ->
         Map.merge(res, %{
           "status" => :succeeded,
           "succeeded_at" => bounty_charge["succeeded_at"],
@@ -710,7 +724,7 @@ defmodule DatabaseMigration do
           "updated_at" => bounty_charge["succeeded_at"]
         })
 
-      type == "credit" && bounty_charge["succeeded_at"] != nil ->
+      type == "credit" && !nullish?(bounty_charge["succeeded_at"]) ->
         Map.merge(res, %{
           "status" => :succeeded,
           "succeeded_at" => bounty_charge["succeeded_at"],
@@ -1037,6 +1051,8 @@ defmodule DatabaseMigration do
 
   defp deserialize_value(value), do: value
 
+  defp nullish?(value), do: is_nil(deserialize_value(value))
+
   defp clear_tables! do
     commands =
       [
@@ -1073,24 +1089,29 @@ defmodule DatabaseMigration do
     end
   end
 
+  defp time_step(description, function) do
+    IO.puts("\n#{description}...")
+    {time, result} = :timer.tc(function)
+    IO.puts("✓ #{description} completed in #{time / 1_000_000} seconds")
+    result
+  end
+
   def run! do
     input_file = ".local/prod_db.sql"
     output_file = ".local/prod_db_new.sql"
 
     if File.exists?(input_file) or File.exists?(output_file) do
-      IO.puts("Processing dump...")
-      :ok = process_dump(input_file, output_file)
+      IO.puts("\nStarting migration...")
 
-      IO.puts("Clearing tables...")
-      :ok = clear_tables!()
+      {total_time, _} =
+        :timer.tc(fn ->
+          :ok = time_step("Processing dump", fn -> process_dump(input_file, output_file) end)
+          :ok = time_step("Clearing tables", fn -> clear_tables!() end)
+          {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_file]) end)
+          :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
+        end)
 
-      IO.puts("Importing new data...")
-      {:ok, _} = psql(["-f", output_file])
-
-      IO.puts("Backfilling repositories...")
-      :ok = Algora.Admin.backfill_repos!()
-
-      IO.puts("Migration completed successfully")
+      IO.puts("\n✓ Migration completed successfully in #{total_time / 1_000_000} seconds")
     end
   end
 end

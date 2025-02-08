@@ -24,6 +24,7 @@ defmodule DatabaseMigration do
   alias Algora.Bounties.Claim
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
+  alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
@@ -44,7 +45,8 @@ defmodule DatabaseMigration do
     "BountyTransfer" => "transactions",
     "GithubInstallation" => "installations",
     "StripeAccount" => "accounts",
-    "StripeCustomer" => "customers"
+    "StripeCustomer" => "customers",
+    "StripePaymentMethod" => "payment_methods"
   }
 
   @schema_mappings %{
@@ -61,11 +63,13 @@ defmodule DatabaseMigration do
     "BountyTransfer" => Transaction,
     "GithubInstallation" => Installation,
     "StripeAccount" => Account,
-    "StripeCustomer" => Customer
+    "StripeCustomer" => Customer,
+    "StripePaymentMethod" => PaymentMethod
   }
 
   @backfilled_tables [
     "accounts",
+    "payment_methods",
     "customers",
     "installations",
     "repositories",
@@ -487,6 +491,26 @@ defmodule DatabaseMigration do
       "provider_meta" => nil,
       "name" => row["name"],
       "user_id" => row["org_id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"]
+    }
+  end
+
+  defp transform("StripePaymentMethod", row, db) do
+    customer = db |> Map.get("StripeCustomer", []) |> Enum.find(&(&1["id"] == row["customer_id"]))
+
+    if !customer do
+      raise "StripeCustomer not found: #{inspect(row)}"
+    end
+
+    %{
+      "id" => row["id"],
+      "provider" => "stripe",
+      "provider_id" => row["stripe_id"],
+      "provider_meta" => nil,
+      "provider_customer_id" => customer["stripe_id"],
+      "is_default" => row["is_default"],
+      "customer_id" => row["customer_id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"]
     }

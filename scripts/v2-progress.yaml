@@ -168,15 +168,15 @@
     - CONSTRAINT: 0
     - CONSTRAINT: 0
 - payment_methods:
-    - id: 0
-    - provider: 0
-    - provider_id: 0
-    - provider_meta: 0
-    - provider_customer_id: 0
-    - is_default: 0
-    - customer_id: 0
-    - inserted_at: 0
-    - updated_at: 0
+    - id: 1
+    - provider: 1
+    - provider_id: 1
+    - provider_meta: -1
+    - provider_customer_id: 1
+    - is_default: 1
+    - customer_id: 1
+    - inserted_at: 1
+    - updated_at: 1
 - repositories:
     - id: 0
     - provider: 0

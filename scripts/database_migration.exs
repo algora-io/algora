@@ -824,7 +824,7 @@ defmodule DatabaseMigration do
 
     indexes =
       Enum.reduce(@index_fields, %{}, fn {table, columns}, acc ->
-        table_indexes = Map.new(columns, fn column -> {column, index_by_field(db[table], column)} end)
+        table_indexes = Map.new(columns, fn column -> {column, index_by_field(db, table, column)} end)
         Map.put(acc, table, table_indexes)
       end)
 
@@ -913,10 +913,17 @@ defmodule DatabaseMigration do
     Map.merge(merged1, merged2)
   end
 
-  defp index_by_field(data, field) do
-    data
+  defp index_by_field(db, table, field) do
+    db[table]
+    |> Enum.reject(fn row -> table == "StripeCustomer" and row["region"] == "EU" end)
     |> Enum.group_by(&Map.get(&1, field))
-    |> Map.new(fn {k, v} -> {k, List.first(v)} end)
+    |> Map.new(fn {k, v} ->
+      {k,
+       case v do
+         [v] -> v
+         v -> raise "Unexpected number of entities for #{table}.#{field}: #{inspect(v)}"
+       end}
+    end)
   end
 
   defp find_by_index(db, table, field, value) do

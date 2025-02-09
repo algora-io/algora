@@ -917,6 +917,7 @@ defmodule DatabaseMigration do
     db[table]
     |> Enum.reject(fn row -> table == "StripeCustomer" and row["region"] == "EU" end)
     |> Enum.group_by(&Map.get(&1, field))
+    |> Enum.reject(fn {k, _v} -> nullish?(k) end)
     |> Map.new(fn {k, v} ->
       {k,
        case v do

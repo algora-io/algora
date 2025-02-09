@@ -60,9 +60,8 @@ defmodule DatabaseMigration do
   ]
 
   @index_fields [
-    {"GithubUser", ["id", "user_id"]},
     {"User", ["id"]},
-    {"Org", ["id"]},
+    {"GithubUser", ["id", "user_id"]},
     {"Bounty", ["id", "task_id"]},
     {"Task", ["id"]},
     {"Claim", ["id", "bounty_id"]},
@@ -203,53 +202,57 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform({"Org", User}, row, _db) do
-    %{
-      "id" => row["id"],
-      "provider" => row["github_handle"] && "github",
-      "provider_id" => row["github_id"],
-      "provider_login" => row["github_handle"],
-      "provider_meta" => row["github_data"] && deserialize_value(row["github_data"]),
-      "email" => nil,
-      "display_name" => row["name"],
-      "handle" => row["handle"],
-      "avatar_url" => update_url(row["avatar_url"]),
-      "external_homepage_url" => nil,
-      "type" => "organization",
-      "bio" => row["description"],
-      "location" => nil,
-      "country" => nil,
-      "timezone" => nil,
-      "stargazers_count" => row["stargazers_count"],
-      "domain" => row["domain"],
-      "tech_stack" => row["tech"],
-      "featured" => row["featured"],
-      "priority" => row["priority"],
-      "fee_pct" => row["fee_pct"],
-      "seeded" => row["seeded"],
-      "activated" => row["active"],
-      "max_open_attempts" => row["max_open_attempts"],
-      "manual_assignment" => row["manual_assignment"],
-      "bounty_mode" => nil,
-      "hourly_rate_min" => nil,
-      "hourly_rate_max" => nil,
-      "hours_per_week" => nil,
-      "website_url" => row["website_url"],
-      "twitter_url" => row["twitter_url"],
-      "github_url" => nil,
-      "youtube_url" => row["youtube_url"],
-      "twitch_url" => nil,
-      "discord_url" => row["discord_url"],
-      "slack_url" => row["slack_url"],
-      "linkedin_url" => nil,
-      "og_title" => nil,
-      "og_image_url" => nil,
-      "last_context" => nil,
-      "need_avatar" => nil,
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"],
-      "is_admin" => false
-    }
+  defp transform({"Org", User}, row, db) do
+    merged_user = find_by_index(db, "_MergedUser", "id", row["id"])
+
+    if not user?(merged_user) do
+      %{
+        "id" => row["id"],
+        "provider" => row["github_handle"] && "github",
+        "provider_id" => row["github_id"],
+        "provider_login" => row["github_handle"],
+        "provider_meta" => row["github_data"] && deserialize_value(row["github_data"]),
+        "email" => nil,
+        "display_name" => row["name"],
+        "handle" => row["handle"],
+        "avatar_url" => update_url(row["avatar_url"]),
+        "external_homepage_url" => nil,
+        "type" => "organization",
+        "bio" => row["description"],
+        "location" => nil,
+        "country" => nil,
+        "timezone" => nil,
+        "stargazers_count" => row["stargazers_count"],
+        "domain" => row["domain"],
+        "tech_stack" => row["tech"],
+        "featured" => row["featured"],
+        "priority" => row["priority"],
+        "fee_pct" => row["fee_pct"],
+        "seeded" => row["seeded"],
+        "activated" => row["active"],
+        "max_open_attempts" => row["max_open_attempts"],
+        "manual_assignment" => row["manual_assignment"],
+        "bounty_mode" => nil,
+        "hourly_rate_min" => nil,
+        "hourly_rate_max" => nil,
+        "hours_per_week" => nil,
+        "website_url" => row["website_url"],
+        "twitter_url" => row["twitter_url"],
+        "github_url" => nil,
+        "youtube_url" => row["youtube_url"],
+        "twitch_url" => nil,
+        "discord_url" => row["discord_url"],
+        "slack_url" => row["slack_url"],
+        "linkedin_url" => nil,
+        "og_title" => nil,
+        "og_image_url" => nil,
+        "last_context" => nil,
+        "need_avatar" => nil,
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"],
+        "is_admin" => false
+      }
+    end
   end
 
   defp transform({"GithubUser", User}, row, _db) do
@@ -324,10 +327,16 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform({"OrgMember", Member}, row, _db) do
+  defp transform({"OrgMember", Member}, row, db) do
+    owner = find_by_index(db, "_MergedUser", "id", row["org_id"])
+
+    if !owner do
+      raise "Owner not found: #{inspect(row)}"
+    end
+
     %{
       "id" => row["id"],
-      "org_id" => row["org_id"],
+      "org_id" => owner["id"],
       "role" => row["role"],
       "user_id" => row["user_id"],
       "inserted_at" => row["created_at"],
@@ -337,15 +346,20 @@ defmodule DatabaseMigration do
 
   defp transform({"Bounty", Bounty}, row, db) do
     reward = find_by_index(db, "Reward", "bounty_id", row["id"])
+    owner = find_by_index(db, "_MergedUser", "id", row["org_id"])
 
     amount = if reward, do: Money.from_integer(String.to_integer(reward["amount"]), reward["currency"])
+
+    if !owner do
+      raise "Owner not found: #{inspect(row)}"
+    end
 
     if row["type"] != "tip" do
       %{
         "id" => row["id"],
         "amount" => amount,
         "ticket_id" => row["task_id"],
-        "owner_id" => row["org_id"],
+        "owner_id" => owner["id"],
         "creator_id" => row["poster_id"],
         "inserted_at" => row["created_at"],
         "updated_at" => row["updated_at"],
@@ -434,7 +448,7 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"BountyCharge", Transaction}, row, db) do
-    user = find_by_index(db, "Org", "id", row["org_id"])
+    user = find_by_index(db, "_MergedUser", "id", row["org_id"])
 
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
@@ -483,7 +497,7 @@ defmodule DatabaseMigration do
     claim = find_by_index(db, "Claim", "id", row["claim_id"])
     github_user = find_by_index(db, "GithubUser", "id", claim["github_user_id"])
     bounty = find_by_index(db, "Bounty", "id", claim["bounty_id"])
-
+    owner = find_by_index(db, "_MergedUser", "id", bounty["org_id"])
     user_id = or_else(github_user["user_id"], github_user["id"])
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
@@ -495,13 +509,17 @@ defmodule DatabaseMigration do
       raise "User not found: #{inspect(row)}"
     end
 
+    if !owner do
+      raise "Owner not found: #{inspect(row)}"
+    end
+
     if bounty["type"] == "tip" do
       %{
         "id" => bounty["id"] <> user_id,
         "amount" => amount,
         "status" => nil,
         "ticket_id" => bounty["task_id"],
-        "owner_id" => bounty["org_id"],
+        "owner_id" => owner["id"],
         "creator_id" => bounty["poster_id"],
         "recipient_id" => user_id,
         "inserted_at" => bounty["created_at"],
@@ -514,7 +532,7 @@ defmodule DatabaseMigration do
     claim = find_by_index(db, "Claim", "id", row["claim_id"])
     bounty = find_by_index(db, "Bounty", "id", claim["bounty_id"])
     github_user = find_by_index(db, "GithubUser", "id", claim["github_user_id"])
-    org = find_by_index(db, "Org", "id", bounty["org_id"])
+    org = find_by_index(db, "_MergedUser", "id", bounty["org_id"])
     bounty_charge = find_by_index(db, "BountyCharge", "id", row["bounty_charge_id"])
 
     user_id = or_else(github_user["user_id"], github_user["id"])
@@ -566,7 +584,13 @@ defmodule DatabaseMigration do
     )
   end
 
-  defp transform({"GithubInstallation", Installation}, row, _db) do
+  defp transform({"GithubInstallation", Installation}, row, db) do
+    connected_user = find_by_index(db, "_MergedUser", "id", row["org_id"])
+
+    if !connected_user do
+      raise "Connected user not found: #{inspect(row)}"
+    end
+
     %{
       "id" => row["id"],
       "provider" => "github",
@@ -575,7 +599,7 @@ defmodule DatabaseMigration do
       "avatar_url" => nil,
       "repository_selection" => nil,
       "owner_id" => nil,
-      "connected_user_id" => row["org_id"],
+      "connected_user_id" => connected_user["id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
       "provider_user_id" => nil
@@ -605,15 +629,21 @@ defmodule DatabaseMigration do
     }
   end
 
-  defp transform({"StripeCustomer", Customer}, row, _db) do
-    if row["org_id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
+  defp transform({"StripeCustomer", Customer}, row, db) do
+    owner = find_by_index(db, "_MergedUser", "id", row["org_id"])
+
+    if !owner do
+      raise "Owner not found: #{inspect(row)}"
+    end
+
+    if owner["id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
       %{
         "id" => row["id"],
         "provider" => "stripe",
         "provider_id" => row["stripe_id"],
         "provider_meta" => nil,
         "name" => row["name"],
-        "user_id" => row["org_id"],
+        "user_id" => owner["id"],
         "inserted_at" => row["created_at"],
         "updated_at" => row["updated_at"]
       }
@@ -621,13 +651,19 @@ defmodule DatabaseMigration do
   end
 
   defp transform({"StripePaymentMethod", PaymentMethod}, row, db) do
-    if row["org_id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
-      customer = find_by_index(db, "StripeCustomer", "org_id", row["org_id"])
+    owner = find_by_index(db, "_MergedUser", "id", row["org_id"])
 
-      if !customer do
-        raise "StripeCustomer not found: #{inspect(row)}"
-      end
+    if !owner do
+      raise "Owner not found: #{inspect(row)}"
+    end
 
+    customer = find_by_index(db, "StripeCustomer", "org_id", row["org_id"])
+
+    if !customer do
+      raise "StripeCustomer not found: #{inspect(row)}"
+    end
+
+    if owner["id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
       %{
         "id" => row["id"],
         "provider" => "stripe",
@@ -765,6 +801,8 @@ defmodule DatabaseMigration do
     |> Stream.run()
   end
 
+  defp user?(row), do: not nullish?(row["email"])
+
   defp collect_data(input_file) do
     db =
       input_file
@@ -790,7 +828,49 @@ defmodule DatabaseMigration do
         Map.put(acc, table, table_indexes)
       end)
 
-    Map.put(db, :indexes, indexes)
+    db = Map.put(db, :indexes, indexes)
+
+    put_in(db, [:indexes, "_MergedUser"], %{"id" => index_merged_users(db)})
+  end
+
+  defp index_merged_users(db) do
+    (db["User"] ++ db["Org"])
+    |> Enum.group_by(fn row ->
+      if user?(row) do
+        github_user = find_by_index(db, "GithubUser", "user_id", row["id"])
+
+        if is_nil(github_user) or nullish?(github_user["login"]) do
+          "algora_" <> row["id"]
+        else
+          "github_" <> github_user["login"]
+        end
+      else
+        if nullish?(row["github_handle"]) do
+          "algora_" <> row["id"]
+        else
+          "github_" <> row["github_handle"]
+        end
+      end
+    end)
+    |> Enum.flat_map(fn {_k, entities} ->
+      case Enum.find(entities, &user?/1) do
+        nil ->
+          case entities do
+            [user] -> [{user["id"], user}]
+            _ -> raise "Unexpected number of users for #{inspect(entities)}"
+          end
+
+        user ->
+          Enum.map(entities, fn row ->
+            if row["id"] != user["id"] do
+              Logger.info("#{row["handle"]} -> #{user["handle"]}")
+            end
+
+            {row["id"], user}
+          end)
+      end
+    end)
+    |> Map.new(fn {k, v} -> {k, v} end)
   end
 
   defp index_by_field(data, field) do
@@ -907,13 +987,11 @@ defmodule DatabaseMigration do
   end
 
   defp ensure_unique_handle(fields) do
-    case fields[:handle] do
-      nil ->
-        fields
-
-      handle ->
-        new_handle = get_unique_handle(handle)
-        Map.put(fields, :handle, new_handle)
+    if nullish?(fields[:handle]) do
+      fields
+    else
+      new_handle = get_unique_handle(fields[:handle])
+      Map.put(fields, :handle, new_handle)
     end
   end
 
@@ -924,6 +1002,10 @@ defmodule DatabaseMigration do
 
     new_handle = if count > 0, do: "#{handle}#{count + 1}", else: handle
     Process.put(:handles, Map.put(handles, downcased_handle, count + 1))
+
+    if count > 0 do
+      Logger.warning("Unique handle collision: #{handle} -> #{new_handle}")
+    end
 
     new_handle
   end
@@ -1144,7 +1226,7 @@ defmodule DatabaseMigration do
           :ok = time_step("Processing dump", fn -> process_dump(input_file, output_file) end)
           :ok = time_step("Clearing tables", fn -> clear_tables!() end)
           {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_file]) end)
-          :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
+          # :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
         end)
 
       IO.puts("\n✓ Migration completed successfully in #{total_time / 1_000_000} seconds")

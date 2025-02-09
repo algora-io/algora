@@ -62,9 +62,9 @@ defmodule DatabaseMigration do
   @index_fields [
     {"User", ["id"]},
     {"GithubUser", ["id", "user_id"]},
-    {"Bounty", ["id", "task_id"]},
+    {"Bounty", ["id"]},
     {"Task", ["id"]},
-    {"Claim", ["id", "bounty_id"]},
+    {"Claim", ["id"]},
     {"BountyCharge", ["id"]},
     {"StripeCustomer", ["org_id"]},
     {"GithubIssue", ["id"]},

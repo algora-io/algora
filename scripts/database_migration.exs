@@ -834,43 +834,83 @@ defmodule DatabaseMigration do
   end
 
   defp index_merged_users(db) do
-    (db["User"] ++ db["Org"])
-    |> Enum.group_by(fn row ->
-      if user?(row) do
-        github_user = find_by_index(db, "GithubUser", "user_id", row["id"])
+    entities =
+      (db["User"] ++ db["Org"])
+      |> Enum.group_by(fn row ->
+        if user?(row) do
+          github_user = find_by_index(db, "GithubUser", "user_id", row["id"])
 
-        if is_nil(github_user) or nullish?(github_user["login"]) do
-          "algora_" <> row["id"]
-        else
-          "github_" <> github_user["login"]
-        end
-      else
-        if nullish?(row["github_handle"]) do
-          "algora_" <> row["id"]
-        else
-          "github_" <> row["github_handle"]
-        end
-      end
-    end)
-    |> Enum.flat_map(fn {_k, entities} ->
-      case Enum.find(entities, &user?/1) do
-        nil ->
-          case entities do
-            [user] -> [{user["id"], user}]
-            _ -> raise "Unexpected number of users for #{inspect(entities)}"
+          if is_nil(github_user) or nullish?(github_user["login"]) do
+            "algora_" <> row["id"]
+          else
+            "github_" <> github_user["login"]
           end
+        else
+          if nullish?(row["github_handle"]) do
+            "algora_" <> row["id"]
+          else
+            "github_" <> row["github_handle"]
+          end
+        end
+      end)
+      |> Enum.flat_map(fn {_k, entities} ->
+        case entities do
+          [user] ->
+            [{:unmerged, user["id"], user}]
 
-        user ->
-          Enum.map(entities, fn row ->
-            if row["id"] != user["id"] do
-              Logger.info("#{row["handle"]} -> #{user["handle"]}")
+          entities ->
+            case Enum.find(entities, &user?/1) do
+              nil ->
+                raise "Unexpected number of users for #{inspect(entities)}"
+
+              user ->
+                Enum.map(entities, fn row ->
+                  # if row["id"] != user["id"], do: Logger.info("[same github user] #{row["handle"]} -> #{user["handle"]}")
+                  {:merged, row["id"], user}
+                end)
+            end
+        end
+      end)
+      |> Enum.group_by(fn {type, _id, _user} -> type end)
+
+    merged1 =
+      entities
+      |> Map.get(:merged, [])
+      |> Map.new(fn {_type, id, user} -> {id, user} end)
+
+    merged2 =
+      entities
+      |> Map.get(:unmerged, [])
+      |> Enum.map(fn {_type, _id, row} -> row end)
+      |> Enum.group_by(fn row -> row["handle"] end)
+      |> Enum.flat_map(fn {handle, entities} ->
+        case entities do
+          [entity] ->
+            [{entity["id"], entity}]
+
+          [_entity1, _entity2] ->
+            user = Enum.find(entities, &user?/1)
+            org = Enum.find(entities, &(not user?(&1)))
+
+            if is_nil(user) or is_nil(org) do
+              raise "User or org not found for handle #{handle}: #{inspect(entities)}"
             end
 
-            {row["id"], user}
-          end)
-      end
-    end)
-    |> Map.new(fn {k, v} -> {k, v} end)
+            if org["creator_id"] == user["id"] do
+              # Logger.info("[same handle] #{org["handle"]} -> #{user["handle"]}")
+              Enum.map(entities, fn row -> {row["id"], user} end)
+            else
+              Logger.warning("Org #{org["handle"]} was not created by user #{user["handle"]}")
+              Enum.map(entities, fn row -> {row["id"], row} end)
+            end
+
+          _ ->
+            raise "Unexpected number of entities for handle #{handle}: #{inspect(entities)}"
+        end
+      end)
+      |> Map.new()
+
+    Map.merge(merged1, merged2)
   end
 
   defp index_by_field(data, field) do

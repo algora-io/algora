@@ -356,10 +356,18 @@ defmodule DatabaseMigration do
       raise "Owner not found: #{inspect(row)}"
     end
 
+    transfer = find_by_index(db, "_BountyTransfer", "bounty_id", row["id"])
+
     if row["type"] != "tip" do
       %{
         "id" => row["id"],
         "amount" => amount,
+        "status" =>
+          cond do
+            not is_nil(transfer) -> :paid
+            row["deleted_at"] || row["status"] == "inactive" -> :cancelled
+            true -> :open
+          end,
         "ticket_id" => row["task_id"],
         "owner_id" => owner["id"],
         "creator_id" => row["poster_id"],
@@ -832,7 +840,19 @@ defmodule DatabaseMigration do
 
     db = Map.put(db, :indexes, indexes)
 
-    put_in(db, [:indexes, "_MergedUser"], %{"id" => index_merged_users(db)})
+    db
+    |> put_in([:indexes, "_MergedUser"], %{"id" => index_merged_users(db)})
+    |> put_in([:indexes, "_BountyTransfer"], %{
+      "bounty_id" =>
+        Enum.group_by(db["BountyTransfer"], fn row ->
+          claim = find_by_index(db, "Claim", "id", row["claim_id"])
+          charge = find_by_index(db, "BountyCharge", "id", row["bounty_charge_id"])
+
+          if charge["succeeded_at"] do
+            claim["bounty_id"]
+          end
+        end)
+    })
   end
 
   defp index_merged_users(db) do

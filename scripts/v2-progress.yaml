@@ -28,7 +28,7 @@
 - bounties:
     - id: 1
     - amount: 1
-    - status: 0
+    - status: 1
     - ticket_id: 1
     - owner_id: 1
     - creator_id: 1

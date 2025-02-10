@@ -334,14 +334,16 @@ defmodule DatabaseMigration do
       raise "Owner not found: #{inspect(row)}"
     end
 
-    %{
-      "id" => row["id"],
-      "org_id" => owner["id"],
-      "role" => row["role"],
-      "user_id" => row["user_id"],
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"]
-    }
+    if owner["id"] != row["user_id"] do
+      %{
+        "id" => row["id"],
+        "org_id" => owner["id"],
+        "role" => row["role"],
+        "user_id" => row["user_id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"]
+      }
+    end
   end
 
   defp transform({"Bounty", Bounty}, row, db) do
@@ -1263,8 +1265,8 @@ defmodule DatabaseMigration do
   end
 
   def run! do
-    input_file = ".local/prod_db.sql"
-    output_file = ".local/prod_db_new.sql"
+    input_file = ".local/db/v1-data-2025-02-10.sql"
+    output_file = ".local/db/v2-data-2025-02-10.sql"
 
     if File.exists?(input_file) or File.exists?(output_file) do
       IO.puts("\nStarting migration...")

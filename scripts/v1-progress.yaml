@@ -360,11 +360,11 @@
     - github_handle: 1
     - active: 1
 - "OrgBalanceTransaction":
-    - id: -1
-    - created_at: -1
-    - org_id: -1
-    - amount: -1
-    - currency: -1
+    - id: 1
+    - created_at: 1
+    - org_id: 1
+    - amount: 1
+    - currency: 1
     - type: -1
     - effect: -1
     - tier: -1

@@ -53,6 +53,7 @@ defmodule DatabaseMigration do
     {"BountyCharge", Transaction},
     {"BountyTransfer", Tip},
     {"BountyTransfer", Transaction},
+    {"OrgBalanceTransaction", Transaction},
     {"GithubInstallation", Installation},
     {"StripeAccount", Account},
     {"StripeCustomer", Customer},
@@ -592,6 +593,55 @@ defmodule DatabaseMigration do
       ],
       &is_nil/1
     )
+  end
+
+  defp transform({"OrgBalanceTransaction", Transaction}, row, db) do
+    user = find_by_index(db, "_MergedUser", "id", row["org_id"])
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
+    end
+
+    amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
+
+    {abs_amount, type} =
+      if Money.positive?(amount) do
+        {amount, "credit"}
+      else
+        {Money.negate!(amount), "debit"}
+      end
+
+    %{
+      "id" => row["id"],
+      "provider" => "stripe",
+      "provider_id" => nil,
+      "provider_charge_id" => nil,
+      "provider_payment_intent_id" => nil,
+      "provider_transfer_id" => nil,
+      "provider_invoice_id" => nil,
+      "provider_balance_transaction_id" => nil,
+      "provider_meta" => nil,
+      "gross_amount" => abs_amount,
+      "net_amount" => abs_amount,
+      "total_fee" => Money.zero(:USD),
+      "provider_fee" => nil,
+      "line_items" => nil,
+      "type" => type,
+      "status" => :succeeded,
+      "succeeded_at" => row["created_at"],
+      "reversed_at" => nil,
+      "group_id" => row["id"],
+      "user_id" => user["id"],
+      "contract_id" => nil,
+      "original_contract_id" => nil,
+      "timesheet_id" => nil,
+      "bounty_id" => nil,
+      "tip_id" => nil,
+      "linked_transaction_id" => nil,
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["created_at"],
+      "claim_id" => nil
+    }
   end
 
   defp transform({"GithubInstallation", Installation}, row, db) do
@@ -1285,8 +1335,8 @@ defmodule DatabaseMigration do
   end
 
   def run! do
-    input_file = ".local/db/v1-data-2025-02-10.sql"
-    output_file = ".local/db/v2-data-2025-02-10.sql"
+    input_file = ".local/db/v1-data-2025-02-13.sql"
+    output_file = ".local/db/v2-data-2025-02-13.sql"
 
     if File.exists?(input_file) or File.exists?(output_file) do
       IO.puts("\nStarting migration...")

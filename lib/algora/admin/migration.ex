@@ -6,7 +6,7 @@ defmodule Algora.Admin.Migration do
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
-  @balances_file ".local/db/balance-2025-02-10.json"
+  @balances_file ".local/db/balance-2025-02-13.json"
 
   def get_actual_balances(type) do
     with {:ok, content} <- File.read(@balances_file),
@@ -23,7 +23,9 @@ defmodule Algora.Admin.Migration do
   end
 
   def get_balances(type) do
-    Enum.filter(get_balances(), &(&1.type == type))
+    get_balances()
+    |> Enum.filter(&(&1.type == type))
+    |> Enum.reject(&(&1.provider_login in ["algora-io", "Uber4Coding"]))
   end
 
   def get_balances do
@@ -47,9 +49,9 @@ defmodule Algora.Admin.Migration do
                 """
                   CASE
                     WHEN ? = 'credit' THEN ?
-                    WHEN ? = 'debit' THEN money_negate(?)
+                    WHEN ? = 'debit' THEN -?
                     WHEN ? = 'charge' THEN ?
-                    WHEN ? = 'transfer' THEN money_negate(?)
+                    WHEN ? = 'transfer' THEN -?
                     ELSE ('USD', 0)::money_with_currency
                   END
                 """,
@@ -84,6 +86,10 @@ defmodule Algora.Admin.Migration do
         {currency, amount} = user.balance
         %{user | balance: Money.new!(currency, amount)}
     end)
+  end
+
+  def diff_balances do
+    diff_balances(:individual) ++ diff_balances(:organization)
   end
 
   def diff_balances(type) do

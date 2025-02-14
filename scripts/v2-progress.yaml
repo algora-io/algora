@@ -43,7 +43,7 @@
     - updated_at: -1
 - claims:
     - id: 1
-    - status: 0
+    - status: 1
     - type: 1
     - url: 1
     - group_id: 1

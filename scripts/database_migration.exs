@@ -439,8 +439,11 @@ defmodule DatabaseMigration do
 
     %{
       "id" => row["id"],
-      # TODO:
-      "status" => :pending,
+      "status" =>
+        case row["status"] do
+          "accepted" -> :approved
+          _ -> :pending
+        end,
       "type" =>
         cond do
           !nullish?(row["github_pull_request_id"]) -> "pull_request"

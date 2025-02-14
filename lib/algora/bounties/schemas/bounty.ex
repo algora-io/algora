@@ -9,6 +9,7 @@ defmodule Algora.Bounties.Bounty do
   typed_schema "bounties" do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
+    field :number, :integer, default: 0
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
@@ -33,7 +34,7 @@ defmodule Algora.Bounties.Bounty do
     |> foreign_key_constraint(:ticket)
     |> foreign_key_constraint(:owner)
     |> foreign_key_constraint(:creator)
-    |> unique_constraint([:ticket_id, :owner_id])
+    |> unique_constraint([:ticket_id, :owner_id, :number])
     |> Algora.Validations.validate_money_positive(:amount)
   end
 

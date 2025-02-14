@@ -9,8 +9,8 @@ defmodule Algora.Workspace.Installation do
   typed_schema "installations" do
     field :provider, :string, null: false
     field :provider_id, :string, null: false
-    field :provider_meta, :map, null: false
-    field :provider_user_id, :string, null: false
+    field :provider_meta, :map
+    field :provider_user_id, :string
 
     field :avatar_url, :string
     field :repository_selection, :string

@@ -7,7 +7,7 @@ defmodule Algora.Workspace.CommandResponse do
 
   typed_schema "command_responses" do
     field :provider, :string, null: false
-    field :provider_meta, :map, null: false
+    field :provider_meta, :map
     field :provider_command_id, :string
     field :provider_response_id, :string, null: false
     field :command_source, Ecto.Enum, values: [:ticket, :comment], null: false

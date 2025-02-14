@@ -79,7 +79,9 @@ defmodule Algora.Bounties.PrizePool do
     top_bounties = fetch_top_bounties(ticket_ids)
 
     Enum.map(tickets, fn ticket ->
-      Map.put(ticket, :top_bounties, Map.get(top_bounties, ticket.ticket_id, []))
+      ticket
+      |> Map.put(:top_bounties, Map.get(top_bounties, ticket.ticket_id, []))
+      |> Map.put(:total_bounty_amount, ticket.total_bounty_amount || Money.zero(:USD))
     end)
   end
 

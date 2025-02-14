@@ -11,16 +11,17 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Wordmarks
+  alias AlgoraWeb.Data.PlatformStats
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
     Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
 
     stats = [
-      %{label: "Paid Out", value: Money.to_string!(get_total_paid_out())},
-      %{label: "Completed Bounties", value: number_to_delimited(get_completed_bounties_count())},
-      %{label: "Contributors", value: number_to_delimited(get_contributors_count())},
-      %{label: "Countries", value: number_to_delimited(get_countries_count())}
+      %{label: "Paid Out", value: format_money(get_total_paid_out())},
+      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())},
+      %{label: "Contributors", value: format_number(get_contributors_count())},
+      %{label: "Countries", value: format_number(get_countries_count())}
     ]
 
     {:ok,
@@ -331,27 +332,47 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp get_total_paid_out do
-    Repo.one(
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded,
-        select: sum(t.net_amount)
-    ) || Money.new(0, :USD)
+    subtotal =
+      Repo.one(
+        from t in Transaction,
+          where: t.type == :credit and t.status == :succeeded,
+          select: sum(t.net_amount)
+      ) || Money.new(0, :USD)
+
+    subtotal |> Money.add!(PlatformStats.get().extra_paid_out) |> Money.round(currency_digits: 0)
   end
 
   defp get_completed_bounties_count do
-    Repo.one(
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded and not is_nil(t.bounty_id),
-        select: count(fragment("DISTINCT ?", t.bounty_id))
-    ) || 0
+    bounties_subtotal =
+      Repo.one(
+        from t in Transaction,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.bounty_id),
+          select: count(fragment("DISTINCT ?", t.bounty_id))
+      ) || 0
+
+    tips_subtotal =
+      Repo.one(
+        from t in Transaction,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.tip_id),
+          select: count(fragment("DISTINCT ?", t.tip_id))
+      ) || 0
+
+    bounties_subtotal + tips_subtotal + PlatformStats.get().extra_completed_bounties
   end
 
   defp get_contributors_count do
-    Repo.one(
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded,
-        select: count(fragment("DISTINCT ?", t.user_id))
-    ) || 0
+    subtotal =
+      Repo.one(
+        from t in Transaction,
+          where: t.type == :credit and t.status == :succeeded,
+          select: count(fragment("DISTINCT ?", t.user_id))
+      ) || 0
+
+    subtotal + PlatformStats.get().extra_contributors
   end
 
   defp get_countries_count do
@@ -426,5 +447,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp number_to_delimited(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+
+  defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 end

@@ -427,7 +427,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
                       {@account.default_currency |> String.upcase()}
                     </dd>
                   </div>
-                  <%= if bank_account = Enum.find(get_in(@account.provider_meta, ["external_accounts", "data"]), fn account -> account["default_for_currency"] end) do %>
+                  <%= if bank_account = Enum.find(get_in(@account.provider_meta, ["external_accounts", "data"]) || [], fn account -> account["default_for_currency"] end) do %>
                     <div>
                       <dt class="text-sm font-medium text-muted-foreground">Bank Account</dt>
                       <dd class="text-sm font-semibold">

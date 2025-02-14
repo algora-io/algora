@@ -18,9 +18,9 @@ defmodule AlgoraWeb.HomeLive do
 
     stats = [
       %{label: "Paid Out", value: Money.to_string!(get_total_paid_out())},
-      %{label: "Completed Bounties", value: get_completed_bounties_count()},
-      %{label: "Contributors", value: get_contributors_count()},
-      %{label: "Countries", value: get_countries_count()}
+      %{label: "Completed Bounties", value: number_to_delimited(get_completed_bounties_count())},
+      %{label: "Contributors", value: number_to_delimited(get_contributors_count())},
+      %{label: "Countries", value: number_to_delimited(get_countries_count())}
     ]
 
     {:ok,
@@ -424,4 +424,6 @@ defmodule AlgoraWeb.HomeLive do
     <% end %>
     """
   end
+
+  defp number_to_delimited(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 end

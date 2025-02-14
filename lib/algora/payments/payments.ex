@@ -79,6 +79,8 @@ defmodule Algora.Payments do
 
   def get_customer_by(fields), do: Repo.get_by(Customer, fields)
 
+  def fetch_customer_by(fields), do: Repo.fetch_by(Customer, fields)
+
   def get_default_payment_method(org) do
     Repo.one(
       from(pm in PaymentMethod,
@@ -136,6 +138,37 @@ defmodule Algora.Payments do
     |> preload(linked_transaction: :user)
     |> order_by([t], desc: t.inserted_at)
     |> Repo.all()
+  end
+
+  def fetch_or_create_customer(org, user) do
+    case fetch_customer_by(user_id: org.id) do
+      {:ok, customer} -> {:ok, customer}
+      {:error, :not_found} -> create_customer(org, user)
+    end
+  end
+
+  def create_customer(org, user) do
+    with {:ok, stripe_customer} <- Stripe.Customer.create(%{name: org.name, email: user.email}) do
+      Algora.Repo.insert(%Algora.Payments.Customer{
+        provider: "stripe",
+        provider_id: stripe_customer.id,
+        provider_meta: stripe_customer,
+        user_id: org.id,
+        name: org.name
+      })
+    end
+  end
+
+  def create_stripe_setup_session(customer, success_url, cancel_url) do
+    Stripe.Session.create(%{
+      billing_address_collection: "required",
+      mode: "setup",
+      payment_method_types: ["card"],
+      success_url: success_url,
+      cancel_url: cancel_url,
+      customer: customer.provider_id,
+      metadata: %{version: Algora.Payments.metadata_version(), customer_id: customer.provider_id}
+    })
   end
 
   @spec fetch_or_create_account(user :: User.t(), country :: String.t()) ::

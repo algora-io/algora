@@ -5,7 +5,10 @@ defmodule AlgoraWeb.Org.SettingsLive do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
+  alias Algora.Payments
   alias AlgoraWeb.Components.Logos
+
+  require Logger
 
   def render(assigns) do
     ~H"""
@@ -14,6 +17,36 @@ defmodule AlgoraWeb.Org.SettingsLive do
         <h1 class="text-2xl font-bold">Settings</h1>
         <p class="text-muted-foreground">Update your settings and preferences</p>
       </div>
+
+      <.card>
+        <.card_header>
+          <.card_title>
+            <div class="flex items-center gap-2">
+              Auto-pay on merge
+            </div>
+          </.card_title>
+          <.card_description>
+            Once enabled, we will charge your saved payment method automatically when
+          </.card_description>
+          <ul class="mt-1 pl-4 list-disc text-sm text-muted-foreground">
+            <li>a pull request that claims a bounty is merged</li>
+            <li>
+              <.badge><code>/tip</code></.badge>
+              command is used by you or any other
+              <.link navigate={~p"/org/#{@current_org.handle}/team"} class="font-semibold">
+                {@current_org.name} admins
+              </.link>
+            </li>
+          </ul>
+        </.card_header>
+        <.card_content>
+          <div class="flex">
+            <.button phx-click="setup_payment" class="ml-auto">
+              <.icon name="tabler-brand-stripe" class="w-5 h-5 mr-2 -ml-1" /> Save card with Stripe
+            </.button>
+          </div>
+        </.card_content>
+      </.card>
 
       <.card>
         <.card_header>
@@ -37,14 +70,14 @@ defmodule AlgoraWeb.Org.SettingsLive do
                   </div>
                 </div>
               <% end %>
-              <.button phx-click="install_app" class="ml-auto gap-2">
-                <Logos.github class="w-4 h-4 mr-2 -ml-1" />
+              <.button phx-click="install_app" class="ml-auto">
+                <Logos.github class="w-5 h-5 mr-2 -ml-1" />
                 Manage {ngettext("installation", "installations", length(@installations))}
               </.button>
             <% else %>
-              <div class="flex flex-col gap-2">
-                <.button phx-click="install_app" class="ml-auto gap-2">
-                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+              <div class="flex flex-col">
+                <.button phx-click="install_app" class="ml-auto">
+                  <Logos.github class="w-5 h-5 mr-2 -ml-1" /> Install GitHub App
                 </.button>
               </div>
             <% end %>
@@ -143,6 +176,21 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, changeset)}
+    end
+  end
+
+  def handle_event("setup_payment", _params, socket) do
+    %{current_org: org, current_user: user} = socket.assigns
+    success_url = ~p"/org/#{org.handle}/settings"
+    cancel_url = ~p"/org/#{org.handle}/settings"
+
+    with {:ok, customer} <- Payments.fetch_or_create_customer(org, user),
+         {:ok, session} <- Payments.create_stripe_setup_session(customer, success_url, cancel_url) do
+      {:noreply, redirect(socket, external: session.url)}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to create setup session: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 

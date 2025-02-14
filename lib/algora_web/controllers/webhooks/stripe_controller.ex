@@ -81,6 +81,36 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   @impl true
+  def handle_event(%Stripe.Event{
+        type: "checkout.session.completed",
+        data: %{
+          object: %Stripe.Session{
+            metadata: %{"version" => @metadata_version, "customer_id" => customer_id},
+            mode: "setup",
+            setup_intent: setup_intent_id
+          }
+        }
+      })
+      when is_binary(customer_id) do
+    with {:ok, setup_intent} <- Stripe.SetupIntent.retrieve(setup_intent_id, %{}),
+         {:ok, payment_method} <-
+           Stripe.PaymentMethod.attach(%{payment_method: setup_intent.payment_method, customer: customer_id}),
+         {:ok, payment_method} <- Stripe.PaymentMethod.retrieve(payment_method.id, %{}),
+         {:ok, customer} <- Repo.fetch(Customer, customer_id),
+         {:ok, _} <-
+           Repo.insert(%Algora.Payments.PaymentMethod{
+             provider: "stripe",
+             provider_id: payment_method.id,
+             provider_meta: Util.normalize_struct(payment_method),
+             provider_customer_id: customer.provider_id,
+             customer_id: customer.id,
+             is_default: true
+           }) do
+      :ok
+    end
+  end
+
+  @impl true
   def handle_event(%Stripe.Event{type: "checkout.session.completed"} = event) do
     Logger.info("Stripe #{event.type} event: #{event.id}")
   end

@@ -37,6 +37,7 @@ defmodule Algora.Bounties.PrizePool do
   def base_query(criteria \\ []) do
     bounty_subquery =
       from(b in Bounty)
+      |> where([b], not is_nil(b.amount))
       |> apply_criteria(criteria)
       |> group_by([b], b.ticket_id)
       |> select([b], %{

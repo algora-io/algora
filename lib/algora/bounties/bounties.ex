@@ -710,6 +710,7 @@ defmodule Algora.Bounties do
     |> join(:inner, [b], o in assoc(b, :owner), as: :o)
     |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
+    |> where([b], not is_nil(b.amount))
     |> apply_criteria(criteria)
     |> order_by([b], desc: b.amount, desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{

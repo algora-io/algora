@@ -71,7 +71,7 @@
     - poster_id: 1
     - org_id: 1
     - task_id: 1
-    - status: 0
+    - status: 1
     - github_req_comment_id: 1
     - github_res_comment_id: 1
     - type: 0

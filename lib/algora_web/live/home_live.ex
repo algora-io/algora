@@ -309,7 +309,8 @@ defmodule AlgoraWeb.HomeLive do
       />
       <div class="font-display mt-1 rounded-xl rounded-t-none bg-card/50 p-3 text-sm ring-1 ring-border backdrop-blur-sm">
         <div class="font-semibold text-foreground">{@dev.name} {@dev.flag}</div>
-        <div class="mt-1 text-sm">
+        <div class="mt-0.5 text-xs font-medium text-foreground">{@dev.bio}</div>
+        <div class="hidden mt-1 text-sm">
           <div class="-ml-1 flex h-6 flex-wrap gap-1 overflow-hidden p-px text-sm">
             <%= for tech <- @dev.tech_stack do %>
               <span class="rounded-xl bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground ring-1 ring-border">
@@ -318,9 +319,9 @@ defmodule AlgoraWeb.HomeLive do
             <% end %>
           </div>
         </div>
-        <div class="mt-3 text-xs text-muted-foreground">
+        <div class="mt-0.5 text-xs text-muted-foreground">
           <span class="font-medium">Total Earned:</span>
-          <span class="text-sm font-bold text-foreground">
+          <span class="text-sm font-bold text-success">
             {Money.to_string!(@dev.total_earned, no_fraction_if_integer: true)}
           </span>
         </div>

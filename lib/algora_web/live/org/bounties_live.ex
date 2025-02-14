@@ -198,7 +198,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <div class="min-w-[180px]">
                         <div class="flex items-center justify-end gap-4">
-                          <.button href={hd(claims).source.url} variant="secondary">
+                          <.button
+                            :if={hd(claims).source}
+                            href={hd(claims).source.url}
+                            variant="secondary"
+                          >
                             View
                           </.button>
                           <.button href={~p"/claims/#{hd(claims).group_id}"}>

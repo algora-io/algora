@@ -14,6 +14,7 @@ defmodule Algora.Accounts do
 
   @type criterion ::
           {:id, binary()}
+          | {:ids, [binary()]}
           | {:org_id, binary()}
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
@@ -27,6 +28,9 @@ defmodule Algora.Accounts do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([b] in query, where: b.id == ^id)
+
+      {:ids, ids}, query ->
+        from([b] in query, where: b.id in ^ids)
 
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)

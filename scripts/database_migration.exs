@@ -1331,9 +1331,9 @@ defmodule DatabaseMigration do
   end
 
   defp time_step(description, function) do
-    IO.puts("\n#{description}...")
+    IO.puts("⏳ #{description}...")
     {time, result} = :timer.tc(function)
-    IO.puts("✓ #{description} completed in #{time / 1_000_000} seconds")
+    IO.puts("✅ #{description} completed in #{time / 1_000_000} seconds")
     result
   end
 
@@ -1341,18 +1341,20 @@ defmodule DatabaseMigration do
     input_file = ".local/db/v1-data-2025-02-13.sql"
     output_file = ".local/db/v2-data-2025-02-13.sql"
 
+    System.put_env("MIGRATION", "true")
+
     if File.exists?(input_file) or File.exists?(output_file) do
-      IO.puts("\nStarting migration...")
+      IO.puts("⏳ Starting migration...")
 
       {total_time, _} =
         :timer.tc(fn ->
           :ok = time_step("Processing dump", fn -> process_dump(input_file, output_file) end)
           :ok = time_step("Clearing tables", fn -> clear_tables!() end)
           {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_file]) end)
-          # :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
+          :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
         end)
 
-      IO.puts("\n✓ Migration completed successfully in #{total_time / 1_000_000} seconds")
+      IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
     end
   end
 end

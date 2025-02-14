@@ -310,7 +310,7 @@ defmodule AlgoraWeb.HomeLive do
       />
       <div class="font-display mt-1 rounded-xl rounded-t-none bg-card/50 p-3 text-sm ring-1 ring-border backdrop-blur-sm">
         <div class="font-semibold text-foreground">{@dev.name} {@dev.flag}</div>
-        <div class="mt-0.5 text-xs font-medium text-foreground">{@dev.bio}</div>
+        <div class="mt-0.5 text-xs font-medium text-foreground line-clamp-2">{@dev.bio}</div>
         <div class="hidden mt-1 text-sm">
           <div class="-ml-1 flex h-6 flex-wrap gap-1 overflow-hidden p-px text-sm">
             <%= for tech <- @dev.tech_stack do %>

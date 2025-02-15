@@ -1,13 +1,19 @@
 defmodule AlgoraWeb.Webhooks.GithubController do
   use AlgoraWeb, :controller
 
+  import Ecto.Query
+
   alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
   alias Algora.Github
   alias Algora.Github.Webhook
   alias Algora.Repo
   alias Algora.Workspace
   alias Algora.Workspace.CommandResponse
+  alias Algora.Workspace.Installation
+  alias Algora.Workspace.Ticket
 
   require Logger
 
@@ -15,9 +21,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: auto-retry failed deliveries with exponential backoff
 
   def new(conn, params) do
-    with {:ok, webhook} <- Webhook.new(conn),
+    with {:ok, %{event: event} = webhook} <- Webhook.new(conn),
          :ok <- ensure_human_author(webhook, params),
-         {:ok, _} <- process_commands(webhook, params) do
+         author = get_author(event, params),
+         body = get_body(event, params),
+         event_action = event <> "." <> params["action"],
+         {:ok, _} <- process_commands(webhook, event_action, author, body, params),
+         :ok <- process_event(event_action, params) do
       conn |> put_status(:accepted) |> json(%{status: "ok"})
     else
       {:error, :bot_event} ->
@@ -62,6 +72,73 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
+
+  defp process_event(event_action, params) when event_action in ["pull_request.closed"] do
+    %{"repository" => repository, "pull_request" => pull_request, "installation" => installation} = params
+
+    with {:ok, token} <- Github.get_installation_token(installation["id"]),
+         {:ok, source} <-
+           Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
+      # TODO: handle multi claims
+      claim =
+        Repo.one(
+          from c in Claim,
+            join: s in assoc(c, :source),
+            join: t in assoc(c, :target),
+            join: u in assoc(c, :user),
+            where: s.id == ^source.id,
+            where: u.provider == "github",
+            where: u.provider_id == ^to_string(pull_request["user"]["id"]),
+            preload: [source: s, target: t, user: u],
+            order_by: [asc: c.inserted_at],
+            limit: 1
+        )
+
+      if claim do
+        installation =
+          Repo.one(
+            from i in Installation,
+              where: i.provider == "github",
+              where: i.provider_id == ^to_string(installation["id"])
+          )
+
+        bounties =
+          Repo.all(
+            from(b in Bounty,
+              join: t in assoc(b, :ticket),
+              join: o in assoc(b, :owner),
+              left_join: c in assoc(o, :customer),
+              left_join: p in assoc(c, :default_payment_method),
+              where: t.id == ^claim.target_id,
+              select_merge: %{owner: %{o | customer: %{default_payment_method: p}}}
+            )
+          )
+
+        bounties |> Enum.map(& &1.owner.customer) |> dbg()
+
+        autopayable_bounties =
+          Enum.filter(
+            bounties,
+            &(not is_nil(installation) and
+                &1.owner.id == installation.connected_user_id and
+                not is_nil(&1.owner.customer) and
+                not is_nil(&1.owner.customer.default_payment_method))
+          )
+
+        dbg(autopayable_bounties)
+
+        # TODO: auto-pay bounties
+        # TODO: update claim status
+        # TODO: notify non autopayable bounty sponsors
+      end
+
+      :ok
+    end
+  end
+
+  defp process_event(_event_action, _params) do
+    :ok
+  end
 
   defp execute_command(event_action, {:bounty, args}, author, params)
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
@@ -242,12 +319,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  def process_commands(%Webhook{event: event, hook_id: hook_id}, params) do
-    author = get_author(event, params)
-    body = get_body(event, params)
-
-    event_action = event <> "." <> params["action"]
-
+  def process_commands(%Webhook{hook_id: hook_id}, event_action, author, body, params) do
     case build_commands(body) do
       {:ok, commands} ->
         Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->

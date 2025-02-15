@@ -5,7 +5,10 @@ defmodule AlgoraWeb.Org.SettingsLive do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
+  alias Algora.Payments
   alias AlgoraWeb.Components.Logos
+
+  require Logger
 
   def render(assigns) do
     ~H"""
@@ -14,6 +17,42 @@ defmodule AlgoraWeb.Org.SettingsLive do
         <h1 class="text-2xl font-bold">Settings</h1>
         <p class="text-muted-foreground">Update your settings and preferences</p>
       </div>
+
+      <.card>
+        <.card_header>
+          <.card_title>
+            <div class="flex items-center gap-2">
+              Auto-pay on merge
+            </div>
+          </.card_title>
+          <.card_description>
+            Once enabled, we will charge your saved payment method automatically when
+          </.card_description>
+          <ul class="mt-1 pl-4 list-disc text-sm text-muted-foreground">
+            <li>a pull request that claims a bounty is merged</li>
+            <li>
+              <.badge><code>/tip</code></.badge>
+              command is used by you or any other
+              <.link navigate={~p"/org/#{@current_org.handle}/team"} class="font-semibold">
+                {@current_org.name} admins
+              </.link>
+            </li>
+          </ul>
+        </.card_header>
+        <.card_content>
+          <div class="flex">
+            <%= if @has_default_payment_method do %>
+              <.badge class="ml-auto text-sm px-3 py-2" variant="success">
+                <.icon name="tabler-check" class="w-5 h-5 mr-1 -ml-1" /> Enabled
+              </.badge>
+            <% else %>
+              <.button phx-click="setup_payment" class="ml-auto">
+                <.icon name="tabler-brand-stripe" class="w-5 h-5 mr-2 -ml-1" /> Save card with Stripe
+              </.button>
+            <% end %>
+          </div>
+        </.card_content>
+      </.card>
 
       <.card>
         <.card_header>
@@ -37,14 +76,14 @@ defmodule AlgoraWeb.Org.SettingsLive do
                   </div>
                 </div>
               <% end %>
-              <.button phx-click="install_app" class="ml-auto gap-2">
-                <Logos.github class="w-4 h-4 mr-2 -ml-1" />
+              <.button phx-click="install_app" class="ml-auto">
+                <Logos.github class="w-5 h-5 mr-2 -ml-1" />
                 Manage {ngettext("installation", "installations", length(@installations))}
               </.button>
             <% else %>
-              <div class="flex flex-col gap-2">
-                <.button phx-click="install_app" class="ml-auto gap-2">
-                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+              <div class="flex flex-col">
+                <.button phx-click="install_app" class="ml-auto">
+                  <Logos.github class="w-5 h-5 mr-2 -ml-1" /> Install GitHub App
                 </.button>
               </div>
             <% end %>
@@ -101,6 +140,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+      Payments.subscribe()
     end
 
     %{current_org: current_org} = socket.assigns
@@ -112,11 +152,16 @@ defmodule AlgoraWeb.Org.SettingsLive do
      socket
      |> assign(:installations, installations)
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+     |> assign_has_default_payment_method()
      |> assign_form(changeset)}
   end
 
   def handle_info({:authenticated, user}, socket) do
     {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
+  end
+
+  def handle_info(:payments_updated, socket) do
+    {:noreply, assign_has_default_payment_method(socket)}
   end
 
   def handle_event("install_app", _params, socket) do
@@ -146,6 +191,21 @@ defmodule AlgoraWeb.Org.SettingsLive do
     end
   end
 
+  def handle_event("setup_payment", _params, socket) do
+    %{current_org: org} = socket.assigns
+    success_url = url(~p"/org/#{org.handle}/settings")
+    cancel_url = url(~p"/org/#{org.handle}/settings")
+
+    with {:ok, customer} <- Payments.fetch_or_create_customer(org),
+         {:ok, session} <- Payments.create_stripe_setup_session(customer, success_url, cancel_url) do
+      {:noreply, redirect(socket, external: session.url)}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to create setup session: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
+  end
+
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -156,5 +216,9 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
+  end
+
+  defp assign_has_default_payment_method(socket) do
+    assign(socket, :has_default_payment_method, Payments.has_default_payment_method?(socket.assigns.current_org.id))
   end
 end

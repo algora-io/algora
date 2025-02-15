@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Query
 
   alias Algora.Payments
+  alias Algora.Payments.Customer
   alias Algora.Payments.Jobs.ExecutePendingTransfers
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -77,6 +78,21 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       error ->
         Logger.error("Failed to update transaction: #{inspect(error)}")
         {:error, :failed_to_update_transaction}
+    end
+  end
+
+  @impl true
+  def handle_event(%Stripe.Event{
+        type: "checkout.session.completed",
+        data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
+      }) do
+    with {:ok, setup_intent} <- Stripe.SetupIntent.retrieve(setup_intent_id, %{}),
+         pm_id = setup_intent.payment_method,
+         {:ok, payment_method} <- Stripe.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
+         {:ok, customer} <- Repo.fetch_by(Customer, provider: "stripe", provider_id: customer_id),
+         {:ok, _} <- Payments.create_payment_method(customer, payment_method) do
+      Payments.broadcast()
+      :ok
     end
   end
 

@@ -140,25 +140,69 @@ defmodule Algora.Payments do
     |> Repo.all()
   end
 
-  def fetch_or_create_customer(org, user) do
-    case fetch_customer_by(user_id: org.id) do
+  @spec fetch_or_create_customer(user :: User.t()) ::
+          {:ok, Customer.t()} | {:error, Ecto.Changeset.t()} | {:error, Stripe.Error.t()}
+  def fetch_or_create_customer(user) do
+    case fetch_customer_by(user_id: user.id) do
       {:ok, customer} -> {:ok, customer}
-      {:error, :not_found} -> create_customer(org, user)
+      {:error, :not_found} -> create_customer(user)
     end
   end
 
-  def create_customer(org, user) do
-    with {:ok, stripe_customer} <- Stripe.Customer.create(%{name: org.name, email: user.email}) do
-      Algora.Repo.insert(%Algora.Payments.Customer{
+  @spec create_customer(user :: User.t()) ::
+          {:ok, Customer.t()} | {:error, Ecto.Changeset.t()} | {:error, Stripe.Error.t()}
+  def create_customer(user) do
+    with {:ok, stripe_customer} <- Stripe.Customer.create(%{name: user.name}) do
+      %Customer{}
+      |> Customer.changeset(%{
         provider: "stripe",
         provider_id: stripe_customer.id,
-        provider_meta: stripe_customer,
-        user_id: org.id,
-        name: org.name
+        provider_meta: Util.normalize_struct(stripe_customer),
+        user_id: user.id,
+        name: user.name
       })
+      |> Repo.insert()
     end
   end
 
+  @spec create_payment_method(customer :: Customer.t(), payment_method :: Stripe.PaymentMethod.t()) ::
+          {:ok, PaymentMethod.t()} | {:error, Ecto.Changeset.t()}
+  def create_payment_method(customer, payment_method) do
+    %PaymentMethod{}
+    |> PaymentMethod.changeset(%{
+      provider: "stripe",
+      provider_id: payment_method.id,
+      provider_meta: Util.normalize_struct(payment_method),
+      provider_customer_id: customer.provider_id,
+      customer_id: customer.id,
+      is_default: true
+    })
+    |> Repo.insert()
+  end
+
+  @spec fetch_default_payment_method(user_id :: String.t()) ::
+          {:ok, PaymentMethod.t()} | {:error, :not_found}
+  def fetch_default_payment_method(user_id) do
+    Repo.fetch_one(
+      from(pm in PaymentMethod,
+        join: c in assoc(pm, :customer),
+        where: c.user_id == ^user_id and pm.is_default == true
+      )
+    )
+  end
+
+  @spec has_default_payment_method?(user_id :: String.t()) :: boolean()
+  def has_default_payment_method?(user_id) do
+    Repo.exists?(
+      from(pm in PaymentMethod,
+        join: c in assoc(pm, :customer),
+        where: c.user_id == ^user_id and pm.is_default == true
+      )
+    )
+  end
+
+  @spec create_stripe_setup_session(customer :: Customer.t(), success_url :: String.t(), cancel_url :: String.t()) ::
+          {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
   def create_stripe_setup_session(customer, success_url, cancel_url) do
     Stripe.Session.create(%{
       billing_address_collection: "required",
@@ -166,8 +210,7 @@ defmodule Algora.Payments do
       payment_method_types: ["card"],
       success_url: success_url,
       cancel_url: cancel_url,
-      customer: customer.provider_id,
-      metadata: %{version: Algora.Payments.metadata_version(), customer_id: customer.provider_id}
+      customer: customer.provider_id
     })
   end
 

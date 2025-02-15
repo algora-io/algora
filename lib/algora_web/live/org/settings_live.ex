@@ -41,9 +41,15 @@ defmodule AlgoraWeb.Org.SettingsLive do
         </.card_header>
         <.card_content>
           <div class="flex">
-            <.button phx-click="setup_payment" class="ml-auto">
-              <.icon name="tabler-brand-stripe" class="w-5 h-5 mr-2 -ml-1" /> Save card with Stripe
-            </.button>
+            <%= if @has_default_payment_method do %>
+              <.badge class="ml-auto text-sm px-3 py-2" variant="success">
+                <.icon name="tabler-check" class="w-5 h-5 mr-1 -ml-1" /> Enabled
+              </.badge>
+            <% else %>
+              <.button phx-click="setup_payment" class="ml-auto">
+                <.icon name="tabler-brand-stripe" class="w-5 h-5 mr-2 -ml-1" /> Save card with Stripe
+              </.button>
+            <% end %>
           </div>
         </.card_content>
       </.card>
@@ -134,6 +140,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+      Payments.subscribe()
     end
 
     %{current_org: current_org} = socket.assigns
@@ -145,11 +152,16 @@ defmodule AlgoraWeb.Org.SettingsLive do
      socket
      |> assign(:installations, installations)
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+     |> assign_has_default_payment_method()
      |> assign_form(changeset)}
   end
 
   def handle_info({:authenticated, user}, socket) do
     {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
+  end
+
+  def handle_info(:payments_updated, socket) do
+    {:noreply, assign_has_default_payment_method(socket)}
   end
 
   def handle_event("install_app", _params, socket) do
@@ -180,11 +192,11 @@ defmodule AlgoraWeb.Org.SettingsLive do
   end
 
   def handle_event("setup_payment", _params, socket) do
-    %{current_org: org, current_user: user} = socket.assigns
-    success_url = ~p"/org/#{org.handle}/settings"
-    cancel_url = ~p"/org/#{org.handle}/settings"
+    %{current_org: org} = socket.assigns
+    success_url = url(~p"/org/#{org.handle}/settings")
+    cancel_url = url(~p"/org/#{org.handle}/settings")
 
-    with {:ok, customer} <- Payments.fetch_or_create_customer(org, user),
+    with {:ok, customer} <- Payments.fetch_or_create_customer(org),
          {:ok, session} <- Payments.create_stripe_setup_session(customer, success_url, cancel_url) do
       {:noreply, redirect(socket, external: session.url)}
     else
@@ -204,5 +216,9 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
+  end
+
+  defp assign_has_default_payment_method(socket) do
+    assign(socket, :has_default_payment_method, Payments.has_default_payment_method?(socket.assigns.current_org.id))
   end
 end

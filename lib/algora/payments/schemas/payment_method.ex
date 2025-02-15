@@ -20,7 +20,10 @@ defmodule Algora.Payments.PaymentMethod do
 
   def changeset(payment_method, attrs) do
     payment_method
-    |> cast(attrs, [:provider, :provider_id, :provider_meta, :provider_customer_id])
-    |> validate_required([:provider, :provider_id, :provider_meta, :provider_customer_id])
+    |> cast(attrs, [:provider, :provider_id, :provider_meta, :provider_customer_id, :is_default, :customer_id])
+    |> generate_id()
+    |> validate_required([:provider, :provider_id, :provider_meta, :provider_customer_id, :is_default, :customer_id])
+    |> unique_constraint([:provider, :provider_id])
+    |> foreign_key_constraint(:customer_id)
   end
 end

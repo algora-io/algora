@@ -81,12 +81,23 @@ defmodule Algora.Payments do
 
   def fetch_customer_by(fields), do: Repo.fetch_by(Customer, fields)
 
-  def get_default_payment_method(org) do
-    Repo.one(
+  @spec fetch_default_payment_method(user_id :: String.t()) ::
+          {:ok, PaymentMethod.t()} | {:error, :not_found}
+  def fetch_default_payment_method(user_id) do
+    Repo.fetch_one(
       from(pm in PaymentMethod,
         join: c in assoc(pm, :customer),
-        join: u in assoc(c, :user),
-        where: u.id == ^org.id and pm.is_default == true
+        where: c.user_id == ^user_id and pm.is_default == true
+      )
+    )
+  end
+
+  @spec has_default_payment_method?(user_id :: String.t()) :: boolean()
+  def has_default_payment_method?(user_id) do
+    Repo.exists?(
+      from(pm in PaymentMethod,
+        join: c in assoc(pm, :customer),
+        where: c.user_id == ^user_id and pm.is_default == true
       )
     )
   end
@@ -178,27 +189,6 @@ defmodule Algora.Payments do
       is_default: true
     })
     |> Repo.insert()
-  end
-
-  @spec fetch_default_payment_method(user_id :: String.t()) ::
-          {:ok, PaymentMethod.t()} | {:error, :not_found}
-  def fetch_default_payment_method(user_id) do
-    Repo.fetch_one(
-      from(pm in PaymentMethod,
-        join: c in assoc(pm, :customer),
-        where: c.user_id == ^user_id and pm.is_default == true
-      )
-    )
-  end
-
-  @spec has_default_payment_method?(user_id :: String.t()) :: boolean()
-  def has_default_payment_method?(user_id) do
-    Repo.exists?(
-      from(pm in PaymentMethod,
-        join: c in assoc(pm, :customer),
-        where: c.user_id == ^user_id and pm.is_default == true
-      )
-    )
   end
 
   @spec create_stripe_setup_session(customer :: Customer.t(), success_url :: String.t(), cancel_url :: String.t()) ::

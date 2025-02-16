@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
          :ok <- ensure_human_author(webhook, params),
          author = get_author(event, params),
          body = get_body(event, params),
-         event_action = event <> "." <> params["action"],
+         event_action = join_event_action(event, params),
          {:ok, _} <- process_commands(webhook, event_action, author, body, params),
          :ok <- process_event(event_action, params) do
       conn |> put_status(:accepted) |> json(%{status: "ok"})
@@ -431,17 +431,20 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp get_author("issues", params), do: params["issue"]["user"]
-  defp get_author("issue_comment", params), do: params["comment"]["user"]
-  defp get_author("pull_request", params), do: params["pull_request"]["user"]
-  defp get_author("pull_request_review", params), do: params["review"]["user"]
-  defp get_author("pull_request_review_comment", params), do: params["comment"]["user"]
-  defp get_author(_event, _params), do: nil
+  def join_event_action(event, params), do: event <> "." <> params["action"]
 
-  defp get_body("issues", params), do: params["issue"]["body"]
-  defp get_body("issue_comment", params), do: params["comment"]["body"]
-  defp get_body("pull_request", params), do: params["pull_request"]["body"]
-  defp get_body("pull_request_review", params), do: params["review"]["body"]
-  defp get_body("pull_request_review_comment", params), do: params["comment"]["body"]
-  defp get_body(_event, _params), do: nil
+  def split_event_action(event_action) do
+    [event, action] = String.split(event_action, ".")
+    {event, action}
+  end
+
+  def get_entity_key("issues"), do: "issue"
+  def get_entity_key("issue_comment"), do: "comment"
+  def get_entity_key("pull_request"), do: "pull_request"
+  def get_entity_key("pull_request_review"), do: "review"
+  def get_entity_key("pull_request_review_comment"), do: "comment"
+  def get_entity_key(_event), do: nil
+
+  def get_author(event, params), do: get_in(params, ["#{get_entity_key(event)}", "user"])
+  def get_body(event, params), do: get_in(params, ["#{get_entity_key(event)}", "body"])
 end

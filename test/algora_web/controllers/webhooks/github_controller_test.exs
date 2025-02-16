@@ -206,21 +206,25 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     )
   end
 
-  defp process_commands(event_action, command, author \\ @admin_user) do
-    body = """
-    Lorem
-    ipsum #{command} dolor
-    sit
-    amet
-    """
+  defp mock_body(s), do: "Lorem\r\nipsum\r\n dolor #{s} sit\r\namet"
 
-    [event, action] = String.split(event_action, ".")
+  defp process_commands(event_action, command, author \\ @admin_user) do
+    {event, action} = GithubController.split_event_action(event_action)
+    entity = GithubController.get_entity_key(event)
+
+    webhook = Map.put(@webhook, :event, event)
+
+    params =
+      @params
+      |> Map.put(entity, %{"user" => %{"login" => author}, "body" => mock_body(command)})
+      |> Map.put("action", action)
 
     GithubController.process_commands(
-      Map.put(@webhook, :event, event),
-      @params
-      |> Map.put("comment", %{"user" => %{"login" => author}, "body" => body})
-      |> Map.put("action", action)
+      webhook,
+      event_action,
+      GithubController.get_author(event, params),
+      GithubController.get_body(event, params),
+      params
     )
   end
 end

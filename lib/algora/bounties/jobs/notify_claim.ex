@@ -36,7 +36,7 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
 
     names =
       claims
-      |> Enum.map(fn c -> c.user.provider_login end)
+      |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
       |> Algora.Util.format_name_list()
 
     Github.create_issue_comment(

@@ -76,17 +76,17 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
-  defp process_event(event_action, %{"pull_request" => %{"merged_at" => nil}})
-       when event_action in ["pull_request.closed"] do
+  def process_event(event_action, %{"pull_request" => %{"merged_at" => nil}})
+      when event_action in ["pull_request.closed"] do
     :ok
   end
 
-  defp process_event(event_action, %{
-         "repository" => repository,
-         "pull_request" => pull_request,
-         "installation" => installation
-       })
-       when event_action in ["pull_request.closed"] do
+  def process_event(event_action, %{
+        "repository" => repository,
+        "pull_request" => pull_request,
+        "installation" => installation
+      })
+      when event_action in ["pull_request.closed"] do
     with {:ok, token} <- Github.get_installation_token(installation["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
@@ -125,7 +125,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             )
         end
 
-      if claims != [] do
+      if claims == [] do
+        :ok
+      else
         primary_claim = List.first(claims)
 
         installation =
@@ -225,7 +227,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp process_event(_event_action, _params) do
+  def process_event(_event_action, _params) do
     :ok
   end
 

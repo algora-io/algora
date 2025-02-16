@@ -5,7 +5,9 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   import Money.Sigil
   import Mox
 
+  alias Algora.Bounties.Claim
   alias Algora.Github.Webhook
+  alias Algora.Repo
   alias AlgoraWeb.Webhooks.GithubController
 
   setup :verify_on_exit!
@@ -122,6 +124,71 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 1,000.50")
       assert bounty.amount == ~M[1000.50]usd
     end
+  end
+
+  describe "pull request closed event" do
+    setup [:setup_github_mocks]
+
+    test "handles unmerged pull request", context do
+      {claim, params} = setup_claim(context)
+      params = put_in(params, ["pull_request", "merged_at"], nil)
+
+      assert :ok == GithubController.process_event("pull_request.closed", params)
+
+      updated_claim = Repo.get(Claim, claim.id)
+      assert updated_claim.status == :pending
+    end
+
+    test "handles merged pull request with claims", context do
+      {claim, params} = setup_claim(context)
+      params = put_in(params, ["pull_request", "merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
+
+      assert :ok == GithubController.process_event("pull_request.closed", params)
+
+      updated_claim = Repo.get(Claim, claim.id)
+      assert updated_claim.status == :approved
+    end
+
+    test "handles merged pull request without claims", context do
+      {claim, params} = setup_claim(context)
+
+      params =
+        params
+        |> put_in(["pull_request", "merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
+        |> put_in(["pull_request", "number"], claim.source.number + 1)
+
+      assert :ok == GithubController.process_event("pull_request.closed", params)
+
+      updated_claim = Repo.get(Claim, claim.id)
+      assert updated_claim.status == :pending
+    end
+  end
+
+  defp setup_claim(context) do
+    author = insert!(:user)
+    repository = insert!(:repository, user: context[:org])
+    target = insert!(:ticket, repository: repository)
+    source = insert!(:ticket, repository: repository)
+    claim = insert!(:claim, user: author, target: target, source: source, status: :pending)
+
+    params = %{
+      "action" => "closed",
+      "repository" => %{
+        "id" => String.to_integer(repository.provider_id),
+        "owner" => %{"login" => context[:org].provider_login},
+        "name" => repository.name
+      },
+      "pull_request" => %{
+        "merged_at" => DateTime.to_iso8601(DateTime.utc_now()),
+        "number" => source.number,
+        "user" => %{"id" => String.to_integer(author.provider_id)}
+      },
+      "installation" => %{
+        "id" => String.to_integer(context[:installation].provider_id)
+      }
+    }
+
+    {claim, params}
   end
 
   defp setup_github_mocks(context) do

@@ -10,7 +10,7 @@ defmodule Algora.Factory do
     %Algora.Accounts.Identity{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"identity#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:identity)}"),
       provider_token: sequence(:provider_token, &"token#{&1}"),
       provider_email: sequence(:provider_email, &"identity#{&1}@example.com"),
       provider_login: sequence(:provider_login, &"identity#{&1}")
@@ -38,6 +38,7 @@ defmodule Algora.Factory do
       github_url: "https://github.com/erich",
       linkedin_url: "https://linkedin.com/in/erich",
       provider: "github",
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:user)}"),
       provider_login: sequence(:provider_login, &"erlich#{&1}")
     }
   end
@@ -73,7 +74,7 @@ defmodule Algora.Factory do
       slack_url: "https://piedpiper.slack.com",
       provider: "github",
       provider_login: "piedpiper",
-      provider_id: sequence(:provider_id, &"#{&1}")
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:organization)}")
     }
   end
 
@@ -176,7 +177,7 @@ defmodule Algora.Factory do
     %Algora.Workspace.Repository{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"repository#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:repository)}"),
       name: "middle-out",
       url: "https://github.com/piedpiper/middle-out",
       og_image_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-banner.jpg",
@@ -188,7 +189,7 @@ defmodule Algora.Factory do
     %Algora.Workspace.Ticket{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"ticket#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:ticket)}"),
       type: :issue,
       title: "Optimize compression algorithm for large files",
       description: "We need to improve performance when handling files over 1GB",
@@ -211,7 +212,8 @@ defmodule Algora.Factory do
       id: id,
       group_id: id,
       type: :pull_request,
-      status: :pending
+      status: :pending,
+      url: sequence(:url, &"https://github.com/piedpiper/middle-out/pull/#{&1}")
     }
   end
 
@@ -227,8 +229,8 @@ defmodule Algora.Factory do
     %Installation{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"installation#{&1}"),
-      provider_user_id: sequence(:provider_user_id, &"installation#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:installation)}"),
+      provider_user_id: sequence(:provider_user_id, &"#{&1 + offset(:installation)}"),
       provider_meta: %{
         "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
         "repository_selection" => "selected"
@@ -259,5 +261,16 @@ defmodule Algora.Factory do
       time,
       "Etc/UTC"
     )
+  end
+
+  defp offset(factory_name) do
+    # Convert each character to its ASCII value, multiply by position to ensure
+    # different orderings of same letters produce different results
+    factory_name
+    |> Atom.to_string()
+    |> String.to_charlist()
+    |> Enum.with_index(1)
+    |> Enum.reduce(0, fn {char, index}, acc -> acc + char * index end)
+    |> Kernel.*(1_000_000)
   end
 end

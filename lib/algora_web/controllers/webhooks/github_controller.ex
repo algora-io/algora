@@ -1,13 +1,18 @@
 defmodule AlgoraWeb.Webhooks.GithubController do
   use AlgoraWeb, :controller
 
+  import Ecto.Query
+
   alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
   alias Algora.Github
   alias Algora.Github.Webhook
   alias Algora.Repo
   alias Algora.Workspace
   alias Algora.Workspace.CommandResponse
+  alias Algora.Workspace.Installation
 
   require Logger
 
@@ -15,9 +20,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: auto-retry failed deliveries with exponential backoff
 
   def new(conn, params) do
-    with {:ok, webhook} <- Webhook.new(conn),
+    with {:ok, %{event: event} = webhook} <- Webhook.new(conn),
          :ok <- ensure_human_author(webhook, params),
-         {:ok, _} <- process_commands(webhook, params) do
+         author = get_author(event, params),
+         body = get_body(event, params),
+         event_action = join_event_action(event, params),
+         {:ok, _} <- process_commands(webhook, event_action, author, body, params),
+         :ok <- process_event(event_action, params) do
       conn |> put_status(:accepted) |> json(%{status: "ok"})
     else
       {:error, :bot_event} ->
@@ -32,10 +41,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       {:error, reason} ->
         Logger.error("Error processing webhook: #{inspect(reason)}")
         conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
+
+      error ->
+        Logger.error("Error processing webhook: #{inspect(error)}")
+        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
     end
   rescue
     e ->
-      Logger.error("Unexpected error: #{inspect(e)}")
+      Logger.error(Exception.format(:error, e, __STACKTRACE__))
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
   end
 
@@ -62,6 +75,161 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
+
+  def process_event(event_action, %{"pull_request" => %{"merged_at" => nil}})
+      when event_action in ["pull_request.closed"] do
+    :ok
+  end
+
+  def process_event(event_action, %{
+        "repository" => repository,
+        "pull_request" => pull_request,
+        "installation" => installation
+      })
+      when event_action in ["pull_request.closed"] do
+    with {:ok, token} <- Github.get_installation_token(installation["id"]),
+         {:ok, source} <-
+           Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
+      claims =
+        case Repo.one(
+               from c in Claim,
+                 join: s in assoc(c, :source),
+                 join: u in assoc(c, :user),
+                 where: s.id == ^source.id,
+                 where: u.provider == "github",
+                 where: u.provider_id == ^to_string(pull_request["user"]["id"]),
+                 order_by: [asc: c.inserted_at],
+                 limit: 1
+             ) do
+          nil ->
+            []
+
+          %Claim{group_id: group_id} ->
+            Repo.update_all(
+              from(c in Claim, where: c.group_id == ^group_id),
+              set: [status: :approved]
+            )
+
+            Repo.all(
+              from c in Claim,
+                join: t in assoc(c, :target),
+                join: tr in assoc(t, :repository),
+                join: tru in assoc(tr, :user),
+                join: u in assoc(c, :user),
+                where: c.group_id == ^group_id,
+                order_by: [desc: c.group_share, asc: c.inserted_at],
+                select_merge: %{
+                  target: %{t | repository: %{tr | user: tru}},
+                  user: u
+                }
+            )
+        end
+
+      if claims == [] do
+        :ok
+      else
+        primary_claim = List.first(claims)
+
+        installation =
+          Repo.one(
+            from i in Installation,
+              where: i.provider == "github",
+              where: i.provider_id == ^to_string(installation["id"])
+          )
+
+        bounties =
+          Repo.all(
+            from(b in Bounty,
+              join: t in assoc(b, :ticket),
+              join: o in assoc(b, :owner),
+              left_join: u in assoc(b, :creator),
+              left_join: c in assoc(o, :customer),
+              left_join: p in assoc(c, :default_payment_method),
+              where: t.id == ^primary_claim.target_id,
+              select_merge: %{owner: %{o | customer: %{default_payment_method: p}}, creator: u}
+            )
+          )
+
+        autopayable_bounty =
+          Enum.find(
+            bounties,
+            &(not is_nil(installation) and
+                &1.owner.id == installation.connected_user_id and
+                not is_nil(&1.owner.customer) and
+                not is_nil(&1.owner.customer.default_payment_method))
+          )
+
+        autopay_result =
+          if autopayable_bounty do
+            with {:ok, invoice} <-
+                   Bounties.create_invoice(
+                     %{
+                       owner: autopayable_bounty.owner,
+                       amount: autopayable_bounty.amount
+                     },
+                     ticket_ref: %{
+                       owner: repository["owner"]["login"],
+                       repo: repository["name"],
+                       number: pull_request["number"]
+                     },
+                     bounty_id: autopayable_bounty.id,
+                     claims: claims
+                   ),
+                 {:ok, _invoice} <-
+                   Algora.Stripe.pay_invoice(invoice, %{
+                     payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
+                     off_session: true
+                   }) do
+              Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
+              :ok
+            else
+              {:error, reason} ->
+                Logger.error(
+                  "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}"
+                )
+
+                :error
+            end
+          end
+
+        unpaid_bounties =
+          Enum.filter(
+            bounties,
+            &case autopay_result do
+              :ok -> &1.id != autopayable_bounty.id
+              _ -> true
+            end
+          )
+
+        sponsors_to_notify =
+          unpaid_bounties
+          |> Enum.map(&(&1.creator || &1.owner))
+          |> Enum.map_join(", ", &"@#{&1.provider_login}")
+
+        if unpaid_bounties != [] do
+          names =
+            claims
+            |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
+            |> Algora.Util.format_name_list()
+
+          Github.create_issue_comment(
+            token,
+            primary_claim.target.repository.user.provider_login,
+            primary_claim.target.repository.name,
+            primary_claim.target.number,
+            "🎉 The pull request of #{names} has been merged. You can visit [Algora](#{Claim.reward_url(primary_claim)}) to award the bounty." <>
+              if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
+          )
+        end
+
+        :ok
+      end
+    end
+  end
+
+  def process_event(_event_action, _params) do
+    :ok
+  end
 
   defp execute_command(event_action, {:bounty, args}, author, params)
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
@@ -242,12 +410,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  def process_commands(%Webhook{event: event, hook_id: hook_id}, params) do
-    author = get_author(event, params)
-    body = get_body(event, params)
-
-    event_action = event <> "." <> params["action"]
-
+  def process_commands(%Webhook{hook_id: hook_id}, event_action, author, body, params) do
     case build_commands(body) do
       {:ok, commands} ->
         Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
@@ -270,17 +433,20 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp get_author("issues", params), do: params["issue"]["user"]
-  defp get_author("issue_comment", params), do: params["comment"]["user"]
-  defp get_author("pull_request", params), do: params["pull_request"]["user"]
-  defp get_author("pull_request_review", params), do: params["review"]["user"]
-  defp get_author("pull_request_review_comment", params), do: params["comment"]["user"]
-  defp get_author(_event, _params), do: nil
+  def join_event_action(event, params), do: event <> "." <> params["action"]
 
-  defp get_body("issues", params), do: params["issue"]["body"]
-  defp get_body("issue_comment", params), do: params["comment"]["body"]
-  defp get_body("pull_request", params), do: params["pull_request"]["body"]
-  defp get_body("pull_request_review", params), do: params["review"]["body"]
-  defp get_body("pull_request_review_comment", params), do: params["comment"]["body"]
-  defp get_body(_event, _params), do: nil
+  def split_event_action(event_action) do
+    [event, action] = String.split(event_action, ".")
+    {event, action}
+  end
+
+  def get_entity_key("issues"), do: "issue"
+  def get_entity_key("issue_comment"), do: "comment"
+  def get_entity_key("pull_request"), do: "pull_request"
+  def get_entity_key("pull_request_review"), do: "review"
+  def get_entity_key("pull_request_review_comment"), do: "comment"
+  def get_entity_key(_event), do: nil
+
+  def get_author(event, params), do: get_in(params, ["#{get_entity_key(event)}", "user"])
+  def get_body(event, params), do: get_in(params, ["#{get_entity_key(event)}", "body"])
 end

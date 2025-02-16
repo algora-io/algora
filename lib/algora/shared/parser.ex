@@ -6,8 +6,8 @@ defmodule Algora.Parser do
     @moduledoc false
     def whitespace, do: ascii_string([?\s, ?\t], min: 1)
     def digits, do: ascii_string([?0..?9], min: 1)
-    def word_chars, do: ascii_string([not: ?\s, not: ?\t, not: ?\n], min: 1)
-    def non_separator_chars, do: ascii_string([not: ?#, not: ?/, not: ?\s, not: ?\t, not: ?\n], min: 1)
+    def word_chars, do: ascii_string([not: ?\s, not: ?\t, not: ?\n, not: ?\r], min: 1)
+    def non_separator_chars, do: ascii_string([not: ?#, not: ?/, not: ?\s, not: ?\t, not: ?\n, not: ?\r], min: 1)
     def integer, do: reduce(digits(), {__MODULE__, :to_integer, []})
 
     def amount do

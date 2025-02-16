@@ -462,7 +462,7 @@ defmodule Algora.Bounties do
     recipient = opts[:recipient]
     claims = opts[:claims] || []
 
-    description = if(ticket_ref, do: "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}")
+    description = if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
     platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
     transaction_fee_pct = Payments.get_transaction_fee_pct()
@@ -559,6 +559,73 @@ defmodule Algora.Bounties do
                metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
              }) do
         {:ok, session.url}
+      end
+    end)
+  end
+
+  @spec create_invoice(
+          %{owner: User.t(), amount: Money.t()},
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            tip_id: String.t(),
+            bounty_id: String.t(),
+            claims: [Claim.t()],
+            recipient: User.t()
+          ]
+        ) ::
+          {:ok, Stripe.Invoice.t()} | {:error, atom()}
+  def create_invoice(%{owner: owner, amount: amount}, opts \\ []) do
+    tx_group_id = Nanoid.generate()
+
+    line_items =
+      generate_line_items(%{amount: amount},
+        ticket_ref: opts[:ticket_ref],
+        recipient: opts[:recipient],
+        claims: opts[:claims]
+      )
+
+    gross_amount = LineItem.gross_amount(line_items)
+
+    Repo.transact(fn ->
+      with {:ok, _charge} <-
+             initialize_charge(%{
+               id: Nanoid.generate(),
+               tip_id: opts[:tip_id],
+               bounty_id: opts[:bounty_id],
+               claim_id: nil,
+               user_id: owner.id,
+               gross_amount: gross_amount,
+               net_amount: amount,
+               total_fee: Money.sub!(gross_amount, amount),
+               line_items: line_items,
+               group_id: tx_group_id
+             }),
+           {:ok, _transactions} <-
+             create_transaction_pairs(%{
+               claims: opts[:claims] || [],
+               tip_id: opts[:tip_id],
+               bounty_id: opts[:bounty_id],
+               claim_id: nil,
+               amount: amount,
+               creator_id: owner.id,
+               group_id: tx_group_id
+             }),
+           {:ok, customer} <- Payments.fetch_or_create_customer(owner),
+           {:ok, invoice} <-
+             Algora.Stripe.create_invoice(%{
+               auto_advance: false,
+               customer: customer.provider_id
+             }),
+           {:ok, _line_items} <-
+             line_items
+             |> Enum.map(&LineItem.to_invoice_item(&1, invoice, customer))
+             |> Enum.reduce_while({:ok, []}, fn params, {:ok, acc} ->
+               case Algora.Stripe.create_invoice_item(params) do
+                 {:ok, item} -> {:cont, {:ok, [item | acc]}}
+                 {:error, error} -> {:halt, {:error, error}}
+               end
+             end) do
+        {:ok, invoice}
       end
     end)
   end

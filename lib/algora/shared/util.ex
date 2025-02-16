@@ -80,6 +80,13 @@ defmodule Algora.Util do
     |> Kernel.<>("%")
   end
 
+  def normalize_struct(%Money{} = money) do
+    %{
+      amount: Decimal.to_string(money.amount),
+      currency: money.currency
+    }
+  end
+
   def normalize_struct(struct) when is_struct(struct) do
     struct
     |> Map.from_struct()

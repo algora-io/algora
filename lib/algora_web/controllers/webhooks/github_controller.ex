@@ -13,7 +13,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   alias Algora.Workspace
   alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
-  alias Algora.Workspace.Ticket
 
   require Logger
 
@@ -76,6 +75,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp process_event(event_action, params) when event_action in ["pull_request.closed"] do
     %{"repository" => repository, "pull_request" => pull_request, "installation" => installation} = params
 
+    # TODO: ensure PR is merged
+
     with {:ok, token} <- Github.get_installation_token(installation["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
@@ -114,10 +115,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             )
           )
 
-        bounties |> Enum.map(& &1.owner.customer) |> dbg()
-
-        autopayable_bounties =
-          Enum.filter(
+        autopayable_bounty =
+          Enum.find(
             bounties,
             &(not is_nil(installation) and
                 &1.owner.id == installation.connected_user_id and
@@ -125,14 +124,44 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                 not is_nil(&1.owner.customer.default_payment_method))
           )
 
-        dbg(autopayable_bounties)
+        if autopayable_bounty do
+          with {:ok, invoice} <-
+                 Bounties.create_invoice(
+                   %{
+                     owner: autopayable_bounty.owner,
+                     amount: autopayable_bounty.amount
+                   },
+                   ticket_ref: %{
+                     owner: repository["owner"]["login"],
+                     repo: repository["name"],
+                     number: pull_request["number"]
+                   },
+                   bounty_id: autopayable_bounty.id,
+                   claims: [claim]
+                 ),
+               {:ok, _invoice} <-
+                 Algora.Stripe.pay_invoice(invoice, %{
+                   payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
+                   off_session: true
+                 }) do
+            Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
+          else
+            {:error, reason} ->
+              Logger.error(
+                "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}"
+              )
+          end
+        end
 
-        # TODO: auto-pay bounties
         # TODO: update claim status
         # TODO: notify non autopayable bounty sponsors
       end
 
       :ok
+    else
+      {:error, reason} = error ->
+        Logger.error("Error processing event: #{inspect(reason)}")
+        error
     end
   end
 

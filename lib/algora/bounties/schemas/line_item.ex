@@ -32,6 +32,16 @@ defmodule Algora.Bounties.LineItem do
     }
   end
 
+  def to_invoice_item(line_item, invoice, customer) do
+    %{
+      invoice: invoice.id,
+      customer: customer.provider_id,
+      amount: MoneyUtils.to_minor_units(line_item.amount),
+      currency: to_string(line_item.amount.currency),
+      description: if(line_item.description, do: line_item.title <> " - " <> line_item.description, else: line_item.title)
+    }
+  end
+
   def gross_amount(line_items) do
     Enum.reduce(line_items, Money.zero(:USD), fn item, acc -> Money.add!(acc, item.amount) end)
   end

@@ -75,25 +75,28 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp process_event(event_action, params) when event_action in ["pull_request.closed"] do
     %{"repository" => repository, "pull_request" => pull_request, "installation" => installation} = params
 
+    claims_query =
+      from c in Claim,
+        join: s in assoc(c, :source),
+        join: t in assoc(c, :target),
+        join: u in assoc(c, :user),
+        where: s.id == ^source.id,
+        where: u.provider == "github",
+        where: u.provider_id == ^to_string(pull_request["user"]["id"])
+
     # TODO: ensure PR is merged
+    Repo.update_all(claims_query, set: [status: :approved])
 
     with {:ok, token} <- Github.get_installation_token(installation["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
       # TODO: handle multi claims
       claim =
-        Repo.one(
-          from c in Claim,
-            join: s in assoc(c, :source),
-            join: t in assoc(c, :target),
-            join: u in assoc(c, :user),
-            where: s.id == ^source.id,
-            where: u.provider == "github",
-            where: u.provider_id == ^to_string(pull_request["user"]["id"]),
-            preload: [source: s, target: t, user: u],
-            order_by: [asc: c.inserted_at],
-            limit: 1
-        )
+        claims_query
+        |> preload(source: s, target: t, user: u)
+        |> order_by(asc: c.inserted_at)
+        |> limit(1)
+        |> Repo.one()
 
       if claim do
         installation =
@@ -153,7 +156,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           end
         end
 
-        # TODO: update claim status
         # TODO: notify non autopayable bounty sponsors
       end
 

@@ -41,10 +41,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       {:error, reason} ->
         Logger.error("Error processing webhook: #{inspect(reason)}")
         conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
+
+      error ->
+        Logger.error("Error processing webhook: #{inspect(error)}")
+        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
     end
   rescue
     e ->
-      Logger.error("Unexpected error: #{inspect(e)}")
+      Logger.error(Exception.format(:error, e, __STACKTRACE__))
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
   end
 
@@ -72,132 +76,151 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp get_permissions(_author, _params), do: {:error, :invalid_params}
 
-  defp process_event(event_action, params) when event_action in ["pull_request.closed"] do
-    %{"repository" => repository, "pull_request" => pull_request, "installation" => installation} = params
+  defp process_event(event_action, %{"pull_request" => %{"merged_at" => nil}})
+       when event_action in ["pull_request.closed"] do
+    :ok
+  end
 
-    if pull_request["merged_at"] do
-      with {:ok, token} <- Github.get_installation_token(installation["id"]),
-           {:ok, source} <-
-             Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
-        claims_query =
-          from c in Claim,
-            join: s in assoc(c, :source),
-            join: t in assoc(c, :target),
-            join: tr in assoc(t, :repository),
-            join: tru in assoc(tr, :user),
-            join: u in assoc(c, :user),
-            where: s.id == ^source.id,
-            where: u.provider == "github",
-            where: u.provider_id == ^to_string(pull_request["user"]["id"])
+  defp process_event(event_action, %{
+         "repository" => repository,
+         "pull_request" => pull_request,
+         "installation" => installation
+       })
+       when event_action in ["pull_request.closed"] do
+    with {:ok, token} <- Github.get_installation_token(installation["id"]),
+         {:ok, source} <-
+           Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
+      claims =
+        case Repo.one(
+               from c in Claim,
+                 join: s in assoc(c, :source),
+                 join: u in assoc(c, :user),
+                 where: s.id == ^source.id,
+                 where: u.provider == "github",
+                 where: u.provider_id == ^to_string(pull_request["user"]["id"]),
+                 order_by: [asc: c.inserted_at],
+                 limit: 1
+             ) do
+          nil ->
+            []
 
-        Repo.update_all(claims_query, set: [status: :approved])
-
-        # TODO: handle multi claims
-        # TODO: handle splits
-        claim =
-          claims_query
-          |> order_by([c], asc: c.inserted_at)
-          |> limit(1)
-          |> select_merge([c, s, t, tr, tru, u], %{
-            source: s,
-            target: %{t | repository: %{tr | user: tru}},
-            user: u
-          })
-          |> Repo.one()
-
-        if claim do
-          installation =
-            Repo.one(
-              from i in Installation,
-                where: i.provider == "github",
-                where: i.provider_id == ^to_string(installation["id"])
+          %Claim{group_id: group_id} ->
+            Repo.update_all(
+              from(c in Claim, where: c.group_id == ^group_id),
+              set: [status: :approved]
             )
 
-          bounties =
             Repo.all(
-              from(b in Bounty,
-                join: t in assoc(b, :ticket),
-                join: o in assoc(b, :owner),
-                left_join: u in assoc(b, :creator),
-                left_join: c in assoc(o, :customer),
-                left_join: p in assoc(c, :default_payment_method),
-                where: t.id == ^claim.target_id,
-                select_merge: %{owner: %{o | customer: %{default_payment_method: p}}, creator: u}
-              )
+              from c in Claim,
+                join: t in assoc(c, :target),
+                join: tr in assoc(t, :repository),
+                join: tru in assoc(tr, :user),
+                join: u in assoc(c, :user),
+                where: c.group_id == ^group_id,
+                order_by: [desc: c.group_share, asc: c.inserted_at],
+                select_merge: %{
+                  target: %{t | repository: %{tr | user: tru}},
+                  user: u
+                }
             )
+        end
 
-          autopayable_bounty =
-            Enum.find(
-              bounties,
-              &(not is_nil(installation) and
-                  &1.owner.id == installation.connected_user_id and
-                  not is_nil(&1.owner.customer) and
-                  not is_nil(&1.owner.customer.default_payment_method))
+      if claims != [] do
+        primary_claim = List.first(claims)
+
+        installation =
+          Repo.one(
+            from i in Installation,
+              where: i.provider == "github",
+              where: i.provider_id == ^to_string(installation["id"])
+          )
+
+        bounties =
+          Repo.all(
+            from(b in Bounty,
+              join: t in assoc(b, :ticket),
+              join: o in assoc(b, :owner),
+              left_join: u in assoc(b, :creator),
+              left_join: c in assoc(o, :customer),
+              left_join: p in assoc(c, :default_payment_method),
+              where: t.id == ^primary_claim.target_id,
+              select_merge: %{owner: %{o | customer: %{default_payment_method: p}}, creator: u}
             )
+          )
 
-          autopay_result =
-            if autopayable_bounty do
-              with {:ok, invoice} <-
-                     Bounties.create_invoice(
-                       %{
-                         owner: autopayable_bounty.owner,
-                         amount: autopayable_bounty.amount
-                       },
-                       ticket_ref: %{
-                         owner: repository["owner"]["login"],
-                         repo: repository["name"],
-                         number: pull_request["number"]
-                       },
-                       bounty_id: autopayable_bounty.id,
-                       claims: [claim]
-                     ),
-                   {:ok, _invoice} <-
-                     Algora.Stripe.pay_invoice(invoice, %{
-                       payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
-                       off_session: true
-                     }) do
-                Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
-              else
-                {:error, reason} = error ->
-                  Logger.error(
-                    "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}"
-                  )
+        autopayable_bounty =
+          Enum.find(
+            bounties,
+            &(not is_nil(installation) and
+                &1.owner.id == installation.connected_user_id and
+                not is_nil(&1.owner.customer) and
+                not is_nil(&1.owner.customer.default_payment_method))
+          )
 
-                  error
-              end
+        autopay_result =
+          if autopayable_bounty do
+            with {:ok, invoice} <-
+                   Bounties.create_invoice(
+                     %{
+                       owner: autopayable_bounty.owner,
+                       amount: autopayable_bounty.amount
+                     },
+                     ticket_ref: %{
+                       owner: repository["owner"]["login"],
+                       repo: repository["name"],
+                       number: pull_request["number"]
+                     },
+                     bounty_id: autopayable_bounty.id,
+                     claims: claims
+                   ),
+                 {:ok, _invoice} <-
+                   Algora.Stripe.pay_invoice(invoice, %{
+                     payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
+                     off_session: true
+                   }) do
+              Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
+              :ok
+            else
+              {:error, reason} ->
+                Logger.error(
+                  "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}"
+                )
+
+                :error
             end
-
-          unpaid_bounties =
-            Enum.filter(
-              bounties,
-              &case autopay_result do
-                {:ok, _} -> &1.id != autopayable_bounty.id
-                _ -> true
-              end
-            )
-
-          sponsors_to_notify =
-            unpaid_bounties
-            |> Enum.map(&(&1.creator || &1.owner))
-            |> Enum.map_join(", ", &"@#{&1.provider_login}")
-
-          if unpaid_bounties != [] do
-            Github.create_issue_comment(
-              token,
-              claim.target.repository.user.provider_login,
-              claim.target.repository.name,
-              claim.target.number,
-              "💡 @#{claim.user.provider_login}'s PR has been merged. You can visit [Algora](#{Claim.reward_url(claim)}) to award the bounty." <>
-                if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
-            )
           end
 
-          :ok
+        unpaid_bounties =
+          Enum.filter(
+            bounties,
+            &case autopay_result do
+              :ok -> &1.id != autopayable_bounty.id
+              _ -> true
+            end
+          )
+
+        sponsors_to_notify =
+          unpaid_bounties
+          |> Enum.map(&(&1.creator || &1.owner))
+          |> Enum.map_join(", ", &"@#{&1.provider_login}")
+
+        if unpaid_bounties != [] do
+          names =
+            claims
+            |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
+            |> Algora.Util.format_name_list()
+
+          Github.create_issue_comment(
+            token,
+            primary_claim.target.repository.user.provider_login,
+            primary_claim.target.repository.name,
+            primary_claim.target.number,
+            "🎉 The pull request of #{names} has been merged. You can visit [Algora](#{Claim.reward_url(primary_claim)}) to award the bounty." <>
+              if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
+          )
         end
-      else
-        {:error, reason} = error ->
-          Logger.error("Error processing event: #{inspect(reason)}")
-          error
+
+        :ok
       end
     end
   end

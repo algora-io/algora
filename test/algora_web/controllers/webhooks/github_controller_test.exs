@@ -2,126 +2,128 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use AlgoraWeb.ConnCase
 
   import Algora.Factory
+  import AlgoraWeb.Webhooks.GithubController
   import Money.Sigil
   import Mox
 
   alias Algora.Bounties.Claim
   alias Algora.Github.Webhook
   alias Algora.Repo
-  alias AlgoraWeb.Webhooks.GithubController
 
   setup :verify_on_exit!
 
-  @admin_user "jsmith"
-  @unauthorized_user "jdoe"
-  @repo_owner "owner"
-  @repo_name "repo"
-  @installation_id 123
+  setup(%{} = ctx) do
+    admin = insert!(:user)
+    unauthorized_user = insert!(:user)
+    org = insert!(:organization)
+    repository = insert!(:repository, user: org)
+    installation = insert!(:installation, owner: admin, connected_user: org)
 
-  @webhook %Webhook{
-    event: "issue_comment",
-    hook_id: "123456789",
-    delivery: "00000000-0000-0000-0000-000000000000",
-    signature: "sha1=0000000000000000000000000000000000000000",
-    signature_256: "sha256=0000000000000000000000000000000000000000000000000000000000000000",
-    user_agent: "GitHub-Hookshot/0000000",
-    installation_type: "integration",
-    installation_id: "123456"
-  }
+    user_type = ctx[:user_type] || :admin
 
-  @params %{
-    "id" => 123,
-    "action" => "created",
-    "repository" => %{
-      "owner" => %{"login" => @repo_owner},
-      "name" => @repo_name
-    },
-    "issue" => %{
-      "number" => 123
-    },
-    "installation" => %{
-      "id" => @installation_id
+    author =
+      case user_type do
+        :unauthorized -> unauthorized_user
+        _ -> admin
+      end
+
+    event = ctx[:event] || "issue_comment"
+    action = ctx[:action] || "created"
+    body = ctx[:body] || ""
+
+    ctx = %{
+      user_type: user_type,
+      admin: admin,
+      author: author,
+      org: org,
+      installation: installation,
+      repository: repository,
+      event: event,
+      action: action,
+      body: body
     }
-  }
 
-  setup do
-    admin = insert!(:user, handle: @admin_user)
-    org = insert!(:organization, handle: @repo_owner)
+    webhook = mock_webhook(ctx)
 
-    installation =
-      insert!(:installation, %{
-        owner: admin,
-        connected_user: org,
-        provider_id: to_string(@installation_id)
-      })
-
-    %{admin: admin, org: org, installation: installation}
+    Map.put(ctx, :webhook, webhook)
   end
 
   describe "bounty command" do
     setup [:setup_github_mocks]
 
-    @tag user: @unauthorized_user
-    test "handles bounty command with unauthorized user", %{user: user} do
-      assert {:error, :unauthorized} = process_commands("issue_comment.created", "/bounty $100", user)
+    @tag user_type: :unauthorized, body: "/bounty $100"
+    test "handles bounty command with unauthorized user", context do
+      assert {:error, :unauthorized} = process_commands(context[:webhook])
     end
 
-    test "handles bounty command without amount" do
-      assert {:ok, []} = process_commands("issue_comment.created", "/bounty")
+    @tag body: "/bounty"
+    test "handles bounty command without amount", context do
+      assert {:ok, []} = process_commands(context[:webhook])
     end
 
-    test "handles valid bounty command with $ prefix" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty $100")
+    @tag body: "/bounty $100"
+    test "handles valid bounty command with $ prefix", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100]usd
     end
 
-    test "handles invalid bounty command with $ suffix" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100$")
+    @tag body: "/bounty 100$"
+    test "handles invalid bounty command with $ suffix", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100]usd
     end
 
-    test "handles bounty command without $ symbol" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100")
+    @tag body: "/bounty 100"
+    test "handles bounty command without $ symbol", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100]usd
     end
 
-    test "handles bounty command with decimal amount" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.50")
+    @tag body: "/bounty 100.50"
+    test "handles bounty command with decimal amount", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100.50]usd
     end
 
-    test "handles bounty command with partial decimal amount" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.5")
+    @tag body: "/bounty 100.5"
+    test "handles bounty command with partial decimal amount", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100.5]usd
     end
 
-    test "handles bounty command with decimal amount and $ prefix" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty $100.50")
+    @tag body: "/bounty $100.50"
+    test "handles bounty command with decimal amount and $ prefix", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100.50]usd
     end
 
-    test "handles bounty command with partial decimal amount and $ prefix" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty $100.5")
+    @tag body: "/bounty $100.5"
+    test "handles bounty command with partial decimal amount and $ prefix", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100.5]usd
     end
 
-    test "handles bounty command with decimal amount and $ suffix" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.50$")
+    @tag body: "/bounty 100.50$"
+    test "handles bounty command with decimal amount and $ suffix", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100.50]usd
     end
 
-    test "handles bounty command with partial decimal amount and $ suffix" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 100.5$")
+    @tag body: "/bounty 100.5$"
+    test "handles bounty command with partial decimal amount and $ suffix", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[100.5]usd
     end
 
-    test "handles bounty command with comma separator" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 1,000")
+    @tag body: "/bounty 1,000"
+    test "handles bounty command with comma separator", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[1000]usd
     end
 
-    test "handles bounty command with comma separator and decimal amount" do
-      assert {:ok, [bounty]} = process_commands("issue_comment.created", "/bounty 1,000.50")
+    @tag body: "/bounty 1,000.50"
+    test "handles bounty command with comma separator and decimal amount", context do
+      assert {:ok, [bounty]} = process_commands(context[:webhook])
       assert bounty.amount == ~M[1000.50]usd
     end
   end
@@ -129,35 +131,36 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   describe "pull request closed event" do
     setup [:setup_github_mocks]
 
+    @tag event: "pull_request", action: "closed"
     test "handles unmerged pull request", context do
-      {claim, params} = setup_claim(context)
-      params = put_in(params, ["pull_request", "merged_at"], nil)
+      %{claim: claim, webhook: webhook} = setup_claim(context)
+      webhook = put_in(webhook.payload["pull_request"]["merged_at"], nil)
 
-      assert :ok == GithubController.process_event("pull_request.closed", params)
+      assert :ok == process_event(webhook)
 
       updated_claim = Repo.get(Claim, claim.id)
       assert updated_claim.status == :pending
     end
 
+    @tag event: "pull_request", action: "closed"
     test "handles merged pull request with claims", context do
-      {claim, params} = setup_claim(context)
-      params = put_in(params, ["pull_request", "merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
+      %{claim: claim, webhook: webhook} = setup_claim(context)
+      webhook = put_in(webhook.payload["pull_request"]["merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
 
-      assert :ok == GithubController.process_event("pull_request.closed", params)
+      assert :ok == process_event(webhook)
 
       updated_claim = Repo.get(Claim, claim.id)
       assert updated_claim.status == :approved
     end
 
+    @tag event: "pull_request", action: "closed"
     test "handles merged pull request without claims", context do
-      {claim, params} = setup_claim(context)
+      %{claim: claim, webhook: webhook} = setup_claim(context)
 
-      params =
-        params
-        |> put_in(["pull_request", "merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
-        |> put_in(["pull_request", "number"], claim.source.number + 1)
+      webhook = put_in(webhook.payload["pull_request"]["merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
+      webhook = put_in(webhook.payload["pull_request"]["number"], claim.source.number + 1)
 
-      assert :ok == GithubController.process_event("pull_request.closed", params)
+      assert :ok == process_event(webhook)
 
       updated_claim = Repo.get(Claim, claim.id)
       assert updated_claim.status == :pending
@@ -165,35 +168,19 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   defp setup_claim(context) do
-    author = insert!(:user)
-    repository = insert!(:repository, user: context[:org])
-    target = insert!(:ticket, repository: repository)
-    source = insert!(:ticket, repository: repository)
-    claim = insert!(:claim, user: author, target: target, source: source, status: :pending)
+    target = insert!(:ticket, repository: context[:repository])
+    source = insert!(:ticket, repository: context[:repository])
+    claim = insert!(:claim, user: context[:author], target: target, source: source, status: :pending)
 
-    params = %{
-      "action" => "closed",
-      "repository" => %{
-        "id" => String.to_integer(repository.provider_id),
-        "owner" => %{"login" => context[:org].provider_login},
-        "name" => repository.name
-      },
-      "pull_request" => %{
-        "merged_at" => DateTime.to_iso8601(DateTime.utc_now()),
-        "number" => source.number,
-        "user" => %{"id" => String.to_integer(author.provider_id)}
-      },
-      "installation" => %{
-        "id" => String.to_integer(context[:installation].provider_id)
-      }
-    }
+    webhook = context[:webhook]
+    webhook = put_in(webhook.payload["pull_request"]["number"], source.number)
 
-    {claim, params}
+    Map.merge(context, %{claim: claim, webhook: webhook})
   end
 
   defp setup_github_mocks(context) do
     setup_installation_token()
-    setup_repository_permissions(context[:user] || @admin_user)
+    setup_repository_permissions(context[:user_type])
     setup_create_issue_comment()
     setup_get_user_by_username()
     setup_get_issue()
@@ -209,7 +196,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     )
   end
 
-  defp setup_repository_permissions(@admin_user) do
+  defp setup_repository_permissions(:admin) do
     stub(
       Algora.GithubMock,
       :get_repository_permissions,
@@ -217,7 +204,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     )
   end
 
-  defp setup_repository_permissions(@unauthorized_user) do
+  defp setup_repository_permissions(:unauthorized) do
     stub(
       Algora.GithubMock,
       :get_repository_permissions,
@@ -273,25 +260,98 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     )
   end
 
-  defp mock_body(s), do: "Lorem\r\nipsum\r\n dolor #{s} sit\r\namet"
+  defp mock_body(body \\ ""), do: "Lorem\r\nipsum\r\n dolor #{body} sit\r\namet"
 
-  defp process_commands(event_action, command, author \\ @admin_user) do
-    {event, action} = GithubController.split_event_action(event_action)
-    entity = GithubController.get_entity_key(event)
+  defp mock_user(user) do
+    %{
+      "id" => String.to_integer(user.provider_id),
+      "login" => user.provider_login
+    }
+  end
 
-    webhook = Map.put(@webhook, :event, event)
+  defp mock_webhook(context) do
+    webhook_body = mock_body(context[:body])
+    webhook_author = mock_user(context[:author])
+    payload = mock_payload(context)
 
-    params =
-      @params
-      |> Map.put(entity, %{"user" => %{"login" => author}, "body" => mock_body(command)})
-      |> Map.put("action", action)
+    %Webhook{
+      event: context[:event],
+      event_action: "#{context[:event]}.#{context[:action]}",
+      hook_id: "123456789",
+      delivery: "00000000-0000-0000-0000-000000000000",
+      signature: "sha1=0000000000000000000000000000000000000000",
+      signature_256: "sha256=0000000000000000000000000000000000000000000000000000000000000000",
+      user_agent: "GitHub-Hookshot/0000000",
+      installation_target_type: "integration",
+      installation_target_id: "123456",
+      payload: payload,
+      body: webhook_body,
+      author: webhook_author
+    }
+  end
 
-    GithubController.process_commands(
-      webhook,
-      event_action,
-      GithubController.get_author(event, params),
-      GithubController.get_body(event, params),
-      params
-    )
+  defp mock_base_payload(context) do
+    %{
+      "action" => context[:action],
+      "repository" => %{
+        "id" => String.to_integer(context[:repository].provider_id),
+        "owner" => %{
+          "id" => String.to_integer(context[:org].provider_id),
+          "login" => context[:org].provider_login
+        },
+        "name" => context[:repository].name
+      },
+      "installation" => %{
+        "id" => String.to_integer(context[:installation].provider_id)
+      },
+      Webhook.entity_key(context[:event]) => %{
+        "number" => 123,
+        "body" => "Lorem\r\nipsum\r\n dolor #{context[:body]} sit\r\namet",
+        "user" => %{
+          "id" => String.to_integer(context[:author].provider_id),
+          "login" => context[:author].provider_login
+        }
+      }
+    }
+  end
+
+  defp mock_payload(%{event: "issue_comment"} = context) do
+    context
+    |> mock_base_payload()
+    |> Map.merge(%{
+      "comment" => %{
+        "id" => 123,
+        "body" => mock_body(context[:body]),
+        "user" => mock_user(context[:author])
+      },
+      "issue" => %{
+        "id" => 123,
+        "number" => 123,
+        "body" => mock_body(),
+        "user" => mock_user(context[:admin])
+      }
+    })
+  end
+
+  defp mock_payload(%{event: "issues"} = context) do
+    context
+    |> mock_base_payload()
+    |> Map.put("issue", %{
+      "id" => 123,
+      "number" => 123,
+      "body" => mock_body(context[:body]),
+      "user" => mock_user(context[:author])
+    })
+  end
+
+  defp mock_payload(%{event: "pull_request"} = context) do
+    context
+    |> mock_base_payload()
+    |> Map.put("pull_request", %{
+      "id" => 123,
+      "number" => 123,
+      "body" => mock_body(context[:body]),
+      "user" => mock_user(context[:author])
+    })
   end
 end

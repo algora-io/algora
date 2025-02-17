@@ -22,7 +22,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   def new(conn, payload) do
     with {:ok, webhook} <- Webhook.new(conn, payload),
          :ok <- ensure_human_author(webhook),
-         {:ok, _} <- process_commands(webhook),
+         :ok <- process_commands(webhook),
          :ok <- process_event(webhook) do
       Logger.debug("✅ #{inspect(webhook.event_action)}")
       conn |> put_status(:accepted) |> json(%{status: "ok"})
@@ -407,10 +407,10 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   def process_commands(%Webhook{event_action: event_action, body: body, hook_id: hook_id} = webhook) do
     case build_commands(body) do
       {:ok, commands} ->
-        Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
+        Enum.reduce_while(commands, :ok, fn command, :ok ->
           case execute_command(webhook, command) do
-            {:ok, result} ->
-              {:cont, {:ok, [result | results]}}
+            {:ok, _result} ->
+              {:cont, :ok}
 
             error ->
               Logger.error(

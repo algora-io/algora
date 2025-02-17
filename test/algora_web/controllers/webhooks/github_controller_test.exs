@@ -195,7 +195,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert Repo.one(Claim).status == :pending
     end
 
-    @tag event: "pull_request", action: "closed"
     test "handles merged pull request with claims", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)
@@ -224,7 +223,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert Repo.one(Claim).status == :approved
     end
 
-    @tag event: "pull_request", action: "closed"
     test "handles merged pull request without claims", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)

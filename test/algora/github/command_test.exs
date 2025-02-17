@@ -110,6 +110,38 @@ defmodule Algora.Github.CommandTest do
     end
   end
 
+  describe "parse/1 with split claim command" do
+    test "parses claim with multiple split commands separated by spaces" do
+      assert {:ok,
+              [
+                claim: [ticket_ref: [number: 123]],
+                split: [recipient: "jsmith"],
+                split: [recipient: "jdoe"]
+              ]} ==
+               Command.parse("/claim #123 /split @jsmith /split @jdoe")
+    end
+
+    test "parses claim with multiple split commands separated by newlines" do
+      assert {:ok,
+              [
+                claim: [ticket_ref: [number: 123]],
+                split: [recipient: "jsmith"],
+                split: [recipient: "jdoe"]
+              ]} ==
+               Command.parse("/claim #123\r\n/split @jsmith\r\n/split @jdoe")
+    end
+
+    test "parses claim with multiple split commands without separators" do
+      assert {:ok,
+              [
+                claim: [ticket_ref: [number: 123]],
+                split: [recipient: "jsmith"],
+                split: [recipient: "jdoe"]
+              ]} ==
+               Command.parse("/claim #123/split @jsmith/split @jdoe")
+    end
+  end
+
   describe "parse/1 with multiple commands" do
     test "parses multiple commands in sequence" do
       assert {:ok,

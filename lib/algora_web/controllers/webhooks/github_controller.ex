@@ -78,10 +78,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp process_event(%Webhook{
-         event_action: "pull_request.closed",
-         payload: %{"pull_request" => %{"merged_at" => nil} = _pull_request}
-       }) do
+  defp process_event(%Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}}) do
     :ok
   end
 

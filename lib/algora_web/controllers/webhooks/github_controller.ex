@@ -19,14 +19,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: persist & alert about failed deliveries
   # TODO: auto-retry failed deliveries with exponential backoff
 
-  def new(conn, params) do
-    with {:ok, %{event: event} = webhook} <- Webhook.new(conn),
-         :ok <- ensure_human_author(webhook, params),
-         author = get_author(event, params),
-         body = get_body(event, params),
-         event_action = join_event_action(event, params),
-         {:ok, _} <- process_commands(webhook, event_action, author, body, params),
-         :ok <- process_event(event_action, params) do
+  def new(conn, payload) do
+    with {:ok, webhook} <- Webhook.new(conn, payload),
+         :ok <- ensure_human_author(webhook),
+         {:ok, _} <- process_commands(webhook),
+         :ok <- process_event(webhook) do
+      Logger.debug("✅ #{inspect(webhook.event_action)}")
       conn |> put_status(:accepted) |> json(%{status: "ok"})
     else
       {:error, :bot_event} ->
@@ -52,8 +50,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
   end
 
-  defp ensure_human_author(%Webhook{event: event}, params) do
-    case get_author(event, params) do
+  defp ensure_human_author(%Webhook{author: author}) do
+    case author do
       %{"type" => "Bot"} -> {:error, :bot_event}
       _ -> :ok
     end
@@ -61,35 +59,37 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   # TODO: cache installation tokens
   # TODO: check org permissions on algora
-  defp get_permissions(author, %{"repository" => repository, "installation" => installation}) do
-    with {:ok, access_token} <- Github.get_installation_token(installation["id"]),
+  defp get_permissions(%Webhook{payload: payload, author: author}) do
+    with {:ok, access_token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, %{"permission" => permission}} <-
            Github.get_repository_permissions(
              access_token,
-             repository["owner"]["login"],
-             repository["name"],
+             payload["repository"]["owner"]["login"],
+             payload["repository"]["name"],
              author["login"]
            ) do
       {:ok, permission}
     end
   end
 
-  defp get_permissions(_author, _params), do: {:error, :invalid_params}
+  defp get_permissions(_webhook), do: {:error, :invalid_payload}
 
-  def process_event(event_action, %{"pull_request" => %{"merged_at" => nil}})
-      when event_action in ["pull_request.closed"] do
+  def process_event(%Webhook{
+        event_action: "pull_request.closed",
+        payload: %{"pull_request" => %{"merged_at" => nil} = _pull_request}
+      }) do
     :ok
   end
 
-  def process_event(event_action, %{
-        "repository" => repository,
-        "pull_request" => pull_request,
-        "installation" => installation
-      })
-      when event_action in ["pull_request.closed"] do
-    with {:ok, token} <- Github.get_installation_token(installation["id"]),
+  def process_event(%Webhook{event_action: "pull_request.closed", payload: payload}) do
+    with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, source} <-
-           Workspace.ensure_ticket(token, repository["owner"]["login"], repository["name"], pull_request["number"]) do
+           Workspace.ensure_ticket(
+             token,
+             payload["repository"]["owner"]["login"],
+             payload["repository"]["name"],
+             payload["pull_request"]["number"]
+           ) do
       claims =
         case Repo.one(
                from c in Claim,
@@ -97,7 +97,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                  join: u in assoc(c, :user),
                  where: s.id == ^source.id,
                  where: u.provider == "github",
-                 where: u.provider_id == ^to_string(pull_request["user"]["id"]),
+                 where: u.provider_id == ^to_string(payload["pull_request"]["user"]["id"]),
                  order_by: [asc: c.inserted_at],
                  limit: 1
              ) do
@@ -134,7 +134,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           Repo.one(
             from i in Installation,
               where: i.provider == "github",
-              where: i.provider_id == ^to_string(installation["id"])
+              where: i.provider_id == ^to_string(payload["installation"]["id"])
           )
 
         bounties =
@@ -168,9 +168,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                        amount: autopayable_bounty.amount
                      },
                      ticket_ref: %{
-                       owner: repository["owner"]["login"],
-                       repo: repository["name"],
-                       number: pull_request["number"]
+                       owner: payload["repository"]["owner"]["login"],
+                       repo: payload["repository"]["name"],
+                       number: payload["pull_request"]["number"]
                      },
                      bounty_id: autopayable_bounty.id,
                      claims: claims
@@ -227,23 +227,16 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  def process_event(_event_action, _params) do
-    :ok
-  end
+  def process_event(_webhook), do: :ok
 
-  defp execute_command(event_action, {:bounty, args}, author, params)
+  defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:bounty, args})
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
-    [event, _action] = String.split(event_action, ".")
-
     amount = args[:amount]
-    repo = params["repository"]
-    issue = params["issue"]
-    installation_id = params["installation"]["id"]
 
     {command_source, command_id} =
-      case event do
-        "issue_comment" -> {:comment, params["comment"]["id"]}
-        _ -> {:ticket, issue["id"]}
+      case webhook.event do
+        "issue_comment" -> {:comment, payload["comment"]["id"]}
+        "issues" -> {:ticket, payload["issue"]["id"]}
       end
 
     # TODO: perform compensating action if needed
@@ -260,21 +253,25 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       end
 
     # TODO: community bounties?
-    with {:ok, "admin"} <- get_permissions(author, params),
-         {:ok, token} <- Github.get_installation_token(installation_id),
+    with {:ok, "admin"} <- get_permissions(webhook),
+         {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, installation} <-
-           Workspace.fetch_installation_by(provider: "github", provider_id: to_string(installation_id)),
+           Workspace.fetch_installation_by(provider: "github", provider_id: to_string(payload["installation"]["id"])),
          {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
-         {:ok, creator} <- Workspace.ensure_user(token, repo["owner"]["login"]) do
+         {:ok, creator} <- Workspace.ensure_user(token, payload["repository"]["owner"]["login"]) do
       Bounties.create_bounty(
         %{
           creator: creator,
           owner: owner,
           amount: amount,
-          ticket_ref: %{owner: repo["owner"]["login"], repo: repo["name"], number: issue["number"]}
+          ticket_ref: %{
+            owner: payload["repository"]["owner"]["login"],
+            repo: payload["repository"]["name"],
+            number: payload["issue"]["number"]
+          }
         },
         strategy: strategy,
-        installation_id: installation_id,
+        installation_id: payload["installation"]["id"],
         command_id: command_id,
         command_source: command_source
       )
@@ -287,28 +284,29 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(event_action, {:tip, args}, author, params)
+  defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:tip, args})
        when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
     recipient = args[:recipient]
-    repo = params["repository"]
-    issue = params["issue"]
-    installation_id = params["installation"]["id"]
 
     # TODO: handle missing amount
     # TODO: handle missing recipient
     # TODO: handle tip to self
     # TODO: handle autopay with cooldown
     # TODO: community tips?
-    case get_permissions(author, params) do
+    case get_permissions(webhook) do
       {:ok, "admin"} ->
         Bounties.create_tip_intent(
           %{
             recipient: recipient,
             amount: amount,
-            ticket_ref: %{owner: repo["owner"]["login"], repo: repo["name"], number: issue["number"]}
+            ticket_ref: %{
+              owner: payload["repository"]["owner"]["login"],
+              repo: payload["repository"]["name"],
+              number: payload["issue"]["number"]
+            }
           },
-          installation_id: installation_id
+          installation_id: payload["installation"]["id"]
         )
 
       {:ok, _permission} ->
@@ -319,16 +317,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(event_action, {:attempt, args}, author, params)
+  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:attempt, args})
        when event_action in ["issue_comment.created", "issue_comment.edited"] do
-    installation_id = params["installation"]["id"]
-    repo = params["repository"]
-    issue = params["issue"]
-
     source_ticket_ref = %{
-      owner: repo["owner"]["login"],
-      repo: repo["name"],
-      number: issue["number"]
+      owner: payload["repository"]["owner"]["login"],
+      repo: payload["repository"]["name"],
+      number: payload["issue"]["number"]
     }
 
     target_ticket_ref =
@@ -339,8 +333,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       }
 
     with true <- source_ticket_ref == target_ticket_ref,
-         {:ok, token} <- Github.get_installation_token(installation_id),
-         {:ok, ticket} <- Workspace.ensure_ticket(token, repo["owner"]["login"], repo["name"], issue["number"]),
+         {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
+         {:ok, ticket} <-
+           Workspace.ensure_ticket(
+             token,
+             payload["repository"]["owner"]["login"],
+             payload["repository"]["name"],
+             payload["issue"]["number"]
+           ),
          {:ok, user} <- Workspace.ensure_user(token, author["login"]),
          {:ok, attempt} <- Bounties.get_or_create_attempt(%{ticket: ticket, user: user}),
          {:ok, _} <- Bounties.refresh_bounty_response(token, target_ticket_ref, ticket) do
@@ -348,16 +348,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(event_action, {:claim, args}, author, params)
+  defp execute_command(%Webhook{event_action: event_action, author: author, payload: payload}, {:claim, args})
        when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
-    installation_id = params["installation"]["id"]
-    pull_request = params["pull_request"]
-    repo = params["repository"]
-
     source_ticket_ref = %{
-      owner: repo["owner"]["login"],
-      repo: repo["name"],
-      number: pull_request["number"]
+      owner: payload["repository"]["owner"]["login"],
+      repo: payload["repository"]["name"],
+      number: payload["pull_request"]["number"]
     }
 
     target_ticket_ref =
@@ -367,7 +363,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         number: args[:ticket_ref][:number]
       }
 
-    with {:ok, token} <- Github.get_installation_token(installation_id),
+    with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
       Bounties.claim_bounty(
         %{
@@ -375,17 +371,15 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           coauthor_provider_logins: (args[:splits] || []) |> Enum.map(& &1[:recipient]) |> Enum.uniq(),
           target_ticket_ref: target_ticket_ref,
           source_ticket_ref: source_ticket_ref,
-          status: if(pull_request["merged_at"], do: :approved, else: :pending),
+          status: if(payload["pull_request"]["merged_at"], do: :approved, else: :pending),
           type: :pull_request
         },
-        installation_id: installation_id
+        installation_id: payload["installation"]["id"]
       )
     end
   end
 
-  defp execute_command(_event_action, _command, _author, _params) do
-    {:ok, nil}
-  end
+  defp execute_command(_webhook, _command), do: {:ok, nil}
 
   def build_command({:claim, args}, commands) do
     splits = Keyword.get_values(commands, :split)
@@ -410,11 +404,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  def process_commands(%Webhook{hook_id: hook_id}, event_action, author, body, params) do
+  def process_commands(%Webhook{event_action: event_action, body: body, hook_id: hook_id} = webhook) do
     case build_commands(body) do
       {:ok, commands} ->
         Enum.reduce_while(commands, {:ok, []}, fn command, {:ok, results} ->
-          case execute_command(event_action, command, author, params) do
+          case execute_command(webhook, command) do
             {:ok, result} ->
               {:cont, {:ok, [result | results]}}
 
@@ -432,21 +426,4 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         error
     end
   end
-
-  def join_event_action(event, params), do: event <> "." <> params["action"]
-
-  def split_event_action(event_action) do
-    [event, action] = String.split(event_action, ".")
-    {event, action}
-  end
-
-  def get_entity_key("issues"), do: "issue"
-  def get_entity_key("issue_comment"), do: "comment"
-  def get_entity_key("pull_request"), do: "pull_request"
-  def get_entity_key("pull_request_review"), do: "review"
-  def get_entity_key("pull_request_review_comment"), do: "comment"
-  def get_entity_key(_event), do: nil
-
-  def get_author(event, params), do: get_in(params, ["#{get_entity_key(event)}", "user"])
-  def get_body(event, params), do: get_in(params, ["#{get_entity_key(event)}", "body"])
 end

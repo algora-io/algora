@@ -54,79 +54,79 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
     @tag user_type: :unauthorized, body: "/bounty $100"
     test "handles bounty command with unauthorized user", context do
-      assert {:error, :unauthorized} = process_commands(context[:webhook])
+      assert {:error, :unauthorized} = process_delivery(context[:webhook])
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
     @tag body: "/bounty"
     test "handles bounty command without amount", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
     @tag body: "/bounty $100"
     test "handles bounty command with $ prefix", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     @tag body: "/bounty 100$"
     test "handles bounty command with $ suffix", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     @tag body: "/bounty 100"
     test "handles bounty command without $ symbol", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     @tag body: "/bounty 100.50"
     test "handles bounty command with decimal amount", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     @tag body: "/bounty 100.5"
     test "handles bounty command with partial decimal amount", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     @tag body: "/bounty $100.50"
     test "handles bounty command with decimal amount and $ prefix", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     @tag body: "/bounty $100.5"
     test "handles bounty command with partial decimal amount and $ prefix", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     @tag body: "/bounty 100.50$"
     test "handles bounty command with decimal amount and $ suffix", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     @tag body: "/bounty 100.5$"
     test "handles bounty command with partial decimal amount and $ suffix", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     @tag body: "/bounty 1,000"
     test "handles bounty command with comma separator", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000]usd)
     end
 
     @tag body: "/bounty 1,000.50"
     test "handles bounty command with comma separator and decimal amount", context do
-      assert :ok = process_commands(context[:webhook])
+      assert :ok = process_delivery(context[:webhook])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000.50]usd)
     end
   end
@@ -139,7 +139,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       %{claim: claim, webhook: webhook} = setup_claim(context)
       webhook = put_in(webhook.payload["pull_request"]["merged_at"], nil)
 
-      assert :ok == process_event(webhook)
+      assert :ok == process_delivery(webhook)
 
       updated_claim = Repo.get(Claim, claim.id)
       assert updated_claim.status == :pending
@@ -150,7 +150,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       %{claim: claim, webhook: webhook} = setup_claim(context)
       webhook = put_in(webhook.payload["pull_request"]["merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
 
-      assert :ok == process_event(webhook)
+      assert :ok == process_delivery(webhook)
 
       updated_claim = Repo.get(Claim, claim.id)
       assert updated_claim.status == :approved
@@ -163,7 +163,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       webhook = put_in(webhook.payload["pull_request"]["merged_at"], DateTime.to_iso8601(DateTime.utc_now()))
       webhook = put_in(webhook.payload["pull_request"]["number"], claim.source.number + 1)
 
-      assert :ok == process_event(webhook)
+      assert :ok == process_delivery(webhook)
 
       updated_claim = Repo.get(Claim, claim.id)
       assert updated_claim.status == :pending

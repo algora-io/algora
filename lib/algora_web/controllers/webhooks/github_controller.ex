@@ -21,10 +21,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   def new(conn, payload) do
     with {:ok, webhook} <- Webhook.new(conn, payload),
-         :ok <- ensure_human_author(webhook),
-         :ok <- process_commands(webhook),
-         :ok <- process_event(webhook) do
-      Logger.debug("✅ #{inspect(webhook.event_action)}")
+         :ok <- process_delivery(webhook) do
       conn |> put_status(:accepted) |> json(%{status: "ok"})
     else
       {:error, :bot_event} ->
@@ -48,6 +45,15 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     e ->
       Logger.error(Exception.format(:error, e, __STACKTRACE__))
       conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
+  end
+
+  def process_delivery(webhook) do
+    with :ok <- ensure_human_author(webhook),
+         :ok <- process_commands(webhook),
+         :ok <- process_event(webhook) do
+      Logger.debug("✅ #{inspect(webhook.event_action)}")
+      :ok
+    end
   end
 
   defp ensure_human_author(%Webhook{author: author}) do
@@ -74,14 +80,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp get_permissions(_webhook), do: {:error, :invalid_payload}
 
-  def process_event(%Webhook{
-        event_action: "pull_request.closed",
-        payload: %{"pull_request" => %{"merged_at" => nil} = _pull_request}
-      }) do
+  defp process_event(%Webhook{
+         event_action: "pull_request.closed",
+         payload: %{"pull_request" => %{"merged_at" => nil} = _pull_request}
+       }) do
     :ok
   end
 
-  def process_event(%Webhook{event_action: "pull_request.closed", payload: payload}) do
+  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload}) do
     with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(
@@ -227,7 +233,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  def process_event(_webhook), do: :ok
+  defp process_event(_webhook), do: :ok
 
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:bounty, args})
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
@@ -404,7 +410,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  def process_commands(%Webhook{event_action: event_action, body: body, hook_id: hook_id} = webhook) do
+  defp process_commands(%Webhook{event_action: event_action, body: body, hook_id: hook_id} = webhook) do
     case build_commands(body) do
       {:ok, commands} ->
         Enum.reduce_while(commands, :ok, fn command, :ok ->

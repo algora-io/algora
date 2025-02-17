@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   import Money.Sigil
   import Mox
 
+  alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Github.Webhook
   alias Algora.Repo
@@ -54,77 +55,79 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     @tag user_type: :unauthorized, body: "/bounty $100"
     test "handles bounty command with unauthorized user", context do
       assert {:error, :unauthorized} = process_commands(context[:webhook])
+      assert Repo.aggregate(Bounty, :count) == 0
     end
 
     @tag body: "/bounty"
     test "handles bounty command without amount", context do
-      assert {:ok, []} = process_commands(context[:webhook])
+      assert :ok = process_commands(context[:webhook])
+      assert Repo.aggregate(Bounty, :count) == 0
     end
 
     @tag body: "/bounty $100"
-    test "handles valid bounty command with $ prefix", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100]usd
+    test "handles bounty command with $ prefix", context do
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     @tag body: "/bounty 100$"
-    test "handles invalid bounty command with $ suffix", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100]usd
+    test "handles bounty command with $ suffix", context do
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     @tag body: "/bounty 100"
     test "handles bounty command without $ symbol", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     @tag body: "/bounty 100.50"
     test "handles bounty command with decimal amount", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100.50]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     @tag body: "/bounty 100.5"
     test "handles bounty command with partial decimal amount", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100.5]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     @tag body: "/bounty $100.50"
     test "handles bounty command with decimal amount and $ prefix", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100.50]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     @tag body: "/bounty $100.5"
     test "handles bounty command with partial decimal amount and $ prefix", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100.5]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     @tag body: "/bounty 100.50$"
     test "handles bounty command with decimal amount and $ suffix", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100.50]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     @tag body: "/bounty 100.5$"
     test "handles bounty command with partial decimal amount and $ suffix", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[100.5]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     @tag body: "/bounty 1,000"
     test "handles bounty command with comma separator", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[1000]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[1000]usd)
     end
 
     @tag body: "/bounty 1,000.50"
     test "handles bounty command with comma separator and decimal amount", context do
-      assert {:ok, [bounty]} = process_commands(context[:webhook])
-      assert bounty.amount == ~M[1000.50]usd
+      assert :ok = process_commands(context[:webhook])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[1000.50]usd)
     end
   end
 

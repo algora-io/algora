@@ -1,16 +1,18 @@
 defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use AlgoraWeb.ConnCase
   use ExMachina.Ecto, repo: Algora.Repo
+  use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
-  import AlgoraWeb.Webhooks.GithubController
   import Money.Sigil
   import Mox
 
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Jobs.NotifyBounty
   alias Algora.Github.Webhook
   alias Algora.Repo
+  alias AlgoraWeb.Webhooks.GithubController
 
   setup :verify_on_exit!
 
@@ -30,7 +32,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     }
   end
 
-  describe "bounty command" do
+  describe "create bounties" do
     setup [:setup_github_mocks]
 
     test "handles bounty command with unauthorized user", ctx do
@@ -97,6 +99,68 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     test "handles bounty command with comma separator and decimal amount", ctx do
       process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 1,000.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000.50]usd)
+    end
+  end
+
+  describe "edit bounties" do
+    setup [:setup_github_mocks]
+
+    test "updates bounty amount when editing the original bounty comment", ctx do
+      comment_id = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"id" => comment_id}
+        }
+      ])
+
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+
+      assert [job] = all_enqueued(worker: NotifyBounty)
+      assert {:ok, _} = perform_job(NotifyBounty, job.args)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.edited",
+          user_type: :admin,
+          body: "/bounty $200",
+          params: %{"id" => comment_id}
+        }
+      ])
+
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[200]usd)
+    end
+
+    test "adds to bounty amount when creating a new bounty comment", ctx do
+      comment_id = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"id" => comment_id}
+        }
+      ])
+
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+
+      assert [job] = all_enqueued(worker: NotifyBounty)
+      assert {:ok, _} = perform_job(NotifyBounty, job.args)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $200",
+          params: %{"id" => comment_id + 1}
+        }
+      ])
+
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[300]usd)
     end
   end
 
@@ -197,6 +261,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     setup_get_user_by_username()
     setup_get_issue()
     setup_get_repository()
+    setup_add_labels()
     :ok
   end
 
@@ -270,6 +335,14 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
            "html_url" => "https://github.com/#{owner}/#{repo}"
          }}
       end
+    )
+  end
+
+  defp setup_add_labels do
+    stub(
+      Algora.GithubMock,
+      :add_labels,
+      fn _token, _owner, _repo, _number, _labels -> {:ok, %{}} end
     )
   end
 
@@ -388,7 +461,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       scenario,
       :ok,
       fn opts, :ok ->
-        case ctx |> Map.merge(opts) |> mock_webhook() |> process_delivery() do
+        case ctx |> Map.merge(opts) |> mock_webhook() |> GithubController.process_delivery() do
           :ok -> {:cont, :ok}
           error -> {:halt, error}
         end

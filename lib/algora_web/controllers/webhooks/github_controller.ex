@@ -78,8 +78,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp get_permissions(_webhook), do: {:error, :invalid_payload}
-
   defp process_event(%Webhook{
          event_action: "pull_request.closed",
          payload: %{"pull_request" => %{"merged_at" => nil} = _pull_request}

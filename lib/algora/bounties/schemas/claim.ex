@@ -3,7 +3,6 @@ defmodule Algora.Bounties.Claim do
   use Algora.Schema
 
   alias Algora.Activities.Activity
-  alias Algora.Bounties.Claim
   alias Algora.Workspace.Ticket
 
   @type status :: :pending | :approved | :cancelled
@@ -34,7 +33,8 @@ defmodule Algora.Bounties.Claim do
     |> foreign_key_constraint(:source_id)
     |> foreign_key_constraint(:target_id)
     |> foreign_key_constraint(:user_id)
-    |> unique_constraint([:target_id, :user_id])
+    |> unique_constraint([:user_id, :group_id])
+    |> unique_constraint([:user_id, :source_id, :target_id])
   end
 
   def preload(id) do

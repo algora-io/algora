@@ -49,8 +49,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
-         :ok <- process_commands(webhook),
-         :ok <- process_event(webhook) do
+         {:ok, commands} <- process_commands(webhook),
+         :ok <- process_event(webhook, commands) do
       Logger.debug("✅ #{inspect(webhook.event_action)}")
       :ok
     end
@@ -78,11 +78,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp process_event(%Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}}) do
+  defp process_event(
+         %Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}},
+         _commands
+       ) do
     :ok
   end
 
-  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload}) do
+  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload}, _commands) do
     with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(
@@ -228,7 +231,31 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp process_event(_webhook), do: :ok
+  defp process_event(%Webhook{event_action: event_action, payload: payload}, commands)
+       when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
+    if Enum.any?(commands, &match?({:claim, _}, &1)) do
+      :ok
+    else
+      source =
+        Workspace.get_ticket(
+          payload["repository"]["owner"]["login"],
+          payload["repository"]["name"],
+          payload["pull_request"]["number"]
+        )
+
+      case source do
+        nil ->
+          :ok
+
+        source ->
+          source.id
+          |> Bounties.get_active_claims()
+          |> Bounties.cancel_all_claims()
+      end
+    end
+  end
+
+  defp process_event(_webhook, _commands), do: :ok
 
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:bounty, args})
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
@@ -397,7 +424,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         {:ok,
          commands
          |> Enum.map(&build_command(&1, commands))
-         |> Enum.reject(&is_nil/1)}
+         |> Enum.reject(&is_nil/1)
+         # keep only the first claim command if multiple claims are present
+         |> Enum.reduce([], fn
+           {:claim, _} = claim, acc -> if Enum.any?(acc, &match?({:claim, _}, &1)), do: acc, else: [claim | acc]
+           command, acc -> [command | acc]
+         end)
+         |> Enum.reverse()}
 
       {:error, reason} = error ->
         Logger.error("Error parsing commands: #{inspect(reason)}")
@@ -405,26 +438,24 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp process_commands(%Webhook{event_action: event_action, body: body, hook_id: hook_id} = webhook) do
-    case build_commands(body) do
-      {:ok, commands} ->
-        Enum.reduce_while(commands, :ok, fn command, :ok ->
-          case execute_command(webhook, command) do
-            {:ok, _result} ->
-              {:cont, :ok}
-
-            error ->
-              Logger.error(
-                "Command execution failed for #{event_action}(#{hook_id}): #{inspect(command)}: #{inspect(error)}"
-              )
-
-              {:halt, error}
-          end
-        end)
-
-      {:error, reason} = error ->
-        Logger.error("Error parsing commands: #{inspect(reason)}")
-        error
+  defp process_commands(%Webhook{body: body} = webhook) do
+    with {:ok, commands} <- build_commands(body),
+         :ok <- execute_commands(webhook, commands) do
+      {:ok, commands}
     end
+  end
+
+  defp execute_commands(%Webhook{event_action: event_action, hook_id: hook_id} = webhook, commands) do
+    Enum.reduce_while(commands, :ok, fn command, :ok ->
+      case execute_command(webhook, command) do
+        {:ok, _result} ->
+          Logger.debug("✅ #{inspect(command)}")
+          {:cont, :ok}
+
+        error ->
+          Logger.error("Command execution failed for #{event_action}(#{hook_id}): #{inspect(command)}: #{inspect(error)}")
+          {:halt, error}
+      end
+    end)
   end
 end

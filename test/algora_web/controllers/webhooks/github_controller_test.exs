@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
+  import Ecto.Query
   import Money.Sigil
   import Mox
 
@@ -164,6 +165,216 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     end
   end
 
+  describe "create claims" do
+    setup [:setup_github_mocks]
+
+    test "creates claims with split shares", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @jsmith /split @jdoe",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      claims = Repo.all(Claim)
+
+      assert length(claims) == 3
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 3)))
+      assert Enum.all?(claims, &(&1.group_id == hd(claims).group_id))
+      assert Enum.all?(claims, &(&1.source_id == hd(claims).source_id))
+      assert Enum.all?(claims, &(&1.target_id == hd(claims).target_id))
+    end
+
+    test "claim command is idempotent when editing pull request", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"number" => pr_number}
+        },
+        %{
+          event_action: "pull_request.edited",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      assert Repo.aggregate(Claim, :count) == 1
+    end
+
+    test "does not allow multiple claims in a single PR", ctx do
+      issue_number1 = :rand.uniform(1000)
+      issue_number2 = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number1}
+        },
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number2}
+        }
+      ])
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number1} /claim #{issue_number2}",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      assert Repo.aggregate(Claim, :count) == 1
+    end
+
+    test "cancels existing claim when attempting to claim a different bounty in the same PR", ctx do
+      issue_number1 = :rand.uniform(1000)
+      issue_number2 = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number1}
+        }
+      ])
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number1}",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number2}",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      claims = Repo.all(from c in Claim, where: c.status != :cancelled)
+      assert length(claims) == 1
+
+      claims = Repo.all(from c in Claim, where: c.status == :cancelled)
+      assert length(claims) == 1
+    end
+
+    test "handles claim lifecycle with splits and cancellations", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number}
+        }
+      ])
+
+      assert Repo.aggregate(Claim, :count) == 0
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      claims = Repo.all(Claim)
+      assert length(claims) == 1
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.edited",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @jsmith",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      claims = Repo.all(Claim)
+
+      assert length(claims) == 2
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 2)))
+      assert Enum.all?(claims, &(&1.group_id == hd(claims).group_id))
+      assert Enum.all?(claims, &(&1.source_id == hd(claims).source_id))
+      assert Enum.all?(claims, &(&1.target_id == hd(claims).target_id))
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.edited",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @jdoe",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      cancelled_claims = Repo.all(from c in Claim, where: c.status == :cancelled)
+      assert length(cancelled_claims) == 1
+
+      claims = Repo.all(from c in Claim, where: c.status != :cancelled)
+      assert length(claims) == 2
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 2)))
+      assert Enum.all?(claims, &(&1.group_id == hd(claims).group_id))
+      assert Enum.all?(claims, &(&1.source_id == hd(claims).source_id))
+      assert Enum.all?(claims, &(&1.target_id == hd(claims).target_id))
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.edited",
+          user_type: :unauthorized,
+          body: "",
+          params: %{"number" => pr_number}
+        }
+      ])
+
+      cancelled_claims = Repo.all(from c in Claim, where: c.status == :cancelled)
+      assert length(cancelled_claims) == 3
+
+      claims = Repo.all(from c in Claim, where: c.status != :cancelled)
+      assert length(claims) == 0
+    end
+  end
+
   describe "pull request closed event" do
     setup [:setup_github_mocks]
 
@@ -300,7 +511,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     stub(
       Algora.GithubMock,
       :get_user_by_username,
-      fn _token, username -> {:ok, %{"id" => 123, "login" => username}} end
+      fn _token, username -> {:ok, %{"id" => sequence(:github_user_id, & &1), "login" => username}} end
     )
   end
 

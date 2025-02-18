@@ -229,26 +229,41 @@ defmodule Algora.Bounties do
          status: status,
          type: type
        }) do
-    with {:ok, user} <- Workspace.ensure_user(token, provider_login),
-         activity_attrs = %{type: :claim_submitted, notify_users: [user.id]},
-         {:ok, claim} <-
-           Repo.insert_with_activity(
-             Claim.changeset(%Claim{}, %{
-               target_id: target.id,
-               source_id: source.id,
-               user_id: user.id,
-               type: type,
-               status: status,
-               url: source.url,
-               group_id: group_id,
-               group_share: group_share
-             }),
-             activity_attrs
-           ) do
-      {:ok, claim}
-    else
-      {:error, %{errors: [target_id: {_, [constraint: :unique, constraint_name: _]}]}} ->
-        {:error, :already_exists}
+    case Workspace.ensure_user(token, provider_login) do
+      {:ok, user} ->
+        activity_attrs = %{type: :claim_submitted, notify_users: [user.id]}
+
+        claim_attrs = %{
+          target_id: target.id,
+          source_id: source.id,
+          user_id: user.id,
+          type: type,
+          status: status,
+          url: source.url,
+          group_id: group_id,
+          group_share: group_share
+        }
+
+        # Try to find existing claim
+        existing_claim =
+          Repo.get_by(Claim,
+            target_id: target.id,
+            source_id: source.id,
+            user_id: user.id
+          )
+
+        case existing_claim do
+          nil ->
+            # Create new claim
+            %Claim{}
+            |> Claim.changeset(claim_attrs)
+            |> Repo.insert_with_activity(activity_attrs)
+
+          claim ->
+            claim
+            |> Claim.changeset(claim_attrs)
+            |> Repo.update_with_activity(activity_attrs)
+        end
 
       {:error, _reason} = error ->
         error
@@ -306,7 +321,7 @@ defmodule Algora.Bounties do
           },
           opts :: [installation_id: integer()]
         ) ::
-          {:ok, Bounty.t()} | {:error, atom()}
+          {:ok, [Claim.t()]} | {:error, atom()}
   def claim_bounty(
         %{
           user: user,
@@ -328,23 +343,87 @@ defmodule Algora.Bounties do
     Repo.transact(fn ->
       with {:ok, token} <- token_res,
            {:ok, target} <- Workspace.ensure_ticket(token, target_repo_owner, target_repo_name, target_number),
-           {:ok, source} <- Workspace.ensure_ticket(token, source_repo_owner, source_repo_name, source_number),
-           {:ok, [claim | _]} <-
-             do_claim_bounties(%{
-               provider_logins: [user.provider_login | coauthor_provider_logins],
-               token: token,
-               target: target,
-               source: source,
-               status: status,
-               type: type
-             }),
-           {:ok, _job} <- notify_claim(%{claim: claim}, installation_id: installation_id) do
-        broadcast()
-        {:ok, claim}
+           {:ok, source} <- Workspace.ensure_ticket(token, source_repo_owner, source_repo_name, source_number) do
+        # Get all active claims for this PR
+        active_claims = get_active_claims(source.id)
+        requested_participants = [user.provider_login | coauthor_provider_logins]
+
+        cond do
+          # Case 1: Target changed - cancel all claims and create new ones
+          target_changed?(active_claims, target.id) ->
+            with :ok <- cancel_all_claims(active_claims) do
+              create_new_claims(token, source, target, requested_participants, status, type, installation_id)
+            end
+
+          # Case 3: Participants changed - cancel old claims and create new ones
+          participants_changed?(active_claims, requested_participants) ->
+            with :ok <- cancel_all_claims(active_claims) do
+              create_new_claims(token, source, target, requested_participants, status, type, installation_id)
+            end
+
+          # Case 4: No existing claims - create new ones
+          Enum.empty?(active_claims) ->
+            create_new_claims(token, source, target, requested_participants, status, type, installation_id)
+
+          # Case 5: No changes needed
+          true ->
+            {:ok, active_claims}
+        end
       else
         {:error, _reason} = error -> error
       end
     end)
+  end
+
+  def get_active_claims(source_id) do
+    Repo.all(
+      from c in Claim,
+        where: c.source_id == ^source_id,
+        where: c.status != :cancelled,
+        preload: [:user]
+    )
+  end
+
+  defp target_changed?(claims, target_id) do
+    Enum.any?(claims, fn claim -> claim.target_id != target_id end)
+  end
+
+  defp participants_changed?(claims, requested_participants) do
+    current_participants =
+      claims
+      |> Enum.map(& &1.user.provider_login)
+      |> Enum.sort()
+
+    requested_participants
+    |> Enum.sort()
+    |> Kernel.!=(current_participants)
+  end
+
+  def cancel_all_claims(claims) do
+    Enum.reduce_while(claims, :ok, fn claim, :ok ->
+      case claim
+           |> Claim.changeset(%{status: :cancelled})
+           |> Repo.update() do
+        {:ok, _} -> {:cont, :ok}
+        error -> error
+      end
+    end)
+  end
+
+  defp create_new_claims(token, source, target, participants, status, type, installation_id) do
+    with {:ok, [claim | _] = claims} <-
+           do_claim_bounties(%{
+             provider_logins: participants,
+             token: token,
+             target: target,
+             source: source,
+             status: status,
+             type: type
+           }),
+         {:ok, _job} <- notify_claim(%{claim: claim}, installation_id: installation_id) do
+      broadcast()
+      {:ok, claims}
+    end
   end
 
   @spec notify_claim(

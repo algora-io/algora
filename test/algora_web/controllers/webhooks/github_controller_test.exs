@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
   import Algora.Factory
   import Ecto.Query
+  import ExUnit.CaptureLog
   import Money.Sigil
 
   alias Algora.Bounties.Bounty
@@ -33,7 +34,8 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   describe "create bounties" do
     test "handles bounty command with unauthorized user", ctx do
       scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
-      assert {:error, :unauthorized} = process_scenario(ctx, scenario)
+      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
+      assert {:error, :unauthorized} = result
       assert Repo.aggregate(Bounty, :count) == 0
     end
 

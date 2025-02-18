@@ -10,7 +10,7 @@ defmodule Algora.BountiesTest do
   alias Algora.Activities.SendEmail
 
   setup do
-    stub_with(Algora.GithubMock, Algora.Github.Stub)
+    stub_with(Algora.GithubMock, Algora.Support.GithubMock)
     :ok
   end
 

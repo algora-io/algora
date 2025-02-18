@@ -18,7 +18,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   setup :verify_on_exit!
 
   setup do
-    stub_with(Algora.GithubMock, Algora.Github.Stub)
+    stub_with(Algora.GithubMock, Algora.Support.GithubMock)
 
     admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))
     unauthorized_user = insert!(:user, provider_login: sequence(:provider_login, &"unauthorized#{&1}"))

@@ -1,4 +1,4 @@
-defmodule Algora.Github.Stub do
+defmodule Algora.Support.GithubMock do
   @moduledoc false
   @behaviour Algora.Github.Behaviour
 

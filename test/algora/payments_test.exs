@@ -1,14 +1,10 @@
 defmodule Algora.PaymentsTest do
   use Algora.DataCase
 
-  import Mox
-
   alias Algora.Payments
   alias Algora.Payments.Account
   alias Algora.Payments.Transaction
   alias Algora.Repo
-
-  setup :verify_on_exit!
 
   describe "execute_pending_transfers/1" do
     setup do

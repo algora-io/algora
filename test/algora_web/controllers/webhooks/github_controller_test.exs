@@ -18,6 +18,8 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   setup :verify_on_exit!
 
   setup do
+    stub_with(Algora.GithubMock, Algora.Github.Stub)
+
     admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))
     unauthorized_user = insert!(:user, provider_login: sequence(:provider_login, &"unauthorized#{&1}"))
     org = insert!(:organization)
@@ -34,8 +36,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   describe "create bounties" do
-    setup [:setup_github_mocks]
-
     test "handles bounty command with unauthorized user", ctx do
       scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
       assert {:error, :unauthorized} = process_scenario(ctx, scenario)
@@ -104,8 +104,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   describe "edit bounties" do
-    setup [:setup_github_mocks]
-
     test "updates bounty amount when editing the original bounty comment", ctx do
       comment_id = :rand.uniform(1000)
 
@@ -166,8 +164,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   describe "create claims" do
-    setup [:setup_github_mocks]
-
     test "creates claims with split shares", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)
@@ -376,8 +372,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   describe "pull request closed event" do
-    setup [:setup_github_mocks]
-
     test "handles unmerged pull request", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)
@@ -461,98 +455,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
       assert Repo.aggregate(Claim, :count) == 0
     end
-  end
-
-  defp setup_github_mocks(_ctx) do
-    setup_installation_token()
-    setup_repository_permissions()
-    setup_create_issue_comment()
-    setup_get_user_by_username()
-    setup_get_issue()
-    setup_get_repository()
-    setup_add_labels()
-    :ok
-  end
-
-  defp setup_installation_token do
-    stub(
-      Algora.GithubMock,
-      :get_installation_token,
-      fn _installation_id -> {:ok, %{"token" => "test_token"}} end
-    )
-  end
-
-  defp setup_repository_permissions do
-    stub(
-      Algora.GithubMock,
-      :get_repository_permissions,
-      fn _token, _owner, _repo, user ->
-        {:ok,
-         %{
-           "permission" =>
-             case user do
-               "admin" <> _ -> "admin"
-               "unauthorized" <> _ -> "none"
-             end
-         }}
-      end
-    )
-  end
-
-  defp setup_create_issue_comment do
-    stub(
-      Algora.GithubMock,
-      :create_issue_comment,
-      fn _token, _owner, _repo, _number, _body -> {:ok, %{"id" => sequence(:github_comment_id, & &1)}} end
-    )
-  end
-
-  defp setup_get_user_by_username do
-    stub(
-      Algora.GithubMock,
-      :get_user_by_username,
-      fn _token, username -> {:ok, %{"id" => sequence(:github_user_id, & &1), "login" => username}} end
-    )
-  end
-
-  defp setup_get_issue do
-    stub(
-      Algora.GithubMock,
-      :get_issue,
-      fn _token, owner, repo, number ->
-        {:ok,
-         %{
-           "id" => sequence(:github_issue_id, & &1),
-           "number" => number,
-           "title" => "Test Issue",
-           "body" => "Test body",
-           "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}"
-         }}
-      end
-    )
-  end
-
-  defp setup_get_repository do
-    stub(
-      Algora.GithubMock,
-      :get_repository,
-      fn _token, owner, repo ->
-        {:ok,
-         %{
-           "id" => sequence(:github_repository_id, & &1),
-           "name" => repo,
-           "html_url" => "https://github.com/#{owner}/#{repo}"
-         }}
-      end
-    )
-  end
-
-  defp setup_add_labels do
-    stub(
-      Algora.GithubMock,
-      :add_labels,
-      fn _token, _owner, _repo, _number, _labels -> {:ok, %{}} end
-    )
   end
 
   defp mock_body(body \\ ""), do: "Lorem\r\nipsum\r\n dolor #{body} sit\r\namet"

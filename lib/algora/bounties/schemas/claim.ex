@@ -6,6 +6,9 @@ defmodule Algora.Bounties.Claim do
   alias Algora.Bounties.Claim
   alias Algora.Workspace.Ticket
 
+  @type status :: :pending | :approved | :cancelled
+  @type type :: :pull_request | :review | :video | :design | :article
+
   typed_schema "claims" do
     field :status, Ecto.Enum, values: [:pending, :approved, :cancelled], null: false
     field :type, Ecto.Enum, values: [:pull_request, :review, :video, :design, :article]

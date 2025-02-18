@@ -4,15 +4,9 @@ defmodule Algora.BountiesTest do
 
   import Algora.Factory
   import Money.Sigil
-  import Mox
 
   alias Algora.Activities.Notifier
   alias Algora.Activities.SendEmail
-
-  setup do
-    stub_with(Algora.GithubMock, Algora.Support.GithubMock)
-    :ok
-  end
 
   describe "bounties" do
     test "create" do

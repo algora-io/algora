@@ -9,58 +9,8 @@ defmodule Algora.ContractsTest do
   alias Algora.Contracts
   alias Algora.Contracts.Contract
   alias Algora.Payments
+  alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
-
-  def card_declined_error, do: %Stripe.Error{source: :stripe, code: :card_error, message: "Your card was declined."}
-
-  # Mock implementation for Stripe API calls
-  defmodule MockStripe do
-    @moduledoc false
-    def create_invoice(params) do
-      {:ok, %{id: "inv_mock", customer: params.customer}}
-    end
-
-    def create_invoice_item(params) do
-      {:ok, %{id: "ii_mock", amount: params.amount}}
-    end
-
-    def pay_invoice(_invoice_id, _params) do
-      {:ok, %{id: "inv_mock", paid: true, status: "paid"}}
-    end
-
-    def create_transfer(_params) do
-      {:ok, %{id: "tr_mock"}}
-    end
-  end
-
-  defmodule MockStripeWithFailure do
-    @moduledoc false
-    def create_invoice(params) do
-      {:ok, %{id: "inv_mock", customer: params.customer}}
-    end
-
-    def create_invoice_item(params) do
-      {:ok, %{id: "ii_mock", amount: params.amount}}
-    end
-
-    def create_transfer(_params) do
-      {:ok, %{id: "tr_mock"}}
-    end
-
-    def pay_invoice(_invoice_id, _params) do
-      {:error, Algora.ContractsTest.card_declined_error()}
-    end
-  end
-
-  setup do
-    # Set the mock implementation for tests
-    Application.put_env(:algora, :stripe_impl, MockStripe)
-
-    on_exit(fn ->
-      # Reset to default implementation after test
-      Application.delete_env(:algora, :stripe_impl)
-    end)
-  end
 
   defp setup_contract(attrs) do
     client = insert!(:organization)
@@ -262,18 +212,20 @@ defmodule Algora.ContractsTest do
     test "prepayment fails when payment method is invalid" do
       contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
 
-      payment_error = card_declined_error()
+      PaymentMethod
+      |> Repo.one!()
+      |> change(%{provider_id: "pm_card_declined"})
+      |> Repo.update!()
 
-      Application.put_env(:algora, :stripe_impl, MockStripeWithFailure)
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
 
-      {:error, ^payment_error} = Contracts.prepay_contract(contract)
+      {:error, _} = Contracts.prepay_contract(contract)
 
       # Verify charge was marked as failed
       charge = Repo.one(from t in Transaction, where: t.contract_id == ^contract.id)
       assert charge.status == :failed
 
-      assert %{"error" => %{"code" => "card_error", "message" => "Your card was declined."}} =
-               charge.provider_meta
+      assert %{"error" => %{"code" => "card_declined"}} = charge.provider_meta
     end
 
     test "release payment handles exact prepayment hours correctly" do

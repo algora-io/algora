@@ -32,7 +32,7 @@ defmodule Algora.Payments do
         ) ::
           {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
   def create_stripe_session(line_items, payment_intent_data) do
-    Algora.Stripe.create_session(%{
+    Algora.Stripe.Session.create(%{
       mode: "payment",
       billing_address_collection: "required",
       line_items: line_items,
@@ -387,7 +387,7 @@ defmodule Algora.Payments do
   defp execute_transfer(transaction, account) do
     # TODO: set other params
     # TODO: provide idempotency key
-    case Algora.Stripe.create_transfer(%{
+    case Algora.Stripe.Transfer.create(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
            currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
            destination: account.provider_id,

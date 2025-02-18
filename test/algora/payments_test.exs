@@ -33,29 +33,16 @@ defmodule Algora.PaymentsTest do
         net_amount: Money.new(2, :USD)
       )
 
-      stripe_transfer_id = "tr_#{Nanoid.generate()}"
-
-      expect(Algora.StripeMock, :create_transfer, fn params ->
-        {:ok,
-         %{
-           id: stripe_transfer_id,
-           amount: params.amount,
-           currency: params.currency,
-           destination: params.destination
-         }}
-      end)
-
       assert {:ok, transfer} = Payments.execute_pending_transfers(user.id)
-      assert transfer.id == stripe_transfer_id
       assert transfer.amount == 100 + 200
       assert transfer.currency == "usd"
       assert transfer.destination == account.provider_id
 
-      transfer_tx = Repo.get_by(Transaction, provider_id: stripe_transfer_id)
+      transfer_tx = Repo.get_by(Transaction, provider_id: transfer.id)
       assert transfer_tx.status == :succeeded
       assert transfer_tx.type == :transfer
       assert transfer_tx.provider == "stripe"
-      assert transfer_tx.provider_meta["id"] == stripe_transfer_id
+      assert transfer_tx.provider_meta["id"] == transfer.id
       assert Money.equal?(transfer_tx.net_amount, Money.new(1 + 2, :USD))
       assert Money.equal?(transfer_tx.gross_amount, Money.new(1 + 2, :USD))
       assert Money.equal?(transfer_tx.total_fee, Money.new(0, :USD))
@@ -114,9 +101,7 @@ defmodule Algora.PaymentsTest do
         net_amount: Money.new(1, :USD)
       )
 
-      expect(Algora.StripeMock, :create_transfer, fn _params ->
-        {:error, %{message: "Insufficient funds"}}
-      end)
+      Account |> Repo.one!() |> change(%{provider_id: "acct_invalid"}) |> Repo.update!()
 
       assert {:error, _} = Payments.execute_pending_transfers(user.id)
 

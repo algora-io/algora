@@ -12,6 +12,10 @@ defmodule Algora.Util do
     |> String.replace(["/", "+"], "-")
   end
 
+  def random_int(n \\ 1_000_000) do
+    :rand.uniform(n)
+  end
+
   def term_to_base64(term) do
     term
     |> :erlang.term_to_binary()

@@ -396,7 +396,7 @@ defmodule Algora.Contracts do
   defp maybe_generate_invoice(contract, charge) do
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
-    with {:ok, invoice} <- Stripe.create_invoice(invoice_params),
+    with {:ok, invoice} <- Stripe.Invoice.create(invoice_params),
          {:ok, _line_items} <- create_line_items(contract, invoice, charge.line_items) do
       {:ok, invoice}
     end
@@ -443,7 +443,7 @@ defmodule Algora.Contracts do
 
   defp create_line_items(contract, invoice, line_items) do
     Enum.reduce_while(line_items, {:ok, []}, fn line_item, {:ok, acc} ->
-      case Stripe.create_invoice_item(%{
+      case Stripe.Invoiceitem.create(%{
              invoice: invoice.id,
              customer: contract.client.customer.provider_id,
              amount: MoneyUtils.to_minor_units(line_item.amount),
@@ -461,7 +461,7 @@ defmodule Algora.Contracts do
   defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
-    case Stripe.pay_invoice(invoice.id, %{off_session: true, payment_method: pm_id}) do
+    case Stripe.Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}) do
       {:ok, stripe_invoice} ->
         if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}
@@ -481,7 +481,7 @@ defmodule Algora.Contracts do
 
   # TODO: do we need to lock the transactions here?
   defp transfer_funds(contract, %Transaction{type: :transfer} = transaction) when transaction.status != :succeeded do
-    case Stripe.create_transfer(%{
+    case Stripe.Transfer.create(%{
            amount: MoneyUtils.to_minor_units(transaction.net_amount),
            currency: to_string(transaction.net_amount.currency),
            destination: transaction.user_id
@@ -507,10 +507,19 @@ defmodule Algora.Contracts do
     |> Repo.update()
   end
 
+  defp update_transaction_status(transaction, nil, status) do
+    transaction
+    |> change(%{
+      status: status,
+      succeeded_at: if(status == :succeeded, do: DateTime.utc_now())
+    })
+    |> Repo.update()
+  end
+
   defp update_transaction_status(transaction, record, status) do
     transaction
     |> change(%{
-      provider_id: record[:id],
+      provider_id: record.id,
       provider_meta: Util.normalize_struct(record),
       status: status,
       succeeded_at: if(status == :succeeded, do: DateTime.utc_now())

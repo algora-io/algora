@@ -11,7 +11,6 @@ defmodule Algora.BountiesTest do
 
   setup do
     stub_with(Algora.GithubMock, Algora.Github.Stub)
-    stub_with(Algora.StripeMock, Algora.Stripe.Stub)
     :ok
   end
 

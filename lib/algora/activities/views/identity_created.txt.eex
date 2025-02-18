@@ -1,3 +1,0 @@
-An identity from <%= identity.provider %> has been linked on algora.
-
-<%= Algora.Activities.external_url(activity) %>

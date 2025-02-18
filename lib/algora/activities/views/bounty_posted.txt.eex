@@ -1,3 +1,0 @@
-A new bounty has been posted by <%= bounty.creator.display_name %>
-
-<%= Algora.Activities.external_url(activity) %>

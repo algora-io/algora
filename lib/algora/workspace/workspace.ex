@@ -19,7 +19,14 @@ defmodule Algora.Workspace do
   @type command_source :: :ticket | :comment
 
   def ensure_ticket(token, owner, repo, number) do
-    ticket_query =
+    case get_ticket(owner, repo, number) do
+      %Ticket{} = ticket -> {:ok, ticket}
+      nil -> create_ticket_from_github(token, owner, repo, number)
+    end
+  end
+
+  def get_ticket(owner, repo, number) do
+    Repo.one(
       from(t in Ticket,
         join: r in assoc(t, :repository),
         join: u in assoc(r, :user),
@@ -29,11 +36,7 @@ defmodule Algora.Workspace do
         where: u.provider_login == ^owner,
         preload: [repository: {r, user: u}]
       )
-
-    case Repo.one(ticket_query) do
-      %Ticket{} = ticket -> {:ok, ticket}
-      nil -> create_ticket_from_github(token, owner, repo, number)
-    end
+    )
   end
 
   def create_ticket_from_github(token, owner, repo, number) do

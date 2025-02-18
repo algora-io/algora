@@ -7,7 +7,6 @@ defmodule Algora.BountiesTest do
 
   alias Algora.Activities.Notifier
   alias Algora.Activities.SendEmail
-  alias Algora.Activities.Views
 
   def setup_github_mocks(_context) do
     import Algora.Mocks.GithubMock
@@ -59,7 +58,7 @@ defmodule Algora.BountiesTest do
 
       assert {:ok, bounty} = Algora.Bounties.create_bounty(bounty_params, [])
 
-      assert {:ok, claim} =
+      assert {:ok, claims} =
                Algora.Bounties.claim_bounty(
                  %{
                    user: recipient,
@@ -72,7 +71,7 @@ defmodule Algora.BountiesTest do
                  installation_id: installation.id
                )
 
-      claim = Algora.Repo.one(Algora.Bounties.Claim.preload(claim.id))
+      claims = Repo.preload(claims, :user)
 
       assert {:ok, _bounty} =
                Algora.Bounties.reward_bounty(
@@ -80,7 +79,7 @@ defmodule Algora.BountiesTest do
                    owner: owner,
                    amount: ~M[4000]usd,
                    bounty_id: bounty.id,
-                   claims: [claim]
+                   claims: claims
                  },
                  installation_id: installation.id
                )
@@ -94,14 +93,14 @@ defmodule Algora.BountiesTest do
                    recipient: recipient
                  },
                  ticket_ref: ticket_ref,
-                 claims: [claim]
+                 claims: claims
                )
 
       assert_activity_names([:bounty_posted, :claim_submitted, :bounty_awarded, :tip_awarded])
       assert_activity_names_for_user(creator.id, [:bounty_posted, :bounty_awarded, :tip_awarded])
       assert_activity_names_for_user(recipient.id, [:claim_submitted, :tip_awarded])
 
-      assert [bounty, claim, awarded, tip] = Enum.reverse(Algora.Activities.all())
+      assert [bounty, _claim, _awarded, tip] = Enum.reverse(Algora.Activities.all())
       assert "tip_activities" == tip.assoc_name
       assert tip.notify_users == [recipient.id]
       assert activity = Algora.Activities.get_with_preloaded_assoc(tip.assoc_name, tip.id)

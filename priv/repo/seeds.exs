@@ -9,42 +9,7 @@ alias Algora.Util
 
 require Logger
 
-Application.put_env(:algora, :stripe_impl, Algora.Stripe.SeedImpl)
-
-defmodule Algora.Stripe.SeedImpl do
-  @moduledoc false
-  @behaviour Algora.Stripe.Behaviour
-
-  @impl true
-  def create_invoice(params) do
-    {:ok, %{id: "inv_#{Nanoid.generate()}", customer: params.customer}}
-  end
-
-  @impl true
-  def create_invoice_item(params) do
-    {:ok, %{id: "ii_#{Nanoid.generate()}", amount: params.amount}}
-  end
-
-  @impl true
-  def pay_invoice(_invoice_id, _params) do
-    {:ok,
-     %{
-       id: "inv_#{Nanoid.generate()}",
-       paid: true,
-       status: "paid"
-     }}
-  end
-
-  @impl true
-  def create_transfer(_params) do
-    {:ok, %{id: "tr_#{Nanoid.generate()}"}}
-  end
-
-  @impl true
-  def create_session(_params) do
-    {:ok, %{url: "https://#{Nanoid.generate()}.example.com"}}
-  end
-end
+Application.put_env(:algora, :stripe_impl, Algora.Support.StripeMock)
 
 github_id =
   case System.argv() do

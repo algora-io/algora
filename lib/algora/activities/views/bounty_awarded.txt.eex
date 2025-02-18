@@ -1,3 +1,0 @@
-Congratulations, you've been awarded a bounty by <%= bounty.creator.display_name %>!
-
-<%= Algora.Activities.external_url(activity) %>

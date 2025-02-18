@@ -1,3 +1,0 @@
-<%= tip.creator.display_name %> sent you a <%= tip.amount %> tip on Algora!
-
-<%= Algora.Activities.external_url(activity) %>

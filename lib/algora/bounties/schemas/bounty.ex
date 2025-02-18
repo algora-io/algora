@@ -4,7 +4,6 @@ defmodule Algora.Bounties.Bounty do
 
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
-  alias Algora.Payments.Transaction
 
   typed_schema "bounties" do
     field :amount, Algora.Types.Money

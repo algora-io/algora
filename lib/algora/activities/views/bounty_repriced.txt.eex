@@ -1,3 +1,0 @@
-A Bounty for <% bounty.ticket.repository.name %> had it's reward updated to <% bounty.amount %>
-
-<%= Algora.Activities.external_url(activity) %>

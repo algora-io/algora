@@ -1,3 +1,0 @@
-A contract for "<%= contract.client.display_name %>" has been prepaid.
-
-<%= Algora.Activities.external_url(activity) %>

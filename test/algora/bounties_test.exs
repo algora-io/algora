@@ -4,32 +4,18 @@ defmodule Algora.BountiesTest do
 
   import Algora.Factory
   import Money.Sigil
+  import Mox
 
   alias Algora.Activities.Notifier
   alias Algora.Activities.SendEmail
 
-  def setup_github_mocks(_context) do
-    import Algora.Mocks.GithubMock
-
-    setup_installation_token()
-    setup_repository_permissions()
-    setup_create_issue_comment()
-    setup_get_user_by_username()
-    setup_get_issue()
-    setup_get_repository()
-    :ok
-  end
-
-  def setup_stripe_mocks(_context) do
-    import Algora.Mocks.StripeMock
-
-    setup_create_session()
+  setup do
+    stub_with(Algora.GithubMock, Algora.Github.Stub)
+    stub_with(Algora.StripeMock, Algora.Stripe.Stub)
     :ok
   end
 
   describe "bounties" do
-    setup [:setup_github_mocks, :setup_stripe_mocks]
-
     test "create" do
       creator = insert!(:user)
       owner = insert!(:user)

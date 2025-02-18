@@ -6,7 +6,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   import Algora.Factory
   import Ecto.Query
   import Money.Sigil
-  import Mox
 
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -14,8 +13,6 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias Algora.Github.Webhook
   alias Algora.Repo
   alias AlgoraWeb.Webhooks.GithubController
-
-  setup :verify_on_exit!
 
   setup do
     admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))

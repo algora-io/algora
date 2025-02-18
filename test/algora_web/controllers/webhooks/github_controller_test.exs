@@ -503,7 +503,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     stub(
       Algora.GithubMock,
       :create_issue_comment,
-      fn _token, _owner, _repo, _issue_number, _body -> {:ok, %{"id" => 1}} end
+      fn _token, _owner, _repo, _number, _body -> {:ok, %{"id" => sequence(:github_comment_id, & &1)}} end
     )
   end
 
@@ -519,14 +519,14 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     stub(
       Algora.GithubMock,
       :get_issue,
-      fn _token, owner, repo, issue_number ->
+      fn _token, owner, repo, number ->
         {:ok,
          %{
-           "id" => 123,
-           "number" => issue_number,
+           "id" => sequence(:github_issue_id, & &1),
+           "number" => number,
            "title" => "Test Issue",
            "body" => "Test body",
-           "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{issue_number}"
+           "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}"
          }}
       end
     )
@@ -539,7 +539,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       fn _token, owner, repo ->
         {:ok,
          %{
-           "id" => 123,
+           "id" => sequence(:github_repository_id, & &1),
            "name" => repo,
            "html_url" => "https://github.com/#{owner}/#{repo}"
          }}

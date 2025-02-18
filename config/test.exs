@@ -19,6 +19,8 @@ config :algora, AlgoraWeb.Endpoint,
   secret_key_base: "M+VvXlmVxm5bl+xdXcImlpFP7Kob6M/sYK4SoaPgF0Spteix9NWw7WimjBQolY6V",
   server: false
 
+config :algora, Oban, queues: false, plugins: false
+
 # In test we don't send emails.
 config :algora, Algora.Mailer, adapter: Swoosh.Adapters.Test
 

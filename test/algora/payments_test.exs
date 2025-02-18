@@ -1,6 +1,8 @@
 defmodule Algora.PaymentsTest do
   use Algora.DataCase
 
+  import ExUnit.CaptureLog
+
   alias Algora.Payments
   alias Algora.Payments.Account
   alias Algora.Payments.Transaction
@@ -99,7 +101,8 @@ defmodule Algora.PaymentsTest do
 
       Account |> Repo.one!() |> change(%{provider_id: "acct_invalid"}) |> Repo.update!()
 
-      assert {:error, _} = Payments.execute_pending_transfers(user.id)
+      {result, _log} = with_log(fn -> Payments.execute_pending_transfers(user.id) end)
+      assert {:error, %Stripe.Error{code: :invalid_request_error}} = result
 
       transfer_tx = Repo.one(from t in Transaction, where: t.type == :transfer)
       assert transfer_tx.status == :failed

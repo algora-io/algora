@@ -9,7 +9,7 @@ alias Algora.Util
 
 require Logger
 
-Application.put_env(:algora, :stripe_impl, Algora.Support.StripeMock)
+Application.put_env(:algora, :stripe_client, Algora.Support.StripeMock)
 
 github_id =
   case System.argv() do

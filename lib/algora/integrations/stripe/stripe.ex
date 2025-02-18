@@ -3,7 +3,7 @@ defmodule Algora.Stripe do
 
   defmodule Invoice do
     @moduledoc false
-    @stripe Application.compile_env(:algora, :stripe_impl, Stripe)
+    @stripe Application.compile_env(:algora, :stripe_client, Stripe)
 
     def create(params) do
       @stripe.Invoice.create(params)
@@ -16,7 +16,7 @@ defmodule Algora.Stripe do
 
   defmodule Invoiceitem do
     @moduledoc false
-    @stripe Application.compile_env(:algora, :stripe_impl, Stripe)
+    @stripe Application.compile_env(:algora, :stripe_client, Stripe)
 
     def create(params) do
       @stripe.Invoiceitem.create(params)
@@ -25,7 +25,7 @@ defmodule Algora.Stripe do
 
   defmodule Transfer do
     @moduledoc false
-    @stripe Application.compile_env(:algora, :stripe_impl, Stripe)
+    @stripe Application.compile_env(:algora, :stripe_client, Stripe)
 
     def create(params) do
       @stripe.Transfer.create(params)
@@ -34,7 +34,7 @@ defmodule Algora.Stripe do
 
   defmodule Session do
     @moduledoc false
-    @stripe Application.compile_env(:algora, :stripe_impl, Stripe)
+    @stripe Application.compile_env(:algora, :stripe_client, Stripe)
 
     def create(params) do
       @stripe.Session.create(params)

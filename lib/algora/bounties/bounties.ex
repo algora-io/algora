@@ -215,8 +215,8 @@ defmodule Algora.Bounties do
           source: Ticket.t(),
           group_id: String.t() | nil,
           group_share: Decimal.t(),
-          status: :pending | :approved | :rejected | :paid,
-          type: :pull_request | :review | :video | :design | :article
+          status: Claim.status(),
+          type: Claim.type()
         }) ::
           {:ok, Claim.t()} | {:error, atom()}
   defp do_claim_bounty(%{
@@ -260,8 +260,8 @@ defmodule Algora.Bounties do
           token: String.t(),
           target: Ticket.t(),
           source: Ticket.t(),
-          status: :pending | :approved | :rejected | :paid,
-          type: :pull_request | :review | :video | :design | :article
+          status: Claim.status(),
+          type: Claim.type()
         }) ::
           {:ok, [Claim.t()]} | {:error, atom()}
   defp do_claim_bounties(%{
@@ -301,8 +301,8 @@ defmodule Algora.Bounties do
             coauthor_provider_logins: [String.t()],
             target_ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             source_ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
-            status: :pending | :approved | :rejected | :paid,
-            type: :pull_request | :review | :video | :design | :article
+            status: Claim.status(),
+            type: Claim.type()
           },
           opts :: [installation_id: integer()]
         ) ::

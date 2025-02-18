@@ -27,7 +27,8 @@ defmodule Algora.Github.Command do
       "/bounty"
       |> string()
       |> ignore()
-      |> concat(whitespace() |> ignore() |> concat(amount()))
+      |> concat(ignore(whitespace()))
+      |> concat(amount())
       |> tag(:bounty)
       |> label(@usage.bounty)
     end

@@ -78,9 +78,8 @@ defmodule Algora.Util do
   def format_pct(percentage) do
     percentage
     |> Decimal.mult(100)
-    |> Decimal.to_string()
-    |> String.trim_trailing("0")
-    |> String.trim_trailing(".")
+    |> Decimal.normalize()
+    |> Decimal.to_string(:normal)
     |> Kernel.<>("%")
   end
 

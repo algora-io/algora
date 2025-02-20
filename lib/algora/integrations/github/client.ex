@@ -79,7 +79,8 @@ defmodule Algora.Github.Client do
       "api.github.com",
       method,
       path,
-      [{"accept", "application/vnd.github.v3+json"}, {"Authorization", "Bearer #{access_token}"}],
+      [{"accept", "application/vnd.github.v3+json"}] ++
+        if(access_token, do: [{"Authorization", "Bearer #{access_token}"}], else: []),
       body,
       opts
     )

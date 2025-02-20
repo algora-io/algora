@@ -109,7 +109,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"id" => comment_id}
+          params: %{"comment" => %{"id" => comment_id}}
         }
       ])
 
@@ -123,7 +123,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.edited",
           user_type: :admin,
           body: "/bounty $200",
-          params: %{"id" => comment_id}
+          params: %{"comment" => %{"id" => comment_id}}
         }
       ])
 
@@ -138,7 +138,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"id" => comment_id}
+          params: %{"comment" => %{"id" => comment_id}}
         }
       ])
 
@@ -152,7 +152,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $200",
-          params: %{"id" => comment_id + 1}
+          params: %{"comment" => %{"id" => comment_id + 1}}
         }
       ])
 
@@ -170,13 +170,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number}
+          params: %{"issue" => %{"number" => issue_number}}
         },
         %{
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number} /split @jsmith /split @jdoe",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -198,19 +198,19 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number}
+          params: %{"issue" => %{"number" => issue_number}}
         },
         %{
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         },
         %{
           event_action: "pull_request.edited",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -227,13 +227,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number1}
+          params: %{"issue" => %{"number" => issue_number1}}
         },
         %{
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number2}
+          params: %{"issue" => %{"number" => issue_number2}}
         }
       ])
 
@@ -242,7 +242,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number1} /claim #{issue_number2}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -259,7 +259,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number1}
+          params: %{"issue" => %{"number" => issue_number1}}
         }
       ])
 
@@ -268,7 +268,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number1}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -277,7 +277,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number2}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -297,7 +297,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number}
+          params: %{"issue" => %{"number" => issue_number}}
         }
       ])
 
@@ -308,7 +308,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -320,7 +320,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.edited",
           user_type: :unauthorized,
           body: "/claim #{issue_number} /split @jsmith",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -337,7 +337,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.edited",
           user_type: :unauthorized,
           body: "/claim #{issue_number} /split @jdoe",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -356,7 +356,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "pull_request.edited",
           user_type: :unauthorized,
           body: "",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         }
       ])
 
@@ -378,19 +378,19 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number}
+          params: %{"issue" => %{"number" => issue_number}}
         },
         %{
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         },
         %{
           event_action: "pull_request.closed",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number, "merged_at" => nil}
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => nil}}
         }
       ])
 
@@ -406,19 +406,19 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number}
+          params: %{"issue" => %{"number" => issue_number}}
         },
         %{
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "fixes #{issue_number}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         },
         %{
           event_action: "pull_request.closed",
           user_type: :unauthorized,
           body: "fixes #{issue_number}",
-          params: %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
         }
       ])
 
@@ -434,19 +434,19 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           event_action: "issue_comment.created",
           user_type: :admin,
           body: "/bounty $100",
-          params: %{"number" => issue_number}
+          params: %{"issue" => %{"number" => issue_number}}
         },
         %{
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number}
+          params: %{"pull_request" => %{"number" => pr_number}}
         },
         %{
           event_action: "pull_request.closed",
           user_type: :unauthorized,
           body: "/claim #{issue_number}",
-          params: %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
         }
       ])
 
@@ -507,39 +507,53 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     }
   end
 
+  defp merge_payload(base_payload, params) do
+    Map.new(base_payload, fn {key, base_value} ->
+      case {base_value, get_in(params || %{}, [key])} do
+        {base_map, override_map} when is_map(base_map) and is_map(override_map) ->
+          {key, Map.merge(base_map, override_map)}
+
+        _ ->
+          {key, base_value}
+      end
+    end)
+  end
+
   defp mock_payload(%{event: "issue_comment"} = ctx) do
     ctx
     |> mock_base_payload()
-    |> Map.merge(%{
-      "comment" =>
-        Map.merge(
-          %{
+    |> Map.merge(
+      merge_payload(
+        %{
+          "comment" => %{
             "id" => 123,
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author])
           },
-          ctx[:params]
-        ),
-      "issue" => %{
-        "id" => 123,
-        "number" => 123,
-        "body" => mock_body(),
-        "user" => mock_user(ctx[:admin])
-      }
-    })
+          "issue" => %{
+            "id" => 123,
+            "number" => 123,
+            "body" => mock_body(),
+            "user" => mock_user(ctx[:admin])
+          }
+        },
+        ctx[:params]
+      )
+    )
   end
 
   defp mock_payload(%{event: "issues"} = ctx) do
     ctx
     |> mock_base_payload()
-    |> Map.put(
-      "issue",
-      Map.merge(
+    |> Map.merge(
+      merge_payload(
         %{
-          "id" => 123,
-          "number" => 123,
-          "body" => mock_body(ctx[:body]),
-          "user" => mock_user(ctx[:author])
+          "issue" => %{
+            "id" => 123,
+            "number" => 123,
+            "body" => mock_body(ctx[:body]),
+            "user" => mock_user(ctx[:author])
+          }
         },
         ctx[:params]
       )
@@ -549,15 +563,16 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   defp mock_payload(%{event: "pull_request"} = ctx) do
     ctx
     |> mock_base_payload()
-    |> Map.put(
-      "pull_request",
-      Map.merge(
+    |> Map.merge(
+      merge_payload(
         %{
-          "id" => 123,
-          "number" => 123,
-          "body" => mock_body(ctx[:body]),
-          "user" => mock_user(ctx[:author]),
-          "merged_at" => nil
+          "pull_request" => %{
+            "id" => 123,
+            "number" => 123,
+            "body" => mock_body(ctx[:body]),
+            "user" => mock_user(ctx[:author]),
+            "merged_at" => nil
+          }
         },
         ctx[:params]
       )

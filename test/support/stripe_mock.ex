@@ -4,7 +4,7 @@ defmodule Algora.Support.StripeMock do
   defmodule Invoice do
     @moduledoc false
     def create(_params) do
-      {:ok, %Stripe.Invoice{id: "inv_#{Algora.Util.random_int()}"}}
+      {:ok, %Stripe.Invoice{id: "inv_#{Algora.Util.random_int()}", paid: false, status: "open"}}
     end
 
     def pay(_invoice_id, %{payment_method: "pm_card_declined"}) do
@@ -17,7 +17,7 @@ defmodule Algora.Support.StripeMock do
     end
 
     def pay(invoice_id, _params) do
-      {:ok, %Stripe.Invoice{id: invoice_id, paid: true}}
+      {:ok, %Stripe.Invoice{id: invoice_id, paid: true, status: "paid"}}
     end
   end
 

@@ -105,6 +105,10 @@ defmodule Algora.Util do
     Enum.map(list, &normalize_struct/1)
   end
 
+  def normalize_struct(tuple) when is_tuple(tuple) do
+    tuple |> Tuple.to_list() |> normalize_struct()
+  end
+
   def normalize_struct(value), do: value
 
   def format_name_list([x]), do: x

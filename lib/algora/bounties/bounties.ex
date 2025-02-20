@@ -610,9 +610,6 @@ defmodule Algora.Bounties do
       with {:ok, _charge} <-
              initialize_charge(%{
                id: Nanoid.generate(),
-               tip_id: opts[:tip_id],
-               bounty_id: opts[:bounty_id],
-               claim_id: nil,
                user_id: owner.id,
                gross_amount: gross_amount,
                net_amount: amount,
@@ -669,9 +666,6 @@ defmodule Algora.Bounties do
       with {:ok, _charge} <-
              initialize_charge(%{
                id: Nanoid.generate(),
-               tip_id: opts[:tip_id],
-               bounty_id: opts[:bounty_id],
-               claim_id: nil,
                user_id: owner.id,
                gross_amount: gross_amount,
                net_amount: amount,
@@ -711,8 +705,6 @@ defmodule Algora.Bounties do
 
   defp initialize_charge(%{
          id: id,
-         tip_id: tip_id,
-         bounty_id: bounty_id,
          user_id: user_id,
          gross_amount: gross_amount,
          net_amount: net_amount,
@@ -726,8 +718,6 @@ defmodule Algora.Bounties do
       provider: "stripe",
       type: :charge,
       status: :initialized,
-      tip_id: tip_id,
-      bounty_id: bounty_id,
       user_id: user_id,
       gross_amount: gross_amount,
       net_amount: net_amount,
@@ -739,9 +729,6 @@ defmodule Algora.Bounties do
     |> Algora.Validations.validate_positive(:net_amount)
     |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:user_id)
-    |> foreign_key_constraint(:tip_id)
-    |> foreign_key_constraint(:bounty_id)
-    |> foreign_key_constraint(:claim_id)
     |> Repo.insert()
   end
 

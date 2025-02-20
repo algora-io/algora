@@ -28,6 +28,7 @@ defmodule Algora.AnalyticsTest do
   end
 
   describe "analytics" do
+    @tag :slow
     test "get_company_analytics 30d" do
       {:ok, resp} = Analytics.get_company_analytics("30d")
       assert resp.total_companies == 200
@@ -73,6 +74,7 @@ defmodule Algora.AnalyticsTest do
       assert resp.active_trend == :up
     end
 
+    @tag :slow
     test "get_company_analytics 356d" do
       {:ok, resp} = Analytics.get_company_analytics("365d")
       assert resp.total_companies == 200
@@ -83,6 +85,7 @@ defmodule Algora.AnalyticsTest do
       assert resp.active_trend == :up
     end
 
+    @tag :slow
     test "get_company_analytics 7d" do
       insert(:organization, %{seeded: true, activated: true})
       {:ok, resp} = Analytics.get_company_analytics("7d")

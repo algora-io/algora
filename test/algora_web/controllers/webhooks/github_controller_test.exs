@@ -397,35 +397,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert Repo.one(Claim).status == :pending
     end
 
-    test "handles merged pull request with claims", ctx do
-      issue_number = :rand.uniform(1000)
-      pr_number = :rand.uniform(1000)
-
-      process_scenario!(ctx, [
-        %{
-          event_action: "issue_comment.created",
-          user_type: :admin,
-          body: "/bounty $100",
-          params: %{"number" => issue_number}
-        },
-        %{
-          event_action: "pull_request.opened",
-          user_type: :unauthorized,
-          body: "/claim #{issue_number}",
-          params: %{"number" => pr_number}
-        },
-        %{
-          event_action: "pull_request.closed",
-          user_type: :unauthorized,
-          body: "/claim #{issue_number}",
-          params: %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}
-        }
-      ])
-
-      assert Repo.one(Claim).status == :approved
-    end
-
-    test "handles merged pull request without claims", ctx do
+    test "does nothing when merged pull request has no claims", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)
 
@@ -451,6 +423,34 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       ])
 
       assert Repo.aggregate(Claim, :count) == 0
+    end
+
+    test "approves claim when pull request is merged", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"number" => issue_number}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"number" => pr_number}
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}
+        }
+      ])
+
+      assert Repo.one(Claim).status == :approved
     end
   end
 

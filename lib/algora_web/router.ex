@@ -20,12 +20,6 @@ defmodule AlgoraWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/webhooks", AlgoraWeb do
-    pipe_through :api
-
-    post "/github", Webhooks.GithubController, :new
-  end
-
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 

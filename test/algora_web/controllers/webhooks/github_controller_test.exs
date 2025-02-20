@@ -12,6 +12,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs.NotifyBounty
   alias Algora.Github.Webhook
+  alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Webhooks.GithubController
 
@@ -451,6 +452,133 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       ])
 
       assert Repo.one(Claim).status == :approved
+    end
+
+    test "handles autopay", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      bounty = Repo.one!(Bounty)
+      claim = Repo.one!(Claim)
+      assert claim.target_id == bounty.ticket_id
+      assert claim.status == :approved
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, Money.new(:USD, 100))
+      assert charge.status == :initialized
+      assert charge.user_id == ctx[:org].id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, Money.new(:USD, 100))
+      assert debit.status == :initialized
+      assert debit.user_id == ctx[:org].id
+      assert debit.bounty_id == bounty.id
+      assert debit.claim_id == claim.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, Money.new(:USD, 100))
+      assert credit.status == :initialized
+      assert credit.user_id == ctx[:unauthorized_user].id
+      assert credit.bounty_id == bounty.id
+      assert credit.claim_id == claim.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
+    end
+
+    test "handles split bounty payments between two users when PR is merged", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      user1 = ctx[:unauthorized_user]
+      user2 = insert!(:user)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @#{user2.provider_login}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @#{user2.provider_login}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      bounty = Repo.one!(Bounty)
+      claim1 = Repo.one!(from c in Claim, where: c.user_id == ^user1.id)
+      claim2 = Repo.one!(from c in Claim, where: c.user_id == ^user2.id)
+      assert claim1.target_id == bounty.ticket_id
+      assert claim1.status == :approved
+      assert claim2.status == :approved
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, Money.new(:USD, 100))
+      assert charge.status == :initialized
+      assert charge.user_id == ctx[:org].id
+
+      debit1 = Repo.one!(from t in Transaction, where: t.type == :debit and t.claim_id == ^claim1.id)
+      assert Money.equal?(debit1.net_amount, Money.new(:USD, 50))
+      assert debit1.status == :initialized
+      assert debit1.user_id == ctx[:org].id
+      assert debit1.bounty_id == bounty.id
+
+      debit2 = Repo.one!(from t in Transaction, where: t.type == :debit and t.claim_id == ^claim2.id)
+      assert Money.equal?(debit2.net_amount, Money.new(:USD, 50))
+      assert debit2.status == :initialized
+      assert debit2.user_id == ctx[:org].id
+      assert debit2.bounty_id == bounty.id
+
+      credit1 = Repo.one!(from t in Transaction, where: t.type == :credit and t.claim_id == ^claim1.id)
+      assert Money.equal?(credit1.net_amount, Money.new(:USD, 50))
+      assert credit1.status == :initialized
+      assert credit1.user_id == user1.id
+      assert credit1.bounty_id == bounty.id
+
+      credit2 = Repo.one!(from t in Transaction, where: t.type == :credit and t.claim_id == ^claim2.id)
+      assert Money.equal?(credit2.net_amount, Money.new(:USD, 50))
+      assert credit2.status == :initialized
+      assert credit2.user_id == user2.id
+      assert credit2.bounty_id == bounty.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
     end
   end
 

@@ -1,6 +1,6 @@
 # Script for populating the database. You can run it as:
 #
-#     mix ecto.seed <your-github-id>
+#     mix ecto.seed <your-github-login>
 
 import Algora.Factory
 
@@ -11,10 +11,10 @@ require Logger
 
 Application.put_env(:algora, :stripe_client, Algora.Support.StripeMock)
 
-github_id =
+{:ok, github_user} =
   case System.argv() do
-    [github_id] -> github_id
-    _ -> "123456789"
+    [github_handle] -> Algora.Github.get_user_by_username(nil, github_handle)
+    _ -> {:ok, nil}
   end
 
 pied_piper = upsert!(:organization, [:email])
@@ -23,7 +23,25 @@ erich =
   upsert!(
     :user,
     [:provider, :provider_id],
-    %{provider_id: github_id, last_context: pied_piper.handle, is_admin: true}
+    %{last_context: pied_piper.handle, is_admin: true}
+    |> Map.merge(
+      if(github_user,
+        do: %{
+          provider: "github",
+          provider_login: github_user["login"],
+          provider_id: to_string(github_user["id"]),
+          handle: github_user["login"],
+          display_name: github_user["name"],
+          avatar_url: github_user["avatar_url"],
+          website_url: github_user["blog"],
+          twitter_url: "https://x.com/" <> github_user["twitter_username"],
+          location: github_user["location"],
+          bio: github_user["bio"]
+        },
+        else: %{}
+      )
+    )
+    |> Map.merge(if(github_user && github_user["email"], do: %{email: github_user["email"]}, else: %{}))
   )
 
 upsert!(

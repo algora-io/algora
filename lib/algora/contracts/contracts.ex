@@ -44,12 +44,10 @@ defmodule Algora.Contracts do
 
   @spec get_payment_status(Contract.t()) :: payment_status()
   def get_payment_status(contract) do
-    zero = Money.zero(:USD)
-
-    case {contract.timesheet, contract.amount_credited} do
-      {nil, _} -> {:pending_timesheet, contract}
-      {_, ^zero} -> {:pending_release, contract}
-      {_, _} -> {:paid, contract}
+    cond do
+      is_nil(contract.timesheet) -> {:pending_timesheet, contract}
+      Money.positive?(contract.amount_credited) -> {:paid, contract}
+      true -> {:pending_release, contract}
     end
   end
 

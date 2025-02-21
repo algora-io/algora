@@ -9,6 +9,7 @@ defmodule Algora.Contracts do
   alias Algora.FeeTier
   alias Algora.MoneyUtils
   alias Algora.Payments
+  alias Algora.Payments.Account
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Stripe
@@ -479,16 +480,17 @@ defmodule Algora.Contracts do
 
   # TODO: do we need to lock the transactions here?
   defp transfer_funds(contract, %Transaction{type: :transfer} = transaction) when transaction.status != :succeeded do
-    case Stripe.Transfer.create(%{
-           amount: MoneyUtils.to_minor_units(transaction.net_amount),
-           currency: to_string(transaction.net_amount.currency),
-           destination: transaction.user_id
-         }) do
-      {:ok, stripe_transfer} ->
-        update_transaction_status(transaction, stripe_transfer, :succeeded)
-        mark_contract_as_paid(contract)
-        {:ok, stripe_transfer}
-
+    with {:ok, account} <- Repo.fetch_by(Account, user_id: transaction.user_id),
+         {:ok, stripe_transfer} <-
+           Stripe.Transfer.create(%{
+             amount: MoneyUtils.to_minor_units(transaction.net_amount),
+             currency: to_string(transaction.net_amount.currency),
+             destination: account.provider_id
+           }) do
+      update_transaction_status(transaction, stripe_transfer, :succeeded)
+      mark_contract_as_paid(contract)
+      {:ok, stripe_transfer}
+    else
       {:error, error} ->
         update_transaction_status(transaction, {:error, error})
         Activities.insert(contract, %{type: :contract_prepayment_failed})

@@ -16,6 +16,7 @@ defmodule Algora.ContractsTest do
     client = insert!(:organization)
     contractor = insert!(:user)
     customer = insert!(:customer, %{user: client})
+    _account = insert!(:account, %{user: contractor})
     _payment_method = insert!(:payment_method, %{customer: customer})
     contract = insert!(:contract, Map.merge(%{client: client, contractor: contractor}, attrs))
 

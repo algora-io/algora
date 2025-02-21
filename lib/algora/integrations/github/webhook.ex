@@ -22,16 +22,20 @@ defmodule Algora.Github.Webhook do
 
   defstruct @enforce_keys
 
-  def new(conn, payload) do
+  def new(conn) do
     secret = Algora.Github.webhook_secret()
 
     with {:ok, headers} <- parse_headers(conn),
-         {:ok, _} <- verify_signature(headers.signature_256, conn.assigns[:raw_body], secret) do
-      build_webhook(headers, payload)
+         {:ok, payload, conn} = Plug.Conn.read_body(conn),
+         {:ok, _} <- verify_signature(headers.signature_256, payload, secret),
+         {:ok, webhook} <- build_webhook(headers, payload) do
+      {:ok, webhook, conn}
     end
   end
 
   defp build_webhook(headers, payload) do
+    payload = Jason.decode!(payload)
+
     params =
       headers
       |> Map.put(:payload, payload)

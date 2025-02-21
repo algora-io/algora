@@ -19,34 +19,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: persist & alert about failed deliveries
   # TODO: auto-retry failed deliveries with exponential backoff
 
-  def new(conn, payload) do
-    with {:ok, webhook} <- Webhook.new(conn, payload),
-         :ok <- process_delivery(webhook) do
-      conn |> put_status(:accepted) |> json(%{status: "ok"})
-    else
-      {:error, :bot_event} ->
-        conn |> put_status(:ok) |> json(%{status: "ok"})
-
-      {:error, :missing_header} ->
-        conn |> put_status(:bad_request) |> json(%{error: "Missing header"})
-
-      {:error, :signature_mismatch} ->
-        conn |> put_status(:unauthorized) |> json(%{error: "Signature mismatch"})
-
-      {:error, reason} ->
-        Logger.error("Error processing webhook: #{inspect(reason)}")
-        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
-
-      error ->
-        Logger.error("Error processing webhook: #{inspect(error)}")
-        conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
-    end
-  rescue
-    e ->
-      Logger.error(Exception.format(:error, e, __STACKTRACE__))
-      conn |> put_status(:internal_server_error) |> json(%{error: "Internal server error"})
-  end
-
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
          {:ok, commands} <- process_commands(webhook),

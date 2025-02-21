@@ -34,6 +34,8 @@ defmodule Algora.Github.Webhook do
   end
 
   defp build_webhook(headers, payload) do
+    payload = Jason.decode!(payload)
+
     params =
       headers
       |> Map.put(:payload, payload)

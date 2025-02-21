@@ -19,30 +19,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   # TODO: persist & alert about failed deliveries
   # TODO: auto-retry failed deliveries with exponential backoff
 
-  def handle_webhook(webhook) do
-    case process_delivery(webhook) do
-      :ok ->
-        :ok
-
-      {:error, :bot_event} ->
-        :ok
-
-      {:error, :missing_header} ->
-        {:error, "Missing header"}
-
-      {:error, :signature_mismatch} ->
-        {:error, "Signature mismatch"}
-
-      error ->
-        Logger.error("Error processing webhook: #{inspect(error)}")
-        {:error, "Internal server error"}
-    end
-  rescue
-    e ->
-      Logger.error(Exception.format(:error, e, __STACKTRACE__))
-      {:error, "Internal server error"}
-  end
-
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
          {:ok, commands} <- process_commands(webhook),

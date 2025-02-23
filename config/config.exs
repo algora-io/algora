@@ -17,7 +17,7 @@ config :algora,
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,
   url: [host: "localhost"],
-  adapter: Bandit.PhoenixAdapter,
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
     formats: [html: AlgoraWeb.ErrorHTML, json: AlgoraWeb.ErrorJSON],
     layout: false

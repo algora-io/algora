@@ -418,6 +418,10 @@ defmodule Algora.Payments do
       provider: "stripe",
       type: :transfer,
       status: :initialized,
+      tip_id: credit.tip_id,
+      bounty_id: credit.bounty_id,
+      contract_id: credit.contract_id,
+      claim_id: credit.claim_id,
       user_id: credit.user_id,
       gross_amount: credit.net_amount,
       net_amount: credit.net_amount,
@@ -427,6 +431,10 @@ defmodule Algora.Payments do
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:bounty_id)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:claim_id)
     |> Repo.insert()
   end
 

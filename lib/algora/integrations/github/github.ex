@@ -49,8 +49,9 @@ defmodule Algora.Github do
     if pat_enabled() do
       apply(function, [pat() | args])
     else
-      {module, name} = Function.info(function, :name)
-      function_name = "#{module}.#{name}"
+      {_, module} = Function.info(function, :module)
+      {_, name} = Function.info(function, :name)
+      function_name = String.trim_leading("#{module}.#{name}", "Elixir.")
 
       formatted_args =
         Enum.map_join(args, ", ", fn

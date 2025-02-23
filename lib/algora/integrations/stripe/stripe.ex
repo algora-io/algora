@@ -32,4 +32,16 @@ defmodule Algora.Stripe do
 
     def create(params), do: Algora.Stripe.client(__MODULE__).create(params)
   end
+
+  defmodule PaymentMethod do
+    @moduledoc false
+
+    def attach(params), do: Algora.Stripe.client(__MODULE__).attach(params)
+  end
+
+  defmodule SetupIntent do
+    @moduledoc false
+
+    def retrieve(id, params), do: Algora.Stripe.client(__MODULE__).retrieve(id, params)
+  end
 end

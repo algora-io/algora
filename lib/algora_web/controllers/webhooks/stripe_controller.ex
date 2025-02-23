@@ -4,9 +4,9 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Bounties
   alias Algora.Payments
   alias Algora.Payments.Customer
-  alias Algora.Payments.Jobs.ExecutePendingTransfers
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Util
@@ -27,9 +27,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
         )
 
-      # TODO: split into two groups:
-      #     - has active payout account -> execute pending transfers
-      #     - has no active payout account -> notify user to connect payout account
       jobs_result =
         from(t in Transaction,
           where: t.group_id == ^group_id,
@@ -37,14 +34,23 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           where: t.status == :succeeded
         )
         |> Repo.all()
-        |> Enum.map(fn %{user_id: user_id} -> user_id end)
-        |> Enum.uniq()
-        |> Enum.reduce_while(:ok, fn user_id, :ok ->
-          case %{user_id: user_id}
-               |> ExecutePendingTransfers.new()
-               |> Oban.insert() do
-            {:ok, _job} -> {:cont, :ok}
-            error -> {:halt, error}
+        |> Enum.reduce_while(:ok, fn credit, :ok ->
+          case Payments.fetch_active_account(credit.user_id) do
+            {:ok, _account} ->
+              case %{credit_id: credit.id}
+                   |> Payments.Jobs.ExecutePendingTransfer.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
+
+            {:error, :no_active_account} ->
+              case %{credit_id: credit.id}
+                   |> Bounties.Jobs.PromptPayoutConnect.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
           end
         end)
 
@@ -70,8 +76,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
       }) do
     with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
-         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer) do
-      # TODO: notify user
+         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer),
+         {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transfer_id: transaction.id})) do
       Payments.broadcast()
       {:ok, nil}
     else
@@ -86,9 +92,9 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         type: "checkout.session.completed",
         data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
       }) do
-    with {:ok, setup_intent} <- Stripe.SetupIntent.retrieve(setup_intent_id, %{}),
+    with {:ok, setup_intent} <- Algora.Stripe.SetupIntent.retrieve(setup_intent_id, %{}),
          pm_id = setup_intent.payment_method,
-         {:ok, payment_method} <- Stripe.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
+         {:ok, payment_method} <- Algora.Stripe.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
          {:ok, customer} <- Repo.fetch_by(Customer, provider: "stripe", provider_id: customer_id),
          {:ok, _} <- Payments.create_payment_method(customer, payment_method) do
       Payments.broadcast()

@@ -19,6 +19,7 @@ defmodule Algora.Workspace.Ticket do
 
     belongs_to :repository, Algora.Workspace.Repository
     has_many :bounties, Algora.Bounties.Bounty
+    has_many :tips, Algora.Bounties.Tip
 
     has_many :activities, {"ticket_activities", Activity}, foreign_key: :assoc_id
 

@@ -49,22 +49,12 @@ defmodule Algora.Bounties.Jobs.NotifyTransfer do
   end
 
   defp do_perform(ticket_ref, body, nil) do
-    if Github.pat_enabled() do
-      Github.create_issue_comment(
-        Github.pat(),
-        ticket_ref["owner"],
-        ticket_ref["repo"],
-        ticket_ref["number"],
-        body
-      )
-    else
-      Logger.info("""
-      Github.create_issue_comment(Github.pat(), "#{ticket_ref["owner"]}", "#{ticket_ref["repo"]}", #{ticket_ref["number"]},
-             \"\"\"
-             #{body}
-             \"\"\")
-      """)
-    end
+    Github.try_without_installation(&Github.create_issue_comment/5, [
+      ticket_ref["owner"],
+      ticket_ref["repo"],
+      ticket_ref["number"],
+      body
+    ])
   end
 
   defp do_perform(ticket_ref, body, installation) do

@@ -2,6 +2,8 @@ defmodule Algora.Github do
   @moduledoc false
   @behaviour Algora.Github.Behaviour
 
+  require Logger
+
   @type token :: String.t()
 
   def client_id, do: Algora.config([:github, :client_id])
@@ -42,6 +44,26 @@ defmodule Algora.Github do
   end
 
   defp client, do: Application.get_env(:algora, :github_client, Algora.Github.Client)
+
+  def try_without_installation(function, args) do
+    if pat_enabled() do
+      apply(function, [pat() | args])
+    else
+      {module, name} = Function.info(function, :name)
+      function_name = "#{module}.#{name}"
+
+      formatted_args =
+        Enum.map_join(args, ", ", fn
+          arg when is_binary(arg) -> "\"#{arg}\""
+          arg -> "#{arg}"
+        end)
+
+      Logger.warning("""
+      App installation not found and GITHUB_PAT_ENABLED is false, skipping Github call:
+      #{function_name}(#{formatted_args})
+      """)
+    end
+  end
 
   @impl true
   def get_repository(token, owner, repo), do: client().get_repository(token, owner, repo)

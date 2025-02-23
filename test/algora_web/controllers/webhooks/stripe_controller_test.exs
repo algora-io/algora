@@ -131,7 +131,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
       assert updated_tx.status == :succeeded
       assert updated_tx.succeeded_at != nil
 
-      assert_enqueued(worker: Bounties.Jobs.NotifyTransfer, args: %{transaction_id: transaction.id})
+      assert_enqueued(worker: Bounties.Jobs.NotifyTransfer, args: %{transfer_id: transaction.id})
     end
   end
 

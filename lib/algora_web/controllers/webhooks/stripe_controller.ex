@@ -45,13 +45,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
               end
 
             {:error, :no_active_account} ->
-              # TODO:
-              installation_id = 0
-
-              # TODO:
-              ticket_ref = %{"owner" => "", "repo" => "", "number" => 0}
-
-              case %{installation_id: installation_id, ticket_ref: ticket_ref}
+              case %{credit_id: credit.id}
                    |> Bounties.Jobs.PromptPayoutConnect.new()
                    |> Oban.insert() do
                 {:ok, _job} -> {:cont, :ok}
@@ -83,7 +77,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       }) do
     with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
          {:ok, _transaction} <- maybe_update_transaction(transaction, transfer),
-         {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transaction_id: transaction.id})) do
+         {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transfer_id: transaction.id})) do
       Payments.broadcast()
       {:ok, nil}
     else

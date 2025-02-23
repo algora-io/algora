@@ -34,11 +34,11 @@ config :algora, Oban,
     notify_bounty: 1,
     notify_tip_intent: 1,
     notify_claim: 1,
-    prompt_payout_connect: 10,
+    notify_transfer: 100,
+    prompt_payout_connect: 100,
     transfers: 1,
     activity_notifier: 1,
-    activity_mailer: 1,
-    notify_transfer: 100
+    activity_mailer: 1
   ]
 
 # Configures the mailer

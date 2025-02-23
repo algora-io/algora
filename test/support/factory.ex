@@ -141,7 +141,8 @@ defmodule Algora.Factory do
 
   def transaction_factory do
     %Algora.Payments.Transaction{
-      id: Nanoid.generate()
+      id: Nanoid.generate(),
+      group_id: Nanoid.generate()
     }
   end
 

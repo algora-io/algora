@@ -7,6 +7,9 @@ defmodule Algora.BountiesTest do
 
   alias Algora.Activities.Notifier
   alias Algora.Activities.SendEmail
+  alias Algora.Bounties
+  alias Algora.Payments.Transaction
+  alias Bounties.Tip
 
   describe "bounties" do
     test "create" do
@@ -35,10 +38,10 @@ defmodule Algora.BountiesTest do
           amount: amount
         }
 
-      assert {:ok, bounty} = Algora.Bounties.create_bounty(bounty_params, [])
+      assert {:ok, bounty} = Bounties.create_bounty(bounty_params, [])
 
       assert {:ok, claims} =
-               Algora.Bounties.claim_bounty(
+               Bounties.claim_bounty(
                  %{
                    user: recipient,
                    coauthor_provider_logins: [],
@@ -53,7 +56,7 @@ defmodule Algora.BountiesTest do
       claims = Repo.preload(claims, :user)
 
       assert {:ok, _bounty} =
-               Algora.Bounties.reward_bounty(
+               Bounties.reward_bounty(
                  %{
                    owner: owner,
                    amount: ~M[4000]usd,
@@ -64,7 +67,7 @@ defmodule Algora.BountiesTest do
                )
 
       assert {:ok, _stripe_session_url} =
-               Algora.Bounties.create_tip(
+               Bounties.create_tip(
                  %{
                    amount: amount,
                    owner: owner,
@@ -83,7 +86,7 @@ defmodule Algora.BountiesTest do
       assert "tip_activities" == tip.assoc_name
       assert tip.notify_users == [recipient.id]
       assert activity = Algora.Activities.get_with_preloaded_assoc(tip.assoc_name, tip.id)
-      assert activity.assoc.__meta__.schema == Algora.Bounties.Tip
+      assert activity.assoc.__meta__.schema == Tip
       assert activity.assoc.creator.id == creator.id
 
       assert_enqueued(worker: Notifier, args: %{"activity_id" => bounty.id})
@@ -115,18 +118,99 @@ defmodule Algora.BountiesTest do
               amount: amount
             }
 
-          Algora.Bounties.create_bounty(bounty_params, [])
+          Bounties.create_bounty(bounty_params, [])
         end)
 
-      assert Algora.Bounties.list_bounties(
+      assert Bounties.list_bounties(
                owner_id: bounty.owner_id,
                tech_stack: ["elixir"],
                status: :open
              )
 
-      # assert Algora.Bounties.fetch_stats(bounty.owner_id)
-      # assert Algora.Bounties.fetch_stats()
-      assert Algora.Bounties.PrizePool.list()
+      # assert Bounties.fetch_stats(bounty.owner_id)
+      # assert Bounties.fetch_stats()
+      assert Bounties.PrizePool.list()
+    end
+
+    test "successfully creates and pays invoice for bounty claim" do
+      creator = insert!(:user)
+      owner = insert!(:organization)
+      customer = insert!(:customer, user: owner)
+      payment_method = insert!(:payment_method, customer: customer)
+      recipient = insert!(:user)
+      installation = insert!(:installation, owner: creator, connected_user: owner)
+      _identity = insert!(:identity, user: creator, provider_email: creator.email)
+      repo = insert!(:repository, %{user: owner})
+      ticket = insert!(:ticket, %{repository: repo})
+      amount = ~M[4000]usd
+
+      ticket_ref = %{
+        owner: owner.handle,
+        repo: repo.name,
+        number: ticket.number
+      }
+
+      assert {:ok, bounty} =
+               Bounties.create_bounty(
+                 %{
+                   ticket_ref: ticket_ref,
+                   owner: owner,
+                   creator: creator,
+                   amount: amount
+                 },
+                 installation_id: installation.id
+               )
+
+      assert {:ok, [claim]} =
+               Bounties.claim_bounty(
+                 %{
+                   user: recipient,
+                   coauthor_provider_logins: [],
+                   target_ticket_ref: ticket_ref,
+                   source_ticket_ref: ticket_ref,
+                   status: :pending,
+                   type: :pull_request
+                 },
+                 installation_id: installation.id
+               )
+
+      claim = Repo.preload(claim, :user)
+
+      assert {:ok, invoice} =
+               Bounties.create_invoice(
+                 %{owner: owner, amount: amount},
+                 ticket_ref: ticket_ref,
+                 bounty_id: bounty.id,
+                 claims: [claim]
+               )
+
+      assert {:ok, _invoice} =
+               Algora.Stripe.Invoice.pay(invoice, %{
+                 payment_method: payment_method.provider_id,
+                 off_session: true
+               })
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, amount)
+      assert charge.status == :initialized
+      assert charge.user_id == owner.id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, amount)
+      assert debit.status == :initialized
+      assert debit.user_id == owner.id
+      assert debit.bounty_id == bounty.id
+      assert debit.claim_id == claim.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, amount)
+      assert credit.status == :initialized
+      assert credit.user_id == recipient.id
+      assert credit.bounty_id == bounty.id
+      assert credit.claim_id == claim.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
     end
   end
 end

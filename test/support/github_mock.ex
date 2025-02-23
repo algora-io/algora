@@ -18,7 +18,12 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def get_repository(_access_token, owner, repo) do
-    {:ok, %{"id" => random_id(), "name" => "repo_#{random_id()}", "html_url" => "https://github.com/#{owner}/#{repo}"}}
+    {:ok,
+     %{
+       "id" => random_id(),
+       "name" => repo,
+       "html_url" => "https://github.com/#{owner}/#{repo}"
+     }}
   end
 
   @impl true

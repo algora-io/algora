@@ -8,6 +8,7 @@ defmodule Algora.Payments do
   alias Algora.MoneyUtils
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
+  alias Algora.Payments.Jobs
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -319,80 +320,139 @@ defmodule Algora.Payments do
     end
   end
 
-  def execute_pending_transfers(user_id) do
-    pending_amount = get_pending_amount(user_id)
+  @spec execute_pending_transfer(credit_id :: String.t()) ::
+          {:ok, Stripe.Transfer.t()} | {:error, :not_found} | {:error, :duplicate_transfer_attempt}
+  def execute_pending_transfer(credit_id) do
+    with {:ok, credit} <- Repo.fetch_by(Transaction, id: credit_id, type: :credit, status: :succeeded) do
+      transfers =
+        Repo.all(
+          from(t in Transaction,
+            where: t.user_id == ^credit.user_id,
+            where: t.group_id == ^credit.group_id,
+            where: t.type == :transfer,
+            where: t.status in [:initialized, :processing, :succeeded]
+          )
+        )
 
-    with {:ok, account} <- Repo.fetch_by(Account, user_id: user_id, provider: "stripe", payouts_enabled: true),
-         true <- Money.positive?(pending_amount) do
-      initialize_and_execute_transfer(user_id, pending_amount, account)
-    else
-      _ -> {:ok, nil}
+      amount_transferred = Enum.reduce(transfers, Money.zero(:USD), fn t, acc -> Money.add!(acc, t.net_amount) end)
+
+      if Money.positive?(amount_transferred) do
+        Logger.error("Duplicate transfer attempt at transaction #{credit_id}")
+        {:error, :duplicate_transfer_attempt}
+      else
+        initialize_and_execute_transfer(credit)
+      end
     end
   end
 
-  defp get_pending_amount(user_id) do
-    total_credits =
-      Repo.one(
-        from(t in Transaction,
-          where: t.user_id == ^user_id,
-          where: t.type == :credit,
-          where: t.status == :succeeded,
-          select: sum(t.net_amount)
-        )
-      ) || Money.zero(:USD)
-
-    total_transfers =
-      Repo.one(
-        from(t in Transaction,
-          where: t.user_id == ^user_id,
-          where: t.type == :transfer,
-          where: t.status == :succeeded or t.status == :processing or t.status == :initialized,
-          select: sum(t.net_amount)
-        )
-      ) || Money.zero(:USD)
-
-    Money.sub!(total_credits, total_transfers)
+  def list_payable_credits(user_id) do
+    Repo.all(
+      from(cr in Transaction,
+        left_join: tr in Transaction,
+        on:
+          tr.user_id == cr.user_id and tr.group_id == cr.group_id and tr.type == :transfer and
+            tr.status in [:initialized, :processing, :succeeded],
+        where: cr.user_id == ^user_id,
+        where: cr.type == :credit,
+        where: cr.status == :succeeded,
+        where: is_nil(tr.id)
+      )
+    )
   end
 
-  defp initialize_and_execute_transfer(user_id, pending_amount, account) do
-    with {:ok, transaction} <- initialize_transfer(user_id, pending_amount),
-         {:ok, transfer} <- execute_transfer(transaction, account) do
-      broadcast()
-      {:ok, transfer}
-    else
-      error ->
-        Logger.error("Failed to execute transfer: #{inspect(error)}")
-        error
+  @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}
+  def enqueue_pending_transfers(user_id) do
+    Repo.transact(fn ->
+      with {:ok, _account} <- fetch_active_account(user_id),
+           credits = list_payable_credits(user_id),
+           :ok <-
+             Enum.reduce_while(credits, :ok, fn credit, :ok ->
+               case %{credit_id: credit.id}
+                    |> Jobs.ExecutePendingTransfer.new()
+                    |> Oban.insert() do
+                 {:ok, _job} -> {:cont, :ok}
+                 error -> {:halt, error}
+               end
+             end) do
+        {:ok, nil}
+      else
+        {:error, reason} ->
+          Logger.error("Failed to execute pending transfers: #{inspect(reason)}")
+          {:error, reason}
+      end
+    end)
+  end
+
+  @spec fetch_active_account(user_id :: String.t()) :: {:ok, Account.t()} | {:error, :no_active_account}
+  def fetch_active_account(user_id) do
+    case Repo.fetch_by(Account, user_id: user_id, provider: "stripe", payouts_enabled: true) do
+      {:ok, account} -> {:ok, account}
+      {:error, :not_found} -> {:error, :no_active_account}
     end
   end
 
-  defp initialize_transfer(user_id, pending_amount) do
+  @spec initialize_and_execute_transfer(credit :: Transaction.t()) :: {:ok, Stripe.Transfer.t()} | {:error, term()}
+  defp initialize_and_execute_transfer(%Transaction{} = credit) do
+    case fetch_active_account(credit.user_id) do
+      {:ok, account} ->
+        with {:ok, transaction} <- initialize_transfer(credit),
+             {:ok, transfer} <- execute_transfer(transaction, account) do
+          broadcast()
+          {:ok, transfer}
+        else
+          error ->
+            Logger.error("Failed to execute transfer: #{inspect(error)}")
+            error
+        end
+
+      _ ->
+        Logger.error("Attempted to execute transfer to inactive account")
+        {:error, :no_active_account}
+    end
+  end
+
+  defp initialize_transfer(%Transaction{} = credit) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
       provider: "stripe",
       type: :transfer,
       status: :initialized,
-      user_id: user_id,
-      gross_amount: pending_amount,
-      net_amount: pending_amount,
-      total_fee: Money.zero(:USD)
+      tip_id: credit.tip_id,
+      bounty_id: credit.bounty_id,
+      contract_id: credit.contract_id,
+      claim_id: credit.claim_id,
+      user_id: credit.user_id,
+      gross_amount: credit.net_amount,
+      net_amount: credit.net_amount,
+      total_fee: Money.zero(:USD),
+      group_id: credit.group_id
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:tip_id)
+    |> foreign_key_constraint(:bounty_id)
+    |> foreign_key_constraint(:contract_id)
+    |> foreign_key_constraint(:claim_id)
     |> Repo.insert()
   end
 
-  defp execute_transfer(transaction, account) do
-    # TODO: set other params
+  defp execute_transfer(%Transaction{} = transaction, account) do
+    charge = Repo.get_by(Transaction, type: :credit, status: :succeeded, group_id: transaction.group_id)
+
+    transfer_params =
+      %{
+        amount: MoneyUtils.to_minor_units(transaction.net_amount),
+        currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
+        destination: account.provider_id,
+        metadata: %{"version" => metadata_version()}
+      }
+      |> Map.merge(if transaction.group_id, do: %{transfer_group: transaction.group_id}, else: %{})
+      |> Map.merge(if charge && charge.provider_id, do: %{source_transaction: charge.provider_id}, else: %{})
+
     # TODO: provide idempotency key
-    case Algora.Stripe.Transfer.create(%{
-           amount: MoneyUtils.to_minor_units(transaction.net_amount),
-           currency: MoneyUtils.to_stripe_currency(transaction.net_amount),
-           destination: account.provider_id,
-           metadata: %{"version" => metadata_version()}
-         }) do
+    case Algora.Stripe.Transfer.create(transfer_params) do
       {:ok, transfer} ->
         # it's fine if this fails since we'll receive a webhook
         transaction

@@ -57,4 +57,24 @@ defmodule Algora.Support.StripeMock do
       {:ok, %Stripe.Session{id: "cs_#{Algora.Util.random_int()}", url: "https://example.com/stripe"}}
     end
   end
+
+  defmodule PaymentMethod do
+    @moduledoc false
+    def attach(%{payment_method: payment_method_id}) do
+      {:ok, %Stripe.PaymentMethod{id: payment_method_id}}
+    end
+  end
+
+  defmodule SetupIntent do
+    @moduledoc false
+    def retrieve(id, _params) do
+      payment_method_id = "pm_#{:erlang.phash2(id)}"
+
+      {:ok,
+       %Stripe.SetupIntent{
+         id: "seti_#{:erlang.phash2(id)}",
+         payment_method: payment_method_id
+       }}
+    end
+  end
 end

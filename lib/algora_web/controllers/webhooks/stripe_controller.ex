@@ -82,8 +82,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
       }) do
     with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
-         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer) do
-      # TODO: notify user
+         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer),
+         {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transaction_id: transaction.id})) do
       Payments.broadcast()
       {:ok, nil}
     else

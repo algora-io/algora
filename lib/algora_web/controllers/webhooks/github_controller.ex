@@ -344,13 +344,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
          {:ok, ticket} <-
            Workspace.ensure_ticket(
              token,
-             payload["repository"]["owner"]["login"],
-             payload["repository"]["name"],
-             payload["issue"]["number"]
+             source_ticket_ref.owner,
+             source_ticket_ref.repo,
+             source_ticket_ref.number
            ),
          {:ok, user} <- Workspace.ensure_user(token, author["login"]),
-         {:ok, attempt} <- Bounties.get_or_create_attempt(%{ticket: ticket, user: user}),
-         {:ok, _} <- Bounties.refresh_bounty_response(token, target_ticket_ref, ticket) do
+         {:ok, attempt} <- Bounties.get_or_create_attempt(%{ticket: ticket, user: user}) do
+      Bounties.try_refresh_bounty_response(token, target_ticket_ref, ticket)
       {:ok, attempt}
     end
   end
@@ -371,18 +371,28 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       }
 
     with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
-         {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
-      Bounties.claim_bounty(
-        %{
-          user: user,
-          coauthor_provider_logins: (args[:splits] || []) |> Enum.map(& &1[:recipient]) |> Enum.uniq(),
-          target_ticket_ref: target_ticket_ref,
-          source_ticket_ref: source_ticket_ref,
-          status: if(payload["pull_request"]["merged_at"], do: :approved, else: :pending),
-          type: :pull_request
-        },
-        installation_id: payload["installation"]["id"]
-      )
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]),
+         {:ok, target_ticket} <-
+           Workspace.ensure_ticket(
+             token,
+             target_ticket_ref.owner,
+             target_ticket_ref.repo,
+             target_ticket_ref.number
+           ),
+         {:ok, claims} <-
+           Bounties.claim_bounty(
+             %{
+               user: user,
+               coauthor_provider_logins: (args[:splits] || []) |> Enum.map(& &1[:recipient]) |> Enum.uniq(),
+               target_ticket_ref: target_ticket_ref,
+               source_ticket_ref: source_ticket_ref,
+               status: if(payload["pull_request"]["merged_at"], do: :approved, else: :pending),
+               type: :pull_request
+             },
+             installation_id: payload["installation"]["id"]
+           ) do
+      Bounties.try_refresh_bounty_response(token, target_ticket_ref, target_ticket)
+      {:ok, claims}
     end
   end
 

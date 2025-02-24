@@ -206,6 +206,14 @@ defmodule Algora.Factory do
     }
   end
 
+  def attempt_factory do
+    %Algora.Bounties.Attempt{
+      id: Nanoid.generate(),
+      status: :active,
+      warnings_count: 0
+    }
+  end
+
   def claim_factory do
     id = Nanoid.generate()
 

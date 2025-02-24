@@ -395,7 +395,7 @@ defmodule Algora.Contracts do
   defp maybe_generate_invoice(contract, charge) do
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
-    with {:ok, invoice} <- Invoice.create(invoice_params),
+    with {:ok, invoice} <- Invoice.create(invoice_params, %{idempotency_key: "contract-#{contract.id}"}),
          {:ok, _line_items} <- create_line_items(contract, invoice, charge.line_items) do
       {:ok, invoice}
     end
@@ -441,14 +441,19 @@ defmodule Algora.Contracts do
   end
 
   defp create_line_items(contract, invoice, line_items) do
-    Enum.reduce_while(line_items, {:ok, []}, fn line_item, {:ok, acc} ->
-      case Algora.PSP.Invoiceitem.create(%{
-             invoice: invoice.id,
-             customer: contract.client.customer.provider_id,
-             amount: MoneyUtils.to_minor_units(line_item.amount),
-             currency: to_string(line_item.amount.currency),
-             description: line_item.description
-           }) do
+    line_items
+    |> Enum.with_index()
+    |> Enum.reduce_while({:ok, []}, fn {line_item, index}, {:ok, acc} ->
+      case Algora.PSP.Invoiceitem.create(
+             %{
+               invoice: invoice.id,
+               customer: contract.client.customer.provider_id,
+               amount: MoneyUtils.to_minor_units(line_item.amount),
+               currency: to_string(line_item.amount.currency),
+               description: line_item.description
+             },
+             %{idempotency_key: "contract-#{contract.id}-#{index}"}
+           ) do
         {:ok, item} -> {:cont, {:ok, [item | acc]}}
         {:error, error} -> {:halt, {:error, error}}
       end
@@ -460,7 +465,9 @@ defmodule Algora.Contracts do
   defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
-    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}) do
+    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}, %{
+           idempotency_key: "contract-#{contract.id}"
+         }) do
       {:ok, stripe_invoice} ->
         if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}

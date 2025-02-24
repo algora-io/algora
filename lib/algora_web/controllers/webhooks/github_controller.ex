@@ -349,8 +349,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
              source_ticket_ref.number
            ),
          {:ok, user} <- Workspace.ensure_user(token, author["login"]),
-         {:ok, attempt} <- Bounties.get_or_create_attempt(%{ticket: ticket, user: user}),
-         {:ok, _} <- Bounties.refresh_bounty_response(token, target_ticket_ref, ticket) do
+         {:ok, attempt} <- Bounties.get_or_create_attempt(%{ticket: ticket, user: user}) do
+      Bounties.try_refresh_bounty_response(token, target_ticket_ref, ticket)
       {:ok, attempt}
     end
   end
@@ -390,8 +390,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                type: :pull_request
              },
              installation_id: payload["installation"]["id"]
-           ),
-         {:ok, _} <- Bounties.refresh_bounty_response(token, target_ticket_ref, target_ticket) do
+           ) do
+      Bounties.try_refresh_bounty_response(token, target_ticket_ref, target_ticket)
       {:ok, claims}
     end
   end

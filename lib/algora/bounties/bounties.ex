@@ -236,6 +236,20 @@ defmodule Algora.Bounties do
     })
   end
 
+  def try_refresh_bounty_response(token, ticket_ref, ticket) do
+    case refresh_bounty_response(token, ticket_ref, ticket) do
+      {:ok, response} ->
+        {:ok, response}
+
+      {:error, _} ->
+        Logger.error(
+          "Failed to refresh bounty response for #{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"
+        )
+
+        {:ok, nil}
+    end
+  end
+
   @spec notify_bounty(
           %{
             owner: User.t(),

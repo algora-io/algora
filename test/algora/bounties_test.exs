@@ -334,35 +334,36 @@ defmodule Algora.BountiesTest do
     end
 
     test "generates response body without attempts table when no attempts exist" do
-      owner = %Algora.Accounts.User{
-        id: "user_123",
-        name: "Test Owner",
-        provider_login: "test_owner"
-      }
+      repo_owner = insert!(:user, provider_login: "repo_owner")
+      bounty_owner = insert!(:user, handle: "bounty_owner", display_name: "Bounty Owner")
+      bounty_owner = Repo.get!(User, bounty_owner.id)
+      repository = insert!(:repository, user: repo_owner, name: "test_repo")
 
       bounties = [
         %Bounty{
           amount: Money.new(1000, :USD),
-          owner: owner
+          owner: bounty_owner
         }
       ]
 
+      ticket = insert!(:ticket, number: 100, repository: repository)
+
       ticket_ref = %{
-        owner: "test-org",
-        repo: "test-repo",
-        number: 123
+        owner: repo_owner.provider_login,
+        repo: ticket.repository.name,
+        number: ticket.number
       }
 
       response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
 
       expected_response = """
-      ## 💎 $10.00 bounty [• Test Owner](#{User.url(owner)})
+      ## 💎 $1,000.00 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
       ### Steps to solve:
-      1. **Start working**: Comment `/attempt #123` with your implementation plan
-      2. **Submit work**: Create a pull request including `/claim #123` in the PR body to claim the bounty
+      1. **Start working**: Comment `/attempt #100` with your implementation plan
+      2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
       3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
 
-      Thank you for contributing to test-org/test-repo!
+      Thank you for contributing to repo_owner/test_repo!
       """
 
       assert response == String.trim(expected_response)

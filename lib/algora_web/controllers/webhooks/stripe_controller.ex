@@ -92,9 +92,9 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         type: "checkout.session.completed",
         data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
       }) do
-    with {:ok, setup_intent} <- Algora.Stripe.SetupIntent.retrieve(setup_intent_id, %{}),
+    with {:ok, setup_intent} <- Algora.PSP.SetupIntent.retrieve(setup_intent_id, %{}),
          pm_id = setup_intent.payment_method,
-         {:ok, payment_method} <- Algora.Stripe.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
+         {:ok, payment_method} <- Algora.PSP.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
          {:ok, customer} <- Repo.fetch_by(Customer, provider: "stripe", provider_id: customer_id),
          {:ok, _} <- Payments.create_payment_method(customer, payment_method) do
       Payments.broadcast()

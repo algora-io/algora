@@ -152,7 +152,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      claims: claims
                    ),
                  {:ok, _invoice} <-
-                   Algora.Stripe.Invoice.pay(invoice, %{
+                   Algora.PSP.Invoice.pay(invoice, %{
                      payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
                      off_session: true
                    }) do

@@ -133,7 +133,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseDrawer do
           original_contract_id: contract.original_contract_id
         })
 
-      case Stripe.PaymentIntent.create(%{
+      case Algora.PSP.PaymentIntent.create(%{
              amount: MoneyUtils.to_minor_units(gross_amount),
              currency: to_string(gross_amount.currency),
              customer: org.customer.provider_id,

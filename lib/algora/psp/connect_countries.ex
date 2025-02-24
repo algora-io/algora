@@ -1,4 +1,4 @@
-defmodule Algora.Stripe.ConnectCountries do
+defmodule Algora.PSP.ConnectCountries do
   @moduledoc false
 
   @spec list() :: [{String.t(), String.t()}]

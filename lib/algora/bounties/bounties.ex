@@ -616,7 +616,8 @@ defmodule Algora.Bounties do
                net_amount: amount,
                total_fee: Money.sub!(gross_amount, amount),
                line_items: line_items,
-               group_id: tx_group_id
+               group_id: tx_group_id,
+               idempotency_key: "session-#{Nanoid.generate()}"
              }),
            {:ok, _transactions} <-
              create_transaction_pairs(%{
@@ -641,7 +642,7 @@ defmodule Algora.Bounties do
   end
 
   @spec create_invoice(
-          %{owner: User.t(), amount: Money.t()},
+          %{owner: User.t(), amount: Money.t(), idempotency_key: String.t()},
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             tip_id: String.t(),
@@ -651,7 +652,7 @@ defmodule Algora.Bounties do
           ]
         ) ::
           {:ok, PSP.invoice()} | {:error, atom()}
-  def create_invoice(%{owner: owner, amount: amount}, opts \\ []) do
+  def create_invoice(%{owner: owner, amount: amount, idempotency_key: idempotency_key}, opts \\ []) do
     tx_group_id = Nanoid.generate()
 
     line_items =
@@ -672,7 +673,8 @@ defmodule Algora.Bounties do
                net_amount: amount,
                total_fee: Money.sub!(gross_amount, amount),
                line_items: line_items,
-               group_id: tx_group_id
+               group_id: tx_group_id,
+               idempotency_key: idempotency_key
              }),
            {:ok, _transactions} <-
              create_transaction_pairs(%{
@@ -686,15 +688,19 @@ defmodule Algora.Bounties do
              }),
            {:ok, customer} <- Payments.fetch_or_create_customer(owner),
            {:ok, invoice} <-
-             PSP.Invoice.create(%{
-               auto_advance: false,
-               customer: customer.provider_id
-             }),
+             PSP.Invoice.create(
+               %{
+                 auto_advance: false,
+                 customer: customer.provider_id
+               },
+               %{idempotency_key: idempotency_key}
+             ),
            {:ok, _line_items} <-
              line_items
              |> Enum.map(&LineItem.to_invoice_item(&1, invoice, customer))
-             |> Enum.reduce_while({:ok, []}, fn params, {:ok, acc} ->
-               case PSP.Invoiceitem.create(params) do
+             |> Enum.with_index()
+             |> Enum.reduce_while({:ok, []}, fn {params, index}, {:ok, acc} ->
+               case PSP.Invoiceitem.create(params, %{idempotency_key: "#{idempotency_key}-#{index}"}) do
                  {:ok, item} -> {:cont, {:ok, [item | acc]}}
                  {:error, error} -> {:halt, {:error, error}}
                end
@@ -711,7 +717,8 @@ defmodule Algora.Bounties do
          net_amount: net_amount,
          total_fee: total_fee,
          line_items: line_items,
-         group_id: group_id
+         group_id: group_id,
+         idempotency_key: idempotency_key
        }) do
     %Transaction{}
     |> change(%{
@@ -724,12 +731,14 @@ defmodule Algora.Bounties do
       net_amount: net_amount,
       total_fee: total_fee,
       line_items: Util.normalize_struct(line_items),
-      group_id: group_id
+      group_id: group_id,
+      idempotency_key: idempotency_key
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
     |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:user_id)
+    |> unique_constraint([:idempotency_key])
     |> Repo.insert()
   end
 

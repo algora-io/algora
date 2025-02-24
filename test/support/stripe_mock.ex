@@ -3,11 +3,16 @@ defmodule Algora.Support.StripeMock do
 
   defmodule Invoice do
     @moduledoc false
-    def create(_params) do
-      {:ok, %Stripe.Invoice{id: "inv_#{Algora.Util.random_int()}", paid: false, status: "open"}}
+    def create(_params, opts) do
+      {:ok,
+       %Stripe.Invoice{
+         id: "inv_#{:erlang.phash2(opts[:idempotency_key])}",
+         paid: false,
+         status: "open"
+       }}
     end
 
-    def pay(_invoice_id, %{payment_method: "pm_card_declined"}) do
+    def pay(_invoice_id, %{payment_method: "pm_card_declined"}, _opts) do
       {:error,
        %Stripe.Error{
          source: :stripe,
@@ -16,15 +21,15 @@ defmodule Algora.Support.StripeMock do
        }}
     end
 
-    def pay(invoice_id, _params) do
+    def pay(invoice_id, _params, _opts) do
       {:ok, %Stripe.Invoice{id: invoice_id, paid: true, status: "paid"}}
     end
   end
 
   defmodule Invoiceitem do
     @moduledoc false
-    def create(_params) do
-      {:ok, %Stripe.Invoiceitem{id: "ii_#{Algora.Util.random_int()}"}}
+    def create(_params, opts) do
+      {:ok, %Stripe.Invoiceitem{id: "ii_#{:erlang.phash2(opts[:idempotency_key])}"}}
     end
   end
 

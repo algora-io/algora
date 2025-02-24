@@ -179,17 +179,21 @@ defmodule Algora.BountiesTest do
 
       assert {:ok, invoice} =
                Bounties.create_invoice(
-                 %{owner: owner, amount: amount},
+                 %{owner: owner, amount: amount, idempotency_key: "bounty-#{bounty.id}"},
                  ticket_ref: ticket_ref,
                  bounty_id: bounty.id,
                  claims: [claim]
                )
 
       assert {:ok, _invoice} =
-               PSP.Invoice.pay(invoice, %{
-                 payment_method: payment_method.provider_id,
-                 off_session: true
-               })
+               PSP.Invoice.pay(
+                 invoice,
+                 %{
+                   payment_method: payment_method.provider_id,
+                   off_session: true
+                 },
+                 %{idempotency_key: "bounty-#{bounty.id}"}
+               )
 
       charge = Repo.one!(from t in Transaction, where: t.type == :charge)
       assert Money.equal?(charge.net_amount, amount)

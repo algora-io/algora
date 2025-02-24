@@ -510,6 +510,59 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert is_nil(transfer)
     end
 
+    test "prevents duplicate transaction creation when receiving multiple PR closed events", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      assert Repo.aggregate(from(t in Transaction, where: t.type == :charge), :count) == 1
+      assert Repo.aggregate(from(t in Transaction, where: t.type == :debit), :count) == 1
+      assert Repo.aggregate(from(t in Transaction, where: t.type == :credit), :count) == 1
+
+      {:ok, log} =
+        with_log(fn ->
+          process_scenario(ctx, [
+            %{
+              event_action: "pull_request.closed",
+              user_type: :unauthorized,
+              body: "/claim #{issue_number}",
+              params: %{
+                "pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}
+              }
+            }
+          ])
+        end)
+
+      assert log =~ "Autopay failed"
+
+      assert Repo.aggregate(from(t in Transaction, where: t.type == :charge), :count) == 1
+      assert Repo.aggregate(from(t in Transaction, where: t.type == :debit), :count) == 1
+      assert Repo.aggregate(from(t in Transaction, where: t.type == :credit), :count) == 1
+    end
+
     test "handles split bounty payments between two users when PR is merged", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)

@@ -137,11 +137,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
         autopay_result =
           if autopayable_bounty do
+            idempotency_key = "bounty-#{autopayable_bounty.id}"
+
             with {:ok, invoice} <-
                    Bounties.create_invoice(
                      %{
                        owner: autopayable_bounty.owner,
-                       amount: autopayable_bounty.amount
+                       amount: autopayable_bounty.amount,
+                       idempotency_key: idempotency_key
                      },
                      ticket_ref: %{
                        owner: payload["repository"]["owner"]["login"],
@@ -152,10 +155,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      claims: claims
                    ),
                  {:ok, _invoice} <-
-                   Algora.PSP.Invoice.pay(invoice, %{
-                     payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
-                     off_session: true
-                   }) do
+                   Algora.PSP.Invoice.pay(
+                     invoice,
+                     %{
+                       payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
+                       off_session: true
+                     },
+                     %{idempotency_key: idempotency_key}
+                   ) do
               Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
               :ok
             else

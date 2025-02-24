@@ -330,9 +330,6 @@ defmodule Algora.BountiesTest do
       | 🟢 @solver5 and @solver6 | Jan 05, 2024, 12:00:00 PM | #105 |
       """
 
-      IO.puts(response)
-      IO.puts(expected_response)
-
       assert response == String.trim(expected_response)
     end
 

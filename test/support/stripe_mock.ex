@@ -31,7 +31,7 @@ defmodule Algora.Support.StripeMock do
   defmodule Transfer do
     @moduledoc false
 
-    def create(%{destination: "acct_invalid"}) do
+    def create(%{destination: "acct_invalid"}, _opts) do
       {:error,
        %Stripe.Error{
          source: :stripe,
@@ -40,10 +40,10 @@ defmodule Algora.Support.StripeMock do
        }}
     end
 
-    def create(%{amount: amount, currency: currency, destination: destination}) do
+    def create(%{amount: amount, currency: currency, destination: destination}, opts) do
       {:ok,
        %Stripe.Transfer{
-         id: "tr_#{Algora.Util.random_int()}",
+         id: "tr_#{:erlang.phash2(opts[:idempotency_key])}",
          amount: amount,
          currency: currency,
          destination: destination

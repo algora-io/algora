@@ -10,14 +10,14 @@ defmodule Algora.PaymentsTest do
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
+  setup do
+    user = insert(:user)
+    account = insert(:account, user: user)
+
+    {:ok, user: user, account: account}
+  end
+
   describe "execute_pending_transfer/1" do
-    setup do
-      user = insert(:user)
-      account = insert(:account, user: user)
-
-      {:ok, user: user, account: account}
-    end
-
     test "executes transfer when user has positive balance", %{user: user, account: account} do
       credit =
         insert(:transaction,
@@ -106,6 +106,68 @@ defmodule Algora.PaymentsTest do
       transfer_tx = Repo.one(from t in Transaction, where: t.type == :transfer)
       assert transfer_tx.status == :failed
     end
+
+    test "prevents duplicate transfers", %{user: user} do
+      credit_tx =
+        insert(:transaction,
+          type: :credit,
+          status: :succeeded,
+          net_amount: Money.new(1, :USD),
+          group_id: Nanoid.generate(),
+          user: user
+        )
+
+      {:ok, transfer} = Payments.execute_pending_transfer(credit_tx.id)
+      {:ok, transfer_tx} = Repo.fetch_by(Transaction, type: :transfer, provider_id: transfer.id)
+
+      assert Money.equal?(transfer_tx.net_amount, Money.new(1, :USD))
+      assert transfer_tx.status == :succeeded
+      assert transfer_tx.succeeded_at != nil
+      assert transfer_tx.group_id == credit_tx.group_id
+      assert transfer_tx.user_id == credit_tx.user_id
+      assert transfer_tx.provider_id == transfer.id
+
+      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
+      assert {:error, :duplicate_transfer_attempt} = result
+
+      transfer_tx |> change(status: :succeeded) |> Repo.update!()
+      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
+      assert {:error, :duplicate_transfer_attempt} = result
+
+      transfer_tx |> change(status: :initialized) |> Repo.update!()
+      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
+      assert {:error, :duplicate_transfer_attempt} = result
+
+      transfer_tx |> change(status: :processing) |> Repo.update!()
+      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
+      assert {:error, :duplicate_transfer_attempt} = result
+    end
+
+    test "allows retrying failed/canceled transfers", %{user: user, account: account} do
+      credit_tx =
+        insert(:transaction,
+          type: :credit,
+          status: :succeeded,
+          net_amount: Money.new(1, :USD),
+          group_id: Nanoid.generate(),
+          user: user
+        )
+
+      Account |> Repo.one!() |> change(%{provider_id: "acct_invalid"}) |> Repo.update!()
+      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
+      assert {:error, %Stripe.Error{code: :invalid_request_error}} = result
+
+      Account |> Repo.one!() |> change(%{provider_id: account.provider_id}) |> Repo.update!()
+      {:ok, transfer} = Payments.execute_pending_transfer(credit_tx.id)
+      {:ok, transfer_tx} = Repo.fetch_by(Transaction, type: :transfer, status: :succeeded)
+
+      assert Money.equal?(transfer_tx.net_amount, Money.new(1, :USD))
+      assert transfer_tx.status == :succeeded
+      assert transfer_tx.succeeded_at != nil
+      assert transfer_tx.group_id == credit_tx.group_id
+      assert transfer_tx.user_id == credit_tx.user_id
+      assert transfer_tx.provider_id == transfer.id
+    end
   end
 
   describe "enqueue_pending_transfers/1" do
@@ -189,6 +251,43 @@ defmodule Algora.PaymentsTest do
       assert {:error, :no_active_account} = result
       refute_enqueued(worker: ExecutePendingTransfer)
       refute_enqueued(worker: ExecutePendingTransfer, args: %{credit_id: credit.id})
+    end
+  end
+
+  describe "execute_transfer/2" do
+    test "executes transfer idempotently with same transfer ID and transaction ID", %{account: account} do
+      credit_tx =
+        insert(:transaction,
+          type: :credit,
+          status: :succeeded,
+          net_amount: Money.new(1, :USD),
+          group_id: Nanoid.generate()
+        )
+
+      {:ok, transfer_tx} = Payments.initialize_transfer(credit_tx)
+
+      {:ok, transfer1} = Payments.execute_transfer(transfer_tx, account)
+      {:ok, transfer_tx1} = Repo.fetch_by(Transaction, type: :transfer)
+
+      assert Money.equal?(transfer_tx1.net_amount, Money.new(1, :USD))
+      assert transfer_tx1.status == :succeeded
+      assert transfer_tx1.succeeded_at != nil
+      assert transfer_tx1.group_id == credit_tx.group_id
+      assert transfer_tx1.user_id == credit_tx.user_id
+      assert transfer_tx1.provider_id == transfer1.id
+
+      {:ok, transfer2} = Payments.execute_transfer(transfer_tx, account)
+      {:ok, transfer_tx2} = Repo.fetch_by(Transaction, type: :transfer)
+
+      assert Money.equal?(transfer_tx2.net_amount, Money.new(1, :USD))
+      assert transfer_tx2.status == :succeeded
+      assert transfer_tx2.succeeded_at != nil
+      assert transfer_tx2.group_id == credit_tx.group_id
+      assert transfer_tx2.user_id == credit_tx.user_id
+      assert transfer_tx2.provider_id == transfer2.id
+
+      assert transfer1.id == transfer2.id
+      assert transfer_tx1.id == transfer_tx2.id
     end
   end
 end

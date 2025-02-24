@@ -94,8 +94,7 @@ defmodule Algora.PSP do
   defmodule Account do
     @moduledoc false
 
-    # TODO: remove empty array if dialyzer doesnt complain
-    def retrieve(id), do: Algora.PSP.client(__MODULE__).retrieve(id, [])
+    def retrieve(id), do: Algora.PSP.client(__MODULE__).retrieve(id)
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
     def delete(id), do: Algora.PSP.client(__MODULE__).delete(id)
   end
@@ -111,8 +110,7 @@ defmodule Algora.PSP do
   defmodule LoginLink do
     @moduledoc false
 
-    # TODO: remove empty map if dialyzer doesnt complain
-    def create(params), do: Algora.PSP.client(__MODULE__).create(params, %{})
+    def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
   @type balance_transaction :: Stripe.BalanceTransaction.t()

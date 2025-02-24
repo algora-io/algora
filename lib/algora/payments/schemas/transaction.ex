@@ -31,6 +31,7 @@ defmodule Algora.Payments.Transaction do
     field :succeeded_at, :utc_datetime_usec
     field :reversed_at, :utc_datetime_usec
     field :group_id, :string
+    field :idempotency_key, :string
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Contract
@@ -63,7 +64,8 @@ defmodule Algora.Payments.Transaction do
       :contract_id,
       :original_contract_id,
       :user_id,
-      :succeeded_at
+      :succeeded_at,
+      :idempotency_key
     ])
     |> validate_required([
       :id,
@@ -79,6 +81,7 @@ defmodule Algora.Payments.Transaction do
       :original_contract_id,
       :user_id
     ])
+    |> unique_constraint([:idempotency_key])
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:original_contract_id)

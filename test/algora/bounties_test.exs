@@ -5,9 +5,11 @@ defmodule Algora.BountiesTest do
   import Algora.Factory
   import Money.Sigil
 
+  alias Algora.Accounts.User
   alias Algora.Activities.Notifier
   alias Algora.Activities.SendEmail
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
   alias Algora.Payments.Transaction
   alias Algora.PSP
   alias Bounties.Tip
@@ -216,6 +218,155 @@ defmodule Algora.BountiesTest do
 
       transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
       assert is_nil(transfer)
+    end
+  end
+
+  describe "get_response_body/4" do
+    test "generates correct response body with bounties and attempts" do
+      repo_owner = insert!(:user, provider_login: "repo_owner")
+      bounty_owner = insert!(:user, handle: "bounty_owner", display_name: "Bounty Owner")
+      bounty_owner = Repo.get!(User, bounty_owner.id)
+      repository = insert!(:repository, user: repo_owner, name: "test_repo")
+
+      bounties = [
+        %Bounty{
+          amount: Money.new(1000, :USD),
+          owner: bounty_owner
+        }
+      ]
+
+      ticket = insert!(:ticket, number: 100, repository: repository)
+
+      ticket_ref = %{
+        owner: repo_owner.provider_login,
+        repo: ticket.repository.name,
+        number: ticket.number
+      }
+
+      solver1 = insert!(:user, provider_login: "solver1")
+      solver2 = insert!(:user, provider_login: "solver2")
+      solver3 = insert!(:user, provider_login: "solver3")
+      solver4 = insert!(:user, provider_login: "solver4")
+      solver5 = insert!(:user, provider_login: "solver5")
+      solver6 = insert!(:user, provider_login: "solver6")
+
+      attempts = [
+        insert!(:attempt,
+          user: solver1,
+          ticket: ticket,
+          status: :active,
+          warnings_count: 0,
+          inserted_at: ~U[2024-01-01 12:00:00Z]
+        ),
+        insert!(:attempt,
+          user: solver3,
+          ticket: ticket,
+          status: :inactive,
+          warnings_count: 0,
+          inserted_at: ~U[2024-01-03 12:00:00Z]
+        ),
+        insert!(:attempt,
+          user: solver4,
+          ticket: ticket,
+          status: :active,
+          warnings_count: 1,
+          inserted_at: ~U[2024-01-04 12:00:00Z]
+        ),
+        insert!(:attempt,
+          user: solver5,
+          ticket: ticket,
+          status: :active,
+          warnings_count: 0,
+          inserted_at: ~U[2024-01-05 12:00:00Z]
+        )
+      ]
+
+      claims = [
+        insert!(:claim,
+          user: solver1,
+          target: ticket,
+          source: insert!(:ticket, number: 101, repository: repository),
+          inserted_at: ~U[2024-01-01 12:30:00Z]
+        ),
+        insert!(:claim,
+          user: solver2,
+          target: ticket,
+          source: insert!(:ticket, number: 102, repository: repository),
+          inserted_at: ~U[2024-01-02 12:30:00Z]
+        ),
+        insert!(:claim,
+          user: solver5,
+          target: ticket,
+          source: insert!(:ticket, number: 105, repository: repository),
+          inserted_at: ~U[2024-01-05 12:30:00Z],
+          group_id: "group-105"
+        ),
+        insert!(:claim,
+          user: solver6,
+          target: ticket,
+          source: insert!(:ticket, number: 105, repository: repository),
+          inserted_at: ~U[2024-01-05 12:30:00Z],
+          group_id: "group-105"
+        )
+      ]
+
+      response = Algora.Bounties.get_response_body(bounties, ticket_ref, attempts, claims)
+
+      expected_response = """
+      ## 💎 $1,000.00 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ### Steps to solve:
+      1. **Start working**: Comment `/attempt #100` with your implementation plan
+      2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
+      3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+
+      Thank you for contributing to repo_owner/test_repo!
+
+      | Attempt | Started (UTC) | Solution |
+      | --- | --- | --- |
+      | 🟢 @solver1 | Jan 01, 2024, 12:00:00 PM | #101 |
+      | 🟢 @solver2 | Jan 02, 2024, 12:30:00 PM | #102 |
+      | 🔴 @solver3 | Jan 03, 2024, 12:00:00 PM | WIP |
+      | 🟡 @solver4 | Jan 04, 2024, 12:00:00 PM | WIP |
+      | 🟢 @solver5 and @solver6 | Jan 05, 2024, 12:00:00 PM | #105 |
+      """
+
+      assert response == String.trim(expected_response)
+    end
+
+    test "generates response body without attempts table when no attempts exist" do
+      repo_owner = insert!(:user, provider_login: "repo_owner")
+      bounty_owner = insert!(:user, handle: "bounty_owner", display_name: "Bounty Owner")
+      bounty_owner = Repo.get!(User, bounty_owner.id)
+      repository = insert!(:repository, user: repo_owner, name: "test_repo")
+
+      bounties = [
+        %Bounty{
+          amount: Money.new(1000, :USD),
+          owner: bounty_owner
+        }
+      ]
+
+      ticket = insert!(:ticket, number: 100, repository: repository)
+
+      ticket_ref = %{
+        owner: repo_owner.provider_login,
+        repo: ticket.repository.name,
+        number: ticket.number
+      }
+
+      response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
+
+      expected_response = """
+      ## 💎 $1,000.00 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ### Steps to solve:
+      1. **Start working**: Comment `/attempt #100` with your implementation plan
+      2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
+      3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+
+      Thank you for contributing to repo_owner/test_repo!
+      """
+
+      assert response == String.trim(expected_response)
     end
   end
 end

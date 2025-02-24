@@ -9,6 +9,7 @@ defmodule Algora.BountiesTest do
   alias Algora.Activities.SendEmail
   alias Algora.Bounties
   alias Algora.Payments.Transaction
+  alias Algora.PSP
   alias Bounties.Tip
 
   describe "bounties" do
@@ -185,7 +186,7 @@ defmodule Algora.BountiesTest do
                )
 
       assert {:ok, _invoice} =
-               Algora.Stripe.Invoice.pay(invoice, %{
+               PSP.Invoice.pay(invoice, %{
                  payment_method: payment_method.provider_id,
                  off_session: true
                })

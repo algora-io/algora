@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
   alias Algora.Payments
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
+  alias Algora.PSP
   alias Algora.Repo
   alias AlgoraWeb.Webhooks.StripeController
 
@@ -152,7 +153,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
 
       assert :ok = StripeController.handle_event(event)
 
-      {:ok, setup_intent} = Algora.Stripe.SetupIntent.retrieve(setup_intent_id, %{})
+      {:ok, setup_intent} = PSP.SetupIntent.retrieve(setup_intent_id, %{})
 
       payment_method = Repo.one!(from p in PaymentMethod, where: p.provider_id == ^setup_intent.payment_method)
       assert payment_method.customer_id == customer.id

@@ -47,7 +47,21 @@ defmodule Algora.PSP do
   defmodule Transfer do
     @moduledoc false
 
-    def create(params), do: Algora.PSP.client(__MODULE__).create(params)
+    @spec create(params, options) :: {:ok, Algora.PSP.transfer()} | {:error, Algora.PSP.error()}
+          when params: %{
+                 :amount => pos_integer,
+                 :currency => String.t(),
+                 :destination => String.t(),
+                 optional(:metadata) => Stripe.Types.metadata(),
+                 optional(:source_transaction) => String.t(),
+                 optional(:transfer_group) => String.t(),
+                 optional(:description) => String.t(),
+                 optional(:source_type) => String.t()
+               },
+               options: %{
+                 :idempotency_key => String.t()
+               }
+    def create(params, opts), do: Algora.PSP.client(__MODULE__).create(params, Keyword.new(opts))
   end
 
   @type session :: Stripe.Session.t()

@@ -411,7 +411,7 @@ defmodule Algora.Payments do
     end
   end
 
-  defp initialize_transfer(%Transaction{} = credit) do
+  def initialize_transfer(%Transaction{} = credit) do
     %Transaction{}
     |> change(%{
       id: Nanoid.generate(),
@@ -438,8 +438,8 @@ defmodule Algora.Payments do
     |> Repo.insert()
   end
 
-  defp execute_transfer(%Transaction{} = transaction, account) do
-    charge = Repo.get_by(Transaction, type: :credit, status: :succeeded, group_id: transaction.group_id)
+  def execute_transfer(%Transaction{} = transaction, account) do
+    charge = Repo.get_by(Transaction, type: :charge, status: :succeeded, group_id: transaction.group_id)
 
     transfer_params =
       %{
@@ -451,15 +451,14 @@ defmodule Algora.Payments do
       |> Map.merge(if transaction.group_id, do: %{transfer_group: transaction.group_id}, else: %{})
       |> Map.merge(if charge && charge.provider_id, do: %{source_transaction: charge.provider_id}, else: %{})
 
-    # TODO: provide idempotency key
-    case PSP.Transfer.create(transfer_params) do
+    case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.id}) do
       {:ok, transfer} ->
-        # it's fine if this fails since we'll receive a webhook
         transaction
         |> change(%{
           status: :succeeded,
           succeeded_at: DateTime.utc_now(),
           provider_id: transfer.id,
+          provider_transfer_id: transfer.id,
           provider_meta: Util.normalize_struct(transfer)
         })
         |> Repo.update()
@@ -467,7 +466,6 @@ defmodule Algora.Payments do
         {:ok, transfer}
 
       {:error, error} ->
-        # TODO: inconsistent state if this fails
         transaction
         |> change(%{status: :failed})
         |> Repo.update()

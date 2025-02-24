@@ -24,6 +24,9 @@ defmodule Algora.PSP do
     |> Module.concat(module |> Module.split() |> List.last())
   end
 
+  @type error :: Stripe.Error.t()
+
+  @type invoice :: Stripe.Invoice.t()
   defmodule Invoice do
     @moduledoc false
 
@@ -33,24 +36,31 @@ defmodule Algora.PSP do
     def retrieve(id, opts), do: Algora.PSP.client(__MODULE__).retrieve(id, opts)
   end
 
+  @type invoiceitem :: Stripe.Invoiceitem.t()
   defmodule Invoiceitem do
     @moduledoc false
 
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
+  @type transfer :: Stripe.Transfer.t()
   defmodule Transfer do
     @moduledoc false
 
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
+  @type session :: Stripe.Session.t()
   defmodule Session do
     @moduledoc false
+
+    @type line_item_data :: Stripe.Session.line_item_data()
+    @type payment_intent_data :: Stripe.Session.payment_intent_data()
 
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
+  @type payment_method :: Stripe.PaymentMethod.t()
   defmodule PaymentMethod do
     @moduledoc false
 
@@ -58,18 +68,21 @@ defmodule Algora.PSP do
     def retrieve(id), do: Algora.PSP.client(__MODULE__).retrieve(id)
   end
 
+  @type payment_intent :: Stripe.PaymentIntent.t()
   defmodule PaymentIntent do
     @moduledoc false
 
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
+  @type setup_intent :: Stripe.SetupIntent.t()
   defmodule SetupIntent do
     @moduledoc false
 
     def retrieve(id, params), do: Algora.PSP.client(__MODULE__).retrieve(id, params)
   end
 
+  @type customer :: Stripe.Customer.t()
   defmodule Customer do
     @moduledoc false
 
@@ -77,6 +90,7 @@ defmodule Algora.PSP do
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
+  @type account :: Stripe.Account.t()
   defmodule Account do
     @moduledoc false
 
@@ -86,12 +100,14 @@ defmodule Algora.PSP do
     def delete(id), do: Algora.PSP.client(__MODULE__).delete(id)
   end
 
+  @type account_link :: Stripe.AccountLink.t()
   defmodule AccountLink do
     @moduledoc false
 
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
   end
 
+  @type login_link :: Stripe.LoginLink.t()
   defmodule LoginLink do
     @moduledoc false
 
@@ -99,6 +115,7 @@ defmodule Algora.PSP do
     def create(params), do: Algora.PSP.client(__MODULE__).create(params, %{})
   end
 
+  @type balance_transaction :: Stripe.BalanceTransaction.t()
   defmodule BalanceTransaction do
     @moduledoc false
 

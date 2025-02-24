@@ -16,6 +16,7 @@ defmodule Algora.Bounties do
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
+  alias Algora.PSP
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
@@ -649,7 +650,7 @@ defmodule Algora.Bounties do
             recipient: User.t()
           ]
         ) ::
-          {:ok, Stripe.Invoice.t()} | {:error, atom()}
+          {:ok, PSP.invoice()} | {:error, atom()}
   def create_invoice(%{owner: owner, amount: amount}, opts \\ []) do
     tx_group_id = Nanoid.generate()
 
@@ -685,7 +686,7 @@ defmodule Algora.Bounties do
              }),
            {:ok, customer} <- Payments.fetch_or_create_customer(owner),
            {:ok, invoice} <-
-             Algora.PSP.Invoice.create(%{
+             PSP.Invoice.create(%{
                auto_advance: false,
                customer: customer.provider_id
              }),
@@ -693,7 +694,7 @@ defmodule Algora.Bounties do
              line_items
              |> Enum.map(&LineItem.to_invoice_item(&1, invoice, customer))
              |> Enum.reduce_while({:ok, []}, fn params, {:ok, acc} ->
-               case Algora.PSP.Invoiceitem.create(params) do
+               case PSP.Invoiceitem.create(params) do
                  {:ok, item} -> {:cont, {:ok, [item | acc]}}
                  {:error, error} -> {:halt, {:error, error}}
                end

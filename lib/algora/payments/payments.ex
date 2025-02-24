@@ -28,10 +28,10 @@ defmodule Algora.Payments do
   end
 
   @spec create_stripe_session(
-          line_items :: [Stripe.Session.line_item_data()],
-          payment_intent_data :: Stripe.Session.payment_intent_data()
+          line_items :: [PSP.Session.line_item_data()],
+          payment_intent_data :: PSP.Session.payment_intent_data()
         ) ::
-          {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
+          {:ok, PSP.session()} | {:error, PSP.error()}
   def create_stripe_session(line_items, payment_intent_data) do
     PSP.Session.create(%{
       mode: "payment",
@@ -153,7 +153,7 @@ defmodule Algora.Payments do
   end
 
   @spec fetch_or_create_customer(user :: User.t()) ::
-          {:ok, Customer.t()} | {:error, Ecto.Changeset.t()} | {:error, Stripe.Error.t()}
+          {:ok, Customer.t()} | {:error, Ecto.Changeset.t()} | {:error, PSP.error()}
   def fetch_or_create_customer(user) do
     case fetch_customer_by(user_id: user.id) do
       {:ok, customer} -> {:ok, customer}
@@ -162,7 +162,7 @@ defmodule Algora.Payments do
   end
 
   @spec create_customer(user :: User.t()) ::
-          {:ok, Customer.t()} | {:error, Ecto.Changeset.t()} | {:error, Stripe.Error.t()}
+          {:ok, Customer.t()} | {:error, Ecto.Changeset.t()} | {:error, PSP.error()}
   def create_customer(user) do
     with {:ok, stripe_customer} <- PSP.Customer.create(%{name: user.name}) do
       %Customer{}
@@ -177,7 +177,7 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec create_payment_method(customer :: Customer.t(), payment_method :: Stripe.PaymentMethod.t()) ::
+  @spec create_payment_method(customer :: Customer.t(), payment_method :: PSP.payment_method()) ::
           {:ok, PaymentMethod.t()} | {:error, Ecto.Changeset.t()}
   def create_payment_method(customer, payment_method) do
     %PaymentMethod{}
@@ -193,7 +193,7 @@ defmodule Algora.Payments do
   end
 
   @spec create_stripe_setup_session(customer :: Customer.t(), success_url :: String.t(), cancel_url :: String.t()) ::
-          {:ok, Stripe.Session.t()} | {:error, Stripe.Error.t()}
+          {:ok, PSP.session()} | {:error, PSP.error()}
   def create_stripe_setup_session(customer, success_url, cancel_url) do
     PSP.Session.create(%{
       billing_address_collection: "required",
@@ -242,7 +242,7 @@ defmodule Algora.Payments do
   end
 
   @spec create_stripe_account(attrs :: map()) ::
-          {:ok, Stripe.Account.t()} | {:error, Stripe.Error.t()}
+          {:ok, PSP.account()} | {:error, PSP.error()}
   defp create_stripe_account(%{country: country, type: type}) do
     case PSP.Account.create(%{country: country, type: to_string(type)}) do
       {:ok, account} -> {:ok, account}
@@ -251,7 +251,7 @@ defmodule Algora.Payments do
   end
 
   @spec create_account_link(account :: Account.t(), base_url :: String.t()) ::
-          {:ok, Stripe.AccountLink.t()} | {:error, Stripe.Error.t()}
+          {:ok, PSP.account_link()} | {:error, PSP.error()}
   def create_account_link(account, base_url) do
     PSP.AccountLink.create(%{
       account: account.provider_id,
@@ -262,12 +262,12 @@ defmodule Algora.Payments do
   end
 
   @spec create_login_link(account :: Account.t()) ::
-          {:ok, Stripe.LoginLink.t()} | {:error, Stripe.Error.t()}
+          {:ok, PSP.login_link()} | {:error, PSP.error()}
   def create_login_link(account) do
     PSP.LoginLink.create(account.provider_id)
   end
 
-  @spec update_account(account :: Account.t(), stripe_account :: Stripe.Account.t()) ::
+  @spec update_account(account :: Account.t(), stripe_account :: PSP.account()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   def update_account(account, stripe_account) do
     account
@@ -288,7 +288,7 @@ defmodule Algora.Payments do
   end
 
   @spec refresh_stripe_account(user :: User.t()) ::
-          {:ok, Account.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found} | {:error, Stripe.Error.t()}
+          {:ok, Account.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found} | {:error, PSP.error()}
   def refresh_stripe_account(user) do
     with {:ok, account} <- fetch_account(user),
          {:ok, stripe_account} <- PSP.Account.retrieve(account.provider_id),
@@ -303,12 +303,12 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec get_service_agreement(account :: Stripe.Account.t()) :: String.t()
+  @spec get_service_agreement(account :: PSP.account()) :: String.t()
   defp get_service_agreement(%{tos_acceptance: %{service_agreement: agreement}} = _account) when not is_nil(agreement) do
     agreement
   end
 
-  @spec get_service_agreement(account :: Stripe.Account.t()) :: String.t()
+  @spec get_service_agreement(account :: PSP.account()) :: String.t()
   defp get_service_agreement(%{capabilities: capabilities}) do
     if is_nil(capabilities[:card_payments]), do: "recipient", else: "full"
   end
@@ -321,7 +321,7 @@ defmodule Algora.Payments do
   end
 
   @spec execute_pending_transfer(credit_id :: String.t()) ::
-          {:ok, Stripe.Transfer.t()} | {:error, :not_found} | {:error, :duplicate_transfer_attempt}
+          {:ok, PSP.transfer()} | {:error, :not_found} | {:error, :duplicate_transfer_attempt}
   def execute_pending_transfer(credit_id) do
     with {:ok, credit} <- Repo.fetch_by(Transaction, id: credit_id, type: :credit, status: :succeeded) do
       transfers =
@@ -391,7 +391,7 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec initialize_and_execute_transfer(credit :: Transaction.t()) :: {:ok, Stripe.Transfer.t()} | {:error, term()}
+  @spec initialize_and_execute_transfer(credit :: Transaction.t()) :: {:ok, PSP.transfer()} | {:error, term()}
   defp initialize_and_execute_transfer(%Transaction{} = credit) do
     case fetch_active_account(credit.user_id) do
       {:ok, account} ->

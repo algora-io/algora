@@ -482,11 +482,14 @@ defmodule Algora.Contracts do
   defp transfer_funds(contract, %Transaction{type: :transfer} = transaction) when transaction.status != :succeeded do
     with {:ok, account} <- Repo.fetch_by(Account, user_id: transaction.user_id),
          {:ok, stripe_transfer} <-
-           Algora.PSP.Transfer.create(%{
-             amount: MoneyUtils.to_minor_units(transaction.net_amount),
-             currency: to_string(transaction.net_amount.currency),
-             destination: account.provider_id
-           }) do
+           Algora.PSP.Transfer.create(
+             %{
+               amount: MoneyUtils.to_minor_units(transaction.net_amount),
+               currency: to_string(transaction.net_amount.currency),
+               destination: account.provider_id
+             },
+             %{idempotency_key: transaction.id}
+           ) do
       update_transaction_status(transaction, stripe_transfer, :succeeded)
       mark_contract_as_paid(contract)
       {:ok, stripe_transfer}

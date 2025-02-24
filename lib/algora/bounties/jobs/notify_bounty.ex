@@ -77,6 +77,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
          bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
          {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💎 Bounty"]) do
       attempts = Bounties.list_attempts_for_ticket(ticket.id)
+      claims = Bounties.list_claims([ticket.id])
 
       Workspace.ensure_command_response(%{
         token: token,
@@ -85,7 +86,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
         command_type: :bounty,
         command_source: command_source,
         ticket: ticket,
-        body: Bounties.get_response_body(bounties, ticket_ref, attempts)
+        body: Bounties.get_response_body(bounties, ticket_ref, attempts, claims)
       })
     end
   end

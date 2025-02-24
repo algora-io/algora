@@ -138,30 +138,78 @@ defmodule Algora.Bounties do
     end)
   end
 
+  defp claim_to_solution(claim) do
+    %{
+      type: :claim,
+      started_at: claim.inserted_at,
+      user: claim.user,
+      group_id: "claim-#{claim.group_id}",
+      indicator: "🟢",
+      solution: "##{claim.source.number}"
+    }
+  end
+
+  defp attempt_to_solution(attempt) do
+    %{
+      type: :attempt,
+      started_at: attempt.inserted_at,
+      user: attempt.user,
+      group_id: "attempt-#{attempt.id}",
+      indicator: get_attempt_emoji(attempt),
+      solution: "WIP"
+    }
+  end
+
   @spec get_response_body(
           bounties :: list(Bounty.t()),
           ticket_ref :: %{owner: String.t(), repo: String.t(), number: integer()},
-          attempts :: list(Attempt.t())
+          attempts :: list(Attempt.t()),
+          claims :: list(Claim.t())
         ) :: String.t()
-  def get_response_body(bounties, ticket_ref, attempts) do
+  def get_response_body(bounties, ticket_ref, attempts, claims) do
     header =
       Enum.map_join(bounties, "\n", fn bounty ->
         "## 💎 #{bounty.amount} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
       end)
 
-    attempts_table =
-      if Enum.empty?(attempts) do
+    solutions =
+      []
+      |> Enum.concat(Enum.map(claims, &claim_to_solution/1))
+      |> Enum.concat(Enum.map(attempts, &attempt_to_solution/1))
+      |> Enum.group_by(& &1.user.id)
+      |> Enum.map(fn {_user_id, solutions} ->
+        started_at = Enum.min_by(solutions, & &1.started_at).started_at
+        solution = Enum.find(solutions, &(&1.type == :claim)) || List.first(solutions)
+        %{solution | started_at: started_at}
+      end)
+      |> Enum.group_by(& &1.group_id)
+      |> Enum.sort_by(fn {_group_id, solutions} -> Enum.min_by(solutions, & &1.started_at).started_at end)
+      |> Enum.map(fn {_group_id, solutions} ->
+        primary_solution = Enum.min_by(solutions, & &1.started_at)
+        timestamp = Calendar.strftime(primary_solution.started_at, "%b %d, %Y, %I:%M:%S %p")
+
+        users =
+          solutions
+          |> Enum.sort_by(& &1.started_at)
+          |> Enum.map(&"@#{&1.user.provider_login}")
+          |> Util.format_name_list()
+
+        "| #{primary_solution.indicator} #{users} | #{timestamp} | #{primary_solution.solution} |"
+      end)
+
+    solutions_table =
+      if solutions == [] do
         ""
       else
         """
 
-        | Attempt | Started (UTC) |
-        | --- | --- |
-        #{Enum.map_join(attempts, "\n", fn attempt -> "| #{get_attempt_emoji(attempt)} @#{attempt.user.provider_login} | #{Calendar.strftime(attempt.inserted_at, "%b %d, %Y, %I:%M:%S %p")} |" end)}
+        | Attempt | Started (UTC) | Solution |
+        | --- | --- | --- |
+        #{Enum.join(solutions, "\n")}
         """
       end
 
-    """
+    String.trim("""
     #{header}
     ### Steps to solve:
     1. **Start working**: Comment `/attempt ##{ticket_ref[:number]}` with your implementation plan
@@ -169,14 +217,15 @@ defmodule Algora.Bounties do
     3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
 
     Thank you for contributing to #{ticket_ref[:owner]}/#{ticket_ref[:repo]}!
-    #{attempts_table}
-    """
+    #{solutions_table}
+    """)
   end
 
   def refresh_bounty_response(token, ticket_ref, ticket) do
     bounties = list_bounties(ticket_id: ticket.id)
     attempts = list_attempts_for_ticket(ticket.id)
-    body = get_response_body(bounties, ticket_ref, attempts)
+    claims = list_claims([ticket.id])
+    body = get_response_body(bounties, ticket_ref, attempts, claims)
 
     Workspace.refresh_command_response(%{
       token: token,

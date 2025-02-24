@@ -685,7 +685,7 @@ defmodule Algora.Bounties do
              }),
            {:ok, customer} <- Payments.fetch_or_create_customer(owner),
            {:ok, invoice} <-
-             Algora.Stripe.Invoice.create(%{
+             Algora.PSP.Invoice.create(%{
                auto_advance: false,
                customer: customer.provider_id
              }),
@@ -693,7 +693,7 @@ defmodule Algora.Bounties do
              line_items
              |> Enum.map(&LineItem.to_invoice_item(&1, invoice, customer))
              |> Enum.reduce_while({:ok, []}, fn params, {:ok, acc} ->
-               case Algora.Stripe.Invoiceitem.create(params) do
+               case Algora.PSP.Invoiceitem.create(params) do
                  {:ok, item} -> {:cont, {:ok, [item | acc]}}
                  {:error, error} -> {:halt, {:error, error}}
                end

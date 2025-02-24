@@ -3,7 +3,6 @@ defmodule Algora.Payments.Account do
   use Algora.Schema
 
   alias Algora.Activities.Activity
-  alias Algora.Stripe
 
   @derive {Inspect, except: [:provider_meta]}
   typed_schema "accounts" do
@@ -60,7 +59,7 @@ defmodule Algora.Payments.Account do
       :user_id
     ])
     |> validate_inclusion(:type, [:standard, :express])
-    |> validate_inclusion(:country, Stripe.ConnectCountries.list_codes())
+    |> validate_inclusion(:country, Algora.PSP.ConnectCountries.list_codes())
     |> foreign_key_constraint(:user_id)
     |> generate_id()
   end

@@ -7,7 +7,6 @@ defmodule AlgoraWeb.Org.TransactionsLive do
 
   alias Algora.Accounts.User
   alias Algora.Payments
-  alias Algora.Stripe.ConnectCountries
   alias Algora.Util
 
   defmodule PayoutAccountForm do
@@ -16,7 +15,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
 
     import Ecto.Changeset
 
-    @countries ConnectCountries.list()
+    @countries Algora.PSP.ConnectCountries.list()
 
     embedded_schema do
       field :country, :string
@@ -359,7 +358,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
                   <div>
                     <dt class="text-sm font-medium text-muted-foreground">Country</dt>
                     <dd class="text-sm font-semibold">
-                      {ConnectCountries.from_code(@account.country)}
+                      {Algora.PSP.ConnectCountries.from_code(@account.country)}
                     </dd>
                   </div>
                   <div>

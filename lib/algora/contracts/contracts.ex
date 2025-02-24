@@ -11,8 +11,8 @@ defmodule Algora.Contracts do
   alias Algora.Payments
   alias Algora.Payments.Account
   alias Algora.Payments.Transaction
+  alias Algora.PSP.Invoice
   alias Algora.Repo
-  alias Algora.Stripe
   alias Algora.Util
 
   require Algora.SQL
@@ -395,7 +395,7 @@ defmodule Algora.Contracts do
   defp maybe_generate_invoice(contract, charge) do
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
-    with {:ok, invoice} <- Stripe.Invoice.create(invoice_params),
+    with {:ok, invoice} <- Invoice.create(invoice_params),
          {:ok, _line_items} <- create_line_items(contract, invoice, charge.line_items) do
       {:ok, invoice}
     end
@@ -442,7 +442,7 @@ defmodule Algora.Contracts do
 
   defp create_line_items(contract, invoice, line_items) do
     Enum.reduce_while(line_items, {:ok, []}, fn line_item, {:ok, acc} ->
-      case Stripe.Invoiceitem.create(%{
+      case Algora.PSP.Invoiceitem.create(%{
              invoice: invoice.id,
              customer: contract.client.customer.provider_id,
              amount: MoneyUtils.to_minor_units(line_item.amount),
@@ -460,7 +460,7 @@ defmodule Algora.Contracts do
   defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
-    case Stripe.Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}) do
+    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}) do
       {:ok, stripe_invoice} ->
         if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}
@@ -482,7 +482,7 @@ defmodule Algora.Contracts do
   defp transfer_funds(contract, %Transaction{type: :transfer} = transaction) when transaction.status != :succeeded do
     with {:ok, account} <- Repo.fetch_by(Account, user_id: transaction.user_id),
          {:ok, stripe_transfer} <-
-           Stripe.Transfer.create(%{
+           Algora.PSP.Transfer.create(%{
              amount: MoneyUtils.to_minor_units(transaction.net_amount),
              currency: to_string(transaction.net_amount.currency),
              destination: account.provider_id

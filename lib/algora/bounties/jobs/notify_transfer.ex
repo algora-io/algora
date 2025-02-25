@@ -14,7 +14,7 @@ defmodule Algora.Bounties.Jobs.NotifyTransfer do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"transafer_id" => transafer_id}}) do
+  def perform(%Oban.Job{args: %{"transfer_id" => transfer_id}}) do
     with {:ok, ticket} <-
            Repo.fetch_one(
              from t in Ticket,
@@ -24,7 +24,7 @@ defmodule Algora.Bounties.Jobs.NotifyTransfer do
                on: tx.bounty_id == bounty.id or tx.tip_id == tip.id,
                join: repo in assoc(t, :repository),
                join: user in assoc(repo, :user),
-               where: tx.id == ^transafer_id,
+               where: tx.id == ^transfer_id,
                select_merge: %{
                  repository: %{repo | user: user}
                }
@@ -38,7 +38,7 @@ defmodule Algora.Bounties.Jobs.NotifyTransfer do
            Repo.fetch_one(
              from tx in Transaction,
                join: user in assoc(tx, :user),
-               where: tx.id == ^transafer_id,
+               where: tx.id == ^transfer_id,
                select_merge: %{user: user}
            ) do
       installation = Repo.get_by(Installation, provider_user_id: ticket.repository.user.id)

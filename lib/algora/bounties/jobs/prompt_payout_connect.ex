@@ -51,7 +51,8 @@ defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
                join: user in assoc(tx, :user),
                where: tx.type == :debit,
                where: tx.group_id == ^credit_tx.group_id,
-               select_merge: %{user: user}
+               select_merge: %{user: user},
+               limit: 1
            ) do
       installation = Repo.get_by(Installation, provider_user_id: ticket.repository.user.id)
 

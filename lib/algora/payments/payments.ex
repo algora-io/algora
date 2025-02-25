@@ -37,8 +37,7 @@ defmodule Algora.Payments do
       mode: "payment",
       billing_address_collection: "required",
       line_items: line_items,
-      # TODO: handle invoice creation which is not supported by current version
-      # invoice_creation: %{enabled: true},
+      invoice_creation: %{enabled: true},
       success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
       cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
       payment_intent_data: payment_intent_data
@@ -196,8 +195,8 @@ defmodule Algora.Payments do
           {:ok, PSP.session()} | {:error, PSP.error()}
   def create_stripe_setup_session(customer, success_url, cancel_url) do
     PSP.Session.create(%{
-      billing_address_collection: "required",
       mode: "setup",
+      billing_address_collection: "required",
       payment_method_types: ["card"],
       success_url: success_url,
       cancel_url: cancel_url,

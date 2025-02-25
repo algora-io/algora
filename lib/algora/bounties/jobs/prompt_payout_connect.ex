@@ -37,31 +37,34 @@ defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
            repo: ticket.repository.name,
            number: ticket.number
          },
-         {:ok, transaction} <-
+         {:ok, credit_tx} <-
            Repo.fetch_one(
              from tx in Transaction,
                join: user in assoc(tx, :user),
-               left_join: linked_tx in Transaction,
-               on: linked_tx.id == tx.linked_transaction_id,
-               left_join: sender in assoc(linked_tx, :user),
+               where: tx.type == :credit,
                where: tx.id == ^credit_id,
-               select_merge: %{
-                 user: user,
-                 linked_transaction: %{linked_tx | user: sender}
-               }
+               select_merge: %{user: user}
+           ),
+         {:ok, debit_tx} <-
+           Repo.fetch_one(
+             from tx in Transaction,
+               join: user in assoc(tx, :user),
+               where: tx.type == :debit,
+               where: tx.group_id == ^credit_tx.group_id,
+               select_merge: %{user: user}
            ) do
       installation = Repo.get_by(Installation, provider_user_id: ticket.repository.user.id)
 
       reward_type =
         cond do
-          transaction.tip_id -> "tip"
-          transaction.bounty_id -> "bounty"
-          transaction.contract_id -> "contract"
+          credit_tx.tip_id -> "tip"
+          credit_tx.bounty_id -> "bounty"
+          credit_tx.contract_id -> "contract"
           true -> raise "Unknown transaction type"
         end
 
       body =
-        "@#{transaction.user.provider_login}: You've been awarded a **#{transaction.net_amount}** #{reward_type} #{if transaction.linked_transaction, do: "by **#{transaction.linked_transaction.user.name}**", else: ""}! 👉 [Complete your Algora onboarding](#{@onboarding_url}) to collect the #{reward_type}."
+        "@#{credit_tx.user.provider_login}: You've been awarded a **#{credit_tx.net_amount}** by **#{debit_tx.user.name}**! 👉 [Complete your Algora onboarding](#{@onboarding_url}) to collect the #{reward_type}."
 
       do_perform(ticket_ref, body, installation)
     end

@@ -34,15 +34,26 @@ defmodule Algora.Bounties.Jobs.NotifyTransfer do
            repo: ticket.repository.name,
            number: ticket.number
          },
-         {:ok, transaction} <-
+         {:ok, transfer_tx} <-
            Repo.fetch_one(
              from tx in Transaction,
                join: user in assoc(tx, :user),
+               where: tx.type == :transfer,
                where: tx.id == ^transfer_id,
+               select_merge: %{user: user}
+           ),
+         {:ok, debit_tx} <-
+           Repo.fetch_one(
+             from tx in Transaction,
+               join: user in assoc(tx, :user),
+               where: tx.type == :debit,
+               where: tx.group_id == ^transfer_tx.group_id,
                select_merge: %{user: user}
            ) do
       installation = Repo.get_by(Installation, provider_user_id: ticket.repository.user.id)
-      body = "🎉🎈 @#{transaction.user.provider_login} has been awarded **#{transaction.net_amount}**! 🎈🎊"
+
+      body =
+        "🎉🎈 @#{transfer_tx.user.provider_login} has been awarded **#{transfer_tx.net_amount}** by **#{debit_tx.user.name}**! 🎈🎊"
 
       do_perform(ticket_ref, body, installation)
     end

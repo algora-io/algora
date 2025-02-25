@@ -511,6 +511,41 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert is_nil(transfer)
     end
 
+    test "does not autopay when payment method is not default", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: false, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      bounty = Repo.one!(Bounty)
+      claim = Repo.one!(Claim)
+      assert claim.target_id == bounty.ticket_id
+      assert claim.status == :approved
+      assert Repo.aggregate(Transaction, :count) == 0
+    end
+
     test "handles autopay when claim is changed to a different bounty and PR is merged", ctx do
       issue_number1 = :rand.uniform(1000)
       issue_number2 = issue_number1 + :rand.uniform(1000)

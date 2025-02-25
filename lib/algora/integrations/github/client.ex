@@ -8,13 +8,13 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  def http(host, method, path, headers, body, opts \\ []) do
+  def http(host, method, path, headers, body) do
     # TODO: remove after migration
     if System.get_env("MIGRATION", "false") == "true" do
       cache_path = ".local/github/#{path}.json"
 
       with :error <- read_from_cache(cache_path),
-           {:ok, response_body} <- do_http_request(host, method, path, headers, body, opts) do
+           {:ok, response_body} <- do_http_request(host, method, path, headers, body) do
         write_to_cache(cache_path, response_body)
         {:ok, response_body}
       else
@@ -22,25 +22,19 @@ defmodule Algora.Github.Client do
         {:error, reason} -> {:error, reason}
       end
     else
-      do_http_request(host, method, path, headers, body, opts)
+      do_http_request(host, method, path, headers, body)
     end
   end
 
-  defp do_http_request(host, method, path, headers, body, opts) do
+  defp do_http_request(host, method, path, headers, body) do
     url = "https://#{host}#{path}"
     headers = [{"Content-Type", "application/json"} | headers]
 
     with {:ok, encoded_body} <- Jason.encode(body),
          request = Finch.build(method, url, headers, encoded_body),
-         {:ok, response} <- Finch.request(request, Algora.Finch) do
-      if opts[:skip_decoding], do: {:ok, response.body}, else: handle_response(response)
-    end
-  end
-
-  defp handle_response(%Finch.Response{body: body}) do
-    case Jason.decode(body) do
-      {:ok, decoded_body} -> maybe_handle_error(decoded_body)
-      {:error, reason} -> {:error, reason}
+         {:ok, %Finch.Response{body: body}} <- Finch.request(request, Algora.Finch),
+         {:ok, decoded_body} <- Jason.decode(body) do
+      maybe_handle_error(decoded_body)
     end
   end
 
@@ -69,20 +63,18 @@ defmodule Algora.Github.Client do
     File.write!(cache_path, Jason.encode!(data))
   end
 
-  def fetch(access_token, url, method \\ "GET", body \\ nil, opts \\ [])
+  def fetch(access_token, url, method \\ "GET", body \\ nil)
 
-  def fetch(access_token, "https://api.github.com" <> path, method, body, opts),
-    do: fetch(access_token, path, method, body, opts)
+  def fetch(access_token, "https://api.github.com" <> path, method, body), do: fetch(access_token, path, method, body)
 
-  def fetch(access_token, path, method, body, opts) do
+  def fetch(access_token, path, method, body) do
     http(
       "api.github.com",
       method,
       path,
       [{"accept", "application/vnd.github.v3+json"}] ++
         if(access_token, do: [{"Authorization", "Bearer #{access_token}"}], else: []),
-      body,
-      opts
+      body
     )
   end
 

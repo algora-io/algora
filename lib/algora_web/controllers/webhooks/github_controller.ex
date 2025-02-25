@@ -71,6 +71,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                from c in Claim,
                  join: s in assoc(c, :source),
                  join: u in assoc(c, :user),
+                 where: c.status != :cancelled,
                  where: s.id == ^source.id,
                  where: u.provider == "github",
                  where: u.provider_id == ^to_string(payload["pull_request"]["user"]["id"]),
@@ -82,7 +83,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
           %Claim{group_id: group_id} ->
             Repo.update_all(
-              from(c in Claim, where: c.group_id == ^group_id),
+              from(c in Claim, where: c.group_id == ^group_id, where: c.status != :cancelled),
               set: [status: :approved]
             )
 
@@ -93,6 +94,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                 join: tru in assoc(tr, :user),
                 join: u in assoc(c, :user),
                 where: c.group_id == ^group_id,
+                where: c.status != :cancelled,
                 order_by: [desc: c.group_share, asc: c.inserted_at],
                 select_merge: %{
                   target: %{t | repository: %{tr | user: tru}},

@@ -202,7 +202,9 @@ defmodule Algora.Factory do
 
   def bounty_factory do
     %Algora.Bounties.Bounty{
-      id: Nanoid.generate()
+      id: Nanoid.generate(),
+      status: :open,
+      amount: Money.new!(100, :USD)
     }
   end
 

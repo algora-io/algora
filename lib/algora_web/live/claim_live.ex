@@ -9,7 +9,6 @@ defmodule AlgoraWeb.ClaimLive do
   alias Algora.Bounties
   alias Algora.Bounties.Claim
   alias Algora.Bounties.LineItem
-  alias Algora.Github
   alias Algora.Organizations
   alias Algora.Repo
   alias Algora.Util
@@ -79,19 +78,7 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.map(& &1.net_amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-        context =
-          if repo = primary_claim.source.repository do
-            "#{repo.user.provider_login}/#{repo.name}"
-          end
-
-        source_body_html =
-          with token when is_binary(token) <- Github.TokenPool.get_token(),
-               {:ok, source_body_html} <-
-                 Github.render_markdown(token, primary_claim.source.description, context: context) do
-            source_body_html
-          else
-            _ -> primary_claim.source.description
-          end
+        source_body_html = Algora.Markdown.render(primary_claim.source.description)
 
         pledges =
           primary_claim.target.bounties

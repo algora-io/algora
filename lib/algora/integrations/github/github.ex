@@ -121,7 +121,4 @@ defmodule Algora.Github do
 
   @impl true
   def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)
-
-  @impl true
-  def render_markdown(token, text, opts \\ []), do: client().render_markdown(token, text, opts)
 end

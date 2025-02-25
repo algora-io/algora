@@ -527,6 +527,12 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           params: %{"issue" => %{"number" => issue_number1}}
         },
         %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $200",
+          params: %{"issue" => %{"number" => issue_number2}}
+        },
+        %{
           event_action: "pull_request.opened",
           user_type: :unauthorized,
           body: "/claim #{issue_number1}",
@@ -546,33 +552,35 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
         }
       ])
 
-      bounty = Repo.one!(Bounty)
-
       ticket1 = Repo.get_by!(Ticket, number: issue_number1)
       ticket2 = Repo.get_by!(Ticket, number: issue_number2)
 
-      active_claim = Repo.get_by!(Claim, target_id: ticket1.id)
-      cancelled_claim = Repo.get_by!(Claim, target_id: ticket2.id)
+      _bounty1 = Repo.get_by!(Bounty, ticket_id: ticket1.id)
+      bounty2 = Repo.get_by!(Bounty, ticket_id: ticket2.id)
+
+      cancelled_claim = Repo.get_by!(Claim, target_id: ticket1.id)
+      active_claim = Repo.get_by!(Claim, target_id: ticket2.id)
+
       assert active_claim.status == :approved
       assert cancelled_claim.status == :cancelled
 
       charge = Repo.one!(from t in Transaction, where: t.type == :charge)
-      assert Money.equal?(charge.net_amount, Money.new(:USD, 100))
+      assert Money.equal?(charge.net_amount, Money.new(:USD, 200))
       assert charge.status == :initialized
       assert charge.user_id == ctx[:org].id
 
       debit = Repo.one!(from t in Transaction, where: t.type == :debit)
-      assert Money.equal?(debit.net_amount, Money.new(:USD, 100))
+      assert Money.equal?(debit.net_amount, Money.new(:USD, 200))
       assert debit.status == :initialized
       assert debit.user_id == ctx[:org].id
-      assert debit.bounty_id == bounty.id
+      assert debit.bounty_id == bounty2.id
       assert debit.claim_id == active_claim.id
 
       credit = Repo.one!(from t in Transaction, where: t.type == :credit)
-      assert Money.equal?(credit.net_amount, Money.new(:USD, 100))
+      assert Money.equal?(credit.net_amount, Money.new(:USD, 200))
       assert credit.status == :initialized
       assert credit.user_id == ctx[:unauthorized_user].id
-      assert credit.bounty_id == bounty.id
+      assert credit.bounty_id == bounty2.id
       assert credit.claim_id == active_claim.id
     end
 

@@ -14,6 +14,14 @@ defmodule Algora.BountiesTest do
   alias Algora.PSP
   alias Bounties.Tip
 
+  setup do
+    repo_owner = insert!(:user)
+    repo = insert!(:repository, %{user: repo_owner})
+    ticket = insert!(:ticket, %{repository: repo})
+
+    %{ticket: ticket}
+  end
+
   describe "bounties" do
     test "create" do
       creator = insert!(:user)
@@ -367,6 +375,32 @@ defmodule Algora.BountiesTest do
       """
 
       assert response == String.trim(expected_response)
+    end
+  end
+
+  describe "list_bounties/1" do
+    test "does not include cancelled bounties", %{ticket: ticket} do
+      insert!(:bounty, status: :open, ticket: ticket, owner: insert!(:user))
+      insert!(:bounty, status: :paid, ticket: ticket, owner: insert!(:user))
+      insert!(:bounty, status: :cancelled, ticket: ticket, owner: insert!(:user))
+
+      bounties = Bounties.list_bounties()
+      assert Enum.any?(bounties, &(&1.status == :open))
+      assert Enum.any?(bounties, &(&1.status == :paid))
+      refute Enum.any?(bounties, &(&1.status == :cancelled))
+    end
+  end
+
+  describe "list_claims/1" do
+    test "does not include cancelled claims", %{ticket: ticket} do
+      insert!(:claim, status: :pending, target: ticket, user: insert!(:user))
+      insert!(:claim, status: :approved, target: ticket, user: insert!(:user))
+      insert!(:claim, status: :cancelled, target: ticket, user: insert!(:user))
+
+      claims = Bounties.list_claims([ticket.id])
+      assert Enum.any?(claims, &(&1.status == :pending))
+      assert Enum.any?(claims, &(&1.status == :approved))
+      refute Enum.any?(claims, &(&1.status == :cancelled))
     end
   end
 end

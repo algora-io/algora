@@ -58,7 +58,8 @@ defmodule Algora.Bounties.Jobs.NotifyTransfer do
   end
 
   defp do_perform(ticket_ref, body, installation) do
-    with {:ok, token} <- Github.get_installation_token(installation.provider_id) do
+    with {:ok, token} <- Github.get_installation_token(installation.provider_id),
+         {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💰 Rewarded"]) do
       Github.create_issue_comment(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, body)
     end
   end

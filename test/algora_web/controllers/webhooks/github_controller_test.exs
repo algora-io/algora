@@ -14,6 +14,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias Algora.Github.Webhook
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Webhooks.GithubController
 
   setup do
@@ -220,7 +221,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
     test "does not allow multiple claims in a single PR", ctx do
       issue_number1 = :rand.uniform(1000)
-      issue_number2 = :rand.uniform(1000)
+      issue_number2 = issue_number1 + 1
       pr_number = :rand.uniform(1000)
 
       process_scenario!(ctx, [
@@ -252,7 +253,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
     test "cancels existing claim when attempting to claim a different bounty in the same PR", ctx do
       issue_number1 = :rand.uniform(1000)
-      issue_number2 = :rand.uniform(1000)
+      issue_number2 = issue_number1 + 1
       pr_number = :rand.uniform(1000)
 
       process_scenario!(ctx, [
@@ -508,6 +509,71 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
       transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
       assert is_nil(transfer)
+    end
+
+    test "handles autopay when claim is changed to a different bounty and PR is merged", ctx do
+      issue_number1 = :rand.uniform(1000)
+      issue_number2 = issue_number1 + :rand.uniform(1000)
+      pr_number = issue_number1 + :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number1}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number1}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        },
+        %{
+          event_action: "pull_request.edited",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number2}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number2}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      bounty = Repo.one!(Bounty)
+
+      ticket1 = Repo.get_by!(Ticket, number: issue_number1)
+      ticket2 = Repo.get_by!(Ticket, number: issue_number2)
+
+      active_claim = Repo.get_by!(Claim, target_id: ticket1.id)
+      cancelled_claim = Repo.get_by!(Claim, target_id: ticket2.id)
+      assert active_claim.status == :approved
+      assert cancelled_claim.status == :cancelled
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, Money.new(:USD, 100))
+      assert charge.status == :initialized
+      assert charge.user_id == ctx[:org].id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, Money.new(:USD, 100))
+      assert debit.status == :initialized
+      assert debit.user_id == ctx[:org].id
+      assert debit.bounty_id == bounty.id
+      assert debit.claim_id == active_claim.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, Money.new(:USD, 100))
+      assert credit.status == :initialized
+      assert credit.user_id == ctx[:unauthorized_user].id
+      assert credit.bounty_id == bounty.id
+      assert credit.claim_id == active_claim.id
     end
 
     test "prevents duplicate transaction creation when receiving multiple PR closed events", ctx do

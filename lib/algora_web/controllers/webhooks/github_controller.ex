@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Webhooks.GithubController do
   use AlgoraWeb, :controller
 
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts
@@ -214,25 +215,27 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp process_event(%Webhook{event_action: event_action, payload: payload}, commands)
        when event_action in ["pull_request.opened", "pull_request.reopened", "pull_request.edited"] do
-    if Enum.any?(commands, &match?({:claim, _}, &1)) do
-      :ok
+    source =
+      Workspace.get_ticket(
+        payload["repository"]["owner"]["login"],
+        payload["repository"]["name"],
+        payload["pull_request"]["number"]
+      )
+
+    if source do
+      source
+      |> change(%{description: payload["pull_request"]["body"]})
+      |> Repo.update()
+    end
+
+    has_claim = Enum.any?(commands, &match?({:claim, _}, &1))
+
+    if source && !has_claim do
+      source.id
+      |> Bounties.get_active_claims()
+      |> Bounties.cancel_all_claims()
     else
-      source =
-        Workspace.get_ticket(
-          payload["repository"]["owner"]["login"],
-          payload["repository"]["name"],
-          payload["pull_request"]["number"]
-        )
-
-      case source do
-        nil ->
-          :ok
-
-        source ->
-          source.id
-          |> Bounties.get_active_claims()
-          |> Bounties.cancel_all_claims()
-      end
+      :ok
     end
   end
 

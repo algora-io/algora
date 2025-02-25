@@ -917,12 +917,14 @@ defmodule Algora.Bounties do
     |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
+    |> where([b], b.status != :cancelled)
     |> apply_criteria(criteria)
     |> order_by([b], desc: b.amount, desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,
       inserted_at: b.inserted_at,
       amount: b.amount,
+      status: b.status,
       owner: %{
         id: o.id,
         name: o.name,
@@ -956,6 +958,7 @@ defmodule Algora.Bounties do
         join: user in assoc(c, :user),
         left_join: s in assoc(c, :source),
         where: t.id in ^ticket_ids,
+        where: c.status != :cancelled,
         select_merge: %{user: user, source: s}
     )
   end

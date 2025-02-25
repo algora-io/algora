@@ -18,6 +18,8 @@ alias Algora.Payments.Customer
 alias Algora.Payments.PaymentMethod
 alias Algora.Payments.Transaction
 alias Algora.Repo
+alias Algora.Workspace
+alias Algora.Workspace.Installation
 alias Algora.Workspace.Ticket
 
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity], auto_reload: true)

@@ -56,7 +56,8 @@ defmodule Algora.MixProject do
       {:floki, ">= 0.30.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
-      {:tabler_icons, github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
+      {:tabler_icons,
+       github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},
@@ -79,7 +80,7 @@ defmodule Algora.MixProject do
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},
       {:nimble_parsec, "~> 1.4"},
-      {:oban, "~> 2.17"},
+      {:oban, "~> 2.19"},
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:chameleon, "~> 2.2.0"},
@@ -94,7 +95,7 @@ defmodule Algora.MixProject do
       # monitoring, logging
       {:appsignal_phoenix, "~> 2.6"},
       {:logfmt_ex, "~> 0.4"},
-      {:oban_live_dashboard, "~> 0.1.0"},
+      {:oban_web, "~> 2.11"},
       # TODO: delete after migration
       {:yaml_elixir, "~> 2.9"}
     ]

@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
   import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
+  import Oban.Web.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -18,6 +19,12 @@ defmodule AlgoraWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  scope "/" do
+    pipe_through :browser
+
+    oban_dashboard "/admin/oban", resolver: AlgoraWeb.ObanDashboardResolver
   end
 
   scope "/", AlgoraWeb do
@@ -46,7 +53,7 @@ defmodule AlgoraWeb.Router do
 
       live_dashboard "/dashboard",
         metrics: AlgoraWeb.Telemetry,
-        additional_pages: [oban: Oban.LiveDashboard],
+        additional_pages: [],
         layout: {AlgoraWeb.Layouts, :user},
         on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
     end

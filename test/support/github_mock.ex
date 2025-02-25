@@ -115,9 +115,4 @@ defmodule Algora.Support.GithubMock do
   def add_labels(_access_token, _owner, _repo, _number, _labels) do
     {:ok, []}
   end
-
-  @impl true
-  def render_markdown(_access_token, text, _opts \\ []) do
-    {:ok, %{"html" => "<p>#{text}</p>"}}
-  end
 end

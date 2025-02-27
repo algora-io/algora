@@ -560,15 +560,12 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
+    installation_id = opts[:installation_id]
+
     token_res =
-      if opts[:installation_id] do
-        Github.get_installation_token(opts[:installation_id])
-      else
-        case Accounts.get_access_token(creator) do
-          {:ok, token} -> {:ok, token}
-          {:error, _reason} -> {:ok, nil}
-        end
-      end
+      if installation_id,
+        do: Github.get_installation_token(installation_id),
+        else: Accounts.get_access_token(creator)
 
     ticket_ref = opts[:ticket_ref]
 

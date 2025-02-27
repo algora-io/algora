@@ -36,9 +36,15 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
   describe "create bounties" do
     test "handles bounty command with unauthorized user", ctx do
-      scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
-      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
-      assert {:error, :unauthorized} = result
+      {:error, :unauthorized} =
+        process_scenario(ctx, [
+          %{
+            event_action: "issue_comment.created",
+            user_type: :unauthorized,
+            body: "/bounty $100"
+          }
+        ])
+
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
@@ -165,16 +171,14 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
 
   describe "create tips" do
     test "rejects tip command when user is unauthorized", ctx do
-      scenario = [
-        %{
-          event_action: "issue_comment.created",
-          user_type: :unauthorized,
-          body: "/tip $100 @jsmith"
-        }
-      ]
-
-      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
-      assert {:error, :unauthorized} = result
+      {:error, :unauthorized} =
+        process_scenario(ctx, [
+          %{
+            event_action: "issue_comment.created",
+            user_type: :unauthorized,
+            body: "/tip $100 @jsmith"
+          }
+        ])
 
       assert [] = all_enqueued(worker: NotifyTipIntent)
     end
@@ -981,16 +985,21 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   defp process_scenario(ctx, scenario) do
-    Enum.reduce_while(
-      scenario,
-      :ok,
-      fn opts, :ok ->
-        case ctx |> Map.merge(opts) |> mock_webhook() |> GithubController.process_delivery() do
-          :ok -> {:cont, :ok}
-          error -> {:halt, error}
-        end
-      end
-    )
+    {result, _log} =
+      with_log(fn ->
+        Enum.reduce_while(
+          scenario,
+          :ok,
+          fn opts, :ok ->
+            case ctx |> Map.merge(opts) |> mock_webhook() |> GithubController.process_delivery() do
+              :ok -> {:cont, :ok}
+              error -> {:halt, error}
+            end
+          end
+        )
+      end)
+
+    result
   end
 
   defp process_scenario!(ctx, scenario) do

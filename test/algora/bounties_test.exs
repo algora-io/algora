@@ -229,6 +229,56 @@ defmodule Algora.BountiesTest do
     end
   end
 
+  describe "tips" do
+    test "successfully creates checkout url for tips" do
+      creator = insert!(:user)
+      owner = insert!(:organization)
+      recipient = insert!(:user)
+      repo = insert!(:repository, %{user: owner})
+      ticket = insert!(:ticket, %{repository: repo})
+      amount = ~M[4000]usd
+
+      ticket_ref = %{
+        owner: owner.handle,
+        repo: repo.name,
+        number: ticket.number
+      }
+
+      assert {:ok, _checkout_url} =
+               Bounties.create_tip(
+                 %{
+                   amount: amount,
+                   owner: owner,
+                   creator: creator,
+                   recipient: recipient
+                 },
+                 ticket_ref: ticket_ref
+               )
+
+      tip = Repo.one!(Tip)
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, amount)
+      assert charge.status == :initialized
+      assert charge.user_id == owner.id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, amount)
+      assert debit.status == :initialized
+      assert debit.user_id == owner.id
+      assert debit.tip_id == tip.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, amount)
+      assert credit.status == :initialized
+      assert credit.user_id == recipient.id
+      assert credit.tip_id == tip.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
+    end
+  end
+
   describe "get_response_body/4" do
     test "generates correct response body with bounties and attempts" do
       repo_owner = insert!(:user, provider_login: "repo_owner")

@@ -195,7 +195,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
 
       assert job.args["body"] =~
-               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}) to complete your tip via Stripe."
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}&org_id=#{ctx[:installation].connected_user_id}) to complete your tip via Stripe."
     end
 
     test "generates tip payment link when recipient and amount are provided in reverse order", ctx do
@@ -214,7 +214,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
 
       assert job.args["body"] =~
-               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}) to complete your tip via Stripe."
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}&org_id=#{ctx[:installation].connected_user_id}) to complete your tip via Stripe."
     end
 
     test "generates tip payment link when amount is provided and recipient is inferred from issue", ctx do
@@ -233,7 +233,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
 
       assert job.args["body"] =~
-               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}) to complete your tip via Stripe."
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}&org_id=#{ctx[:installation].connected_user_id}) to complete your tip via Stripe."
     end
 
     test "prompts for recipient when attempting to tip issue author who is the tipper", ctx do

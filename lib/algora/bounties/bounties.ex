@@ -20,6 +20,7 @@ defmodule Algora.Bounties do
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
+  alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 
   require Logger
@@ -523,13 +524,20 @@ defmodule Algora.Bounties do
           "Please specify an amount to tip (e.g. `/tip $100 @#{recipient}`)"
 
         true ->
+          installation =
+            case opts[:installation_id] do
+              nil -> nil
+              installation_id -> Repo.get_by(Installation, provider: "github", provider_id: to_string(installation_id))
+            end
+
           query =
             URI.encode_query(
               amount: Money.to_decimal(amount),
               recipient: recipient,
               owner: owner,
               repo: repo,
-              number: number
+              number: number,
+              org_id: if(installation, do: installation.connected_user_id)
             )
 
           url = AlgoraWeb.Endpoint.url() <> "/tip" <> "?" <> query
@@ -548,29 +556,49 @@ defmodule Algora.Bounties do
 
   @spec create_tip(
           %{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()},
-          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, installation_id: integer()]
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
-    changeset =
-      Tip.changeset(%Tip{}, %{
-        amount: amount,
-        owner_id: owner.id,
-        creator_id: creator.id,
-        recipient_id: recipient.id
-      })
+    token_res =
+      if opts[:installation_id] do
+        Github.get_installation_token(opts[:installation_id])
+      else
+        case Accounts.get_access_token(creator) do
+          {:ok, token} -> {:ok, token}
+          {:error, _reason} -> {:ok, nil}
+        end
+      end
 
-    activity_attrs =
-      %{
-        type: :tip_awarded,
-        notify_users: [recipient.id]
-      }
+    ticket_ref = opts[:ticket_ref]
+
+    ticket_res =
+      if ticket_ref do
+        with {:ok, token} <- token_res do
+          Workspace.ensure_ticket(token, ticket_ref[:owner], ticket_ref[:repo], ticket_ref[:number])
+        end
+      else
+        {:ok, nil}
+      end
 
     Repo.transact(fn ->
-      with {:ok, tip} <- Repo.insert_with_activity(changeset, activity_attrs) do
+      with {:ok, ticket} <- ticket_res,
+           {:ok, tip} <-
+             %Tip{}
+             |> Tip.changeset(%{
+               amount: amount,
+               owner_id: owner.id,
+               creator_id: creator.id,
+               recipient_id: recipient.id,
+               ticket_id: if(ticket, do: ticket.id)
+             })
+             |> Repo.insert_with_activity(%{
+               type: :tip_awarded,
+               notify_users: [recipient.id]
+             }) do
         create_payment_session(
           %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
-          ticket_ref: opts[:ticket_ref],
+          ticket_ref: ticket_ref,
           tip_id: tip.id,
           recipient: recipient
         )
@@ -622,29 +650,31 @@ defmodule Algora.Bounties do
     platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
-    if recipient do
-      [
-        %LineItem{
-          amount: amount,
-          title: "Payment to @#{recipient.provider_login}",
-          description: description,
-          image: recipient.avatar_url,
-          type: :payout
-        }
-      ]
-    else
-      []
-    end ++
-      Enum.map(claims, fn claim ->
-        %LineItem{
-          # TODO: ensure shares are normalized
-          amount: Money.mult!(amount, claim.group_share),
-          title: "Payment to @#{claim.user.provider_login}",
-          description: description,
-          image: claim.user.avatar_url,
-          type: :payout
-        }
-      end) ++
+    payouts =
+      if recipient do
+        [
+          %LineItem{
+            amount: amount,
+            title: "Payment to @#{recipient.provider_login}",
+            description: description,
+            image: recipient.avatar_url,
+            type: :payout
+          }
+        ]
+      else
+        Enum.map(claims, fn claim ->
+          %LineItem{
+            # TODO: ensure shares are normalized
+            amount: Money.mult!(amount, claim.group_share),
+            title: "Payment to @#{claim.user.provider_login}",
+            description: description,
+            image: claim.user.avatar_url,
+            type: :payout
+          }
+        end)
+      end
+
+    payouts ++
       [
         %LineItem{
           amount: Money.mult!(amount, platform_fee_pct),
@@ -698,6 +728,7 @@ defmodule Algora.Bounties do
              create_transaction_pairs(%{
                claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
+               recipient_id: if(opts[:recipient], do: opts[:recipient].id),
                bounty_id: opts[:bounty_id],
                claim_id: nil,
                amount: amount,
@@ -755,6 +786,7 @@ defmodule Algora.Bounties do
              create_transaction_pairs(%{
                claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
+               recipient_id: if(opts[:recipient], do: opts[:recipient].id),
                bounty_id: opts[:bounty_id],
                claim_id: nil,
                amount: amount,

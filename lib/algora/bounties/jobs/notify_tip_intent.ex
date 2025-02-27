@@ -4,35 +4,19 @@ defmodule Algora.Bounties.Jobs.NotifyTipIntent do
 
   alias Algora.Github
 
-  require Logger
-
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"url" => url, "ticket_ref" => ticket_ref, "installation_id" => nil}}) do
-    body = get_body(url)
-
-    if Github.pat_enabled() do
-      Github.create_issue_comment(
-        Github.pat(),
-        ticket_ref["owner"],
-        ticket_ref["repo"],
-        ticket_ref["number"],
-        body
-      )
-    else
-      Logger.info("""
-      Github.create_issue_comment(Github.pat(), "#{ticket_ref["owner"]}", "#{ticket_ref["repo"]}", #{ticket_ref["number"]},
-             \"\"\"
-             #{body}
-             \"\"\")
-      """)
-    end
+  def perform(%Oban.Job{args: %{"body" => body, "ticket_ref" => ticket_ref, "installation_id" => nil}}) do
+    Github.try_without_installation(&Github.create_issue_comment/5, [
+      ticket_ref["owner"],
+      ticket_ref["repo"],
+      ticket_ref["number"],
+      body
+    ])
   end
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"url" => url, "ticket_ref" => ticket_ref, "installation_id" => installation_id}}) do
+  def perform(%Oban.Job{args: %{"body" => body, "ticket_ref" => ticket_ref, "installation_id" => installation_id}}) do
     with {:ok, token} <- Github.get_installation_token(installation_id) do
-      body = get_body(url)
-
       Github.create_issue_comment(
         token,
         ticket_ref["owner"],
@@ -42,6 +26,4 @@ defmodule Algora.Bounties.Jobs.NotifyTipIntent do
       )
     end
   end
-
-  defp get_body(url), do: "Please visit [Algora](#{url}) to complete your tip via Stripe."
 end

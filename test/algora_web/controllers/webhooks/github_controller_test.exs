@@ -12,6 +12,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs.NotifyBounty
   alias Algora.Bounties.Jobs.NotifyTipIntent
+  alias Algora.Bounties.Tip
   alias Algora.Github.Webhook
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -270,6 +271,178 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
 
       assert job.args["body"] =~ "Please specify an amount to tip (e.g. `/tip $100 @jsmith`)"
+    end
+
+    test "handles autopay", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      tip = Repo.one!(Tip)
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, Money.new(:USD, 100))
+      assert charge.status == :initialized
+      assert charge.user_id == ctx[:org].id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, Money.new(:USD, 100))
+      assert debit.status == :initialized
+      assert debit.user_id == ctx[:org].id
+      assert debit.tip_id == tip.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, Money.new(:USD, 100))
+      assert credit.status == :initialized
+      assert credit.user_id == ctx[:unauthorized_user].id
+      assert credit.tip_id == tip.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
+    end
+
+    test "does not autopay when payment method is not default", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: false, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert Repo.aggregate(Transaction, :count) == 0
+      assert_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "respects cooldown period for autopay tips to same recipient", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      # Create first tip
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # First tip should be autopaid
+      # charge, debit, credit
+      assert Repo.aggregate(Transaction, :count) == 3
+
+      # Try to create second tip within cooldown period
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $50 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # Second tip should not be autopaid, transaction count should remain same
+      assert Repo.aggregate(Transaction, :count) == 3
+      assert_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "allows autopay after cooldown period expires", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      # Create first tip
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # First tip should be autopaid
+      # charge, debit, credit
+      assert Repo.aggregate(Transaction, :count) == 3
+
+      # Simulate passage of time beyond cooldown period
+      first_tip = Repo.one!(Tip)
+
+      Repo.update!(
+        Ecto.Changeset.change(first_tip,
+          inserted_at: DateTime.add(first_tip.inserted_at, -(:timer.hours(1) + 1), :millisecond)
+        )
+      )
+
+      # Create second tip after cooldown
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $50 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # Second tip should be autopaid, transaction count should increase
+      # 2 sets of charge, debit, credit
+      assert Repo.aggregate(Transaction, :count) == 6
+      refute_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "cooldown applies per recipient", ctx do
+      issue_number = :rand.uniform(1000)
+      other_user = insert!(:user)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      # Create tip for first recipient
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # First tip should be autopaid
+      assert Repo.aggregate(Transaction, :count) == 3
+
+      # Create tip for different recipient within cooldown period
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $50 @#{other_user.provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # Second tip should be autopaid since it's for a different recipient
+      assert Repo.aggregate(Transaction, :count) == 6
+      refute_enqueued(worker: NotifyTipIntent)
     end
   end
 
@@ -879,7 +1052,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       event: event,
       event_action: "#{event}.#{action}",
       hook_id: "123456789",
-      delivery: "00000000-0000-0000-0000-000000000000",
+      delivery: Ecto.UUID.generate(),
       signature: "sha1=0000000000000000000000000000000000000000",
       signature_256: "sha256=0000000000000000000000000000000000000000000000000000000000000000",
       user_agent: "GitHub-Hookshot/0000000",

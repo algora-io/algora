@@ -503,8 +503,8 @@ defmodule Algora.Bounties do
 
   @spec create_tip_intent(
           %{
-            recipient: String.t(),
-            amount: Money.t(),
+            recipient: String.t() | nil,
+            amount: Money.t() | nil,
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
           },
           opts :: [installation_id: integer()]
@@ -514,19 +514,31 @@ defmodule Algora.Bounties do
         %{recipient: recipient, amount: amount, ticket_ref: %{owner: owner, repo: repo, number: number}},
         opts \\ []
       ) do
-    query =
-      URI.encode_query(
-        amount: Money.to_decimal(amount),
-        recipient: recipient,
-        owner: owner,
-        repo: repo,
-        number: number
-      )
+    body =
+      cond do
+        recipient == nil ->
+          "Please specify a recipient to tip (e.g. `/tip $#{Money.to_decimal(amount)} @jsmith`)"
 
-    url = AlgoraWeb.Endpoint.url() <> "/tip" <> "?" <> query
+        amount == nil ->
+          "Please specify an amount to tip (e.g. `/tip $100 @#{recipient}`)"
+
+        true ->
+          query =
+            URI.encode_query(
+              amount: Money.to_decimal(amount),
+              recipient: recipient,
+              owner: owner,
+              repo: repo,
+              number: number
+            )
+
+          url = AlgoraWeb.Endpoint.url() <> "/tip" <> "?" <> query
+
+          "Please visit [Algora](#{url}) to complete your tip via Stripe."
+      end
 
     %{
-      url: url,
+      body: body,
       ticket_ref: %{owner: owner, repo: repo, number: number},
       installation_id: opts[:installation_id]
     }

@@ -20,6 +20,7 @@ defmodule Algora.Bounties do
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
+  alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 
   require Logger
@@ -523,13 +524,20 @@ defmodule Algora.Bounties do
           "Please specify an amount to tip (e.g. `/tip $100 @#{recipient}`)"
 
         true ->
+          installation =
+            case opts[:installation_id] do
+              nil -> nil
+              installation_id -> Repo.get_by(Installation, provider: "github", provider_id: to_string(installation_id))
+            end
+
           query =
             URI.encode_query(
               amount: Money.to_decimal(amount),
               recipient: recipient,
               owner: owner,
               repo: repo,
-              number: number
+              number: number,
+              org_id: if(installation, do: installation.connected_user_id)
             )
 
           url = AlgoraWeb.Endpoint.url() <> "/tip" <> "?" <> query

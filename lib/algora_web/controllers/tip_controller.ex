@@ -2,22 +2,31 @@ defmodule AlgoraWeb.TipController do
   use AlgoraWeb, :controller
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
+  alias Algora.Repo
   alias Algora.Workspace
   alias AlgoraWeb.UserAuth
 
   def create(conn, %{"amount" => amount, "recipient" => recipient} = params) do
     ticket_ref = extract_ticket_ref(params)
 
+    owner_res =
+      case params["org_id"] do
+        nil -> get_current_user(conn)
+        org_id -> Repo.fetch(User, org_id)
+      end
+
     with {:ok, current_user} <- get_current_user(conn),
          %Money{} = amount <- Money.new(:USD, amount),
          {:ok, token} <- Accounts.get_access_token(current_user),
          {:ok, recipient_user} <- Workspace.ensure_user(token, recipient),
+         {:ok, owner} <- owner_res,
          {:ok, checkout_url} <-
            Bounties.create_tip(
              %{
                creator: current_user,
-               owner: current_user,
+               owner: owner,
                recipient: recipient_user,
                amount: amount
              },

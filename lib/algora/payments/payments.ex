@@ -28,20 +28,24 @@ defmodule Algora.Payments do
   end
 
   @spec create_stripe_session(
+          user :: User.t(),
           line_items :: [PSP.Session.line_item_data()],
           payment_intent_data :: PSP.Session.payment_intent_data()
         ) ::
           {:ok, PSP.session()} | {:error, PSP.error()}
-  def create_stripe_session(line_items, payment_intent_data) do
-    PSP.Session.create(%{
-      mode: "payment",
-      billing_address_collection: "required",
-      line_items: line_items,
-      invoice_creation: %{enabled: true},
-      success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
-      cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
-      payment_intent_data: payment_intent_data
-    })
+  def create_stripe_session(user, line_items, payment_intent_data) do
+    with {:ok, customer} <- fetch_or_create_customer(user) do
+      PSP.Session.create(%{
+        mode: "payment",
+        customer: customer.provider_id,
+        billing_address_collection: "required",
+        line_items: line_items,
+        invoice_creation: %{enabled: true},
+        success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
+        cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
+        payment_intent_data: payment_intent_data
+      })
+    end
   end
 
   def get_transaction_fee_pct, do: Decimal.new("0.04")

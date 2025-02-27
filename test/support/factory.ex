@@ -252,7 +252,14 @@ defmodule Algora.Factory do
   end
 
   # Convenience API
-  def insert!(factory_name, attributes \\ []) do
+  def insert!(factory_name, attributes \\ [])
+
+  def insert!(factory_name, attributes) when factory_name in [:user, :organization] do
+    user = insert(:user, attributes)
+    %{user | name: user.display_name || user.handle}
+  end
+
+  def insert!(factory_name, attributes) do
     insert(factory_name, attributes)
   end
 

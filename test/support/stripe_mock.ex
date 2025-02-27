@@ -82,4 +82,11 @@ defmodule Algora.Support.StripeMock do
        }}
     end
   end
+
+  defmodule Customer do
+    @moduledoc false
+    def create(_params) do
+      {:ok, %Stripe.Customer{id: "cus_#{Algora.Util.random_int()}"}}
+    end
+  end
 end

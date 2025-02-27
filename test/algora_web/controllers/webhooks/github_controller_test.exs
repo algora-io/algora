@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs.NotifyBounty
+  alias Algora.Bounties.Jobs.NotifyTipIntent
   alias Algora.Github.Webhook
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -159,6 +160,116 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       ])
 
       assert Money.equal?(Repo.one(Bounty).amount, ~M[300]usd)
+    end
+  end
+
+  describe "create tips" do
+    test "rejects tip command when user is unauthorized", ctx do
+      scenario = [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :unauthorized,
+          body: "/tip $100 @jsmith"
+        }
+      ]
+
+      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
+      assert {:error, :unauthorized} = result
+
+      assert [] = all_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "generates tip payment link when amount and recipient are provided in correct order", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100 @jsmith",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}) to complete your tip via Stripe."
+    end
+
+    test "generates tip payment link when recipient and amount are provided in reverse order", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip @jsmith $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}) to complete your tip via Stripe."
+    end
+
+    test "generates tip payment link when amount is provided and recipient is inferred from issue", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100",
+          params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => "jsmith"}}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}) to complete your tip via Stripe."
+    end
+
+    test "prompts for recipient when attempting to tip issue author who is the tipper", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip $100",
+          params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => ctx[:admin].provider_login}}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~ "Please specify a recipient to tip (e.g. `/tip $100 @jsmith`)"
+    end
+
+    test "prompts for amount when only recipient is provided", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/tip @jsmith",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~ "Please specify an amount to tip (e.g. `/tip $100 @jsmith`)"
     end
   end
 

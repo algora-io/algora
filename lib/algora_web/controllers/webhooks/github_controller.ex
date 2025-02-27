@@ -299,27 +299,23 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:tip, args})
        when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
-    recipient = args[:recipient]
-
-    # TODO: handle missing amount
-    # TODO: handle missing recipient
-    # TODO: handle tip to self
     # TODO: handle autopay with cooldown
-    # TODO: community tips?
     case get_permissions(webhook) do
       {:ok, "admin"} ->
-        Bounties.create_tip_intent(
-          %{
-            recipient: recipient,
-            amount: amount,
-            ticket_ref: %{
-              owner: payload["repository"]["owner"]["login"],
-              repo: payload["repository"]["name"],
-              number: payload["issue"]["number"]
-            }
-          },
-          installation_id: payload["installation"]["id"]
-        )
+        with {:ok, recipient} <- get_tip_recipient(webhook, {:tip, args}) do
+          Bounties.create_tip_intent(
+            %{
+              recipient: recipient,
+              amount: amount,
+              ticket_ref: %{
+                owner: payload["repository"]["owner"]["login"],
+                repo: payload["repository"]["name"],
+                number: payload["issue"]["number"]
+              }
+            },
+            installation_id: payload["installation"]["id"]
+          )
+        end
 
       {:ok, _permission} ->
         {:error, :unauthorized}
@@ -451,5 +447,31 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           {:halt, error}
       end
     end)
+  end
+
+  defp get_tip_recipient(%Webhook{payload: payload, author: author}, {:tip, args}) do
+    res =
+      case args[:recipient] do
+        nil ->
+          with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
+               {:ok, user} <- Workspace.ensure_user(token, payload["issue"]["user"]["login"]) do
+            {:ok, user.provider_login}
+          end
+
+        recipient ->
+          {:ok, recipient}
+      end
+
+    case res do
+      {:ok, recipient} ->
+        {:ok, ensure_valid_recipient(recipient, author)}
+
+      error ->
+        error
+    end
+  end
+
+  defp ensure_valid_recipient(recipient, author) do
+    if recipient == author["login"], do: nil, else: recipient
   end
 end

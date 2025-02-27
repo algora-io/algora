@@ -736,9 +736,7 @@ defmodule Algora.Bounties do
                group_id: tx_group_id
              }),
            {:ok, session} <-
-             line_items
-             |> Enum.map(&LineItem.to_stripe/1)
-             |> Payments.create_stripe_session(%{
+             Payments.create_stripe_session(owner, Enum.map(line_items, &LineItem.to_stripe/1), %{
                description: description,
                metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
              }) do

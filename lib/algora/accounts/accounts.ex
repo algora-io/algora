@@ -389,15 +389,17 @@ defmodule Algora.Accounts do
         limit: 1
       )
 
-    cond do
-      last_debit = Repo.one(last_debit_query) ->
-        last_debit.user.handle
+    last_sponsored_on_behalf_of =
+      cond do
+        last_debit = Repo.one(last_debit_query) -> last_debit.user
+        last_bounty = Repo.one(last_bounty_query) -> last_bounty.owner
+        true -> nil
+      end
 
-      last_bounty = Repo.one(last_bounty_query) ->
-        last_bounty.owner.handle
-
-      true ->
-        default_context()
+    case last_sponsored_on_behalf_of do
+      nil -> default_context()
+      %{type: :individual} -> default_context()
+      user -> user.handle
     end
   end
 

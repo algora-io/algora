@@ -1,5 +1,6 @@
 defmodule Algora.Workspace do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts.User
@@ -92,10 +93,33 @@ defmodule Algora.Workspace do
 
   def create_repository_from_github(token, owner, repo) do
     with {:ok, repository} <- Github.get_repository(token, owner, repo),
-         {:ok, user} <- ensure_user(token, owner) do
-      repository
-      |> Repository.github_changeset(user)
-      |> Repo.insert()
+         {:ok, user} <- ensure_user_by_repo(token, repository, owner),
+         {:ok, user} <- sync_user(user, repository, owner, repo),
+         {:ok, repo} <- repository |> Repository.github_changeset(user) |> Repo.insert() do
+      {:ok, repo}
+    else
+      {:error,
+       %Ecto.Changeset{
+         errors: [provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}]
+       } = changeset} ->
+        Repo.fetch_by(Repository, provider: "github", provider_id: changeset.changes.provider_id)
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
+
+  def ensure_user_by_repo(token, repository, owner) do
+    case Repo.get_by(User, provider: "github", provider_id: to_string(repository["owner"]["id"])) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        if repository["owner"]["login"] != owner do
+          Logger.warning("might need to rename #{owner} -> #{repository["owner"]["login"]}")
+        end
+
+        ensure_user(token, repository["owner"]["login"])
     end
   end
 
@@ -103,6 +127,39 @@ defmodule Algora.Workspace do
     case Repo.get_by(User, provider: "github", provider_login: owner) do
       %User{} = user -> {:ok, user}
       nil -> create_user_from_github(token, owner)
+    end
+  end
+
+  def sync_user(user, repository, owner, repo) do
+    github_user = repository["owner"]
+
+    if github_user["login"] == user.provider_login and not is_nil(user.provider_id) do
+      {:ok, user}
+    else
+      if github_user["login"] != user.provider_login do
+        Logger.warning(
+          "renaming #{user.provider_login} -> #{github_user["login"]} (reason: #{owner}/#{repo} moved to #{repository["full_name"]})"
+        )
+      end
+
+      res =
+        user
+        |> change(%{
+          provider_id: to_string(github_user["id"]),
+          provider_login: github_user["login"],
+          provider_meta: Util.normalize_struct(github_user)
+        })
+        |> unique_constraint([:provider, :provider_id])
+        |> Repo.update()
+
+      case res do
+        {:ok, user} ->
+          {:ok, user}
+
+        error ->
+          Logger.error("#{owner}/#{repo} | failed to remap #{user.provider_login} -> #{github_user["login"]}")
+          error
+      end
     end
   end
 

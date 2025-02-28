@@ -34,6 +34,7 @@
     - creator_id: 1
     - inserted_at: 1
     - updated_at: 1
+    - autopay_disabled: 1
 - chat_participants:
     - id: -1
     - last_read_at: -1

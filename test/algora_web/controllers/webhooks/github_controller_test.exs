@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
+  import Ecto.Changeset
   import Ecto.Query
   import ExUnit.CaptureLog
   import Money.Sigil
@@ -815,6 +816,46 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           body: "/claim #{issue_number}",
           params: %{"pull_request" => %{"number" => pr_number}}
         },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      bounty = Repo.one!(Bounty)
+      claim = Repo.one!(Claim)
+      assert claim.target_id == bounty.ticket_id
+      assert claim.status == :approved
+      assert Repo.aggregate(Transaction, :count) == 0
+    end
+
+    test "does not autopay when autopay is disabled", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        }
+      ])
+
+      Bounty |> Repo.one!() |> change(%{autopay_disabled: true}) |> Repo.update!()
+
+      process_scenario!(ctx, [
         %{
           event_action: "pull_request.closed",
           user_type: :unauthorized,

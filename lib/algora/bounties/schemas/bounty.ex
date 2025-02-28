@@ -9,6 +9,7 @@ defmodule Algora.Bounties.Bounty do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
     field :number, :integer, default: 0
+    field :autopay_disabled, :boolean, default: false
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User

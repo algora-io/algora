@@ -3,6 +3,8 @@ defmodule Algora.Admin do
   import Ecto.Query
 
   alias Algora.Accounts.User
+  alias Algora.Bounties.Claim
+  alias Algora.Parser
   alias Algora.Payments
   alias Algora.Repo
   alias Algora.Workspace
@@ -54,12 +56,50 @@ defmodule Algora.Admin do
     :ok
   end
 
+  def backfill_claims! do
+    query =
+      from(t in Claim,
+        where: not is_nil(t.url),
+        distinct: t.url,
+        select: t.url
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_claim/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Claim backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
   def backfill_repo(url) do
     with %URI{host: "api.github.com", path: "/repos/" <> path} <- URI.parse(url),
          [owner, repo] <- String.split(path, "/", trim: true),
          {:ok, repo} <- Workspace.ensure_repository(token!(), owner, repo),
          :ok <- update_tickets(url, repo.id) do
       {:ok, repo}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill repo #{url}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_claim(url) do
+    with {:ok, [ticket_ref: [owner: owner, repo: repo, type: _type, number: number]], _, _, _, _} <-
+           Parser.full_ticket_ref(url),
+         {:ok, ticket} <- Workspace.ensure_ticket(token!(), owner, repo, number),
+         :ok <- update_claims(url, ticket.id) do
+      {:ok, ticket}
     else
       {:error, "404 Not Found"} = error ->
         error
@@ -90,6 +130,12 @@ defmodule Algora.Admin do
     Repo.update_all(from(t in Ticket, where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)),
       set: [repository_id: repo_id]
     )
+
+    :ok
+  end
+
+  defp update_claims(url, source_id) do
+    Repo.update_all(from(t in Claim, where: t.url == ^url), set: [source_id: source_id])
 
     :ok
   end

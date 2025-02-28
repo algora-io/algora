@@ -427,7 +427,6 @@ defmodule DatabaseMigration do
     bounty = find_by_index(db, "Bounty", "id", row["bounty_id"])
     task = find_by_index(db, "Task", "id", bounty["task_id"])
     github_user = find_by_index(db, "GithubUser", "id", row["github_user_id"])
-    github_pull_request = find_by_index(db, "GithubPullRequest", "id", row["github_pull_request_id"])
 
     user_id = or_else(github_user["user_id"], github_user["id"])
 
@@ -455,7 +454,7 @@ defmodule DatabaseMigration do
       "url" => or_else(row["github_url"], "https://algora.io"),
       "group_id" => row["id"],
       "group_share" => nil,
-      "source_id" => github_pull_request["task_id"],
+      "source_id" => nil,
       "target_id" => task["id"],
       "user_id" => user_id,
       "inserted_at" => row["created_at"],
@@ -1354,6 +1353,7 @@ defmodule DatabaseMigration do
           :ok = time_step("Clearing tables", fn -> clear_tables!() end)
           {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_file]) end)
           :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
+          :ok = time_step("Backfilling claims", fn -> Algora.Admin.backfill_claims!() end)
         end)
 
       IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")

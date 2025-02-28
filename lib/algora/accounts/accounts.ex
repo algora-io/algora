@@ -397,9 +397,8 @@ defmodule Algora.Accounts do
       end
 
     case last_sponsored_on_behalf_of do
-      nil -> default_context()
-      %{type: :individual} -> default_context()
-      user -> user.handle
+      %{type: :organization} -> last_sponsored_on_behalf_of.handle
+      _ -> default_context()
     end
   end
 

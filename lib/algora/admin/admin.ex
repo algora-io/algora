@@ -61,6 +61,9 @@ defmodule Algora.Admin do
          :ok <- update_tickets(url, repo.id) do
       {:ok, repo}
     else
+      {:error, "404 Not Found"} = error ->
+        error
+
       error ->
         Logger.error("Failed to backfill repo #{url}: #{inspect(error)}")
         {:error, error}

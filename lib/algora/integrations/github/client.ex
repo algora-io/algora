@@ -8,19 +8,12 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
+  defp migration?, do: System.get_env("MIGRATION", "false") == "true"
+
   def http(host, method, path, headers, body) do
     # TODO: remove after migration
-    if System.get_env("MIGRATION", "false") == "true" do
-      cache_path = ".local/github/#{path}.json"
-
-      with :error <- read_from_cache(cache_path),
-           {:ok, response_body} <- do_http_request(host, method, path, headers, body) do
-        write_to_cache(cache_path, response_body)
-        {:ok, response_body}
-      else
-        {:ok, cached_data} -> {:ok, cached_data}
-        {:error, reason} -> {:error, reason}
-      end
+    if migration?() do
+      run_cached(path, fn -> do_http_request(host, method, path, headers, body) end)
     else
       do_http_request(host, method, path, headers, body)
     end
@@ -63,20 +56,47 @@ defmodule Algora.Github.Client do
 
   defp maybe_handle_error(body), do: {:ok, body}
 
-  defp read_from_cache(cache_path) do
-    if File.exists?(cache_path) do
-      case File.read(cache_path) do
-        {:ok, content} -> Jason.decode(content)
-        {:error, _} -> :error
-      end
-    else
-      :error
+  defp run_cached(path, fun) do
+    case read_from_cache(path) do
+      :not_found ->
+        Logger.warning("❌ Cache miss for #{path}")
+        write_to_cache!(fun.(), path)
+
+      res ->
+        res
     end
   end
 
-  defp write_to_cache(cache_path, data) do
+  defp get_cache_path(path), do: ".local/github/#{path}.bin"
+
+  defp maybe_retry({:ok, %{"message" => "Moved Permanently"}}), do: :not_found
+  defp maybe_retry({:ok, data}), do: {:ok, data}
+  defp maybe_retry({:error, "404 Not Found"}), do: {:error, "404 Not Found"}
+  defp maybe_retry(_error), do: :not_found
+
+  def read_from_cache(path) do
+    cache_path = get_cache_path(path)
+
+    if File.exists?(cache_path) do
+      case File.read(cache_path) do
+        {:ok, content} ->
+          content
+          |> :erlang.binary_to_term()
+          |> maybe_retry()
+
+        {:error, _} ->
+          :not_found
+      end
+    else
+      :not_found
+    end
+  end
+
+  defp write_to_cache!(data, path) do
+    cache_path = get_cache_path(path)
     File.mkdir_p!(Path.dirname(cache_path))
-    File.write!(cache_path, Jason.encode!(data))
+    File.write!(cache_path, :erlang.term_to_binary(data))
+    data
   end
 
   def fetch(access_token, url, method \\ "GET", body \\ nil)

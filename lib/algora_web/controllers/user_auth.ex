@@ -190,11 +190,11 @@ defmodule AlgoraWeb.UserAuth do
   def signed_in_path_from_context(org_handle), do: ~p"/org/#{org_handle}"
 
   def signed_in_path(%User{} = user) do
-    signed_in_path_from_context(User.last_context(user))
+    signed_in_path_from_context(Accounts.last_context(user))
   end
 
   def signed_in_path(conn) do
-    signed_in_path_from_context(get_session(conn, :last_context) || User.default_context())
+    signed_in_path_from_context(get_session(conn, :last_context) || Accounts.default_context())
   end
 
   defp login_code_ttl, do: 3600

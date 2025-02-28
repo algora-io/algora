@@ -32,9 +32,25 @@ defmodule Algora.Github.Client do
 
     with {:ok, encoded_body} <- Jason.encode(body),
          request = Finch.build(method, url, headers, encoded_body),
-         {:ok, %Finch.Response{body: body}} <- Finch.request(request, Algora.Finch),
+         {:ok, %Finch.Response{body: body}} <- request_with_follow_redirects(request),
          {:ok, decoded_body} <- Jason.decode(body) do
       maybe_handle_error(decoded_body)
+    end
+  end
+
+  defp request_with_follow_redirects(request) do
+    case Finch.request(request, Algora.Finch) do
+      {:ok, %Finch.Response{status: status, headers: headers}} when status in [301, 302, 307] ->
+        case List.keyfind(headers, "location", 0) do
+          {"location", location} ->
+            request_with_follow_redirects(Finch.build(request.method, location, request.headers, request.body))
+
+          nil ->
+            {:error, "Redirect response missing location header"}
+        end
+
+      res ->
+        res
     end
   end
 

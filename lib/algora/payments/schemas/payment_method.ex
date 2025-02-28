@@ -23,7 +23,6 @@ defmodule Algora.Payments.PaymentMethod do
     |> cast(attrs, [:provider, :provider_id, :provider_meta, :provider_customer_id, :is_default, :customer_id])
     |> generate_id()
     |> validate_required([:provider, :provider_id, :provider_meta, :provider_customer_id, :is_default, :customer_id])
-    |> unique_constraint([:provider, :provider_id])
     |> foreign_key_constraint(:customer_id)
   end
 end

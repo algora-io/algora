@@ -196,6 +196,13 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def list_installation_repos(access_token) do
+    with {:ok, %{"repositories" => repos}} <- fetch(access_token, "/installation/repositories", "GET") do
+      {:ok, repos}
+    end
+  end
+
+  @impl true
   def create_issue_comment(access_token, owner, repo, number, body) do
     fetch(
       access_token,

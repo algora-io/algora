@@ -63,9 +63,12 @@ defmodule Algora.Workspace do
         nil -> create_repository_from_github(token, owner, repo)
       end
 
-    case res do
-      {:ok, repository} -> maybe_schedule_og_image_update(repository)
-      error -> error
+    # TODO: remove after migration
+    if System.get_env("MIGRATION", "false") != "true" do
+      case res do
+        {:ok, repository} -> maybe_schedule_og_image_update(repository)
+        error -> error
+      end
     end
 
     res

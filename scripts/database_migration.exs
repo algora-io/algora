@@ -73,6 +73,8 @@ defmodule DatabaseMigration do
     {"Reward", ["bounty_id"]}
   ]
 
+  @test_org_id "cljo6j981000el60f1k1cvtns"
+
   defp relevant_tables do
     @schema_mappings
     |> Enum.map(fn {k, _v} -> k end)
@@ -699,7 +701,7 @@ defmodule DatabaseMigration do
       raise "Owner not found: #{inspect(row)}"
     end
 
-    if owner["id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
+    if owner["id"] != @test_org_id do
       %{
         "id" => row["id"],
         "provider" => "stripe",
@@ -726,7 +728,7 @@ defmodule DatabaseMigration do
       raise "StripeCustomer not found: #{inspect(row)}"
     end
 
-    if owner["id"] not in ["clfqtao4h0001mo0gkp9az0bn", "cm251pvg40007ld031q5t2hj2", "cljo6j981000el60f1k1cvtns"] do
+    if owner["id"] != @test_org_id do
       %{
         "id" => row["id"],
         "provider" => "stripe",

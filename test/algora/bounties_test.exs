@@ -232,7 +232,7 @@ defmodule Algora.BountiesTest do
       creator = insert!(:user)
       owner = insert!(:organization)
       recipient = insert!(:user)
-      installation = insert!(:installation, owner: creator, connected_user: owner)
+      _installation = insert!(:installation, owner: creator, connected_user: owner)
       _identity = insert!(:identity, user: creator, provider_email: creator.email)
       repo = insert!(:repository, %{user: owner})
       ticket = insert!(:ticket, %{repository: repo})

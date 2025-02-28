@@ -104,6 +104,9 @@ defmodule Algora.Admin do
       {:error, "404 Not Found"} = error ->
         error
 
+      {:error, %Postgrex.Error{postgres: %{constraint: "claims_user_id_source_id_target_id_index"}}} = error ->
+        error
+
       error ->
         Logger.error("Failed to backfill claim #{url}: #{inspect(error)}")
         {:error, error}

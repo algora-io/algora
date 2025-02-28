@@ -80,7 +80,7 @@
     - number: 1
     - deleted: 0
     - reward_type: 0
-    - autopay_disabled: 0
+    - autopay_disabled: 1
     - manual_assignments: 0
     - timeouts_disabled: 0
     - experts_only: 0

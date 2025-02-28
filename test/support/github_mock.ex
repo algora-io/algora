@@ -92,6 +92,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def list_installation_repos(_access_token) do
+    {:ok, []}
+  end
+
+  @impl true
   def create_issue_comment(_access_token, _owner, _repo, _number, _body) do
     {:ok, %{"id" => random_id()}}
   end

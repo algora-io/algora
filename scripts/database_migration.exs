@@ -376,7 +376,8 @@ defmodule DatabaseMigration do
         "creator_id" => row["poster_id"],
         "inserted_at" => row["created_at"],
         "updated_at" => row["updated_at"],
-        "number" => row["number"]
+        "number" => row["number"],
+        "autopay_disabled" => row["autopay_disabled"]
       }
     end
   end

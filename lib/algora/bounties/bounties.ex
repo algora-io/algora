@@ -560,6 +560,33 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
+    Repo.transact(fn ->
+      with {:ok, tip} <-
+             do_create_tip(
+               %{
+                 creator: creator,
+                 owner: owner,
+                 recipient: recipient,
+                 amount: amount
+               },
+               opts
+             ) do
+        create_payment_session(
+          %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
+          ticket_ref: opts[:ticket_ref],
+          tip_id: tip.id,
+          recipient: recipient
+        )
+      end
+    end)
+  end
+
+  @spec do_create_tip(
+          %{creator: User.t(), owner: User.t(), recipient: User.t(), amount: Money.t()},
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, installation_id: integer()]
+        ) ::
+          {:ok, Tip.t()} | {:error, atom()}
+  def do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
     installation_id = opts[:installation_id]
 
     token_res =
@@ -578,29 +605,20 @@ defmodule Algora.Bounties do
         {:ok, nil}
       end
 
-    Repo.transact(fn ->
-      with {:ok, ticket} <- ticket_res,
-           {:ok, tip} <-
-             %Tip{}
-             |> Tip.changeset(%{
-               amount: amount,
-               owner_id: owner.id,
-               creator_id: creator.id,
-               recipient_id: recipient.id,
-               ticket_id: if(ticket, do: ticket.id)
-             })
-             |> Repo.insert_with_activity(%{
-               type: :tip_awarded,
-               notify_users: [recipient.id]
-             }) do
-        create_payment_session(
-          %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
-          ticket_ref: ticket_ref,
-          tip_id: tip.id,
-          recipient: recipient
-        )
-      end
-    end)
+    with {:ok, ticket} <- ticket_res do
+      %Tip{}
+      |> Tip.changeset(%{
+        amount: amount,
+        owner_id: owner.id,
+        creator_id: creator.id,
+        recipient_id: recipient.id,
+        ticket_id: if(ticket, do: ticket.id)
+      })
+      |> Repo.insert_with_activity(%{
+        type: :tip_awarded,
+        notify_users: [recipient.id]
+      })
+    end
   end
 
   @spec reward_bounty(

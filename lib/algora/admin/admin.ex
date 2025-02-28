@@ -59,7 +59,7 @@ defmodule Algora.Admin do
   def backfill_claims! do
     query =
       from(t in Claim,
-        where: not is_nil(t.url),
+        where: fragment("? ilike ?", t.url, "%//github.com/%"),
         distinct: t.url,
         select: t.url
       )
@@ -105,7 +105,7 @@ defmodule Algora.Admin do
         error
 
       error ->
-        Logger.error("Failed to backfill repo #{url}: #{inspect(error)}")
+        Logger.error("Failed to backfill claim #{url}: #{inspect(error)}")
         {:error, error}
     end
   end
@@ -132,11 +132,15 @@ defmodule Algora.Admin do
     )
 
     :ok
+  rescue
+    error -> {:error, error}
   end
 
   defp update_claims(url, source_id) do
     Repo.update_all(from(t in Claim, where: t.url == ^url), set: [source_id: source_id])
 
     :ok
+  rescue
+    error -> {:error, error}
   end
 end

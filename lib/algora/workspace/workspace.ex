@@ -114,6 +114,15 @@ defmodule Algora.Workspace do
     end
   end
 
+  def list_installation_repos_by(clauses) do
+    with {:ok, user} <- Repo.fetch_by(User, clauses),
+         {:ok, installation} <- Repo.fetch_by(Installation, connected_user_id: user.id),
+         {:ok, token} <- Github.get_installation_token(installation.provider_id),
+         {:ok, repos} <- Github.list_installation_repos(token) do
+      Enum.map(repos, & &1["full_name"])
+    end
+  end
+
   def create_installation(user, provider_user, org, data) do
     %Installation{}
     |> Installation.github_changeset(user, provider_user, org, data)

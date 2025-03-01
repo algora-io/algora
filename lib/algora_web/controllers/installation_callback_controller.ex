@@ -2,7 +2,6 @@ defmodule AlgoraWeb.InstallationCallbackController do
   use AlgoraWeb, :controller
 
   alias Algora.Accounts
-  alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Organizations
   alias Algora.Workspace

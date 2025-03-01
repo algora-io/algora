@@ -82,11 +82,21 @@ defmodule AlgoraWeb.Router do
       # live "/org/:org_handle/projects/:id", Project.ViewLive
       live "/org/:org_handle/jobs", Org.JobsLive, :index
       live "/org/:org_handle/jobs/:id", Org.JobLive, :index
-      live "/org/:org_handle/transactions", Org.TransactionsLive, :index
       live "/org/:org_handle/chat", ChatLive, :index
-      live "/org/:org_handle/settings", Org.SettingsLive, :edit
       live "/org/:org_handle/team", Org.TeamLive, :index
       live "/org/:org_handle/leaderboard", Org.LeaderboardLive, :index
+    end
+
+    live_session :org_admin,
+      layout: {AlgoraWeb.Layouts, :org},
+      on_mount: [
+        {AlgoraWeb.UserAuth, :ensure_authenticated},
+        {AlgoraWeb.UserAuth, :current_user},
+        AlgoraWeb.Org.Nav,
+        {AlgoraWeb.OrgAuth, :ensure_admin}
+      ] do
+      live "/org/:org_handle/settings", Org.SettingsLive, :edit
+      live "/org/:org_handle/transactions", Org.TransactionsLive, :index
     end
 
     live_session :org2,

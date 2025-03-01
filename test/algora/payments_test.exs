@@ -127,20 +127,11 @@ defmodule Algora.PaymentsTest do
       assert transfer_tx.user_id == credit_tx.user_id
       assert transfer_tx.provider_id == transfer.id
 
-      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
-      assert {:error, :duplicate_transfer_attempt} = result
+      {:ok, transfer2} = Payments.execute_pending_transfer(credit_tx.id)
+      {:ok, transfer_tx2} = Repo.fetch_by(Transaction, type: :transfer, provider_id: transfer2.id)
 
-      transfer_tx |> change(status: :succeeded) |> Repo.update!()
-      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
-      assert {:error, :duplicate_transfer_attempt} = result
-
-      transfer_tx |> change(status: :initialized) |> Repo.update!()
-      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
-      assert {:error, :duplicate_transfer_attempt} = result
-
-      transfer_tx |> change(status: :processing) |> Repo.update!()
-      {result, _log} = with_log(fn -> Payments.execute_pending_transfer(credit_tx.id) end)
-      assert {:error, :duplicate_transfer_attempt} = result
+      assert transfer2.id == transfer.id
+      assert transfer_tx2.id == transfer_tx.id
     end
 
     test "allows retrying failed/canceled transfers", %{user: user, account: account} do
@@ -264,8 +255,7 @@ defmodule Algora.PaymentsTest do
           group_id: Nanoid.generate()
         )
 
-      {:ok, transfer_tx} = Payments.initialize_transfer(credit_tx)
-
+      {:ok, transfer_tx} = Payments.fetch_or_create_transfer(credit_tx)
       {:ok, transfer1} = Payments.execute_transfer(transfer_tx, account)
       {:ok, transfer_tx1} = Repo.fetch_by(Transaction, type: :transfer)
 
@@ -276,6 +266,7 @@ defmodule Algora.PaymentsTest do
       assert transfer_tx1.user_id == credit_tx.user_id
       assert transfer_tx1.provider_id == transfer1.id
 
+      {:ok, transfer_tx} = Payments.fetch_or_create_transfer(credit_tx)
       {:ok, transfer2} = Payments.execute_transfer(transfer_tx, account)
       {:ok, transfer_tx2} = Repo.fetch_by(Transaction, type: :transfer)
 

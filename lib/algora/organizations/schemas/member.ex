@@ -4,14 +4,18 @@ defmodule Algora.Organizations.Member do
 
   alias Algora.Accounts.User
 
+  @roles [:admin, :mod, :expert]
+
   typed_schema "members" do
-    field :role, Ecto.Enum, values: [:admin, :mod, :expert]
+    field :role, Ecto.Enum, values: @roles
 
     belongs_to :org, User
     belongs_to :user, User
 
     timestamps()
   end
+
+  def roles, do: @roles
 
   def changeset(member, params) do
     member

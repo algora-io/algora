@@ -290,4 +290,59 @@ defmodule Algora.PaymentsTest do
       assert transfer_tx1.id == transfer_tx2.id
     end
   end
+
+  describe "refresh_stripe_account/1" do
+    test "executes pending transfers", %{user: user} do
+      group_id0 = Nanoid.generate()
+      group_id1 = Nanoid.generate()
+      group_id2 = Nanoid.generate()
+
+      credit0 =
+        insert(:transaction,
+          user: user,
+          type: :credit,
+          status: :succeeded,
+          net_amount: Money.new(100, :USD),
+          group_id: group_id0
+        )
+
+      _transfer0 =
+        insert(:transaction,
+          user: user,
+          type: :transfer,
+          status: :succeeded,
+          net_amount: Money.new(100, :USD),
+          group_id: group_id0
+        )
+
+      credit1 =
+        insert(:transaction,
+          user: user,
+          type: :credit,
+          status: :succeeded,
+          net_amount: Money.new(100, :USD),
+          group_id: group_id1
+        )
+
+      credit2 =
+        insert(:transaction,
+          user: user,
+          type: :credit,
+          status: :succeeded,
+          net_amount: Money.new(100, :USD),
+          group_id: group_id2
+        )
+
+      assert {:ok, _account} = Payments.refresh_stripe_account(user)
+      jobs = all_enqueued()
+      assert length(jobs) == 2
+      refute_enqueued(worker: ExecutePendingTransfer, args: %{credit_id: credit0.id})
+      assert_enqueued(worker: ExecutePendingTransfer, args: %{credit_id: credit1.id})
+      assert_enqueued(worker: ExecutePendingTransfer, args: %{credit_id: credit2.id})
+
+      assert {:ok, _account} = Payments.refresh_stripe_account(user)
+      jobs = all_enqueued()
+      assert length(jobs) == 2
+    end
+  end
 end

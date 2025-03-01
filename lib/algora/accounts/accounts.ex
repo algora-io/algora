@@ -5,6 +5,8 @@ defmodule Algora.Accounts do
 
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Bounties.Bounty
+  alias Algora.Organizations
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
@@ -366,6 +368,43 @@ defmodule Algora.Accounts do
 
     {:ok, Repo.preload(user, :identities, force: true)}
   end
+
+  def last_context(%{last_context: nil} = user) do
+    orgs = Organizations.get_user_orgs(user)
+
+    last_debit_query =
+      from(t in Transaction,
+        join: u in assoc(t, :user),
+        where: t.type == :debit,
+        where: u.id in ^Enum.map(orgs, & &1.id),
+        order_by: [desc: t.succeeded_at],
+        limit: 1
+      )
+
+    last_bounty_query =
+      from(b in Bounty,
+        join: c in assoc(b, :creator),
+        where: c.id in ^Enum.map(orgs, & &1.id),
+        order_by: [desc: b.created_at],
+        limit: 1
+      )
+
+    last_sponsored_on_behalf_of =
+      cond do
+        last_debit = Repo.one(last_debit_query) -> last_debit.user
+        last_bounty = Repo.one(last_bounty_query) -> last_bounty.owner
+        true -> nil
+      end
+
+    case last_sponsored_on_behalf_of do
+      %{type: :organization} -> last_sponsored_on_behalf_of.handle
+      _ -> default_context()
+    end
+  end
+
+  def last_context(%{last_context: last_context}), do: last_context
+
+  def default_context, do: "personal"
 
   defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
 

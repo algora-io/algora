@@ -452,14 +452,14 @@ defmodule Algora.Accounts do
   # TODO: remove hardcoded techs
   def list_techs do
     tech_order = [
-      "Swift",
       "TypeScript",
       "Rust",
       "Scala",
-      "C++",
-      "Go",
       "Python",
+      "Go",
+      "C++",
       "Java",
+      "Swift",
       "PHP",
       "Elixir",
       "Haskell",

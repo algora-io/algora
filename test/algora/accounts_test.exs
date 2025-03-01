@@ -36,4 +36,30 @@ defmodule Algora.AccountsTest do
       assert_activity_names_for_user(org_1.id, [])
     end
   end
+
+  describe "set_context/2" do
+    test "can set context to personal" do
+      user = insert(:user, last_context: nil)
+
+      assert {:ok, user} = Accounts.set_context(user, "personal")
+      assert Accounts.last_context(user) == "personal"
+    end
+
+    test "can set context to member org" do
+      user = insert(:user, last_context: nil)
+      org = insert(:organization)
+      insert(:member, user: user, org: org)
+
+      assert {:ok, user} = Accounts.set_context(user, org.handle)
+      assert Accounts.last_context(user) == org.handle
+    end
+
+    test "cannot set context to non-member org" do
+      user = insert(:user, last_context: nil)
+      org = insert(:organization)
+
+      assert {:error, :unauthorized} = Accounts.set_context(user, org.handle)
+      assert Accounts.last_context(user) == "personal"
+    end
+  end
 end

@@ -197,7 +197,7 @@ defmodule DatabaseMigration do
       "linkedin_url" => nil,
       "og_title" => nil,
       "og_image_url" => nil,
-      "last_context" => row["handle"],
+      "last_context" => nil,
       "need_avatar" => nil,
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],

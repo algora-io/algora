@@ -160,8 +160,6 @@ defmodule Algora.Accounts.User do
       |> validate_email()
       |> unique_constraint(:email)
       |> unique_constraint(:handle)
-      # TODO: fetch tech stack from github
-      |> put_change(:tech_stack, ["Swift"])
       |> put_assoc(:identities, [identity_changeset])
     else
       %User{}

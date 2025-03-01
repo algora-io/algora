@@ -97,6 +97,10 @@ defmodule Algora.Organizations do
     )
   end
 
+  def fetch_member(org_id, user_id) do
+    Repo.fetch_by(Member, org_id: org_id, user_id: user_id)
+  end
+
   def list_org_contractors(org) do
     Repo.all(
       from u in User,

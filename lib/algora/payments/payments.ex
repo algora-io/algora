@@ -328,23 +328,21 @@ defmodule Algora.Payments do
           {:ok, PSP.transfer()} | {:error, :not_found} | {:error, :duplicate_transfer_attempt}
   def execute_pending_transfer(credit_id) do
     with {:ok, credit} <- Repo.fetch_by(Transaction, id: credit_id, type: :credit, status: :succeeded) do
-      transfers =
-        Repo.all(
-          from(t in Transaction,
-            where: t.user_id == ^credit.user_id,
-            where: t.group_id == ^credit.group_id,
-            where: t.type == :transfer,
-            where: t.status in [:initialized, :processing, :succeeded]
-          )
-        )
+      case fetch_active_account(credit.user_id) do
+        {:ok, account} ->
+          with {:ok, transaction} <- fetch_or_create_transfer(credit),
+               {:ok, transfer} <- execute_transfer(transaction, account) do
+            broadcast()
+            {:ok, transfer}
+          else
+            error ->
+              Logger.error("Failed to execute transfer: #{inspect(error)}")
+              error
+          end
 
-      amount_transferred = Enum.reduce(transfers, Money.zero(:USD), fn t, acc -> Money.add!(acc, t.net_amount) end)
-
-      if Money.positive?(amount_transferred) do
-        Logger.error("Duplicate transfer attempt at transaction #{credit_id}")
-        {:error, :duplicate_transfer_attempt}
-      else
-        initialize_and_execute_transfer(credit)
+        _ ->
+          Logger.error("Attempted to execute transfer to inactive account")
+          {:error, :no_active_account}
       end
     end
   end
@@ -395,51 +393,41 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec initialize_and_execute_transfer(credit :: Transaction.t()) :: {:ok, PSP.transfer()} | {:error, term()}
-  defp initialize_and_execute_transfer(%Transaction{} = credit) do
-    case fetch_active_account(credit.user_id) do
-      {:ok, account} ->
-        with {:ok, transaction} <- initialize_transfer(credit),
-             {:ok, transfer} <- execute_transfer(transaction, account) do
-          broadcast()
-          {:ok, transfer}
-        else
-          error ->
-            Logger.error("Failed to execute transfer: #{inspect(error)}")
-            error
-        end
+  def fetch_or_create_transfer(%Transaction{} = credit) do
+    idempotency_key = "credit_#{credit.id}"
 
-      _ ->
-        Logger.error("Attempted to execute transfer to inactive account")
-        {:error, :no_active_account}
+    case Repo.get_by(Transaction, idempotency_key: idempotency_key) do
+      nil ->
+        %Transaction{}
+        |> change(%{
+          id: Nanoid.generate(),
+          provider: "stripe",
+          type: :transfer,
+          status: :initialized,
+          tip_id: credit.tip_id,
+          bounty_id: credit.bounty_id,
+          contract_id: credit.contract_id,
+          claim_id: credit.claim_id,
+          user_id: credit.user_id,
+          gross_amount: credit.net_amount,
+          net_amount: credit.net_amount,
+          total_fee: Money.zero(:USD),
+          group_id: credit.group_id,
+          idempotency_key: idempotency_key
+        })
+        |> Algora.Validations.validate_positive(:gross_amount)
+        |> Algora.Validations.validate_positive(:net_amount)
+        |> unique_constraint(:idempotency_key)
+        |> foreign_key_constraint(:user_id)
+        |> foreign_key_constraint(:tip_id)
+        |> foreign_key_constraint(:bounty_id)
+        |> foreign_key_constraint(:contract_id)
+        |> foreign_key_constraint(:claim_id)
+        |> Repo.insert()
+
+      transfer ->
+        {:ok, transfer}
     end
-  end
-
-  def initialize_transfer(%Transaction{} = credit) do
-    %Transaction{}
-    |> change(%{
-      id: Nanoid.generate(),
-      provider: "stripe",
-      type: :transfer,
-      status: :initialized,
-      tip_id: credit.tip_id,
-      bounty_id: credit.bounty_id,
-      contract_id: credit.contract_id,
-      claim_id: credit.claim_id,
-      user_id: credit.user_id,
-      gross_amount: credit.net_amount,
-      net_amount: credit.net_amount,
-      total_fee: Money.zero(:USD),
-      group_id: credit.group_id
-    })
-    |> Algora.Validations.validate_positive(:gross_amount)
-    |> Algora.Validations.validate_positive(:net_amount)
-    |> foreign_key_constraint(:user_id)
-    |> foreign_key_constraint(:tip_id)
-    |> foreign_key_constraint(:bounty_id)
-    |> foreign_key_constraint(:contract_id)
-    |> foreign_key_constraint(:claim_id)
-    |> Repo.insert()
   end
 
   def execute_transfer(%Transaction{} = transaction, account) do
@@ -455,7 +443,7 @@ defmodule Algora.Payments do
       |> Map.merge(if transaction.group_id, do: %{transfer_group: transaction.group_id}, else: %{})
       |> Map.merge(if charge && charge.provider_id, do: %{source_transaction: charge.provider_id}, else: %{})
 
-    case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.id}) do
+    case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.idempotency_key}) do
       {:ok, transfer} ->
         transaction
         |> change(%{

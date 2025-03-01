@@ -7,6 +7,7 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
   alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
@@ -386,7 +387,7 @@ defmodule Algora.Accounts do
       from(b in Bounty,
         join: c in assoc(b, :creator),
         where: c.id in ^Enum.map(orgs, & &1.id),
-        order_by: [desc: b.created_at],
+        order_by: [desc: b.inserted_at],
         limit: 1,
         select_merge: %{creator: c}
       )
@@ -412,6 +413,26 @@ defmodule Algora.Accounts do
   def last_context(%User{last_context: last_context}), do: last_context
 
   def default_context, do: "personal"
+
+  def set_context(%User{} = user, "personal") do
+    update_settings(user, %{last_context: "personal"})
+  end
+
+  def set_context(%User{} = user, context) do
+    membership =
+      Repo.one(
+        from(m in Member,
+          join: o in assoc(m, :org),
+          where: m.user_id == ^user.id and o.handle == ^context
+        )
+      )
+
+    if membership do
+      update_settings(user, %{last_context: context})
+    else
+      {:error, :unauthorized}
+    end
+  end
 
   defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
 

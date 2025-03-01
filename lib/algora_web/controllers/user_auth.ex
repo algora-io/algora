@@ -99,7 +99,7 @@ defmodule AlgoraWeb.UserAuth do
     conn
     |> renew_session()
     |> put_session(:user_id, user.id)
-    |> put_session(:last_context, user.last_context)
+    |> put_session(:last_context, Accounts.last_context(user))
     |> put_session(:live_socket_id, "users_sessions:#{user.id}")
   end
 
@@ -194,7 +194,16 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def signed_in_path(conn) do
-    signed_in_path_from_context(get_session(conn, :last_context) || Accounts.default_context())
+    cond do
+      last_context = get_session(conn, :last_context) ->
+        signed_in_path_from_context(last_context)
+
+      user = conn.assigns[:current_user] ->
+        signed_in_path(user)
+
+      true ->
+        signed_in_path_from_context(Accounts.default_context())
+    end
   end
 
   defp login_code_ttl, do: 3600

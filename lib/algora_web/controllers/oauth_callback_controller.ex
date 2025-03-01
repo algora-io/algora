@@ -45,10 +45,12 @@ defmodule AlgoraWeb.OAuthCallbackController do
           |> render(:success)
 
         :redirect ->
-          conn
-          |> put_flash(:info, welcome_message(user))
-          |> AlgoraWeb.UserAuth.put_current_user(user)
-          |> redirect(to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
+          conn =
+            conn
+            |> put_flash(:info, welcome_message(user))
+            |> AlgoraWeb.UserAuth.put_current_user(user)
+
+          redirect(conn, to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
       end
     else
       {:error, reason} ->

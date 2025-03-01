@@ -298,8 +298,9 @@ defmodule Algora.Payments do
          {:ok, updated_account} <- update_account(account, stripe_account) do
       user = Accounts.get_user(account.user_id)
 
-      if user && stripe_account.charges_enabled do
+      if user && stripe_account.payouts_enabled do
         Accounts.update_settings(user, %{country: stripe_account.country})
+        enqueue_pending_transfers(account.user_id)
       end
 
       {:ok, updated_account}

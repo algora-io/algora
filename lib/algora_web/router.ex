@@ -33,7 +33,6 @@ defmodule AlgoraWeb.Router do
     get "/callbacks/:provider/oauth", OAuthCallbackController, :new
     get "/callbacks/:provider/installation", InstallationCallbackController, :new
     get "/auth/logout", OAuthCallbackController, :sign_out
-    delete "/auth/logout", OAuthCallbackController, :sign_out
 
     get "/tip", TipController, :create
 

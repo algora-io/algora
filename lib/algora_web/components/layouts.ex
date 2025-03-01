@@ -67,7 +67,7 @@ defmodule AlgoraWeb.Layouts do
       <:title>{@current_user.name}</:title>
       <:subtitle>@{@current_user.handle}</:subtitle>
       <:link navigate={~p"/user/settings"}>Settings</:link>
-      <:link href={~p"/auth/logout"} method={:delete}>Sign out</:link>
+      <:link href={~p"/auth/logout"}>Sign out</:link>
     </.dropdown>
     """
   end

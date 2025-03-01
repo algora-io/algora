@@ -369,7 +369,7 @@ defmodule Algora.Accounts do
     {:ok, Repo.preload(user, :identities, force: true)}
   end
 
-  def last_context(%{last_context: nil} = user) do
+  def last_context(%User{last_context: nil} = user) do
     orgs = Organizations.get_user_orgs(user)
 
     last_debit_query =
@@ -378,7 +378,8 @@ defmodule Algora.Accounts do
         where: t.type == :debit,
         where: u.id in ^Enum.map(orgs, & &1.id),
         order_by: [desc: t.succeeded_at],
-        limit: 1
+        limit: 1,
+        select_merge: %{user: u}
       )
 
     last_bounty_query =
@@ -386,7 +387,8 @@ defmodule Algora.Accounts do
         join: c in assoc(b, :creator),
         where: c.id in ^Enum.map(orgs, & &1.id),
         order_by: [desc: b.created_at],
-        limit: 1
+        limit: 1,
+        select_merge: %{creator: c}
       )
 
     last_sponsored_on_behalf_of =
@@ -396,13 +398,18 @@ defmodule Algora.Accounts do
         true -> nil
       end
 
-    case last_sponsored_on_behalf_of do
-      %{type: :organization} -> last_sponsored_on_behalf_of.handle
-      _ -> default_context()
-    end
+    last_context =
+      case last_sponsored_on_behalf_of do
+        %{type: :organization} -> last_sponsored_on_behalf_of.handle
+        _ -> default_context()
+      end
+
+    update_settings(user, %{last_context: last_context})
+
+    last_context
   end
 
-  def last_context(%{last_context: last_context}), do: last_context
+  def last_context(%User{last_context: last_context}), do: last_context
 
   def default_context, do: "personal"
 

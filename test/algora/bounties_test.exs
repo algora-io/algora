@@ -108,39 +108,6 @@ defmodule Algora.BountiesTest do
       assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})
     end
 
-    test "query" do
-      {:ok, bounty} =
-        Enum.reduce(1..10, nil, fn _n, _acc ->
-          creator = insert!(:user)
-          owner = insert!(:user)
-          _installation = insert!(:installation, owner: creator)
-          _identity = insert!(:identity, user: creator, provider_email: creator.email)
-          repo = insert!(:repository, %{user: owner})
-          ticket = insert!(:ticket, %{repository: repo})
-          amount = ~M[100]usd
-
-          bounty_params =
-            %{
-              ticket_ref: %{owner: owner.handle, repo: repo.name, number: ticket.number},
-              owner: owner,
-              creator: creator,
-              amount: amount
-            }
-
-          Bounties.create_bounty(bounty_params, [])
-        end)
-
-      assert Bounties.list_bounties(
-               owner_id: bounty.owner_id,
-               tech_stack: ["elixir"],
-               status: :open
-             )
-
-      # assert Bounties.fetch_stats(bounty.owner_id)
-      # assert Bounties.fetch_stats()
-      assert Bounties.PrizePool.list()
-    end
-
     test "successfully creates and pays invoice for bounty claim" do
       creator = insert!(:user)
       owner = insert!(:organization)
@@ -276,6 +243,59 @@ defmodule Algora.BountiesTest do
 
       transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
       assert is_nil(transfer)
+    end
+  end
+
+  describe "PrizePool.list/1" do
+    test "solver only sees bounties from orgs they received payments from" do
+      solver = insert!(:user)
+      org_with_history = insert!(:user)
+      org_without_history = insert!(:user)
+
+      credit_id = Nanoid.generate()
+      debit_id = Nanoid.generate()
+
+      insert!(:transaction, %{
+        id: credit_id,
+        type: :credit,
+        user_id: solver.id,
+        net_amount: ~M[100]usd,
+        status: :succeeded,
+        linked_transaction_id: debit_id
+      })
+
+      insert!(:transaction, %{
+        id: debit_id,
+        type: :debit,
+        user_id: org_with_history.id,
+        net_amount: ~M[100]usd,
+        status: :succeeded,
+        linked_transaction_id: credit_id
+      })
+
+      for org <- [org_with_history, org_without_history] do
+        for _ <- 1..5 do
+          creator = insert!(:user)
+          repo = insert!(:repository, user: org)
+          _installation = insert!(:installation, owner: creator, connected_user: org)
+          _identity = insert!(:identity, user: creator, provider_email: creator.email)
+          ticket = insert!(:ticket, repository: repo)
+
+          bounty_params = %{
+            ticket_ref: %{owner: org.provider_login, repo: repo.name, number: ticket.number},
+            owner: org,
+            creator: creator,
+            amount: ~M[100]usd
+          }
+
+          Bounties.create_bounty(bounty_params, [])
+        end
+      end
+
+      result = Bounties.PrizePool.list(viewer_id: solver.id)
+
+      assert length(result) == 5
+      assert Enum.all?(result, fn pool -> pool.repository.owner.id == org_with_history.id end)
     end
   end
 

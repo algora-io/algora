@@ -5,6 +5,7 @@ defmodule Algora.Bounties.PrizePool do
   import Ecto.Query
 
   alias Algora.Bounties.Bounty
+  alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace.Ticket
 
@@ -29,7 +30,8 @@ defmodule Algora.Bounties.PrizePool do
 
   @type criterion ::
           {:limit, non_neg_integer()}
-          | {:owner_id, integer()}
+          | {:viewer_id, String.t()}
+          | {:owner_id, String.t()}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
 
@@ -59,6 +61,7 @@ defmodule Algora.Bounties.PrizePool do
         id: r.id,
         name: r.name,
         owner: %{
+          id: ro.id,
           login: ro.provider_login
         }
       },
@@ -118,6 +121,14 @@ defmodule Algora.Bounties.PrizePool do
 
       {:status, status}, query ->
         from([b] in query, where: b.status == ^status)
+
+      {:viewer_id, viewer_id}, query ->
+        from b in query,
+          join: t_credit in Transaction,
+          on: t_credit.user_id == ^viewer_id and t_credit.type == :credit and t_credit.status == :succeeded,
+          join: t_debit in Transaction,
+          on: t_debit.id == t_credit.linked_transaction_id and t_debit.type == :debit and t_debit.status == :succeeded,
+          where: b.owner_id == t_debit.user_id
 
       _, query ->
         query

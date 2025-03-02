@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   alias Algora.Bounties.Tip
   alias Algora.Github
   alias Algora.Github.Webhook
+  alias Algora.Organizations.Member
   alias Algora.Payments.Customer
   alias Algora.PSP.Invoice
   alias Algora.Repo
@@ -39,18 +40,45 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  # TODO: cache installation tokens
-  # TODO: check org permissions on algora
-  defp get_permissions(%Webhook{payload: payload, author: author}) do
-    with {:ok, access_token} <- Github.get_installation_token(payload["installation"]["id"]),
+  defp authorize_user(%Webhook{} = webhook) do
+    case check_org_permissions(webhook) do
+      {:ok, role} -> {:ok, role}
+      {:error, :unauthorized} -> check_repo_permissions(webhook)
+    end
+  end
+
+  defp check_repo_permissions(%Webhook{payload: payload, author: author}) do
+    repo = payload["repository"]
+
+    with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, %{"permission" => permission}} <-
-           Github.get_repository_permissions(
-             access_token,
-             payload["repository"]["owner"]["login"],
-             payload["repository"]["name"],
-             author["login"]
-           ) do
-      {:ok, permission}
+           Github.get_repository_permissions(token, repo["owner"]["login"], repo["name"], author["login"]) do
+      case permission do
+        "admin" -> {:ok, :admin}
+        "write" -> {:ok, :mod}
+        _ -> {:error, :unauthorized}
+      end
+    end
+  end
+
+  defp check_org_permissions(%Webhook{payload: payload, author: author}) do
+    installation_id = payload["installation"]["id"]
+
+    with {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, installation} <- Repo.fetch_by(Installation, provider: "github", provider_id: to_string(installation_id)),
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
+      member =
+        Repo.one(
+          from m in Member,
+            join: o in assoc(m, :org),
+            where: o.id == ^installation.connected_user_id and m.user_id == ^user.id
+        )
+
+      case member do
+        %Member{role: :admin} -> {:ok, :admin}
+        %Member{role: :mod} -> {:ok, :mod}
+        _ -> {:error, :unauthorized}
+      end
     end
   end
 
@@ -265,7 +293,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       end
 
     # TODO: community bounties?
-    with {:ok, "admin"} <- get_permissions(webhook),
+    with {:ok, role} when role in [:admin, :mod] <- authorize_user(webhook),
          {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, installation} <-
            Workspace.fetch_installation_by(provider: "github", provider_id: to_string(payload["installation"]["id"])),
@@ -288,7 +316,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         command_source: command_source
       )
     else
-      {:ok, _permission} ->
+      {:ok, _role} ->
         {:error, :unauthorized}
 
       {:error, _reason} = error ->
@@ -306,8 +334,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       number: payload["issue"]["number"]
     }
 
-    case get_permissions(webhook) do
-      {:ok, "admin"} ->
+    case authorize_user(webhook) do
+      {:ok, role} when role in [:admin, :mod] ->
         installation =
           Repo.get_by(Installation, provider: "github", provider_id: to_string(payload["installation"]["id"]))
 
@@ -409,7 +437,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             )
         end
 
-      {:ok, _permission} ->
+      {:ok, _role} ->
         {:error, :unauthorized}
 
       {:error, _reason} = error ->

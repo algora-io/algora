@@ -312,14 +312,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp assign_achievements(socket) do
-    tech = List.first(socket.assigns.current_user.tech_stack)
-
     status_fns = [
       {&personalize_status/1, "Personalize Algora"},
       {&install_app_status/1, "Install the Algora app"},
       {&create_bounty_status/1, "Create a bounty"},
       {&reward_bounty_status/1, "Reward a bounty"},
-      {&begin_collaboration_status/1, "Contract a #{tech} developer"},
+      {&begin_collaboration_status/1, "Contract a contributor"},
       {&complete_first_contract_status/1, "Complete a contract"}
     ]
 

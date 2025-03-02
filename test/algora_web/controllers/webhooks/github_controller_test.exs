@@ -21,14 +21,25 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias AlgoraWeb.Webhooks.GithubController
 
   setup do
-    admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))
     unauthorized_user = insert!(:user, provider_login: sequence(:provider_login, &"unauthorized#{&1}"))
+    repo_admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))
+    org_admin = insert!(:user)
+    org_mod = insert!(:user)
+    org_expert = insert!(:user)
+
     org = insert!(:organization)
+    insert!(:member, user: org_admin, org: org, role: :admin)
+    insert!(:member, user: org_mod, org: org, role: :mod)
+    insert!(:member, user: org_expert, org: org, role: :expert)
+
     repository = insert!(:repository, user: org)
-    installation = insert!(:installation, owner: admin, connected_user: org)
+    installation = insert!(:installation, owner: repo_admin, connected_user: org)
 
     %{
-      admin: admin,
+      repo_admin: repo_admin,
+      org_admin: org_admin,
+      org_mod: org_mod,
+      org_expert: org_expert,
       unauthorized_user: unauthorized_user,
       org: org,
       installation: installation,
@@ -37,70 +48,87 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   describe "create bounties" do
-    test "handles bounty command with unauthorized user", ctx do
+    test "handles bounty command as unauthorized user", ctx do
       scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
       {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
       assert {:error, :unauthorized} = result
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
+    test "handles bounty command as org expert", ctx do
+      scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
+      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
+      assert {:error, :unauthorized} = result
+      assert Repo.aggregate(Bounty, :count) == 0
+    end
+
+    test "handles bounty command as org mod", ctx do
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :org_mod, body: "/bounty $100"}])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+    end
+
+    test "handles bounty command as org admin", ctx do
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :org_admin, body: "/bounty $100"}])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+    end
+
     test "handles bounty command without amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty"}])
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
     test "handles bounty command with $ prefix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty $100"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty $100"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     test "handles bounty command with $ suffix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100$"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100$"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     test "handles bounty command without $ symbol", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     test "handles bounty command with decimal amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.50"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     test "handles bounty command with partial decimal amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.5"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.5"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     test "handles bounty command with decimal amount and $ prefix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty $100.50"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty $100.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     test "handles bounty command with partial decimal amount and $ prefix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty $100.5"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty $100.5"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     test "handles bounty command with decimal amount and $ suffix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.50$"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.50$"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     test "handles bounty command with partial decimal amount and $ suffix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.5$"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.5$"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     test "handles bounty command with comma separator", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 1,000"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 1,000"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000]usd)
     end
 
     test "handles bounty command with comma separator and decimal amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 1,000.50"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 1,000.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000.50]usd)
     end
   end
@@ -112,7 +140,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"comment" => %{"id" => comment_id}}
         }
@@ -126,7 +154,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.edited",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $200",
           params: %{"comment" => %{"id" => comment_id}}
         }
@@ -141,7 +169,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"comment" => %{"id" => comment_id}}
         }
@@ -155,7 +183,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $200",
           params: %{"comment" => %{"id" => comment_id + 1}}
         }
@@ -187,7 +215,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100 @jsmith",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -206,7 +234,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip @jsmith $100",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -225,7 +253,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100",
           params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => "jsmith"}}}
         }
@@ -244,9 +272,9 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100",
-          params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => ctx[:admin].provider_login}}}
+          params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => ctx[:repo_admin].provider_login}}}
         }
       ])
 
@@ -262,7 +290,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip @jsmith",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -283,7 +311,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -321,7 +349,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -341,7 +369,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -355,7 +383,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $50 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -376,7 +404,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -399,7 +427,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $50 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -422,7 +450,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -435,7 +463,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/tip $50 @#{other_user.provider_login}",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -455,7 +483,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -483,7 +511,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -512,13 +540,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
         },
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number2}}
         }
@@ -544,7 +572,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
         }
@@ -582,7 +610,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -663,7 +691,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -691,7 +719,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -719,7 +747,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -750,7 +778,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -806,7 +834,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -841,7 +869,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -882,13 +910,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
         },
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $200",
           params: %{"issue" => %{"number" => issue_number2}}
         },
@@ -954,7 +982,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -1010,7 +1038,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -1082,7 +1110,10 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     author =
       case ctx[:user_type] do
         :unauthorized -> ctx[:unauthorized_user]
-        _ -> ctx[:admin]
+        :org_admin -> ctx[:org_admin]
+        :org_mod -> ctx[:org_mod]
+        :org_expert -> ctx[:org_expert]
+        :repo_admin -> ctx[:repo_admin]
       end
 
     [event, action] = String.split(ctx[:event_action], ".")
@@ -1149,7 +1180,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
             "id" => 123,
             "number" => 123,
             "body" => mock_body(),
-            "user" => mock_user(ctx[:admin])
+            "user" => mock_user(ctx[:repo_admin])
           }
         },
         ctx[:params]

@@ -2,6 +2,7 @@ defmodule Algora.Admin do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties.Claim
   alias Algora.Parser
@@ -11,6 +12,57 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Ticket
 
   require Logger
+
+  def seed do
+    import Algora.Factory
+
+    title = "Monthly PR Review & Triage Bounty"
+
+    description = """
+    ## What needs doing
+
+    Review open pull requests across our repos and:
+
+    1. Test them locally
+    2. Leave helpful comments
+    3. Merge or close stale PRs
+    4. Tag relevant people when needed
+
+    ## Success looks like
+
+    - [ ] All PRs older than 2 weeks have been reviewed
+    - [ ] Clear comments left on PRs needing changes
+    - [ ] Stale PRs (>30 days old) closed with explanation
+    - [ ] Weekly summary posted in #dev channel
+    """
+
+    org = Repo.get_by!(User, handle: "piedpiper0")
+    user = Repo.get_by!(User, handle: "zcesur")
+
+    repository = insert!(:repository, user: org)
+    ticket = insert!(:ticket, title: title, repository: repository, description: description)
+    bounty = insert!(:bounty, ticket: ticket, owner: org, creator: user, amount: Money.new(1000, :USD))
+
+    for contributor <- Accounts.list_featured_developers() do
+      insert!(:transaction,
+        type: :debit,
+        net_amount: Money.new(1000, :USD),
+        user_id: org.id,
+        bounty_id: bounty.id,
+        status: :succeeded
+      )
+
+      insert!(:transaction,
+        type: :credit,
+        net_amount: Money.new(1000, :USD),
+        user_id: contributor.id,
+        bounty_id: bounty.id,
+        status: :succeeded
+      )
+    end
+
+    IO.puts("#{AlgoraWeb.Endpoint.url()}/org/#{org.handle}/bounties/#{bounty.id}")
+  end
 
   def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 

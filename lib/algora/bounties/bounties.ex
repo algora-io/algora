@@ -628,7 +628,7 @@ defmodule Algora.Bounties do
             bounty_id: String.t(),
             claims: [Claim.t()]
           },
-          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
@@ -640,7 +640,8 @@ defmodule Algora.Bounties do
           %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
           ticket_ref: opts[:ticket_ref],
           bounty_id: bounty_id,
-          claims: claims
+          claims: claims,
+          recipient: opts[:recipient]
         )
       end
     end)

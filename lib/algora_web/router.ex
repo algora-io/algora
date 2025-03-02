@@ -96,6 +96,8 @@ defmodule AlgoraWeb.Router do
       ] do
       live "/org/:org_handle/settings", Org.SettingsLive, :edit
       live "/org/:org_handle/transactions", Org.TransactionsLive, :index
+      # TODO: allow access to invited users
+      live "/org/:org_handle/bounties/:id", BountyLive
     end
 
     live_session :org2,

@@ -314,13 +314,13 @@ defmodule AlgoraWeb.PricingLive do
                     |> JS.toggle(to: "#faq-#{item.id}")
                     |> JS.toggle_class("rotate-180", to: "#icon-#{item.id}")
                   }
-                  class="flex w-full items-center justify-between p-4 text-left"
+                  class="flex w-full justify-between p-4 text-left"
                 >
                   <span class="font-medium text-foreground">{item.question}</span>
                   <.icon
                     id={"icon-#{item.id}"}
                     name="tabler-chevron-down"
-                    class="h-5 w-5 text-muted-foreground transition-transform duration-200"
+                    class="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200"
                   />
                 </button>
                 <div id={"faq-#{item.id}"} class="hidden p-4 pt-0 text-muted-foreground">
@@ -685,7 +685,7 @@ defmodule AlgoraWeb.PricingLive do
               Fund Issues
             </p>
             <p class="mt-2 text-sm/6 text-gray-400">
-              Create bounties on any Swift issue to incentivize solutions and attract talented contributors
+              Create bounties on your issues to incentivize solutions and attract talented contributors
             </p>
           </div>
         </div>
@@ -816,7 +816,7 @@ defmodule AlgoraWeb.PricingLive do
               Fund Together
             </p>
             <p class="mt-2 text-sm/6 text-gray-400">
-              Companies and individuals can pool their money together to fund important Swift improvements
+              Companies and individuals can pool their money together to fund important issues
             </p>
           </div>
         </div>
@@ -846,12 +846,12 @@ defmodule AlgoraWeb.PricingLive do
         <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-br-[2rem]">
           <img class="object-cover" src={~p"/images/screenshots/contract.png"} alt="" />
           <div class="p-4 sm:p-6">
-            <h3 class="text-sm/4 font-semibold text-gray-400">Contracts (coming soon)</h3>
+            <h3 class="text-sm/4 font-semibold text-gray-400">Contracts</h3>
             <p class="mt-2 text-lg font-medium tracking-tight text-white">
               Flexible Engagement
             </p>
             <p class="mt-2 text-sm/6 text-gray-400">
-              Set hourly rates, weekly hours, and payment schedules for ongoing Swift development work. Track progress and manage payments all in one place.
+              Set hourly rates, weekly hours, and payment schedules for ongoing development work. Track progress and manage payments all in one place.
             </p>
           </div>
         </div>

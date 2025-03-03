@@ -45,10 +45,10 @@ defmodule AlgoraWeb.PricingLive do
           <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
             <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
               <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
-                Predictable pricing,<br class="block lg:hidden" /> designed to scale
+                Simple pricing,<br class="block lg:hidden" /> built for developers
               </h1>
               <p class="text-sm sm:text-lg text-muted-foreground">
-                Start building for free, collaborate with your team, then scale to millions of users
+                Fund bounties, reward contributors, and accelerate your project
               </p>
             </div>
           </div>

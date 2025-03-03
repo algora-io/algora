@@ -51,7 +51,13 @@ defmodule AlgoraWeb.PricingLive do
 
         <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12">
           <div class="relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto grid max-w-md gap-4 lg:max-w-none lg:grid-cols-2 xl:grid-cols-3 xl:gap-0">
+            <div class={
+              classes([
+                "mx-auto grid max-w-md gap-4 lg:grid-cols-2",
+                "lg:max-w-4xl"
+                # "lg:max-w-none xl:grid-cols-3 xl:gap-0"
+              ])
+            }>
               <%= for plan <- @plans do %>
                 <.pricing_card plan={plan} />
               <% end %>
@@ -429,10 +435,13 @@ defmodule AlgoraWeb.PricingLive do
 
   defp pricing_card(assigns) do
     ~H"""
-    <div class={[
-      "bg-surface-75 flex flex-col rounded-xl border first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
-      @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
-    ]}>
+    <div class={
+      [
+        "bg-card/75 flex flex-col rounded-xl border",
+        # "first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
+        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
+      ]
+    }>
       <div class="px-8 pt-6 xl:px-4 2xl:px-8">
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 pb-2">
@@ -449,19 +458,14 @@ defmodule AlgoraWeb.PricingLive do
         <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
           {@plan.description}
         </p>
-        <button
+        <.button
           phx-click="select_plan"
           phx-value-plan={@plan.name}
-          class={[
-            "font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1",
-            @plan.popular && "mt-8 bg-primary text-primary-foreground hover:bg-primary/90",
-            !@plan.popular &&
-              "bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
-          ]}
+          class="font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
         >
           {@plan.cta_text}
-        </button>
-        <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:min-h-[175px] lg:pt-10 lg:pb-0 lg:text-4xl xl:text-4xl">
+        </.button>
+        <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
           <div class="flex flex-col gap-1">
             <%= if @plan.price do %>
               <div>
@@ -472,8 +476,22 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
               </div>
             <% else %>
-              <div class="mt-4 flex items-end">
-                <p class="font-display mt-2 pb-1 text-4xl">Custom</p>
+              <div>
+                <%= if @plan.name == "Individuals" do %>
+                  <p class="font-display mt-2 pb-1 text-4xl">
+                    100%
+                  </p>
+                  <p class="text-foreground-lighter text-sm mb-1.5 ml-1 leading-4">
+                    payout received
+                  </p>
+                <% else %>
+                  <p class="font-display mt-2 pb-1 text-4xl">
+                    19%
+                  </p>
+                  <p class="text-foreground-lighter text-sm mb-1.5 ml-1 leading-4">
+                    pay as you go
+                  </p>
+                <% end %>
               </div>
             <% end %>
           </div>
@@ -517,62 +535,35 @@ defmodule AlgoraWeb.PricingLive do
   defp get_plans do
     [
       %Plan{
-        name: "Hobby",
-        description: "Perfect for small projects and indie developers",
-        price: 0,
-        cta_text: "Start for Free",
+        name: "Individuals",
+        description: "For developers contributing to open source",
+        price: nil,
+        cta_text: "Start Contributing",
         popular: false,
         features: [
-          %Feature{name: "Up to $5,000 in project budgets"},
-          %Feature{name: "Algora Network", detail: "15% platform fee"},
-          %Feature{name: "Bring Your Own Devs", detail: "5% platform fee"},
-          %Feature{name: "Unlimited projects"},
-          %Feature{name: "Community support"},
-          %Feature{name: "Basic project management tools"},
-          %Feature{name: "Pay per milestone"}
-        ],
-        footnote: "Perfect for testing the waters with smaller projects"
-      },
-      %Plan{
-        name: "Startup",
-        description: "For growing companies",
-        price: 599,
-        cta_text: "Upgrade now",
-        popular: true,
-        previous_tier: "Hobby",
-        features: [
-          %Feature{name: "Up to $50,000 in project budgets"},
-          %Feature{name: "Algora Network", detail: "15% platform fee"},
-          %Feature{name: "Bring Your Own Devs", detail: "5% platform fee"},
-          %Feature{name: "Priority support"},
-          %Feature{name: "Advanced project management"},
-          %Feature{name: "Custom workflows"},
-          %Feature{name: "Team collaboration tools"},
-          %Feature{name: "Analytics dashboard"},
-          %Feature{name: "Job board access"},
-          %Feature{name: "Unlimited job postings"}
+          %Feature{name: "Payouts in 3-8 days on average"},
+          %Feature{name: "Available in 119 countries/regions"},
+          %Feature{name: "Algora profile with contribution history"},
+          %Feature{name: "Free livestreaming on Algora TV"}
         ]
       },
       %Plan{
-        name: "Enterprise",
-        description: "For large organizations",
+        name: "Organizations",
+        description: "For companies and projects",
         price: nil,
-        cta_text: "Contact Sales",
+        cta_text: "Get Started",
         popular: false,
-        previous_tier: "Startup",
         features: [
-          %Feature{name: "Unlimited project budgets"},
-          %Feature{name: "Algora Network", detail: "15% platform fee"},
-          %Feature{name: "Bring Your Own Devs", detail: "5% platform fee"},
-          %Feature{name: "Dedicated account manager"},
-          %Feature{name: "Custom contracts & MSA"},
-          %Feature{name: "Advanced security features"},
-          %Feature{name: "Custom integrations"},
-          %Feature{name: "SLA guarantees"},
-          %Feature{name: "Onboarding assistance"},
-          %Feature{name: "Training for your team"},
-          %Feature{name: "Custom job board"},
-          %Feature{name: "ATS integration"}
+          %Feature{name: "Fees drop to 7.5% with volume"},
+          %Feature{name: "Public org page with complete history"},
+          %Feature{name: "Teammates with granular access rights"},
+          %Feature{name: "Slack / Discord notifications (Webhooks)"},
+          %Feature{name: "Display bounties on your site (SDK)"},
+          %Feature{name: "Auto-pay on merge"},
+          %Feature{name: "Embedded livestreaming"},
+          %Feature{name: "Experts Network"},
+          %Feature{name: "Hiring Portal"},
+          %Feature{name: "Live Challenges"}
         ]
       }
     ]

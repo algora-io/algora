@@ -405,18 +405,12 @@ defmodule AlgoraWeb.PricingLive do
               <span class="block sm:inline">UpWork alternative.</span>
             </h2>
             <div class="flex justify-center gap-4">
-              <.link
-                navigate="/onboarding/org"
-                class="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
-              >
+              <.button navigate="/onboarding/org">
                 Start your project
-              </.link>
-              <.link
-                href="https://cal.com/ioannisflo"
-                class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
-              >
+              </.button>
+              <.button href="https://cal.com/ioannisflo" variant="secondary">
                 Request a demo
-              </.link>
+              </.button>
             </div>
           </div>
         </div>

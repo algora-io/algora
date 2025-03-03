@@ -540,122 +540,270 @@ defmodule AlgoraWeb.PricingLive do
               </p>
             </div>
             <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
-              <div class="spotlight before:top-1/4 before:left-auto before:right-1/4 [--color-shadow:theme(&quot;colors.purple.400&quot;)]">
-                <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
-                  <div class="col-span-3">
-                    <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
-                      <iframe
-                        src="https://www.youtube.com/embed/xObOGcUdtY0?si=mrHBcTn-Nzj4_okq"
-                        title="YouTube video player"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin"
-                        allowfullscreen
-                        width="100%"
-                        height="100%"
+              <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
+                <div class="col-span-3">
+                  <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/xObOGcUdtY0?si=mrHBcTn-Nzj4_okq"
+                      title="YouTube video player"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div class="col-span-4">
+                  <h3 class="text-3xl font-display font-bold text-success">
+                    $15,000 Bounty: Delighted by the Results
+                  </h3>
+                  <div class="relative text-base">
+                    <svg
+                      viewBox="0 0 162 128"
+                      fill="none"
+                      aria-hidden="true"
+                      class="absolute -top-12 left-0 -z-10 h-32 stroke-white/25"
+                    >
+                      <path
+                        id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
+                        d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
                       >
-                      </iframe>
+                      </path>
+                      <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
+                    </svg>
+                    <div class="font-medium text-white whitespace-pre-line">
+                      We've used Algora extensively at Golem Cloud for our hiring needs and what I have found actually over the course of a few decades of hiring people is that many times someone who is very active in open-source development, these types of engineers often make fantastic additions to a team.
+
+                      Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.
+
+                      The bounty system helps us assess real-world skills instead of just technical challenge problems. It's a great way to find talented developers who deeply understand how your system works.
                     </div>
                   </div>
-                  <div class="col-span-4">
-                    <h3 class="text-3xl font-display font-bold text-success">
-                      $15,000 Bounty: Delighted by the Results
-                    </h3>
-                    <div class="relative text-base">
-                      <svg
-                        viewBox="0 0 162 128"
-                        fill="none"
-                        aria-hidden="true"
-                        class="absolute -top-12 left-0 -z-10 h-32 stroke-white/15"
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
+                    <div class="flex items-center gap-4">
+                      <span class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-full">
+                        <img
+                          alt="John A. De Goes"
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="fill"
+                          class="aspect-square h-full w-full"
+                          sizes="100vw"
+                          src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+                          style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                        />
+                      </span>
+                      <div>
+                        <div class="text-base font-medium text-gray-100">John A. De Goes</div>
+                        <div class="text-sm text-gray-300">Founder & CEO</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <a
+                        class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
+                        href="https://console.algora.io/org/golemcloud"
                       >
-                        <path
-                          id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-                          d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-                        >
-                        </path>
-                        <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
-                      </svg>
-                      <div class="pt-4 font-medium text-white whitespace-pre-line">
-                        We've used Algora extensively at Golem Cloud for our hiring needs and what I have found actually over the course of a few decades of hiring people is that many times someone who is very active in open-source development, these types of engineers often make fantastic additions to a team.
-
-                        Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.
-
-                        The bounty system helps us assess real-world skills instead of just technical challenge problems. It's a great way to find talented developers who deeply understand how your system works.
-                      </div>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4">
-                      <div class="flex items-center gap-4">
-                        <span class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-full">
-                          <img
-                            alt="John A. De Goes"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            class="aspect-square h-full w-full"
-                            sizes="100vw"
-                            src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
-                        </span>
-                        <div>
-                          <div class="text-base font-medium text-gray-100">John A. De Goes</div>
-                          <div class="text-sm text-gray-300">Founder & CEO</div>
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-4">
+                        <img
+                          alt="Golem Cloud"
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="fill"
+                          class="aspect-square h-full w-full"
+                          sizes="100vw"
+                          src="https://avatars.githubusercontent.com/u/133607167?s=200&v=4"
+                          style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                        />
+                      </a>
+                      <div>
                         <a
-                          class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
-                          href="https://console.algora.io/org/tailcallhq"
+                          class="text-base font-medium text-gray-100"
+                          href="https://console.algora.io/org/golemcloud"
                         >
-                          <img
-                            alt="Golem Cloud"
-                            loading="lazy"
-                            decoding="async"
-                            data-nimg="fill"
-                            class="aspect-square h-full w-full"
-                            sizes="100vw"
-                            src="https://avatars.githubusercontent.com/u/133607167?s=200&v=4"
-                            style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                          />
+                          Golem Cloud
                         </a>
-                        <div>
-                          <a
-                            class="text-base font-medium text-gray-100"
-                            href="https://console.algora.io/org/golemcloud"
-                          >
-                            Golem Cloud
-                          </a>
-                          <a
-                            class="block text-sm text-gray-300 hover:text-white"
-                            target="_blank"
-                            rel="noopener"
-                            href="https://golem.cloud"
-                          >
-                            golem.cloud
-                          </a>
-                        </div>
+                        <a
+                          class="block text-sm text-gray-300 hover:text-white"
+                          target="_blank"
+                          rel="noopener"
+                          href="https://golem.cloud"
+                        >
+                          golem.cloud
+                        </a>
                       </div>
                     </div>
-                    <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 xl:flex-nowrap">
-                      <div class="flex flex-col-reverse">
-                        <dt class="text-base text-gray-300">Total awarded</dt>
-                        <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                          $27,500
-                        </dd>
+                    <div class="flex items-center gap-4">
+                      <a
+                        class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
+                        href="https://console.algora.io/org/zio"
+                      >
+                        <img
+                          alt="Ziverge"
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="fill"
+                          class="aspect-square h-full w-full"
+                          sizes="100vw"
+                          src="https://avatars.githubusercontent.com/u/58878508?s=200&v=4"
+                          style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                        />
+                      </a>
+                      <div>
+                        <a
+                          class="text-base font-medium text-gray-100"
+                          href="https://console.algora.io/org/zio"
+                        >
+                          Ziverge
+                        </a>
+                        <a
+                          class="block text-sm text-gray-300 hover:text-white"
+                          target="_blank"
+                          rel="noopener"
+                          href="https://ziverge.com"
+                        >
+                          ziverge.com
+                        </a>
                       </div>
-                      <div class="flex flex-col-reverse">
-                        <dt class="text-base text-gray-300">Bounties completed</dt>
-                        <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                          3
-                        </dd>
+                    </div>
+                  </div>
+                  <dl class="flex flex-wrap items-center gap-x-12 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-base text-gray-300">Total awarded</dt>
+                      <dd class="font-display text-2xl font-semibold tracking-tight text-white">
+                        $103,950
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-base text-gray-300">Bounties completed</dt>
+                      <dd class="font-display text-2xl font-semibold tracking-tight text-white">
+                        359
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-base text-gray-300">Contributors rewarded</dt>
+                      <dd class="font-display text-2xl font-semibold tracking-tight text-white">
+                        82
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+            <div class="mx-auto mt-24 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-30 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
+              <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
+                <div class="col-span-3">
+                  <h3 class="text-3xl font-display font-bold text-success">
+                    From Bounty Contributor<br />To Full-Time Engineer
+                  </h3>
+                  <div class="relative text-base">
+                    <svg
+                      viewBox="0 0 162 128"
+                      fill="none"
+                      aria-hidden="true"
+                      class="absolute -top-12 left-0 -z-10 h-32 stroke-white/25"
+                    >
+                      <path
+                        id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
+                        d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
+                      >
+                      </path>
+                      <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
+                    </svg>
+                    <div class="font-medium text-white whitespace-pre-line">
+                      We were doing bounties on Algora, and this one developer Nick kept solving them. His personality really came through in the GitHub issues and code. We ended up hiring him from that, and it was the easiest hire because we already knew he was great from his contributions.
+
+                      That's one massive advantage open source companies have versus closed source. When I talk to young people asking for advice, I specifically tell them to go on Algora and find issues there. You get to show people your work, plus you can point to your contributions as proof of your abilities, and you make money in the meantime.
+                    </div>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
+                    <div class="flex items-center gap-4">
+                      <span class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-full">
+                        <img
+                          alt="Eric Allam"
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="fill"
+                          class="aspect-square h-full w-full"
+                          sizes="100vw"
+                          src="https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
+                          style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                        />
+                      </span>
+                      <div>
+                        <div class="text-base font-medium text-gray-100">Eric Allam</div>
+                        <div class="text-sm text-gray-300">Founder & CTO</div>
                       </div>
-                      <div class="flex flex-col-reverse">
-                        <dt class="text-base text-gray-300">Contributors rewarded</dt>
-                        <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                          3
-                        </dd>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <a
+                        class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
+                        href="https://console.algora.io/org/triggerdotdev"
+                      >
+                        <img
+                          alt="Trigger.dev"
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="fill"
+                          class="aspect-square h-full w-full"
+                          sizes="100vw"
+                          src="https://avatars.githubusercontent.com/u/95297378?s=200&v=4"
+                          style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                        />
+                      </a>
+                      <div>
+                        <a
+                          class="text-base font-medium text-gray-100"
+                          href="https://console.algora.io/org/triggerdotdev"
+                        >
+                          Trigger.dev (YC W23)
+                        </a>
+                        <a
+                          class="block text-sm text-gray-300 hover:text-white"
+                          target="_blank"
+                          rel="noopener"
+                          href="https://trigger.dev"
+                        >
+                          trigger.dev
+                        </a>
                       </div>
-                    </dl>
+                    </div>
+                  </div>
+                  <dl class="flex flex-wrap items-center gap-x-6 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-base text-gray-300">Total awarded</dt>
+                      <dd class="font-display text-2xl font-semibold tracking-tight text-white">
+                        $9,920
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-base text-gray-300">Bounties completed</dt>
+                      <dd class="font-display text-2xl font-semibold tracking-tight text-white">
+                        106
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-base text-gray-300">Contributors rewarded</dt>
+                      <dd class="font-display text-2xl font-semibold tracking-tight text-white">
+                        35
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+                <div class="col-span-4">
+                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/FXQVD02rfg8?si=rt3r_8-aFt2ZKla8"
+                      title="YouTube video player"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
                   </div>
                 </div>
               </div>

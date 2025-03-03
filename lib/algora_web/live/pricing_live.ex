@@ -14,6 +14,7 @@ defmodule AlgoraWeb.PricingLive do
       :description,
       :price,
       :cta_text,
+      :cta_url,
       :popular,
       :previous_tier,
       :features,
@@ -373,11 +374,6 @@ defmodule AlgoraWeb.PricingLive do
   end
 
   @impl true
-  def handle_event("select_plan", %{"plan" => _plan_name}, socket) do
-    {:noreply, push_navigate(socket, to: "/onboarding/org")}
-  end
-
-  @impl true
   def handle_event("toggle_faq", %{"id" => faq_id}, socket) do
     active_faq = if socket.assigns.active_faq == faq_id, do: nil, else: faq_id
     {:noreply, assign(socket, active_faq: active_faq)}
@@ -409,8 +405,7 @@ defmodule AlgoraWeb.PricingLive do
           {@plan.description}
         </p>
         <.button
-          phx-click="select_plan"
-          phx-value-plan={@plan.name}
+          navigate={@plan.cta_url}
           class="font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
         >
           {@plan.cta_text}
@@ -489,6 +484,7 @@ defmodule AlgoraWeb.PricingLive do
         description: "For developers contributing to open source",
         price: nil,
         cta_text: "Start Contributing",
+        cta_url: "/onboarding/dev",
         popular: false,
         features: [
           %Feature{name: "Payouts in 3-8 days on average"},
@@ -502,6 +498,7 @@ defmodule AlgoraWeb.PricingLive do
         description: "For companies and projects",
         price: nil,
         cta_text: "Get Started",
+        cta_url: "/onboarding/org",
         popular: false,
         features: [
           %Feature{name: "Fees drop to 7.5% with volume"},

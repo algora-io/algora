@@ -126,6 +126,8 @@ defmodule Algora.PSP.ConnectCountries do
       {"Vietnam", "VN"}
     ]
 
+  def count, do: length(list())
+
   @spec from_code(String.t()) :: String.t()
   def from_code(code) do
     list() |> Enum.find(&(elem(&1, 1) == code)) |> elem(0) || code

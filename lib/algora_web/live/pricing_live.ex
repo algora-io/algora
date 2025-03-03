@@ -56,8 +56,8 @@ defmodule AlgoraWeb.PricingLive do
         <div class={
           classes([
             "px-6 lg:px-8",
-            "mx-auto grid max-w-md gap-4 lg:grid-cols-2",
-            "lg:max-w-4xl"
+            "mx-auto grid gap-4",
+            "sm:grid-cols-2 lg:max-w-4xl"
             # "lg:max-w-none xl:grid-cols-3 xl:gap-0"
           ])
         }>
@@ -94,9 +94,9 @@ defmodule AlgoraWeb.PricingLive do
             </p>
           </div>
 
-          <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
-            <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
-              <div class="sm:col-span-3">
+          <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 lg:mx-0 lg:max-w-none">
+            <div class="grid gap-x-12 gap-y-8 lg:grid-cols-7">
+              <div class="lg:col-span-3">
                 <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                   <iframe
                     src="https://www.youtube.com/embed/xObOGcUdtY0?si=mrHBcTn-Nzj4_okq"
@@ -111,7 +111,7 @@ defmodule AlgoraWeb.PricingLive do
                   </iframe>
                 </div>
               </div>
-              <div class="sm:col-span-4">
+              <div class="lg:col-span-4">
                 <h3 class="text-3xl font-display font-bold text-success">
                   $15,000 Bounty: Delighted by the Results
                 </h3>
@@ -180,9 +180,9 @@ defmodule AlgoraWeb.PricingLive do
               </div>
             </div>
           </div>
-          <div class="mx-auto mt-24 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-30 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
-            <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
-              <div class="sm:col-span-3">
+          <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 lg:mx-0 lg:max-w-none">
+            <div class="grid gap-x-12 gap-y-8 lg:grid-cols-7">
+              <div class="lg:col-span-3 order-last lg:order-first">
                 <h3 class="text-3xl font-display font-bold text-success">
                   From Bounty Contributor<br />To Full-Time Engineer
                 </h3>
@@ -280,7 +280,7 @@ defmodule AlgoraWeb.PricingLive do
                   </div>
                 </dl>
               </div>
-              <div class="sm:col-span-4">
+              <div class="lg:col-span-4 order-first lg:order-last">
                 <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                   <iframe
                     src="https://www.youtube.com/embed/FXQVD02rfg8?si=rt3r_8-aFt2ZKla8"

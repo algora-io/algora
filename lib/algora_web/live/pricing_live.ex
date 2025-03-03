@@ -4,6 +4,7 @@ defmodule AlgoraWeb.PricingLive do
 
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
+  alias AlgoraWeb.Components.Wordmarks
 
   defmodule Plan do
     @moduledoc false
@@ -64,16 +65,33 @@ defmodule AlgoraWeb.PricingLive do
             </div>
           </div>
 
-          <div class="py-24 sm:py-32">
+          <div class="pt-24 sm:pt-32">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
-              <div class="mx-auto max-w-xl text-center">
+              <div class="mx-auto max-w-2xl text-center">
                 <h2 class="mb-4 text-3xl font-bold text-popover-foreground">
-                  Trusted by companies worldwide
+                  You're in good company
                 </h2>
-                <p class="text-lg text-muted-foreground">
-                  See what our customers have to say about their experience with Algora
+                <p class="text-base text-muted-foreground">
+                  Join hundreds of open source companies that use Algora to accelerate their development
                 </p>
               </div>
+              <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
+                <.logo_cloud />
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-24 sm:pt-32">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+              <div class="mx-auto max-w-2xl text-center">
+                <h2 class="mb-4 text-3xl font-bold text-popover-foreground">
+                  See what our customers say
+                </h2>
+                <p class="text-base text-muted-foreground">
+                  Discover how Algora helps founders accelerate development and find top talent
+                </p>
+              </div>
+
               <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
                 <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
                   <div class="col-span-3">
@@ -346,7 +364,7 @@ defmodule AlgoraWeb.PricingLive do
             </div>
           </div>
 
-          <div class="container mx-auto py-16">
+          <div class="py-24 sm:py-32">
             <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
               Frequently asked questions
             </h2>
@@ -590,5 +608,112 @@ defmodule AlgoraWeb.PricingLive do
           "We hold payments in escrow and release them based on project milestones. This ensures both clients and developers are protected throughout the project lifecycle."
       }
     ]
+  end
+
+  defp logo_cloud(assigns) do
+    ~H"""
+    <div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 items-center justify-center gap-x-10 gap-y-8">
+        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
+          <Wordmarks.calcom class="w-[7rem] col-auto mt-1" alt="Cal.com" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/qdrant"
+        >
+          <Wordmarks.qdrant class="w-[7rem] col-auto" alt="Qdrant" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/remotion"
+        >
+          <img
+            src="https://algora.io/banners/remotion.png"
+            alt="Remotion"
+            class="col-auto w-full saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
+          <img
+            src="https://algora.io/banners/zio.png"
+            alt="ZIO"
+            class="w-[10rem] col-auto brightness-0 invert"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/triggerdotdev"
+        >
+          <img
+            src="https://algora.io/banners/triggerdotdev.png"
+            alt="Trigger.dev"
+            class="col-auto w-full saturate-0"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/tembo"
+        >
+          <img
+            src="https://algora.io/banners/tembo.png"
+            alt="Tembo"
+            class="w-[13rem] col-auto saturate-0"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/maybe-finance"
+        >
+          <img
+            src="https://algora.io/banners/maybe.png"
+            alt="Maybe"
+            class="col-auto w-full saturate-0"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/golemcloud"
+        >
+          <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/aidenybai"
+        >
+          <img
+            src="https://algora.io/banners/million.png"
+            alt="Million"
+            class="col-auto w-44 saturate-0"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/tailcallhq"
+        >
+          <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/highlight"
+        >
+          <img
+            src="https://algora.io/banners/highlight.png"
+            alt="Highlight"
+            class="col-auto w-44 saturate-0"
+          />
+        </a>
+        <a
+          class="relative flex items-center justify-center"
+          href="https://console.algora.io/org/dittofeed"
+        >
+          <img
+            src="https://algora.io/banners/dittofeed.png"
+            alt="Dittofeed"
+            class="col-auto w-40 brightness-0 invert"
+          />
+        </a>
+      </div>
+    </div>
+    """
   end
 end

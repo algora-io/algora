@@ -31,33 +31,7 @@ defmodule AlgoraWeb.PricingLive do
     defstruct [:id, :question, :answer]
   end
 
-  defmodule ROIEstimate do
-    @moduledoc false
-    defstruct [
-      :developers,
-      :hourly_rate,
-      :hours_per_week,
-      :annual_tc,
-      :platform_fee,
-      :traditional_cost,
-      :traditional_overhead,
-      :traditional_total,
-      :algora_cost,
-      :algora_fee,
-      :monthly_subscription,
-      :algora_total,
-      :savings
-    ]
-  end
-
   def mount(_params, _session, socket) do
-    initial_estimate =
-      calculate_roi_estimate(%{
-        "developers" => "3",
-        "hourly_rate" => "75",
-        "hours_per_week" => "40"
-      })
-
     socket =
       assign(socket,
         page_title: "Pricing",
@@ -65,8 +39,7 @@ defmodule AlgoraWeb.PricingLive do
         faq_items: get_faq_items(),
         testimonials: get_testimonials(),
         page_scroll: 0,
-        active_faq: nil,
-        roi_estimate: initial_estimate
+        active_faq: nil
       )
 
     {:ok, socket}
@@ -83,102 +56,6 @@ defmodule AlgoraWeb.PricingLive do
 
   def handle_event("select_compute", %{"option" => option}, socket) do
     {:noreply, assign(socket, selected_compute_option: option)}
-  end
-
-  def handle_event("calculate_roi", %{"roi" => params}, socket) do
-    params = calculate_missing_rate_field(params)
-    estimate = calculate_roi_estimate(params)
-    {:noreply, assign(socket, roi_estimate: estimate)}
-  end
-
-  defp calculate_missing_rate_field(params) do
-    hours_per_week = params["hours_per_week"] |> to_string() |> String.trim()
-    hourly_rate = params["hourly_rate"] |> to_string() |> String.trim()
-    annual_tc = params["annual_tc"] |> to_string() |> String.trim()
-
-    # Convert empty strings to nil for clearer logic
-    hours_per_week = if hours_per_week == "", do: nil, else: String.to_integer(hours_per_week)
-    hourly_rate = if hourly_rate == "", do: nil, else: String.to_integer(hourly_rate)
-    annual_tc = if annual_tc == "", do: nil, else: String.to_integer(annual_tc)
-
-    cond do
-      # Case 1: Annual TC and Hours/Week provided - calculate Hourly Rate
-      is_nil(hourly_rate) && not is_nil(hours_per_week) && not is_nil(annual_tc) ->
-        calculated_rate = div(annual_tc, hours_per_week * 52)
-
-        %{
-          "developers" => params["developers"],
-          "hourly_rate" => to_string(calculated_rate),
-          "hours_per_week" => to_string(hours_per_week),
-          "annual_tc" => to_string(annual_tc)
-        }
-
-      # Case 2: Annual TC and Hourly Rate provided - calculate Hours/Week
-      is_nil(hours_per_week) && not is_nil(hourly_rate) && not is_nil(annual_tc) ->
-        calculated_hours = div(annual_tc, hourly_rate * 52)
-
-        %{
-          "developers" => params["developers"],
-          "hourly_rate" => to_string(hourly_rate),
-          "hours_per_week" => to_string(calculated_hours),
-          "annual_tc" => to_string(annual_tc)
-        }
-
-      # Case 3: Hours/Week and Hourly Rate provided - calculate Annual TC
-      is_nil(annual_tc) && not is_nil(hourly_rate) && not is_nil(hours_per_week) ->
-        calculated_tc = hourly_rate * hours_per_week * 52
-
-        %{
-          "developers" => params["developers"],
-          "hourly_rate" => to_string(hourly_rate),
-          "hours_per_week" => to_string(hours_per_week),
-          "annual_tc" => to_string(calculated_tc)
-        }
-
-      # Default case: return original params if we don't have enough information
-      true ->
-        params
-    end
-  end
-
-  defp calculate_roi_estimate(params) do
-    developers = String.to_integer(params["developers"])
-    hourly_rate = String.to_integer(params["hourly_rate"])
-    hours_per_week = String.to_integer(params["hours_per_week"])
-    annual_tc = hourly_rate * hours_per_week * 52
-
-    # Base monthly cost (same for both traditional and Algora)
-    monthly_base_cost = developers * hourly_rate * hours_per_week * 4.3
-
-    # Traditional hiring costs (35% overhead - industry average per SBA)
-    traditional_cost = monthly_base_cost
-    traditional_overhead = traditional_cost * 0.35
-    traditional_total = traditional_cost + traditional_overhead
-
-    # Algora costs
-    platform_fee = 0.15
-    monthly_subscription = 599
-    algora_cost = monthly_base_cost
-    algora_fee = algora_cost * platform_fee
-    algora_total = algora_cost + algora_fee + monthly_subscription
-
-    yearly_savings = (traditional_total - algora_total) * 12
-
-    %ROIEstimate{
-      developers: developers,
-      hourly_rate: hourly_rate,
-      hours_per_week: hours_per_week,
-      annual_tc: annual_tc,
-      platform_fee: platform_fee,
-      traditional_cost: traditional_cost,
-      traditional_overhead: traditional_overhead,
-      traditional_total: traditional_total,
-      algora_cost: algora_cost,
-      algora_fee: algora_fee,
-      monthly_subscription: monthly_subscription,
-      algora_total: algora_total,
-      savings: yearly_savings
-    }
   end
 
   # Component: Pricing Card
@@ -507,7 +384,7 @@ defmodule AlgoraWeb.PricingLive do
   def render(assigns) do
     ~H"""
     <main class="relative min-h-screen">
-      <div class="relative z-10 pt-8 pb-4 xl:py-16">
+      <div :if={1 == 2} class="relative z-10 pt-8 pb-4 xl:py-16">
         <div class="mx-auto max-w-7xl px-8 text-center sm:px-6 lg:px-8">
           <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
             <h1 class="text-4xl font-bold text-popover-foreground">
@@ -521,7 +398,7 @@ defmodule AlgoraWeb.PricingLive do
       </div>
 
       <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12">
-        <div class="relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div :if={1 == 2} class="relative z-10 mx-auto w-full px-4 sm:px-6 lg:px-8">
           <div class="mx-auto grid max-w-md gap-4 lg:max-w-none lg:grid-cols-2 xl:grid-cols-3 xl:gap-0">
             <%= for plan <- @plans do %>
               <.pricing_card plan={plan} />

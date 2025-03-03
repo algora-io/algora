@@ -40,13 +40,13 @@ defmodule AlgoraWeb.PricingLive do
       <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12"></div>
 
       <section class="bg-background pb-16 sm:pb-24">
-        <div class="relative z-10 pt-8 pb-4 xl:py-16">
-          <div class="mx-auto max-w-7xl px-8 text-center sm:px-6 lg:px-8">
+        <div class="relative z-10 pb-4 xl:py-16">
+          <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
             <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-              <h1 class="text-4xl font-bold text-popover-foreground">
+              <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
                 Predictable pricing,<br class="block lg:hidden" /> designed to scale
               </h1>
-              <p class="text-lg text-muted-foreground">
+              <p class="text-sm sm:text-lg text-muted-foreground">
                 Start building for free, collaborate with your team, then scale to millions of users
               </p>
             </div>
@@ -54,6 +54,7 @@ defmodule AlgoraWeb.PricingLive do
         </div>
         <div class={
           classes([
+            "px-6 lg:px-8",
             "mx-auto grid max-w-md gap-4 lg:grid-cols-2",
             "lg:max-w-4xl"
             # "lg:max-w-none xl:grid-cols-3 xl:gap-0"
@@ -94,8 +95,8 @@ defmodule AlgoraWeb.PricingLive do
 
           <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
             <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
-              <div class="col-span-3">
-                <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+              <div class="sm:col-span-3">
+                <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                   <iframe
                     src="https://www.youtube.com/embed/xObOGcUdtY0?si=mrHBcTn-Nzj4_okq"
                     title="YouTube video player"
@@ -109,7 +110,7 @@ defmodule AlgoraWeb.PricingLive do
                   </iframe>
                 </div>
               </div>
-              <div class="col-span-4">
+              <div class="sm:col-span-4">
                 <h3 class="text-3xl font-display font-bold text-success">
                   $15,000 Bounty: Delighted by the Results
                 </h3>
@@ -246,7 +247,7 @@ defmodule AlgoraWeb.PricingLive do
           </div>
           <div class="mx-auto mt-24 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-30 sm:grid-cols-2 xl:mx-0 xl:max-w-none">
             <div class="grid gap-x-12 gap-y-8 sm:grid-cols-7">
-              <div class="col-span-3">
+              <div class="sm:col-span-3">
                 <h3 class="text-3xl font-display font-bold text-success">
                   From Bounty Contributor<br />To Full-Time Engineer
                 </h3>
@@ -344,8 +345,8 @@ defmodule AlgoraWeb.PricingLive do
                   </div>
                 </dl>
               </div>
-              <div class="col-span-4">
-                <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+              <div class="sm:col-span-4">
+                <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                   <iframe
                     src="https://www.youtube.com/embed/FXQVD02rfg8?si=rt3r_8-aFt2ZKla8"
                     title="YouTube video player"
@@ -365,41 +366,43 @@ defmodule AlgoraWeb.PricingLive do
       </section>
 
       <section class="bg-muted/20 border-t py-16 sm:py-24">
-        <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
-          Frequently asked questions
-        </h2>
-        <div class="mx-auto max-w-3xl space-y-4">
-          <%= for item <- @faq_items do %>
-            <div class="rounded-lg border">
-              <button
-                phx-click="toggle_faq"
-                phx-value-id={item.id}
-                class="flex w-full items-center justify-between p-4 text-left"
-              >
-                <span class="font-medium text-foreground">{item.question}</span>
-                <.icon
-                  name="tabler-chevron-down"
-                  class={
-                    classes([
-                      "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                      @active_faq == item.id && "rotate-180 transform"
-                    ])
-                  }
-                />
-              </button>
-              <%= if @active_faq == item.id do %>
-                <div class="p-4 pt-0 text-muted-foreground">
-                  {Phoenix.HTML.raw(item.answer)}
-                </div>
-              <% end %>
-            </div>
-          <% end %>
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
+            Frequently asked questions
+          </h2>
+          <div class="mx-auto max-w-3xl space-y-4">
+            <%= for item <- @faq_items do %>
+              <div class="rounded-lg border">
+                <button
+                  phx-click="toggle_faq"
+                  phx-value-id={item.id}
+                  class="flex w-full items-center justify-between p-4 text-left"
+                >
+                  <span class="font-medium text-foreground">{item.question}</span>
+                  <.icon
+                    name="tabler-chevron-down"
+                    class={
+                      classes([
+                        "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                        @active_faq == item.id && "rotate-180 transform"
+                      ])
+                    }
+                  />
+                </button>
+                <%= if @active_faq == item.id do %>
+                  <div class="p-4 pt-0 text-muted-foreground">
+                    {Phoenix.HTML.raw(item.answer)}
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
         </div>
       </section>
 
       <section class="bg-background border-t py-16 sm:py-24">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-          <h2 class="mb-8 text-3xl font-bold text-card-foreground">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
             <span class="text-muted-foreground">The open source</span>
             <span class="block sm:inline">UpWork alternative.</span>
           </h2>
@@ -644,15 +647,15 @@ defmodule AlgoraWeb.PricingLive do
   defp logo_cloud(assigns) do
     ~H"""
     <div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 items-center justify-center gap-x-10 gap-y-8">
+      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
         <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
-          <Wordmarks.calcom class="w-[7rem] col-auto mt-1" alt="Cal.com" />
+          <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
         </a>
         <a
           class="relative flex items-center justify-center"
           href="https://console.algora.io/org/qdrant"
         >
-          <Wordmarks.qdrant class="w-[7rem] col-auto" alt="Qdrant" />
+          <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
         </a>
         <a
           class="relative flex items-center justify-center"
@@ -750,186 +753,184 @@ defmodule AlgoraWeb.PricingLive do
 
   defp features_bento(assigns) do
     ~H"""
-    <div class="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
-      <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-[repeat(14,_minmax(0,_1fr))]">
-        <div class="flex p-px lg:col-span-8">
-          <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-t-[2rem] lg:rounded-tl-[2rem]">
-            <img class="object-cover object-left" src={~p"/images/screenshots/bounty.png"} alt="" />
-            <div class="p-4 sm:p-6">
-              <h3 class="text-sm/4 font-semibold text-gray-400">Bounties</h3>
-              <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                Fund Issues
-              </p>
-              <p class="mt-2 text-sm/6 text-gray-400">
-                Create bounties on any Swift issue to incentivize solutions and attract talented contributors
-              </p>
-            </div>
+    <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-[repeat(14,_minmax(0,_1fr))]">
+      <div class="flex p-px lg:col-span-8">
+        <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tl-[2rem]">
+          <img class="object-cover object-left" src={~p"/images/screenshots/bounty.png"} alt="" />
+          <div class="p-4 sm:p-6">
+            <h3 class="text-sm/4 font-semibold text-gray-400">Bounties</h3>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white">
+              Fund Issues
+            </p>
+            <p class="mt-2 text-sm/6 text-gray-400">
+              Create bounties on any Swift issue to incentivize solutions and attract talented contributors
+            </p>
           </div>
         </div>
-        <div class="flex p-px lg:col-span-6">
-          <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tr-[2rem]">
-            <img class="object-cover" src={~p"/images/screenshots/tip.png"} alt="" />
-            <div class="p-4 sm:p-6">
-              <h3 class="text-sm/4 font-semibold text-gray-400">Tips</h3>
-              <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                Show Appreciation
-              </p>
-              <p class="mt-2 text-sm/6 text-gray-400">
-                Say thanks with tips to recognize valuable contributions
-              </p>
-            </div>
+      </div>
+      <div class="flex p-px lg:col-span-6">
+        <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tr-[2rem]">
+          <img class="object-cover" src={~p"/images/screenshots/tip.png"} alt="" />
+          <div class="p-4 sm:p-6">
+            <h3 class="text-sm/4 font-semibold text-gray-400">Tips</h3>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white">
+              Show Appreciation
+            </p>
+            <p class="mt-2 text-sm/6 text-gray-400">
+              Say thanks with tips to recognize valuable contributions
+            </p>
           </div>
         </div>
-        <div class="flex p-px lg:col-span-6">
-          <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15">
-            <div class="flex object-cover">
-              <div class="flex h-full w-full items-center justify-center gap-x-4 p-4 pb-0 sm:gap-x-6">
-                <div class="flex w-full flex-col space-y-3 sm:w-auto sm:py-9">
-                  <div
-                    class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
-                    style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
-                  >
-                    <div class="flex items-center space-x-2 rounded-md bg-gradient-to-b from-gray-800 to-gray-900 p-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                        class="h-4 w-4 text-success-500"
+      </div>
+      <div class="flex p-px lg:col-span-6">
+        <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15">
+          <div class="flex object-cover">
+            <div class="flex h-full w-full items-center justify-center gap-x-4 p-4 pb-0 sm:gap-x-6">
+              <div class="flex w-full flex-col space-y-3 sm:w-auto sm:py-9">
+                <div
+                  class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
+                  style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
+                >
+                  <div class="flex items-center space-x-2 rounded-md bg-gradient-to-b from-gray-800 to-gray-900 p-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      class="h-4 w-4 text-success-500"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clip-rule="evenodd"
                       >
-                        <path
-                          fill-rule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                          clip-rule="evenodd"
-                        >
-                        </path>
-                      </svg>
-                      <p class="pb-8 font-sans text-sm text-gray-200 last:pb-0">
-                        Merged pull request
-                      </p>
-                    </div>
+                      </path>
+                    </svg>
+                    <p class="pb-8 font-sans text-sm text-gray-200 last:pb-0">
+                      Merged pull request
+                    </p>
                   </div>
-                  <div
-                    class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
-                    style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
-                  >
-                    <div class="flex items-center space-x-2 rounded-md bg-gradient-to-b from-gray-800 to-gray-900 p-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        aria-hidden="true"
-                        class="h-4 w-4 text-success-500"
+                </div>
+                <div
+                  class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
+                  style="opacity: 1; transform: translateX(0.2px) translateZ(0px);"
+                >
+                  <div class="flex items-center space-x-2 rounded-md bg-gradient-to-b from-gray-800 to-gray-900 p-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      class="h-4 w-4 text-success-500"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clip-rule="evenodd"
                       >
-                        <path
-                          fill-rule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                          clip-rule="evenodd"
-                        >
-                        </path>
-                      </svg>
-                      <p class="pb-8 font-sans text-sm text-gray-200 last:pb-0">
-                        Completed payment
-                      </p>
-                    </div>
+                      </path>
+                    </svg>
+                    <p class="pb-8 font-sans text-sm text-gray-200 last:pb-0">
+                      Completed payment
+                    </p>
                   </div>
-                  <div
-                    class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
-                    style="opacity: 0.7; transform: translateX(0.357815px) translateZ(0px);"
-                  >
-                    <div class="flex items-center space-x-2 rounded-md bg-gradient-to-b from-gray-800 to-gray-900 p-2">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-4 w-4 animate-spin motion-reduce:hidden"
+                </div>
+                <div
+                  class="w-full items-center rounded-md bg-gradient-to-b from-gray-400 to-gray-800 p-px"
+                  style="opacity: 0.7; transform: translateX(0.357815px) translateZ(0px);"
+                >
+                  <div class="flex items-center space-x-2 rounded-md bg-gradient-to-b from-gray-800 to-gray-900 p-2">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 animate-spin motion-reduce:hidden"
+                    >
+                      <rect
+                        x="2"
+                        y="2"
+                        width="16"
+                        height="16"
+                        rx="8"
+                        stroke="rgba(59, 130, 246, 0.4)"
+                        stroke-width="3"
                       >
-                        <rect
-                          x="2"
-                          y="2"
-                          width="16"
-                          height="16"
-                          rx="8"
-                          stroke="rgba(59, 130, 246, 0.4)"
-                          stroke-width="3"
-                        >
-                        </rect>
-                        <path
-                          d="M10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2"
-                          stroke="rgba(59, 130, 246)"
-                          stroke-width="3"
-                          stroke-linecap="round"
-                        >
-                        </path>
-                      </svg>
-                      <p class="pb-8 font-sans text-sm text-gray-400 last:pb-0">
-                        Transferring funds to contributor
-                      </p>
-                    </div>
+                      </rect>
+                      <path
+                        d="M10 18C5.58172 18 2 14.4183 2 10C2 5.58172 5.58172 2 10 2"
+                        stroke="rgba(59, 130, 246)"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                      >
+                      </path>
+                    </svg>
+                    <p class="pb-8 font-sans text-sm text-gray-400 last:pb-0">
+                      Transferring funds to contributor
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="p-4 sm:p-6">
-              <h3 class="text-sm/4 font-semibold text-gray-400">Payments</h3>
-              <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                Pay When Merged
-              </p>
-              <p class="mt-2 text-sm/6 text-gray-400">
-                Set up auto-pay to instantly reward contributors as their PRs are merged
-              </p>
-            </div>
+          </div>
+          <div class="p-4 sm:p-6">
+            <h3 class="text-sm/4 font-semibold text-gray-400">Payments</h3>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white">
+              Pay When Merged
+            </p>
+            <p class="mt-2 text-sm/6 text-gray-400">
+              Set up auto-pay to instantly reward contributors as their PRs are merged
+            </p>
           </div>
         </div>
-        <div class="flex p-px lg:col-span-8">
-          <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15">
-            <img class="object-cover object-left" src={~p"/images/screenshots/bounties.png"} alt="" />
-            <div class="p-4 sm:p-6">
-              <h3 class="text-sm/4 font-semibold text-gray-400">Pooling</h3>
-              <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                Fund Together
-              </p>
-              <p class="mt-2 text-sm/6 text-gray-400">
-                Companies and individuals can pool their money together to fund important Swift improvements
-              </p>
-            </div>
+      </div>
+      <div class="flex p-px lg:col-span-8">
+        <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15">
+          <img class="object-cover object-left" src={~p"/images/screenshots/bounties.png"} alt="" />
+          <div class="p-4 sm:p-6">
+            <h3 class="text-sm/4 font-semibold text-gray-400">Pooling</h3>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white">
+              Fund Together
+            </p>
+            <p class="mt-2 text-sm/6 text-gray-400">
+              Companies and individuals can pool their money together to fund important Swift improvements
+            </p>
           </div>
         </div>
-        <div class="flex p-px lg:col-span-5">
-          <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
-            <img
-              class="object-cover object-left"
-              src={~p"/images/screenshots/payout-account.png"}
-              alt=""
-            />
-            <div class="p-4 sm:p-6">
-              <h3 class="text-sm/4 font-semibold text-gray-400">Payouts</h3>
-              <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                Fast, Global Payouts
-              </p>
-              <p class="mt-2 text-sm/6 text-gray-400">
-                Receive payments directly to your bank account from all around the world
-                <span class="font-medium text-foreground">
-                  (#{ConnectCountries.count()} countries supported)
-                </span>
-              </p>
-            </div>
+      </div>
+      <div class="flex p-px lg:col-span-5">
+        <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
+          <img
+            class="object-cover object-left"
+            src={~p"/images/screenshots/payout-account.png"}
+            alt=""
+          />
+          <div class="p-4 sm:p-6">
+            <h3 class="text-sm/4 font-semibold text-gray-400">Payouts</h3>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white">
+              Fast, Global Payouts
+            </p>
+            <p class="mt-2 text-sm/6 text-gray-400">
+              Receive payments directly to your bank account from all around the world
+              <span class="font-medium text-foreground">
+                (#{ConnectCountries.count()} countries supported)
+              </span>
+            </p>
           </div>
         </div>
-        <div class="flex p-px lg:col-span-9">
-          <div class="w-full overflow-hidden rounded-lg bg-card ring-1 ring-white/15 max-lg:rounded-b-[2rem] lg:rounded-br-[2rem]">
-            <img class="object-cover" src={~p"/images/screenshots/contract.png"} alt="" />
-            <div class="p-4 sm:p-6">
-              <h3 class="text-sm/4 font-semibold text-gray-400">Contracts (coming soon)</h3>
-              <p class="mt-2 text-lg font-medium tracking-tight text-white">
-                Flexible Engagement
-              </p>
-              <p class="mt-2 text-sm/6 text-gray-400">
-                Set hourly rates, weekly hours, and payment schedules for ongoing Swift development work. Track progress and manage payments all in one place.
-              </p>
-            </div>
+      </div>
+      <div class="flex p-px lg:col-span-9">
+        <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-br-[2rem]">
+          <img class="object-cover" src={~p"/images/screenshots/contract.png"} alt="" />
+          <div class="p-4 sm:p-6">
+            <h3 class="text-sm/4 font-semibold text-gray-400">Contracts (coming soon)</h3>
+            <p class="mt-2 text-lg font-medium tracking-tight text-white">
+              Flexible Engagement
+            </p>
+            <p class="mt-2 text-sm/6 text-gray-400">
+              Set hourly rates, weekly hours, and payment schedules for ongoing Swift development work. Track progress and manage payments all in one place.
+            </p>
           </div>
         </div>
       </div>

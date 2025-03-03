@@ -309,26 +309,23 @@ defmodule AlgoraWeb.PricingLive do
             <%= for item <- @faq_items do %>
               <div class="rounded-lg border">
                 <button
-                  phx-click="toggle_faq"
-                  phx-value-id={item.id}
+                  phx-click={
+                    %JS{}
+                    |> JS.toggle(to: "#faq-#{item.id}")
+                    |> JS.toggle_class("rotate-180", to: "#icon-#{item.id}")
+                  }
                   class="flex w-full items-center justify-between p-4 text-left"
                 >
                   <span class="font-medium text-foreground">{item.question}</span>
                   <.icon
+                    id={"icon-#{item.id}"}
                     name="tabler-chevron-down"
-                    class={
-                      classes([
-                        "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                        @active_faq == item.id && "rotate-180 transform"
-                      ])
-                    }
+                    class="h-5 w-5 text-muted-foreground transition-transform duration-200"
                   />
                 </button>
-                <%= if @active_faq == item.id do %>
-                  <div class="p-4 pt-0 text-muted-foreground">
-                    {Phoenix.HTML.raw(item.answer)}
-                  </div>
-                <% end %>
+                <div id={"faq-#{item.id}"} class="hidden p-4 pt-0 text-muted-foreground">
+                  {Phoenix.HTML.raw(item.answer)}
+                </div>
               </div>
             <% end %>
           </div>
@@ -371,12 +368,6 @@ defmodule AlgoraWeb.PricingLive do
       )
 
     {:ok, socket}
-  end
-
-  @impl true
-  def handle_event("toggle_faq", %{"id" => faq_id}, socket) do
-    active_faq = if socket.assigns.active_faq == faq_id, do: nil, else: faq_id
-    {:noreply, assign(socket, active_faq: active_faq)}
   end
 
   defp pricing_card(assigns) do

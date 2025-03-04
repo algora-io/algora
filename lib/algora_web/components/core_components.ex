@@ -122,103 +122,6 @@ defmodule AlgoraWeb.CoreComponents do
       </.dropdown>
   """
   attr :id, :string, required: true
-
-  slot :img do
-    attr :src, :string
-    attr :alt, :string
-  end
-
-  slot :title
-  slot :subtitle
-
-  slot :link do
-    attr :navigate, :string
-    attr :href, :string
-    attr :method, :any
-  end
-
-  def dropdown(assigns) do
-    ~H"""
-    <!-- User account dropdown -->
-    <div class="relative inline-block w-full text-left">
-      <div>
-        <button
-          id={@id}
-          type="button"
-          class="group w-full rounded-md px-3.5 py-2 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
-          phx-click={show_dropdown("##{@id}-dropdown")}
-          phx-hook="Menu"
-          data-active-class="bg-accent"
-          aria-haspopup="true"
-        >
-          <span class="flex w-full items-center justify-between">
-            <span class="flex min-w-0 items-center justify-between space-x-3">
-              <%= for img <- @img do %>
-                <img
-                  class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-600"
-                  {assigns_to_attributes(img)}
-                />
-              <% end %>
-              <span class="flex min-w-0 flex-1 flex-col">
-                <span class="truncate text-sm font-medium text-gray-50">
-                  {render_slot(@title)}
-                </span>
-                <span class="truncate text-sm text-gray-400">{render_slot(@subtitle)}</span>
-              </span>
-            </span>
-            <.icon
-              name="tabler-selector"
-              class="ml-2 h-5 w-5 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
-            />
-          </span>
-        </button>
-      </div>
-      <div
-        id={"#{@id}-dropdown"}
-        phx-click-away={hide_dropdown("##{@id}-dropdown")}
-        class="absolute right-0 left-0 z-10 mt-1 hidden origin-top divide-y divide-border rounded-md bg-popover shadow-lg ring-1 ring-border"
-        role="menu"
-        aria-labelledby={@id}
-      >
-        <div class="py-1" role="none">
-          <%= for link <- @link do %>
-            <.link
-              tabindex="-1"
-              role="menuitem"
-              class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
-              {link}
-            >
-              {render_slot(link)}
-            </.link>
-          <% end %>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  @doc """
-  Returns a button triggered dropdown with aria keyboard and focus supporrt.
-
-  Accepts the follow slots:
-
-    * `:id` - The id to uniquely identify this dropdown
-    * `:img` - The optional img to show beside the button title
-    * `:title` - The button title
-    * `:subtitle` - The button subtitle
-
-  ## Examples
-
-      <.dropdown id={@id}>
-        <:img src={@current_user.avatar_url} alt={@current_user.handle}/>
-        <:title><%= @current_user.name %></:title>
-        <:subtitle>@<%= @current_user.handle %></:subtitle>
-
-        <:link navigate={~p"/"}>Dashboard</:link>
-        <:link navigate={~p"/user/settings"}Settings</:link>
-      </.dropdown>
-  """
-  attr :id, :string, required: true
   attr :class, :string, default: nil
 
   slot :img do
@@ -236,7 +139,7 @@ defmodule AlgoraWeb.CoreComponents do
     attr :method, :any
   end
 
-  def dropdown2(assigns) do
+  def dropdown(assigns) do
     ~H"""
     <!-- User account dropdown -->
     <div class={classes(["relative w-full text-left", @class])}>
@@ -299,7 +202,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def context_selector(assigns) do
     ~H"""
-    <.dropdown2 id="dashboard-dropdown">
+    <.dropdown id="dashboard-dropdown">
       <:img src={@current_context.avatar_url} alt={@current_context.handle} />
       <:title>{@current_context.name}</:title>
 
@@ -328,7 +231,7 @@ defmodule AlgoraWeb.CoreComponents do
           <div class="font-semibold">Logout</div>
         </div>
       </:link>
-    </.dropdown2>
+    </.dropdown>
     """
   end
 

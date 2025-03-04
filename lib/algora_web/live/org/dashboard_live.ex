@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   import Ecto.Changeset
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Contracts
   alias Algora.Github
@@ -67,6 +68,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
     %{current_org: current_org} = socket.assigns
 
     if socket.assigns.current_user_role in [:admin, :mod] do
+      top_earners = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
+
       installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
       if connected?(socket) do
@@ -77,6 +80,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        socket
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
+       |> assign(:matching_devs, top_earners)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
@@ -137,9 +141,90 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {create_tip(assigns)}
           </div>
         </.section>
+
+        <div class="relative h-full">
+          <div class="flex flex-col space-y-1.5">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight">
+              Top earners
+            </h2>
+            <p class="text-sm text-muted-foreground">
+              Developers who have earned the most in your organization
+            </p>
+          </div>
+          <div class="pt-3 relative w-full overflow-auto">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for user <- @matching_devs do %>
+                  <.matching_dev user={user} />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
     {sidebar(assigns)}
+    """
+  end
+
+  defp matching_dev(assigns) do
+    ~H"""
+    <tr class="border-b transition-colors">
+      <td class="py-4 align-middle">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-start gap-4">
+            <.link navigate={User.url(@user)}>
+              <.avatar class="h-20 w-20 rounded-full">
+                <.avatar_image src={@user.avatar_url} alt={@user.name} />
+                <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+              </.avatar>
+            </.link>
+
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-1 text-base text-foreground">
+                <.link navigate={User.url(@user)} class="font-semibold hover:underline">
+                  {@user.name}
+                  <span class="text-sm text-muted-foreground">
+                    @{@user.handle}
+                  </span>
+                </.link>
+              </div>
+
+              <div
+                :if={@user.provider_meta}
+                class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1 text-xs text-gray-300 sm:text-sm"
+              >
+                <div :if={@user.provider_meta["twitter_handle"]} class="flex items-center gap-1">
+                  <.icon name="tabler-brand-twitter" class="h-4 w-4" />
+                  <span class="whitespace-nowrap">{@user.provider_meta["twitter_handle"]}</span>
+                </div>
+                <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
+                  <.icon name="tabler-map-pin" class="h-4 w-4" />
+                  <span class="whitespace-nowrap">{@user.provider_meta["location"]}</span>
+                </div>
+                <div :if={@user.provider_meta["company"]} class="flex items-center gap-1">
+                  <.icon name="tabler-building" class="h-4 w-4" />
+                  <span class="whitespace-nowrap">
+                    {@user.provider_meta["company"] |> String.trim_leading("@")}
+                  </span>
+                </div>
+              </div>
+
+              <div class="mt-1 flex flex-wrap gap-2">
+                <%= for tech <- @user.tech_stack do %>
+                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+                    {tech}
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <.button phx-click="offer_contract">
+            Offer contract
+          </.button>
+        </div>
+      </td>
+    </tr>
     """
   end
 

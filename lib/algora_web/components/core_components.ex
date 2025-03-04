@@ -300,19 +300,32 @@ defmodule AlgoraWeb.CoreComponents do
   def context_selector(assigns) do
     ~H"""
     <.dropdown2 id="dashboard-dropdown">
-      <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-      <:title>{@current_user.name}</:title>
+      <:img src={@current_context.avatar_url} alt={@current_context.handle} />
+      <:title>{@current_context.name}</:title>
 
       <:link
-        :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
-        href={~p"/set_context/#{org.handle}"}
+        :for={ctx <- @all_contexts}
+        :if={@current_context.id != ctx.id}
+        href={
+          if ctx.id == @current_user.id,
+            do: ~p"/set_context/personal",
+            else: ~p"/set_context/#{ctx.handle}"
+        }
       >
-        <div class="flex items-center">
-          <img src={org.avatar_url} alt={org.name} class="mr-3 h-8 w-8 rounded-full" />
-          <div class="truncate">
-            <div class="truncate font-semibold">{org.name}</div>
-            <div class="truncate text-sm text-gray-500">@{org.handle}</div>
+        <div class="flex items-center whitespace-nowrap">
+          <img src={ctx.avatar_url} alt={ctx.name} class="mr-3 h-8 w-8 rounded-full" />
+          <div>
+            <div class="font-semibold">{ctx.name}</div>
+            <div class="text-sm text-gray-500">@{ctx.handle}</div>
           </div>
+        </div>
+      </:link>
+      <:link href={~p"/auth/logout"}>
+        <div class="flex items-center whitespace-nowrap">
+          <div class="mr-3 flex h-8 w-8 items-center justify-center">
+            <.icon name="tabler-logout" class="h-5 w-5" />
+          </div>
+          <div class="font-semibold">Logout</div>
         </div>
       </:link>
     </.dropdown2>

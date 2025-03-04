@@ -170,21 +170,17 @@
           <span class="relative text-sm font-semibold">Docs</span>
         </.link>
         <%= if @current_user do %>
-          <div>
-            {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
-              id: "activity-timeline",
-              session: %{},
-              sticky: true,
-              assigns: %{current_user: @current_user}
-            )}
-          </div>
-          <div>
-            <.context_selector
-              current_user={@current_user}
-              current_context={@current_context}
-              all_contexts={@all_contexts}
-            />
-          </div>
+          <%!-- {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
+            id: "activity-timeline",
+            session: %{},
+            sticky: true,
+            assigns: %{current_user: @current_user}
+          )} --%>
+          <.context_selector
+            current_user={@current_user}
+            current_context={@current_context}
+            all_contexts={@all_contexts}
+          />
         <% else %>
           <.link
             navigate="/auth/login"

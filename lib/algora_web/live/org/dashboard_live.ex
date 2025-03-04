@@ -67,26 +67,30 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def mount(_params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
-    experts =
-      current_org.tech_stack
-      |> List.first()
-      |> Accounts.list_experts()
-      |> Enum.take(6)
+    if socket.assigns.current_user_role in [:admin, :mod] do
+      experts =
+        current_org.tech_stack
+        |> List.first()
+        |> Accounts.list_experts()
+        |> Enum.take(6)
 
-    installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
+      installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
-    if connected?(socket) do
-      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+      if connected?(socket) do
+        Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+      end
+
+      {:ok,
+       socket
+       |> assign(:installations, installations)
+       |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+       |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+       |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+       |> assign(:experts, experts)
+       |> assign_achievements()}
+    else
+      {:ok, redirect(socket, to: ~p"/org/#{current_org.handle}/home")}
     end
-
-    {:ok,
-     socket
-     |> assign(:installations, installations)
-     |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
-     |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-     |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-     |> assign(:experts, experts)
-     |> assign_achievements()}
   end
 
   @impl true

@@ -43,6 +43,7 @@ defmodule AlgoraWeb.Org.Nav do
      socket
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
+     |> assign(:current_user_role, current_user_role)
      |> assign(:nav, nav_items(current_org.handle, current_user_role))
      |> assign(:contacts, contacts)
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}

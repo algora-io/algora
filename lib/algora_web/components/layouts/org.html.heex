@@ -124,48 +124,11 @@
             assigns: %{current_user: @current_user}
           )}
           <div>
-            <.dropdown2 id="dashboard-dropdown">
-              <:img src={@current_org.avatar_url} alt={@current_org.handle} />
-              <:title>{@current_org.name}</:title>
-
-              <:link href={~p"/set_context/personal"}>
-                <div class="flex items-center whitespace-nowrap">
-                  <img
-                    src={@current_user.avatar_url}
-                    alt={@current_user.name}
-                    class="mr-3 h-8 w-8 rounded-full"
-                  />
-                  <div>
-                    <div class="font-semibold">{@current_user.name}</div>
-                    <div class="text-sm text-gray-500">@{@current_user.handle}</div>
-                  </div>
-                </div>
-              </:link>
-              <:link
-                :for={
-                  org <-
-                    Algora.Organizations.get_user_orgs(@current_user)
-                    |> Enum.reject(&(&1.id == @current_org.id))
-                }
-                href={~p"/set_context/#{org.handle}"}
-              >
-                <div class="flex items-center whitespace-nowrap">
-                  <img src={org.avatar_url} alt={org.name} class="mr-3 h-8 w-8 rounded-full" />
-                  <div>
-                    <div class="font-semibold">{org.name}</div>
-                    <div class="text-sm text-gray-500">@{org.handle}</div>
-                  </div>
-                </div>
-              </:link>
-              <:link href={~p"/auth/logout"}>
-                <div class="flex items-center whitespace-nowrap">
-                  <div class="mr-3 flex h-8 w-8 items-center justify-center">
-                    <.icon name="tabler-logout" class="h-5 w-5" />
-                  </div>
-                  <div class="font-semibold">Logout</div>
-                </div>
-              </:link>
-            </.dropdown2>
+            <.context_selector
+              current_user={@current_user}
+              current_context={@current_context}
+              all_contexts={@all_contexts}
+            />
           </div>
         <% else %>
           <.link

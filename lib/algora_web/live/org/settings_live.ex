@@ -10,6 +10,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
   require Logger
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
@@ -137,6 +138,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
     """
   end
 
+  @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
@@ -150,25 +152,48 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
     {:ok,
      socket
+     |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
      |> assign(:installations, installations)
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign_has_default_payment_method()
      |> assign_form(changeset)}
   end
 
+  @impl true
   def handle_info({:authenticated, user}, socket) do
-    {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
+    socket =
+      socket
+      |> assign(:current_user, user)
+      |> assign(:has_fresh_token?, true)
+
+    case socket.assigns.pending_action do
+      {event, params} ->
+        socket = assign(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+
+      nil ->
+        {:noreply, socket}
+    end
   end
 
+  @impl true
   def handle_info(:payments_updated, socket) do
     {:noreply, assign_has_default_payment_method(socket)}
   end
 
-  def handle_event("install_app", _params, socket) do
-    # TODO: immediately redirect to install_url if user has valid token
-    {:noreply, push_event(socket, "open_popup", %{url: socket.assigns.oauth_url})}
+  @impl true
+  def handle_event("install_app" = event, unsigned_params, socket) do
+    {:noreply,
+     if socket.assigns.has_fresh_token? do
+       redirect(socket, external: Github.install_url_select_target())
+     else
+       socket
+       |> assign(:pending_action, {event, unsigned_params})
+       |> push_event("open_popup", %{url: socket.assigns.oauth_url})
+     end}
   end
 
+  @impl true
   def handle_event("validate", %{"user" => params}, socket) do
     changeset =
       socket.assigns.current_org
@@ -178,6 +203,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
     {:noreply, assign_form(socket, changeset)}
   end
 
+  @impl true
   def handle_event("save", %{"user" => params}, socket) do
     case Accounts.update_settings(socket.assigns.current_org, params) do
       {:ok, user} ->
@@ -191,6 +217,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
     end
   end
 
+  @impl true
   def handle_event("setup_payment", _params, socket) do
     %{current_org: org} = socket.assigns
     success_url = url(~p"/org/#{org.handle}/settings")
@@ -206,6 +233,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
     end
   end
 
+  @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end

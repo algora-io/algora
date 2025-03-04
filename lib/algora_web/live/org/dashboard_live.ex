@@ -180,24 +180,35 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </.avatar>
             </.link>
 
-            <div class="flex flex-col gap-1">
+            <div>
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link navigate={User.url(@user)} class="font-semibold hover:underline">
                   {@user.name}
-                  <span class="text-sm text-muted-foreground">
-                    @{@user.handle}
-                  </span>
                 </.link>
               </div>
 
               <div
                 :if={@user.provider_meta}
-                class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1 text-xs text-gray-300 sm:text-sm"
+                class="pt-0.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
               >
-                <div :if={@user.provider_meta["twitter_handle"]} class="flex items-center gap-1">
-                  <.icon name="tabler-brand-twitter" class="h-4 w-4" />
+                <.link
+                  :if={@user.provider_login}
+                  href={"https://github.com/#{@user.provider_login}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <Logos.github class="h-4 w-4" />
+                  <span class="whitespace-nowrap">{@user.provider_login}</span>
+                </.link>
+                <.link
+                  :if={@user.provider_meta["twitter_handle"]}
+                  href={"https://x.com/#{@user.provider_meta["twitter_handle"]}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <.icon name="tabler-brand-x" class="h-4 w-4" />
                   <span class="whitespace-nowrap">{@user.provider_meta["twitter_handle"]}</span>
-                </div>
+                </.link>
                 <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
                   <.icon name="tabler-map-pin" class="h-4 w-4" />
                   <span class="whitespace-nowrap">{@user.provider_meta["location"]}</span>
@@ -210,7 +221,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </div>
               </div>
 
-              <div class="mt-1 flex flex-wrap gap-2">
+              <div class="pt-1.5 flex flex-wrap gap-2">
                 <%= for tech <- @user.tech_stack do %>
                   <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
                     {tech}

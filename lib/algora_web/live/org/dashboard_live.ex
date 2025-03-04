@@ -75,8 +75,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
-       # TODO: remove this once we have a way to check if the OAuth flow is complete
-       |> assign(:oauth_completed?, false)
+       |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -232,7 +231,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     socket =
       socket
       |> assign(:current_user, user)
-      |> assign(:oauth_completed?, true)
+      |> assign(:has_fresh_token?, true)
 
     case socket.assigns.pending_action do
       {event, params} ->
@@ -247,7 +246,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def handle_event("install_app" = event, unsigned_params, socket) do
     {:noreply,
-     if socket.assigns.oauth_completed? do
+     if socket.assigns.has_fresh_token? do
        redirect(socket, external: Github.install_url_select_target())
      else
        socket
@@ -257,7 +256,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
-    if socket.assigns.oauth_completed? do
+    if socket.assigns.has_fresh_token? do
       changeset =
         %BountyForm{}
         |> BountyForm.changeset(params)
@@ -297,7 +296,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
-    if socket.assigns.oauth_completed? do
+    if socket.assigns.has_fresh_token? do
       changeset =
         %TipForm{}
         |> TipForm.changeset(params)

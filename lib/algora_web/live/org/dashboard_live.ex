@@ -75,6 +75,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
+       # TODO: remove this once we have a way to check if the OAuth flow is complete
+       |> assign(:oauth_completed?, false)
        |> assign(:installations, installations)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -227,13 +229,31 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_info({:authenticated, user}, socket) do
-    {:noreply, socket |> assign(:current_user, user) |> redirect(external: Github.install_url_select_target())}
+    socket =
+      socket
+      |> assign(:current_user, user)
+      |> assign(:oauth_completed?, true)
+
+    case socket.assigns.pending_action do
+      {event, params} ->
+        socket = assign(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+
+      nil ->
+        {:noreply, socket}
+    end
   end
 
   @impl true
-  def handle_event("install_app", _params, socket) do
-    # TODO: immediately redirect to install_url if user has valid token
-    {:noreply, push_event(socket, "open_popup", %{url: socket.assigns.oauth_url})}
+  def handle_event("install_app" = event, unsigned_params, socket) do
+    {:noreply,
+     if socket.assigns.oauth_completed? do
+       redirect(socket, external: Github.install_url_select_target())
+     else
+       socket
+       |> assign(:pending_action, {event, unsigned_params})
+       |> push_event("open_popup", %{url: socket.assigns.oauth_url})
+     end}
   end
 
   def handle_event("create_bounty", %{"bounty_form" => params}, socket) do

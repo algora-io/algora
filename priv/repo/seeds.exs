@@ -159,13 +159,12 @@ for user <- pied_piper_members do
 end
 
 if customer_id = Algora.config([:stripe, :test_customer_id]) do
-  {:ok, cus} = Algora.PSP.Customer.retrieve(customer_id)
-  {:ok, pm} = Algora.PSP.PaymentMethod.retrieve(cus.invoice_settings.default_payment_method)
+  {:ok, cus} = Stripe.Customer.retrieve(customer_id)
+  {:ok, pm} = Stripe.PaymentMethod.retrieve(cus.invoice_settings.default_payment_method)
 
   customer =
-    upsert!(
+    insert!(
       :customer,
-      [:provider, :provider_id],
       %{
         provider_id: cus.id,
         provider_meta: Util.normalize_struct(cus),
@@ -175,9 +174,8 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
     )
 
   _payment_method =
-    upsert!(
+    insert!(
       :payment_method,
-      [:provider, :provider_id],
       %{
         provider_id: pm.id,
         provider_meta: Util.normalize_struct(pm),
@@ -188,7 +186,7 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
 end
 
 if account_id = Algora.config([:stripe, :test_account_id]) do
-  {:ok, acct} = Algora.PSP.Account.retrieve(account_id)
+  {:ok, acct} = Stripe.Account.retrieve(account_id)
 
   upsert!(
     :account,

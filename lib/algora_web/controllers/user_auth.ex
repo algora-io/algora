@@ -12,7 +12,21 @@ defmodule AlgoraWeb.UserAuth do
   def on_mount(:current_user, _params, session, socket) do
     case session do
       %{"user_id" => user_id} ->
-        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user(user_id) end)}
+        case socket.assigns[:current_user] do
+          %Accounts.User{} = _user ->
+            {:cont, socket}
+
+          nil ->
+            current_user = Accounts.get_user(user_id)
+            current_context = Accounts.get_last_context_user(current_user)
+            all_contexts = Accounts.get_contexts(current_user)
+
+            {:cont,
+             socket
+             |> Phoenix.Component.assign(:current_user, current_user)
+             |> Phoenix.Component.assign(:current_context, current_context)
+             |> Phoenix.Component.assign(:all_contexts, all_contexts)}
+        end
 
       %{} ->
         {:cont, Phoenix.Component.assign(socket, :current_user, nil)}
@@ -22,7 +36,11 @@ defmodule AlgoraWeb.UserAuth do
   def on_mount(:ensure_authenticated, _params, session, socket) do
     case get_authenticated_user(session, socket) do
       {:ok, user} ->
-        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> user end)}
+        {:cont,
+         socket
+         |> Phoenix.Component.assign_new(:current_user, fn -> user end)
+         |> Phoenix.Component.assign_new(:current_context, fn -> Accounts.get_last_context_user(user) end)
+         |> Phoenix.Component.assign_new(:all_contexts, fn -> Accounts.get_contexts(user) end)}
 
       {:error, :unauthenticated} ->
         {:halt, redirect_require_login(socket)}
@@ -36,7 +54,11 @@ defmodule AlgoraWeb.UserAuth do
           raise(AlgoraWeb.NotFoundError)
         end
 
-        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> user end)}
+        {:cont,
+         socket
+         |> Phoenix.Component.assign_new(:current_user, fn -> user end)
+         |> Phoenix.Component.assign_new(:current_context, fn -> Accounts.get_last_context_user(user) end)
+         |> Phoenix.Component.assign_new(:all_contexts, fn -> Accounts.get_contexts(user) end)}
 
       {:error, :unauthenticated} ->
         {:halt, redirect_require_login(socket)}
@@ -48,7 +70,7 @@ defmodule AlgoraWeb.UserAuth do
       %{"user_id" => user_id} ->
         new_socket = Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
 
-        case new_socket.assigns.current_user do
+        case new_socket.assigns[:current_user] do
           %Accounts.User{} = user ->
             {:ok, user}
 
@@ -94,7 +116,11 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def put_current_user(conn, user) do
-    conn = assign(conn, :current_user, user)
+    conn =
+      conn
+      |> assign(:current_user, user)
+      |> assign(:current_context, Accounts.get_last_context_user(user))
+      |> assign(:all_contexts, Accounts.get_contexts(user))
 
     conn
     |> renew_session()
@@ -130,7 +156,11 @@ defmodule AlgoraWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     user_id = get_session(conn, :user_id)
     user = user_id && Accounts.get_user(user_id)
-    assign(conn, :current_user, user)
+
+    conn
+    |> assign(:current_user, user)
+    |> assign(:current_context, Accounts.get_last_context_user(user))
+    |> assign(:all_contexts, Accounts.get_contexts(user))
   end
 
   @doc """

@@ -370,6 +370,8 @@ defmodule Algora.Accounts do
     {:ok, Repo.preload(user, :identities, force: true)}
   end
 
+  def last_context(nil), do: "nil"
+
   def last_context(%User{last_context: nil} = user) do
     orgs = Organizations.get_user_orgs(user)
 
@@ -412,6 +414,15 @@ defmodule Algora.Accounts do
 
   def last_context(%User{last_context: last_context}), do: last_context
 
+  def get_last_context_user(nil), do: nil
+
+  def get_last_context_user(%User{} = user) do
+    case last_context(user) do
+      "personal" -> user
+      last_context -> get_user_by_handle(last_context)
+    end
+  end
+
   def default_context, do: "personal"
 
   def set_context(%User{} = user, "personal") do
@@ -432,6 +443,12 @@ defmodule Algora.Accounts do
     else
       {:error, :unauthorized}
     end
+  end
+
+  def get_contexts(nil), do: []
+
+  def get_contexts(%User{} = user) do
+    [user | Organizations.get_user_orgs(user)]
   end
 
   defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")

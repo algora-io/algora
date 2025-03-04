@@ -4,7 +4,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
 
   import AlgoraWeb.Components.Achievement
   import AlgoraWeb.Components.Bounties
-  import AlgoraWeb.Components.Experts
+  import AlgoraWeb.Components.Users
   import Ecto.Changeset
 
   alias Algora.Accounts
@@ -63,10 +63,10 @@ defmodule AlgoraWeb.Community.DashboardLive do
   end
 
   def mount(_params, _session, socket) do
-    experts =
+    users =
       socket.assigns.current_user.tech_stack
       |> List.first()
-      |> Accounts.list_experts()
+      |> Accounts.list_community()
       |> Enum.take(6)
 
     if connected?(socket) do
@@ -77,7 +77,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
      socket
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-     |> assign(:experts, experts)
+     |> assign(:users, users)
      |> assign_tickets()
      |> assign_achievements()}
   end
@@ -112,13 +112,13 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </.section>
 
         <.section
-          :if={@experts != []}
-          title="Experts"
-          subtitle="Meet the experts on Algora"
-          link={~p"/experts"}
+          :if={@users != []}
+          title="Community"
+          subtitle="Meet the Algora community"
+          link={~p"/community"}
         >
           <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
-            <.experts experts={@experts} />
+            <.users users={@users} />
           </ul>
         </.section>
       </div>

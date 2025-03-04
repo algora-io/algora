@@ -453,14 +453,14 @@ defmodule Algora.Accounts do
 
   defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
 
-  # TODO: implement this
-  def list_experts(tech_stack) do
-    experts_file = :algora |> :code.priv_dir() |> Path.join("dev/experts/#{tech_stack}.json")
+  # TODO: fetch from db
+  def list_community(tech_stack) do
+    community_file = :algora |> :code.priv_dir() |> Path.join("dev/community/#{tech_stack}.json")
 
-    with true <- File.exists?(experts_file),
-         {:ok, contents} <- File.read(experts_file),
-         {:ok, experts} <- Jason.decode(contents) do
-      experts
+    with true <- File.exists?(community_file),
+         {:ok, contents} <- File.read(community_file),
+         {:ok, community} <- Jason.decode(contents) do
+      community
     else
       _ -> []
     end
@@ -485,7 +485,7 @@ defmodule Algora.Accounts do
 
     :algora
     |> :code.priv_dir()
-    |> Path.join("dev/experts")
+    |> Path.join("dev/community")
     |> File.ls!()
     |> Enum.filter(&String.ends_with?(&1, ".json"))
     |> Enum.map(&String.trim_trailing(&1, ".json"))

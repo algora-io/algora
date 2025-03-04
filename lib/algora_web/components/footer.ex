@@ -83,9 +83,9 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <a
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/experts"
+                    href="https://console.algora.io/community"
                   >
-                    Experts
+                    Community
                   </a>
                 </li>
                 <li>

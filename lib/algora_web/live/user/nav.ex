@@ -22,7 +22,7 @@ defmodule AlgoraWeb.User.Nav do
         {User.SettingsLive, _} -> :settings
         {User.TransactionsLive, _} -> :transactions
         {User.InstallationsLive, _} -> :installations
-        {AlgoraWeb.ExpertsLive, _} -> :experts
+        {AlgoraWeb.CommunityLive, _} -> :community
         {AlgoraWeb.BountiesLive, _} -> :bounties
         {_, _} -> nil
       end

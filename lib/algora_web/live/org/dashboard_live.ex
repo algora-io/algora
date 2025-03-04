@@ -132,7 +132,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </.card>
         </.section>
 
-        <.section :if={@installations != []}>
+        <.section>
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
             {create_bounty(assigns)}
             {create_tip(assigns)}
@@ -256,63 +256,77 @@ defmodule AlgoraWeb.Org.DashboardLive do
      end}
   end
 
-  def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
-    changeset =
-      %BountyForm{}
-      |> BountyForm.changeset(params)
-      |> Map.put(:action, :validate)
+  def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+    if socket.assigns.oauth_completed? do
+      changeset =
+        %BountyForm{}
+        |> BountyForm.changeset(params)
+        |> Map.put(:action, :validate)
 
-    amount = get_field(changeset, :amount)
-    ticket_ref = get_field(changeset, :ticket_ref)
+      amount = get_field(changeset, :amount)
+      ticket_ref = get_field(changeset, :ticket_ref)
 
-    with %{valid?: true} <- changeset,
-         {:ok, _bounty} <-
-           Bounties.create_bounty(%{
-             creator: socket.assigns.current_user,
-             owner: socket.assigns.current_user,
-             amount: amount,
-             ticket_ref: ticket_ref
-           }) do
+      with %{valid?: true} <- changeset,
+           {:ok, _bounty} <-
+             Bounties.create_bounty(%{
+               creator: socket.assigns.current_user,
+               owner: socket.assigns.current_user,
+               amount: amount,
+               ticket_ref: ticket_ref
+             }) do
+        {:noreply,
+         socket
+         |> assign_achievements()
+         |> put_flash(:info, "Bounty created")}
+      else
+        %{valid?: false} ->
+          {:noreply, assign(socket, :bounty_form, to_form(changeset))}
+
+        {:error, :already_exists} ->
+          {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
+      end
+    else
       {:noreply,
        socket
-       |> assign_achievements()
-       |> put_flash(:info, "Bounty created")}
-    else
-      %{valid?: false} ->
-        {:noreply, assign(socket, :bounty_form, to_form(changeset))}
-
-      {:error, :already_exists} ->
-        {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
-
-      {:error, _reason} ->
-        {:noreply, put_flash(socket, :error, "Something went wrong")}
+       |> assign(:pending_action, {event, unsigned_params})
+       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
     end
   end
 
-  def handle_event("create_tip", %{"tip_form" => params}, socket) do
-    changeset =
-      %TipForm{}
-      |> TipForm.changeset(params)
-      |> Map.put(:action, :validate)
+  def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
+    if socket.assigns.oauth_completed? do
+      changeset =
+        %TipForm{}
+        |> TipForm.changeset(params)
+        |> Map.put(:action, :validate)
 
-    with %{valid?: true} <- changeset,
-         {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
-         {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
-         {:ok, checkout_url} <-
-           Bounties.create_tip(%{
-             creator: socket.assigns.current_user,
-             owner: socket.assigns.current_user,
-             recipient: recipient,
-             amount: get_field(changeset, :amount)
-           }) do
-      {:noreply, redirect(socket, external: checkout_url)}
+      with %{valid?: true} <- changeset,
+           {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+           {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
+           {:ok, checkout_url} <-
+             Bounties.create_tip(%{
+               creator: socket.assigns.current_user,
+               owner: socket.assigns.current_user,
+               recipient: recipient,
+               amount: get_field(changeset, :amount)
+             }) do
+        {:noreply, redirect(socket, external: checkout_url)}
+      else
+        %{valid?: false} ->
+          {:noreply, assign(socket, :tip_form, to_form(changeset))}
+
+        {:error, reason} ->
+          Logger.error("Failed to create tip: #{inspect(reason)}")
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
+      end
     else
-      %{valid?: false} ->
-        {:noreply, assign(socket, :tip_form, to_form(changeset))}
-
-      {:error, reason} ->
-        Logger.error("Failed to create tip: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong")}
+      {:noreply,
+       socket
+       |> assign(:pending_action, {event, unsigned_params})
+       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
     end
   end
 

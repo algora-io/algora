@@ -145,10 +145,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <div class="relative h-full">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Top earners
+              Contracts
             </h2>
             <p class="text-sm text-muted-foreground">
-              Developers who have earned the most in your organization
+              Engage top-performing developers with contract opportunities
             </p>
           </div>
           <div class="pt-3 relative w-full overflow-auto">

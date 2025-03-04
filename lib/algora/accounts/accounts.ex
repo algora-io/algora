@@ -6,6 +6,7 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
+  alias Algora.Github
   alias Algora.Organizations
   alias Algora.Organizations.Member
   alias Algora.Payments.Transaction
@@ -342,6 +343,20 @@ defmodule Algora.Accounts do
     case Repo.one(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github")) do
       %Identity{provider_token: token} -> {:ok, token}
       _ -> {:error, :not_found}
+    end
+  end
+
+  def has_fresh_token?(%User{} = user) do
+    # TODO: use refresh tokens and check expiration
+    case get_access_token(user) do
+      {:ok, token} ->
+        case Github.get_user(token, user.provider_id) do
+          {:ok, _} -> true
+          _ -> false
+        end
+
+      _ ->
+        false
     end
   end
 

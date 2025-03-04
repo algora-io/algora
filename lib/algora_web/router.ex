@@ -62,7 +62,7 @@ defmodule AlgoraWeb.Router do
       # live "/dashboard", User.DashboardLive, :index
       live "/dashboard", Community.DashboardLive, :index
       live "/bounties", BountiesLive, :index
-      live "/experts", ExpertsLive, :index
+      live "/community", CommunityLive, :index
       live "/user/transactions", User.TransactionsLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index

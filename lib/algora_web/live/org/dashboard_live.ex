@@ -3,7 +3,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Achievement
-  import AlgoraWeb.Components.Experts
+  import AlgoraWeb.Components.Users
   import Ecto.Changeset
 
   alias Algora.Accounts
@@ -68,10 +68,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
     %{current_org: current_org} = socket.assigns
 
     if socket.assigns.current_user_role in [:admin, :mod] do
-      experts =
+      users =
         current_org.tech_stack
         |> List.first()
-        |> Accounts.list_experts()
+        |> Accounts.list_community()
         |> Enum.take(6)
 
       installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-       |> assign(:experts, experts)
+       |> assign(:users, users)
        |> assign_achievements()}
     else
       {:ok, redirect(socket, to: ~p"/org/#{current_org.handle}/home")}
@@ -146,13 +146,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
 
         <.section
-          :if={@experts != []}
-          title="Experts"
-          subtitle="Meet the experts on Algora"
-          link={~p"/experts"}
+          :if={@users != []}
+          title="Community"
+          subtitle="Meet the Algora community"
+          link={~p"/community"}
         >
           <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
-            <.experts experts={@experts} />
+            <.users users={@users} />
           </ul>
         </.section>
       </div>

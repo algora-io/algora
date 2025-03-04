@@ -38,17 +38,17 @@
         </li>
         <li>
           <.link
-            navigate={~p"/experts"}
+            navigate={~p"/community"}
             class={[
               "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-              if(@active_tab == :experts,
+              if(@active_tab == :community,
                 do: "bg-gray-800 text-white",
                 else: "text-gray-400 hover:bg-gray-800 hover:text-white"
               )
             ]}
           >
             <.icon name="tabler-users" class="h-6 w-6 shrink-0" />
-            <span class="sr-only">Experts</span>
+            <span class="sr-only">Community</span>
           </.link>
         </li>
         <li>

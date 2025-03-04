@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Components.ExpertCard do
+defmodule AlgoraWeb.Components.UserCard do
   @moduledoc false
   use AlgoraWeb.Component
 
@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Components.ExpertCard do
   attr :bio, :string, required: true
   attr :twitter_handle, :string, required: true
 
-  def expert_card(assigns) do
+  def user_card(assigns) do
     ~H"""
     <a href={"https://github.com/#{@github_handle}"} target="_blank" rel="noopener">
       <div class="group/card from-white/[2%] via-white/[2%] to-white/[2%] bg-purple-200/[5%] relative h-full rounded-xl border border-white/10 bg-gradient-to-br hover:bg-purple-200/[7.5%] hover:border-white/15 md:gap-8">

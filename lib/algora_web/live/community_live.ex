@@ -1,8 +1,8 @@
-defmodule AlgoraWeb.ExpertsLive do
+defmodule AlgoraWeb.CommunityLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  import AlgoraWeb.Components.Experts
+  import AlgoraWeb.Components.Users
 
   alias Algora.Accounts
 
@@ -16,24 +16,27 @@ defmodule AlgoraWeb.ExpertsLive do
      socket
      |> assign(:techs, techs)
      |> assign(:tech, tech)
-     |> assign_experts()}
+     |> assign_users()}
   end
 
   def handle_event("select_tech", %{"tech" => tech}, socket) do
     {:noreply,
      socket
      |> assign(:tech, tech)
-     |> assign_experts()}
+     |> assign_users()}
   end
 
-  defp assign_experts(socket) do
-    assign(socket, :experts, Accounts.list_experts(socket.assigns.tech))
+  defp assign_users(socket) do
+    users = Accounts.list_community(socket.assigns.tech)
+    remainder = rem(length(users), 3)
+    trimmed_users = if remainder == 0, do: users, else: Enum.slice(users, 0, length(users) - remainder)
+    assign(socket, :users, trimmed_users)
   end
 
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
-      <.section title="Experts" subtitle="View all experts on Algora">
+      <.section title="Community" subtitle="Meet the Algora community">
         <div class="-mt-4 mb-4 flex flex-wrap gap-2">
           <%= for tech <- @techs do %>
             <div
@@ -64,7 +67,7 @@ defmodule AlgoraWeb.ExpertsLive do
           <% end %>
         </div>
         <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
-          <.experts experts={@experts} />
+          <.users users={@users} />
         </ul>
       </.section>
     </div>

@@ -532,7 +532,7 @@ defmodule AlgoraWeb.ClaimLive do
 
                     <div>
                       <.label>On behalf of</.label>
-                      <.dropdown id="context-dropdown" class="mt-2">
+                      <.dropdown id="context-dropdown" class="mt-2" border>
                         <:img src={@selected_context.avatar_url} />
                         <:title>{@selected_context.name}</:title>
                         <:subtitle>@{@selected_context.handle}</:subtitle>

@@ -123,6 +123,7 @@ defmodule AlgoraWeb.CoreComponents do
   """
   attr :id, :string, required: true
   attr :class, :string, default: nil
+  attr :border, :boolean, default: false
 
   slot :img do
     attr :src, :string
@@ -147,7 +148,12 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full rounded-md p-3 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring border border-input"
+          class={
+            classes([
+              "group w-full rounded-md p-3 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring",
+              @border && "border border-input"
+            ])
+          }
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
           data-active-class="bg-accent"

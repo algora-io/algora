@@ -30,6 +30,7 @@ erich =
           provider: "github",
           provider_login: github_user["login"],
           provider_id: to_string(github_user["id"]),
+          provider_meta: Util.normalize_struct(github_user),
           handle: github_user["login"],
           display_name: github_user["name"],
           avatar_url: github_user["avatar_url"],
@@ -144,7 +145,12 @@ carver =
       tech_stack: ["Python", "Go", "Rust", "Terraform"],
       hourly_rate_min: Money.new!(200, :USD),
       hourly_rate_max: Money.new!(300, :USD),
-      hours_per_week: 30
+      hours_per_week: 30,
+      provider_meta: %{
+        "company" => "Chaos Engineering LLC",
+        "location" => "San Francisco, CA",
+        "twitter_handle" => "the_real_carver"
+      }
     }
   )
 
@@ -319,7 +325,12 @@ big_head =
       country: "IT",
       hourly_rate_min: Money.new!(150, :USD),
       hourly_rate_max: Money.new!(200, :USD),
-      hours_per_week: 25
+      hours_per_week: 25,
+      provider_meta: %{
+        "company" => "Stanford University",
+        "location" => "Palo Alto, CA",
+        "twitter_handle" => "bighead_stanford"
+      }
     }
   )
 
@@ -338,7 +349,12 @@ jian_yang =
       country: "HK",
       hourly_rate_min: Money.new!(125, :USD),
       hourly_rate_max: Money.new!(175, :USD),
-      hours_per_week: 35
+      hours_per_week: 35,
+      provider_meta: %{
+        "company" => "@SeeFood",
+        "location" => "Hong Kong",
+        "twitter_handle" => "jianyang"
+      }
     }
   )
 
@@ -357,7 +373,12 @@ john =
       country: "GB",
       hourly_rate_min: Money.new!(140, :USD),
       hourly_rate_max: Money.new!(190, :USD),
-      hours_per_week: 40
+      hours_per_week: 40,
+      provider_meta: %{
+        "company" => "DataRack Solutions",
+        "location" => "London, UK",
+        "twitter_handle" => "johnstafford_tech"
+      }
     }
   )
 
@@ -376,7 +397,12 @@ aly =
       country: "IN",
       hourly_rate_min: Money.new!(160, :USD),
       hourly_rate_max: Money.new!(220, :USD),
-      hours_per_week: 35
+      hours_per_week: 35,
+      provider_meta: %{
+        "company" => "Distributed Systems Inc.",
+        "location" => "Bangalore, India",
+        "twitter_handle" => "aly_distributed"
+      }
     }
   )
 

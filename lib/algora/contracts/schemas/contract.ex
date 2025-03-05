@@ -88,12 +88,7 @@ defmodule Algora.Contracts.Contract do
       :client_id,
       :contractor_id
     ])
-    |> validate_required([
-      :status,
-      :hourly_rate,
-      :hours_per_week,
-      :client_id
-    ])
+    |> validate_required([:status, :hours_per_week, :client_id])
     |> validate_number(:hours_per_week, greater_than: 0)
     |> Validations.validate_money_positive(:hourly_rate)
     |> foreign_key_constraint(:client_id)

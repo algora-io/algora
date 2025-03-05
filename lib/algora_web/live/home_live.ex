@@ -10,6 +10,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Accounts.User
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
@@ -153,38 +154,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
           <!-- New Footer -->
-          <footer class="border-t">
-            <div class="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
-              <div class="flex justify-center space-x-6 md:order-2">
-                <.link
-                  href={AlgoraWeb.Constants.get(:twitter_url)}
-                  class="text-muted-foreground hover:text-foreground"
-                >
-                  <span class="sr-only">Twitter</span>
-                  <.icon name="tabler-brand-twitter" class="h-6 w-6" />
-                </.link>
-                <.link
-                  href={AlgoraWeb.Constants.get(:github_url)}
-                  class="text-muted-foreground hover:text-foreground"
-                >
-                  <span class="sr-only">GitHub</span>
-                  <.icon name="tabler-brand-github" class="h-6 w-6" />
-                </.link>
-                <.link
-                  href={AlgoraWeb.Constants.get(:discord_url)}
-                  class="text-muted-foreground hover:text-foreground"
-                >
-                  <span class="sr-only">Discord</span>
-                  <.icon name="tabler-brand-discord" class="h-6 w-6" />
-                </.link>
-              </div>
-              <div class="mt-8 md:order-1 md:mt-0">
-                <p class="text-center text-sm leading-5 text-muted-foreground">
-                  &copy; {DateTime.utc_now().year} Algora, Public Benefit Corporation
-                </p>
-              </div>
-            </div>
-          </footer>
+          <Footer.footer />
         </div>
       </main>
     </div>

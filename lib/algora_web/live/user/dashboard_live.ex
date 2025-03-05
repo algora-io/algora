@@ -14,13 +14,15 @@ defmodule AlgoraWeb.User.DashboardLive do
       Bounties.subscribe()
     end
 
+    contracts = Algora.Contracts.list_contracts(status: :draft, contractor_id: socket.assigns.current_user.id)
+
     socket =
       socket
       |> assign(:view_mode, "compact")
       |> assign(:available_to_work, true)
       |> assign(:hourly_rate, Money.new!(50, :USD))
       |> assign(:hours_per_week, 40)
-      |> assign(:contracts, Algora.Contracts.list_contracts(open?: true, limit: 10))
+      |> assign(:contracts, contracts)
       |> assign(:achievements, fetch_achievements())
       |> assign_tickets()
 
@@ -33,7 +35,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       <!-- Hourly Bounties Section -->
       <%= if length(@contracts) > 0 do %>
         <div class="relative mx-auto h-full max-w-4xl p-6">
-          <div class="flex justify-between px-6">
+          <div class="flex justify-between">
             <div class="flex flex-col space-y-1.5">
               <h2 class="text-2xl font-semibold leading-none tracking-tight">
                 Hourly contracts
@@ -41,7 +43,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               <p class="text-sm text-muted-foreground">Paid out weekly</p>
             </div>
           </div>
-          <div class="-ml-4 px-6">
+          <div class="-ml-4">
             <div class="relative w-full overflow-auto">
               <table class="w-full caption-bottom text-sm">
                 <tbody>
@@ -206,8 +208,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply, assign(socket, :view_mode, mode)}
   end
 
-  def handle_event("accept_contract", %{"org" => _org_handle}, socket) do
-    # TODO: Implement contract acceptance logic
+  def handle_event("view_contract", %{"org" => _org_handle}, socket) do
     {:noreply, socket}
   end
 
@@ -328,10 +329,7 @@ defmodule AlgoraWeb.User.DashboardLive do
                 {@contract.client.bio}
               </div>
               <div class="group flex items-center gap-2">
-                <div
-                  :if={@contract.status != :draft}
-                  class="font-display text-xl font-semibold text-success"
-                >
+                <div class="font-display text-xl font-semibold text-success">
                   {Money.to_string!(@contract.hourly_rate)}/hr
                 </div>
                 <span class="text-sm text-muted-foreground">
@@ -352,20 +350,17 @@ defmodule AlgoraWeb.User.DashboardLive do
           <div class="flex flex-col items-end gap-3">
             <div class="text-right">
               <div class="whitespace-nowrap text-sm text-muted-foreground">Total contract value</div>
-              <div
-                :if={@contract.status != :draft}
-                class="font-display text-lg font-semibold text-foreground"
-              >
+              <div class="font-display text-lg font-semibold text-foreground">
                 {Money.to_string!(Money.mult!(@contract.hourly_rate, @contract.hours_per_week))} / wk
               </div>
             </div>
             <.button
               navigate={~p"/org/#{@contract.client.handle}/contracts/#{@contract.id}"}
-              phx-click="accept_contract"
+              phx-click="view_contract"
               phx-value-org={@contract.client.handle}
               size="sm"
             >
-              Accept contract
+              View contract
             </.button>
           </div>
         </div>

@@ -43,7 +43,7 @@ defmodule Algora.Organizations do
         )
 
       contract_changeset =
-        Contract.draft_changeset(
+        Contract.changeset(
           %Contract{},
           Map.put(params.contract, :client_id, org.id)
         )

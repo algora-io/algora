@@ -6,6 +6,7 @@ defmodule Algora.Contracts.Contract do
   alias Algora.Activities.Activity
   alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
+  alias Algora.Validations
 
   typed_schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
@@ -78,6 +79,8 @@ defmodule Algora.Contracts.Contract do
       :status,
       :sequence_number,
       :hourly_rate,
+      :hourly_rate_min,
+      :hourly_rate_max,
       :hours_per_week,
       :start_date,
       :end_date,
@@ -89,40 +92,20 @@ defmodule Algora.Contracts.Contract do
       :status,
       :hourly_rate,
       :hours_per_week,
-      :start_date,
-      :client_id,
-      :contractor_id
+      :client_id
     ])
     |> validate_number(:hours_per_week, greater_than: 0)
-    |> validate_number(:hourly_rate, greater_than: 0)
+    |> Validations.validate_money_positive(:hourly_rate)
     |> foreign_key_constraint(:client_id)
     |> foreign_key_constraint(:contractor_id)
     |> generate_id()
+    |> put_original_contract_id()
   end
 
-  def draft_changeset(contract, attrs) do
-    contract
-    |> cast(attrs, [
-      :status,
-      :sequence_number,
-      :hourly_rate_min,
-      :hourly_rate_max,
-      :hours_per_week,
-      :start_date,
-      :end_date,
-      :original_contract_id,
-      :client_id
-    ])
-    |> validate_required([
-      :status,
-      :hourly_rate_min,
-      :hourly_rate_max,
-      :hours_per_week,
-      :start_date,
-      :client_id
-    ])
-    |> validate_number(:hours_per_week, greater_than: 0)
-    |> foreign_key_constraint(:client_id)
-    |> generate_id()
+  def put_original_contract_id(changeset) do
+    case get_field(changeset, :original_contract_id) do
+      nil -> put_change(changeset, :original_contract_id, get_field(changeset, :id))
+      _existing -> changeset
+    end
   end
 end

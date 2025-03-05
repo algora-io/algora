@@ -134,6 +134,8 @@ defmodule Algora.Accounts do
       id: u.id,
       handle: u.handle,
       name: u.name,
+      provider_login: u.provider_login,
+      provider_meta: u.provider_meta,
       avatar_url: u.avatar_url,
       bio: u.bio,
       country: u.country,

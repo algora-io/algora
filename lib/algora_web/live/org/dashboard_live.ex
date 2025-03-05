@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   import Ecto.Changeset
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Contracts
   alias Algora.Github
@@ -62,11 +63,33 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  defmodule ContractForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :hourly_rate, USD
+      field :hours_per_week, :integer
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:hourly_rate, :hours_per_week])
+      |> validate_required([:hourly_rate, :hours_per_week])
+      |> Validations.validate_money_positive(:hourly_rate)
+      |> validate_number(:hours_per_week, greater_than: 0, less_than_or_equal_to: 40)
+    end
+  end
+
   @impl true
   def mount(_params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
     if socket.assigns.current_user_role in [:admin, :mod] do
+      top_earners = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
+
       installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
       if connected?(socket) do
@@ -77,9 +100,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
        socket
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
+       |> assign(:matching_devs, top_earners)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+       |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+       |> assign(:show_contract_modal, false)
+       |> assign(:selected_developer, nil)
+       |> assign_contracts()
        |> assign_achievements()}
     else
       {:ok, redirect(socket, to: ~p"/org/#{current_org.handle}/home")}
@@ -137,10 +165,230 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {create_tip(assigns)}
           </div>
         </.section>
+
+        <div class="relative h-full">
+          <div class="flex flex-col space-y-1.5">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight">
+              Contracts
+            </h2>
+            <p class="text-sm text-muted-foreground">
+              Engage top-performing developers with contract opportunities
+            </p>
+          </div>
+          <div class="pt-3 relative w-full overflow-auto">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for user <- @matching_devs do %>
+                  <.matching_dev user={user} contracts={@contracts} current_org={@current_org} />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
     {sidebar(assigns)}
+    <.drawer show={@show_contract_modal} direction="right" on_cancel="close_contract_drawer">
+      <.drawer_header :if={@selected_developer}>
+        <.drawer_title>Offer Contract</.drawer_title>
+        <.drawer_description>
+          Once you send an offer, {@selected_developer.name} will be notified and can accept or decline.
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content :if={@selected_developer} class="mt-4">
+        <.form for={@contract_form} phx-change="validate_contract" phx-submit="create_contract">
+          <div class="flex flex-col gap-8">
+            <.card>
+              <.card_header>
+                <.card_title>Developer</.card_title>
+              </.card_header>
+              <.card_content>
+                <div class="flex items-start gap-4">
+                  <.avatar class="h-20 w-20 rounded-full">
+                    <.avatar_image
+                      src={@selected_developer.avatar_url}
+                      alt={@selected_developer.name}
+                    />
+                    <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+                  </.avatar>
+
+                  <div>
+                    <div class="flex items-center gap-1 text-base text-foreground">
+                      <span class="font-semibold">{@selected_developer.name}</span>
+                    </div>
+
+                    <div
+                      :if={@selected_developer.provider_meta}
+                      class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                    >
+                      <.link
+                        :if={@selected_developer.provider_login}
+                        href={"https://github.com/#{@selected_developer.provider_login}"}
+                        target="_blank"
+                        class="flex items-center gap-1 hover:underline"
+                      >
+                        <Logos.github class="h-4 w-4" />
+                        <span class="whitespace-nowrap">{@selected_developer.provider_login}</span>
+                      </.link>
+                      <.link
+                        :if={@selected_developer.provider_meta["twitter_handle"]}
+                        href={"https://x.com/#{@selected_developer.provider_meta["twitter_handle"]}"}
+                        target="_blank"
+                        class="flex items-center gap-1 hover:underline"
+                      >
+                        <.icon name="tabler-brand-x" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">
+                          {@selected_developer.provider_meta["twitter_handle"]}
+                        </span>
+                      </.link>
+                      <div
+                        :if={@selected_developer.provider_meta["location"]}
+                        class="flex items-center gap-1"
+                      >
+                        <.icon name="tabler-map-pin" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">
+                          {@selected_developer.provider_meta["location"]}
+                        </span>
+                      </div>
+                      <div
+                        :if={@selected_developer.provider_meta["company"]}
+                        class="flex items-center gap-1"
+                      >
+                        <.icon name="tabler-building" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">
+                          {@selected_developer.provider_meta["company"] |> String.trim_leading("@")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="pt-1.5 flex flex-wrap gap-2">
+                      <%= for tech <- @selected_developer.tech_stack do %>
+                        <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+                          {tech}
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </.card_content>
+            </.card>
+
+            <.card>
+              <.card_header>
+                <.card_title>Contract Details</.card_title>
+              </.card_header>
+              <.card_content>
+                <div class="space-y-4">
+                  <.input
+                    label="Hourly Rate"
+                    icon="tabler-currency-dollar"
+                    field={@contract_form[:hourly_rate]}
+                  />
+                  <.input label="Hours per Week" field={@contract_form[:hours_per_week]} />
+                </div>
+              </.card_content>
+            </.card>
+
+            <div class="ml-auto flex gap-4">
+              <.button variant="secondary" phx-click="close_contract_drawer" type="button">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Send Contract Offer <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     """
+  end
+
+  defp matching_dev(assigns) do
+    ~H"""
+    <tr class="border-b transition-colors">
+      <td class="py-4 align-middle">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-start gap-4">
+            <.link navigate={User.url(@user)}>
+              <.avatar class="h-20 w-20 rounded-full">
+                <.avatar_image src={@user.avatar_url} alt={@user.name} />
+                <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+              </.avatar>
+            </.link>
+
+            <div>
+              <div class="flex items-center gap-1 text-base text-foreground">
+                <.link navigate={User.url(@user)} class="font-semibold hover:underline">
+                  {@user.name}
+                </.link>
+              </div>
+
+              <div
+                :if={@user.provider_meta}
+                class="pt-0.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+              >
+                <.link
+                  :if={@user.provider_login}
+                  href={"https://github.com/#{@user.provider_login}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <Logos.github class="h-4 w-4" />
+                  <span class="whitespace-nowrap">{@user.provider_login}</span>
+                </.link>
+                <.link
+                  :if={@user.provider_meta["twitter_handle"]}
+                  href={"https://x.com/#{@user.provider_meta["twitter_handle"]}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <.icon name="tabler-brand-x" class="h-4 w-4" />
+                  <span class="whitespace-nowrap">{@user.provider_meta["twitter_handle"]}</span>
+                </.link>
+                <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
+                  <.icon name="tabler-map-pin" class="h-4 w-4" />
+                  <span class="whitespace-nowrap">{@user.provider_meta["location"]}</span>
+                </div>
+                <div :if={@user.provider_meta["company"]} class="flex items-center gap-1">
+                  <.icon name="tabler-building" class="h-4 w-4" />
+                  <span class="whitespace-nowrap">
+                    {@user.provider_meta["company"] |> String.trim_leading("@")}
+                  </span>
+                </div>
+              </div>
+
+              <div class="pt-1.5 flex flex-wrap gap-2">
+                <%= for tech <- @user.tech_stack do %>
+                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+                    {tech}
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          <%= if contract_for_user(@contracts, @user) do %>
+            <.button
+              variant="secondary"
+              navigate={
+                ~p"/org/#{@current_org.handle}/contracts/#{contract_for_user(@contracts, @user).id}"
+              }
+            >
+              View contract
+            </.button>
+          <% else %>
+            <.button phx-click="offer_contract" phx-value-user_id={@user.id}>
+              Offer contract
+            </.button>
+          <% end %>
+        </div>
+      </td>
+    </tr>
+    """
+  end
+
+  defp contract_for_user(contracts, user) do
+    Enum.find(contracts, fn contract -> contract.contractor_id == user.id end)
   end
 
   defp create_bounty(assigns) do
@@ -327,6 +575,70 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:pending_action, {event, unsigned_params})
        |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
     end
+  end
+
+  def handle_event("offer_contract", %{"user_id" => user_id}, socket) do
+    developer = Enum.find(socket.assigns.matching_devs, &(&1.id == user_id))
+
+    {:noreply,
+     socket
+     |> assign(:selected_developer, developer)
+     |> assign(:show_contract_modal, true)}
+  end
+
+  def handle_event("offer_contract", _params, socket) do
+    # When no user_id is provided, use the user from the current row
+    {:noreply, put_flash(socket, :error, "Please select a developer first")}
+  end
+
+  def handle_event("close_contract_drawer", _params, socket) do
+    {:noreply, assign(socket, :show_contract_modal, false)}
+  end
+
+  def handle_event("validate_contract", %{"contract_form" => params}, socket) do
+    changeset =
+      %ContractForm{}
+      |> ContractForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :contract_form, to_form(changeset))}
+  end
+
+  def handle_event("create_contract", %{"contract_form" => params}, socket) do
+    changeset = ContractForm.changeset(%ContractForm{}, params)
+
+    case apply_action(changeset, :save) do
+      {:ok, data} ->
+        contract_params = %{
+          client_id: socket.assigns.current_org.id,
+          contractor_id: socket.assigns.selected_developer.id,
+          hourly_rate: data.hourly_rate,
+          hours_per_week: data.hours_per_week,
+          status: :draft
+        }
+
+        case Contracts.create_contract(contract_params) do
+          {:ok, _contract} ->
+            # TODO: send email
+            {:noreply,
+             socket
+             |> assign(:show_contract_modal, false)
+             |> assign_contracts()
+             |> put_flash(:info, "Contract offer sent to #{socket.assigns.selected_developer.name}")}
+
+          {:error, changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to create contract: #{inspect(changeset.errors)}")}
+        end
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :contract_form, to_form(changeset))}
+    end
+  end
+
+  defp assign_contracts(socket) do
+    contracts = Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: :draft)
+
+    assign(socket, :contracts, contracts)
   end
 
   defp assign_achievements(socket) do

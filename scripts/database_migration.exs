@@ -8,19 +8,20 @@ defmodule DatabaseMigration do
   the result in the same COPY format.
 
   Functionality:
-  1. Reads a PostgreSQL dump file containing COPY statements and their associated data.
-  2. Processes each COPY section (extract, transform, load).
-  3. Applies transformations based on table names.
-  4. Outputs the transformed data in COPY format.
-  5. Discards COPY sections for tables not in the allowed list.
+  1. Dumps the PostgreSQL database from MIGRATION_URL environment variable
+  2. Reads a PostgreSQL dump file containing COPY statements and their associated data.
+  3. Processes each COPY section (extract, transform, load).
+  4. Applies transformations based on table names.
+  5. Outputs the transformed data in COPY format.
+  6. Discards COPY sections for tables not in the allowed list.
 
   Usage:
-  - Set the input_file to your PostgreSQL dump file path.
-  - Set the output_file to your desired output file path.
+  - Set the MIGRATION_URL environment variable to the source database URL
   - Run the script using: elixir scripts/database_migration.exs
   """
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Admin
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -1339,26 +1340,52 @@ defmodule DatabaseMigration do
     result
   end
 
-  def run! do
-    input_file = ".local/db/v1-data-2025-02-13.sql"
-    output_file = ".local/db/v2-data-2025-02-13.sql"
+  defp dump_database!(output_path) do
+    {output, exit_code} =
+      System.cmd(
+        "pg_dump",
+        [
+          System.fetch_env!("MIGRATION_URL"),
+          "-N",
+          "supabase_functions",
+          "-a",
+          "-f",
+          output_path
+        ],
+        stderr_to_stdout: true
+      )
 
+    if exit_code != 0 do
+      Logger.error(output)
+      raise "Failed to dump database with exit code: #{exit_code}"
+    end
+
+    :ok
+  end
+
+  def run! do
     System.put_env("MIGRATION", "true")
 
-    if File.exists?(input_file) or File.exists?(output_file) do
-      IO.puts("⏳ Starting migration...")
+    pwd = ".local/db"
+    File.mkdir_p!(pwd)
 
-      {total_time, _} =
-        :timer.tc(fn ->
-          :ok = time_step("Processing dump", fn -> process_dump(input_file, output_file) end)
-          :ok = time_step("Clearing tables", fn -> clear_tables!() end)
-          {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_file]) end)
-          :ok = time_step("Backfilling repositories", fn -> Algora.Admin.backfill_repos!() end)
-          :ok = time_step("Backfilling claims", fn -> Algora.Admin.backfill_claims!() end)
-        end)
+    timestamp = Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
+    input_path = Path.join(pwd, "v1-data-#{timestamp}.sql")
+    output_path = Path.join(pwd, "v2-data-#{timestamp}.sql")
 
-      IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
-    end
+    IO.puts("⏳ Starting migration...")
+
+    {total_time, _} =
+      :timer.tc(fn ->
+        :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
+        :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
+        :ok = time_step("Clearing tables", fn -> clear_tables!() end)
+        {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
+        :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
+        :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
+      end)
+
+    IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
   end
 end
 

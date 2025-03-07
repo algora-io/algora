@@ -56,7 +56,7 @@ defmodule Algora.Bounties do
     changeset
     |> Repo.insert_with_activity(%{
       type: :bounty_posted,
-      notify_users: [creator.id]
+      notify_users: []
     })
     |> case do
       {:ok, bounty} ->
@@ -305,7 +305,7 @@ defmodule Algora.Bounties do
        }) do
     case Workspace.ensure_user(token, provider_login) do
       {:ok, user} ->
-        activity_attrs = %{type: :claim_submitted, notify_users: [user.id]}
+        activity_attrs = %{type: :claim_submitted, notify_users: []}
 
         claim_attrs = %{
           target_id: target.id,
@@ -625,7 +625,7 @@ defmodule Algora.Bounties do
       })
       |> Repo.insert_with_activity(%{
         type: :tip_awarded,
-        notify_users: [recipient.id]
+        notify_users: []
       })
     end
   end

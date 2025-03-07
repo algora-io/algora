@@ -543,7 +543,7 @@ defmodule Algora.Contracts do
     |> change(%{status: :paid})
     |> Repo.update_with_activity(%{
       type: :contract_paid,
-      notify_users: [contract.client_id, contract.contractor_id]
+      notify_users: []
     })
   end
 
@@ -563,7 +563,7 @@ defmodule Algora.Contracts do
     })
     |> Repo.insert_with_activity(%{
       type: :contract_renewed,
-      notify_users: [contract.client_id, contract.contractor_id]
+      notify_users: []
     })
   end
 

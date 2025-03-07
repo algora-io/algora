@@ -144,7 +144,8 @@ defmodule Algora.Bounties do
       type: :claim,
       started_at: claim.inserted_at,
       user: claim.user,
-      group_id: "claim-#{claim.group_id}",
+      group_id: claim.group_id,
+      solution_id: "claim-#{claim.group_id}",
       indicator: "🟢",
       solution: "##{claim.source.number}"
     }
@@ -155,7 +156,8 @@ defmodule Algora.Bounties do
       type: :attempt,
       started_at: attempt.inserted_at,
       user: attempt.user,
-      group_id: "attempt-#{attempt.id}",
+      group_id: attempt.id,
+      solution_id: "attempt-#{attempt.id}",
       indicator: get_attempt_emoji(attempt),
       solution: "WIP"
     }
@@ -183,9 +185,9 @@ defmodule Algora.Bounties do
         solution = Enum.find(solutions, &(&1.type == :claim)) || List.first(solutions)
         %{solution | started_at: started_at}
       end)
-      |> Enum.group_by(& &1.group_id)
-      |> Enum.sort_by(fn {_group_id, solutions} -> Enum.min_by(solutions, & &1.started_at).started_at end)
-      |> Enum.map(fn {_group_id, solutions} ->
+      |> Enum.group_by(& &1.solution_id)
+      |> Enum.sort_by(fn {_solution_id, solutions} -> Enum.min_by(solutions, & &1.started_at).started_at end)
+      |> Enum.map(fn {_solution_id, solutions} ->
         primary_solution = Enum.min_by(solutions, & &1.started_at)
         timestamp = Calendar.strftime(primary_solution.started_at, "%b %d, %Y, %I:%M:%S %p")
 
@@ -195,7 +197,14 @@ defmodule Algora.Bounties do
           |> Enum.map(&"@#{&1.user.provider_login}")
           |> Util.format_name_list()
 
-        "| #{primary_solution.indicator} #{users} | #{timestamp} | #{primary_solution.solution} |"
+        actions =
+          if primary_solution.type == :claim do
+            "[Reward](#{AlgoraWeb.Endpoint.url()}/claims/#{primary_solution.group_id})"
+          else
+            ""
+          end
+
+        "| #{primary_solution.indicator} #{users} | #{timestamp} | #{primary_solution.solution} | #{actions} |"
       end)
 
     solutions_table =
@@ -204,8 +213,8 @@ defmodule Algora.Bounties do
       else
         """
 
-        | Attempt | Started (UTC) | Solution |
-        | --- | --- | --- |
+        | Attempt | Started (UTC) | Solution | Actions |
+        | --- | --- | --- | --- |
         #{Enum.join(solutions, "\n")}
         """
       end

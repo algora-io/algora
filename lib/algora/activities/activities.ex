@@ -5,6 +5,7 @@ defmodule Algora.Activities do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Activities.Activity
+  alias Algora.Activities.DiscordViews
   alias Algora.Activities.Router
   alias Algora.Activities.Views
   alias Algora.Bounties.Bounty
@@ -276,33 +277,41 @@ defmodule Algora.Activities do
     end)
   end
 
-  def notify_users(_activity, []), do: :ok
-
   def notify_users(activity, users_to_notify) do
     title = Views.render(activity, :title)
     body = Views.render(activity, :txt)
 
-    users_to_notify
-    |> Enum.reduce([], fn
-      %{name: display_name, email: email, id: id}, acc ->
-        changeset =
-          Algora.Activities.SendEmail.changeset(%{
-            title: title,
-            body: body,
-            user_id: id,
-            activity_id: activity.id,
-            activity_type: activity.type,
-            activity_table: activity.assoc_name,
-            name: display_name,
-            email: email
-          })
+    email_jobs =
+      Enum.reduce(users_to_notify, [], fn
+        %{name: display_name, email: email, id: id}, acc ->
+          changeset =
+            Algora.Activities.SendEmail.changeset(%{
+              title: title,
+              body: body,
+              user_id: id,
+              activity_id: activity.id,
+              activity_type: activity.type,
+              activity_table: activity.assoc_name,
+              name: display_name,
+              email: email
+            })
 
-        [changeset | acc]
+          [changeset | acc]
 
-      _user, acc ->
-        acc
-    end)
-    |> Oban.insert_all()
+        _user, acc ->
+          acc
+      end)
+
+    dbg(DiscordViews.render(activity))
+
+    discord_job =
+      if discord_payload = DiscordViews.render(activity) do
+        [Algora.Activities.SendDiscord.changeset(%{payload: discord_payload})]
+      else
+        []
+      end
+
+    Oban.insert_all(email_jobs ++ discord_job)
   end
 
   def redirect_url_for_activity(activity) do

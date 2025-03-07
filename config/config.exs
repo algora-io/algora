@@ -38,7 +38,8 @@ config :algora, Oban,
     prompt_payout_connect: 100,
     transfers: 1,
     activity_notifier: 1,
-    activity_mailer: 1
+    activity_mailer: 1,
+    activity_discord: 10
   ]
 
 # Configures the mailer

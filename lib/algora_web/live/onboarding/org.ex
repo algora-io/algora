@@ -127,14 +127,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       field :hourly_rate_max, :integer
       field :hours_per_week, :integer
       field :hiring, :boolean
-      field :company_types, {:array, :string}
+      field :categories, {:array, :string}
     end
 
     def hiring_options do
       [{"Yes", "true"}, {"No", "false"}]
     end
 
-    def company_types_options do
+    def categories_options do
       [
         {"Open source company", "open_source"},
         {"Closed source company", "closed_source"},
@@ -144,7 +144,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
 
     def init do
-      to_form(PreferencesForm.changeset(%PreferencesForm{}, %{company_types: []}))
+      to_form(PreferencesForm.changeset(%PreferencesForm{}, %{categories: []}))
     end
 
     def changeset(form, attrs) do
@@ -154,7 +154,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         :hourly_rate_max,
         :hours_per_week,
         :hiring,
-        :company_types
+        :categories
       ])
       |> validate_required([:hourly_rate_min], message: "Please enter a minimum hourly rate")
       |> validate_required([:hourly_rate_max], message: "Please enter a maximum hourly rate")
@@ -163,14 +163,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_number(:hourly_rate_min, greater_than: 0)
       |> validate_number(:hourly_rate_max, greater_than: 0)
       |> validate_number(:hours_per_week, greater_than: 0)
-      |> validate_length(:company_types,
-        min: 1,
-        message: "Please select at least one company type"
-      )
-      |> validate_subset(
-        :company_types,
-        Enum.map(PreferencesForm.company_types_options(), &elem(&1, 1))
-      )
+      |> validate_length(:categories, min: 1, message: "Please select at least one category")
+      |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
       |> validate_rate_range()
     end
 
@@ -409,6 +403,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
             tech_stack: tech_stack,
+            categories: preferences.categories,
             hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
             hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
             hours_per_week: preferences.hours_per_week,
@@ -769,7 +764,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               Select all that apply
             </p>
             <div class="grid grid-cols-2 gap-4">
-              <%= for {label, value} <- PreferencesForm.company_types_options() do %>
+              <%= for {label, value} <- PreferencesForm.categories_options() do %>
                 <label class={[
                   "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
                   "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
@@ -777,10 +772,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 ]}>
                   <div class="sr-only">
                     <.input
-                      field={@preferences_form[:company_types]}
+                      field={@preferences_form[:categories]}
                       type="checkbox"
                       value={value}
-                      checked={value in (get_field(@preferences_form.source, :company_types) || [])}
+                      checked={value in (get_field(@preferences_form.source, :categories) || [])}
                       multiple
                     />
                   </div>

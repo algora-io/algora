@@ -364,13 +364,15 @@ defmodule Algora.BountiesTest do
           user: solver1,
           target: ticket,
           source: insert!(:ticket, number: 101, repository: repository),
-          inserted_at: ~U[2024-01-01 12:30:00Z]
+          inserted_at: ~U[2024-01-01 12:30:00Z],
+          group_id: "group-101"
         ),
         insert!(:claim,
           user: solver2,
           target: ticket,
           source: insert!(:ticket, number: 102, repository: repository),
-          inserted_at: ~U[2024-01-02 12:30:00Z]
+          inserted_at: ~U[2024-01-02 12:30:00Z],
+          group_id: "group-102"
         ),
         insert!(:claim,
           user: solver5,
@@ -399,13 +401,13 @@ defmodule Algora.BountiesTest do
 
       Thank you for contributing to repo_owner/test_repo!
 
-      | Attempt | Started (UTC) | Solution |
-      | --- | --- | --- |
-      | 🟢 @solver1 | Jan 01, 2024, 12:00:00 PM | #101 |
-      | 🟢 @solver2 | Jan 02, 2024, 12:30:00 PM | #102 |
-      | 🔴 @solver3 | Jan 03, 2024, 12:00:00 PM | WIP |
-      | 🟡 @solver4 | Jan 04, 2024, 12:00:00 PM | WIP |
-      | 🟢 @solver5 and @solver6 | Jan 05, 2024, 12:00:00 PM | #105 |
+      | Attempt | Started (UTC) | Solution | Actions |
+      | --- | --- | --- | --- |
+      | 🟢 @solver1 | Jan 01, 2024, 12:00:00 PM | #101 | [Reward](http://localhost:4002/claims/group-101) |
+      | 🟢 @solver2 | Jan 02, 2024, 12:30:00 PM | #102 | [Reward](http://localhost:4002/claims/group-102) |
+      | 🔴 @solver3 | Jan 03, 2024, 12:00:00 PM | WIP |  |
+      | 🟡 @solver4 | Jan 04, 2024, 12:00:00 PM | WIP |  |
+      | 🟢 @solver5 and @solver6 | Jan 05, 2024, 12:00:00 PM | #105 | [Reward](http://localhost:4002/claims/group-105) |
       """
 
       assert response == String.trim(expected_response)

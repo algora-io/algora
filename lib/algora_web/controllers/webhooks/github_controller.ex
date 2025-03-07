@@ -269,7 +269,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp process_event(_webhook, _commands), do: :ok
 
-  defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:bounty, args})
+  defp execute_command(%Webhook{event_action: event_action, payload: payload, author: author} = webhook, {:bounty, args})
        when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
 
@@ -298,7 +298,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
          {:ok, installation} <-
            Workspace.fetch_installation_by(provider: "github", provider_id: to_string(payload["installation"]["id"])),
          {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
-         {:ok, creator} <- Workspace.ensure_user(token, payload["repository"]["owner"]["login"]) do
+         {:ok, creator} <- Workspace.ensure_user(token, author["login"]) do
       Bounties.create_bounty(
         %{
           creator: creator,

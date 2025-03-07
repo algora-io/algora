@@ -136,4 +136,6 @@ if config_env() == :prod do
   config :algora,
     bucket_name: System.fetch_env!("BUCKET_NAME"),
     auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
+
+  config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")
 end

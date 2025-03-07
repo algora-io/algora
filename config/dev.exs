@@ -122,3 +122,5 @@ config :algora,
   cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
   swift_mode: System.get_env("SWIFT_MODE") == "true",
   auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
+
+config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")

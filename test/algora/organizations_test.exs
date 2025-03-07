@@ -6,7 +6,7 @@ defmodule Algora.OrganizationsTest do
     user: %{
       display_name: "Algora",
       handle: "algora-pZW6",
-      tech_stack: ["Elixir", "Pheonix"],
+      tech_stack: ["Elixir", "Phoenix"],
       email: "test@example.com",
       timezone: "America/New_York"
     },
@@ -14,11 +14,12 @@ defmodule Algora.OrganizationsTest do
       display_name: "Algora",
       handle: "algora-tkPF",
       domain: "algora.io",
-      tech_stack: ["test"],
+      tech_stack: ["Elixir", "Phoenix"],
       email: "admin@example.com",
       hourly_rate_min: Money.new(:USD, "50"),
       hourly_rate_max: Money.new(:USD, "150"),
-      hours_per_week: 40
+      hours_per_week: 40,
+      categories: ["open_source", "agency"]
     },
     contract: %{
       start_date: DateTime.utc_now(),
@@ -39,7 +40,7 @@ defmodule Algora.OrganizationsTest do
       display_name: "dev",
       last_context: "algora-CEec",
       timezone: "America/New_York",
-      tech_stack: ["Elixir", "Pheonix"]
+      tech_stack: ["Elixir", "Phoenix"]
     },
     organization: %{
       handle: "algora-CEec",
@@ -51,7 +52,7 @@ defmodule Algora.OrganizationsTest do
       email: "admin@algora.io",
       display_name: "Algora",
       bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
-      tech_stack: ["Elixir", "Pheonix"],
+      tech_stack: ["Elixir", "Phoenix"],
       hourly_rate_min: Money.new(:USD, "50"),
       hourly_rate_max: Money.new(:USD, "150"),
       hours_per_week: 40,
@@ -86,6 +87,8 @@ defmodule Algora.OrganizationsTest do
       assert org.hourly_rate_min == Money.new(:USD, "50")
       assert org.hourly_rate_max == Money.new(:USD, "150")
       assert org.display_name == "Algora"
+      assert org.tech_stack == ["Elixir", "Phoenix"]
+      assert org.categories == ["open_source", "agency"]
     end
 
     test "onboard with crawler" do

@@ -35,6 +35,7 @@ defmodule Algora.Accounts.User do
     field :stargazers_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []
+    field :categories, {:array, :string}, default: []
     field :featured, :boolean, default: false
     field :priority, :integer, default: 0
     field :fee_pct, :integer, default: 19
@@ -227,8 +228,10 @@ defmodule Algora.Accounts.User do
       :handle,
       :domain,
       :tech_stack,
+      :categories,
       :hourly_rate_min,
       :hourly_rate_max,
+      :hours_per_week,
       :last_context
     ])
     |> generate_id()

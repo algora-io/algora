@@ -218,6 +218,16 @@ defmodule AlgoraWeb.Org.BountiesLive do
           </table>
         </div>
       </div>
+      <div :if={@has_more_open and @current_tab == :open} class="flex justify-center mt-4">
+        <.button variant="ghost" phx-click="load_more_open">
+          <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
+        </.button>
+      </div>
+      <div :if={@has_more_paid and @current_tab == :completed} class="flex justify-center mt-4">
+        <.button variant="ghost" phx-click="load_more_paid">
+          <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
+        </.button>
+      </div>
     </div>
     """
   end
@@ -230,8 +240,58 @@ defmodule AlgoraWeb.Org.BountiesLive do
     {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=open")}
   end
 
+  def handle_event("load_more_open", _params, socket) do
+    %{open_bounties: open_bounties, current_org: current_org} = socket.assigns
+
+    last_bounty = List.last(open_bounties)
+
+    cursor = %{
+      inserted_at: last_bounty.inserted_at,
+      id: last_bounty.id
+    }
+
+    more_bounties =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: :open,
+        before: cursor
+      )
+
+    {:noreply,
+     socket
+     |> assign(:open_bounties, open_bounties ++ more_bounties)
+     |> assign(:has_more_open, length(more_bounties) >= page_size())
+     |> assign_bounties()}
+  end
+
+  def handle_event("load_more_paid", _params, socket) do
+    %{paid_bounties: paid_bounties, current_org: current_org} = socket.assigns
+
+    last_bounty = List.last(paid_bounties)
+
+    cursor = %{
+      inserted_at: last_bounty.inserted_at,
+      id: last_bounty.id
+    }
+
+    more_bounties =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: :paid,
+        before: cursor
+      )
+
+    {:noreply,
+     socket
+     |> assign(:paid_bounties, paid_bounties ++ more_bounties)
+     |> assign(:has_more_paid, length(more_bounties) >= page_size())
+     |> assign_bounties()}
+  end
+
   def handle_params(params, _uri, socket) do
-    limit = 10
+    limit = page_size()
     current_org = socket.assigns.current_org
     current_tab = get_current_tab(params)
 
@@ -243,10 +303,23 @@ defmodule AlgoraWeb.Org.BountiesLive do
     open_count = length(open_bounties)
     paid_count = length(paid_bounties)
 
+    {:noreply,
+     socket
+     |> assign(:current_tab, current_tab)
+     |> assign(:open_count, open_count)
+     |> assign(:completed_count, paid_count)
+     |> assign(:open_bounties, open_bounties)
+     |> assign(:paid_bounties, paid_bounties)
+     |> assign(:has_more_open, length(open_bounties) >= page_size())
+     |> assign(:has_more_paid, length(paid_bounties) >= page_size())
+     |> assign_bounties()}
+  end
+
+  defp assign_bounties(socket) do
     bounties =
-      case current_tab do
-        :open -> open_bounties
-        :completed -> paid_bounties
+      case socket.assigns.current_tab do
+        :open -> socket.assigns.open_bounties
+        :completed -> socket.assigns.paid_bounties
       end
 
     claims_by_ticket =
@@ -263,12 +336,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
         %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
       end)
 
-    {:noreply,
-     socket
-     |> assign(:current_tab, current_tab)
-     |> assign(:bounties, bounties)
-     |> assign(:open_count, open_count)
-     |> assign(:completed_count, paid_count)}
+    assign(socket, :bounties, bounties)
   end
 
   defp get_current_tab(params) do
@@ -278,4 +346,6 @@ defmodule AlgoraWeb.Org.BountiesLive do
       _ -> :open
     end
   end
+
+  defp page_size, do: 10
 end

@@ -196,7 +196,9 @@ defmodule AlgoraWeb.HomeLive do
     subtotal =
       Repo.one(
         from t in Transaction,
-          where: t.type == :credit and t.status == :succeeded,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
           select: sum(t.net_amount)
       ) || Money.new(0, :USD)
 
@@ -209,6 +211,7 @@ defmodule AlgoraWeb.HomeLive do
         from t in Transaction,
           where: t.type == :credit,
           where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
           where: not is_nil(t.bounty_id),
           select: count(fragment("DISTINCT ?", t.bounty_id))
       ) || 0
@@ -218,6 +221,7 @@ defmodule AlgoraWeb.HomeLive do
         from t in Transaction,
           where: t.type == :credit,
           where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
           where: not is_nil(t.tip_id),
           select: count(fragment("DISTINCT ?", t.tip_id))
       ) || 0
@@ -229,7 +233,9 @@ defmodule AlgoraWeb.HomeLive do
     subtotal =
       Repo.one(
         from t in Transaction,
-          where: t.type == :credit and t.status == :succeeded,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
           select: count(fragment("DISTINCT ?", t.user_id))
       ) || 0
 
@@ -241,7 +247,9 @@ defmodule AlgoraWeb.HomeLive do
       from u in User,
         join: t in Transaction,
         on: t.user_id == u.id,
-        where: t.type == :credit and t.status == :succeeded,
+        where: t.type == :credit,
+        where: t.status == :succeeded,
+        where: not is_nil(t.linked_transaction_id),
         where: not is_nil(u.country) and u.country != "",
         select: count(fragment("DISTINCT ?", u.country))
     ) || 0

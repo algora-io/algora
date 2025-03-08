@@ -39,15 +39,15 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={@current_tab == :open}
-                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :open, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
-                  data-state={if @current_tab == :open, do: "active", else: "inactive"}
+                  aria-selected={@current_status == :open}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :open, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
+                  data-state={if @current_status == :open, do: "active", else: "inactive"}
                   phx-click="change-tab"
                   phx-value-tab="open"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
-                    <span class={"min-w-[1ch] font-mono #{if @current_tab == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
+                    <span class={"min-w-[1ch] font-mono #{if @current_status == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
                       {@stats.open_bounties_count}
                     </span>
                   </div>
@@ -55,15 +55,15 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 <button
                   type="button"
                   role="tab"
-                  aria-selected={@current_tab == :completed}
-                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_tab == :completed, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
-                  data-state={if @current_tab == :completed, do: "active", else: "inactive"}
+                  aria-selected={@current_status == :paid}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :paid, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
+                  data-state={if @current_status == :paid, do: "active", else: "inactive"}
                   phx-click="change-tab"
                   phx-value-tab="completed"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
-                    <span class={"min-w-[1ch] font-mono #{if @current_tab == :completed, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
+                    <span class={"min-w-[1ch] font-mono #{if @current_status == :paid, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
                       {@stats.rewarded_bounties_count}
                     </span>
                   </div>
@@ -77,7 +77,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
         <div class="scrollbar-thin w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <tbody class="[&_tr:last-child]:border-0">
-              <%= for %{bounty: bounty, claim_groups: claim_groups} <- @bounties do %>
+              <%= for %{bounty: bounty, claim_groups: claim_groups} <- @rows do %>
                 <tr
                   class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                   data-state="false"
@@ -218,13 +218,8 @@ defmodule AlgoraWeb.Org.BountiesLive do
           </table>
         </div>
       </div>
-      <div :if={@has_more_open and @current_tab == :open} class="flex justify-center mt-4">
-        <.button variant="ghost" phx-click="load_more_open">
-          <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
-        </.button>
-      </div>
-      <div :if={@has_more_paid and @current_tab == :completed} class="flex justify-center mt-4">
-        <.button variant="ghost" phx-click="load_more_paid">
+      <div :if={@has_more} class="flex justify-center mt-4">
+        <.button variant="ghost" phx-click="load_more">
           <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
         </.button>
       </div>
@@ -240,35 +235,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
     {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=open")}
   end
 
-  def handle_event("load_more_open", _params, socket) do
-    %{open_bounties: open_bounties, current_org: current_org} = socket.assigns
+  def handle_event("load_more", _params, socket) do
+    %{rows: rows, current_org: current_org} = socket.assigns
 
-    last_bounty = List.last(open_bounties)
-
-    cursor = %{
-      inserted_at: last_bounty.inserted_at,
-      id: last_bounty.id
-    }
-
-    more_bounties =
-      Bounties.list_bounties(
-        owner_id: current_org.id,
-        limit: page_size(),
-        status: :open,
-        before: cursor
-      )
-
-    {:noreply,
-     socket
-     |> assign(:open_bounties, open_bounties ++ more_bounties)
-     |> assign(:has_more_open, length(more_bounties) >= page_size())
-     |> assign_bounties()}
-  end
-
-  def handle_event("load_more_paid", _params, socket) do
-    %{paid_bounties: paid_bounties, current_org: current_org} = socket.assigns
-
-    last_bounty = List.last(paid_bounties)
+    last_bounty = List.last(rows).bounty
 
     cursor = %{
       inserted_at: last_bounty.inserted_at,
@@ -279,46 +249,33 @@ defmodule AlgoraWeb.Org.BountiesLive do
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),
-        status: :paid,
+        status: socket.assigns.current_status,
         before: cursor
       )
 
     {:noreply,
      socket
-     |> assign(:paid_bounties, paid_bounties ++ more_bounties)
-     |> assign(:has_more_paid, length(more_bounties) >= page_size())
-     |> assign_bounties()}
+     |> assign(:rows, rows ++ to_rows(more_bounties))
+     |> assign(:has_more, length(more_bounties) >= page_size())}
   end
 
   def handle_params(params, _uri, socket) do
-    limit = page_size()
     current_org = socket.assigns.current_org
-    current_tab = get_current_tab(params)
-
-    # TODO: fetch only bounties for the current tab
-    open_bounties = Bounties.list_bounties(owner_id: current_org.id, limit: limit, status: :open)
-    paid_bounties = Bounties.list_bounties(owner_id: current_org.id, limit: limit, status: :paid)
+    current_status = get_current_status(params)
 
     stats = Bounties.fetch_stats(current_org.id)
 
+    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: current_status)
+
     {:noreply,
      socket
-     |> assign(:current_tab, current_tab)
-     |> assign(:open_bounties, open_bounties)
-     |> assign(:paid_bounties, paid_bounties)
-     |> assign(:has_more_open, length(open_bounties) >= page_size())
-     |> assign(:has_more_paid, length(paid_bounties) >= page_size())
-     |> assign(:stats, stats)
-     |> assign_bounties()}
+     |> assign(:current_status, current_status)
+     |> assign(:rows, to_rows(bounties))
+     |> assign(:has_more, length(bounties) >= page_size())
+     |> assign(:stats, stats)}
   end
 
-  defp assign_bounties(socket) do
-    bounties =
-      case socket.assigns.current_tab do
-        :open -> socket.assigns.open_bounties
-        :completed -> socket.assigns.paid_bounties
-      end
-
+  defp to_rows(bounties) do
     claims_by_ticket =
       bounties
       |> Enum.map(& &1.ticket.id)
@@ -328,18 +285,15 @@ defmodule AlgoraWeb.Org.BountiesLive do
         {ticket_id, Enum.group_by(claims, & &1.group_id)}
       end)
 
-    bounties =
-      Enum.map(bounties, fn bounty ->
-        %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
-      end)
-
-    assign(socket, :bounties, bounties)
+    Enum.map(bounties, fn bounty ->
+      %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
+    end)
   end
 
-  defp get_current_tab(params) do
+  defp get_current_status(params) do
     case params["status"] do
       "open" -> :open
-      "completed" -> :completed
+      "completed" -> :paid
       _ -> :open
     end
   end

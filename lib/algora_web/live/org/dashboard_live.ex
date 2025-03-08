@@ -166,7 +166,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <div class="relative h-full">
+        <div :if={@matching_devs != []} class="relative h-full">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">
               Contracts

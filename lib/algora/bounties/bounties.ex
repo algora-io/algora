@@ -951,7 +951,7 @@ defmodule Algora.Bounties do
         from([b] in query, where: b.ticket_id == ^ticket_id)
 
       {:owner_id, owner_id}, query ->
-        from([b] in query, where: b.owner_id == ^owner_id)
+        from([b, r: r] in query, where: b.owner_id == ^owner_id or r.user_id == ^owner_id)
 
       {:status, status}, query ->
         from([b] in query, where: b.status == ^status)
@@ -1051,21 +1051,24 @@ defmodule Algora.Bounties do
 
     open_bounties_query =
       from b in Bounty,
-        join: u in assoc(b, :owner),
         join: t in assoc(b, :ticket),
-        where: u.id == ^org_id,
+        left_join: r in assoc(t, :repository),
+        where: b.owner_id == ^org_id or r.user_id == ^org_id,
         where: b.status == :open,
         # TODO: persist state as separate field
         where: fragment("(?->>'state' != 'closed')", t.provider_meta)
 
     rewards_query =
-      from t in Transaction,
-        where: t.type == :credit,
-        where: t.status == :succeeded,
-        join: lt in assoc(t, :linked_transaction),
-        where: lt.type == :debit,
-        where: lt.status == :succeeded,
-        where: lt.user_id == ^org_id
+      from tx in Transaction,
+        where: tx.type == :credit,
+        where: tx.status == :succeeded,
+        join: ltx in assoc(tx, :linked_transaction),
+        left_join: b in assoc(tx, :bounty),
+        left_join: t in assoc(b, :ticket),
+        left_join: r in assoc(t, :repository),
+        where: ltx.type == :debit,
+        where: ltx.status == :succeeded,
+        where: ltx.user_id == ^org_id or r.user_id == ^org_id
 
     rewarded_bounties_query = rewards_query |> where([t], not is_nil(t.bounty_id)) |> distinct(:bounty_id)
     rewarded_tips_query = rewards_query |> where([t], not is_nil(t.tip_id)) |> distinct(:tip_id)

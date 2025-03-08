@@ -984,8 +984,10 @@ defmodule Algora.Bounties do
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
+    # TODO: persist state as separate field
+    |> where([t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
     |> apply_criteria(criteria)
-    |> order_by([b], desc: b.amount, desc: b.inserted_at, desc: b.id)
+    |> order_by([b], desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,
       inserted_at: b.inserted_at,
@@ -1055,6 +1057,8 @@ defmodule Algora.Bounties do
         left_join: r in assoc(t, :repository),
         where: b.owner_id == ^org_id or r.user_id == ^org_id,
         where: b.status == :open,
+        where: b.status != :cancelled,
+        where: not is_nil(b.amount),
         # TODO: persist state as separate field
         where: fragment("(?->>'state' != 'closed')", t.provider_meta)
 

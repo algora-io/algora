@@ -48,7 +48,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
                     <span class={"min-w-[1ch] font-mono #{if @current_tab == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
-                      {@open_count}
+                      {@stats.open_bounties_count}
                     </span>
                   </div>
                 </button>
@@ -64,7 +64,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
                     <span class={"min-w-[1ch] font-mono #{if @current_tab == :completed, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
-                      {@completed_count}
+                      {@stats.rewarded_bounties_count}
                     </span>
                   </div>
                 </button>
@@ -299,19 +299,16 @@ defmodule AlgoraWeb.Org.BountiesLive do
     open_bounties = Bounties.list_bounties(owner_id: current_org.id, limit: limit, status: :open)
     paid_bounties = Bounties.list_bounties(owner_id: current_org.id, limit: limit, status: :paid)
 
-    # TODO: fetch stats in one query
-    open_count = length(open_bounties)
-    paid_count = length(paid_bounties)
+    stats = Bounties.fetch_stats(current_org.id)
 
     {:noreply,
      socket
      |> assign(:current_tab, current_tab)
-     |> assign(:open_count, open_count)
-     |> assign(:completed_count, paid_count)
      |> assign(:open_bounties, open_bounties)
      |> assign(:paid_bounties, paid_bounties)
      |> assign(:has_more_open, length(open_bounties) >= page_size())
      |> assign(:has_more_paid, length(paid_bounties) >= page_size())
+     |> assign(:stats, stats)
      |> assign_bounties()}
   end
 

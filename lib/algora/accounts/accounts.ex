@@ -87,19 +87,23 @@ defmodule Algora.Accounts do
 
     filter_org_id =
       if org_id = criteria[:org_id],
-        do: dynamic([linked_transaction: lt], lt.user_id == ^org_id),
+        do: dynamic([linked_transaction: ltx, repository: r], ltx.user_id == ^org_id or r.user_id == ^org_id),
         else: true
 
     earnings_query =
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded,
-        left_join: lt in assoc(t, :linked_transaction),
+      from tx in Transaction,
+        where: tx.type == :credit and tx.status == :succeeded,
+        left_join: ltx in assoc(tx, :linked_transaction),
         as: :linked_transaction,
+        left_join: b in assoc(tx, :bounty),
+        left_join: t in assoc(b, :ticket),
+        left_join: r in assoc(t, :repository),
+        as: :repository,
         where: ^filter_org_id,
-        group_by: t.user_id,
+        group_by: tx.user_id,
         select: %{
-          user_id: t.user_id,
-          total_earned: sum(t.net_amount)
+          user_id: tx.user_id,
+          total_earned: sum(tx.net_amount)
         }
 
     bounties_query =

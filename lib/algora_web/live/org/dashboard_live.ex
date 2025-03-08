@@ -326,7 +326,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
               <div
                 :if={@user.provider_meta}
-                class="pt-0.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
               >
                 <.link
                   :if={@user.provider_login}

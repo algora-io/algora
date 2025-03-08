@@ -1069,7 +1069,7 @@ defmodule Algora.Bounties do
     rewarded_contracts_query = distinct(rewards_query, :contract_id)
     rewarded_users_query = rewards_query |> distinct(true) |> select([:user_id])
 
-    rewarded_users_last_month_query =
+    rewarded_users_diff_query =
       from t in rewarded_users_query,
         where: t.succeeded_at >= fragment("NOW() - INTERVAL '1 month'"),
         except_all: ^from(t in rewarded_users_query, where: t.succeeded_at < fragment("NOW() - INTERVAL '1 month'"))
@@ -1081,7 +1081,7 @@ defmodule Algora.Bounties do
     rewarded_bounties_count = Repo.aggregate(rewarded_bounties_query, :count, :id)
     rewarded_tips_count = Repo.aggregate(rewarded_tips_query, :count, :id)
     rewarded_contracts_count = Repo.aggregate(rewarded_contracts_query, :count, :id)
-    solvers_count_last_month = Repo.aggregate(rewarded_users_last_month_query, :count, :user_id)
+    solvers_diff = Repo.aggregate(rewarded_users_diff_query, :count, :user_id)
     solvers_count = Repo.aggregate(rewarded_users_query, :count, :user_id)
     members_count = Repo.aggregate(members_query, :count, :id)
 
@@ -1093,7 +1093,7 @@ defmodule Algora.Bounties do
       rewarded_tips_count: rewarded_tips_count,
       rewarded_contracts_count: rewarded_contracts_count,
       solvers_count: solvers_count,
-      solvers_diff: solvers_count - solvers_count_last_month,
+      solvers_diff: solvers_diff,
       members_count: members_count
     }
   end

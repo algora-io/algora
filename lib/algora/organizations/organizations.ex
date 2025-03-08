@@ -93,7 +93,17 @@ defmodule Algora.Organizations do
         where: m.org_id == ^org.id and m.user_id == u.id,
         select_merge: %{
           user: u
-        }
+        },
+        order_by: [
+          fragment(
+            "CASE WHEN ? = 'admin' THEN 0 WHEN ? = 'mod' THEN 1 WHEN ? = 'expert' THEN 2 ELSE 3 END",
+            m.role,
+            m.role,
+            m.role
+          ),
+          asc: m.inserted_at,
+          asc: m.id
+        ]
     )
   end
 

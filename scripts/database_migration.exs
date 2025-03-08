@@ -515,11 +515,16 @@ defmodule DatabaseMigration do
     github_user = find_by_index(db, "GithubUser", "id", claim["github_user_id"])
     bounty = find_by_index(db, "Bounty", "id", claim["bounty_id"])
     owner = find_by_index(db, "_MergedUser", "id", bounty["org_id"])
+    bounty_charge = find_by_index(db, "BountyCharge", "id", row["bounty_charge_id"])
     user_id = or_else(github_user["user_id"], github_user["id"])
     amount = Money.from_integer(String.to_integer(row["amount"]), row["currency"])
 
     if !bounty do
       raise "Bounty not found: #{inspect(row)}"
+    end
+
+    if !bounty_charge do
+      raise "BountyCharge not found: #{inspect(row)}"
     end
 
     if nullish?(user_id) do
@@ -530,7 +535,7 @@ defmodule DatabaseMigration do
       raise "Owner not found: #{inspect(row)}"
     end
 
-    if bounty["type"] == "tip" do
+    if bounty["type"] == "tip" and !nullish?(bounty_charge["succeeded_at"]) do
       %{
         "id" => bounty["id"] <> user_id,
         "amount" => amount,
@@ -570,35 +575,37 @@ defmodule DatabaseMigration do
       raise "BountyCharge not found: #{inspect(row)}"
     end
 
-    Enum.reject(
-      [
-        maybe_create_transaction("debit", %{
-          bounty_charge: bounty_charge,
-          bounty_transfer: row,
-          bounty: bounty,
-          claim: claim,
-          org: org,
-          user_id: user_id
-        }),
-        maybe_create_transaction("credit", %{
-          bounty_charge: bounty_charge,
-          bounty_transfer: row,
-          bounty: bounty,
-          claim: claim,
-          org: org,
-          user_id: user_id
-        }),
-        maybe_create_transaction("transfer", %{
-          bounty_charge: bounty_charge,
-          bounty_transfer: row,
-          bounty: bounty,
-          claim: claim,
-          org: org,
-          user_id: user_id
-        })
-      ],
-      &is_nil/1
-    )
+    if !nullish?(bounty_charge["succeeded_at"]) do
+      Enum.reject(
+        [
+          maybe_create_transaction("debit", %{
+            bounty_charge: bounty_charge,
+            bounty_transfer: row,
+            bounty: bounty,
+            claim: claim,
+            org: org,
+            user_id: user_id
+          }),
+          maybe_create_transaction("credit", %{
+            bounty_charge: bounty_charge,
+            bounty_transfer: row,
+            bounty: bounty,
+            claim: claim,
+            org: org,
+            user_id: user_id
+          }),
+          maybe_create_transaction("transfer", %{
+            bounty_charge: bounty_charge,
+            bounty_transfer: row,
+            bounty: bounty,
+            claim: claim,
+            org: org,
+            user_id: user_id
+          })
+        ],
+        &is_nil/1
+      )
+    end
   end
 
   defp transform({"OrgBalanceTransaction", Transaction}, row, db) do

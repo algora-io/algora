@@ -461,6 +461,42 @@ const Hooks = {
       });
     },
   },
+  InfiniteScroll: {
+    mounted() {
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            this.pushEvent("load_more");
+          }
+        },
+        {
+          root: null, // viewport
+          rootMargin: "0px 0px 400px 0px", // trigger when indicator is 400px from viewport
+          threshold: 0.1,
+        }
+      );
+
+      const loadMoreIndicator = document.getElementById("load-more-indicator");
+      if (loadMoreIndicator) {
+        this.observer.observe(loadMoreIndicator);
+      }
+    },
+
+    updated() {
+      // Re-observe the indicator after updates
+      const loadMoreIndicator = document.getElementById("load-more-indicator");
+      if (loadMoreIndicator) {
+        this.observer.observe(loadMoreIndicator);
+      }
+    },
+
+    destroyed() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling
@@ -643,3 +679,5 @@ window.addEventListener("phx:open_popup", (e: CustomEvent) => {
     newWindow.focus();
   }
 });
+
+export default Hooks;

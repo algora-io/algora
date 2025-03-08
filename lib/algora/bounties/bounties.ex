@@ -1052,8 +1052,11 @@ defmodule Algora.Bounties do
     open_bounties_query =
       from b in Bounty,
         join: u in assoc(b, :owner),
+        join: t in assoc(b, :ticket),
         where: u.id == ^org_id,
-        where: b.status == :open
+        where: b.status == :open,
+        # TODO: persist state as separate field
+        where: fragment("(?->>'state' != 'closed')", t.provider_meta)
 
     rewards_query =
       from t in Transaction,

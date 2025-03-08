@@ -994,6 +994,7 @@ defmodule Algora.Bounties do
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
     |> apply_criteria(criteria)
+    # TODO: sort by b.paid_at if criteria[:status] == :paid
     |> order_by([b], desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,

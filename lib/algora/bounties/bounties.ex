@@ -33,6 +33,7 @@ defmodule Algora.Bounties do
           | {:owner_id, String.t()}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
+          | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
 
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "bounties:all", :bounties_updated)
@@ -964,6 +965,11 @@ defmodule Algora.Bounties do
           _ ->
             query
         end
+
+      {:before, %{inserted_at: inserted_at, id: id}}, query ->
+        from([b] in query,
+          where: {b.inserted_at, b.id} < {^inserted_at, ^id}
+        )
 
       {:tech_stack, tech_stack}, query ->
         from([b, o: o] in query,

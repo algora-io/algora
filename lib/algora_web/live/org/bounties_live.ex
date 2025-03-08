@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   def render(assigns) do
     ~H"""
-    <div class="max-w-7xl mx-auto p-6">
+    <div class="max-w-7xl mx-auto p-6" id="bounties-container" phx-hook="InfiniteScroll">
       <div class="mb-6">
         <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
           <div>
@@ -218,10 +218,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
           </table>
         </div>
       </div>
-      <div :if={@has_more} class="flex justify-center mt-4">
-        <.button variant="ghost" phx-click="load_more">
-          <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
-        </.button>
+      <div :if={@has_more} class="flex justify-center mt-4" id="load-more-indicator">
+        <div class="animate-pulse text-gray-400">
+          <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+        </div>
       </div>
     </div>
     """

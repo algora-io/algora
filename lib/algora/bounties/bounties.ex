@@ -954,7 +954,16 @@ defmodule Algora.Bounties do
         from([b, r: r] in query, where: b.owner_id == ^owner_id or r.user_id == ^owner_id)
 
       {:status, status}, query ->
-        from([b] in query, where: b.status == ^status)
+        query = where(query, [b], b.status == ^status)
+
+        case status do
+          :open ->
+            # TODO: persist state as separate field
+            where(query, [t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
+
+          _ ->
+            query
+        end
 
       {:tech_stack, tech_stack}, query ->
         from([b, o: o] in query,
@@ -984,8 +993,6 @@ defmodule Algora.Bounties do
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
-    # TODO: persist state as separate field
-    |> where([t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
     |> apply_criteria(criteria)
     |> order_by([b], desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{

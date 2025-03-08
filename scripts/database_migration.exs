@@ -1369,7 +1369,12 @@ defmodule DatabaseMigration do
     pwd = ".local/db"
     File.mkdir_p!(pwd)
 
-    timestamp = Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
+    timestamp =
+      case System.argv() do
+        [timestamp | _] -> timestamp
+        [] -> Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
+      end
+
     input_path = Path.join(pwd, "v1-data-#{timestamp}.sql")
     output_path = Path.join(pwd, "v2-data-#{timestamp}.sql")
 

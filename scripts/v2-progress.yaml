@@ -13,7 +13,7 @@
     - user_id: 1
     - inserted_at: 1
     - updated_at: 1
-    - payouts_enabled: -1
+    - payouts_enabled: 1
     - payout_interval: -1
     - payout_speed: -1
     - default_currency: -1

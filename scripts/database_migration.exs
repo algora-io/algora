@@ -708,7 +708,7 @@ defmodule DatabaseMigration do
       "user_id" => row["user_id"],
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
-      "payouts_enabled" => nil,
+      "payouts_enabled" => row["charges_enabled"],
       "payout_interval" => nil,
       "payout_speed" => nil,
       "default_currency" => nil

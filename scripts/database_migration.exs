@@ -374,7 +374,7 @@ defmodule DatabaseMigration do
         "status" =>
           cond do
             not is_nil(transfer) -> :paid
-            row["deleted_at"] || row["status"] == "inactive" -> :cancelled
+            true?(row["deleted"]) || row["status"] == "inactive" -> :cancelled
             true -> :open
           end,
         "ticket_id" => row["task_id"],

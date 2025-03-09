@@ -31,6 +31,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:tech_stack, :intentions])
+      |> validate_required(:tech_stack, message: "Please select at least one technology")
+      |> validate_required(:intentions, message: "Please select at least one intention")
       |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
       |> validate_length(:intentions, min: 1, message: "Please select at least one intention")
       |> validate_subset(:intentions, Enum.map(intentions_options(), &elem(&1, 0)))
@@ -281,7 +283,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
     changeset =
       %InfoForm{}
-      |> InfoForm.changeset(%{tech_stack: tech_stack, intentions: params["intentions"] || []})
+      |> InfoForm.changeset(%{tech_stack: tech_stack, intentions: params["intentions"]})
       |> Map.put(:action, :validate)
 
     case changeset do

@@ -206,7 +206,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
         </div>
         <%= if @account do %>
           <div class="flex items-center gap-2">
-            <%= if @account.charges_enabled do %>
+            <%= if @account.payouts_enabled do %>
               <.badge variant="success" phx-click="show_manage_payout_drawer" class="cursor-pointer">
                 Payout account active
               </.badge>

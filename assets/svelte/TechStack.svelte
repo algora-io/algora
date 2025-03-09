@@ -16,8 +16,13 @@
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       const tech = input.trim();
-      const techLower = tech.toLowerCase();
 
+      if (e.key === "Enter" && tech === "") {
+        e.target.closest("form").requestSubmit();
+        return;
+      }
+
+      const techLower = tech.toLowerCase();
       if (tech && !techMap.has(techLower)) {
         techMap.set(techLower, tech);
         updateTechStack();

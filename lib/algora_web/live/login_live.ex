@@ -3,185 +3,92 @@ defmodule AlgoraWeb.LoginLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Accounts.User
+  alias AlgoraWeb.Components.Logos
   alias Swoosh.Email
 
   def render(assigns) do
     ~H"""
-    <div class="flex min-h-screen bg-background">
+    <div class="flex min-h-screen bg-[#111113]">
       <div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div class="mx-auto w-full max-w-sm lg:w-96">
           <div>
-            <img
-              class="h-10 w-auto"
-              src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-              alt="Your Company"
-            />
-            <h2 class="mt-8 text-2xl/9 font-bold tracking-tight text-foreground">
-              Sign in to your account
+            <.wordmark class="h-10 w-auto" />
+            <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
+              Welcome back
             </h2>
             <p class="mt-2 text-sm/6 text-muted-foreground">
-              Not a member?
-              <a href="#" class="font-semibold text-primary hover:text-primary/90">
-                Start a 14 day free trial
-              </a>
+              Sign in to your account
             </p>
           </div>
 
-          <div class="mt-10">
-            <div>
-              <form action="#" method="POST" class="space-y-6">
-                <div>
-                  <label for="email" class="block text-sm/6 font-medium text-foreground">
-                    Email address
-                  </label>
-                  <div class="mt-2">
-                    <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      autocomplete="email"
-                      required
-                      class="block w-full rounded-md bg-background px-3 py-1.5 text-base text-foreground ring-1 ring-inset ring-input placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary sm:text-sm/6"
-                    />
-                  </div>
-                </div>
+          <div class="mt-8">
+            <form action="#" method="POST" class="space-y-6">
+              <.input
+                field={@form[:email]}
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                required
+              />
 
-                <div>
-                  <label for="password" class="block text-sm/6 font-medium text-foreground">
-                    Password
-                  </label>
-                  <div class="mt-2">
-                    <input
-                      type="password"
-                      name="password"
-                      id="password"
-                      autocomplete="current-password"
-                      required
-                      class="block w-full rounded-md bg-background px-3 py-1.5 text-base text-foreground ring-1 ring-inset ring-input placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary sm:text-sm/6"
-                    />
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <div class="flex gap-3">
-                    <div class="flex h-6 shrink-0 items-center">
-                      <div class="group grid size-4 grid-cols-1">
-                        <input
-                          id="remember-me"
-                          name="remember-me"
-                          type="checkbox"
-                          class="col-start-1 row-start-1 appearance-none rounded border border-input bg-background checked:border-primary checked:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:border-input disabled:bg-muted"
-                        />
-                        <svg
-                          class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-primary-foreground group-has-[:disabled]:stroke-muted-foreground/25"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                        >
-                          <path
-                            class="opacity-0 group-has-[:checked]:opacity-100"
-                            d="M3 8L6 11L11 3.5"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          />
-                          <path
-                            class="opacity-0 group-has-[:indeterminate]:opacity-100"
-                            d="M3 7H11"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                    <label for="remember-me" class="block text-sm/6 text-foreground">
-                      Remember me
-                    </label>
-                  </div>
-
-                  <div class="text-sm/6">
-                    <a href="#" class="font-semibold text-primary hover:text-primary/90">
-                      Forgot password?
-                    </a>
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    type="submit"
-                    class="flex w-full justify-center rounded-md bg-primary px-3 py-1.5 text-sm/6 font-semibold text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                  >
-                    Sign in
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div class="mt-10">
-              <div class="relative">
-                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div class="w-full border-t border-border"></div>
-                </div>
-                <div class="relative flex justify-center text-sm/6 font-medium">
-                  <span class="bg-background px-6 text-muted-foreground">Or continue with</span>
-                </div>
+              <div>
+                <.button type="submit" class="w-full" size="lg">
+                  Sign in
+                </.button>
               </div>
+            </form>
+          </div>
 
-              <div class="mt-6 grid grid-cols-2 gap-4">
-                <a
-                  href="#"
-                  class="flex w-full items-center justify-center gap-3 rounded-md bg-background px-3 py-2 text-sm font-semibold text-foreground ring-1 ring-inset ring-input hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                >
-                  <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                      d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
-                      fill="#EA4335"
-                    />
-                    <path
-                      d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                      fill="#34A853"
-                    />
-                  </svg>
-                  <span class="text-sm/6 font-semibold">Google</span>
-                </a>
-
-                <a
-                  href="#"
-                  class="flex w-full items-center justify-center gap-3 rounded-md bg-background px-3 py-2 text-sm font-semibold text-foreground ring-1 ring-inset ring-input hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                >
-                  <svg
-                    class="size-5 fill-[#24292F]"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                  <span class="text-sm/6 font-semibold">GitHub</span>
-                </a>
-              </div>
+          <div class="mt-4 relative">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+              <div class="w-full border-t border-border"></div>
             </div>
+            <div class="relative flex justify-center text-sm/6 font-medium">
+              <span class="bg-[#111113] px-6 text-muted-foreground">or</span>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <.button href="#" variant="secondary" class="w-full" size="lg">
+              <Logos.github class="size-5 mr-2 -ml-1 shrink-0" />
+              <span class="text-sm/6 font-semibold">Continue with GitHub</span>
+            </.button>
           </div>
         </div>
       </div>
       <div class="relative hidden w-0 flex-1 lg:block">
-        <img
-          class="absolute inset-0 size-full object-cover"
-          src="https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
-          alt=""
-        />
+        <div class="absolute inset-0 flex flex-col items-center justify-center bg-background p-12">
+          <div class="max-w-xl">
+            <div class="relative text-base">
+              <svg
+                viewBox="0 0 162 128"
+                fill="none"
+                aria-hidden="true"
+                class="absolute -top-12 left-0 h-32 stroke-white/25"
+              >
+                <path
+                  id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
+                  d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
+                >
+                </path>
+                <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
+              </svg>
+              <blockquote class="text-3xl font-medium text-foreground">
+                {@random_quote.text}
+              </blockquote>
+            </div>
+
+            <div class="mt-8 flex items-center gap-4">
+              <div class="size-12 overflow-hidden rounded-full bg-muted">
+                <img src={@random_quote.avatar} alt="Avatar" class="h-full w-full object-cover" />
+              </div>
+              <div>
+                <div class="font-medium text-foreground">{@random_quote.author}</div>
+                <div class="text-sm text-muted-foreground">{@random_quote.role}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     """
@@ -195,11 +102,13 @@ defmodule AlgoraWeb.LoginLive do
       end
 
     changeset = User.login_changeset(%User{}, %{})
+    random_quote = get_random_quote()
 
     {:ok,
      socket
      |> assign(authorize_url: authorize_url)
      |> assign(secret_code: nil)
+     |> assign(random_quote: random_quote)
      |> assign_form(changeset)}
   end
 
@@ -277,4 +186,23 @@ defmodule AlgoraWeb.LoginLive do
   end
 
   defp throttle, do: :timer.sleep(1000)
+
+  defp get_random_quote do
+    Enum.random([
+      %{
+        text:
+          "Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.",
+        author: "John A. De Goes",
+        role: "Founder & CEO",
+        avatar: "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+      },
+      %{
+        text:
+          "That's one massive advantage open source companies have versus closed source. You get to show people your work, plus you can point to your contributions as proof of your abilities.",
+        author: "Eric Allam",
+        role: "Founder & CTO",
+        avatar: "https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
+      }
+    ])
+  end
 end

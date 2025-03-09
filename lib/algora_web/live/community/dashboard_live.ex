@@ -289,22 +289,22 @@ defmodule AlgoraWeb.Community.DashboardLive do
     tech = List.first(socket.assigns.current_user.tech_stack)
 
     status_fns = [
-      {&personalize_status/1, "Personalize Algora"},
-      {&create_bounty_status/1, "Create a bounty"},
-      {&reward_bounty_status/1, "Reward a bounty"},
-      {&begin_collaboration_status/1, "Contract a #{tech} developer"},
-      {&complete_first_contract_status/1, "Complete a contract"}
+      {&personalize_status/1, "Personalize Algora", nil},
+      {&create_bounty_status/1, "Create a bounty", nil},
+      {&reward_bounty_status/1, "Reward a bounty", nil},
+      {&begin_collaboration_status/1, "Contract a #{tech} developer", nil},
+      {&complete_first_contract_status/1, "Complete a contract", nil}
     ]
 
     {achievements, _} =
-      Enum.reduce_while(status_fns, {[], false}, fn {status_fn, name}, {acc, found_current} ->
+      Enum.reduce_while(status_fns, {[], false}, fn {status_fn, name, path}, {acc, found_current} ->
         status = status_fn.(socket.assigns.current_user)
 
         result =
           cond do
-            found_current -> {acc ++ [%{status: status, name: name}], found_current}
-            status == :completed -> {acc ++ [%{status: status, name: name}], false}
-            true -> {acc ++ [%{status: :current, name: name}], true}
+            found_current -> {acc ++ [%{status: status, name: name, path: path}], found_current}
+            status == :completed -> {acc ++ [%{status: status, name: name, path: path}], false}
+            true -> {acc ++ [%{status: :current, name: name, path: path}], true}
           end
 
         {:cont, result}

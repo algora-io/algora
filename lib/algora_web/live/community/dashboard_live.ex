@@ -78,7 +78,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:users, users)
-     |> assign_tickets()
+     |> assign_bounties()
      |> assign_achievements()}
   end
 
@@ -94,7 +94,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
         </.section>
 
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
-          <%= if Enum.empty?(@tickets) do %>
+          <%= if Enum.empty?(@bounties) do %>
             <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
               <.card_header>
                 <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -107,7 +107,7 @@ defmodule AlgoraWeb.Community.DashboardLive do
               </.card_header>
             </.card>
           <% else %>
-            <.bounties tickets={@tickets} />
+            <.bounties bounties={@bounties} />
           <% end %>
         </.section>
 
@@ -271,18 +271,18 @@ defmodule AlgoraWeb.Community.DashboardLive do
   end
 
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
+    {:noreply, assign_bounties(socket)}
   end
 
-  defp assign_tickets(socket) do
-    tickets =
-      Bounties.PrizePool.list(
+  defp assign_bounties(socket) do
+    bounties =
+      Bounties.list_bounties(
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100
       )
 
-    assign(socket, :tickets, Enum.take(tickets, 6))
+    assign(socket, :bounties, Enum.take(bounties, 6))
   end
 
   defp assign_achievements(socket) do

@@ -538,6 +538,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             class="mt-4"
             tech={get_field(@tech_stack_form.source, :tech_stack) || []}
             socket={@socket}
+            form="tech_stack_form"
           />
 
           <.error :for={msg <- @tech_stack_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>

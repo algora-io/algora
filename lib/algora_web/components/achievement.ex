@@ -17,20 +17,20 @@ defmodule AlgoraWeb.Components.Achievement do
     """
   end
 
-  def achievement(%{achievement: %{status: :upcoming, path: path}} = assigns) do
+  def achievement(%{achievement: %{status: :upcoming}} = assigns) do
     ~H"""
-    <.maybe_link navigate={path}>
+    <.maybe_link navigate={@achievement.path}>
       <div class={
         classes([
           "group flex items-center gap-3",
-          path && "hover:text-foreground"
+          @achievement.path && "hover:text-foreground"
         ])
       }>
         <div class="flex h-5 w-5 items-center justify-center">
           <div class={
             classes([
               "h-2 w-2 rounded-full bg-muted-foreground",
-              path && "group-hover:bg-foreground"
+              @achievement.path && "group-hover:bg-foreground"
             ])
           }>
           </div>
@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Components.Achievement do
         <span class={
           classes([
             "text-sm font-medium text-muted-foreground",
-            path && "group-hover:text-foreground"
+            @achievement.path && "group-hover:text-foreground"
           ])
         }>
           {@achievement.name}
@@ -48,13 +48,13 @@ defmodule AlgoraWeb.Components.Achievement do
     """
   end
 
-  def achievement(%{achievement: %{status: :current, path: path}} = assigns) do
+  def achievement(%{achievement: %{status: :current}} = assigns) do
     ~H"""
-    <.maybe_link navigate={path}>
+    <.maybe_link navigate={@achievement.path}>
       <div
         class={[
           "group flex items-start",
-          path && "hover:text-foreground"
+          @achievement.path && "hover:text-foreground"
         ]}
         aria-current="step"
       >
@@ -65,14 +65,14 @@ defmodule AlgoraWeb.Components.Achievement do
           <span class={
             classes([
               "absolute h-5 w-5 animate-pulse rounded-full bg-success/25",
-              path && "group-hover:bg-foreground/25"
+              @achievement.path && "group-hover:bg-foreground/25"
             ])
           }>
           </span>
           <span class={
             classes([
               "relative block h-2 w-2 rounded-full bg-success",
-              path && "group-hover:bg-foreground"
+              @achievement.path && "group-hover:bg-foreground"
             ])
           }>
           </span>
@@ -80,7 +80,7 @@ defmodule AlgoraWeb.Components.Achievement do
         <span class={
           classes([
             "ml-3 text-sm font-medium text-muted-foreground",
-            path && "group-hover:text-foreground"
+            @achievement.path && "group-hover:text-foreground"
           ])
         }>
           {@achievement.name}

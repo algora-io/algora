@@ -208,25 +208,26 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   defp assign_achievements(socket) do
     achievements = [
-      {&personalize_status/1, "Personalize Algora"},
-      {&setup_stripe_status/1, "Create Stripe account"},
-      {&earn_first_bounty_status/1, "Earn first bounty"},
-      {&earn_through_referral_status/1, "Earn through referral"},
-      {&earn_10k_status/1, "Earn $10K"}
+      {&personalize_status/1, "Personalize Algora", nil},
+      {&setup_stripe_status/1, "Create Stripe account", ~p"/user/transactions"},
+      {&earn_first_bounty_status/1, "Earn first bounty", ~p"/bounties"},
+      {&earn_through_referral_status/1, "Earn through referral", nil},
+      {&earn_10k_status/1, "Earn $10K", ~p"/bounties"}
     ]
 
     {achievements, _} =
-      Enum.reduce_while(achievements, {[], false}, fn {status_fn, name}, {acc, found_current} ->
-        status = status_fn.(socket)
+      Enum.reduce_while(achievements, {[], false}, fn
+        {status_fn, name, path}, {acc, found_current} ->
+          status = status_fn.(socket)
 
-        result =
-          cond do
-            found_current -> {acc ++ [%{status: :upcoming, name: name}], found_current}
-            status == :completed -> {acc ++ [%{status: status, name: name}], false}
-            true -> {acc ++ [%{status: :current, name: name}], true}
-          end
+          result =
+            cond do
+              found_current -> {acc ++ [%{status: :upcoming, name: name, path: path}], found_current}
+              status == :completed -> {acc ++ [%{status: status, name: name, path: path}], false}
+              true -> {acc ++ [%{status: :current, name: name, path: path}], true}
+            end
 
-        {:cont, result}
+          {:cont, result}
       end)
 
     assign(socket, :achievements, achievements)

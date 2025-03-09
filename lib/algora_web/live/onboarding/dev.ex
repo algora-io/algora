@@ -1,12 +1,38 @@
 defmodule AlgoraWeb.Onboarding.DevLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Logos
+
+  @steps [:info, :oauth]
+
+  defmodule TechStackForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :tech_stack, {:array, :string}
+    end
+
+    def init do
+      to_form(TechStackForm.changeset(%TechStackForm{}, %{tech_stack: []}))
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:tech_stack])
+      |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
+    end
+  end
 
   def mount(_params, _session, socket) do
     context = %{
@@ -37,10 +63,12 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
     {:ok,
      socket
-     |> assign(:step, 1)
-     |> assign(:total_steps, 2)
+     |> assign(:step, Enum.at(@steps, 0))
+     |> assign(:steps, @steps)
+     |> assign(:total_steps, length(@steps))
      |> assign(:context, context)
-     |> assign(:transactions, transactions)}
+     |> assign(:transactions, transactions)
+     |> assign(:tech_stack_form, TechStackForm.init())}
   end
 
   def render(assigns) do
@@ -49,167 +77,147 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       <div class="flex flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">
-            <div class="mb-6 flex items-center gap-4 text-lg">
+            <div class="mb-4 flex items-center gap-4 text-lg">
               <span class="text-muted-foreground">
-                {@step} / {@total_steps}
+                {Enum.find_index(@steps, &(&1 == @step)) + 1} / {length(@steps)}
               </span>
-              <h1 class="text-lg font-semibold uppercase">Get started</h1>
+              <h1 class="text-lg font-semibold uppercase">
+                <%= if @step == Enum.at(@steps, -1) do %>
+                  Last step
+                <% else %>
+                  Get started
+                <% end %>
+              </h1>
             </div>
 
             <div class="mb-4">
-              {render_step(assigns)}
-            </div>
-
-            <div class="flex justify-between">
-              <%= if @step > 1 do %>
-                <.button phx-click="prev_step" variant="secondary">
-                  Previous
-                </.button>
-              <% else %>
-                <div></div>
-              <% end %>
-              <%= if @step < @total_steps do %>
-                <.button phx-click="next_step" variant="default">
-                  Next
-                </.button>
-              <% else %>
-                <.button
-                  href={Algora.Github.authorize_url()}
-                  rel="noopener"
-                  class="inline-flex items-center"
-                >
-                  <Logos.github class="mr-2 h-5 w-5" /> Sign in with GitHub
-                </.button>
-              <% end %>
+              {main_content(assigns)}
             </div>
           </div>
         </div>
         <div class="h-screen w-1/3 overflow-y-auto border-l border-border bg-background px-6 py-4">
-          <h2 class="mb-4 text-lg font-semibold uppercase">
-            Recently Completed Bounties
-          </h2>
-          <%= if @transactions == [] do %>
-            <p class="text-muted-foreground">No completed bounties available</p>
-          <% else %>
-            <%= for transaction <- @transactions do %>
-              <div class="mb-4 rounded-lg border border-border bg-card p-4">
-                <div class="flex gap-4">
-                  <div class="flex-1">
-                    <div class="mb-2 font-mono text-2xl font-extrabold text-success">
-                      {Money.to_string!(transaction.bounty.amount)}
-                    </div>
-                    <div class="mb-1 text-sm text-muted-foreground">
-                      {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}
-                    </div>
-                    <div class="font-medium">
-                      {transaction.bounty.ticket.title}
-                    </div>
-                    <div class="mt-1 text-xs text-muted-foreground">
-                      {Algora.Util.time_ago(transaction.succeeded_at)}
-                    </div>
-                  </div>
-
-                  <div class="flex w-32 flex-col items-center border-l border-border pl-4">
-                    <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
-                      Awarded to
-                    </h3>
-                    <img
-                      src={transaction.user.avatar_url}
-                      class="mb-2 h-16 w-16 rounded-full"
-                      alt={transaction.user.name}
-                    />
-                    <div class="text-center text-sm font-medium">
-                      {transaction.user.name}
-                      <div>
-                        {Algora.Misc.CountryEmojis.get(transaction.user.country, "🌎")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          <% end %>
+          {sidebar_content(assigns)}
         </div>
       </div>
     </div>
     """
   end
 
-  def render_step(%{step: 1} = assigns) do
+  defp sidebar_content(assigns) do
+    ~H"""
+    <h2 class="mb-4 text-lg font-semibold uppercase">
+      Recently Completed Bounties
+    </h2>
+    <%= if @transactions == [] do %>
+      <p class="text-muted-foreground">No completed bounties available</p>
+    <% else %>
+      <%= for transaction <- @transactions do %>
+        <div class="mb-4 rounded-lg border border-border bg-card p-4">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <div class="mb-2 font-mono text-2xl font-extrabold text-success">
+                {Money.to_string!(transaction.bounty.amount)}
+              </div>
+              <div class="mb-1 text-sm text-muted-foreground">
+                {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}
+              </div>
+              <div class="font-medium">
+                {transaction.bounty.ticket.title}
+              </div>
+              <div class="mt-1 text-xs text-muted-foreground">
+                {Algora.Util.time_ago(transaction.succeeded_at)}
+              </div>
+            </div>
+
+            <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+              <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
+                Awarded to
+              </h3>
+              <img
+                src={transaction.user.avatar_url}
+                class="mb-2 h-16 w-16 rounded-full"
+                alt={transaction.user.name}
+              />
+              <div class="text-center text-sm font-medium">
+                {transaction.user.name}
+                <div>
+                  {Algora.Misc.CountryEmojis.get(transaction.user.country, "🌎")}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+    """
+  end
+
+  def main_content(%{step: :info} = assigns) do
     ~H"""
     <div class="space-y-8">
-      <div>
-        <h2 class="mb-2 text-4xl font-semibold">
-          What is your tech stack?
-        </h2>
-        <p class="text-muted-foreground">Select the technologies you work with</p>
+      <.form for={@tech_stack_form} phx-submit="submit_tech_stack" class="space-y-8">
+        <div>
+          <h2 class="mb-2 text-4xl font-semibold">
+            What is your tech stack?
+          </h2>
+          <p class="text-muted-foreground">Select the technologies you work with</p>
 
-        <div class="relative mt-1">
-          <.input
-            type="text"
-            name="tech_input"
-            value=""
-            placeholder="Elixir, Phoenix, PostgreSQL, etc."
-            phx-keydown="handle_tech_input"
-            phx-debounce="200"
-            class="w-full border-input bg-background"
+          <.TechStack
+            class="mt-4"
+            tech={get_field(@tech_stack_form.source, :tech_stack) || []}
+            socket={@socket}
           />
+
+          <.error :for={msg <- @tech_stack_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
+            {msg}
+          </.error>
         </div>
 
-        <div class="mt-4 flex flex-wrap gap-3">
-          <%= for tech <- @context.tech_stack do %>
-            <div class="flex items-center rounded-lg bg-success/10 px-3 py-1.5 text-sm font-semibold text-success">
-              {tech}
-              <button
-                phx-click="remove_tech"
-                phx-value-tech={tech}
-                class="ml-2 text-success hover:text-success/80"
-              >
-                ×
-              </button>
-            </div>
-          <% end %>
-        </div>
-      </div>
+        <div class="mt-8">
+          <h2 class="mb-2 text-4xl font-semibold">
+            What are you looking to do?
+          </h2>
+          <p class="text-muted-foreground">Select all that apply</p>
 
-      <div class="mt-8">
-        <h2 class="mb-2 text-4xl font-semibold">
-          What are you looking to do?
-        </h2>
-        <p class="text-muted-foreground">Select all that apply</p>
-
-        <div class="mt-2 -ml-4">
-          <%= for {intention, label, description, icon} <- [
-            {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
-            {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
-            {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
-          ] do %>
-            <label class="flex cursor-pointer items-center gap-3 rounded-lg p-4 hover:bg-muted">
-              <input
-                type="checkbox"
-                phx-click="toggle_intention"
-                phx-value-intention={intention}
-                checked={intention in @context.intentions}
-                class="h-10 w-10 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
-              />
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <.icon name={icon} class="h-5 w-5 text-muted-foreground" />
-                  <span class="font-medium">{label}</span>
+          <div class="mt-2 -ml-4">
+            <%= for {intention, label, description, icon} <- [
+              {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
+              {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
+              {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
+            ] do %>
+              <label class="flex cursor-pointer items-center gap-3 rounded-lg p-4 hover:bg-muted">
+                <input
+                  type="checkbox"
+                  phx-click="toggle_intention"
+                  phx-value-intention={intention}
+                  checked={intention in @context.intentions}
+                  class="h-10 w-10 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <.icon name={icon} class="h-5 w-5 text-muted-foreground" />
+                    <span class="font-medium">{label}</span>
+                  </div>
+                  <p class="mt-0.5 text-sm text-muted-foreground">
+                    {description}
+                  </p>
                 </div>
-                <p class="mt-0.5 text-sm text-muted-foreground">
-                  {description}
-                </p>
-              </div>
-            </label>
-          <% end %>
+              </label>
+            <% end %>
+          </div>
         </div>
-      </div>
+
+        <div class="flex justify-end">
+          <.button type="submit">
+            Next <.icon name="tabler-arrow-right" class="ml-2 size-4" />
+          </.button>
+        </div>
+      </.form>
     </div>
     """
   end
 
-  def render_step(%{step: 2} = assigns) do
+  def main_content(%{step: :oauth} = assigns) do
     ~H"""
     <div class="space-y-8">
       <div>
@@ -225,6 +233,14 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
           and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
         </p>
+      </div>
+      <div class="flex justify-between">
+        <.button phx-click="prev_step" variant="secondary">
+          Previous
+        </.button>
+        <.button href={Algora.Github.authorize_url()} rel="noopener" class="inline-flex items-center">
+          <Logos.github class="mr-2 h-5 w-5" /> Sign in with GitHub
+        </.button>
       </div>
     </div>
     """
@@ -251,12 +267,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     Map.put(context, String.to_atom(field), value)
   end
 
-  def handle_event("next_step", _, socket) do
-    {:noreply, assign(socket, step: socket.assigns.step + 1)}
-  end
-
   def handle_event("prev_step", _, socket) do
-    {:noreply, assign(socket, step: socket.assigns.step - 1)}
+    current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
+    prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
+    {:noreply, assign(socket, :step, prev_step)}
   end
 
   def handle_event("submit", _, socket) do
@@ -293,13 +307,43 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     {:noreply, assign(socket, context: updated_context)}
   end
 
+  def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
+    changeset = TechStackForm.changeset(%TechStackForm{}, %{tech_stack: tech_stack})
+    {:noreply, assign(socket, :tech_stack_form, to_form(changeset))}
+  end
+
   def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
-    updated_tech_stack = Enum.uniq([String.trim(tech) | socket.assigns.context.tech_stack])
-    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
-    {:noreply, assign(socket, context: updated_context)}
+    tech_stack = [String.trim(tech) | get_field(socket.assigns.tech_stack_form.source, :tech_stack) || []]
+    changeset = TechStackForm.changeset(%TechStackForm{}, %{tech_stack: Enum.uniq(tech_stack)})
+    {:noreply, assign(socket, :tech_stack_form, to_form(changeset))}
   end
 
   def handle_event("handle_tech_input", _params, socket) do
     {:noreply, socket}
+  end
+
+  def handle_event("submit_tech_stack", %{"tech_stack_form" => params}, socket) do
+    tech_stack =
+      Jason.decode!(params["tech_stack"]) ++
+        case String.trim(params["tech_stack_input"]) do
+          "" -> []
+          tech_stack_input -> String.split(tech_stack_input, ",")
+        end
+
+    changeset =
+      %TechStackForm{}
+      |> TechStackForm.changeset(%{tech_stack: tech_stack})
+      |> Map.put(:action, :validate)
+
+    case changeset do
+      %{valid?: true} ->
+        {:noreply,
+         socket
+         |> assign(:tech_stack_form, to_form(changeset))
+         |> assign(step: :oauth)}
+
+      %{valid?: false} ->
+        {:noreply, assign(socket, tech_stack_form: to_form(changeset))}
+    end
   end
 end

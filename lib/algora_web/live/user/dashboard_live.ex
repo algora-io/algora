@@ -24,6 +24,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
       |> assign(:achievements, fetch_achievements())
+      |> assign(:has_more_bounties, false)
       |> assign_bounties()
 
     {:ok, socket}
@@ -60,7 +61,14 @@ defmodule AlgoraWeb.User.DashboardLive do
 
       <div class="relative mx-auto h-full max-w-4xl p-6">
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
-          <.bounties bounties={@bounties} />
+          <div id="bounties-container" phx-hook="InfiniteScroll">
+            <.bounties bounties={@bounties} />
+            <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+              <div class="animate-pulse text-muted-foreground">
+                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+              </div>
+            </div>
+          </div>
         </.section>
       </div>
     </div>
@@ -212,6 +220,30 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply, socket}
   end
 
+  def handle_event("load_more", _params, socket) do
+    %{bounties: bounties, current_user: current_user} = socket.assigns
+
+    last_bounty = List.last(bounties)
+
+    cursor = %{
+      inserted_at: last_bounty.inserted_at,
+      id: last_bounty.id
+    }
+
+    more_bounties =
+      Bounties.list_bounties(
+        status: :open,
+        tech_stack: current_user.tech_stack,
+        limit: page_size(),
+        before: cursor
+      )
+
+    {:noreply,
+     socket
+     |> assign(:bounties, bounties ++ more_bounties)
+     |> assign(:has_more_bounties, length(more_bounties) >= page_size())}
+  end
+
   def handle_info(:bounties_updated, socket) do
     {:noreply, assign_bounties(socket)}
   end
@@ -221,11 +253,15 @@ defmodule AlgoraWeb.User.DashboardLive do
       Bounties.list_bounties(
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
-        limit: 100
+        limit: page_size()
       )
 
-    assign(socket, :bounties, Enum.take(bounties, 6))
+    socket
+    |> assign(:bounties, bounties)
+    |> assign(:has_more_bounties, length(bounties) >= page_size())
   end
+
+  defp page_size, do: 10
 
   def compact_view(assigns) do
     ~H"""

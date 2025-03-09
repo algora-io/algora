@@ -123,9 +123,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     @primary_key false
     embedded_schema do
-      field :hourly_rate_min, :integer
-      field :hourly_rate_max, :integer
-      field :hours_per_week, :integer
       field :hiring, :boolean
       field :categories, {:array, :string}
     end
@@ -150,33 +147,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [
-        :hourly_rate_min,
-        :hourly_rate_max,
-        :hours_per_week,
         :hiring,
         :categories
       ])
-      |> validate_required([:hourly_rate_min], message: "Please enter a minimum hourly rate")
-      |> validate_required([:hourly_rate_max], message: "Please enter a maximum hourly rate")
-      |> validate_required([:hours_per_week], message: "Please enter a number of hours per week")
       |> validate_required([:hiring], message: "Please select a hiring status")
-      |> validate_number(:hourly_rate_min, greater_than: 0)
-      |> validate_number(:hourly_rate_max, greater_than: 0)
-      |> validate_number(:hours_per_week, greater_than: 0)
       |> validate_length(:categories, min: 1, message: "Please select at least one category")
       |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
-      |> validate_rate_range()
-    end
-
-    defp validate_rate_range(changeset) do
-      min_rate = get_field(changeset, :hourly_rate_min)
-      max_rate = get_field(changeset, :hourly_rate_max)
-
-      if min_rate && max_rate && min_rate > max_rate do
-        add_error(changeset, :hourly_rate_min, "must be less than maximum rate")
-      else
-        changeset
-      end
     end
   end
 
@@ -225,7 +201,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
            |> assign(:email_form, email_form)
            |> assign(:verification_form, verificaiton_form)
            |> assign(:preferences_form, PreferencesForm.init())
-           |> assign(:step, Enum.at(@steps, 2))
+           |> assign(:step, :preferences)
            |> assign(:steps, @steps)
            |> assign(:code_sent?, true)
            |> assign(:code_valid?, true)
@@ -411,9 +387,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             og_image_url: get_in(metadata, [:org, :og_image_url]),
             tech_stack: tech_stack,
             categories: preferences.categories,
-            hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
-            hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
-            hours_per_week: preferences.hours_per_week,
             website_url: get_in(metadata, [:org, :website_url]),
             twitter_url: get_in(metadata, [:org, :socials, :twitter]),
             github_url: get_in(metadata, [:org, :socials, :github]),
@@ -443,10 +416,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         contract_params =
           %{
             start_date: DateTime.utc_now(),
-            status: :draft,
-            hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
-            hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
-            hours_per_week: preferences.hours_per_week
+            status: :draft
           }
 
         params =
@@ -650,7 +620,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </p>
 
         <div class="mt-6">
-          <.form for={@verification_form} phx-submit="submit_verification">
+          <.form for={@verification_form} phx-submit="submit_verification" class="space-y-6">
             <label class="mb-2 block text-sm font-medium">Verification Code</label>
             <.input
               field={@verification_form[:code]}
@@ -689,53 +659,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </div>
 
         <div class="space-y-8">
-          <div>
-            <label class="mb-1 block text-lg font-semibold">Hourly Rate (USD)</label>
-            <p class="mb-3 text-sm text-muted-foreground">
-              Enter the range of hourly rates you're looking for
-            </p>
-            <div class="flex items-center gap-4">
-              <div class="flex-1">
-                <.input
-                  field={@preferences_form[:hourly_rate_min]}
-                  icon="tabler-currency-dollar"
-                  label="Min"
-                  placeholder="0"
-                  class="w-full border-input bg-background"
-                  hide_errors
-                />
-              </div>
-              <div class="flex-1">
-                <.input
-                  field={@preferences_form[:hourly_rate_max]}
-                  icon="tabler-currency-dollar"
-                  label="Max"
-                  placeholder="0"
-                  class="w-full border-input bg-background"
-                  hide_errors
-                />
-              </div>
-              <div class="flex-1">
-                <.input
-                  field={@preferences_form[:hours_per_week]}
-                  icon="tabler-clock"
-                  label="Hours per week"
-                  placeholder="40"
-                  class="w-full border-input bg-background"
-                  hide_errors
-                />
-              </div>
-            </div>
-            <.error :for={
-              msg <-
-                [:hourly_rate_min, :hourly_rate_max, :hours_per_week]
-                |> Enum.flat_map(&@preferences_form[&1].errors)
-                |> Enum.map(&translate_error(&1))
-            }>
-              {msg}
-            </.error>
-          </div>
-
           <div>
             <label class="mb-1 block text-lg font-semibold">Are you hiring full-time?</label>
             <p class="mb-3 text-sm text-muted-foreground">

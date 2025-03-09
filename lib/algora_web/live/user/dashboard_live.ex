@@ -18,7 +18,11 @@ defmodule AlgoraWeb.User.DashboardLive do
 
     contracts = Algora.Contracts.list_contracts(status: :draft, contractor_id: socket.assigns.current_user.id)
 
-    account = Payments.get_account(socket.assigns.current_user)
+    has_active_account =
+      case Payments.get_account(socket.assigns.current_user) do
+        %Account{payouts_enabled: true} -> true
+        _ -> false
+      end
 
     socket =
       socket
@@ -28,7 +32,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
       |> assign(:has_more_bounties, false)
-      |> assign(:account, account)
+      |> assign(:has_active_account, has_active_account)
       |> assign_bounties()
       |> assign_achievements()
 
@@ -38,6 +42,25 @@ defmodule AlgoraWeb.User.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="flex-1 bg-background text-foreground lg:pr-96">
+      <div class="relative mx-auto h-full max-w-4xl p-6">
+        <.section :if={not @has_active_account}>
+          <.card>
+            <.card_header>
+              <.card_title>Connect with Stripe</.card_title>
+              <.card_description>
+                Connect your Stripe account to receive payments for bounties and contracts
+              </.card_description>
+            </.card_header>
+            <.card_content>
+              <div class="flex flex-col gap-3">
+                <.button navigate={~p"/user/transactions"} class="ml-auto">
+                  Connect with Stripe <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2 -mr-1" />
+                </.button>
+              </div>
+            </.card_content>
+          </.card>
+        </.section>
+      </div>
       <!-- Hourly Bounties Section -->
       <%= if length(@contracts) > 0 do %>
         <div class="relative mx-auto h-full max-w-4xl p-6">
@@ -212,11 +235,10 @@ defmodule AlgoraWeb.User.DashboardLive do
   defp personalize_status(_socket), do: :completed
 
   defp setup_stripe_status(socket) do
-    dbg(socket.assigns.account)
-
-    case socket.assigns.account do
-      %Account{payouts_enabled: true} -> :completed
-      _ -> :upcoming
+    if socket.assigns.has_active_account do
+      :completed
+    else
+      :upcoming
     end
   end
 

@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @steps [:info, :oauth]
 
-  defmodule TechStackForm do
+  defmodule InfoForm do
     @moduledoc false
     use Ecto.Schema
 
@@ -21,16 +21,27 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     @primary_key false
     embedded_schema do
       field :tech_stack, {:array, :string}
+      field :intentions, {:array, :string}
     end
 
     def init do
-      to_form(TechStackForm.changeset(%TechStackForm{}, %{tech_stack: []}))
+      to_form(InfoForm.changeset(%InfoForm{}, %{tech_stack: [], intentions: []}))
     end
 
     def changeset(form, attrs) do
       form
-      |> cast(attrs, [:tech_stack])
+      |> cast(attrs, [:tech_stack, :intentions])
       |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
+      |> validate_length(:intentions, min: 1, message: "Please select at least one intention")
+      |> validate_subset(:intentions, Enum.map(intentions_options(), &elem(&1, 0)))
+    end
+
+    def intentions_options do
+      [
+        {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
+        {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
+        {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
+      ]
     end
   end
 
@@ -68,7 +79,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
      |> assign(:total_steps, length(@steps))
      |> assign(:context, context)
      |> assign(:transactions, transactions)
-     |> assign(:tech_stack_form, TechStackForm.init())}
+     |> assign(:info_form, InfoForm.init())}
   end
 
   def render(assigns) do
@@ -155,7 +166,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   def main_content(%{step: :info} = assigns) do
     ~H"""
     <div class="space-y-8">
-      <.form for={@tech_stack_form} phx-submit="submit_tech_stack" class="space-y-8">
+      <.form for={@info_form} phx-submit="submit_info" class="space-y-8">
         <div>
           <h2 class="mb-2 text-4xl font-semibold">
             What is your tech stack?
@@ -164,11 +175,12 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
           <.TechStack
             class="mt-4"
-            tech={get_field(@tech_stack_form.source, :tech_stack) || []}
+            tech={get_field(@info_form.source, :tech_stack) || []}
             socket={@socket}
+            form="info_form"
           />
 
-          <.error :for={msg <- @tech_stack_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
+          <.error :for={msg <- @info_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
             {msg}
           </.error>
         </div>
@@ -180,18 +192,15 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           <p class="text-muted-foreground">Select all that apply</p>
 
           <div class="mt-2 -ml-4">
-            <%= for {intention, label, description, icon} <- [
-              {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
-              {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
-              {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
-            ] do %>
+            <%= for {value, label, description, icon} <- InfoForm.intentions_options() do %>
               <label class="flex cursor-pointer items-center gap-3 rounded-lg p-4 hover:bg-muted">
-                <input
+                <.input
+                  field={@info_form[:intentions]}
                   type="checkbox"
-                  phx-click="toggle_intention"
-                  phx-value-intention={intention}
-                  checked={intention in @context.intentions}
+                  value={value}
+                  checked={value in (get_field(@info_form.source, :intentions) || [])}
                   class="h-10 w-10 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                  multiple
                 />
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
@@ -205,6 +214,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
               </label>
             <% end %>
           </div>
+
+          <.error :for={msg <- @info_form[:intentions].errors |> Enum.map(&translate_error(&1))}>
+            {msg}
+          </.error>
         </div>
 
         <div class="flex justify-end">
@@ -246,83 +259,19 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     """
   end
 
-  defp update_context_field(context, "tech_stack", _value, %{"tech" => tech}) do
-    tech_stack =
-      if tech in context.tech_stack,
-        do: List.delete(context.tech_stack, tech),
-        else: [tech | context.tech_stack]
-
-    %{context | tech_stack: tech_stack}
-  end
-
-  defp update_context_field(context, "email" = _field, value, _params) do
-    domain = value |> String.split("@") |> List.last()
-
-    context
-    |> Map.put(:email, value)
-    |> Map.put(:domain, domain)
-  end
-
-  defp update_context_field(context, field, value, _params) do
-    Map.put(context, String.to_atom(field), value)
-  end
-
   def handle_event("prev_step", _, socket) do
     current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
     prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
     {:noreply, assign(socket, :step, prev_step)}
   end
 
-  def handle_event("submit", _, socket) do
-    # Handle context submission
+  def handle_event("tech_stack_changed", _params, socket) do
     {:noreply, socket}
   end
 
-  def handle_event("add_tech", %{"tech" => tech}, socket) do
-    updated_tech_stack = Enum.uniq([tech | socket.assigns.context.tech_stack])
-    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
-    {:noreply, assign(socket, context: updated_context)}
-  end
+  def handle_event("submit_info", %{"info_form" => params}, socket) do
+    dbg(params)
 
-  def handle_event("remove_tech", %{"tech" => tech}, socket) do
-    updated_tech_stack = List.delete(socket.assigns.context.tech_stack, tech)
-    updated_context = Map.put(socket.assigns.context, :tech_stack, updated_tech_stack)
-    {:noreply, assign(socket, context: updated_context)}
-  end
-
-  def handle_event("update_context", %{"field" => field, "value" => value} = params, socket) do
-    updated_context = update_context_field(socket.assigns.context, field, value, params)
-    {:noreply, assign(socket, context: updated_context)}
-  end
-
-  def handle_event("toggle_intention", %{"intention" => intention}, socket) do
-    updated_intentions =
-      if intention in socket.assigns.context.intentions do
-        List.delete(socket.assigns.context.intentions, intention)
-      else
-        [intention | socket.assigns.context.intentions]
-      end
-
-    updated_context = Map.put(socket.assigns.context, :intentions, updated_intentions)
-    {:noreply, assign(socket, context: updated_context)}
-  end
-
-  def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
-    changeset = TechStackForm.changeset(%TechStackForm{}, %{tech_stack: tech_stack})
-    {:noreply, assign(socket, :tech_stack_form, to_form(changeset))}
-  end
-
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
-    tech_stack = [String.trim(tech) | get_field(socket.assigns.tech_stack_form.source, :tech_stack) || []]
-    changeset = TechStackForm.changeset(%TechStackForm{}, %{tech_stack: Enum.uniq(tech_stack)})
-    {:noreply, assign(socket, :tech_stack_form, to_form(changeset))}
-  end
-
-  def handle_event("handle_tech_input", _params, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_event("submit_tech_stack", %{"tech_stack_form" => params}, socket) do
     tech_stack =
       Jason.decode!(params["tech_stack"]) ++
         case String.trim(params["tech_stack_input"]) do
@@ -331,19 +280,19 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         end
 
     changeset =
-      %TechStackForm{}
-      |> TechStackForm.changeset(%{tech_stack: tech_stack})
+      %InfoForm{}
+      |> InfoForm.changeset(%{tech_stack: tech_stack, intentions: params["intentions"] || []})
       |> Map.put(:action, :validate)
 
     case changeset do
       %{valid?: true} ->
         {:noreply,
          socket
-         |> assign(:tech_stack_form, to_form(changeset))
+         |> assign(:info_form, to_form(changeset))
          |> assign(step: :oauth)}
 
       %{valid?: false} ->
-        {:noreply, assign(socket, tech_stack_form: to_form(changeset))}
+        {:noreply, assign(socket, info_form: to_form(changeset))}
     end
   end
 end

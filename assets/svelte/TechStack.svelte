@@ -1,5 +1,6 @@
 <script>
   export let tech = [];
+  export let form;
   export let live;
 
   let input = "";
@@ -46,7 +47,7 @@
 <div class="mt-4">
   <input
     type="text"
-    name="tech_stack_form[tech_stack_input]"
+    name={`${form}[tech_stack_input]`}
     bind:value={input}
     on:keydown={addTech}
     placeholder="Elixir, Phoenix, PostgreSQL, etc."
@@ -55,7 +56,7 @@
 
   <input
     type="hidden"
-    name="tech_stack_form[tech_stack]"
+    name={`${form}[tech_stack]`}
     value={JSON.stringify(tech)}
   />
 

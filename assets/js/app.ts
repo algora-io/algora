@@ -463,6 +463,18 @@ const Hooks = {
   },
   InfiniteScroll: {
     mounted() {
+      this.setupObserver();
+    },
+
+    updated() {
+      // Disconnect previous observer before creating a new one
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+      this.setupObserver();
+    },
+
+    setupObserver() {
       this.observer = new IntersectionObserver(
         (entries) => {
           const entry = entries[0];
@@ -477,16 +489,10 @@ const Hooks = {
         }
       );
 
-      const loadMoreIndicator = document.getElementById("load-more-indicator");
+      // Look for the indicator inside this.el rather than document-wide
+      const loadMoreIndicator = this.el.querySelector("#load-more-indicator");
       if (loadMoreIndicator) {
-        this.observer.observe(loadMoreIndicator);
-      }
-    },
-
-    updated() {
-      // Re-observe the indicator after updates
-      const loadMoreIndicator = document.getElementById("load-more-indicator");
-      if (loadMoreIndicator) {
+        console.log("observing indicator", loadMoreIndicator);
         this.observer.observe(loadMoreIndicator);
       }
     },

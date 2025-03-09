@@ -75,7 +75,7 @@ defmodule AlgoraWeb.LoginLive do
               navigate="/auth/signup"
               class="underline font-medium text-foreground/90 hover:text-foreground"
             >
-              Sign Up Now
+              Sign up now
             </.link>
           </div>
 

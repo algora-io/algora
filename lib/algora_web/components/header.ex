@@ -51,9 +51,12 @@ defmodule AlgoraWeb.Components.Header do
           </.link>
         </div>
 
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-          <.button navigate={~p"/auth/login"} variant="subtle">
+        <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-2">
+          <.button navigate={~p"/auth/login"} variant="ghost">
             Sign in
+          </.button>
+          <.button navigate={~p"/auth/signup"} variant="default">
+            Sign up
           </.button>
         </div>
       </nav>

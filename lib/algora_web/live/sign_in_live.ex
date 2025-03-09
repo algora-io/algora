@@ -6,6 +6,7 @@ defmodule AlgoraWeb.SignInLive do
   alias AlgoraWeb.Components.Logos
   alias Swoosh.Email
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="flex min-h-[100svh] bg-[#111113]">
@@ -14,10 +15,10 @@ defmodule AlgoraWeb.SignInLive do
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col">
           <div :if={!@secret_code}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
-              Welcome back
+              {if @mode == :signup, do: "Get started", else: "Welcome back"}
             </h2>
             <p class="mt-2 text-base/6 text-muted-foreground">
-              Sign in to your account
+              {if @mode == :signup, do: "Create a new account", else: "Sign in to your account"}
             </p>
           </div>
           <div :if={@secret_code}>
@@ -47,7 +48,7 @@ defmodule AlgoraWeb.SignInLive do
                 required
               />
               <.button if={!@secret_code} phx-disable-with="Signing in..." class="w-full py-5">
-                <span :if={!@secret_code}>Sign in</span>
+                <span :if={!@secret_code}>{if @mode == :signup, do: "Sign up", else: "Sign in"}</span>
                 <span :if={@secret_code}>Submit</span>
               </.button>
             </.simple_form>
@@ -69,13 +70,23 @@ defmodule AlgoraWeb.SignInLive do
           </div>
 
           <div :if={!@secret_code} class="mt-8 text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <.link
-              navigate="/auth/signup"
-              class="underline font-medium text-foreground/90 hover:text-foreground"
-            >
-              Sign up now
-            </.link>
+            <%= if @mode == :signup do %>
+              Already have an account?
+              <.link
+                patch={~p"/auth/login"}
+                class="underline font-medium text-foreground/90 hover:text-foreground"
+              >
+                Sign in
+              </.link>
+            <% else %>
+              Don't have an account?
+              <.link
+                patch={~p"/auth/signup"}
+                class="underline font-medium text-foreground/90 hover:text-foreground"
+              >
+                Sign up now
+              </.link>
+            <% end %>
           </div>
 
           <div class="absolute bottom-8 text-center text-xs sm:text-sm text-muted-foreground max-w-[calc(100vw-2rem)] sm:max-w-sm w-full mx-auto">
@@ -134,6 +145,7 @@ defmodule AlgoraWeb.SignInLive do
     """
   end
 
+  @impl true
   def mount(params, _session, socket) do
     authorize_url =
       case params["return_to"] do
@@ -154,9 +166,16 @@ defmodule AlgoraWeb.SignInLive do
      socket
      |> assign(:authorize_url, authorize_url)
      |> assign(:secret_code, nil)
+     |> assign(:mode, socket.assigns.live_action)
      |> assign_form(changeset)}
   end
 
+  @impl true
+  def handle_params(_params, _url, socket) do
+    {:noreply, assign(socket, :mode, socket.assigns.live_action)}
+  end
+
+  @impl true
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
     code = Nanoid.generate()
 
@@ -183,6 +202,7 @@ defmodule AlgoraWeb.SignInLive do
     end
   end
 
+  @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
       user = socket.assigns.user

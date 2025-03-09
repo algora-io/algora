@@ -46,7 +46,7 @@ defmodule AlgoraWeb.SignInLive do
                 label="Login code"
                 required
               />
-              <.button if={!@secret_code} phx-disable-with="Signing in..." class="w-full" size="lg">
+              <.button if={!@secret_code} phx-disable-with="Signing in..." class="w-full py-5">
                 <span :if={!@secret_code}>Sign in</span>
                 <span :if={@secret_code}>Submit</span>
               </.button>
@@ -63,9 +63,8 @@ defmodule AlgoraWeb.SignInLive do
           </div>
 
           <div :if={!@secret_code} class="mt-4">
-            <.button href={@authorize_url} variant="secondary" class="w-full" size="lg">
-              <Logos.github class="size-5 mr-2 -ml-1 shrink-0" />
-              <span class="text-sm/6 font-semibold">Continue with GitHub</span>
+            <.button href={@authorize_url} variant="secondary" class="w-full py-5">
+              <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
             </.button>
           </div>
 

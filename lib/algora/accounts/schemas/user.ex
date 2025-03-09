@@ -60,8 +60,8 @@ defmodule Algora.Accounts.User do
     field :need_avatar, :boolean, default: false
 
     field :bounty_mode, Ecto.Enum,
-      values: [:community, :experts_only, :public],
-      default: :community
+      values: [:community, :exclusive, :public],
+      default: :public
 
     field :website_url, :string
     field :twitter_url, :string

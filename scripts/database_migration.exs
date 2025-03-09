@@ -236,7 +236,12 @@ defmodule DatabaseMigration do
         "activated" => row["active"],
         "max_open_attempts" => row["max_open_attempts"],
         "manual_assignment" => row["manual_assignment"],
-        "bounty_mode" => nil,
+        "bounty_mode" =>
+          if true?(row["enabled_community_mode"]) do
+            :community
+          else
+            :public
+          end,
         "hourly_rate_min" => nil,
         "hourly_rate_max" => nil,
         "hours_per_week" => nil,
@@ -378,7 +383,13 @@ defmodule DatabaseMigration do
         "inserted_at" => row["created_at"],
         "updated_at" => row["updated_at"],
         "number" => row["number"],
-        "autopay_disabled" => row["autopay_disabled"]
+        "autopay_disabled" => row["autopay_disabled"],
+        "visibility" =>
+          cond do
+            row["visibility"] == "unlisted" -> :exclusive
+            true?(owner["enabled_community_mode"]) -> :community
+            true -> :public
+          end
       }
     end
   end
@@ -1308,6 +1319,8 @@ defmodule DatabaseMigration do
   defp deserialize_value(value), do: value
 
   defp nullish?(value), do: is_nil(deserialize_value(value))
+
+  defp true?(value), do: deserialize_value(value) == true
 
   defp or_else(value, default), do: if(nullish?(value), do: default, else: value)
 

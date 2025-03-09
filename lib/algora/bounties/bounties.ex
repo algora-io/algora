@@ -34,6 +34,7 @@ defmodule Algora.Bounties do
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
           | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
+          | {:amount_gt, Money.t()}
 
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "bounties:all", :bounties_updated)
@@ -989,6 +990,17 @@ defmodule Algora.Bounties do
               "EXISTS (SELECT 1 FROM UNNEST(?::citext[]) t1 WHERE t1 = ANY(?::citext[]))",
               o.tech_stack,
               ^tech_stack
+            )
+        )
+
+      {:amount_gt, min_amount}, query ->
+        from([b] in query,
+          where:
+            fragment(
+              "?::money_with_currency >= (?, ?)::money_with_currency",
+              b.amount,
+              ^to_string(min_amount.currency),
+              ^min_amount.amount
             )
         )
 

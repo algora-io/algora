@@ -16,17 +16,7 @@ defmodule Algora.OrganizationsTest do
       domain: "algora.io",
       tech_stack: ["Elixir", "Phoenix"],
       email: "admin@example.com",
-      hourly_rate_min: Money.new(:USD, "50"),
-      hourly_rate_max: Money.new(:USD, "150"),
-      hours_per_week: 40,
       categories: ["open_source", "agency"]
-    },
-    contract: %{
-      start_date: DateTime.utc_now(),
-      status: :draft,
-      hourly_rate_min: Money.new(:USD, "50"),
-      hourly_rate_max: Money.new(:USD, "150"),
-      hours_per_week: 40
     }
   }
 
@@ -53,9 +43,6 @@ defmodule Algora.OrganizationsTest do
       display_name: "Algora",
       bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
       tech_stack: ["Elixir", "Phoenix"],
-      hourly_rate_min: Money.new(:USD, "50"),
-      hourly_rate_max: Money.new(:USD, "150"),
-      hours_per_week: 40,
       website_url: nil,
       twitter_url: "https://twitter.com/algoraio",
       twitch_url: nil,
@@ -63,36 +50,23 @@ defmodule Algora.OrganizationsTest do
       linkedin_url: nil,
       og_title: "Algora: Open source bounties",
       og_image_url: "https://console.algora.io/og.png"
-    },
-    contract: %{
-      status: :draft,
-      hourly_rate_min: Money.new(:USD, "50"),
-      hourly_rate_max: Money.new(:USD, "150"),
-      hours_per_week: 40,
-      start_date: ~U[2024-12-27 01:30:51.117317Z]
     }
   }
 
   describe "organizations" do
     test "onboard" do
-      assert {:ok, %{user: user, org: org, member: member, contract: contract}} =
+      assert {:ok, %{user: user, org: org, member: member}} =
                Algora.Organizations.onboard_organization(@params)
 
       assert member.org_id == org.id
       assert member.user_id == user.id
-      assert contract.client_id == org.id
-      assert contract.status == :draft
-      assert contract.hourly_rate_min == Money.new(:USD, "50")
-      assert contract.hourly_rate_max == Money.new(:USD, "150")
-      assert org.hourly_rate_min == Money.new(:USD, "50")
-      assert org.hourly_rate_max == Money.new(:USD, "150")
       assert org.display_name == "Algora"
       assert org.tech_stack == ["Elixir", "Phoenix"]
       assert org.categories == ["open_source", "agency"]
     end
 
     test "onboard with crawler" do
-      assert {:ok, %{user: user, org: org, member: _member, contract: _contract}} =
+      assert {:ok, %{user: user, org: org, member: _member}} =
                Algora.Organizations.onboard_organization(@params_crawler)
 
       assert org.avatar_url == "https://console.algora.io/logo-512px.png"

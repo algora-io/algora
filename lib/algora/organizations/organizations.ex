@@ -3,7 +3,6 @@ defmodule Algora.Organizations do
   import Ecto.Query
 
   alias Algora.Accounts.User
-  alias Algora.Contracts.Contract
   alias Algora.Organizations.Member
   alias Algora.Organizations.Org
   alias Algora.Repo
@@ -42,15 +41,7 @@ defmodule Algora.Organizations do
           Map.merge(params.member, %{user: user, org: org})
         )
 
-      contract_changeset =
-        Contract.changeset(
-          %Contract{},
-          Map.put(params.contract, :client_id, org.id)
-        )
-
-      Multi.new()
-      |> Multi.insert(:member, member_changeset)
-      |> Multi.insert(:contract, contract_changeset)
+      Multi.insert(Multi.new(), :member, member_changeset)
     end)
     |> Repo.transaction()
   end

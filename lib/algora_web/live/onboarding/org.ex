@@ -13,6 +13,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   require Logger
 
+  @steps [:tech_stack, :email, :preferences]
+
   # === SCHEMAS === #
 
   defmodule TechStackForm do
@@ -33,7 +35,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:tech_stack])
-      |> validate_length(:tech_stack, min: 1, message: "Please select at least one technology")
+      |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
     end
   end
 
@@ -155,8 +157,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
     end
   end
-
-  @steps [:tech_stack, :email, :preferences]
 
   # === LIFECYCLE === #
 

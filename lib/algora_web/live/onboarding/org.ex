@@ -148,11 +148,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     def changeset(form, attrs) do
       form
-      |> cast(attrs, [
-        :hiring,
-        :categories
-      ])
+      |> cast(attrs, [:hiring, :categories])
       |> validate_required([:hiring], message: "Please select a hiring status")
+      |> validate_required([:categories], message: "Please select at least one category")
       |> validate_length(:categories, min: 1, message: "Please select at least one category")
       |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
     end
@@ -312,10 +310,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
-  def handle_event("submit_preferences", %{"preferences_form" => params}, socket) do
+  def handle_event("submit_preferences", params, socket) do
     changeset =
       %PreferencesForm{}
-      |> PreferencesForm.changeset(params)
+      |> PreferencesForm.changeset(params["preferences_form"] || %{})
       |> Map.put(:action, :validate)
 
     case changeset do
@@ -690,6 +688,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </label>
               <% end %>
             </div>
+            <.error :for={msg <- @preferences_form[:hiring].errors |> Enum.map(&translate_error(&1))}>
+              {msg}
+            </.error>
           </div>
 
           <div>
@@ -725,6 +726,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </label>
               <% end %>
             </div>
+            <.error :for={
+              msg <- @preferences_form[:categories].errors |> Enum.map(&translate_error(&1))
+            }>
+              {msg}
+            </.error>
           </div>
         </div>
 

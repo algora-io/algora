@@ -687,12 +687,11 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           value={@value}
           checked={@checked}
-          class="rounded border-input text-primary focus:ring-ring"
+          class={classes(["rounded border-input text-primary focus:ring-ring", @class])}
           {@rest}
         />
         {@label}
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end

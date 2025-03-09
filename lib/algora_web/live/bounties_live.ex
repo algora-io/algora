@@ -13,14 +13,14 @@ defmodule AlgoraWeb.BountiesLive do
       Bounties.subscribe()
     end
 
-    {:ok, assign_tickets(socket)}
+    {:ok, assign_bounties(socket)}
   end
 
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <.section title="Bounties" subtitle="Open bounties for you">
-        <%= if Enum.empty?(@tickets) do %>
+        <%= if Enum.empty?(@bounties) do %>
           <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
             <.card_header>
               <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -33,7 +33,7 @@ defmodule AlgoraWeb.BountiesLive do
             </.card_header>
           </.card>
         <% else %>
-          <.bounties tickets={@tickets} />
+          <.bounties bounties={@bounties} />
         <% end %>
       </.section>
     </div>
@@ -41,17 +41,17 @@ defmodule AlgoraWeb.BountiesLive do
   end
 
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
+    {:noreply, assign_bounties(socket)}
   end
 
-  defp assign_tickets(socket) do
-    tickets =
-      Bounties.PrizePool.list(
+  defp assign_bounties(socket) do
+    bounties =
+      Bounties.list_bounties(
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100
       )
 
-    assign(socket, :tickets, tickets)
+    assign(socket, :bounties, bounties)
   end
 end

@@ -24,7 +24,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
       |> assign(:achievements, fetch_achievements())
-      |> assign_tickets()
+      |> assign_bounties()
 
     {:ok, socket}
   end
@@ -60,7 +60,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
       <div class="relative mx-auto h-full max-w-4xl p-6">
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
-          <.bounties tickets={@tickets} />
+          <.bounties bounties={@bounties} />
         </.section>
       </div>
     </div>
@@ -213,18 +213,18 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
+    {:noreply, assign_bounties(socket)}
   end
 
-  defp assign_tickets(socket) do
-    tickets =
-      Bounties.PrizePool.list(
+  defp assign_bounties(socket) do
+    bounties =
+      Bounties.list_bounties(
         status: :open,
         tech_stack: socket.assigns.current_user.tech_stack,
         limit: 100
       )
 
-    assign(socket, :tickets, Enum.take(tickets, 6))
+    assign(socket, :bounties, Enum.take(bounties, 6))
   end
 
   def compact_view(assigns) do

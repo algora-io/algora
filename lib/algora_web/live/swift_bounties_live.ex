@@ -82,7 +82,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
           |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
           |> assign(:pending_action, nil)
-          |> assign_tickets()
+          |> assign_bounties()
           |> assign_active_repos()
 
         current_user ->
@@ -468,7 +468,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     </div>
 
     <div class="container mx-auto max-w-7xl space-y-12 px-6">
-      <%= if Enum.empty?(@tickets) do %>
+      <%= if Enum.empty?(@bounties) do %>
         <.card class="rounded-[2rem] bg-card py-12 text-center">
           <.card_header>
             <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -486,7 +486,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             <.card_title>Open Bounties</.card_title>
           </.card_header>
           <.card_content>
-            <.bounties tickets={@tickets} />
+            <.bounties bounties={@bounties} />
             <div class="hidden justify-center pt-4">
               <.button variant="ghost" phx-click="load_more">
                 <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
@@ -683,18 +683,18 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
+    {:noreply, assign_bounties(socket)}
   end
 
-  defp assign_tickets(socket) do
-    tickets =
-      Bounties.PrizePool.list(
+  defp assign_bounties(socket) do
+    bounties =
+      Bounties.list_bounties(
         status: :open,
         tech_stack: ["Swift"],
         limit: 100
       )
 
-    assign(socket, :tickets, tickets)
+    assign(socket, :bounties, bounties)
   end
 
   defp assign_active_repos(socket) do

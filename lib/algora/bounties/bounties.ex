@@ -1006,7 +1006,7 @@ defmodule Algora.Bounties do
     |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
     |> join(:inner, [b], t in assoc(b, :ticket), as: :t)
     |> join(:inner, [b], o in assoc(b, :owner), as: :o)
-    |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
+    |> join(:inner, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
@@ -1036,7 +1036,9 @@ defmodule Algora.Bounties do
         name: r.name,
         owner: %{
           id: ro.id,
-          login: ro.provider_login
+          handle: ro.handle,
+          provider_login: ro.provider_login,
+          avatar_url: ro.avatar_url
         }
       }
     })

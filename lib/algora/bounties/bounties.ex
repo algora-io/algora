@@ -51,7 +51,8 @@ defmodule Algora.Bounties do
         amount: amount,
         ticket_id: ticket.id,
         owner_id: owner.id,
-        creator_id: creator.id
+        creator_id: creator.id,
+        visibility: owner.bounty_mode
       })
 
     changeset
@@ -960,7 +961,12 @@ defmodule Algora.Bounties do
         case status do
           :open ->
             # TODO: persist state as separate field
-            where(query, [t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
+            query = where(query, [t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
+
+            case criteria[:owner_id] do
+              nil -> where(query, [b], b.visibility == :public)
+              _org_id -> where(query, [b], b.visibility in [:public, :community])
+            end
 
           _ ->
             query
@@ -1074,7 +1080,8 @@ defmodule Algora.Bounties do
         where: b.status != :cancelled,
         where: not is_nil(b.amount),
         # TODO: persist state as separate field
-        where: fragment("(?->>'state' != 'closed')", t.provider_meta)
+        where: fragment("(?->>'state' != 'closed')", t.provider_meta),
+        where: b.visibility in [:public, :community]
 
     rewards_query =
       from tx in Transaction,

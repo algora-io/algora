@@ -76,7 +76,7 @@
     - github_res_comment_id: 1
     - type: 0
     - kind: 0
-    - visibility: 0
+    - visibility: 1
     - number: 1
     - deleted: 0
     - reward_type: 0
@@ -351,7 +351,7 @@
     - twitter_url: 1
     - website_url: 1
     - youtube_url: 1
-    - enabled_community_mode: 0
+    - enabled_community_mode: 1
     - webhook_url_discord: -1
     - webhook_url_slack: -1
     - accepts_community_bounties: 0

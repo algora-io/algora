@@ -15,11 +15,15 @@ defmodule Algora.BountiesTest do
   alias Bounties.Tip
 
   setup do
-    repo_owner = insert!(:user)
-    repo = insert!(:repository, %{user: repo_owner})
+    creator = insert!(:user)
+    owner = insert!(:user, bounty_mode: :community)
+    _installation = insert!(:installation, owner: creator, connected_user: owner)
+    _identity = insert!(:identity, user: creator, provider_email: creator.email)
+    repo = insert!(:repository, %{user: owner})
     ticket = insert!(:ticket, %{repository: repo})
+    ticket_ref = %{owner: owner.handle, repo: repo.name, number: ticket.number}
 
-    %{ticket: ticket}
+    %{creator: creator, owner: owner, repo: repo, ticket: ticket, ticket_ref: ticket_ref}
   end
 
   describe "bounties" do
@@ -48,6 +52,8 @@ defmodule Algora.BountiesTest do
         }
 
       assert {:ok, bounty} = Bounties.create_bounty(bounty_params, [])
+
+      assert bounty.visibility == :public
 
       assert {:ok, claims} =
                Bounties.claim_bounty(
@@ -106,6 +112,42 @@ defmodule Algora.BountiesTest do
       end)
 
       # assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})
+    end
+
+    test "create public bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :public}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
+
+      assert bounty.visibility == :public
+    end
+
+    test "create community bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :community}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
+
+      assert bounty.visibility == :community
+    end
+
+    test "create exclusive bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :exclusive}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
+
+      assert bounty.visibility == :exclusive
     end
 
     test "successfully creates and pays invoice for bounty claim" do

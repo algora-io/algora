@@ -909,7 +909,12 @@ defmodule DatabaseMigration do
     |> put_in([:indexes, "_MergedUser"], %{"id" => index_merged_users(db)})
     |> put_in([:indexes, "_BountyTransfer"], %{
       "bounty_id" =>
-        Enum.group_by(db["BountyTransfer"], fn row ->
+        db["BountyTransfer"]
+        |> Enum.reject(fn row ->
+          charge = find_by_index(db, "BountyCharge", "id", row["bounty_charge_id"])
+          nullish?(charge["succeeded_at"])
+        end)
+        |> Enum.group_by(fn row ->
           claim = find_by_index(db, "Claim", "id", row["claim_id"])
           charge = find_by_index(db, "BountyCharge", "id", row["bounty_charge_id"])
 

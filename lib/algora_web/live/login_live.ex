@@ -9,7 +9,7 @@ defmodule AlgoraWeb.LoginLive do
   def render(assigns) do
     ~H"""
     <div class="flex min-h-[100svh] bg-[#111113]">
-      <div class="relative flex flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+      <div class="relative flex flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:flex-none lg:px-20 xl:px-24 lg:border-r lg:border-border">
         <.wordmark class="h-10 w-auto absolute top-4 left-4 sm:top-8 sm:left-8" />
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col">
           <div :if={!@secret_code}>

@@ -8,9 +8,9 @@ defmodule AlgoraWeb.LoginLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex min-h-screen bg-[#111113]">
-      <div class="relative flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-        <.wordmark class="h-10 w-auto absolute top-8 left-8" />
+    <div class="flex min-h-[100svh] bg-[#111113]">
+      <div class="relative flex flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <.wordmark class="h-10 w-auto absolute top-4 left-4 sm:top-8 sm:left-8" />
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col">
           <div :if={!@secret_code}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
@@ -79,7 +79,7 @@ defmodule AlgoraWeb.LoginLive do
             </.link>
           </div>
 
-          <div class="absolute bottom-8 text-center text-sm text-muted-foreground max-w-sm w-full mx-auto">
+          <div class="absolute bottom-8 text-center text-xs sm:text-sm text-muted-foreground max-w-[calc(100vw-2rem)] sm:max-w-sm w-full mx-auto">
             By continuing, you agree to our
             <.link
               href="https://console.algora.io/legal/terms"

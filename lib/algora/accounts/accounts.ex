@@ -23,7 +23,7 @@ defmodule Algora.Accounts do
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
           | {:handles, [String.t()]}
-          | {:earnings_gt, non_neg_integer()}
+          | {:earnings_gt, Money.t()}
           | {:sort_by_country, String.t()}
           | {:sort_by_tech_stack, [String.t()]}
 

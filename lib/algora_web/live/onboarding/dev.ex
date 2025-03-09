@@ -2,7 +2,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Bounties
+  import Ecto.Query
+
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
 
   def mount(_params, _session, socket) do
     context = %{
@@ -11,18 +14,32 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       intentions: []
     }
 
-    bounties =
-      [status: :paid, limit: 50, solver_country: socket.assigns.current_country]
-      |> Bounties.list_bounties()
-      |> Enum.filter(&Map.get(&1, :solver))
-      |> Enum.uniq_by(& &1.solver.id)
+    transactions =
+      Repo.all(
+        from tx in Transaction,
+          where: tx.type == :credit,
+          where: not is_nil(tx.succeeded_at),
+          where:
+            fragment(
+              "? >= ('USD', 500)::money_with_currency",
+              tx.net_amount
+            ),
+          join: u in assoc(tx, :user),
+          join: b in assoc(tx, :bounty),
+          join: t in assoc(b, :ticket),
+          join: r in assoc(t, :repository),
+          join: o in assoc(r, :user),
+          select_merge: %{user: u, bounty: %{b | ticket: %{t | repository: %{r | user: o}}}},
+          order_by: [desc: tx.succeeded_at],
+          limit: 10
+      )
 
     {:ok,
      socket
      |> assign(:step, 1)
      |> assign(:total_steps, 2)
      |> assign(:context, context)
-     |> assign(:bounties, bounties)}
+     |> assign(:transactions, transactions)}
   end
 
   def render(assigns) do
@@ -70,24 +87,24 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           <h2 class="mb-4 text-lg font-semibold uppercase">
             Recently Completed Bounties
           </h2>
-          <%= if @bounties == [] do %>
+          <%= if @transactions == [] do %>
             <p class="text-muted-foreground">No completed bounties available</p>
           <% else %>
-            <%= for bounty <- @bounties do %>
+            <%= for transaction <- @transactions do %>
               <div class="mb-4 rounded-lg border border-border bg-card p-4">
                 <div class="flex gap-4">
                   <div class="flex-1">
                     <div class="mb-2 font-mono text-2xl font-extrabold text-success">
-                      {Money.to_string!(bounty.amount)}
+                      {Money.to_string!(transaction.bounty.amount)}
                     </div>
                     <div class="mb-1 text-sm text-muted-foreground">
-                      {bounty.ticket.owner}/{bounty.ticket.repo}#{bounty.ticket.number}
+                      {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}
                     </div>
                     <div class="font-medium">
-                      {bounty.ticket.title}
+                      {transaction.bounty.ticket.title}
                     </div>
-                    <div class="mt-2 text-xs text-muted-foreground">
-                      {Algora.Util.time_ago(bounty.inserted_at)}
+                    <div class="mt-1 text-xs text-muted-foreground">
+                      {Algora.Util.time_ago(transaction.succeeded_at)}
                     </div>
                   </div>
 
@@ -96,15 +113,15 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                       Awarded to
                     </h3>
                     <img
-                      src={bounty.solver.avatar_url}
+                      src={transaction.user.avatar_url}
                       class="mb-2 h-16 w-16 rounded-full"
-                      alt={bounty.solver.name}
+                      alt={transaction.user.name}
                     />
                     <div class="text-center text-sm font-medium">
-                      {bounty.solver.name}
-                      <span class="ml-1">
-                        {Algora.Misc.CountryEmojis.get(bounty.solver.country, "🌎")}
-                      </span>
+                      {transaction.user.name}
+                      <div>
+                        {Algora.Misc.CountryEmojis.get(transaction.user.country, "🌎")}
+                      </div>
                     </div>
                   </div>
                 </div>

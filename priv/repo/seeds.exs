@@ -203,6 +203,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
       name: acct.business_profile.name,
       details_submitted: acct.details_submitted,
       charges_enabled: acct.charges_enabled,
+      payouts_enabled: acct.payouts_enabled,
       country: acct.country,
       type: String.to_atom(acct.type),
       user_id: carver.id

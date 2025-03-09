@@ -272,8 +272,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   def handle_event("submit_info", %{"info_form" => params}, socket) do
-    dbg(params)
-
     tech_stack =
       Jason.decode!(params["tech_stack"]) ++
         case String.trim(params["tech_stack_input"]) do

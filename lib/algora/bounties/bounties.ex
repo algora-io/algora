@@ -964,8 +964,13 @@ defmodule Algora.Bounties do
             query = where(query, [t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
 
             case criteria[:owner_id] do
-              nil -> where(query, [b], b.visibility == :public)
-              _org_id -> where(query, [b], b.visibility in [:public, :community])
+              nil ->
+                query
+                |> where([b], b.visibility == :public)
+                |> where([b], fragment("? >= ('USD', 500)::money_with_currency", b.amount))
+
+              _org_id ->
+                where(query, [b], b.visibility in [:public, :community])
             end
 
           _ ->

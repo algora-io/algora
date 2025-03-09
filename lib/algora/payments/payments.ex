@@ -223,6 +223,11 @@ defmodule Algora.Payments do
     Repo.fetch_by(Account, user_id: user.id)
   end
 
+  @spec get_account(user :: User.t()) :: Account.t() | nil
+  def get_account(user) do
+    Repo.get_by(Account, user_id: user.id)
+  end
+
   @spec create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   def create_account(user, country) do

@@ -566,7 +566,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
           <.TechStack
             class="mt-4"
-            props={%{tech_stack: get_field(@tech_stack_form.source, :tech_stack) || []}}
+            tech={get_field(@tech_stack_form.source, :tech_stack) || []}
             socket={@socket}
           />
 

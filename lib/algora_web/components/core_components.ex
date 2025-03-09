@@ -1176,7 +1176,7 @@ defmodule AlgoraWeb.CoreComponents do
   end
 
   defp link?(assigns) do
-    [assigns[:href], assigns[:navigate], assigns[:patch]] |> Enum.any?() |> dbg()
+    Enum.any?([assigns[:href], assigns[:navigate], assigns[:patch]])
   end
 
   attr :href, :string, default: nil

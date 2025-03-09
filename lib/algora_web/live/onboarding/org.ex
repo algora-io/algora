@@ -275,9 +275,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_event("submit_tech_stack", %{"tech_stack_form" => params}, socket) do
+    tech_stack =
+      Jason.decode!(params["tech_stack"]) ++
+        case String.trim(params["tech_stack_input"]) do
+          "" -> []
+          tech_stack_input -> String.split(tech_stack_input, ",")
+        end
+
     changeset =
       %TechStackForm{}
-      |> TechStackForm.changeset(%{tech_stack: Jason.decode!(params["tech_stack"])})
+      |> TechStackForm.changeset(%{tech_stack: tech_stack})
       |> Map.put(:action, :validate)
 
     case changeset do

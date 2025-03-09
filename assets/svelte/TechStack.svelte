@@ -42,6 +42,7 @@
 <div class="mt-4">
   <input
     type="text"
+    name="tech_stack_form[tech_stack_input]"
     bind:value={input}
     on:keydown={addTech}
     placeholder="Elixir, Phoenix, PostgreSQL, etc."

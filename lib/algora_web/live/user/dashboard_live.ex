@@ -8,6 +8,8 @@ defmodule AlgoraWeb.User.DashboardLive do
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Payments
+  alias Algora.Payments.Account
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -16,6 +18,8 @@ defmodule AlgoraWeb.User.DashboardLive do
 
     contracts = Algora.Contracts.list_contracts(status: :draft, contractor_id: socket.assigns.current_user.id)
 
+    account = Payments.get_account(socket.assigns.current_user)
+
     socket =
       socket
       |> assign(:view_mode, "compact")
@@ -23,9 +27,10 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hourly_rate, Money.new!(50, :USD))
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
-      |> assign(:achievements, fetch_achievements())
       |> assign(:has_more_bounties, false)
+      |> assign(:account, account)
       |> assign_bounties()
+      |> assign_achievements()
 
     {:ok, socket}
   end
@@ -58,7 +63,6 @@ defmodule AlgoraWeb.User.DashboardLive do
         </div>
       <% end %>
       <!-- Regular Bounties Section -->
-
       <div class="relative mx-auto h-full max-w-4xl p-6">
         <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
           <div id="bounties-container" phx-hook="InfiniteScroll">
@@ -179,14 +183,68 @@ defmodule AlgoraWeb.User.DashboardLive do
     """
   end
 
-  defp fetch_achievements do
-    [
-      %{status: :completed, name: "Personalize Algora"},
-      %{status: :current, name: "Create Stripe account"},
-      %{status: :upcoming, name: "Earn first bounty"},
-      %{status: :upcoming, name: "Earn through referral"},
-      %{status: :upcoming, name: "Earn $10K"}
+  defp assign_achievements(socket) do
+    achievements = [
+      {&personalize_status/1, "Personalize Algora"},
+      {&setup_stripe_status/1, "Create Stripe account"},
+      {&earn_first_bounty_status/1, "Earn first bounty"},
+      {&earn_through_referral_status/1, "Earn through referral"},
+      {&earn_10k_status/1, "Earn $10K"}
     ]
+
+    {achievements, _} =
+      Enum.reduce_while(achievements, {[], false}, fn {status_fn, name}, {acc, found_current} ->
+        status = status_fn.(socket)
+
+        result =
+          cond do
+            found_current -> {acc ++ [%{status: :upcoming, name: name}], found_current}
+            status == :completed -> {acc ++ [%{status: status, name: name}], false}
+            true -> {acc ++ [%{status: :current, name: name}], true}
+          end
+
+        {:cont, result}
+      end)
+
+    assign(socket, :achievements, achievements)
+  end
+
+  defp personalize_status(_socket), do: :completed
+
+  defp setup_stripe_status(socket) do
+    dbg(socket.assigns.account)
+
+    case socket.assigns.account do
+      %Account{payouts_enabled: true} -> :completed
+      _ -> :upcoming
+    end
+  end
+
+  defp earn_first_bounty_status(socket) do
+    if earned?(socket.assigns.current_user, Money.new!(0, :USD)) do
+      :completed
+    else
+      :upcoming
+    end
+  end
+
+  # TODO: implement referral earnings check
+  defp earn_through_referral_status(_socket), do: :upcoming
+
+  defp earn_10k_status(socket) do
+    if earned?(socket.assigns.current_user, Money.new!(10_000, :USD)) do
+      :completed
+    else
+      :upcoming
+    end
+  end
+
+  defp earned?(user, amount) do
+    cond do
+      is_nil(user.total_earned) -> false
+      Money.compare(user.total_earned, amount) == :lt -> false
+      true -> true
+    end
   end
 
   def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do

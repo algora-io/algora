@@ -398,7 +398,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
               </.card_content>
             </.card>
 
-            <.card :if={@account.details_submitted}>
+            <.card :if={@account.details_submitted and @account.provider_meta}>
               <.card_header>
                 <.card_title>Payout Settings</.card_title>
               </.card_header>

@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias AlgoraWeb.Components.Logos
 
   def mount(_params, _session, socket) do
     context = %{
@@ -77,7 +78,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
                   rel="noopener"
                   class="inline-flex items-center"
                 >
-                  <.icon name="tabler-brand-github" class="mr-2 h-5 w-5" /> Sign in with GitHub
+                  <Logos.github class="mr-2 h-5 w-5" /> Sign in with GitHub
                 </.button>
               <% end %>
             </div>

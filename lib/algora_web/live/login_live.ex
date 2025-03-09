@@ -10,9 +10,9 @@ defmodule AlgoraWeb.LoginLive do
     ~H"""
     <div class="flex min-h-screen bg-[#111113]">
       <div class="relative flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <.wordmark class="h-10 w-auto absolute top-8 left-8" />
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col">
-          <div>
-            <.wordmark class="h-10 w-auto absolute top-8 left-8" />
+          <div :if={!@secret_code}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
               Welcome back
             </h2>
@@ -20,26 +20,40 @@ defmodule AlgoraWeb.LoginLive do
               Sign in to your account
             </p>
           </div>
+          <div :if={@secret_code}>
+            <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
+              Check your email
+            </h2>
+            <p class="mt-2 text-base/6 text-muted-foreground">
+              Enter the login code we sent you
+            </p>
+          </div>
 
           <div class="mt-8">
-            <form action="#" method="POST" class="space-y-6">
+            <.simple_form for={@form} id="send_login_code_form" phx-submit="send_login_code">
               <.input
+                :if={!@secret_code}
                 field={@form[:email]}
                 type="email"
                 label="Email"
                 placeholder="you@example.com"
                 required
               />
-
-              <div>
-                <.button type="submit" class="w-full" size="lg">
-                  Sign in
-                </.button>
-              </div>
-            </form>
+              <.input
+                :if={@secret_code}
+                field={@form[:login_code]}
+                type="text"
+                label="Login code"
+                required
+              />
+              <.button if={!@secret_code} phx-disable-with="Signing in..." class="w-full" size="lg">
+                <span :if={!@secret_code}>Sign in</span>
+                <span :if={@secret_code}>Submit</span>
+              </.button>
+            </.simple_form>
           </div>
 
-          <div class="mt-4 relative">
+          <div :if={!@secret_code} class="mt-4 relative">
             <div class="absolute inset-0 flex items-center" aria-hidden="true">
               <div class="w-full border-t border-border"></div>
             </div>
@@ -48,14 +62,14 @@ defmodule AlgoraWeb.LoginLive do
             </div>
           </div>
 
-          <div class="mt-4">
+          <div :if={!@secret_code} class="mt-4">
             <.button href={@authorize_url} variant="secondary" class="w-full" size="lg">
               <Logos.github class="size-5 mr-2 -ml-1 shrink-0" />
               <span class="text-sm/6 font-semibold">Continue with GitHub</span>
             </.button>
           </div>
 
-          <div class="mt-8 text-center text-sm text-muted-foreground">
+          <div :if={!@secret_code} class="mt-8 text-center text-sm text-muted-foreground">
             Don't have an account?
             <.link
               navigate="/auth/signup"
@@ -121,9 +135,7 @@ defmodule AlgoraWeb.LoginLive do
     """
   end
 
-  def mount(params, session, socket) do
-    dbg(session)
-
+  def mount(params, _session, socket) do
     authorize_url =
       case params["return_to"] do
         nil -> Algora.Github.authorize_url()
@@ -141,8 +153,8 @@ defmodule AlgoraWeb.LoginLive do
 
     {:ok,
      socket
-     |> assign(authorize_url: authorize_url)
-     |> assign(secret_code: nil)
+     |> assign(:authorize_url, authorize_url)
+     |> assign(:secret_code, nil)
      |> assign_form(changeset)}
   end
 
@@ -159,8 +171,7 @@ defmodule AlgoraWeb.LoginLive do
              socket
              |> assign(:secret_code, code)
              |> assign(:user, user)
-             |> assign_form(changeset)
-             |> put_flash(:info, "Login code sent to #{email}!")}
+             |> assign_form(changeset)}
 
           {:error, _reason} ->
             # capture_error reason

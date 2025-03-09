@@ -42,8 +42,8 @@ defmodule AlgoraWeb.User.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="flex-1 bg-background text-foreground lg:pr-96">
-      <div class="relative mx-auto h-full max-w-4xl p-6">
-        <.section :if={not @has_active_account}>
+      <div :if={not @has_active_account} class="relative h-full p-6">
+        <.section>
           <.card>
             <.card_header>
               <.card_title>Connect with Stripe</.card_title>
@@ -61,33 +61,31 @@ defmodule AlgoraWeb.User.DashboardLive do
           </.card>
         </.section>
       </div>
-      <!-- Hourly Bounties Section -->
-      <%= if length(@contracts) > 0 do %>
-        <div class="relative mx-auto h-full max-w-4xl p-6">
-          <div class="flex justify-between">
-            <div class="flex flex-col space-y-1.5">
-              <h2 class="text-2xl font-semibold leading-none tracking-tight">
-                Hourly contracts
-              </h2>
-              <p class="text-sm text-muted-foreground">Paid out weekly</p>
-            </div>
-          </div>
-          <div class="-ml-4">
-            <div class="relative w-full overflow-auto">
-              <table class="w-full caption-bottom text-sm">
-                <tbody>
-                  <%= for contract <- @contracts do %>
-                    <.contract_card contract={contract} />
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
+      <!-- Contracts section -->
+      <div :if={length(@contracts) > 0} class="relative h-full p-6">
+        <div class="flex justify-between">
+          <div class="flex flex-col space-y-1.5">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight">
+              Hourly contracts
+            </h2>
+            <p class="text-sm text-muted-foreground">Paid out weekly</p>
           </div>
         </div>
-      <% end %>
-      <!-- Regular Bounties Section -->
-      <div class="relative mx-auto h-full max-w-4xl p-6">
-        <.section title="Open bounties" subtitle="Bounties for you" link={~p"/bounties"}>
+        <div class="-ml-4">
+          <div class="relative w-full overflow-auto">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for contract <- @contracts do %>
+                  <.contract_card contract={contract} />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Bounties section -->
+      <div :if={length(@bounties) > 0} class="relative h-full p-6">
+        <.section title="Open bounties" subtitle="Bounties for you">
           <div id="bounties-container" phx-hook="InfiniteScroll">
             <.bounties bounties={@bounties} />
             <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">

@@ -1176,6 +1176,28 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  defp link?(assigns) do
+    [assigns[:href], assigns[:navigate], assigns[:patch]] |> Enum.any?() |> dbg()
+  end
+
+  attr :href, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
+  attr :replace, :boolean, default: false
+  slot :inner_block
+
+  def maybe_link(assigns) do
+    ~H"""
+    <%= if link?(assigns) do %>
+      <.link href={@href} navigate={@navigate} patch={@patch} replace={@replace}>
+        {render_slot(@inner_block)}
+      </.link>
+    <% else %>
+      <span>{render_slot(@inner_block)}</span>
+    <% end %>
+    """
+  end
+
   defdelegate accordion_item(assigns), to: Accordion
   defdelegate accordion_trigger(assigns), to: Accordion
   defdelegate accordion(assigns), to: Accordion

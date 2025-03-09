@@ -74,7 +74,7 @@ defmodule DatabaseMigration do
     {"Reward", ["bounty_id"]}
   ]
 
-  @test_org_id "cljo6j981000el60f1k1cvtns"
+  @test_orgs ["cljo6j981000el60f1k1cvtns", "clcqf530c0001jy08mdisnzmj"]
 
   defp relevant_tables do
     @schema_mappings
@@ -362,7 +362,7 @@ defmodule DatabaseMigration do
 
     transfer = find_by_index(db, "_BountyTransfer", "bounty_id", row["id"])
 
-    if row["type"] != "tip" do
+    if row["type"] != "tip" and owner["id"] not in @test_orgs do
       %{
         "id" => row["id"],
         "amount" => amount,
@@ -473,7 +473,7 @@ defmodule DatabaseMigration do
       raise "User not found: #{inspect(row)}"
     end
 
-    if !nullish?(row["succeeded_at"]) do
+    if !nullish?(row["succeeded_at"]) and user["id"] not in @test_orgs do
       %{
         "id" => row["id"],
         "provider" => "stripe",
@@ -535,7 +535,7 @@ defmodule DatabaseMigration do
       raise "Owner not found: #{inspect(row)}"
     end
 
-    if bounty["type"] == "tip" and !nullish?(bounty_charge["succeeded_at"]) do
+    if bounty["type"] == "tip" and !nullish?(bounty_charge["succeeded_at"]) and owner["id"] not in @test_orgs do
       %{
         "id" => bounty["id"] <> user_id,
         "amount" => amount,
@@ -575,7 +575,7 @@ defmodule DatabaseMigration do
       raise "BountyCharge not found: #{inspect(row)}"
     end
 
-    if !nullish?(bounty_charge["succeeded_at"]) do
+    if !nullish?(bounty_charge["succeeded_at"]) and org["id"] not in @test_orgs do
       Enum.reject(
         [
           maybe_create_transaction("debit", %{
@@ -624,37 +624,39 @@ defmodule DatabaseMigration do
         {Money.negate!(amount), "debit"}
       end
 
-    %{
-      "id" => row["id"],
-      "provider" => "stripe",
-      "provider_id" => nil,
-      "provider_charge_id" => nil,
-      "provider_payment_intent_id" => nil,
-      "provider_transfer_id" => nil,
-      "provider_invoice_id" => nil,
-      "provider_balance_transaction_id" => nil,
-      "provider_meta" => nil,
-      "gross_amount" => abs_amount,
-      "net_amount" => abs_amount,
-      "total_fee" => Money.zero(:USD),
-      "provider_fee" => nil,
-      "line_items" => nil,
-      "type" => type,
-      "status" => :succeeded,
-      "succeeded_at" => row["created_at"],
-      "reversed_at" => nil,
-      "group_id" => row["id"],
-      "user_id" => user["id"],
-      "contract_id" => nil,
-      "original_contract_id" => nil,
-      "timesheet_id" => nil,
-      "bounty_id" => nil,
-      "tip_id" => nil,
-      "linked_transaction_id" => nil,
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["created_at"],
-      "claim_id" => nil
-    }
+    if user["id"] not in @test_orgs do
+      %{
+        "id" => row["id"],
+        "provider" => "stripe",
+        "provider_id" => nil,
+        "provider_charge_id" => nil,
+        "provider_payment_intent_id" => nil,
+        "provider_transfer_id" => nil,
+        "provider_invoice_id" => nil,
+        "provider_balance_transaction_id" => nil,
+        "provider_meta" => nil,
+        "gross_amount" => abs_amount,
+        "net_amount" => abs_amount,
+        "total_fee" => Money.zero(:USD),
+        "provider_fee" => nil,
+        "line_items" => nil,
+        "type" => type,
+        "status" => :succeeded,
+        "succeeded_at" => row["created_at"],
+        "reversed_at" => nil,
+        "group_id" => row["id"],
+        "user_id" => user["id"],
+        "contract_id" => nil,
+        "original_contract_id" => nil,
+        "timesheet_id" => nil,
+        "bounty_id" => nil,
+        "tip_id" => nil,
+        "linked_transaction_id" => nil,
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["created_at"],
+        "claim_id" => nil
+      }
+    end
   end
 
   defp transform({"GithubInstallation", Installation}, row, db) do
@@ -709,7 +711,7 @@ defmodule DatabaseMigration do
       raise "Owner not found: #{inspect(row)}"
     end
 
-    if owner["id"] != @test_org_id do
+    if owner["id"] not in @test_orgs do
       %{
         "id" => row["id"],
         "provider" => "stripe",
@@ -736,7 +738,7 @@ defmodule DatabaseMigration do
       raise "StripeCustomer not found: #{inspect(row)}"
     end
 
-    if owner["id"] != @test_org_id do
+    if owner["id"] not in @test_orgs do
       %{
         "id" => row["id"],
         "provider" => "stripe",

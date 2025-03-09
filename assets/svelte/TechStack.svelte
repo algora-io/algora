@@ -2,40 +2,39 @@
   export let tech = [];
   export let live;
 
-  let input = '';
+  let input = "";
   let techMap = new Map();
 
   $: {
     techMap.clear();
-    tech.forEach(tech => {
+    tech.forEach((tech) => {
       techMap.set(tech.toLowerCase(), tech);
     });
   }
 
   function addTech(e) {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       const tech = input.trim();
       const techLower = tech.toLowerCase();
-      
+
       if (tech && !techMap.has(techLower)) {
         techMap.set(techLower, tech);
         updateTechStack();
       }
-      input = '';
+      input = "";
     }
   }
 
   function removeTech(tech) {
     techMap.delete(tech.toLowerCase());
     updateTechStack();
-    
   }
 
   function updateTechStack() {
     const newTechStack = Array.from(techMap.values());
     tech = newTechStack;
-    live.pushEvent('tech_stack_changed', { tech_stack: tech });
+    live.pushEvent("tech_stack_changed", { tech_stack: tech });
   }
 </script>
 
@@ -57,7 +56,9 @@
 
   <div class="flex flex-wrap gap-3 mt-4">
     {#each tech as tech}
-      <div class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center">
+      <div
+        class="bg-success/10 text-success rounded-lg px-3 py-1.5 text-sm font-semibold flex items-center"
+      >
         {tech}
         <button
           type="button"
@@ -69,4 +70,4 @@
       </div>
     {/each}
   </div>
-</div> 
+</div>

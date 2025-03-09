@@ -302,8 +302,6 @@ defmodule Algora.Activities do
           acc
       end)
 
-    dbg(DiscordViews.render(activity))
-
     discord_job =
       if discord_payload = DiscordViews.render(activity) do
         [Algora.Activities.SendDiscord.changeset(%{payload: discord_payload})]

@@ -9,14 +9,14 @@ defmodule AlgoraWeb.LoginLive do
   def render(assigns) do
     ~H"""
     <div class="flex min-h-screen bg-[#111113]">
-      <div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-        <div class="mx-auto w-full max-w-sm lg:w-96">
+      <div class="relative flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col">
           <div>
-            <.wordmark class="h-10 w-auto" />
+            <.wordmark class="h-10 w-auto absolute top-8 left-8" />
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
               Welcome back
             </h2>
-            <p class="mt-2 text-sm/6 text-muted-foreground">
+            <p class="mt-2 text-base/6 text-muted-foreground">
               Sign in to your account
             </p>
           </div>
@@ -49,16 +49,43 @@ defmodule AlgoraWeb.LoginLive do
           </div>
 
           <div class="mt-4">
-            <.button href="#" variant="secondary" class="w-full" size="lg">
+            <.button href={@authorize_url} variant="secondary" class="w-full" size="lg">
               <Logos.github class="size-5 mr-2 -ml-1 shrink-0" />
               <span class="text-sm/6 font-semibold">Continue with GitHub</span>
             </.button>
+          </div>
+
+          <div class="mt-8 text-center text-sm text-muted-foreground">
+            Don't have an account?
+            <.link
+              navigate="/auth/signup"
+              class="underline font-medium text-foreground/90 hover:text-foreground"
+            >
+              Sign Up Now
+            </.link>
+          </div>
+
+          <div class="absolute bottom-8 text-center text-sm text-muted-foreground max-w-sm w-full mx-auto">
+            By continuing, you agree to our
+            <.link
+              href="https://console.algora.io/legal/terms"
+              class="font-medium text-foreground/90 hover:text-foreground"
+            >
+              terms
+            </.link>
+            {" "} and
+            <.link
+              href="https://console.algora.io/legal/privacy"
+              class="font-medium text-foreground/90 hover:text-foreground"
+            >
+              privacy policy.
+            </.link>
           </div>
         </div>
       </div>
       <div class="relative hidden w-0 flex-1 lg:block">
         <div class="absolute inset-0 flex flex-col items-center justify-center bg-background p-12">
-          <div class="max-w-xl">
+          <div :if={@random_quote} class="max-w-xl">
             <div class="relative text-base">
               <svg
                 viewBox="0 0 162 128"
@@ -94,7 +121,9 @@ defmodule AlgoraWeb.LoginLive do
     """
   end
 
-  def mount(params, _session, socket) do
+  def mount(params, session, socket) do
+    dbg(session)
+
     authorize_url =
       case params["return_to"] do
         nil -> Algora.Github.authorize_url()
@@ -102,13 +131,18 @@ defmodule AlgoraWeb.LoginLive do
       end
 
     changeset = User.login_changeset(%User{}, %{})
-    random_quote = get_random_quote()
+
+    socket =
+      if connected?(socket) do
+        assign(socket, :random_quote, get_random_quote())
+      else
+        assign(socket, :random_quote, nil)
+      end
 
     {:ok,
      socket
      |> assign(authorize_url: authorize_url)
      |> assign(secret_code: nil)
-     |> assign(random_quote: random_quote)
      |> assign_form(changeset)}
   end
 
@@ -193,15 +227,57 @@ defmodule AlgoraWeb.LoginLive do
         text:
           "Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.",
         author: "John A. De Goes",
-        role: "Founder & CEO",
+        role: "Founder & CEO, Golem Cloud",
         avatar: "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
       },
       %{
         text:
           "That's one massive advantage open source companies have versus closed source. You get to show people your work, plus you can point to your contributions as proof of your abilities.",
         author: "Eric Allam",
-        role: "Founder & CTO",
+        role: "Founder & CTO, Trigger.dev (YC W23)",
         avatar: "https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
+      },
+      %{
+        text:
+          "We've used Algora extensively at Golem Cloud for our hiring needs. Many times someone who is very active in open-source development, these types of engineers often make fantastic additions to a team.",
+        author: "John A. De Goes",
+        role: "Founder & CEO, Golem Cloud",
+        avatar: "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+      },
+      %{
+        text:
+          "We were doing bounties on Algora, and this one developer Nick kept solving them. His personality really came through in the GitHub issues and code. We ended up hiring him from that.",
+        author: "Eric Allam",
+        role: "Founder & CTO, Trigger.dev (YC W23)",
+        avatar: "https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
+      },
+      %{
+        text:
+          "The majority of work is done by open source contributors, that's how it's built today. And that sort of helps us control our burn rate. You get paid if you get a pull request merged.",
+        author: "Tushar Mathur",
+        role: "Founder & CEO, Tailcall",
+        avatar: "https://avatars.githubusercontent.com/u/194482?v=4"
+      },
+      %{
+        text:
+          "A GitHub issue is this atomic unit of a problem, and allowing you to put a cash bounty on it, to solve this specific problem, without any overhead, and make it available to any person, I find it very interesting.",
+        author: "Jonny Burger",
+        role: "Founder, Remotion",
+        avatar: "https://avatars.githubusercontent.com/u/1629785?v=4"
+      },
+      %{
+        text:
+          "I certainly believe people should be compensated for their time, especially if we commercially benefit from it. When possible we should offer some sort of compensation.",
+        author: "Josh Pigford",
+        role: "Co-founder & CEO, Maybe",
+        avatar: "https://avatars.githubusercontent.com/u/35243?v=4"
+      },
+      %{
+        text:
+          "Instead of doing work for free, I was able to get paid and it gives you a really nice feeling that you feel rewarded, that you feel appreciated.",
+        author: "Lucas Smith",
+        role: "Co-founder & CTO, Documenso",
+        avatar: "https://avatars.githubusercontent.com/u/13398220?v=4"
       }
     ])
   end

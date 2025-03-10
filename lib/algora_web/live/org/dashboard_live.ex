@@ -4,15 +4,22 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   import AlgoraWeb.Components.Achievement
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
   alias Algora.Contracts
   alias Algora.Github
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
   alias Algora.Types.USD
   alias Algora.Validations
   alias Algora.Workspace
+  alias Algora.Workspace.Repository
+  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Logos
 
   require Logger
@@ -107,6 +114,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
        |> assign(:show_contract_modal, false)
        |> assign(:selected_developer, nil)
+       |> assign_payable_bounties()
        |> assign_contracts()
        |> assign_achievements()}
     else
@@ -119,6 +127,115 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="lg:pr-96">
       <div class="container mx-auto max-w-7xl space-y-8 p-8">
+        <.section :if={@payable_bounties != []}>
+          <.card>
+            <.card_header>
+              <.card_title>Pending Payments</.card_title>
+              <.card_description>
+                The following claims have been approved and are ready for payment.
+              </.card_description>
+            </.card_header>
+            <.card_content>
+              <table class="w-full caption-bottom text-sm">
+                <tbody class="[&_tr:last-child]:border-0">
+                  <%= for {_group_id, [%{target: %{bounties: [bounty | _]}} | _] = claims} <- @payable_bounties do %>
+                    <tr
+                      class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
+                      data-state="false"
+                    >
+                      <td colspan={2} class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                        <div class="min-w-[250px]">
+                          <div class="group relative flex h-full flex-col">
+                            <div class="relative h-full pl-2">
+                              <div class="flex items-start justify-between">
+                                <div class="cursor-pointer font-mono text-2xl">
+                                  <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
+                                    {Money.to_string!(bounty.amount)}
+                                  </div>
+                                </div>
+                              </div>
+                              <.link
+                                rel="noopener"
+                                class="group/issue inline-flex flex-col"
+                                href={Bounty.url(bounty)}
+                              >
+                                <div class="flex items-center gap-4">
+                                  <div class="truncate">
+                                    <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
+                                      {Bounty.path(bounty)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <p class="line-clamp-2 break-words text-base font-medium leading-tight text-gray-100 group-hover/issue:text-white group-hover/issue:underline">
+                                  {bounty.ticket.title}
+                                </p>
+                              </.link>
+                              <p class="flex items-center gap-1.5 text-xs text-gray-400">
+                                {Algora.Util.time_ago(bounty.inserted_at)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
+                      data-state="false"
+                    >
+                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
+                        <div class="min-w-[250px]">
+                          <div class="flex items-center gap-3">
+                            <div class="flex -space-x-3">
+                              <%= for claim <- claims do %>
+                                <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
+                                  <img
+                                    alt={User.handle(claim.user)}
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="rounded-full"
+                                    src={claim.user.avatar_url}
+                                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                                  />
+                                </div>
+                              <% end %>
+                            </div>
+                            <div>
+                              <div class="text-sm font-medium text-gray-200">
+                                {claims
+                                |> Enum.map(fn c -> User.handle(c.user) end)
+                                |> Algora.Util.format_name_list()}
+                              </div>
+                              <div class="text-xs text-gray-400">
+                                {Algora.Util.time_ago(hd(claims).inserted_at)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                        <div class="min-w-[180px]">
+                          <div class="flex items-center justify-end gap-4">
+                            <.button
+                              :if={hd(claims).source}
+                              href={hd(claims).source.url}
+                              variant="secondary"
+                            >
+                              View
+                            </.button>
+                            <.button href={~p"/claims/#{hd(claims).group_id}"}>
+                              Reward
+                            </.button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </.card_content>
+          </.card>
+        </.section>
+
         <.section :if={@installations == []}>
           <.card>
             <.card_header>
@@ -633,6 +750,34 @@ defmodule AlgoraWeb.Org.DashboardLive do
       {:error, changeset} ->
         {:noreply, assign(socket, :contract_form, to_form(changeset))}
     end
+  end
+
+  defp assign_payable_bounties(socket) do
+    org = socket.assigns.current_org
+
+    payable_claims =
+      Repo.all(
+        from c in Claim,
+          where: c.status == :approved,
+          join: t in assoc(c, :target),
+          join: b in assoc(t, :bounties),
+          where: b.owner_id == ^org.id,
+          left_join: tx in Transaction,
+          on: tx.claim_id == c.id and tx.type == :debit,
+          where: is_nil(tx.status) or tx.status not in [:initialized, :succeeded],
+          join: r in assoc(t, :repository),
+          join: ru in assoc(r, :user),
+          join: cu in assoc(c, :user),
+          left_join: s in assoc(c, :source),
+          select_merge: %{
+            user: cu,
+            source: s,
+            target: %Ticket{t | bounties: [%Bounty{b | ticket: %{t | repository: %{r | user: ru}}}]}
+          }
+      )
+
+    payable_bounties = Enum.group_by(payable_claims, & &1.group_id)
+    assign(socket, :payable_bounties, payable_bounties)
   end
 
   defp assign_contracts(socket) do

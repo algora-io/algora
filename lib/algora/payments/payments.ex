@@ -14,6 +14,7 @@ defmodule Algora.Payments do
   alias Algora.PSP
   alias Algora.Repo
   alias Algora.Util
+  alias Algora.Workspace.Ticket
 
   require Logger
 
@@ -364,6 +365,26 @@ defmodule Algora.Payments do
         where: cr.status == :succeeded,
         where: is_nil(tr.id)
       )
+    )
+  end
+
+  def list_sent_transactions(user_id, opts \\ []) do
+    Repo.all(
+      from tx in Transaction,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        join: ltx in assoc(tx, :linked_transaction),
+        where: ltx.user_id == ^user_id,
+        join: recipient in assoc(tx, :user),
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        left_join: o in assoc(r, :user),
+        select: %{transaction: tx, recipient: recipient, ticket: %{t | repository: %{r | user: o}}},
+        order_by: [desc: tx.succeeded_at],
+        limit: ^opts[:limit]
     )
   end
 

@@ -126,7 +126,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="lg:pr-96">
       <div class="container mx-auto max-w-7xl space-y-8 p-8">
-        <.section :if={@payable_bounties != []}>
+        <.section :if={@payable_bounties != %{}}>
           <.card>
             <.card_header>
               <.card_title>Pending Payments</.card_title>

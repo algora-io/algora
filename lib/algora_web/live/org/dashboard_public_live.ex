@@ -149,7 +149,7 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           <div class="relative -ml-4 w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
-                <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transactions do %>
+                <%= for %{transaction: transaction, ticket: ticket} <- @transactions do %>
                   <tr class="h-10 border-b transition-colors hover:bg-muted/10">
                     <td class="p-4 py-0 align-middle">
                       <div class="flex items-center gap-4">

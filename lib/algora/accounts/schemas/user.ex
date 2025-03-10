@@ -181,14 +181,12 @@ defmodule Algora.Accounts.User do
 
     if identity_changeset.valid? do
       params = %{
-        "handle" => info["login"],
-        "email" => primary_email,
-        "display_name" => get_change(identity_changeset, :provider_name),
-        "bio" => info["bio"],
-        "location" => info["location"],
-        "avatar_url" => info["avatar_url"],
-        "website_url" => info["blog"],
-        "github_url" => info["html_url"],
+        "display_name" => user.display_name || get_change(identity_changeset, :provider_name),
+        "bio" => user.bio || info["bio"],
+        "location" => user.location || info["location"],
+        "avatar_url" => user.avatar_url || info["avatar_url"],
+        "website_url" => user.website_url || info["blog"],
+        "github_url" => user.github_url || info["html_url"],
         "provider" => "github",
         "provider_id" => to_string(info["id"]),
         "provider_login" => info["login"],
@@ -197,8 +195,6 @@ defmodule Algora.Accounts.User do
 
       user
       |> cast(params, [
-        :handle,
-        :email,
         :display_name,
         :bio,
         :location,
@@ -211,8 +207,7 @@ defmodule Algora.Accounts.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:email, :display_name, :handle])
-      |> validate_handle()
+      |> validate_required([:display_name])
       |> validate_email()
     else
       user

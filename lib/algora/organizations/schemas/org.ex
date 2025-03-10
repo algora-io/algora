@@ -16,6 +16,7 @@ defmodule Algora.Organizations.Org do
       :stargazers_count,
       :tech_stack,
       :categories,
+      :hiring,
       :featured,
       :priority,
       :fee_pct,

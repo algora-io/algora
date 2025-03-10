@@ -12,7 +12,8 @@ defmodule Algora.Support.GithubMock do
        "title" => "title #{number}",
        "body" => "body #{number}",
        "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}"
+       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}",
+       "state" => "open"
      }}
   end
 
@@ -53,7 +54,8 @@ defmodule Algora.Support.GithubMock do
        "title" => "title #{number}",
        "body" => "body #{number}",
        "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}"
+       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}",
+       "state" => "open"
      }}
   end
 

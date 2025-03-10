@@ -411,18 +411,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             role: :admin
           }
 
-        contract_params =
-          %{
-            start_date: DateTime.utc_now(),
-            status: :draft
-          }
-
         params =
           %{
             organization: org_params,
             user: user_params,
-            member: member_params,
-            contract: contract_params
+            member: member_params
           }
 
         socket =

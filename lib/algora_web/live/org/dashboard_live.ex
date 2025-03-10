@@ -18,7 +18,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Types.USD
   alias Algora.Validations
   alias Algora.Workspace
-  alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Logos
 

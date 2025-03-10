@@ -14,15 +14,19 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   end
 
   attr :class, :string, default: nil
+  attr :src, :string, required: true
   attr :rest, :global
 
   def avatar_image(assigns) do
     ~H"""
     <img
+      src={@src}
       class={classes(["aspect-square h-full w-full", @class])}
-      {@rest}
+      id={@src}
+      phx-update="ignore"
       style="display:none"
       onload="this.style.display=''"
+      {@rest}
     />
     """
   end

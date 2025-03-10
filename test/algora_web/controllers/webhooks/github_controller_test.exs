@@ -1097,6 +1097,241 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     end
   end
 
+  describe "ticket state updates" do
+    test "updates ticket state on issues.opened", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number, "state" => "open"}}
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on issues.closed", ctx do
+      issue_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number, "state" => "open"}}
+        },
+        %{
+          event_action: "issues.closed",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at)
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.state == :closed
+      assert DateTime.compare(ticket.closed_at, closed_at) == :eq
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on issues.reopened", ctx do
+      issue_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number, "state" => "open"}}
+        },
+        %{
+          event_action: "issues.closed",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at)
+            }
+          }
+        },
+        %{
+          event_action: "issues.reopened",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "open",
+              "closed_at" => nil
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on pull_request.opened", ctx do
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on pull_request.closed without merge", ctx do
+      pr_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at),
+              "merged_at" => nil
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :closed
+      assert DateTime.compare(ticket.closed_at, closed_at) == :eq
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on pull_request.closed with merge", ctx do
+      pr_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+      merged_at = DateTime.add(closed_at, -1, :second)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at),
+              "merged_at" => DateTime.to_iso8601(merged_at)
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :closed
+      assert DateTime.compare(ticket.closed_at, closed_at) == :eq
+      assert DateTime.compare(ticket.merged_at, merged_at) == :eq
+    end
+
+    test "updates ticket state on pull_request.reopened", ctx do
+      pr_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at),
+              "merged_at" => nil
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.reopened",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open",
+              "closed_at" => nil,
+              "merged_at" => nil
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+  end
+
   defp mock_body(body \\ ""), do: "Lorem\r\nipsum\r\n dolor #{body} sit\r\namet"
 
   defp mock_user(user) do
@@ -1179,6 +1414,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           "issue" => %{
             "id" => 123,
             "number" => 123,
+            "state" => "open",
             "body" => mock_body(),
             "user" => mock_user(ctx[:repo_admin])
           }
@@ -1197,6 +1433,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           "issue" => %{
             "id" => 123,
             "number" => 123,
+            "state" => "open",
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author])
           }
@@ -1215,6 +1452,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           "pull_request" => %{
             "id" => 123,
             "number" => 123,
+            "state" => "open",
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author]),
             "merged_at" => nil

@@ -15,6 +15,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   alias Algora.Payments.Customer
   alias Algora.PSP.Invoice
   alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
@@ -82,14 +83,24 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp process_event(
-         %Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}},
-         _commands
-       ) do
-    :ok
-  end
+  defp process_event(%Webhook{event_action: "issues.closed"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
 
-  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload}, _commands) do
+  defp process_event(%Webhook{event_action: "issues.reopened"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
+  defp process_event(%Webhook{event_action: "pull_request.reopened"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
+  defp process_event(
+         %Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}} = webhook,
+         _commands
+       ),
+       do: handle_ticket_state_change(webhook)
+
+  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload} = webhook, _commands) do
+    _res = handle_ticket_state_change(webhook)
+
     with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(
@@ -608,5 +619,34 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp ensure_valid_recipient(recipient, author) do
     if recipient == author["login"], do: nil, else: recipient
+  end
+
+  defp handle_ticket_state_change(%Webhook{event: event, payload: payload}) do
+    github_ticket =
+      case event do
+        "issues" -> payload["issue"]
+        "pull_request" -> payload["pull_request"]
+      end
+
+    case Workspace.get_ticket(
+           payload["repository"]["owner"]["login"],
+           payload["repository"]["name"],
+           github_ticket["number"]
+         ) do
+      nil ->
+        :ok
+
+      ticket ->
+        case ticket
+             |> change(
+               state: String.to_existing_atom(github_ticket["state"]),
+               closed_at: Util.to_date!(github_ticket["closed_at"]),
+               merged_at: Util.to_date!(github_ticket["merged_at"])
+             )
+             |> Repo.update() do
+          {:ok, _} -> :ok
+          {:error, reason} -> {:error, reason}
+        end
+    end
   end
 end

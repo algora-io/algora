@@ -162,10 +162,12 @@ defmodule AlgoraWeb.CoreComponents do
           <span class="flex w-full items-center justify-between">
             <span class="flex min-w-0 items-center justify-between space-x-3">
               <%= for img <- @img do %>
-                <img
-                  class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-600"
-                  {assigns_to_attributes(img)}
-                />
+                <.avatar class="h-10 w-10">
+                  <.avatar_image src={img.src} />
+                  <.avatar_fallback>
+                    {Algora.Util.initials(img.alt)}
+                  </.avatar_fallback>
+                </.avatar>
               <% end %>
               <span class="flex min-w-0 flex-1 flex-col">
                 <span class="truncate text-sm font-medium text-gray-50">
@@ -222,7 +224,12 @@ defmodule AlgoraWeb.CoreComponents do
         }
       >
         <div class="flex items-center whitespace-nowrap">
-          <img src={ctx.avatar_url} alt={ctx.name} class="mr-3 h-8 w-8 rounded-full" />
+          <.avatar class="mr-3 h-8 w-8">
+            <.avatar_image src={ctx.avatar_url} />
+            <.avatar_fallback>
+              {Algora.Util.initials(ctx.name)}
+            </.avatar_fallback>
+          </.avatar>
           <div>
             <div class="font-semibold">{ctx.name}</div>
             <div class="text-sm text-gray-500">@{ctx.handle}</div>

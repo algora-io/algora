@@ -86,7 +86,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           |> assign_active_repos()
 
         current_user ->
-          push_navigate(socket, to: UserAuth.signed_in_path(current_user))
+          redirect(socket, to: UserAuth.signed_in_path(current_user))
       end
 
     {:ok, socket}

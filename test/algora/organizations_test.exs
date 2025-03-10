@@ -16,7 +16,8 @@ defmodule Algora.OrganizationsTest do
       domain: "algora.io",
       tech_stack: ["Elixir", "Phoenix"],
       email: "admin@example.com",
-      categories: ["open_source", "agency"]
+      categories: ["open_source", "agency"],
+      hiring: true
     }
   }
 
@@ -63,6 +64,7 @@ defmodule Algora.OrganizationsTest do
       assert org.display_name == "Algora"
       assert org.tech_stack == ["Elixir", "Phoenix"]
       assert org.categories == ["open_source", "agency"]
+      assert org.hiring == true
     end
 
     test "onboard with crawler" do

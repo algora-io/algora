@@ -32,6 +32,7 @@ defmodule Algora.Workspace.Ticket do
   def github_changeset(meta, repo) do
     params = %{
       provider_id: to_string(meta["id"]),
+      type: if(meta["pull_request"], do: :pull_request, else: :issue),
       title: meta["title"],
       description: meta["body"],
       number: meta["number"],
@@ -43,9 +44,20 @@ defmodule Algora.Workspace.Ticket do
     }
 
     %Ticket{provider: "github", provider_meta: meta}
-    |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id, :state, :closed_at, :merged_at])
+    |> cast(params, [
+      :provider_id,
+      :type,
+      :title,
+      :description,
+      :number,
+      :url,
+      :repository_id,
+      :state,
+      :closed_at,
+      :merged_at
+    ])
     |> generate_id()
-    |> validate_required([:provider_id, :title, :number, :url, :repository_id])
+    |> validate_required([:provider_id, :type, :title, :number, :url, :repository_id, :state])
 
     # TODO: Reenable this after migration is complete.
     # |> unique_constraint([:provider, :provider_id])

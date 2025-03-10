@@ -371,8 +371,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         org_params =
           %{
-            # TODO: unset email
-            email: "admin@#{domain}",
             display_name: org_name,
             bio:
               get_in(metadata, [:org, :bio]) ||

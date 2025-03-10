@@ -47,6 +47,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     end
   end
 
+  @impl true
   def mount(_params, _session, socket) do
     context = %{
       country: socket.assigns.current_country,
@@ -84,6 +85,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
      |> assign(:info_form, InfoForm.init())}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-card">
@@ -116,56 +118,45 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     """
   end
 
-  defp sidebar_content(assigns) do
-    ~H"""
-    <h2 class="mb-4 text-lg font-semibold uppercase">
-      Recently Completed Bounties
-    </h2>
-    <%= if @transactions == [] do %>
-      <p class="text-muted-foreground">No completed bounties available</p>
-    <% else %>
-      <%= for transaction <- @transactions do %>
-        <div class="mb-4 rounded-lg border border-border bg-card p-4">
-          <div class="flex gap-4">
-            <div class="flex-1">
-              <div class="mb-2 font-mono text-2xl font-extrabold text-success">
-                {Money.to_string!(transaction.bounty.amount)}
-              </div>
-              <div class="mb-1 text-sm text-muted-foreground">
-                {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}
-              </div>
-              <div class="font-medium">
-                {transaction.bounty.ticket.title}
-              </div>
-              <div class="mt-1 text-xs text-muted-foreground">
-                {Algora.Util.time_ago(transaction.succeeded_at)}
-              </div>
-            </div>
-
-            <div class="flex w-32 flex-col items-center border-l border-border pl-4">
-              <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
-                Awarded to
-              </h3>
-              <img
-                src={transaction.user.avatar_url}
-                class="mb-2 h-16 w-16 rounded-full"
-                alt={transaction.user.name}
-              />
-              <div class="text-center text-sm font-medium">
-                {transaction.user.name}
-                <div>
-                  {Algora.Misc.CountryEmojis.get(transaction.user.country, "🌎")}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
-    """
+  @impl true
+  def handle_event("prev_step", _, socket) do
+    current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
+    prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
+    {:noreply, assign(socket, :step, prev_step)}
   end
 
-  def main_content(%{step: :info} = assigns) do
+  @impl true
+  def handle_event("tech_stack_changed", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("submit_info", %{"info_form" => params}, socket) do
+    tech_stack =
+      Jason.decode!(params["tech_stack"]) ++
+        case String.trim(params["tech_stack_input"]) do
+          "" -> []
+          tech_stack_input -> String.split(tech_stack_input, ",")
+        end
+
+    changeset =
+      %InfoForm{}
+      |> InfoForm.changeset(%{tech_stack: tech_stack, intentions: params["intentions"]})
+      |> Map.put(:action, :validate)
+
+    case changeset do
+      %{valid?: true} ->
+        {:noreply,
+         socket
+         |> assign(:info_form, to_form(changeset))
+         |> assign(step: :oauth)}
+
+      %{valid?: false} ->
+        {:noreply, assign(socket, info_form: to_form(changeset))}
+    end
+  end
+
+  defp main_content(%{step: :info} = assigns) do
     ~H"""
     <div class="space-y-8">
       <.form for={@info_form} phx-submit="submit_info" class="space-y-8">
@@ -232,7 +223,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     """
   end
 
-  def main_content(%{step: :oauth} = assigns) do
+  defp main_content(%{step: :oauth} = assigns) do
     ~H"""
     <div class="space-y-8">
       <div>
@@ -261,38 +252,52 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     """
   end
 
-  def handle_event("prev_step", _, socket) do
-    current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
-    prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
-    {:noreply, assign(socket, :step, prev_step)}
-  end
+  defp sidebar_content(assigns) do
+    ~H"""
+    <h2 class="mb-4 text-lg font-semibold uppercase">
+      Recently Completed Bounties
+    </h2>
+    <%= if @transactions == [] do %>
+      <p class="text-muted-foreground">No completed bounties available</p>
+    <% else %>
+      <%= for transaction <- @transactions do %>
+        <div class="mb-4 rounded-lg border border-border bg-card p-4">
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <div class="mb-2 font-mono text-2xl font-extrabold text-success">
+                {Money.to_string!(transaction.bounty.amount)}
+              </div>
+              <div class="mb-1 text-sm text-muted-foreground">
+                {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}
+              </div>
+              <div class="font-medium">
+                {transaction.bounty.ticket.title}
+              </div>
+              <div class="mt-1 text-xs text-muted-foreground">
+                {Algora.Util.time_ago(transaction.succeeded_at)}
+              </div>
+            </div>
 
-  def handle_event("tech_stack_changed", _params, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_event("submit_info", %{"info_form" => params}, socket) do
-    tech_stack =
-      Jason.decode!(params["tech_stack"]) ++
-        case String.trim(params["tech_stack_input"]) do
-          "" -> []
-          tech_stack_input -> String.split(tech_stack_input, ",")
-        end
-
-    changeset =
-      %InfoForm{}
-      |> InfoForm.changeset(%{tech_stack: tech_stack, intentions: params["intentions"]})
-      |> Map.put(:action, :validate)
-
-    case changeset do
-      %{valid?: true} ->
-        {:noreply,
-         socket
-         |> assign(:info_form, to_form(changeset))
-         |> assign(step: :oauth)}
-
-      %{valid?: false} ->
-        {:noreply, assign(socket, info_form: to_form(changeset))}
-    end
+            <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+              <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
+                Awarded to
+              </h3>
+              <img
+                src={transaction.user.avatar_url}
+                class="mb-2 h-16 w-16 rounded-full"
+                alt={transaction.user.name}
+              />
+              <div class="text-center text-sm font-medium">
+                {transaction.user.name}
+                <div>
+                  {Algora.Misc.CountryEmojis.get(transaction.user.country, "🌎")}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+    """
   end
 end

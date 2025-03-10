@@ -11,7 +11,7 @@ defmodule AlgoraWeb.SignInLive do
     <div class="flex min-h-[100svh] bg-[#111113]">
       <div class="relative flex flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:flex-none lg:px-20 xl:px-24 lg:border-r lg:border-border">
         <.wordmark class="h-10 w-auto absolute top-4 left-4 sm:top-8 sm:left-8" />
-        <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col">
+        <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col min-h-[426px]">
           <div :if={!@secret_code}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
               Welcome back
@@ -19,7 +19,56 @@ defmodule AlgoraWeb.SignInLive do
             <p class="mt-2 text-base/6 text-muted-foreground">
               Sign in to your account
             </p>
+
+            <div class="mt-6">
+              <label class="mb-2 block text-sm/6 font-semibold">I am a...</label>
+              <div class="grid grid-cols-2 gap-4">
+                <label class={[
+                  "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                  "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                  "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+                ]}>
+                  <input
+                    type="radio"
+                    name="user_type"
+                    value="company"
+                    checked={@user_type == "company"}
+                    class="sr-only"
+                    phx-click={JS.show(to: "#company-form") |> JS.hide(to: "#developer-form")}
+                  />
+                  <span class="flex flex-1 items-center justify-between">
+                    <span class="text-sm font-medium">Company</span>
+                    <.icon
+                      name="tabler-check"
+                      class="invisible size-5 text-primary group-has-[:checked]:visible"
+                    />
+                  </span>
+                </label>
+                <label class={[
+                  "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                  "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                  "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+                ]}>
+                  <input
+                    type="radio"
+                    name="user_type"
+                    value="developer"
+                    checked={@user_type == "developer"}
+                    class="sr-only"
+                    phx-click={JS.show(to: "#developer-form") |> JS.hide(to: "#company-form")}
+                  />
+                  <span class="flex flex-1 items-center justify-between">
+                    <span class="text-sm font-medium">Developer</span>
+                    <.icon
+                      name="tabler-check"
+                      class="invisible size-5 text-primary group-has-[:checked]:visible"
+                    />
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
+
           <div :if={@secret_code}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
               Check your email
@@ -30,42 +79,43 @@ defmodule AlgoraWeb.SignInLive do
           </div>
 
           <div class="mt-8">
-            <.simple_form for={@form} id="send_login_code_form" phx-submit="send_login_code">
-              <.input
+            <div id="company-form" class={if @user_type == "developer", do: "hidden"}>
+              <.simple_form
                 :if={!@secret_code}
-                field={@form[:email]}
-                type="email"
-                label="Email"
-                placeholder="you@example.com"
-                required
-              />
-              <.input
-                :if={@secret_code}
-                field={@form[:login_code]}
-                type="text"
-                label="Login code"
-                required
-              />
-              <.button if={!@secret_code} phx-disable-with="Signing in..." class="w-full py-5">
-                <span :if={!@secret_code}>Sign in</span>
-                <span :if={@secret_code}>Submit</span>
+                for={@form}
+                id="send_login_code_form"
+                phx-submit="send_login_code"
+              >
+                <.input
+                  field={@form[:email]}
+                  type="email"
+                  label="Email"
+                  placeholder="you@example.com"
+                  required
+                />
+                <.button phx-disable-with="Signing in..." class="w-full py-5">
+                  Sign in
+                </.button>
+              </.simple_form>
+            </div>
+
+            <div id="developer-form" class={if @user_type == "company", do: "hidden"}>
+              <.button :if={!@secret_code} href={@authorize_url} class="w-full py-5">
+                <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
+              </.button>
+            </div>
+
+            <.simple_form
+              :if={@secret_code}
+              for={@form}
+              id="send_login_code_form"
+              phx-submit="send_login_code"
+            >
+              <.input field={@form[:login_code]} type="text" label="Login code" required />
+              <.button phx-disable-with="Signing in..." class="w-full py-5">
+                Submit
               </.button>
             </.simple_form>
-          </div>
-
-          <div :if={!@secret_code} class="mt-4 relative">
-            <div class="absolute inset-0 flex items-center" aria-hidden="true">
-              <div class="w-full border-t border-border"></div>
-            </div>
-            <div class="relative flex justify-center text-sm/6 font-medium">
-              <span class="bg-[#111113] px-6 text-muted-foreground">or</span>
-            </div>
-          </div>
-
-          <div :if={!@secret_code} class="mt-4">
-            <.button href={@authorize_url} variant="secondary" class="w-full py-5">
-              <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
-            </.button>
           </div>
 
           <div :if={!@secret_code} class="mt-8 text-center text-sm text-muted-foreground">
@@ -154,6 +204,7 @@ defmodule AlgoraWeb.SignInLive do
      socket
      |> assign(:authorize_url, authorize_url)
      |> assign(:secret_code, nil)
+     |> assign(:user_type, "company")
      |> assign_form(changeset)}
   end
 

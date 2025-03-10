@@ -112,7 +112,7 @@ defmodule AlgoraWeb.UserAuth do
 
     conn
     |> put_current_user(user)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: user_return_to || signed_in_path(user))
   end
 
   def put_current_user(conn, user) do

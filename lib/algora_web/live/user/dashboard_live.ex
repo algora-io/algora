@@ -382,7 +382,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             <.avatar class="h-14 w-14 rounded-xl">
               <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
               <.avatar_fallback>
-                {String.first(@bounty.owner.name)}
+                {Algora.Util.initials(@bounty.owner.name)}
               </.avatar_fallback>
             </.avatar>
           </.link>

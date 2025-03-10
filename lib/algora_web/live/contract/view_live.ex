@@ -24,13 +24,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.client.avatar_url} />
                   <.avatar_fallback>
-                    {String.slice(@contract.client.name, 0, 2)}
+                    {Algora.Util.initials(@contract.client.name)}
                   </.avatar_fallback>
                 </.avatar>
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.contractor.avatar_url} />
                   <.avatar_fallback>
-                    {String.slice(@contract.contractor.name, 0, 2)}
+                    {Algora.Util.initials(@contract.contractor.name)}
                   </.avatar_fallback>
                 </.avatar>
               </div>
@@ -270,7 +270,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar class="h-9 w-9 ring-2 ring-background">
                           <.avatar_image src={member.user.avatar_url} />
                           <.avatar_fallback>
-                            {String.slice(member.user.name, 0, 2)}
+                            {Algora.Util.initials(member.user.name)}
                           </.avatar_fallback>
                         </.avatar>
                       <% end %>
@@ -343,7 +343,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.avatar>
                 <.avatar_image src={@contract.contractor.avatar_url} alt="Developer avatar" />
                 <.avatar_fallback>
-                  {String.slice(@contract.contractor.name, 0, 2)}
+                  {Algora.Util.initials(@contract.contractor.name)}
                 </.avatar_fallback>
               </.avatar>
               <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
@@ -384,7 +384,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={message.sender.avatar_url} />
                       <.avatar_fallback>
-                        {String.slice(message.sender.name, 0, 2)}
+                        {Algora.Util.initials(message.sender.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">

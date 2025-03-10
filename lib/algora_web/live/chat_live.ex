@@ -265,7 +265,7 @@ defmodule AlgoraWeb.ChatLive do
                 <div class="relative">
                   <.avatar class="h-12 w-12">
                     <.avatar_image src={thread.user.avatar_url} />
-                    <.avatar_fallback>{String.slice(thread.user.name, 0, 2)}</.avatar_fallback>
+                    <.avatar_fallback>{Algora.Util.initials(thread.user.name)}</.avatar_fallback>
                   </.avatar>
                   <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
                   </div>
@@ -296,7 +296,7 @@ defmodule AlgoraWeb.ChatLive do
             <div class="relative">
               <.avatar>
                 <.avatar_image src={@other_user.avatar_url} alt="User avatar" />
-                <.avatar_fallback>{String.slice(@other_user.name, 0, 2)}</.avatar_fallback>
+                <.avatar_fallback>{Algora.Util.initials(@other_user.name)}</.avatar_fallback>
               </.avatar>
               <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
               </div>
@@ -337,7 +337,7 @@ defmodule AlgoraWeb.ChatLive do
                   <.avatar class="h-8 w-8">
                     <.avatar_image src={message.avatar_url} />
                     <.avatar_fallback>
-                      {String.slice(message.sender.name, 0, 2)}
+                      {Algora.Util.initials(message.sender.name)}
                     </.avatar_fallback>
                   </.avatar>
                   <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
@@ -387,7 +387,7 @@ defmodule AlgoraWeb.ChatLive do
             <div class="flex flex-col items-center text-center">
               <.avatar class="h-20 w-20">
                 <.avatar_image src={@other_user.avatar_url} />
-                <.avatar_fallback>{String.slice(@other_user.name, 0, 2)}</.avatar_fallback>
+                <.avatar_fallback>{Algora.Util.initials(@other_user.name)}</.avatar_fallback>
               </.avatar>
               <h3 class="mt-4 text-lg font-semibold">
                 {@other_user.name} {@other_user.flag}

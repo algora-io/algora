@@ -49,7 +49,7 @@ defmodule AlgoraWeb.Org.TeamLive do
                         <.avatar>
                           <.avatar_image src={member.user.avatar_url} />
                           <.avatar_fallback>
-                            {String.slice(member.user.handle, 0, 2)}
+                            {Algora.Util.initials(member.user.name)}
                           </.avatar_fallback>
                         </.avatar>
                         <div>
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Org.TeamLive do
                 <div class="flex items-center gap-3">
                   <.avatar>
                     <.avatar_image src={contractor.avatar_url} />
-                    <.avatar_fallback>{String.slice(contractor.handle, 0, 2)}</.avatar_fallback>
+                    <.avatar_fallback>{Algora.Util.initials(contractor.handle)}</.avatar_fallback>
                   </.avatar>
                   <div>
                     <.card_title class="text-base">

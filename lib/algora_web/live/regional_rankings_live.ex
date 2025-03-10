@@ -52,7 +52,7 @@ defmodule AlgoraWeb.RegionalRankingsLive do
                       <.avatar class="h-12 w-12">
                         <.avatar_image src={user.avatar_url} alt={user.name} />
                         <.avatar_fallback>
-                          {String.first(user.name || "")}
+                          {Algora.Util.initials(user.name)}
                         </.avatar_fallback>
                       </.avatar>
                       <div class="space-y-1">

@@ -190,7 +190,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
                       <.avatar_fallback>
-                        {String.first(review.reviewer.name)}
+                        {Algora.Util.initials(review.reviewer.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="flex flex-col">

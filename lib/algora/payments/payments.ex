@@ -369,7 +369,7 @@ defmodule Algora.Payments do
   end
 
   def list_sent_transactions(user_id, opts \\ []) do
-    Repo.all(
+    query =
       from tx in Transaction,
         where: tx.type == :credit,
         where: not is_nil(tx.succeeded_at),
@@ -383,9 +383,19 @@ defmodule Algora.Payments do
         left_join: r in assoc(t, :repository),
         left_join: o in assoc(r, :user),
         select: %{transaction: tx, recipient: recipient, ticket: %{t | repository: %{r | user: o}}},
-        order_by: [desc: tx.succeeded_at],
-        limit: ^opts[:limit]
-    )
+        order_by: [desc: tx.succeeded_at]
+
+    query =
+      if cursor = opts[:before] do
+        from [tx] in query,
+          where: {tx.succeeded_at, tx.id} < {^cursor.succeeded_at, ^cursor.id}
+      else
+        query
+      end
+
+    query = from q in query, limit: ^opts[:limit]
+
+    Repo.all(query)
   end
 
   @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}

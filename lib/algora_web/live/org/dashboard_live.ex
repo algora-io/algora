@@ -326,7 +326,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
                       src={@selected_developer.avatar_url}
                       alt={@selected_developer.name}
                     />
-                    <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+                    <.avatar_fallback class="rounded-lg">
+                      {Algora.Util.initials(@selected_developer.name)}
+                    </.avatar_fallback>
                   </.avatar>
 
                   <div>
@@ -430,7 +432,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <.link navigate={User.url(@user)}>
               <.avatar class="h-20 w-20 rounded-full">
                 <.avatar_image src={@user.avatar_url} alt={@user.name} />
-                <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+                <.avatar_fallback class="rounded-lg">
+                  {Algora.Util.initials(@user.name)}
+                </.avatar_fallback>
               </.avatar>
             </.link>
 

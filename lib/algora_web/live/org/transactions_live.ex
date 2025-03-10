@@ -265,7 +265,9 @@ defmodule AlgoraWeb.Org.TransactionsLive do
                           <div class="flex items-center gap-3">
                             <.avatar class="h-8 w-8">
                               <.avatar_image src={linked_user.avatar_url} alt={linked_user.name} />
-                              <.avatar_fallback>{String.first(linked_user.name)}</.avatar_fallback>
+                              <.avatar_fallback>
+                                {Algora.Util.initials(linked_user.name)}
+                              </.avatar_fallback>
                             </.avatar>
                             <div class="font-medium">
                               <div>{linked_user.name}</div>

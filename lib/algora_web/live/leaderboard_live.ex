@@ -63,7 +63,7 @@ defmodule AlgoraWeb.LeaderboardLive do
                   <.avatar class="h-24 w-24">
                     <.avatar_image src={user.avatar_url} alt={user.name} />
                     <.avatar_fallback class="text-lg">
-                      {String.first(user.name || "")}
+                      {Algora.Util.initials(user.name)}
                     </.avatar_fallback>
                   </.avatar>
                   <div>

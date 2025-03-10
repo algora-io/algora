@@ -685,7 +685,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             <.avatar class="h-14 w-14 rounded-xl">
               <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
               <.avatar_fallback>
-                {String.first(@bounty.owner.name)}
+                {Algora.Util.initials(@bounty.owner.name)}
               </.avatar_fallback>
             </.avatar>
           </.link>
@@ -733,7 +733,9 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
             <.link navigate={User.url(@user)}>
               <.avatar class="h-20 w-20 rounded-full">
                 <.avatar_image src={@user.avatar_url} alt={@user.name} />
-                <.avatar_fallback class="rounded-lg"></.avatar_fallback>
+                <.avatar_fallback class="rounded-lg">
+                  {Algora.Util.initials(@user.name)}
+                </.avatar_fallback>
               </.avatar>
             </.link>
 
@@ -777,7 +779,7 @@ defmodule AlgoraWeb.Org.DashboardAdminLive do
                     alt={@user.review.reviewer.name}
                   />
                   <.avatar_fallback>
-                    {String.first(@user.review.reviewer.name)}
+                    {Algora.Util.initials(@user.review.reviewer.name)}
                   </.avatar_fallback>
                 </.avatar>
                 <div class="flex flex-col">

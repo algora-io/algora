@@ -311,7 +311,7 @@ defmodule AlgoraWeb.ClaimLive do
                 <.avatar class="h-12 w-12 rounded-full">
                   <.avatar_image src={@source_or_target.repository.user.avatar_url} />
                   <.avatar_fallback>
-                    {String.first(@source_or_target.repository.user.provider_login)}
+                    {Algora.Util.initials(@source_or_target.repository.user.provider_login)}
                   </.avatar_fallback>
                 </.avatar>
                 <div>
@@ -394,7 +394,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <div class="flex items-center gap-4">
                         <.avatar>
                           <.avatar_image src={claim.user.avatar_url} />
-                          <.avatar_fallback>{String.first(claim.user.name)}</.avatar_fallback>
+                          <.avatar_fallback>{Algora.Util.initials(claim.user.name)}</.avatar_fallback>
                         </.avatar>
                         <div>
                           <p class="font-medium">{claim.user.name}</p>
@@ -427,7 +427,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <.avatar>
                         <.avatar_image src={sponsor.sponsor.avatar_url} />
                         <.avatar_fallback>
-                          {String.first(sponsor.sponsor.name)}
+                          {Algora.Util.initials(sponsor.sponsor.name)}
                         </.avatar_fallback>
                       </.avatar>
                       <div>

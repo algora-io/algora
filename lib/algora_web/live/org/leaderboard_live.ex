@@ -57,7 +57,7 @@ defmodule AlgoraWeb.Org.LeaderboardLive do
                         <.avatar>
                           <.avatar_image src={earner.avatar_url} />
                           <.avatar_fallback>
-                            {String.slice(User.handle(earner), 0, 2)}
+                            {Algora.Util.initials(User.handle(earner))}
                           </.avatar_fallback>
                         </.avatar>
                         <div>

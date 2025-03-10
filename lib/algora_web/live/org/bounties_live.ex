@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Payments
 
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -73,11 +74,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
           </div>
         </div>
       </div>
-      <div class="overflow-hidden rounded-xl border border-white/15">
+      <div :if={@current_status == :open} class="overflow-hidden rounded-xl border border-white/15">
         <div class="scrollbar-thin w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <tbody class="[&_tr:last-child]:border-0">
-              <%= for %{bounty: bounty, claim_groups: claim_groups} <- @rows do %>
+              <%= for %{bounty: bounty, claim_groups: claim_groups} <- @bounty_rows do %>
                 <tr
                   class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                   data-state="false"
@@ -217,10 +218,54 @@ defmodule AlgoraWeb.Org.BountiesLive do
             </tbody>
           </table>
         </div>
+        <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+          <div class="animate-pulse text-gray-400">
+            <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+          </div>
+        </div>
       </div>
-      <div :if={@has_more} class="flex justify-center mt-4" id="load-more-indicator">
-        <div class="animate-pulse text-gray-400">
-          <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+      <div :if={@current_status == :paid} class="relative">
+        <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transaction_rows do %>
+          <div class="mb-4 rounded-lg border border-border bg-card p-4">
+            <div class="flex gap-4">
+              <div class="flex-1">
+                <div class="mb-2 font-mono text-2xl font-extrabold text-success">
+                  {Money.to_string!(transaction.net_amount)}
+                </div>
+                <div :if={ticket.repository} class="mb-1 text-sm text-muted-foreground">
+                  {ticket.repository.user.provider_login}/{ticket.repository.name}#{ticket.number}
+                </div>
+                <div class="font-medium">
+                  {ticket.title}
+                </div>
+                <div class="mt-1 text-xs text-muted-foreground">
+                  {Algora.Util.time_ago(transaction.succeeded_at)}
+                </div>
+              </div>
+
+              <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+                <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
+                  Awarded to
+                </h3>
+                <img
+                  src={recipient.avatar_url}
+                  class="mb-2 h-16 w-16 rounded-full"
+                  alt={recipient.name}
+                />
+                <div class="text-center text-sm font-medium">
+                  {recipient.name}
+                  <div>
+                    {Algora.Misc.CountryEmojis.get(recipient.country, "🌎")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        <div :if={@has_more_transactions} class="flex justify-center mt-4" id="load-more-indicator">
+          <div class="animate-pulse text-gray-400">
+            <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+          </div>
         </div>
       </div>
     </div>
@@ -236,6 +281,50 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("load_more", _params, socket) do
+    {:noreply,
+     case socket.assigns.current_status do
+       :open -> assign_more_bounties(socket)
+       :paid -> assign_more_transactions(socket)
+     end}
+  end
+
+  def handle_params(params, _uri, socket) do
+    current_org = socket.assigns.current_org
+    current_status = get_current_status(params)
+
+    stats = Bounties.fetch_stats(current_org.id)
+
+    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
+    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
+
+    {:noreply,
+     socket
+     |> assign(:current_status, current_status)
+     |> assign(:bounty_rows, to_bounty_rows(bounties))
+     |> assign(:transaction_rows, to_transaction_rows(transactions))
+     |> assign(:has_more_bounties, length(bounties) >= page_size())
+     |> assign(:has_more_transactions, length(transactions) >= page_size())
+     |> assign(:stats, stats)}
+  end
+
+  defp to_bounty_rows(bounties) do
+    claims_by_ticket =
+      bounties
+      |> Enum.map(& &1.ticket.id)
+      |> Bounties.list_claims()
+      |> Enum.group_by(& &1.target_id)
+      |> Map.new(fn {ticket_id, claims} ->
+        {ticket_id, Enum.group_by(claims, & &1.group_id)}
+      end)
+
+    Enum.map(bounties, fn bounty ->
+      %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
+    end)
+  end
+
+  defp to_transaction_rows(transactions), do: transactions
+
+  def assign_more_bounties(socket) do
     %{rows: rows, current_org: current_org} = socket.assigns
 
     last_bounty = List.last(rows).bounty
@@ -253,41 +342,14 @@ defmodule AlgoraWeb.Org.BountiesLive do
         before: cursor
       )
 
-    {:noreply,
-     socket
-     |> assign(:rows, rows ++ to_rows(more_bounties))
-     |> assign(:has_more, length(more_bounties) >= page_size())}
+    socket
+    |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
+    |> assign(:has_more, length(more_bounties) >= page_size())
   end
 
-  def handle_params(params, _uri, socket) do
-    current_org = socket.assigns.current_org
-    current_status = get_current_status(params)
-
-    stats = Bounties.fetch_stats(current_org.id)
-
-    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: current_status)
-
-    {:noreply,
-     socket
-     |> assign(:current_status, current_status)
-     |> assign(:rows, to_rows(bounties))
-     |> assign(:has_more, length(bounties) >= page_size())
-     |> assign(:stats, stats)}
-  end
-
-  defp to_rows(bounties) do
-    claims_by_ticket =
-      bounties
-      |> Enum.map(& &1.ticket.id)
-      |> Bounties.list_claims()
-      |> Enum.group_by(& &1.target_id)
-      |> Map.new(fn {ticket_id, claims} ->
-        {ticket_id, Enum.group_by(claims, & &1.group_id)}
-      end)
-
-    Enum.map(bounties, fn bounty ->
-      %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
-    end)
+  defp assign_more_transactions(socket) do
+    # TODO: implement
+    socket
   end
 
   defp get_current_status(params) do

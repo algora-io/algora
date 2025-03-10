@@ -6,43 +6,29 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
-  alias Algora.Organizations
+  alias Algora.Payments
 
-  def mount(%{"org_handle" => handle}, _session, socket) do
-    org = Organizations.get_org_by_handle!(handle)
-    open_bounties = Bounties.list_bounties(owner_id: org.id, status: :open, limit: 5)
-    completed_bounties = Bounties.list_bounties(owner_id: org.id, status: :paid, limit: 5)
+  @impl true
+  def mount(_params, _session, socket) do
+    org = socket.assigns.current_org
+    open_bounties = Bounties.list_bounties(owner_id: org.id, status: :open, limit: page_size())
     top_earners = Accounts.list_developers(org_id: org.id, limit: 10, earnings_gt: Money.zero(:USD))
     stats = Bounties.fetch_stats(org.id)
+    transactions = Payments.list_sent_transactions(org.id, limit: page_size())
 
     socket =
       socket
       |> assign(:org, org)
       |> assign(:page_title, org.name)
       |> assign(:open_bounties, open_bounties)
-      |> assign(:completed_bounties, completed_bounties)
+      |> assign(:transactions, transactions)
       |> assign(:top_earners, top_earners)
       |> assign(:stats, stats)
 
     {:ok, socket}
   end
 
-  defp social_links do
-    [
-      {:website, "world"},
-      {:github, "brand-github"},
-      {:twitter, "brand-x"},
-      {:youtube, "brand-youtube"},
-      {:twitch, "brand-twitch"},
-      {:discord, "brand-discord"},
-      {:slack, "brand-slack"},
-      {:linkedin, "brand-linkedin"}
-    ]
-  end
-
-  defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
-  defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
-
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
@@ -121,7 +107,29 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for bounty <- @open_bounties do %>
-                  <.compact_bounty_view bounty={bounty} />
+                  <tr class="h-10 border-b transition-colors hover:bg-muted/10">
+                    <td class="p-4 py-0 align-middle">
+                      <div class="flex items-center gap-4">
+                        <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
+                          {Money.to_string!(bounty.amount)}
+                        </div>
+
+                        <.link
+                          href={Bounty.url(bounty)}
+                          class="max-w-[400px] truncate text-sm text-foreground hover:underline"
+                        >
+                          {bounty.ticket.title}
+                        </.link>
+
+                        <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
+                          <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                          <.link href={Bounty.url(bounty)} class="hover:underline">
+                            {Bounty.path(bounty)}
+                          </.link>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
                 <% end %>
               </tbody>
             </table>
@@ -141,8 +149,43 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
           <div class="relative -ml-4 w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">
               <tbody>
-                <%= for bounty <- @completed_bounties do %>
-                  <.compact_bounty_view bounty={bounty} />
+                <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transactions do %>
+                  <tr class="h-10 border-b transition-colors hover:bg-muted/10">
+                    <td class="p-4 py-0 align-middle">
+                      <div class="flex items-center gap-4">
+                        <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
+                          {Money.to_string!(transaction.net_amount)}
+                        </div>
+
+                        <.link
+                          href={
+                            if ticket.repository,
+                              do:
+                                "https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}",
+                              else: ticket.url
+                          }
+                          class="max-w-[400px] truncate text-sm text-foreground hover:underline"
+                        >
+                          {ticket.title}
+                        </.link>
+
+                        <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
+                          <.icon name="tabler-chevron-right" class="h-4 w-4" />
+                          <.link
+                            href={
+                              if ticket.repository,
+                                do:
+                                  "https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}",
+                                else: ticket.url
+                            }
+                            class="hover:underline"
+                          >
+                            {Bounty.path(%{ticket: ticket})}
+                          </.link>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
                 <% end %>
               </tbody>
             </table>
@@ -178,31 +221,21 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
     """
   end
 
-  def compact_bounty_view(assigns) do
-    ~H"""
-    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 py-0 align-middle">
-        <div class="flex items-center gap-4">
-          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
-            {Money.to_string!(@bounty.amount)}
-          </div>
-
-          <.link
-            href={Bounty.url(@bounty)}
-            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
-          >
-            {@bounty.ticket.title}
-          </.link>
-
-          <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
-            <.icon name="tabler-chevron-right" class="h-4 w-4" />
-            <.link href={Bounty.url(@bounty)} class="hover:underline">
-              {Bounty.path(@bounty)}
-            </.link>
-          </div>
-        </div>
-      </td>
-    </tr>
-    """
+  defp social_links do
+    [
+      {:website, "world"},
+      {:github, "brand-github"},
+      {:twitter, "brand-x"},
+      {:youtube, "brand-youtube"},
+      {:twitch, "brand-twitch"},
+      {:discord, "brand-discord"},
+      {:slack, "brand-slack"},
+      {:linkedin, "brand-linkedin"}
+    ]
   end
+
+  defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
+  defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
+
+  defp page_size, do: 5
 end

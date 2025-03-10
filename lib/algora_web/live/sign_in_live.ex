@@ -121,7 +121,7 @@ defmodule AlgoraWeb.SignInLive do
           <div :if={!@secret_code} class="mt-8 text-center text-sm text-muted-foreground">
             Don't have an account?
             <.link
-              navigate="/auth/signup"
+              navigate={~p"/"}
               class="underline font-medium text-foreground/90 hover:text-foreground"
             >
               Sign up now

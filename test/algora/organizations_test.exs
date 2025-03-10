@@ -74,5 +74,27 @@ defmodule Algora.OrganizationsTest do
       assert org.avatar_url == "https://console.algora.io/logo-512px.png"
       assert user.avatar_url != org.avatar_url
     end
+
+    test "onboard updates existing records when params change" do
+      assert {:ok, first_result} = Algora.Organizations.onboard_organization(@params)
+
+      updated_params =
+        @params
+        |> put_in([:user, :display_name], "Updated User")
+        |> put_in([:organization, :display_name], "Updated Algora")
+        |> put_in([:organization, :tech_stack], ["Elixir", "Phoenix", "PostgreSQL"])
+        |> put_in([:member, :role], :mod)
+
+      assert {:ok, second_result} = Algora.Organizations.onboard_organization(updated_params)
+
+      assert first_result.user.id == second_result.user.id
+      assert first_result.org.id == second_result.org.id
+      assert first_result.member.id == second_result.member.id
+
+      assert second_result.user.display_name == "Updated User"
+      assert second_result.org.display_name == "Updated Algora"
+      assert second_result.org.tech_stack == ["Elixir", "Phoenix", "PostgreSQL"]
+      assert second_result.member.role == :mod
+    end
   end
 end

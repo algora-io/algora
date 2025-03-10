@@ -6,7 +6,6 @@ defmodule Algora.Organizations do
   alias Algora.Organizations.Member
   alias Algora.Organizations.Org
   alias Algora.Repo
-  alias Ecto.Multi
 
   def create_organization(params) do
     %User{type: :organization}
@@ -27,23 +26,48 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
-    org_changeset = Org.changeset(%User{type: :organization}, params.organization)
+    Repo.transact(fn repo ->
+      {:ok, org} =
+        case repo.get_by(User, handle: params.organization.handle) do
+          nil ->
+            %User{type: :organization}
+            |> Org.changeset(params.organization)
+            |> repo.insert()
 
-    user_changeset = User.org_registration_changeset(%User{type: :individual}, params.user)
+          existing_org ->
+            existing_org
+            |> Org.changeset(params.organization)
+            |> repo.update()
+        end
 
-    Multi.new()
-    |> Multi.insert(:org, org_changeset)
-    |> Multi.insert(:user, user_changeset)
-    |> Multi.merge(fn %{user: user, org: org} ->
-      member_changeset =
-        Member.changeset(
-          %Member{},
-          Map.merge(params.member, %{user: user, org: org})
-        )
+      {:ok, user} =
+        case repo.get_by(User, email: params.user.email) do
+          nil ->
+            %User{type: :individual}
+            |> User.org_registration_changeset(params.user)
+            |> repo.insert()
 
-      Multi.insert(Multi.new(), :member, member_changeset)
+          existing_user ->
+            existing_user
+            |> User.org_registration_changeset(params.user)
+            |> repo.update()
+        end
+
+      {:ok, member} =
+        case repo.get_by(Member, user_id: user.id, org_id: org.id) do
+          nil ->
+            %Member{}
+            |> Member.changeset(Map.merge(params.member, %{user_id: user.id, org_id: org.id}))
+            |> repo.insert()
+
+          existing_member ->
+            existing_member
+            |> Member.changeset(Map.merge(params.member, %{user_id: user.id, org_id: org.id}))
+            |> repo.update()
+        end
+
+      {:ok, %{org: org, user: user, member: member}}
     end)
-    |> Repo.transaction()
   end
 
   def get_org_by(fields), do: Repo.get_by(User, fields)

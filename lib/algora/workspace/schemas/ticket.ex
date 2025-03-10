@@ -16,6 +16,9 @@ defmodule Algora.Workspace.Ticket do
     field :description, :string
     field :number, :integer
     field :url, :string
+    field :state, Ecto.Enum, values: [:open, :closed], default: :open
+    field :closed_at, :utc_datetime_usec
+    field :merged_at, :utc_datetime_usec
 
     belongs_to :repository, Algora.Workspace.Repository
     has_many :bounties, Algora.Bounties.Bounty
@@ -33,11 +36,14 @@ defmodule Algora.Workspace.Ticket do
       description: meta["body"],
       number: meta["number"],
       url: meta["html_url"],
-      repository_id: repo.id
+      repository_id: repo.id,
+      state: meta["state"],
+      closed_at: meta["closed_at"],
+      merged_at: get_in(meta, ["pull_request", "merged_at"])
     }
 
     %Ticket{provider: "github", provider_meta: meta}
-    |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id])
+    |> cast(params, [:provider_id, :title, :description, :number, :url, :repository_id, :state, :closed_at, :merged_at])
     |> generate_id()
     |> validate_required([:provider_id, :title, :number, :url, :repository_id])
 

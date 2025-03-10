@@ -6,7 +6,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Payments.Transaction
   alias Algora.Repo

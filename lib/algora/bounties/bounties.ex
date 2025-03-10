@@ -961,8 +961,7 @@ defmodule Algora.Bounties do
 
         case status do
           :open ->
-            # TODO: persist state as separate field
-            query = where(query, [t: t], fragment("(?->>'state' != 'closed')", t.provider_meta))
+            query = where(query, [t: t], t.state == :open)
 
             case criteria[:owner_id] do
               nil ->
@@ -1098,8 +1097,7 @@ defmodule Algora.Bounties do
         where: b.status == :open,
         where: b.status != :cancelled,
         where: not is_nil(b.amount),
-        # TODO: persist state as separate field
-        where: fragment("(?->>'state' != 'closed')", t.provider_meta),
+        where: t.state == :open,
         where: b.visibility in [:public, :community]
 
     rewards_query =

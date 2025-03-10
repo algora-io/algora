@@ -616,7 +616,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             {:noreply,
              socket
              |> put_flash(:info, "Bounty created")
-             |> push_navigate(to: ~p"/home")}
+             |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
             {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}

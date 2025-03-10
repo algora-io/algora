@@ -21,7 +21,6 @@ defmodule AlgoraWeb.Components.UI.Avatar do
     <img
       class={classes(["aspect-square h-full w-full", @class])}
       {@rest}
-      phx-update="ignore"
       style="display:none"
       onload="this.style.display=''"
     />

@@ -4,18 +4,16 @@ defmodule Algora.OrganizationsTest do
   @params %{
     member: %{role: :admin},
     user: %{
-      display_name: "Algora",
-      handle: "algora-pZW6",
+      handle: "zcesur-pZW6",
+      display_name: "Zafer Cesur",
       tech_stack: ["Elixir", "Phoenix"],
-      email: "test@example.com",
-      timezone: "America/New_York"
+      email: "zafer@algora.io"
     },
     organization: %{
-      display_name: "Algora",
       handle: "algora-tkPF",
-      domain: "algora.io",
+      display_name: "Algora",
       tech_stack: ["Elixir", "Phoenix"],
-      email: "admin@example.com",
+      domain: "algora.io",
       categories: ["open_source", "agency"],
       hiring: true
     }
@@ -24,31 +22,29 @@ defmodule Algora.OrganizationsTest do
   @params_crawler %{
     member: %{role: :admin},
     user: %{
-      handle: "dev-9XgZ",
-      avatar_url:
-        "https://www.gravatar.com/avatar/69344de5f380397e2e2363f9a6a71e624b4d9ceecb53b78fab3463e8a1f702a6?d=&s=460&d=identicon",
-      email: "dev@algora.io",
-      display_name: "dev",
-      last_context: "algora-CEec",
-      timezone: "America/New_York",
-      tech_stack: ["Elixir", "Phoenix"]
+      handle: "zafer-9XgZ",
+      display_name: "Zafer Cesur",
+      tech_stack: ["Elixir", "Phoenix"],
+      email: "zafer@algora.io",
+      avatar_url: "https://avatars.githubusercontent.com/u/17045339?v=4"
     },
     organization: %{
       handle: "algora-CEec",
-      domain: "algora.io",
-      youtube_url: nil,
-      discord_url: nil,
-      avatar_url: "https://console.algora.io/logo-512px.png",
-      github_url: nil,
-      email: "admin@algora.io",
       display_name: "Algora",
-      bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
       tech_stack: ["Elixir", "Phoenix"],
-      website_url: nil,
+      domain: "algora.io",
+      categories: ["open_source", "agency"],
+      hiring: true,
+      youtube_url: "https://www.youtube.com/@algora-io",
+      discord_url: "https://algora.io/discord",
+      avatar_url: "https://console.algora.io/logo-512px.png",
+      github_url: "https://github.com/algora-io",
+      bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
+      website_url: "https://algora.io",
       twitter_url: "https://twitter.com/algoraio",
-      twitch_url: nil,
-      slack_url: nil,
-      linkedin_url: nil,
+      twitch_url: "https://www.twitch.tv/algoratv",
+      slack_url: "https://algora.io/discord",
+      linkedin_url: "https://linkedin.com/company/algorapbc",
       og_title: "Algora: Open source bounties",
       og_image_url: "https://console.algora.io/og.png"
     }
@@ -71,8 +67,24 @@ defmodule Algora.OrganizationsTest do
       assert {:ok, %{user: user, org: org, member: _member}} =
                Algora.Organizations.onboard_organization(@params_crawler)
 
+      assert org.display_name == "Algora"
+      assert org.tech_stack == ["Elixir", "Phoenix"]
+      assert org.categories == ["open_source", "agency"]
+      assert org.hiring == true
       assert org.avatar_url == "https://console.algora.io/logo-512px.png"
-      assert user.avatar_url != org.avatar_url
+      assert org.youtube_url == "https://www.youtube.com/@algora-io"
+      assert org.discord_url == "https://algora.io/discord"
+      assert org.avatar_url == "https://console.algora.io/logo-512px.png"
+      assert org.github_url == "https://github.com/algora-io"
+      assert org.bio =~ "Algora is"
+      assert org.website_url == "https://algora.io"
+      assert org.twitter_url == "https://twitter.com/algoraio"
+      assert org.twitch_url == "https://www.twitch.tv/algoratv"
+      assert org.slack_url == "https://algora.io/discord"
+      assert org.linkedin_url == "https://linkedin.com/company/algorapbc"
+      assert org.og_title == "Algora: Open source bounties"
+      assert org.og_image_url == "https://console.algora.io/og.png"
+      assert user.avatar_url == "https://avatars.githubusercontent.com/u/17045339?v=4"
     end
 
     test "onboard updates existing records when params change" do
@@ -81,8 +93,11 @@ defmodule Algora.OrganizationsTest do
       updated_params =
         @params
         |> put_in([:user, :display_name], "Updated User")
-        |> put_in([:organization, :display_name], "Updated Algora")
-        |> put_in([:organization, :tech_stack], ["Elixir", "Phoenix", "PostgreSQL"])
+        |> put_in([:user, :tech_stack], ["Haskell"])
+        |> put_in([:organization, :display_name], "Updated Org")
+        |> put_in([:organization, :tech_stack], ["Rust"])
+        |> put_in([:organization, :categories], ["nonprofit"])
+        |> put_in([:organization, :hiring], false)
         |> put_in([:member, :role], :mod)
 
       assert {:ok, second_result} = Algora.Organizations.onboard_organization(updated_params)
@@ -92,8 +107,11 @@ defmodule Algora.OrganizationsTest do
       assert first_result.member.id == second_result.member.id
 
       assert second_result.user.display_name == "Updated User"
-      assert second_result.org.display_name == "Updated Algora"
-      assert second_result.org.tech_stack == ["Elixir", "Phoenix", "PostgreSQL"]
+      assert second_result.user.tech_stack == ["Haskell"]
+      assert second_result.org.display_name == "Updated Org"
+      assert second_result.org.tech_stack == ["Rust"]
+      assert second_result.org.categories == ["nonprofit"]
+      assert second_result.org.hiring == false
       assert second_result.member.role == :mod
     end
   end

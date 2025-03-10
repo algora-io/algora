@@ -364,10 +364,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           |> String.replace(~r/[^a-zA-Z0-9]/, "")
           |> String.downcase()
 
-        # TODO: generate nicer handles or let the user choose
-
-        org_unique_handle = org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
-        user_unique_handle = user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
+        org_unique_handle = org_handle
+        user_unique_handle = user_handle
 
         org_params =
           %{

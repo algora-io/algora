@@ -27,29 +27,40 @@ defmodule Algora.Organizations do
 
   def onboard_organization(params) do
     Repo.transact(fn repo ->
-      {:ok, org} =
-        case repo.get_by(User, handle: params.organization.handle) do
-          nil ->
-            %User{type: :organization}
-            |> Org.changeset(params.organization)
-            |> repo.insert()
-
-          existing_org ->
-            existing_org
-            |> Org.changeset(params.organization)
-            |> repo.update()
-        end
-
       {:ok, user} =
         case repo.get_by(User, email: params.user.email) do
           nil ->
+            handle = generate_unique_handle(repo, params.user.handle)
+
             %User{type: :individual}
-            |> User.org_registration_changeset(params.user)
+            |> User.org_registration_changeset(Map.put(params.user, :handle, handle))
             |> repo.insert()
 
           existing_user ->
             existing_user
-            |> User.org_registration_changeset(params.user)
+            |> User.org_registration_changeset(Map.delete(params.user, :handle))
+            |> repo.update()
+        end
+
+      {:ok, org} =
+        case repo.one(
+               from o in User,
+                 join: m in assoc(o, :members),
+                 join: u in assoc(m, :user),
+                 where: o.handle in ^generate_unique_org_handle_candidates(params.organization.handle),
+                 where: u.id == ^user.id,
+                 limit: 1
+             ) do
+          nil ->
+            handle = generate_unique_org_handle(repo, params.organization.handle)
+
+            %User{type: :organization}
+            |> Org.changeset(Map.put(params.organization, :handle, handle))
+            |> repo.insert()
+
+          existing_org ->
+            existing_org
+            |> Org.changeset(Map.delete(params.organization, :handle))
             |> repo.update()
         end
 
@@ -68,6 +79,55 @@ defmodule Algora.Organizations do
 
       {:ok, %{org: org, user: user, member: member}}
     end)
+  end
+
+  defp generate_unique_handle(repo, base_handle) do
+    0
+    |> Stream.iterate(&(&1 + 1))
+    |> Enum.reduce_while(base_handle, fn i, _handle -> {:halt, increment_handle(repo, base_handle, i)} end)
+  end
+
+  defp generate_unique_org_handle_candidates(base_handle) do
+    suffixes = ["hq", "team", "app", "labs", "co"]
+    prefixes = ["get", "try", "join", "go"]
+
+    List.flatten(
+      [base_handle] ++
+        Enum.map(suffixes, &"#{base_handle}#{&1}") ++
+        Enum.map(prefixes, &"#{&1}#{base_handle}")
+    )
+  end
+
+  defp generate_unique_org_handle(repo, base_handle) do
+    case try_candidates(repo, base_handle) do
+      nil -> increment_handle(repo, base_handle, 1)
+      handle -> handle
+    end
+  end
+
+  defp try_candidates(repo, base_handle) do
+    candidates = generate_unique_org_handle_candidates(base_handle)
+
+    Enum.reduce_while(candidates, nil, fn candidate, _acc ->
+      case repo.get_by(User, handle: candidate) do
+        nil -> {:halt, candidate}
+        _user -> {:cont, nil}
+      end
+    end)
+  end
+
+  defp increment_handle(repo, base_handle, n) do
+    candidate =
+      case n do
+        0 -> base_handle
+        n when n <= 42 -> "#{base_handle}#{n}"
+        _ -> raise "Too many attempts to generate unique handle"
+      end
+
+    case repo.get_by(User, handle: candidate) do
+      nil -> candidate
+      _user -> increment_handle(repo, base_handle, n + 1)
+    end
   end
 
   def get_org_by(fields), do: Repo.get_by(User, fields)

@@ -4,13 +4,13 @@ defmodule Algora.OrganizationsTest do
   @params %{
     member: %{role: :admin},
     user: %{
-      handle: "zcesur-pZW6",
+      handle: "zafer",
       display_name: "Zafer Cesur",
       tech_stack: ["Elixir", "Phoenix"],
       email: "zafer@algora.io"
     },
     organization: %{
-      handle: "algora-tkPF",
+      handle: "algora",
       display_name: "Algora",
       tech_stack: ["Elixir", "Phoenix"],
       domain: "algora.io",
@@ -22,14 +22,14 @@ defmodule Algora.OrganizationsTest do
   @params_crawler %{
     member: %{role: :admin},
     user: %{
-      handle: "zafer-9XgZ",
+      handle: "zafer",
       display_name: "Zafer Cesur",
       tech_stack: ["Elixir", "Phoenix"],
       email: "zafer@algora.io",
       avatar_url: "https://avatars.githubusercontent.com/u/17045339?v=4"
     },
     organization: %{
-      handle: "algora-CEec",
+      handle: "algora",
       display_name: "Algora",
       tech_stack: ["Elixir", "Phoenix"],
       domain: "algora.io",
@@ -113,6 +113,78 @@ defmodule Algora.OrganizationsTest do
       assert second_result.org.categories == ["nonprofit"]
       assert second_result.org.hiring == false
       assert second_result.member.role == :mod
+    end
+
+    test "onboard handles user handle collision by generating alternative handles" do
+      assert {:ok, result1} =
+               @params
+               |> put_in([:user, :handle], "erich")
+               |> put_in([:user, :email], "erich1@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert {:ok, result2} =
+               @params
+               |> put_in([:user, :handle], "erich")
+               |> put_in([:user, :email], "erich2@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert {:ok, result3} =
+               @params
+               |> put_in([:user, :handle], "erich")
+               |> put_in([:user, :email], "erich3@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert result1.user.handle == "erich"
+      assert result2.user.handle == "erich1"
+      assert result3.user.handle == "erich2"
+    end
+
+    test "onboard handles org handle collision by generating alternative handles" do
+      assert {:ok, result1} =
+               @params
+               |> put_in([:organization, :handle], "piedpiper")
+               |> put_in([:user, :email], "erich@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert {:ok, result2} =
+               @params
+               |> put_in([:organization, :handle], "piedpiper")
+               |> put_in([:user, :email], "richard@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert {:ok, result3} =
+               @params
+               |> put_in([:organization, :handle], "piedpiper")
+               |> put_in([:user, :email], "dinesh@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert result1.org.handle == "piedpiper"
+      assert result2.org.handle == "piedpiperhq"
+      assert result3.org.handle == "piedpiperteam"
+    end
+
+    test "" do
+      assert {:ok, result1} =
+               @params
+               |> put_in([:organization, :handle], "piedpiper")
+               |> put_in([:user, :email], "richard@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert {:ok, result2} =
+               @params
+               |> put_in([:organization, :handle], "piedpiper")
+               |> put_in([:user, :email], "erich@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert {:ok, result3} =
+               @params
+               |> put_in([:organization, :handle], "piedpiper")
+               |> put_in([:user, :email], "erich@example.com")
+               |> Algora.Organizations.onboard_organization()
+
+      assert result1.org.handle == "piedpiper"
+      assert result2.org.handle == "piedpiperhq"
+      assert result3.org.handle == "piedpiperhq"
     end
   end
 end

@@ -242,6 +242,8 @@ defmodule Algora.Accounts.User do
     |> generate_id()
     |> validate_required([:type, :handle, :email, :display_name])
     |> validate_email()
+    |> unique_constraint(:handle)
+    |> unique_constraint(:email)
   end
 
   def settings_changeset(%User{} = user, params) do

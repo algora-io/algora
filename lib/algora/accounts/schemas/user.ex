@@ -45,6 +45,11 @@ defmodule Algora.Accounts.User do
     field :manual_assignment, :boolean, default: false
     field :is_admin, :boolean, default: false
 
+    field :seeking_bounties, :boolean, default: false
+    field :seeking_contracts, :boolean, default: false
+    field :seeking_jobs, :boolean, default: false
+    field :hiring, :boolean, default: false
+
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money
     field :hours_per_week, :integer

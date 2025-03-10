@@ -270,13 +270,28 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp process_event(_webhook, _commands), do: :ok
 
   defp execute_command(%Webhook{event_action: event_action, payload: payload, author: author} = webhook, {:bounty, args})
-       when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
+       when event_action in [
+              "issues.opened",
+              "issues.edited",
+              "issue_comment.created",
+              "issue_comment.edited",
+              "pull_request.opened",
+              "pull_request.edited"
+            ] do
     amount = args[:amount]
 
     {command_source, command_id} =
       case webhook.event do
         "issue_comment" -> {:comment, payload["comment"]["id"]}
         "issues" -> {:ticket, payload["issue"]["id"]}
+        "pull_request" -> {:ticket, payload["pull_request"]["id"]}
+      end
+
+    ticket_number =
+      case webhook.event do
+        "issue_comment" -> payload["issue"]["number"]
+        "issues" -> payload["issue"]["number"]
+        "pull_request" -> payload["pull_request"]["number"]
       end
 
     # TODO: perform compensating action if needed
@@ -307,7 +322,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           ticket_ref: %{
             owner: payload["repository"]["owner"]["login"],
             repo: payload["repository"]["name"],
-            number: payload["issue"]["number"]
+            number: ticket_number
           }
         },
         strategy: strategy,

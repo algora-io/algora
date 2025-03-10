@@ -6,9 +6,13 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts.User
+  alias Algora.Github
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Logos
+
+  require Logger
 
   @steps [:info, :oauth]
 
@@ -42,13 +46,17 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       [
         {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
         {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
-        {"projects", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
+        {"contracts", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
       ]
     end
   end
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+    end
+
     context = %{
       country: socket.assigns.current_country,
       tech_stack: [],
@@ -119,7 +127,39 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
-  def handle_event("prev_step", _, socket) do
+  def handle_info({:authenticated, user}, socket) do
+    tech_stack = get_field(socket.assigns.info_form.source, :tech_stack)
+    intentions = get_field(socket.assigns.info_form.source, :intentions)
+
+    case user
+         |> change(
+           tech_stack: tech_stack,
+           seeking_bounties: "bounties" in intentions,
+           seeking_contracts: "contracts" in intentions,
+           seeking_jobs: "jobs" in intentions
+         )
+         |> Repo.update() do
+      {:ok, _user} ->
+        :ok
+
+      {:error, changeset} ->
+        Logger.error("Failed to update user #{user.id} on onboarding: #{inspect(changeset)}")
+    end
+
+    {:noreply,
+     socket
+     |> assign(:current_user, user)
+     |> redirect(to: ~p"/")}
+  end
+
+  @impl true
+  def handle_event("sign_in_with_github", _params, socket) do
+    popup_url = Github.authorize_url(%{socket_id: socket.id})
+    {:noreply, push_event(socket, "open_popup", %{url: popup_url})}
+  end
+
+  @impl true
+  def handle_event("prev_step", _params, socket) do
     current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
     prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
     {:noreply, assign(socket, :step, prev_step)}
@@ -244,7 +284,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         <.button phx-click="prev_step" variant="secondary">
           Previous
         </.button>
-        <.button href={Algora.Github.authorize_url()} rel="noopener" class="inline-flex items-center">
+        <.button phx-click="sign_in_with_github" class="inline-flex items-center">
           <Logos.github class="mr-2 h-5 w-5" /> Sign in with GitHub
         </.button>
       </div>

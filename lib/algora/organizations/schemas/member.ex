@@ -19,10 +19,11 @@ defmodule Algora.Organizations.Member do
 
   def changeset(member, params) do
     member
-    |> cast(params, [:role])
-    |> put_assoc(:org, params.org)
-    |> put_assoc(:user, params.user)
-    |> validate_required([:role, :org, :user])
+    |> cast(params, [:role, :org_id, :user_id])
+    |> validate_required([:role, :org_id, :user_id])
+    |> foreign_key_constraint(:org_id)
+    |> foreign_key_constraint(:user_id)
+    |> unique_constraint([:org_id, :user_id])
     |> generate_id()
   end
 

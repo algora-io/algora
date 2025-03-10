@@ -426,7 +426,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
-              # TODO try to recover
               Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
 
               socket

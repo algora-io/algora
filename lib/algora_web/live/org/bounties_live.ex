@@ -348,8 +348,23 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   defp assign_more_transactions(socket) do
-    # TODO: implement
+    %{transaction_rows: rows, current_org: current_org} = socket.assigns
+
+    last_transaction = List.last(rows).transaction
+
+    more_transactions =
+      Payments.list_sent_transactions(
+        current_org.id,
+        limit: page_size(),
+        before: %{
+          succeeded_at: last_transaction.succeeded_at,
+          id: last_transaction.id
+        }
+      )
+
     socket
+    |> assign(:transaction_rows, rows ++ to_transaction_rows(more_transactions))
+    |> assign(:has_more_transactions, length(more_transactions) >= page_size())
   end
 
   defp get_current_status(params) do

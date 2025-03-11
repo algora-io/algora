@@ -149,7 +149,7 @@ defmodule Algora.Organizations do
     Repo.all(
       from u in User,
         where: u.type == :organization,
-        limit: ^Keyword.fetch!(opts, :limit)
+        limit: ^opts[:limit]
     )
   end
 

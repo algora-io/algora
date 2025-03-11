@@ -50,17 +50,10 @@ defmodule AlgoraWeb.Router do
         on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
     end
 
-    live_session :community,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/home", User.DashboardLive, :index
-    end
-
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      # live "/dashboard", User.DashboardLive, :index
-      live "/dashboard", Community.DashboardLive, :index
+      live "/home", User.DashboardLive, :index
       live "/bounties", BountiesLive, :index
       live "/community", CommunityLive, :index
       live "/user/transactions", User.TransactionsLive, :index
@@ -73,15 +66,8 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
       live "/org/:org_handle", Org.DashboardLive, :index
       live "/org/:org_handle/home", Org.DashboardPublicLive, :index
-      live "/org/:org_handle/bounties/new", Org.CreateBountyLive, :new
-      live "/org/:org_handle/jobs/new", Org.CreateJobLive, :new
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
       live "/org/:org_handle/contracts/:id", Contract.ViewLive
-      live "/org/:org_handle/projects", Project.IndexLive, :index
-      # live "/org/:org_handle/projects/:id", Project.ViewLive
-      live "/org/:org_handle/jobs", Org.JobsLive, :index
-      live "/org/:org_handle/jobs/:id", Org.JobLive, :index
-      live "/org/:org_handle/chat", ChatLive, :index
       live "/org/:org_handle/team", Org.TeamLive, :index
       live "/org/:org_handle/leaderboard", Org.LeaderboardLive, :index
     end
@@ -98,11 +84,6 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/transactions", Org.TransactionsLive, :index
     end
 
-    live_session :org2,
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
-      live "/org/:org_handle/projects/:id", DevLive
-    end
-
     live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/auth/login", SignInLive, :index
       live "/payment/success", Payment.SuccessLive, :index
@@ -111,33 +92,14 @@ defmodule AlgoraWeb.Router do
       live "/claims/:group_id", ClaimLive
     end
 
-    live "/orgs/new", Org.CreateLive
-
-    live "/projects/new", Project.CreateLive
-    live "/projects", Project.IndexLive
-    live "/projects/:id", Project.ViewLive
-
-    live "/jobs/new", Job.CreateLive
-    live "/jobs", Job.IndexLive
-    live "/jobs/:id", Job.ViewLive
-
     live "/leaderboard", LeaderboardLive
 
     live_session :onboarding,
       on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
-      live "/companies", CompaniesLive, :index
-      live "/developers", DevelopersLive, :index
       live "/pricing", PricingLive
     end
-
-    live_session :tmp,
-      on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
-      live "/tmp/pricing", Tmp.PricingLive
-    end
-
-    live "/trotw", TROTWLive
 
     live "/open-source", OpenSourceLive, :index
 

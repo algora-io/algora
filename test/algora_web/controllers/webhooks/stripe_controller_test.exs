@@ -6,6 +6,9 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
   import Ecto.Query
 
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Tip
+  alias Algora.Contracts.Contract
   alias Algora.Payments
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
@@ -22,6 +25,64 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
   end
 
   describe "handle_event/1 for charge.succeeded" do
+    test "updates transaction statuses and marks associated records as paid", %{
+      metadata: metadata,
+      sender: sender,
+      recipient: recipient
+    } do
+      group_id = "#{Algora.Util.random_int()}"
+
+      bounty = insert(:bounty, status: :open, owner_id: sender.id, ticket: insert(:ticket))
+      tip = insert(:tip, status: :open, owner_id: sender.id, recipient: recipient)
+      contract = insert(:contract, status: :active, client: sender, contractor: recipient)
+
+      bounty_credit_tx =
+        insert(:transaction, %{
+          type: :credit,
+          status: :initialized,
+          group_id: group_id,
+          user_id: recipient.id,
+          bounty_id: bounty.id
+        })
+
+      tip_credit_tx =
+        insert(:transaction, %{
+          type: :credit,
+          status: :initialized,
+          group_id: group_id,
+          user_id: recipient.id,
+          tip_id: tip.id
+        })
+
+      contract_credit_tx =
+        insert(:transaction, %{
+          type: :credit,
+          status: :initialized,
+          group_id: group_id,
+          user_id: recipient.id,
+          contract_id: contract.id
+        })
+
+      event = %Stripe.Event{
+        type: "charge.succeeded",
+        data: %{
+          object: %Stripe.Charge{
+            metadata: Map.put(metadata, "group_id", group_id)
+          }
+        }
+      }
+
+      assert {:ok, _} = StripeController.handle_event(event)
+
+      assert Repo.get(Transaction, bounty_credit_tx.id).status == :succeeded
+      assert Repo.get(Transaction, tip_credit_tx.id).status == :succeeded
+      assert Repo.get(Transaction, contract_credit_tx.id).status == :succeeded
+
+      assert Repo.get(Bounty, bounty.id).status == :paid
+      assert Repo.get(Tip, tip.id).status == :paid
+      assert Repo.get(Contract, contract.id).status == :paid
+    end
+
     test "updates transaction status and enqueues PromptPayoutConnect job", %{
       metadata: metadata,
       sender: sender,

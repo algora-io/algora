@@ -41,7 +41,9 @@ config :algora, :github,
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
   private_key: System.get_env("GITHUB_PRIVATE_KEY"),
   pat: System.get_env("GITHUB_PAT"),
-  pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true"
+  pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true",
+  oauth_state_ttl: String.to_integer(System.get_env("GITHUB_OAUTH_STATE_TTL", "600")),
+  oauth_state_salt: System.get_env("GITHUB_OAUTH_STATE_SALT", "github-oauth-state")
 
 config :algora, :stripe_client, Algora.Support.StripeMock
 config :algora, :github_client, Algora.Support.GithubMock

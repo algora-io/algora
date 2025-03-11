@@ -29,7 +29,9 @@ if config_env() == :prod do
     webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
     private_key: System.fetch_env!("GITHUB_PRIVATE_KEY"),
     pat: System.fetch_env!("GITHUB_PAT"),
-    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true"
+    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true",
+    oauth_state_ttl: String.to_integer(System.get_env("GITHUB_OAUTH_STATE_TTL", "600")),
+    oauth_state_salt: System.fetch_env!("GITHUB_OAUTH_STATE_SALT")
 
   config :stripity_stripe,
     api_key: System.fetch_env!("STRIPE_SECRET_KEY")

@@ -66,7 +66,6 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
       live "/org/:org_handle", Org.DashboardLive, :index
       live "/org/:org_handle/home", Org.DashboardPublicLive, :index
-      live "/org/:org_handle/bounties/new", Org.CreateBountyLive, :new
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
       live "/org/:org_handle/contracts/:id", Contract.ViewLive
       live "/org/:org_handle/team", Org.TeamLive, :index

@@ -58,10 +58,6 @@ defmodule Algora.Accounts.User do
     field :completed_bounties_count, :integer, virtual: true
     field :contributed_projects_count, :integer, virtual: true
 
-    ## TODO: remove temporary fields
-    field :message, :string, virtual: true
-    field :flag, :string, virtual: true
-
     field :need_avatar, :boolean, default: false
 
     field :bounty_mode, Ecto.Enum,

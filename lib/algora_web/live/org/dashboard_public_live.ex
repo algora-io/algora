@@ -206,7 +206,9 @@ defmodule AlgoraWeb.Org.DashboardPublicLive do
                   <.avatar_image src={earner.avatar_url} alt={earner.name} />
                 </.avatar>
                 <div>
-                  <div class="font-medium">{earner.name} {earner.flag}</div>
+                  <div class="font-medium">
+                    {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
+                  </div>
                   <div class="text-sm text-muted-foreground">@{User.handle(earner)}</div>
                 </div>
               </.link>

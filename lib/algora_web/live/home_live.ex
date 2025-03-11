@@ -170,7 +170,9 @@ defmodule AlgoraWeb.HomeLive do
         class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
       />
       <div class="font-display mt-1 rounded-xl rounded-t-none bg-card/50 p-3 text-sm ring-1 ring-border backdrop-blur-sm">
-        <div class="font-semibold text-foreground">{@dev.name} {@dev.flag}</div>
+        <div class="font-semibold text-foreground">
+          {@dev.name} {Algora.Misc.CountryEmojis.get(@dev.country)}
+        </div>
         <div class="mt-0.5 text-xs font-medium text-foreground line-clamp-2">{@dev.bio}</div>
         <div class="hidden mt-1 text-sm">
           <div class="-ml-1 flex h-6 flex-wrap gap-1 overflow-hidden p-px text-sm">

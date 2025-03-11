@@ -6,6 +6,7 @@ defmodule AlgoraWeb.SignInLive do
   alias AlgoraWeb.Components.Logos
   alias Swoosh.Email
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="flex min-h-[100svh] bg-[#111113]">
@@ -184,6 +185,7 @@ defmodule AlgoraWeb.SignInLive do
     """
   end
 
+  @impl true
   def mount(params, _session, socket) do
     authorize_url =
       case params["return_to"] do
@@ -214,6 +216,7 @@ defmodule AlgoraWeb.SignInLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
     code = Nanoid.generate()
 
@@ -240,6 +243,7 @@ defmodule AlgoraWeb.SignInLive do
     end
   end
 
+  @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
       user = socket.assigns.user

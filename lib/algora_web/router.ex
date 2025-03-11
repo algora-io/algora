@@ -50,17 +50,10 @@ defmodule AlgoraWeb.Router do
         on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
     end
 
-    live_session :community,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/home", User.DashboardLive, :index
-    end
-
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      # live "/dashboard", User.DashboardLive, :index
-      live "/dashboard", Community.DashboardLive, :index
+      live "/home", User.DashboardLive, :index
       live "/bounties", BountiesLive, :index
       live "/community", CommunityLive, :index
       live "/user/transactions", User.TransactionsLive, :index

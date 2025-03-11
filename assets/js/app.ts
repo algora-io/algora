@@ -492,7 +492,6 @@ const Hooks = {
       // Look for the indicator inside this.el rather than document-wide
       const loadMoreIndicator = this.el.querySelector("#load-more-indicator");
       if (loadMoreIndicator) {
-        console.log("observing indicator", loadMoreIndicator);
         this.observer.observe(loadMoreIndicator);
       }
     },

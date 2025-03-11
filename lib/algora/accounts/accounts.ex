@@ -177,9 +177,14 @@ defmodule Algora.Accounts do
     end
   end
 
-  # HACK: eventually fetch dynamically
   def list_featured_developers(_country \\ nil) do
-    list_developers(handles: ["carver", "jianyang", "aly", "john", "bighead"])
+    case Algora.Settings.get_featured_developers() do
+      handles when is_list(handles) and handles != [] ->
+        list_developers(handles: handles)
+
+      _ ->
+        list_developers(limit: 5)
+    end
   end
 
   def get_users_map(user_ids) when is_list(user_ids) do

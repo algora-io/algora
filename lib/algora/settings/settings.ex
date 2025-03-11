@@ -30,4 +30,15 @@ defmodule Algora.Settings do
       config -> Repo.delete(config)
     end
   end
+
+  def get_featured_developers do
+    case get("featured_developers") do
+      %{"handles" => handles} when is_list(handles) -> handles
+      _ -> nil
+    end
+  end
+
+  def set_featured_developers(handles) when is_list(handles) do
+    set("featured_developers", %{"handles" => handles})
+  end
 end

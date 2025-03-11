@@ -18,14 +18,15 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   attr :rest, :global
 
   def avatar_image(assigns) do
+    assigns = assign(assigns, id: "avatar-image-#{Algora.Util.random_string()}")
+
     ~H"""
     <img
+      id={@id}
       src={@src}
       class={classes(["aspect-square h-full w-full", @class])}
-      id={@src}
-      phx-update="ignore"
+      phx-hook="AvatarImage"
       style="display:none"
-      onload="this.style.display=''"
       {@rest}
     />
     """

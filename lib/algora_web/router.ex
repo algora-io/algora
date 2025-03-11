@@ -119,13 +119,6 @@ defmodule AlgoraWeb.Router do
       live "/pricing", PricingLive
     end
 
-    live_session :tmp,
-      on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
-      live "/tmp/pricing", Tmp.PricingLive
-    end
-
-    live "/trotw", TROTWLive
-
     live "/open-source", OpenSourceLive, :index
 
     live_session :root,

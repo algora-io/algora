@@ -191,8 +191,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         |> VerificationForm.changeset(%{code: login_code})
         |> to_form()
 
-      case AlgoraWeb.UserAuth.verify_login_code(login_code) do
-        {:ok, %{email: ^email}} ->
+      case AlgoraWeb.UserAuth.verify_login_code(login_code, email) do
+        {:ok, _login_token} ->
           {:ok,
            socket
            |> assign(:tech_stack_form, tech_stack_form)
@@ -208,12 +208,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
            |> assign_matching_devs()
            |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
            |> assign(:user_metadata, AsyncResult.loading())}
-
-        {:ok, _no_match} ->
-          {:ok,
-           socket
-           |> put_flash(:error, "Invalid onboarding token")
-           |> redirect(to: "/")}
 
         {:error, _invalid} ->
           {:ok,
@@ -447,18 +441,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         code = get_field(changeset, :code)
         email = get_field(socket.assigns.email_form.source, :email)
 
-        case AlgoraWeb.UserAuth.verify_login_code(code) do
-          {:ok, %{email: ^email}} ->
+        case AlgoraWeb.UserAuth.verify_login_code(code, email) do
+          {:ok, _login_token} ->
             {:noreply,
              socket
              |> assign(:verification_form, to_form(changeset))
              |> assign(step: :preferences)}
-
-          {:ok, _different_email} ->
-            {:noreply,
-             socket
-             |> assign(:verification_form, to_form(changeset))
-             |> assign(:code_valid?, false)}
 
           {:error, _reason} ->
             {:noreply,

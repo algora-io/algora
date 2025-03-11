@@ -251,24 +251,37 @@ defmodule AlgoraWeb.UserAuth do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
   end
 
-  def verify_login_code(code) do
+  def verify_login_code(code, email) do
     case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
       {:ok, payload} ->
-        case String.split(payload, ":") do
-          [email, domain | tech_stack] ->
-            {:ok,
-             %{
-               email: email,
-               domain: if(domain != "", do: domain),
-               tech_stack: Enum.reject(tech_stack, &(&1 == "")),
-               token: code
-             }}
+        result =
+          case String.split(payload, ":") do
+            [email, domain | tech_stack] ->
+              {:ok,
+               %{
+                 email: email,
+                 domain: if(domain != "", do: domain),
+                 tech_stack: Enum.reject(tech_stack, &(&1 == "")),
+                 token: code
+               }}
 
-          [email] ->
-            {:ok, %{email: email, token: code}}
+            [email] ->
+              {:ok, %{email: email, token: code}}
 
-          _other ->
-            {:error, "invalid token payload"}
+            _other ->
+              {:error, :invalid_payload}
+          end
+
+        case result do
+          {:ok, data} ->
+            if data.email == email do
+              {:ok, data}
+            else
+              {:error, :invalid_email}
+            end
+
+          {:error, reason} ->
+            {:error, reason}
         end
 
       {:error, reason} ->

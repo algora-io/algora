@@ -163,9 +163,9 @@ defmodule AlgoraWeb.CoreComponents do
             <span class="flex min-w-0 items-center justify-between space-x-3">
               <%= for img <- @img do %>
                 <.avatar class="h-10 w-10">
-                  <.avatar_image src={img.src} />
+                  <.avatar_image src={img[:src]} />
                   <.avatar_fallback>
-                    {Algora.Util.initials(img.alt)}
+                    {Algora.Util.initials(img[:alt])}
                   </.avatar_fallback>
                 </.avatar>
               <% end %>

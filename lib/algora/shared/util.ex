@@ -115,7 +115,9 @@ defmodule Algora.Util do
   def format_name_list([x1, x2, x3]), do: "#{x1}, #{x2} and #{x3}"
   def format_name_list([x1, x2 | xs]), do: "#{x1}, #{x2} and #{length(xs)} others"
 
-  def initials(str, length \\ 2), do: str |> String.slice(0, length) |> String.upcase()
+  def initials(str, length \\ 2)
+  def initials(nil, _length), do: ""
+  def initials(str, length), do: str |> String.slice(0, length) |> String.upcase()
 
   # TODO: Implement this for all countries
   def locale_from_country_code("gr"), do: "el"

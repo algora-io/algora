@@ -208,6 +208,14 @@ defmodule Algora.Factory do
     }
   end
 
+  def tip_factory do
+    %Algora.Bounties.Tip{
+      id: Nanoid.generate(),
+      status: :open,
+      amount: Money.new!(100, :USD)
+    }
+  end
+
   def attempt_factory do
     %Algora.Bounties.Attempt{
       id: Nanoid.generate(),

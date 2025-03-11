@@ -5,6 +5,9 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Query
 
   alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Tip
+  alias Algora.Contracts.Contract
   alias Algora.Payments
   alias Algora.Payments.Customer
   alias Algora.Payments.Transaction
@@ -22,18 +25,22 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       })
       when is_binary(group_id) do
     Repo.transact(fn ->
-      update_result =
-        Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id),
+      {_, txs} =
+        Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
           set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
         )
 
+      bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+      Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
+      Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
+      Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
+
       jobs_result =
-        from(t in Transaction,
-          where: t.group_id == ^group_id,
-          where: t.type == :credit,
-          where: t.status == :succeeded
-        )
-        |> Repo.all()
+        txs
+        |> Enum.filter(&(&1.type == :credit))
         |> Enum.reduce_while(:ok, fn credit, :ok ->
           case Payments.fetch_active_account(credit.user_id) do
             {:ok, _account} ->
@@ -54,7 +61,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           end
         end)
 
-      with {count, _} when count > 0 <- update_result,
+      with txs when txs != [] <- txs,
            :ok <- jobs_result do
         Payments.broadcast()
         {:ok, nil}

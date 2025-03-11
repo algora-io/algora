@@ -134,7 +134,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 The following claims have been approved and are ready for payment.
               </.card_description>
             </.card_header>
-            <.card_content>
+            <.card_content class="p-0">
               <table class="w-full caption-bottom text-sm">
                 <tbody class="[&_tr:last-child]:border-0">
                   <%= for {_group_id, [%{target: %{bounties: [bounty | _]}} | _] = claims} <- @payable_bounties do %>

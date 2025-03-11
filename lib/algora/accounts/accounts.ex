@@ -153,16 +153,6 @@ defmodule Algora.Accounts do
     })
     |> Repo.all()
     |> Enum.map(&User.after_load/1)
-    |> Enum.map(fn user ->
-      Map.merge(user, %{
-        flag: get_flag(user),
-        message: """
-        Hey 👋
-
-        I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
-        """
-      })
-    end)
   end
 
   def list_developers(criteria \\ []) do
@@ -450,8 +440,6 @@ defmodule Algora.Accounts do
   def get_contexts(%User{} = user) do
     [user | Organizations.get_user_orgs(user)]
   end
-
-  defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
 
   # TODO: fetch from db
   def list_community(tech_stack) do

@@ -883,7 +883,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <div class="flex-grow">
               <div class="flex justify-between">
                 <div>
-                  <div class="font-semibold">{dev.name} {dev.flag}</div>
+                  <div class="font-semibold">
+                    {dev.name} {Algora.Misc.CountryEmojis.get(dev.country)}
+                  </div>
                   <div class="text-sm text-muted-foreground">@{User.handle(dev)}</div>
                 </div>
                 <div class="flex flex-col items-end">

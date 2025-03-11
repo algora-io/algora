@@ -61,7 +61,9 @@ defmodule AlgoraWeb.Org.LeaderboardLive do
                           </.avatar_fallback>
                         </.avatar>
                         <div>
-                          <div class="font-medium">{earner.name} {earner.flag}</div>
+                          <div class="font-medium">
+                            {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
+                          </div>
                           <div class="text-sm text-muted-foreground">@{User.handle(earner)}</div>
                         </div>
                       </div>

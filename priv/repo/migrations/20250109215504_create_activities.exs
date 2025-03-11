@@ -3,8 +3,34 @@ defmodule Algora.Repo.Migrations.CreateActivities do
 
   require Algora.Activities
 
+  @tables [
+    "identity_activities",
+    "user_activities",
+    "attempt_activities",
+    "bonus_activities",
+    "bounty_activities",
+    "claim_activities",
+    "tip_activities",
+    "message_activities",
+    "thread_activities",
+    "contract_activities",
+    "timesheet_activities",
+    "application_activities",
+    "job_activities",
+    "account_activities",
+    "customer_activities",
+    "payment_method_activities",
+    "platform_transaction_activities",
+    "transaction_activities",
+    "project_activities",
+    "review_activities",
+    "installation_activities",
+    "ticket_activities",
+    "repository_activities"
+  ]
+
   def change do
-    Enum.each(Algora.Activities.tables(), fn table_name ->
+    Enum.each(@tables, fn table_name ->
       create table(table_name) do
         add :assoc_id, :string, null: false
         add :user_id, references(:users)

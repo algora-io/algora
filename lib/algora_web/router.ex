@@ -107,8 +107,6 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
-      live "/companies", CompaniesLive, :index
-      live "/developers", DevelopersLive, :index
       live "/pricing", PricingLive
     end
 

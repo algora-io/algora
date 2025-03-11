@@ -208,6 +208,12 @@ defmodule AlgoraWeb.SignInLive do
      |> assign_form(changeset)}
   end
 
+  @impl true
+  def handle_params(params, _uri, socket) do
+    socket = assign(socket, :return_to, params["return_to"])
+    {:noreply, socket}
+  end
+
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
     code = Nanoid.generate()
 
@@ -238,7 +244,15 @@ defmodule AlgoraWeb.SignInLive do
     if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
       user = socket.assigns.user
       token = AlgoraWeb.UserAuth.generate_login_code(user.email)
-      path = AlgoraWeb.UserAuth.login_path(user.email, token)
+
+      path =
+        case socket.assigns.return_to do
+          return_to when is_binary(return_to) ->
+            AlgoraWeb.UserAuth.login_path(user.email, token, return_to)
+
+          _ ->
+            AlgoraWeb.UserAuth.login_path(user.email, token)
+        end
 
       {:noreply,
        socket

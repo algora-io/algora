@@ -195,15 +195,6 @@ defmodule AlgoraWeb.ClaimLive do
      |> assign_line_items()}
   end
 
-  def handle_event("split_bounty", _params, socket) do
-    # TODO: Implement split bounty
-    Logger.error(
-      "Attempt to split bounty #{socket.assigns.target.repository.user.provider_login}/#{socket.assigns.target.repository.name}#{socket.assigns.target.number}"
-    )
-
-    {:noreply, socket}
-  end
-
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
     changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
 

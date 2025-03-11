@@ -74,13 +74,8 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle", Org.DashboardLive, :index
       live "/org/:org_handle/home", Org.DashboardPublicLive, :index
       live "/org/:org_handle/bounties/new", Org.CreateBountyLive, :new
-      live "/org/:org_handle/jobs/new", Org.CreateJobLive, :new
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
       live "/org/:org_handle/contracts/:id", Contract.ViewLive
-      live "/org/:org_handle/projects", Project.IndexLive, :index
-      # live "/org/:org_handle/projects/:id", Project.ViewLive
-      live "/org/:org_handle/jobs", Org.JobsLive, :index
-      live "/org/:org_handle/jobs/:id", Org.JobLive, :index
       live "/org/:org_handle/chat", ChatLive, :index
       live "/org/:org_handle/team", Org.TeamLive, :index
       live "/org/:org_handle/leaderboard", Org.LeaderboardLive, :index
@@ -112,14 +107,6 @@ defmodule AlgoraWeb.Router do
     end
 
     live "/orgs/new", Org.CreateLive
-
-    live "/projects/new", Project.CreateLive
-    live "/projects", Project.IndexLive
-    live "/projects/:id", Project.ViewLive
-
-    live "/jobs/new", Job.CreateLive
-    live "/jobs", Job.IndexLive
-    live "/jobs/:id", Job.ViewLive
 
     live "/leaderboard", LeaderboardLive
 

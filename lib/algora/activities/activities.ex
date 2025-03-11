@@ -24,13 +24,11 @@ defmodule Algora.Activities do
     contract_activities: Algora.Contracts.Contract,
     timesheet_activities: Algora.Contracts.Timesheet,
     application_activities: Algora.Jobs.Application,
-    job_activities: Algora.Jobs.Job,
     account_activities: Algora.Payments.Account,
     customer_activities: Algora.Payments.Customer,
     payment_method_activities: Algora.Payments.PaymentMethod,
     platform_transaction_activities: Algora.Payments.PlatformTransaction,
     transaction_activities: Algora.Payments.Transaction,
-    project_activities: Algora.Projects.Project,
     review_activities: Algora.Reviews.Project,
     installation_activities: Algora.Workplace.Installation,
     ticket_activities: Algora.Workspace.Ticket,
@@ -50,7 +48,6 @@ defmodule Algora.Activities do
     received_tips: "tip_activities",
     identities: "identity_activities",
     owned_installations: "installation_activities",
-    # projects: "project_activities",
     repositories: "repository_activities",
     transactions: "transaction_activities"
   }

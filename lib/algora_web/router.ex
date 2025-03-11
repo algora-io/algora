@@ -69,7 +69,6 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/bounties/new", Org.CreateBountyLive, :new
       live "/org/:org_handle/bounties", Org.BountiesLive, :index
       live "/org/:org_handle/contracts/:id", Contract.ViewLive
-      live "/org/:org_handle/chat", ChatLive, :index
       live "/org/:org_handle/team", Org.TeamLive, :index
       live "/org/:org_handle/leaderboard", Org.LeaderboardLive, :index
     end
@@ -84,11 +83,6 @@ defmodule AlgoraWeb.Router do
       ] do
       live "/org/:org_handle/settings", Org.SettingsLive, :edit
       live "/org/:org_handle/transactions", Org.TransactionsLive, :index
-    end
-
-    live_session :org2,
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
-      live "/org/:org_handle/projects/:id", DevLive
     end
 
     live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do

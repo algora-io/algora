@@ -503,6 +503,17 @@ const Hooks = {
       }
     },
   },
+  AvatarImage: {
+    mounted() {
+      this.handleLoad = () => {
+        this.el.style.display = "";
+      };
+      this.el.addEventListener("load", this.handleLoad);
+    },
+    destroyed() {
+      this.el.removeEventListener("load", this.handleLoad);
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

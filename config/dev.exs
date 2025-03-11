@@ -124,3 +124,7 @@ config :algora,
   auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
 
 config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")
+
+config :algora, :login_code,
+  ttl: String.to_integer(System.get_env("LOGIN_CODE_TTL", "3600")),
+  salt: System.get_env("LOGIN_CODE_SALT", "algora-login-code")

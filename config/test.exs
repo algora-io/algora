@@ -54,3 +54,7 @@ config :algora,
 config :algora, :stripe,
   test_customer_id: System.get_env("STRIPE_TEST_CUSTOMER_ID"),
   test_account_id: System.get_env("STRIPE_TEST_ACCOUNT_ID")
+
+config :algora, :login_code,
+  ttl: String.to_integer(System.get_env("LOGIN_CODE_TTL", "3600")),
+  salt: System.get_env("LOGIN_CODE_SALT", "algora-login-code")

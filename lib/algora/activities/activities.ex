@@ -23,7 +23,6 @@ defmodule Algora.Activities do
     thread_activities: Algora.Chat.Thread,
     contract_activities: Algora.Contracts.Contract,
     timesheet_activities: Algora.Contracts.Timesheet,
-    application_activities: Algora.Jobs.Application,
     account_activities: Algora.Payments.Account,
     customer_activities: Algora.Payments.Customer,
     payment_method_activities: Algora.Payments.PaymentMethod,

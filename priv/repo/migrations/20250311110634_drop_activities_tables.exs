@@ -3,6 +3,7 @@ defmodule Algora.Repo.Migrations.DropActivitiesTables do
 
   def change do
     drop table(:job_activities)
+    drop table(:application_activities)
     drop table(:project_activities)
   end
 end

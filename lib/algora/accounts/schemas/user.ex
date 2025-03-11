@@ -92,7 +92,6 @@ defmodule Algora.Accounts.User do
     has_many :received_tips, Tip, foreign_key: :recipient_id
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
-    has_many :projects, Algora.Projects.Project
     has_many :repositories, Algora.Workspace.Repository
     has_many :transactions, Algora.Payments.Transaction, foreign_key: :user_id
     has_many :owned_installations, Installation, foreign_key: :owner_id

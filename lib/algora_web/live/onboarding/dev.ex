@@ -329,7 +329,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
               <div class="text-center text-sm font-medium">
                 {transaction.user.name}
                 <div>
-                  {Algora.Misc.CountryEmojis.get(transaction.user.country, "🌎")}
+                  {Algora.Misc.CountryEmojis.get(transaction.user.country)}
                 </div>
               </div>
             </div>

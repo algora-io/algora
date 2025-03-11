@@ -328,7 +328,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
               options={
                 PayoutAccountForm.countries()
                 |> Enum.map(fn {name, code} ->
-                  {Algora.Misc.CountryEmojis.get(code, "🌎") <> " " <> name, code}
+                  {Algora.Misc.CountryEmojis.get(code) <> " " <> name, code}
                 end)
               }
               helptext="Select the country where you or your business will legally operate."

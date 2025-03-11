@@ -255,7 +255,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 <div class="text-center text-sm font-medium">
                   {recipient.name}
                   <div>
-                    {Algora.Misc.CountryEmojis.get(recipient.country, "🌎")}
+                    {Algora.Misc.CountryEmojis.get(recipient.country)}
                   </div>
                 </div>
               </div>

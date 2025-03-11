@@ -192,27 +192,6 @@ defmodule Algora.Accounts do
     list_developers(handles: ["carver", "jianyang", "aly", "john", "bighead"])
   end
 
-  def list_orgs(opts) do
-    query =
-      from u in User,
-        where: u.type == :organization and u.seeded == false and not is_nil(u.provider_login),
-        limit: ^Keyword.get(opts, :limit, 100),
-        order_by: [desc: u.priority, desc: u.stargazers_count]
-
-    query
-    |> Repo.all()
-    |> Enum.map(fn user ->
-      %{
-        name: user.name || user.handle,
-        handle: user.handle,
-        flag: get_flag(user),
-        amount: :rand.uniform(100_000),
-        tech_stack: Enum.take(user.tech_stack, 6),
-        avatar_url: user.avatar_url
-      }
-    end)
-  end
-
   def get_users_map(user_ids) when is_list(user_ids) do
     Repo.all(from u in User, where: u.id in ^user_ids, select: {u.id, u})
   end

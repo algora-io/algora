@@ -93,8 +93,6 @@ defmodule AlgoraWeb.Router do
       live "/claims/:group_id", ClaimLive
     end
 
-    live "/orgs/new", Org.CreateLive
-
     live "/leaderboard", LeaderboardLive
 
     live_session :onboarding,

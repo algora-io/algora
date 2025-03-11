@@ -2,6 +2,7 @@ defmodule Algora.AccountsTest do
   use Algora.DataCase
 
   alias Algora.Accounts
+  alias Algora.Organizations
 
   describe "accounts" do
     test "register github user" do
@@ -30,7 +31,7 @@ defmodule Algora.AccountsTest do
       assert [sort_by_tech_stack: ["rust"]] |> Accounts.fetch_developer_by() |> elem(1) |> Map.get(:id) == user_2.id
 
       assert [] |> Accounts.list_developers() |> length() == 2
-      assert [] |> Accounts.list_orgs() |> length() == 1
+      assert [] |> Organizations.list_orgs() |> length() == 1
 
       assert_activity_names_for_user(user_1.id, [])
       assert_activity_names_for_user(org_1.id, [])

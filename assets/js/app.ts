@@ -504,13 +504,19 @@ const Hooks = {
   },
   AvatarImage: {
     mounted() {
-      this.handleLoad = () => {
-        this.el.style.display = "";
+      this.handleError = () => {
+        this.errored = true;
+        this.el.style.display = "none";
       };
-      this.el.addEventListener("load", this.handleLoad);
+      this.el.addEventListener("error", this.handleError);
+    },
+    updated() {
+      if (this.errored) {
+        this.el.style.display = "none";
+      }
     },
     destroyed() {
-      this.el.removeEventListener("load", this.handleLoad);
+      this.el.removeEventListener("error", this.handleError);
     },
   },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;

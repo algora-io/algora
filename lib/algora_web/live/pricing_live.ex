@@ -56,7 +56,7 @@ defmodule AlgoraWeb.PricingLive do
           </div>
         </div>
 
-        <%!-- <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <div class="rounded-2xl bg-card/75 border p-8">
             <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
               <div class="flex-1">
@@ -101,9 +101,152 @@ defmodule AlgoraWeb.PricingLive do
               </div>
             </div>
           </div>
-        </div> --%>
+        </div>
 
-        <div class={
+        <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="rounded-2xl bg-card/75 border p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-foreground">Make payments</h3>
+
+                <p class="mt-1 text-sm text-muted-foreground">
+                  Receive payments within days around the world
+                </p>
+                <div class="mt-4">
+                  <p class="text-4xl font-display text-foreground">9%</p>
+                  <p class="text-sm text-muted-foreground">
+                    service fee on bounty & contract payouts
+                  </p>
+                </div>
+              </div>
+              <div class="flex-1 space-y-4">
+                <ul class="text-xs space-y-2">
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>No platform fees on bounties</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>
+                      Available in
+                      <.link
+                        href="https://docs.algora.io/bounties/payments#supported-countries-regions"
+                        class="font-semibold"
+                      >
+                        {ConnectCountries.count()} countries/regions
+                      </.link>
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Fast payouts in 3-8 days</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="flex-none">
+                <.button navigate="/onboarding/dev" variant="secondary">
+                  Start contributing
+                </.button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="rounded-2xl bg-card/75 border p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-foreground">Receive payments</h3>
+
+                <p class="mt-1 text-sm text-muted-foreground">
+                  Receive payments within days around the world
+                </p>
+                <div class="mt-4">
+                  <p class="text-4xl font-display text-foreground">100%</p>
+                  <p class="text-sm text-muted-foreground">of bounty & contract payouts</p>
+                </div>
+              </div>
+              <div class="flex-1 space-y-4">
+                <ul class="text-xs space-y-2">
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>No platform fees on bounties</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>
+                      Available in
+                      <.link
+                        href="https://docs.algora.io/bounties/payments#supported-countries-regions"
+                        class="font-semibold"
+                      >
+                        {ConnectCountries.count()} countries/regions
+                      </.link>
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Fast payouts in 3-8 days</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="flex-none">
+                <.button navigate="/onboarding/dev" variant="secondary">
+                  Start contributing
+                </.button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="rounded-2xl bg-card/75 border p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-foreground">Receive payments</h3>
+
+                <p class="mt-1 text-sm text-muted-foreground">
+                  Receive payments within days around the world
+                </p>
+                <div class="mt-4">
+                  <p class="text-4xl font-display text-foreground">100%</p>
+                  <p class="text-sm text-muted-foreground">of bounty & contract payouts</p>
+                </div>
+              </div>
+              <div class="flex-1 space-y-4">
+                <ul class="text-xs space-y-2">
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>No platform fees on bounties</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>
+                      Available in
+                      <.link
+                        href="https://docs.algora.io/bounties/payments#supported-countries-regions"
+                        class="font-semibold"
+                      >
+                        {ConnectCountries.count()} countries/regions
+                      </.link>
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Fast payouts in 3-8 days</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="flex-none">
+                <.button navigate="/onboarding/dev" variant="secondary">
+                  Start contributing
+                </.button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%!-- <div class={
           classes([
             "pt-12 px-6 lg:px-8",
             "mx-auto grid gap-4",
@@ -114,7 +257,7 @@ defmodule AlgoraWeb.PricingLive do
           <%= for plan <- @plans do %>
             <.pricing_card plan={plan} plans={@plans} />
           <% end %>
-        </div>
+        </div> --%>
 
         <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
           <div class="rounded-2xl rounded-t-none bg-card/75 border p-8">

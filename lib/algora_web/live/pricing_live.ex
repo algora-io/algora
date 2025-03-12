@@ -112,32 +112,29 @@ defmodule AlgoraWeb.PricingLive do
           ])
         }>
           <%= for plan <- @plans do %>
-            <.pricing_card plan={plan} />
+            <.pricing_card plan={plan} plans={@plans} />
           <% end %>
         </div>
 
-        <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="rounded-2xl bg-card/75 border p-8">
-            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
-              <div class="flex-1">
-                <h3 class="text-2xl font-bold text-foreground">For Enterprise</h3>
-                <p class="mt-1 text-sm text-muted-foreground">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="rounded-2xl rounded-t-none bg-card/75 border p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-12">
+              <div>
+                <h3 class="font-display flex items-center gap-4 text-2xl font-normal uppercase text-foreground">
+                  Enterprise
+                </h3>
+                <p class="mt-2 text-sm text-foreground-light">
                   A custom plan tailored to your requirements
                 </p>
                 <div class="mt-4">
                   <p class="text-4xl font-display text-foreground">Custom</p>
-                  <p class="text-sm text-muted-foreground">pricing based on needs</p>
                 </div>
               </div>
               <div class="flex-1 space-y-4">
-                <ul class="text-xs space-y-2">
+                <ul class="text-xs grid grid-cols-2 gap-2">
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
                     <span>Whitelabel portal (cloud / self-hosted)</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Priority placement (5+ full-time roles)</span>
                   </li>
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
@@ -145,15 +142,19 @@ defmodule AlgoraWeb.PricingLive do
                   </li>
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Priority placement (5+ full-time roles)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
                     <span>HIPAA available as add-on</span>
                   </li>
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Custom Security Questionnaires</span>
+                    <span>24x7x365 premium support</span>
                   </li>
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>24x7x365 premium support</span>
+                    <span>Custom Security Questionnaires</span>
                   </li>
                 </ul>
               </div>
@@ -479,7 +480,7 @@ defmodule AlgoraWeb.PricingLive do
     ~H"""
     <div class={[
       "bg-card/75 flex flex-col rounded-xl border",
-      "first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
+      "first:rounded-tl-xl last:rounded-tr-xl last:border-r xl:rounded-none xl:border-r-0",
       @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
     ]}>
       <div class="px-8 pt-6 xl:px-4 2xl:px-8">
@@ -507,38 +508,77 @@ defmodule AlgoraWeb.PricingLive do
         <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
           <div class="flex flex-col gap-1 w-full">
             <%= case @plan.id do %>
-              <% "individual" -> %>
-                <div class="flex items-end">
-                  <p class="font-display text-4xl">
-                    9%
-                  </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                    pay as you go
-                  </p>
+              <% 0 -> %>
+                <div class="flex justify-between">
+                  <div class="flex items-end">
+                    <p class="font-display text-4xl">
+                      $0
+                    </p>
+                    <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                      /mo
+                    </p>
+                  </div>
+                  <div class="flex items-end">
+                    <p class="font-display text-2xl">
+                      +9%
+                    </p>
+                    <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                      per transaction
+                    </p>
+                  </div>
                 </div>
-              <% "startups" -> %>
-                <div class="flex items-end">
-                  <p class="font-display text-4xl">
-                    $599
-                  </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                    /month
-                  </p>
+              <% 1 -> %>
+                <div class="flex justify-between">
+                  <div class="flex items-end">
+                    <p class="font-display text-4xl">
+                      $599
+                    </p>
+                    <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                      /mo
+                    </p>
+                  </div>
+                  <div class="flex items-end">
+                    <p class="font-display text-2xl">
+                      +9%
+                    </p>
+                    <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                      per transaction
+                    </p>
+                  </div>
                 </div>
-              <% "hiring" -> %>
-                <div class="flex items-end">
-                  <p class="font-display text-4xl">
-                    $4,690
-                  </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                    /quarter
-                  </p>
+              <% 2 -> %>
+                <div class="flex justify-between">
+                  <div class="flex items-end">
+                    <p class="font-display text-4xl">
+                      $1,590
+                    </p>
+                    <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                      /mo
+                    </p>
+                  </div>
+                  <div class="flex items-end">
+                    <p class="font-display text-2xl">
+                      +9%
+                    </p>
+                    <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                      per transaction
+                    </p>
+                  </div>
                 </div>
             <% end %>
           </div>
         </div>
       </div>
       <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
+        <div class="text-sm text-foreground">
+          <%= case @plan.id do %>
+            <% 0 -> %>
+            <% 1 -> %>
+              <span>Everything in {Enum.at(@plans, 0).name}, plus:</span>
+            <% 2 -> %>
+              <span>Everything in {Enum.at(@plans, 1).name}, plus:</span>
+          <% end %>
+        </div>
         <ul class="text-sm text-foreground-lighter flex-1">
           <%= for feature <- @plan.features do %>
             <li class="flex flex-col py-2 first:mt-0">
@@ -571,7 +611,7 @@ defmodule AlgoraWeb.PricingLive do
   defp get_plans do
     [
       %Plan{
-        id: "individual",
+        id: 0,
         name: "Community",
         description: "Pay bounties on any GitHub repo",
         price: nil,
@@ -585,7 +625,7 @@ defmodule AlgoraWeb.PricingLive do
         ]
       },
       %Plan{
-        id: "startups",
+        id: 1,
         name: "Growth",
         description: "Publish bounties & match with top contributors",
         price: nil,
@@ -599,8 +639,8 @@ defmodule AlgoraWeb.PricingLive do
         ]
       },
       %Plan{
-        id: "hiring",
-        name: "Hiring",
+        id: 2,
+        name: "Scale",
         description: "Publish jobs on Algora & hire top talent",
         price: nil,
         cta_text: "Get started",

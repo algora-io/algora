@@ -10,6 +10,7 @@ defmodule AlgoraWeb.PricingLive do
   defmodule Plan do
     @moduledoc false
     defstruct [
+      :id,
       :name,
       :description,
       :price,
@@ -45,20 +46,67 @@ defmodule AlgoraWeb.PricingLive do
           <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
             <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
               <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
-                Simple pricing,<br class="block lg:hidden" /> built for developers
+                Outcome based payments<br class="block lg:hidden" />
               </h1>
               <p class="text-sm sm:text-lg text-muted-foreground">
-                Fund bounties, reward contributors, and accelerate your project
+                Add USD rewards on GitHub issues and pay when you merge.
               </p>
             </div>
           </div>
         </div>
+
+        <div class="mx-auto max-w-7xl px-6 lg:px-8 mb-8">
+          <div class="rounded-2xl bg-card/75 border p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-foreground">For Developers</h3>
+                <p class="mt-2 text-muted-foreground">
+                  Receive payments within days around the world
+                </p>
+                <div class="mt-4">
+                  <p class="text-4xl font-display text-foreground">100%</p>
+                  <p class="text-sm text-muted-foreground">of bounty & contract payouts</p>
+                </div>
+              </div>
+              <div class="flex-1 space-y-4">
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>No platform fees on bounties</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>
+                      Available in
+                      <.link
+                        href="https://docs.algora.io/bounties/payments#supported-countries-regions"
+                        class="font-semibold"
+                      >
+                        {ConnectCountries.count()} countries/regions
+                      </.link>
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Fast payouts in 3-8 days</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="flex-none">
+                <.button navigate="/onboarding/dev" size="lg">
+                  Start Contributing
+                </.button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class={
           classes([
-            "px-6 lg:px-8",
+            "pt-12 px-6 lg:px-8",
             "mx-auto grid gap-4",
-            "sm:grid-cols-2 lg:max-w-4xl"
-            # "lg:max-w-none xl:grid-cols-3 xl:gap-0"
+            # "sm:grid-cols-2 lg:max-w-4xl"
+            "lg:max-w-7xl xl:grid-cols-3 xl:gap-0"
           ])
         }>
           <%= for plan <- @plans do %>
@@ -372,13 +420,11 @@ defmodule AlgoraWeb.PricingLive do
 
   defp pricing_card(assigns) do
     ~H"""
-    <div class={
-      [
-        "bg-card/75 flex flex-col rounded-xl border",
-        # "first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
-        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
-      ]
-    }>
+    <div class={[
+      "bg-card/75 flex flex-col rounded-xl border",
+      "first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
+      @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
+    ]}>
       <div class="px-8 pt-6 xl:px-4 2xl:px-8">
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 pb-2">
@@ -402,43 +448,40 @@ defmodule AlgoraWeb.PricingLive do
           {@plan.cta_text}
         </.button>
         <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
-          <div class="flex flex-col gap-1">
-            <%= if @plan.price do %>
-              <div>
-                <p class="text-foreground-lighter text-[13px] ml-1 font-normal leading-4">From</p>
+          <div class="flex flex-col gap-1 w-full">
+            <%= case @plan.id do %>
+              <% "individual" -> %>
                 <div class="flex items-end">
-                  <p class="font-display mt-2 pb-1 text-5xl">${@plan.price}</p>
-                  <p class="text-foreground-lighter text-[13px] mb-1.5 ml-1 leading-4">/ month</p>
-                </div>
-              </div>
-            <% else %>
-              <div>
-                <%= if @plan.name == "Individuals" do %>
-                  <p class="font-display mt-2 pb-1 text-4xl">
-                    100%
+                  <p class="font-display text-4xl">
+                    9%
                   </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-1 leading-4">
-                    payout received
-                  </p>
-                <% else %>
-                  <p class="font-display mt-2 pb-1 text-4xl">
-                    19%
-                  </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-1 leading-4">
+                  <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
                     pay as you go
                   </p>
-                <% end %>
-              </div>
+                </div>
+              <% "startups" -> %>
+                <div class="flex items-end">
+                  <p class="font-display text-4xl">
+                    $599
+                  </p>
+                  <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                    /month
+                  </p>
+                </div>
+              <% "hiring" -> %>
+                <div class="flex items-end">
+                  <p class="font-display text-4xl">
+                    $4,700
+                  </p>
+                  <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                    /quarter
+                  </p>
+                </div>
             <% end %>
           </div>
         </div>
       </div>
       <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
-        <p class="text-foreground-lighter text-[13px] mt-2 mb-4">
-          {if @plan.previous_tier,
-            do: "Everything in the #{@plan.previous_tier} Plan, plus:",
-            else: "Get started with:"}
-        </p>
         <ul class="text-[13px] text-foreground-lighter flex-1">
           <%= for feature <- @plan.features do %>
             <li class="flex flex-col py-2 first:mt-0">
@@ -471,40 +514,45 @@ defmodule AlgoraWeb.PricingLive do
   defp get_plans do
     [
       %Plan{
-        name: "Individuals",
-        description: "For developers contributing to open source",
+        id: "individual",
+        name: "Anyone",
+        description: "Pay bounties on GitHub issues in any repository",
         price: nil,
-        cta_text: "Start Contributing",
+        cta_text: "Get started",
         cta_url: "/onboarding/dev",
         popular: false,
         features: [
-          %Feature{name: "Payouts in 3-8 days on average"},
-          %Feature{
-            name:
-              ~s(Available in <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="font-semibold">#{ConnectCountries.count()} countries/regions</a>)
-          },
-          %Feature{name: "Algora profile with contribution history"},
-          %Feature{name: "Free livestreaming on Algora TV"}
+          %Feature{name: "Award outcome work done on GitHub"},
+          %Feature{name: "Fix bugs in your open source dependencies"},
+          %Feature{name: "Interview engineers with real work"}
         ]
       },
       %Plan{
-        name: "Organizations",
-        description: "For companies and projects",
+        id: "startups",
+        name: "Startups",
+        description: "Publish bounties and match with top contributors",
         price: nil,
         cta_text: "Get Started",
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Fees drop to 7.5% with volume"},
-          %Feature{name: "Public org page with complete history"},
-          %Feature{name: "Teammates with granular access rights"},
-          %Feature{name: "Slack / Discord notifications (Webhooks)"},
-          %Feature{name: "Display bounties on your site (SDK)"},
-          %Feature{name: "Auto-pay on merge"},
-          %Feature{name: "Embedded livestreaming"},
-          %Feature{name: "Experts Network"},
-          %Feature{name: "Hiring Portal"},
-          %Feature{name: "Live Challenges"}
+          %Feature{name: "Complete contract work on GitHub"},
+          %Feature{name: "Fix bugs in your OSS dependencies"},
+          %Feature{name: "Interview engineers with real work"}
+        ]
+      },
+      %Plan{
+        id: "hiring",
+        name: "Hiring",
+        description: "Publish jobs and hire top talent",
+        price: nil,
+        cta_text: "Get Started",
+        cta_url: "/onboarding/org",
+        popular: false,
+        features: [
+          %Feature{name: "Your job is published on the Algora job board (15k+ monthly visitors)"},
+          %Feature{name: "Your job is shared with Algora's network of top talent"},
+          %Feature{name: "Algora matches you with top candidates versed in your tech stack"}
         ]
       }
     ]

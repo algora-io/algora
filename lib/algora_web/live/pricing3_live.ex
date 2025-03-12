@@ -65,7 +65,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 </div>
               </h2>
               <p class="text-base text-foreground-light">
-                Add USD rewards on GitHub issues and pay when you merge. Complete contract work payments (hourly or fixed rate)
+                Add USD rewards on GitHub issues and pay when you merge. Complete contract work payments (hourly or fixed rate). Outcome based, pay as you go.
               </p>
             </div>
           </div>
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 </div>
               </h2>
               <p class="text-base text-foreground-light">
-                Find new contributors, increase visibility and hire top 1% open source engineers
+                Meet new contributors, maximize visibility and hire top 1% open source engineers
               </p>
             </div>
           </div>
@@ -739,7 +739,9 @@ defmodule AlgoraWeb.Pricing3Live do
         features: [
           %Feature{name: "Get work done in your repos"},
           %Feature{name: "Improve your dependencies"},
-          %Feature{name: "Crowdfund OSS development"}
+          %Feature{name: "Engage your OSS community"},
+          %Feature{name: "Collaborate with freelancers"},
+          %Feature{name: "Interview engineers with real work"}
         ]
       }
     ]
@@ -756,9 +758,9 @@ defmodule AlgoraWeb.Pricing3Live do
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Bounties discoverable on Algora"},
-          %Feature{name: "Experts versed in your stack"},
-          %Feature{name: "Private bounties & contract work"}
+          %Feature{name: "Featured on Algora (15k+ monthly visitors)"},
+          %Feature{name: "Expert OSS contributors (12k+ users)"},
+          %Feature{name: "Scale engineering on-demand"}
         ]
       },
       %Plan{
@@ -770,8 +772,9 @@ defmodule AlgoraWeb.Pricing3Live do
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Jobs published on Algora"},
-          %Feature{name: "Interview your matches"},
+          %Feature{name: "Instant top matches for your roles"},
+          %Feature{name: "Jobs published to platform & newsletter"},
+          %Feature{name: "Interview candidates using bounties"},
           %Feature{name: ~s(<span class="font-medium">No placement fees</span> (up to 5 jobs\))}
         ]
       },

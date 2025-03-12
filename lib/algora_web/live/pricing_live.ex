@@ -61,7 +61,8 @@ defmodule AlgoraWeb.PricingLive do
             <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
               <div class="flex-1">
                 <h3 class="text-2xl font-bold text-foreground">For Developers</h3>
-                <p class="mt-2 text-muted-foreground">
+
+                <p class="mt-1 text-sm text-muted-foreground">
                   Receive payments within days around the world
                 </p>
                 <div class="mt-4">
@@ -70,7 +71,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
               </div>
               <div class="flex-1 space-y-4">
-                <ul class="text-sm space-y-2">
+                <ul class="text-xs space-y-2">
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
                     <span>No platform fees on bounties</span>
@@ -120,8 +121,8 @@ defmodule AlgoraWeb.PricingLive do
             <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
               <div class="flex-1">
                 <h3 class="text-2xl font-bold text-foreground">For Enterprise</h3>
-                <p class="mt-2 text-muted-foreground">
-                  Custom solutions for large organizations
+                <p class="mt-1 text-sm text-muted-foreground">
+                  A custom plan tailored to your requirements
                 </p>
                 <div class="mt-4">
                   <p class="text-4xl font-display text-foreground">Custom</p>
@@ -129,7 +130,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
               </div>
               <div class="flex-1 space-y-4">
-                <ul class="text-sm space-y-2">
+                <ul class="text-xs space-y-2">
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
                     <span>Whitelabel portal (cloud / self-hosted)</span>
@@ -157,12 +158,12 @@ defmodule AlgoraWeb.PricingLive do
                 </ul>
               </div>
               <div class="flex-none">
-                <div class="flex flex-col gap-4">
-                  <.button href="https://cal.com/ioannisflo" variant="subtle">
-                    Contact us <.icon name="tabler-arrow-right" class="h-4 w-4 ml-2 -mr-1" />
-                  </.button>
+                <div class="flex gap-4">
                   <.button href="https://github.com/algora-io/console" variant="secondary">
-                    View source code <Logos.github class="h-4 w-4 ml-2 -mr-1" />
+                    <Logos.github class="h-4 w-4 mr-2 -ml-1" /> View source code
+                  </.button>
+                  <.button href="https://cal.com/ioannisflo" variant="subtle">
+                    Contact us
                   </.button>
                 </div>
               </div>
@@ -538,7 +539,7 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </div>
       <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
-        <ul class="text-base text-foreground-lighter flex-1">
+        <ul class="text-sm text-foreground-lighter flex-1">
           <%= for feature <- @plan.features do %>
             <li class="flex flex-col py-2 first:mt-0">
               <div class="flex items-center">

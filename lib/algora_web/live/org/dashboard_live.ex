@@ -531,9 +531,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
             <p class="text-sm text-muted-foreground">
               <span class="font-semibold">Tip:</span>
-              You can also create bounties directly on
-              GitHub by commenting <code class="px-1 py-0.5 text-success">/bounty $100</code>
-              on any issue.
+              You can also comment <code class="px-1 py-0.5 text-success">/bounty $100</code>
+              to create a bounty on GitHub
+              <button
+                :if={@installations == []}
+                type="button"
+                phx-click="install_app"
+                class="hover:underline"
+              >
+                (requires the Algora app)
+              </button>
             </p>
             <div class="flex justify-end gap-4">
               <.button>Submit</.button>
@@ -561,9 +568,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
             <p class="text-sm text-muted-foreground">
               <span class="font-semibold">Tip:</span>
-              You can also create tips directly on
-              GitHub by commenting <code class="px-1 py-0.5 text-success">/tip $100 @username</code>
-              on any pull request.
+              You can also comment <code class="px-1 py-0.5 text-success">/tip $100 @username</code>
+              to create a tip on GitHub
+              <button
+                :if={@installations == []}
+                type="button"
+                phx-click="install_app"
+                class="hover:underline"
+              >
+                (requires the Algora app)
+              </button>
             </p>
             <div class="flex justify-end gap-4">
               <.button>Submit</.button>

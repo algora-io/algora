@@ -3,6 +3,7 @@ defmodule Algora.Workspace do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Repo
@@ -18,6 +19,67 @@ defmodule Algora.Workspace do
   @type ticket_type :: :issue | :pull_request
   @type command_type :: :bounty | :attempt | :claim
   @type command_source :: :ticket | :comment
+
+  @doc """
+  Resolves a GitHub installation token for interacting with repositories.
+
+  This function attempts to obtain a valid GitHub access token through three methods in order:
+  1. If an installation_id is provided directly, it gets an installation token via the GitHub Apps API
+  2. If no installation_id is provided, it attempts to look up an installation_id by the repo owner
+  3. If no installation is found, it falls back to using the personal access token of the fallback user
+
+  ## Parameters
+    * `installation_id` - Optional GitHub App installation ID
+    * `repo_owner` - The GitHub username/org that owns the repository
+    * `fallback_user` - The user whose personal access token will be used if no installation token is available
+
+  ## Returns
+    * `{:ok, %{installation_id: integer() | nil, token: String.t()}}` - Successfully obtained token
+    * `{:error, atom()}` - Failed to obtain token
+
+  ## Examples
+      # Using provided installation ID
+      iex> resolve_installation_and_token(12345, "octocat", user)
+      {:ok, %{installation_id: 12345, token: "ghs_xxx..."}}
+
+      # Looking up installation ID by owner
+      iex> resolve_installation_and_token(nil, "octocat", user)
+      {:ok, %{installation_id: 67890, token: "ghs_xxx..."}}
+
+      # Falling back to user's personal access token
+      iex> resolve_installation_and_token(nil, "octocat", user)
+      {:ok, %{installation_id: nil, token: "ghp_xxx..."}}
+  """
+  @spec resolve_installation_and_token(integer() | nil, String.t(), User.t()) ::
+          {:ok, %{installation_id: integer() | nil, token: String.t()}} | {:error, atom()}
+  def resolve_installation_and_token(installation_id, repo_owner, fallback_user) do
+    resolved_installation_id = installation_id || get_installation_id_by_owner(repo_owner)
+
+    if resolved_installation_id do
+      case Github.get_installation_token(resolved_installation_id) do
+        {:ok, token} -> {:ok, %{installation_id: resolved_installation_id, token: token}}
+        error -> error
+      end
+    else
+      case Accounts.get_access_token(fallback_user) do
+        {:ok, token} -> {:ok, %{installation_id: nil, token: token}}
+        error -> error
+      end
+    end
+  end
+
+  @spec get_installation_id_by_owner(String.t()) :: integer() | nil
+  def get_installation_id_by_owner(repo_owner) do
+    installation =
+      Repo.one(
+        from i in Installation,
+          join: u in User,
+          on: u.id == i.provider_user_id and u.provider == i.provider,
+          where: u.provider == "github" and u.provider_login == ^repo_owner
+      )
+
+    if installation, do: installation.provider_id
+  end
 
   def ensure_ticket(token, owner, repo, number) do
     case get_ticket(owner, repo, number) do

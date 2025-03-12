@@ -109,16 +109,11 @@ defmodule Algora.Bounties do
         },
         opts \\ []
       ) do
-    installation_id = opts[:installation_id]
     command_id = opts[:command_id]
 
-    token_res =
-      if installation_id,
-        do: Github.get_installation_token(installation_id),
-        else: Accounts.get_access_token(creator)
-
     Repo.transact(fn ->
-      with {:ok, token} <- token_res,
+      with {:ok, %{installation_id: installation_id, token: token}} <-
+             Workspace.resolve_installation_and_token(opts[:installation_id], repo_owner, creator),
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
            existing = Repo.get_by(Bounty, owner_id: owner.id, ticket_id: ticket.id),
            {:ok, strategy} <- strategy_to_action(existing, opts[:strategy]),
@@ -137,7 +132,9 @@ defmodule Algora.Bounties do
         broadcast()
         {:ok, bounty}
       else
-        {:error, _reason} = error -> error
+        {:error, _reason} = error ->
+          Logger.error("Failed to create bounty: #{inspect(error)}")
+          error
       end
     end)
   end
@@ -410,15 +407,9 @@ defmodule Algora.Bounties do
         },
         opts \\ []
       ) do
-    installation_id = opts[:installation_id]
-
-    token_res =
-      if installation_id,
-        do: Github.get_installation_token(installation_id),
-        else: Accounts.get_access_token(user)
-
     Repo.transact(fn ->
-      with {:ok, token} <- token_res,
+      with {:ok, %{installation_id: installation_id, token: token}} <-
+             Workspace.resolve_installation_and_token(opts[:installation_id], source_repo_owner, user),
            {:ok, target} <- Workspace.ensure_ticket(token, target_repo_owner, target_repo_name, target_number),
            {:ok, source} <- Workspace.ensure_ticket(token, source_repo_owner, source_repo_name, source_number) do
         # Get all active claims for this PR
@@ -573,16 +564,7 @@ defmodule Algora.Bounties do
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
     Repo.transact(fn ->
-      with {:ok, tip} <-
-             do_create_tip(
-               %{
-                 creator: creator,
-                 owner: owner,
-                 recipient: recipient,
-                 amount: amount
-               },
-               opts
-             ) do
+      with {:ok, tip} <- do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts) do
         create_payment_session(
           %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
           ticket_ref: opts[:ticket_ref],
@@ -599,18 +581,10 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, Tip.t()} | {:error, atom()}
   def do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
-    installation_id = opts[:installation_id]
-
-    token_res =
-      if installation_id,
-        do: Github.get_installation_token(installation_id),
-        else: Accounts.get_access_token(creator)
-
-    ticket_ref = opts[:ticket_ref]
-
     ticket_res =
-      if ticket_ref do
-        with {:ok, token} <- token_res do
+      if ticket_ref = opts[:ticket_ref] do
+        with {:ok, %{token: token}} <-
+               Workspace.resolve_installation_and_token(opts[:installation_id], ticket_ref[:owner], creator) do
           Workspace.ensure_ticket(token, ticket_ref[:owner], ticket_ref[:repo], ticket_ref[:number])
         end
       else

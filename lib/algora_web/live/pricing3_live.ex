@@ -65,7 +65,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 </div>
               </h2>
               <p class="text-base text-foreground-light">
-                Add USD rewards on GitHub issues and pay when you merge.
+                Add USD rewards on GitHub issues and pay when you merge. Complete contract work payments (hourly or fixed rate)
               </p>
             </div>
           </div>
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 </div>
               </h2>
               <p class="text-base text-foreground-light">
-                Find top talent and get hired for contract work
+                Find new contributors, increase visibility and hire top 1% open source engineers
               </p>
             </div>
           </div>
@@ -462,11 +462,12 @@ defmodule AlgoraWeb.Pricing3Live do
   defp pricing_card1(assigns) do
     ~H"""
     <div class={[
-      "bg-card/75 flex rounded-xl border",
+      "bg-card/75 flex justify-between rounded-xl border",
       "last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
-      @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
+      @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
+      "divide-x divide-default"
     ]}>
-      <div class="px-8 pt-6 xl:px-4 2xl:px-8">
+      <div class="flex-1 px-8 pt-6 xl:px-4 2xl:px-8">
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 pb-2">
             <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
@@ -495,10 +496,10 @@ defmodule AlgoraWeb.Pricing3Live do
                 <div class="flex justify-between">
                   <div class="flex items-end">
                     <p class="font-display text-4xl">
-                      100%
+                      0%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                      of payouts
+                      service fee
                     </p>
                   </div>
                 </div>
@@ -509,7 +510,7 @@ defmodule AlgoraWeb.Pricing3Live do
                       9%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                      on payments
+                      service fee
                     </p>
                   </div>
                 </div>
@@ -528,7 +529,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 <div class="flex justify-between">
                   <div class="flex items-end">
                     <p class="font-display text-4xl">
-                      $1,590
+                      $1,599
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
                       /mo
@@ -547,7 +548,7 @@ defmodule AlgoraWeb.Pricing3Live do
           </div>
         </div>
       </div>
-      <div class="border-l my-auto border-default px-8 py-6 xl:px-4 2xl:px-8">
+      <div class="flex-1 border-l my-auto border-default px-8 xl:px-4 2xl:px-8">
         <%!-- <div class="text-sm text-foreground">
           <%= case @plan.id do %>
             <% 0 -> %>
@@ -613,10 +614,10 @@ defmodule AlgoraWeb.Pricing3Live do
                 <div class="flex justify-between">
                   <div class="flex items-end">
                     <p class="font-display text-4xl">
-                      100%
+                      0%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                      of payouts
+                      service fee
                     </p>
                   </div>
                 </div>
@@ -627,7 +628,7 @@ defmodule AlgoraWeb.Pricing3Live do
                       9%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                      on payments
+                      service fee
                     </p>
                   </div>
                 </div>
@@ -638,7 +639,7 @@ defmodule AlgoraWeb.Pricing3Live do
                       $599
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                      /mo
+                      /month
                     </p>
                   </div>
                 </div>
@@ -646,10 +647,10 @@ defmodule AlgoraWeb.Pricing3Live do
                 <div class="flex justify-between">
                   <div class="flex items-end">
                     <p class="font-display text-4xl">
-                      $1,590
+                      $4,699
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                      /mo
+                      /quarter
                     </p>
                   </div>
                 </div>
@@ -708,8 +709,8 @@ defmodule AlgoraWeb.Pricing3Live do
     [
       %Plan{
         id: :a0,
-        name: "Receive bounties & contracts",
-        description: "Receive payments within days around the world",
+        name: "Receive payments",
+        description: "Within days, from around the world",
         price: "100%",
         cta_text: "Start contributing",
         cta_url: "/onboarding/dev",
@@ -717,12 +718,12 @@ defmodule AlgoraWeb.Pricing3Live do
         features: [
           %Feature{name: "No platform fees on bounties"},
           %Feature{name: "Available in #{ConnectCountries.count()} countries/regions"},
-          %Feature{name: "Fast payouts in 3-8 days"}
+          %Feature{name: "Fast payouts in 2-7 days"}
         ]
       },
       %Plan{
         id: :a1,
-        name: "Pay bounties & contracts",
+        name: "Pay developers",
         description: "Pay bounties on any GitHub repo",
         price: nil,
         cta_text: "Get started",
@@ -741,7 +742,7 @@ defmodule AlgoraWeb.Pricing3Live do
     [
       %Plan{
         id: :b0,
-        name: "Match with top contributors",
+        name: "Match with experts",
         description: "Publish bounties & match with top contributors",
         price: nil,
         cta_text: "Get started",
@@ -755,7 +756,7 @@ defmodule AlgoraWeb.Pricing3Live do
       },
       %Plan{
         id: :b1,
-        name: "Hire top talent",
+        name: "Hire full-time",
         description: "Publish jobs on Algora & hire top talent",
         price: nil,
         cta_text: "Get started",
@@ -769,18 +770,18 @@ defmodule AlgoraWeb.Pricing3Live do
       },
       %Plan{
         id: :b2,
-        name: "Enterprise",
-        description: "A custom plan tailored to your requirements",
+        name: "Looking for more?",
+        description: "Tailor Algora to your needs",
         price: "Custom",
         cta_text: "Contact us",
         cta_url: "https://cal.com/ioannisflo",
         popular: false,
         features: [
           %Feature{name: "Whitelabel portal (cloud / self-hosted)"},
-          %Feature{name: "SOC2 compliance"},
           %Feature{name: "Priority placement (5+ full-time roles)"},
-          %Feature{name: "HIPAA available as add-on"},
           %Feature{name: "24x7x365 premium support"},
+          %Feature{name: "SOC2 compliance"},
+          %Feature{name: "HIPAA available as add-on"},
           %Feature{name: "Custom Security Questionnaires"}
         ]
       }

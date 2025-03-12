@@ -637,7 +637,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
            {:ok, _bounty} <-
              Bounties.create_bounty(%{
                creator: socket.assigns.current_user,
-               owner: socket.assigns.current_user,
+               owner: socket.assigns.current_org,
                amount: amount,
                ticket_ref: ticket_ref
              }) do
@@ -676,7 +676,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
            {:ok, checkout_url} <-
              Bounties.create_tip(%{
                creator: socket.assigns.current_user,
-               owner: socket.assigns.current_user,
+               owner: socket.assigns.current_org,
                recipient: recipient,
                amount: get_field(changeset, :amount)
              }) do
@@ -826,28 +826,28 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp create_bounty_status(socket) do
-    case Bounties.list_bounties(owner_id: socket.assigns.current_user.id, limit: 1) do
+    case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
   defp reward_bounty_status(socket) do
-    case Bounties.list_bounties(owner_id: socket.assigns.current_user.id, status: :paid, limit: 1) do
+    case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, status: :paid, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
   defp begin_collaboration_status(socket) do
-    case Contracts.list_contracts(client_id: socket.assigns.current_user.id, active_or_paid?: true, limit: 1) do
+    case Contracts.list_contracts(client_id: socket.assigns.current_org.id, active_or_paid?: true, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
   defp complete_first_contract_status(socket) do
-    case Contracts.list_contracts(client_id: socket.assigns.current_user.id, status: :paid, limit: 1) do
+    case Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: :paid, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end

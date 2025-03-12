@@ -56,11 +56,11 @@ defmodule AlgoraWeb.PricingLive do
           </div>
         </div>
 
-        <%!-- <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <div class="rounded-2xl bg-card/75 border p-8">
             <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
               <div class="flex-1">
-                <h3 class="text-2xl font-bold text-foreground">Receive payments</h3>
+                <h3 class="text-2xl font-bold text-foreground">For Developers</h3>
 
                 <p class="mt-1 text-sm text-muted-foreground">
                   Receive payments within days around the world
@@ -101,7 +101,7 @@ defmodule AlgoraWeb.PricingLive do
               </div>
             </div>
           </div>
-        </div> --%>
+        </div>
 
         <div class={
           classes([
@@ -116,7 +116,7 @@ defmodule AlgoraWeb.PricingLive do
           <% end %>
         </div>
 
-        <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <div class="rounded-2xl rounded-t-none bg-card/75 border p-8">
             <div class="flex flex-col lg:flex-row justify-between items-center gap-12">
               <div>
@@ -499,49 +499,19 @@ defmodule AlgoraWeb.PricingLive do
         <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
           {@plan.description}
         </p>
-
-        <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
-          <%!-- <div class="text-sm text-foreground">
-          <%= case @plan.id do %>
-            <% 0 -> %>
-            <% 1 -> %>
-              <span>Everything in {Enum.at(@plans, 0).name}, plus:</span>
-            <% 2 -> %>
-              <span>Everything in {Enum.at(@plans, 1).name}, plus:</span>
-          <% end %>
-        </div> --%>
-          <ul class="text-sm text-foreground-lighter flex-1">
-            <%= for feature <- @plan.features do %>
-              <li class="flex flex-col py-2 first:mt-0">
-                <div class="flex items-center">
-                  <div class="flex w-7">
-                    <.icon name="tabler-check" class="size-5 text-success" />
-                  </div>
-                  <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
-                </div>
-                <%= if feature.detail do %>
-                  <p class="text-foreground-lighter ml-6">{feature.detail}</p>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-          <%= if @plan.footnote do %>
-            <div class="mt-auto flex flex-col gap-6 prose">
-              <div class="mt-12 space-y-2">
-                <p class="text-[13px] text-foreground-lighter mb-0 whitespace-pre-wrap leading-5">
-                  {@plan.footnote}
-                </p>
-              </div>
-            </div>
-          <% end %>
-        </div>
-        <div class="border-default flex items-baseline border-b py-3 text-5xl font-normal text-foreground lg:py-3 lg:text-4xl xl:text-4xl">
-          <div class="flex justify-between items-center gap-12 w-full">
+        <.button
+          navigate={@plan.cta_url}
+          class="font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
+        >
+          {@plan.cta_text}
+        </.button>
+        <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
+          <div class="flex flex-col gap-1 w-full">
             <%= case @plan.id do %>
               <% 0 -> %>
-                <div class="flex flex-col gap-4 w-full">
+                <div class="flex justify-between">
                   <div class="flex items-end">
-                    <p class="font-display text-xl">
+                    <p class="font-display text-4xl">
                       $0
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -549,7 +519,7 @@ defmodule AlgoraWeb.PricingLive do
                     </p>
                   </div>
                   <div class="flex items-end">
-                    <p class="font-display text-xl">
+                    <p class="font-display text-2xl">
                       +9%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -558,9 +528,9 @@ defmodule AlgoraWeb.PricingLive do
                   </div>
                 </div>
               <% 1 -> %>
-                <div class="flex flex-col gap-4 w-full">
+                <div class="flex justify-between">
                   <div class="flex items-end">
-                    <p class="font-display text-xl">
+                    <p class="font-display text-4xl">
                       $599
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -568,7 +538,7 @@ defmodule AlgoraWeb.PricingLive do
                     </p>
                   </div>
                   <div class="flex items-end">
-                    <p class="font-display text-xl">
+                    <p class="font-display text-2xl">
                       +9%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -577,9 +547,9 @@ defmodule AlgoraWeb.PricingLive do
                   </div>
                 </div>
               <% 2 -> %>
-                <div class="flex flex-col gap-4 w-full">
+                <div class="flex justify-between">
                   <div class="flex items-end">
-                    <p class="font-display text-xl">
+                    <p class="font-display text-4xl">
                       $1,590
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -587,7 +557,7 @@ defmodule AlgoraWeb.PricingLive do
                     </p>
                   </div>
                   <div class="flex items-end">
-                    <p class="font-display text-xl">
+                    <p class="font-display text-2xl">
                       +9%
                     </p>
                     <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -596,14 +566,43 @@ defmodule AlgoraWeb.PricingLive do
                   </div>
                 </div>
             <% end %>
-            <.button
-              navigate={@plan.cta_url}
-              class="w-full font-regular h-[42px] relative cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
-            >
-              {@plan.cta_text}
-            </.button>
           </div>
         </div>
+      </div>
+      <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
+        <div class="text-sm text-foreground">
+          <%= case @plan.id do %>
+            <% 0 -> %>
+            <% 1 -> %>
+              <span>Everything in {Enum.at(@plans, 0).name}, plus:</span>
+            <% 2 -> %>
+              <span>Everything in {Enum.at(@plans, 1).name}, plus:</span>
+          <% end %>
+        </div>
+        <ul class="text-sm text-foreground-lighter flex-1">
+          <%= for feature <- @plan.features do %>
+            <li class="flex flex-col py-2 first:mt-0">
+              <div class="flex items-center">
+                <div class="flex w-7">
+                  <.icon name="tabler-check" class="size-5 text-success" />
+                </div>
+                <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
+              </div>
+              <%= if feature.detail do %>
+                <p class="text-foreground-lighter ml-6">{feature.detail}</p>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+        <%= if @plan.footnote do %>
+          <div class="mt-auto flex flex-col gap-6 prose">
+            <div class="mt-12 space-y-2">
+              <p class="text-[13px] text-foreground-lighter mb-0 whitespace-pre-wrap leading-5">
+                {@plan.footnote}
+              </p>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
     """
@@ -613,7 +612,7 @@ defmodule AlgoraWeb.PricingLive do
     [
       %Plan{
         id: 0,
-        name: "Basic",
+        name: "Community",
         description: "Pay bounties on any GitHub repo",
         price: nil,
         cta_text: "Get started",
@@ -627,7 +626,7 @@ defmodule AlgoraWeb.PricingLive do
       },
       %Plan{
         id: 1,
-        name: "Plus",
+        name: "Growth",
         description: "Publish bounties & match with top contributors",
         price: nil,
         cta_text: "Get started",
@@ -641,7 +640,7 @@ defmodule AlgoraWeb.PricingLive do
       },
       %Plan{
         id: 2,
-        name: "Pro",
+        name: "Scale",
         description: "Publish jobs on Algora & hire top talent",
         price: nil,
         cta_text: "Get started",

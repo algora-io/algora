@@ -483,12 +483,9 @@ defmodule AlgoraWeb.Pricing3Live do
         <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
           {@plan.description}
         </p>
-        <%!-- <.button
-          navigate={@plan.cta_url}
-          class="font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
-        >
+        <.button navigate={@plan.cta_url}>
           {@plan.cta_text}
-        </.button> --%>
+        </.button>
         <div class="border-default flex items-baseline py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
           <div class="flex flex-col gap-1 w-full">
             <%= case @plan.id do %>
@@ -601,12 +598,22 @@ defmodule AlgoraWeb.Pricing3Live do
         <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
           {@plan.description}
         </p>
-        <%!-- <.button
-          navigate={@plan.cta_url}
-          class="font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
-        >
-          {@plan.cta_text}
-        </.button> --%>
+        <div class="flex gap-4">
+          <.button
+            navigate={@plan.cta_url}
+            class={
+              if @plan.id != :b2,
+                do:
+                  "bg-blue-500/50 hover:bg-blue-500/30 border-blue-500/80 hover:border-blue-500 focus-visible:outline-blue-500-600 data-[state=open]:bg-blue-500-500/80 data-[state=open]:outline-blue-500-600"
+            }
+            variant={if @plan.id == :b2, do: "secondary", else: "default"}
+          >
+            {@plan.cta_text}
+          </.button>
+          <.button :if={@plan.id == :b2} navigate={@plan.cta_url} variant="secondary">
+            <Logos.github class="size-4 mr-2 -ml-1" /> View source code
+          </.button>
+        </div>
         <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
           <div class="flex flex-col gap-1 w-full">
             <%= case @plan.id do %>
@@ -726,7 +733,7 @@ defmodule AlgoraWeb.Pricing3Live do
         name: "Pay developers",
         description: "Pay bounties on any GitHub repo",
         price: nil,
-        cta_text: "Get started",
+        cta_text: "Create bounties",
         cta_url: "/onboarding/dev",
         popular: false,
         features: [
@@ -745,7 +752,7 @@ defmodule AlgoraWeb.Pricing3Live do
         name: "Match with experts",
         description: "Publish bounties & match with top contributors",
         price: nil,
-        cta_text: "Get started",
+        cta_text: "Start collaborating",
         cta_url: "/onboarding/org",
         popular: false,
         features: [
@@ -759,7 +766,7 @@ defmodule AlgoraWeb.Pricing3Live do
         name: "Hire full-time",
         description: "Publish jobs on Algora & hire top talent",
         price: nil,
-        cta_text: "Get started",
+        cta_text: "Hire engineers",
         cta_url: "/onboarding/org",
         popular: false,
         features: [

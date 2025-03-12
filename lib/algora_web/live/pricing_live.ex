@@ -5,6 +5,7 @@ defmodule AlgoraWeb.PricingLive do
   alias Algora.PSP.ConnectCountries
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
+  alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Components.Wordmarks
 
   defmodule Plan do
@@ -55,7 +56,7 @@ defmodule AlgoraWeb.PricingLive do
           </div>
         </div>
 
-        <div class="mx-auto max-w-7xl px-6 lg:px-8 mb-8">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <div class="rounded-2xl bg-card/75 border p-8">
             <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
               <div class="flex-1">
@@ -69,7 +70,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
               </div>
               <div class="flex-1 space-y-4">
-                <ul class="space-y-2">
+                <ul class="text-sm space-y-2">
                   <li class="flex items-center gap-2">
                     <.icon name="tabler-check" class="h-5 w-5 text-success" />
                     <span>No platform fees on bounties</span>
@@ -93,8 +94,8 @@ defmodule AlgoraWeb.PricingLive do
                 </ul>
               </div>
               <div class="flex-none">
-                <.button navigate="/onboarding/dev" size="lg">
-                  Start Contributing
+                <.button navigate="/onboarding/dev" variant="secondary">
+                  Start contributing
                 </.button>
               </div>
             </div>
@@ -112,6 +113,61 @@ defmodule AlgoraWeb.PricingLive do
           <%= for plan <- @plans do %>
             <.pricing_card plan={plan} />
           <% end %>
+        </div>
+
+        <div class="pt-12 mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="rounded-2xl bg-card/75 border p-8">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+              <div class="flex-1">
+                <h3 class="text-2xl font-bold text-foreground">For Enterprise</h3>
+                <p class="mt-2 text-muted-foreground">
+                  Custom solutions for large organizations
+                </p>
+                <div class="mt-4">
+                  <p class="text-4xl font-display text-foreground">Custom</p>
+                  <p class="text-sm text-muted-foreground">pricing based on needs</p>
+                </div>
+              </div>
+              <div class="flex-1 space-y-4">
+                <ul class="text-sm space-y-2">
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Whitelabel portal (cloud / self-hosted)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Priority placement (5+ full-time roles)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>SOC2 compliance</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>HIPAA available as add-on</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>Custom Security Questionnaires</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                    <span>24x7x365 premium support</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="flex-none">
+                <div class="flex flex-col gap-4">
+                  <.button href="https://cal.com/ioannisflo" variant="subtle">
+                    Contact us <.icon name="tabler-arrow-right" class="h-4 w-4 ml-2 -mr-1" />
+                  </.button>
+                  <.button href="https://github.com/algora-io/console" variant="secondary">
+                    View source code <Logos.github class="h-4 w-4 ml-2 -mr-1" />
+                  </.button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -471,7 +527,7 @@ defmodule AlgoraWeb.PricingLive do
               <% "hiring" -> %>
                 <div class="flex items-end">
                   <p class="font-display text-4xl">
-                    $4,700
+                    $4,690
                   </p>
                   <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
                     /quarter
@@ -482,12 +538,12 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </div>
       <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
-        <ul class="text-[13px] text-foreground-lighter flex-1">
+        <ul class="text-base text-foreground-lighter flex-1">
           <%= for feature <- @plan.features do %>
             <li class="flex flex-col py-2 first:mt-0">
               <div class="flex items-center">
-                <div class="flex w-6">
-                  <.icon name="tabler-check" class="h-4 w-4 text-success" />
+                <div class="flex w-7">
+                  <.icon name="tabler-check" class="size-5 text-success" />
                 </div>
                 <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
               </div>
@@ -515,44 +571,44 @@ defmodule AlgoraWeb.PricingLive do
     [
       %Plan{
         id: "individual",
-        name: "Anyone",
-        description: "Pay bounties on GitHub issues in any repository",
+        name: "Community",
+        description: "Pay bounties on any GitHub repo",
         price: nil,
         cta_text: "Get started",
         cta_url: "/onboarding/dev",
         popular: false,
         features: [
-          %Feature{name: "Award outcome work done on GitHub"},
-          %Feature{name: "Fix bugs in your open source dependencies"},
-          %Feature{name: "Interview engineers with real work"}
+          %Feature{name: "Get work done in your repos"},
+          %Feature{name: "Improve your dependencies"},
+          %Feature{name: "Crowdfund OSS development"}
         ]
       },
       %Plan{
         id: "startups",
-        name: "Startups",
-        description: "Publish bounties and match with top contributors",
+        name: "Growth",
+        description: "Publish bounties & match with top contributors",
         price: nil,
-        cta_text: "Get Started",
+        cta_text: "Get started",
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Complete contract work on GitHub"},
-          %Feature{name: "Fix bugs in your OSS dependencies"},
-          %Feature{name: "Interview engineers with real work"}
+          %Feature{name: "Bounties discoverable on Algora"},
+          %Feature{name: "Experts versed in your stack"},
+          %Feature{name: "Private bounties & contract work"}
         ]
       },
       %Plan{
         id: "hiring",
         name: "Hiring",
-        description: "Publish jobs and hire top talent",
+        description: "Publish jobs on Algora & hire top talent",
         price: nil,
-        cta_text: "Get Started",
+        cta_text: "Get started",
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Your job is published on the Algora job board (15k+ monthly visitors)"},
-          %Feature{name: "Your job is shared with Algora's network of top talent"},
-          %Feature{name: "Algora matches you with top candidates versed in your tech stack"}
+          %Feature{name: "Jobs published on Algora"},
+          %Feature{name: "Interview your matches"},
+          %Feature{name: ~s(<span class="font-medium">No placement fees</span> (up to 5 jobs\))}
         ]
       }
     ]

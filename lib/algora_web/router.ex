@@ -100,6 +100,7 @@ defmodule AlgoraWeb.Router do
       live "/onboarding/dev", Onboarding.DevLive
       live "/pricing", PricingLive
       live "/pricing2", Pricing2Live
+      live "/pricing3", Pricing3Live
     end
 
     live "/open-source", OpenSourceLive, :index

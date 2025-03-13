@@ -121,10 +121,6 @@ defmodule AlgoraWeb.Router do
       pipe_through :browser
 
       scope "/" do
-        if Application.compile_env(:algora, :require_admin_for_mailbox) do
-          pipe_through :require_authenticated_admin
-        end
-
         forward "/mailbox", Plug.Swoosh.MailboxPreview
       end
     end

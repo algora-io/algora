@@ -127,7 +127,7 @@ defmodule Algora.Workspace do
       end
 
     # TODO: remove after migration
-    if System.get_env("MIGRATION", "false") != "true" do
+    if not Algora.Settings.migration_in_progress?() do
       case res do
         {:ok, repository} -> maybe_schedule_og_image_update(repository)
         error -> error

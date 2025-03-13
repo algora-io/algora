@@ -194,6 +194,16 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def get_installation(installation_id) do
+    path = "/app/installations/#{installation_id}"
+
+    with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
+         {:ok, %{"token" => token}} <- fetch(jwt, path, "GET") do
+      {:ok, token}
+    end
+  end
+
+  @impl true
   def list_installation_repos(access_token) do
     with {:ok, %{"repositories" => repos}} <- fetch(access_token, "/installation/repositories", "GET") do
       {:ok, repos}

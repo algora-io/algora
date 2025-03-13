@@ -554,7 +554,7 @@ defmodule Algora.Admin.Migration do
       %{
         "id" => bounty["id"] <> user_id,
         "amount" => amount,
-        "status" => nil,
+        "status" => :paid,
         "ticket_id" => bounty["task_id"],
         "owner_id" => owner["id"],
         "creator_id" => bounty["poster_id"],

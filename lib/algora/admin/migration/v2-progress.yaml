@@ -126,11 +126,11 @@
     - provider_meta: -1
     - avatar_url: -1
     - repository_selection: -1
-    - owner_id: 0
+    - owner_id: -1
     - connected_user_id: 1
     - inserted_at: 1
     - updated_at: 1
-    - provider_user_id: 0
+    - provider_user_id: 1
 - members:
     - id: 1
     - role: 1

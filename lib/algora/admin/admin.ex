@@ -11,7 +11,6 @@ defmodule Algora.Admin do
   alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Installation
-  alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
   require Logger

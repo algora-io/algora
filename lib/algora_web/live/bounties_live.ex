@@ -4,7 +4,6 @@ defmodule AlgoraWeb.BountiesLive do
 
   import AlgoraWeb.Components.Bounties
 
-  alias Algora.Accounts
   alias Algora.Bounties
 
   require Logger

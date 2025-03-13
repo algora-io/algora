@@ -7,7 +7,7 @@ defmodule Algora.Bounties.Tip do
 
   typed_schema "tips" do
     field :amount, Algora.Types.Money
-    field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
+    field :status, Ecto.Enum, values: [:open, :cancelled, :paid], default: :open, null: false
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User

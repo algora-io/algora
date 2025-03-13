@@ -1,4 +1,4 @@
-defmodule DatabaseMigration do
+defmodule Algora.Admin.Migration do
   @moduledoc """
   Database Migration Script
 
@@ -1390,18 +1390,13 @@ defmodule DatabaseMigration do
     :ok
   end
 
-  def run! do
+  def run!(timestamp \\ nil) do
     System.put_env("MIGRATION", "true")
 
     pwd = ".local/db"
     File.mkdir_p!(pwd)
 
-    timestamp =
-      case System.argv() do
-        [timestamp | _] -> timestamp
-        [] -> Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
-      end
-
+    timestamp = timestamp || Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
     input_path = Path.join(pwd, "v1-data-#{timestamp}.sql")
     output_path = Path.join(pwd, "v2-data-#{timestamp}.sql")
 
@@ -1420,5 +1415,3 @@ defmodule DatabaseMigration do
     IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
   end
 end
-
-DatabaseMigration.run!()

@@ -1,4 +1,4 @@
-defmodule Algora.Admin.Migration do
+defmodule Algora.Admin.Migration.Test do
   @moduledoc false
   import Ecto.Query
 

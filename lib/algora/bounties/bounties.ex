@@ -3,7 +3,6 @@ defmodule Algora.Bounties do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
@@ -12,7 +11,6 @@ defmodule Algora.Bounties do
   alias Algora.Bounties.LineItem
   alias Algora.Bounties.Tip
   alias Algora.FeeTier
-  alias Algora.Github
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction

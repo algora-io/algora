@@ -41,6 +41,7 @@ defmodule AlgoraWeb.Router do
         layout: {AlgoraWeb.Layouts, :user},
         on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav] do
         live "/analytics", Admin.CompanyAnalyticsLive
+        live "/leaderboard", Admin.LeaderboardLive
       end
 
       live_dashboard "/dashboard",
@@ -91,8 +92,6 @@ defmodule AlgoraWeb.Router do
       live "/@/:handle", User.ProfileLive, :index
       live "/claims/:group_id", ClaimLive
     end
-
-    live "/leaderboard", LeaderboardLive
 
     live_session :onboarding,
       on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do

@@ -74,6 +74,9 @@ RUN apt-get update -y && \
   apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
+# TODO: remove after migration
+RUN apt-get update -y && apt-get install -y postgresql-client
+
 COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
 
 # Set the locale

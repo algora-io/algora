@@ -44,6 +44,7 @@ defmodule Algora.Accounts.User do
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
     field :is_admin, :boolean, default: false
+    field :last_active_at, :utc_datetime_usec
 
     field :seeking_bounties, :boolean, default: false
     field :seeking_contracts, :boolean, default: false

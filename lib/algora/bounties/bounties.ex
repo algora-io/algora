@@ -953,13 +953,8 @@ defmodule Algora.Bounties do
         )
 
       {:tech_stack, tech_stack}, query ->
-        from([b, o: o] in query,
-          where:
-            fragment(
-              "EXISTS (SELECT 1 FROM UNNEST(?::citext[]) t1 WHERE t1 = ANY(?::citext[]))",
-              o.tech_stack,
-              ^tech_stack
-            )
+        from([b, r: r] in query,
+          where: fragment("?::citext = ANY(?::citext[])", r.language, ^tech_stack)
         )
 
       {:amount_gt, min_amount}, query ->

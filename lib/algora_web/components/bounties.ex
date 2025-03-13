@@ -24,7 +24,11 @@ defmodule AlgoraWeb.Components.Bounties do
 
               <div class="flex-grow min-w-0 mr-4">
                 <div class="flex items-center text-sm">
-                  <span class="font-semibold mr-1">{bounty.repository.name}</span>
+                  <span class="font-semibold mr-1">{bounty.repository.owner.name}</span>
+                  <.icon name="tabler-chevron-right" class="mr-1 size-3 text-muted-foreground" />
+                  <span class="font-semibold mr-1 text-muted-foreground">
+                    {bounty.repository.name}
+                  </span>
                   <span class="text-muted-foreground mr-2">#{bounty.ticket.number}</span>
                   <span class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
                     {Money.to_string!(bounty.amount)}

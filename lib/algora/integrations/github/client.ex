@@ -65,7 +65,7 @@ defmodule Algora.Github.Client do
     end
   end
 
-  defp get_cache_path(path), do: ".local/github/#{path}.bin"
+  defp get_cache_path(path), do: Path.join([:code.priv_dir(:algora), "github", path <> ".bin"])
 
   defp maybe_retry({:ok, %{"message" => "Moved Permanently"}}), do: :not_found
   defp maybe_retry({:ok, data}), do: {:ok, data}

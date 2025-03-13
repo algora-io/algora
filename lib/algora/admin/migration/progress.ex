@@ -19,7 +19,7 @@ defmodule Algora.Admin.Migration.Progress do
   @doc """
   Example usage:
 
-      Migration.Progress.init!(".local/db/v2-structure.sql")
+      Migration.Progress.init!("priv/db/v2-structure.sql")
   """
   def init!(path) do
     path

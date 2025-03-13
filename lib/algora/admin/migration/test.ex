@@ -6,7 +6,7 @@ defmodule Algora.Admin.Migration.Test do
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
-  @balances_file ".local/db/balance-2025-02-13.json"
+  @balances_file "priv/db/balance-2025-02-13.json"
 
   def get_actual_balances(type) do
     with {:ok, content} <- File.read(@balances_file),

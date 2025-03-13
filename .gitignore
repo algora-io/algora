@@ -54,4 +54,6 @@ npm-debug.log
 /xref*
 /priv/domain_blacklist.txt
 /priv/plts
+/priv/db
+/priv/github
 /priv/dev

@@ -33,3 +33,5 @@ node_modules
 /xref*
 /priv/domain_blacklist.txt
 /priv/plts
+/priv/db
+/priv/github

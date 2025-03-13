@@ -1393,7 +1393,7 @@ defmodule Algora.Admin.Migration do
   def run!(timestamp \\ nil) do
     Algora.Settings.set_migration_in_progress!(true)
 
-    pwd = ".local/db"
+    pwd = Path.join([:code.priv_dir(:algora), "db"])
     File.mkdir_p!(pwd)
 
     timestamp = timestamp || Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")

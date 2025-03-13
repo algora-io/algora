@@ -56,4 +56,5 @@ npm-debug.log
 /priv/plts
 /priv/db
 /priv/github
+/priv/migration
 /priv/dev

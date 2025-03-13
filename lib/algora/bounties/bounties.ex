@@ -937,9 +937,7 @@ defmodule Algora.Bounties do
 
             case criteria[:owner_id] do
               nil ->
-                query
-                |> where([b], b.visibility == :public)
-                |> where([b], fragment("? >= ('USD', 500)::money_with_currency", b.amount))
+                where(query, [b], b.visibility == :public)
 
               _org_id ->
                 where(query, [b], b.visibility in [:public, :community])

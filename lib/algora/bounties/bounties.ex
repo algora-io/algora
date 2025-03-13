@@ -26,7 +26,7 @@ defmodule Algora.Bounties do
   def base_query, do: Bounty
 
   @type criterion ::
-          {:limit, non_neg_integer()}
+          {:limit, non_neg_integer() | :infinity}
           | {:ticket_id, String.t()}
           | {:owner_id, String.t()}
           | {:status, :open | :paid}
@@ -919,6 +919,9 @@ defmodule Algora.Bounties do
   @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
+      {:limit, :infinity}, query ->
+        query
+
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
 
@@ -973,7 +976,7 @@ defmodule Algora.Bounties do
     end)
   end
 
-  def list_bounties_with(base_query, criteria \\ []) do
+  def list_bounties_query(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 
     base_bounties = select(base_query, [b], b.id)
@@ -987,6 +990,11 @@ defmodule Algora.Bounties do
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
     |> apply_criteria(criteria)
+  end
+
+  def list_bounties_with(base_query, criteria \\ []) do
+    base_query
+    |> list_bounties_query(criteria)
     # TODO: sort by b.paid_at if criteria[:status] == :paid
     |> order_by([b], desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{
@@ -1018,6 +1026,16 @@ defmodule Algora.Bounties do
         }
       }
     })
+    |> Repo.all()
+  end
+
+  def list_tech(criteria \\ []) do
+    base_query()
+    |> list_bounties_query(Keyword.put(criteria, :limit, :infinity))
+    |> where([b, r: r], not is_nil(r.language))
+    |> group_by([b, r: r], r.language)
+    |> select([b, r: r], {r.language, count(r.language)})
+    |> order_by([b, r: r], desc: count(r.language))
     |> Repo.all()
   end
 

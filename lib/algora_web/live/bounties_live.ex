@@ -14,9 +14,6 @@ defmodule AlgoraWeb.BountiesLive do
       Bounties.subscribe()
     end
 
-    techs = Accounts.list_techs()
-    selected_techs = []
-
     query_opts =
       [
         status: :open,
@@ -27,6 +24,9 @@ defmodule AlgoraWeb.BountiesLive do
         else
           [amount_gt: Money.new(:USD, 500)]
         end
+
+    techs = Bounties.list_tech(query_opts)
+    selected_techs = []
 
     query_opts = if selected_techs == [], do: query_opts, else: Keyword.put(query_opts, :tech_stack, selected_techs)
 
@@ -43,13 +43,13 @@ defmodule AlgoraWeb.BountiesLive do
     <div class="container mx-auto max-w-7xl space-y-6 p-6 lg:px-8">
       <.section title="Bounties" subtitle="Open bounties for you">
         <div class="-mt-4 mb-4 flex flex-wrap gap-2">
-          <%= for tech <- @techs do %>
+          <%= for {tech, count} <- @techs do %>
             <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
               <.badge
                 variant={if tech in @selected_techs, do: "success", else: "outline"}
                 class="hover:bg-white/[4%] transition-colors"
               >
-                {tech}
+                {tech} ({count})
               </.badge>
             </div>
           <% end %>

@@ -86,6 +86,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp process_event(%Webhook{event_action: "issues.closed"} = webhook, _commands),
     do: handle_ticket_state_change(webhook)
 
+  defp process_event(%Webhook{event_action: "issues.deleted"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
   defp process_event(%Webhook{event_action: "issues.reopened"} = webhook, _commands),
     do: handle_ticket_state_change(webhook)
 
@@ -621,11 +624,18 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     if recipient == author["login"], do: nil, else: recipient
   end
 
-  defp handle_ticket_state_change(%Webhook{event: event, payload: payload}) do
+  defp handle_ticket_state_change(%Webhook{event: event, payload: payload, event_action: event_action}) do
     github_ticket =
       case event do
         "issues" -> payload["issue"]
         "pull_request" -> payload["pull_request"]
+      end
+
+    state =
+      if event_action == "issues.deleted" do
+        :closed
+      else
+        String.to_existing_atom(github_ticket["state"])
       end
 
     case Workspace.get_ticket(
@@ -639,7 +649,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       ticket ->
         case ticket
              |> change(
-               state: String.to_existing_atom(github_ticket["state"]),
+               state: state,
                closed_at: Util.to_date!(github_ticket["closed_at"]),
                merged_at: Util.to_date!(github_ticket["merged_at"])
              )

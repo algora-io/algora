@@ -4,6 +4,7 @@ defmodule AlgoraWeb.BountiesLive do
 
   import AlgoraWeb.Components.Bounties
 
+  alias Algora.Accounts
   alias Algora.Bounties
 
   require Logger
@@ -12,6 +13,9 @@ defmodule AlgoraWeb.BountiesLive do
     if connected?(socket) do
       Bounties.subscribe()
     end
+
+    techs = Accounts.list_techs()
+    selected_techs = []
 
     query_opts =
       [
@@ -24,13 +28,32 @@ defmodule AlgoraWeb.BountiesLive do
           [amount_gt: Money.new(:USD, 500)]
         end
 
-    {:ok, socket |> assign(:query_opts, query_opts) |> assign_bounties()}
+    query_opts = if selected_techs == [], do: query_opts, else: Keyword.put(query_opts, :tech_stack, selected_techs)
+
+    {:ok,
+     socket
+     |> assign(:techs, techs)
+     |> assign(:selected_techs, selected_techs)
+     |> assign(:query_opts, query_opts)
+     |> assign_bounties()}
   end
 
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6 lg:px-8">
       <.section title="Bounties" subtitle="Open bounties for you">
+        <div class="-mt-4 mb-4 flex flex-wrap gap-2">
+          <%= for tech <- @techs do %>
+            <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
+              <.badge
+                variant={if tech in @selected_techs, do: "success", else: "outline"}
+                class="hover:bg-white/[4%] transition-colors"
+              >
+                {tech}
+              </.badge>
+            </div>
+          <% end %>
+        </div>
         <%= if Enum.empty?(@bounties) do %>
           <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
             <.card_header>
@@ -77,6 +100,28 @@ defmodule AlgoraWeb.BountiesLive do
      socket
      |> assign(:bounties, bounties ++ more_bounties)
      |> assign(:has_more_bounties, length(more_bounties) >= page_size())}
+  end
+
+  def handle_event("toggle_tech", %{"tech" => tech}, socket) do
+    selected_techs =
+      if tech in socket.assigns.selected_techs do
+        List.delete(socket.assigns.selected_techs, tech)
+      else
+        [tech | socket.assigns.selected_techs]
+      end
+
+    query_opts =
+      if selected_techs == [] do
+        Keyword.delete(socket.assigns.query_opts, :tech_stack)
+      else
+        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
+      end
+
+    {:noreply,
+     socket
+     |> assign(:selected_techs, selected_techs)
+     |> assign(:query_opts, query_opts)
+     |> assign_bounties()}
   end
 
   defp assign_bounties(socket) do

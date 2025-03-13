@@ -8,11 +8,9 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  defp migration?, do: System.get_env("MIGRATION", "false") == "true"
-
   def http(host, method, path, headers, body) do
     # TODO: remove after migration
-    if migration?() do
+    if Algora.Settings.migration_in_progress?() do
       run_cached(path, fn -> do_http_request(host, method, path, headers, body) end)
     else
       do_http_request(host, method, path, headers, body)

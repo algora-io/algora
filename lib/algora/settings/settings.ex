@@ -24,6 +24,13 @@ defmodule Algora.Settings do
     |> Repo.insert(on_conflict: {:replace, [:value]}, conflict_target: :key)
   end
 
+  def set!(key, value) do
+    case set(key, value) do
+      {:ok, _} -> :ok
+      {:error, reason} -> raise "Failed to set #{key} to #{value}: #{reason}"
+    end
+  end
+
   def delete(key) do
     case Repo.get(__MODULE__, key) do
       nil -> {:ok, nil}
@@ -40,5 +47,16 @@ defmodule Algora.Settings do
 
   def set_featured_developers(handles) when is_list(handles) do
     set("featured_developers", %{"handles" => handles})
+  end
+
+  def migration_in_progress? do
+    case get("migration_in_progress") do
+      %{"active" => active} when is_boolean(active) -> active
+      _ -> false
+    end
+  end
+
+  def set_migration_in_progress!(active) when is_boolean(active) do
+    set!("migration_in_progress", %{"active" => active})
   end
 end

@@ -21,6 +21,7 @@ alias Algora.Payments.Customer
 alias Algora.Payments.PaymentMethod
 alias Algora.Payments.Transaction
 alias Algora.Repo
+alias Algora.Settings
 alias Algora.Workspace
 alias Algora.Workspace.Installation
 alias Algora.Workspace.Ticket

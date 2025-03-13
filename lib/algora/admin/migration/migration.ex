@@ -1391,7 +1391,7 @@ defmodule Algora.Admin.Migration do
   end
 
   def run!(timestamp \\ nil) do
-    System.put_env("MIGRATION", "true")
+    Algora.Settings.set_migration_in_progress!(true)
 
     pwd = ".local/db"
     File.mkdir_p!(pwd)
@@ -1413,5 +1413,11 @@ defmodule Algora.Admin.Migration do
       end)
 
     IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
+
+    Algora.Settings.set_migration_in_progress!(false)
+  end
+
+  def reset! do
+    clear_tables!()
   end
 end

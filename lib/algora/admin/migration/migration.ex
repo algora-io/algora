@@ -278,7 +278,13 @@ defmodule Algora.Admin.Migration do
         "handle" => nil,
         "avatar_url" => row["avatar_url"],
         "external_homepage_url" => nil,
-        "type" => "individual",
+        "type" =>
+          case row["type"] do
+            "Bot" -> "bot"
+            "Organization" -> "organization"
+            "User" -> "individual"
+            _ -> raise "Unknown user type: #{inspect(row)}"
+          end,
         "bio" => row["bio"],
         "location" => row["location"],
         "country" => nil,

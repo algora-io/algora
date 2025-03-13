@@ -202,6 +202,7 @@ defmodule Algora.Admin.Migration do
       "need_avatar" => nil,
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
+      "last_active_at" => row["last_activity_at"],
       "is_admin" => row["is_admin"]
     }
   end

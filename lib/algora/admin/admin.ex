@@ -11,6 +11,7 @@ defmodule Algora.Admin do
   alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Installation
+  alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
   require Logger
@@ -78,6 +79,30 @@ defmodule Algora.Admin do
       end)
 
     IO.puts("Claim backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
+  def backfill_tickets! do
+    query =
+      from(t in Ticket,
+        join: b in assoc(t, :bounties),
+        where: b.status == :open,
+        where: fragment("?->>'url' IS NOT NULL", t.provider_meta),
+        distinct: t.id,
+        select: t
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_ticket/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Ticket backfill complete: #{success} succeeded, #{failure} failed")
     :ok
   end
 
@@ -156,6 +181,30 @@ defmodule Algora.Admin do
 
       error ->
         Logger.error("Failed to backfill claim #{url}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_ticket(ticket) do
+    case Github.Client.fetch(token!(), ticket.provider_meta["url"]) do
+      {:ok, issue} ->
+        ticket
+        |> Ecto.Changeset.change(
+          provider_meta: Util.normalize_struct(issue),
+          state: String.to_existing_atom(issue["state"])
+        )
+        |> Repo.update()
+
+      {:error, "410 This issue was deleted"} ->
+        ticket
+        |> Ecto.Changeset.change(state: :closed)
+        |> Repo.update()
+
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill ticket #{ticket.id}: #{inspect(error)}")
         {:error, error}
     end
   end

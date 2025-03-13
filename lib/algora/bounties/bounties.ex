@@ -940,7 +940,7 @@ defmodule Algora.Bounties do
 
             case criteria[:owner_id] do
               nil ->
-                where(query, [b], b.visibility == :public)
+                where(query, [b, o: o], b.visibility == :public and o.featured == true)
 
               _org_id ->
                 where(query, [b], b.visibility in [:public, :community])

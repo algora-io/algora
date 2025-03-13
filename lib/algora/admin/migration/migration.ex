@@ -108,6 +108,7 @@ defmodule Algora.Admin.Migration do
             "provider_id" => github_issue["id"],
             "provider_meta" => deserialize_value(github_issue),
             "type" => "issue",
+            "state" => github_issue["state"],
             "title" => github_issue["title"],
             "description" => github_issue["body"],
             "number" => github_issue["number"],
@@ -123,6 +124,7 @@ defmodule Algora.Admin.Migration do
             "provider_id" => github_pull_request["id"],
             "provider_meta" => deserialize_value(github_pull_request),
             "type" => "pull_request",
+            "state" => github_pull_request["state"],
             "title" => github_pull_request["title"],
             "description" => github_pull_request["body"],
             "number" => github_pull_request["number"],
@@ -138,6 +140,7 @@ defmodule Algora.Admin.Migration do
             "provider_id" => nil,
             "provider_meta" => nil,
             "type" => "issue",
+            "state" => nil,
             "title" => row["title"],
             "description" => row["body"],
             "number" => row["number"],
@@ -228,7 +231,7 @@ defmodule Algora.Admin.Migration do
         "stargazers_count" => row["stargazers_count"],
         "domain" => row["domain"],
         "tech_stack" => row["tech"],
-        "featured" => row["featured"],
+        "featured" => true?(row["featured"]) and not true?(row["is_personal"]),
         "priority" => row["priority"],
         "fee_pct" => row["fee_pct"],
         "seeded" => row["seeded"],
@@ -272,7 +275,7 @@ defmodule Algora.Admin.Migration do
         "provider_login" => row["login"],
         "provider_meta" => deserialize_value(row),
         "email" => nil,
-        "display_name" => row["name"],
+        "display_name" => if(nullish?(row["name"]), do: row["login"], else: row["name"]),
         "handle" => nil,
         "avatar_url" => row["avatar_url"],
         "type" =>
@@ -876,7 +879,7 @@ defmodule Algora.Admin.Migration do
     end
   end
 
-  def process_dump(input_file, output_file) do
+  def remap_dump(input_file, output_file) do
     db = collect_data(input_file)
 
     input_file
@@ -1427,8 +1430,8 @@ defmodule Algora.Admin.Migration do
         :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
       end
 
-      if !opts[:skip_processing] do
-        :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
+      if !opts[:skip_remap] do
+        :ok = time_step("Remapping dump", fn -> remap_dump(input_path, output_path) end)
       end
 
       :ok = time_step("Clearing tables", fn -> clear_tables!() end)
@@ -1437,6 +1440,7 @@ defmodule Algora.Admin.Migration do
       :ok = time_step("Backfilling installations", fn -> Admin.backfill_installations!() end)
       :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
       :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
+      :ok = time_step("Backfilling tickets", fn -> Admin.backfill_tickets!() end)
     end)
 
     Process.delete(:handles)

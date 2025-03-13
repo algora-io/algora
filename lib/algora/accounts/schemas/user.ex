@@ -284,7 +284,7 @@ defmodule Algora.Accounts.User do
       provider_id: to_string(meta["id"]),
       provider_login: meta["login"],
       type: type_from_provider(:github, meta["type"]),
-      display_name: meta["name"],
+      display_name: meta["name"] || meta["login"],
       bio: meta["bio"],
       location: meta["location"],
       avatar_url: meta["avatar_url"],

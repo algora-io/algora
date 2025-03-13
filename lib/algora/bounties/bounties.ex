@@ -1020,6 +1020,7 @@ defmodule Algora.Bounties do
         name: r.name,
         owner: %{
           id: ro.id,
+          name: ro.name,
           handle: ro.handle,
           provider_login: ro.provider_login,
           avatar_url: ro.avatar_url

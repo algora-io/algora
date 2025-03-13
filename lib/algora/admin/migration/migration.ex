@@ -168,7 +168,6 @@ defmodule Algora.Admin.Migration do
       "display_name" => row["name"],
       "handle" => row["handle"],
       "avatar_url" => update_url(row["image"]),
-      "external_homepage_url" => nil,
       "type" => "individual",
       "bio" => github_user && github_user["bio"],
       "location" => row["loc"],
@@ -221,7 +220,6 @@ defmodule Algora.Admin.Migration do
         "display_name" => row["name"],
         "handle" => row["handle"],
         "avatar_url" => update_url(row["avatar_url"]),
-        "external_homepage_url" => nil,
         "type" => "organization",
         "bio" => row["description"],
         "location" => nil,
@@ -277,7 +275,6 @@ defmodule Algora.Admin.Migration do
         "display_name" => row["name"],
         "handle" => nil,
         "avatar_url" => row["avatar_url"],
-        "external_homepage_url" => nil,
         "type" =>
           case row["type"] do
             "Bot" -> "bot"

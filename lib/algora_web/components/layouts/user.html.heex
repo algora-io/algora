@@ -1,4 +1,4 @@
-<div>
+<div :if={@current_user}>
   <!-- Static sidebar for desktop -->
   <div class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
     <div class="flex h-16 shrink-0 items-center justify-center">
@@ -197,4 +197,11 @@
       {@inner_content}
     </div>
   </div>
+</div>
+
+<div :if={!@current_user} class="relative pt-16">
+  <.flash_group flash={@flash} />
+  <AlgoraWeb.Components.Header.header />
+  {@inner_content}
+  <AlgoraWeb.Components.Footer.footer />
 </div>

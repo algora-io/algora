@@ -6,6 +6,7 @@ alias Algora.Accounts
 alias Algora.Accounts.Identity
 alias Algora.Accounts.User
 alias Algora.Admin
+alias Algora.Admin.Migration
 alias Algora.Bounties
 alias Algora.Bounties.Claim
 alias Algora.Contracts

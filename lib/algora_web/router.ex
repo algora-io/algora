@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Router do
   use AlgoraWeb, :router
 
-  import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
+  import AlgoraWeb.UserAuth, only: [fetch_current_user: 2, require_authenticated_admin: 2]
   import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 
@@ -120,7 +120,13 @@ defmodule AlgoraWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      scope "/" do
+        if Application.compile_env(:algora, :require_admin_for_mailbox) do
+          pipe_through :require_authenticated_admin
+        end
+
+        forward "/mailbox", Plug.Swoosh.MailboxPreview
+      end
     end
   end
 end

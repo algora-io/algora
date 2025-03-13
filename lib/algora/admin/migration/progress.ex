@@ -16,6 +16,9 @@ defmodule Algora.Admin.Migration.Progress do
     |> display_stats(verbose)
   end
 
+  def v1!(verbose \\ false), do: run!("v1-progress.yaml", verbose)
+  def v2!(verbose \\ false), do: run!("v2-progress.yaml", verbose)
+
   @doc """
   Example usage:
 

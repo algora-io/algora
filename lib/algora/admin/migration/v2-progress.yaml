@@ -126,11 +126,11 @@
     - provider_meta: -1
     - avatar_url: -1
     - repository_selection: -1
-    - owner_id: -2
+    - owner_id: 0
     - connected_user_id: 1
     - inserted_at: 1
     - updated_at: 1
-    - provider_user_id: -1
+    - provider_user_id: 0
 - members:
     - id: 1
     - role: 1
@@ -208,7 +208,7 @@
 - tips:
     - id: 1
     - amount: 1
-    - status: -2
+    - status: 1
     - ticket_id: 1
     - owner_id: 1
     - creator_id: 1
@@ -255,7 +255,6 @@
     - display_name: 1
     - handle: 1
     - avatar_url: 1
-    - external_homepage_url: -2
     - type: 1
     - bio: 1
     - location: 1
@@ -277,7 +276,7 @@
     - hours_per_week: -1
     - website_url: 1
     - twitter_url: 1
-    - github_url: -2
+    - github_url: 1
     - youtube_url: 1
     - twitch_url: 1
     - discord_url: 1
@@ -286,7 +285,7 @@
     - og_title: -1
     - og_image_url: -1
     - last_context: 1
-    - need_avatar: -2
+    - need_avatar: -1
     - inserted_at: 1
     - updated_at: 1
     - name: -1

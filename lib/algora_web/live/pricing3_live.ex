@@ -65,7 +65,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 </div>
               </h2>
               <p class="text-base text-foreground-light">
-                Add USD rewards on GitHub issues and pay when you merge. Complete contract work payments (hourly or fixed rate). Outcome based, pay as you go.
+                Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
               </p>
             </div>
           </div>
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.Pricing3Live do
                 </div>
               </h2>
               <p class="text-base text-foreground-light">
-                Meet new contributors, maximize visibility and hire top 1% open source engineers
+                Connect with top open source talent, increase project visibility, and hire proven contributors
               </p>
             </div>
           </div>
@@ -717,21 +717,21 @@ defmodule AlgoraWeb.Pricing3Live do
       %Plan{
         id: :a0,
         name: "Receive payments",
-        description: "Within days, from around the world",
+        description: "Get paid for your open source work",
         price: "100%",
-        cta_text: "Start contributing",
+        cta_text: "Start earning",
         cta_url: "/onboarding/dev",
         popular: false,
         features: [
-          %Feature{name: "No platform fees on bounties"},
-          %Feature{name: "Available in #{ConnectCountries.count()} countries/regions"},
+          %Feature{name: "Keep 100% of your earnings"},
+          %Feature{name: "Available in #{ConnectCountries.count()} countries"},
           %Feature{name: "Fast payouts in 2-7 days"}
         ]
       },
       %Plan{
         id: :a1,
         name: "Pay developers",
-        description: "Pay bounties on any GitHub repo",
+        description: "Reward contributions with bounties",
         price: nil,
         cta_text: "Create bounties",
         cta_url: "/onboarding/dev",
@@ -741,7 +741,7 @@ defmodule AlgoraWeb.Pricing3Live do
           %Feature{name: "Improve your dependencies"},
           %Feature{name: "Engage your OSS community"},
           %Feature{name: "Collaborate with freelancers"},
-          %Feature{name: "Interview engineers with real work"}
+          %Feature{name: "Evaluate candidates with real tasks"}
         ]
       }
     ]
@@ -752,15 +752,15 @@ defmodule AlgoraWeb.Pricing3Live do
       %Plan{
         id: :b0,
         name: "Match with experts",
-        description: "Publish bounties & match with top contributors",
+        description: "Find and work with proven OSS experts versed in your stack",
         price: nil,
-        cta_text: "Start collaborating",
+        cta_text: "Start matching",
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Featured on Algora (15k+ monthly visitors)"},
-          %Feature{name: "Expert OSS contributors (12k+ users)"},
-          %Feature{name: "Scale engineering on-demand"}
+          %Feature{name: "Featured on Algora's marketplace (15k+ monthly visitors)"},
+          %Feature{name: "Access to verified OSS experts (12k+ users)"},
+          %Feature{name: "Flexible on-demand engineering"}
         ]
       },
       %Plan{

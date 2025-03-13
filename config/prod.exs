@@ -10,8 +10,8 @@ config :algora, AlgoraWeb.Endpoint, cache_static_manifest: "priv/static/cache_ma
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Algora.Finch
 
-# Disable Swoosh Local Memory Storage
-config :swoosh, local: false
+# TODO: Disable Swoosh Local Memory Storage
+config :swoosh, local: true
 
 config :logger,
   format: {LogfmtEx, :format},

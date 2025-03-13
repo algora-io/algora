@@ -163,7 +163,7 @@ defmodule Algora.Admin.Migration do
       "provider" => github_user && "github",
       "provider_id" => github_user && github_user["id"],
       "provider_login" => github_user && github_user["login"],
-      "provider_meta" => github_user && deserialize_value(github_user),
+      "provider_meta" => deserialize_value(github_user),
       "email" => row["email"],
       "display_name" => row["name"],
       "handle" => row["handle"],
@@ -190,8 +190,8 @@ defmodule Algora.Admin.Migration do
       "website_url" => nil,
       "twitter_url" => nil,
       "github_url" => nil,
-      "youtube_url" => row["youtube_handle"] && "https://www.youtube.com/#{row["youtube_handle"]}",
-      "twitch_url" => row["twitch_handle"] && "https://www.twitch.tv/#{row["twitch_handle"]}",
+      "youtube_url" => if(not nullish?(row["youtube_handle"]), do: "https://www.youtube.com/#{row["youtube_handle"]}"),
+      "twitch_url" => if(not nullish?(row["twitch_handle"]), do: "https://www.twitch.tv/#{row["twitch_handle"]}"),
       "discord_url" => nil,
       "slack_url" => nil,
       "linkedin_url" => nil,
@@ -212,10 +212,10 @@ defmodule Algora.Admin.Migration do
     if not user?(merged_user) do
       %{
         "id" => row["id"],
-        "provider" => row["github_handle"] && "github",
+        "provider" => if(not nullish?(row["github_handle"]), do: "github"),
         "provider_id" => row["github_id"],
         "provider_login" => row["github_handle"],
-        "provider_meta" => row["github_data"] && deserialize_value(row["github_data"]),
+        "provider_meta" => deserialize_value(row["github_data"]),
         "email" => nil,
         "display_name" => row["name"],
         "handle" => row["handle"],
@@ -246,7 +246,7 @@ defmodule Algora.Admin.Migration do
         "hours_per_week" => nil,
         "website_url" => row["website_url"],
         "twitter_url" => row["twitter_url"],
-        "github_url" => nil,
+        "github_url" => if(not nullish?(row["github_handle"]), do: "https://github.com/#{row["github_handle"]}"),
         "youtube_url" => row["youtube_url"],
         "twitch_url" => nil,
         "discord_url" => row["discord_url"],
@@ -301,8 +301,9 @@ defmodule Algora.Admin.Migration do
         "hourly_rate_max" => nil,
         "hours_per_week" => nil,
         "website_url" => nil,
-        "twitter_url" => row["twitter_username"] && "https://www.twitter.com/#{row["twitter_username"]}",
-        "github_url" => nil,
+        "twitter_url" =>
+          if(not nullish?(row["twitter_username"]), do: "https://www.twitter.com/#{row["twitter_username"]}"),
+        "github_url" => row["html_url"],
         "youtube_url" => nil,
         "twitch_url" => nil,
         "discord_url" => nil,
@@ -1135,7 +1136,6 @@ defmodule Algora.Admin.Migration do
       |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
       |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
-    # TODO: do we need this?
     fields = ensure_unique_handle(fields)
 
     Map.merge(default_fields, fields)
@@ -1394,22 +1394,46 @@ defmodule Algora.Admin.Migration do
     :ok
   end
 
-  def run!(timestamp \\ nil) do
+  def run!(timestamp \\ nil, opts \\ [])
+
+  def run!(nil, opts) do
+    run!(Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S"), opts)
+  end
+
+  def run!(:last, opts) do
+    timestamp =
+      [:code.priv_dir(:algora), "db"]
+      |> Path.join()
+      |> File.ls!()
+      |> Enum.filter(&String.starts_with?(&1, dump_prefix()))
+      |> List.last()
+      |> String.replace_prefix(dump_prefix(), "")
+      |> String.replace_suffix(".sql", "")
+
+    run!(timestamp, Keyword.put(opts, :skip_dump, true))
+  end
+
+  def run!(timestamp, opts) do
     Algora.Settings.set_migration_in_progress!(true)
 
     pwd = Path.join([:code.priv_dir(:algora), "db"])
     File.mkdir_p!(pwd)
 
-    timestamp = timestamp || Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
-    input_path = Path.join(pwd, "v1-data-#{timestamp}.sql")
-    output_path = Path.join(pwd, "v2-data-#{timestamp}.sql")
+    input_path = Path.join(pwd, "#{dump_prefix()}#{timestamp}.sql")
+    output_path = Path.join(pwd, "#{load_prefix()}#{timestamp}.sql")
 
     IO.puts("⏳ Starting migration...")
 
     {total_time, _} =
       :timer.tc(fn ->
-        :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
-        :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
+        if not opts[:skip_dump] do
+          :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
+        end
+
+        if not opts[:skip_processing] do
+          :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
+        end
+
         :ok = time_step("Clearing tables", fn -> clear_tables!() end)
         {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
         :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
@@ -1418,10 +1442,14 @@ defmodule Algora.Admin.Migration do
 
     IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
 
+    Process.delete(:handles)
     Algora.Settings.set_migration_in_progress!(false)
   end
 
   def reset! do
     clear_tables!()
   end
+
+  defp dump_prefix, do: "v1-data-"
+  defp load_prefix, do: "v2-data-"
 end

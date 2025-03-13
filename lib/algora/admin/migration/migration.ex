@@ -1422,27 +1422,22 @@ defmodule Algora.Admin.Migration do
     input_path = Path.join(pwd, "#{dump_prefix()}#{timestamp}.sql")
     output_path = Path.join(pwd, "#{load_prefix()}#{timestamp}.sql")
 
-    IO.puts("⏳ Starting migration...")
+    time_step("Migrating database", fn ->
+      if !opts[:skip_dump] do
+        :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
+      end
 
-    {total_time, _} =
-      :timer.tc(fn ->
-        if not opts[:skip_dump] do
-          :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
-        end
+      if !opts[:skip_processing] do
+        :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
+      end
 
-        if not opts[:skip_processing] do
-          :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
-        end
-
-        :ok = time_step("Clearing tables", fn -> clear_tables!() end)
-        {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
-        :ok = time_step("Backfilling users", fn -> Admin.backfill_users!() end)
-        :ok = time_step("Backfilling installations", fn -> Admin.backfill_installations!() end)
-        :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
-        :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
-      end)
-
-    IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
+      :ok = time_step("Clearing tables", fn -> clear_tables!() end)
+      {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
+      :ok = time_step("Backfilling users", fn -> Admin.backfill_users!() end)
+      :ok = time_step("Backfilling installations", fn -> Admin.backfill_installations!() end)
+      :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
+      :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
+    end)
 
     Process.delete(:handles)
     Algora.Settings.set_migration_in_progress!(false)

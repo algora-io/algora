@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.LeaderboardLive do
+defmodule AlgoraWeb.Admin.LeaderboardLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 

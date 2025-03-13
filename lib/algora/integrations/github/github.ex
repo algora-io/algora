@@ -104,6 +104,8 @@ defmodule Algora.Github do
   def get_installation_token(installation_id), do: client().get_installation_token(installation_id)
 
   @impl true
+  def get_installation(installation_id), do: client().get_installation(installation_id)
+  @impl true
   def list_installation_repos(token), do: client().list_installation_repos(token)
 
   @impl true

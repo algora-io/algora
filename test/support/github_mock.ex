@@ -107,6 +107,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def get_installation(_installation_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
   def list_installation_repos(_access_token) do
     {:ok, []}
   end

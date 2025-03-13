@@ -4,10 +4,13 @@ defmodule Algora.Admin do
 
   alias Algora.Accounts.User
   alias Algora.Bounties.Claim
+  alias Algora.Github
   alias Algora.Parser
   alias Algora.Payments
   alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace
+  alias Algora.Workspace.Installation
   alias Algora.Workspace.Ticket
 
   require Logger
@@ -78,6 +81,50 @@ defmodule Algora.Admin do
     :ok
   end
 
+  def backfill_users! do
+    query =
+      from(u in User,
+        where: is_nil(u.provider_id) and not is_nil(u.provider_login),
+        distinct: u.provider_login,
+        select: u.provider_login
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_user/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
+  def backfill_installations! do
+    query =
+      from(i in Installation,
+        where: is_nil(i.provider_user_id),
+        distinct: i.provider_id,
+        select: i.provider_id
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_installation/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
   def backfill_repo(url) do
     with %URI{host: "api.github.com", path: "/repos/" <> path} <- URI.parse(url),
          [owner, repo] <- String.split(path, "/", trim: true),
@@ -113,6 +160,34 @@ defmodule Algora.Admin do
     end
   end
 
+  def backfill_user(provider_login) do
+    with {:ok, user} <- Github.get_user_by_username(token!(), provider_login),
+         :ok <- update_user(user) do
+      {:ok, user}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill user #{provider_login}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_installation(installation_id) do
+    with {:ok, installation} <- Github.get_installation(installation_id),
+         :ok <- update_installation(installation) do
+      {:ok, installation}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill installation #{installation_id}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
   def make_admin!(user_handle, is_admin) when is_boolean(is_admin) do
     user_handle
     |> Algora.Accounts.get_user_by_handle()
@@ -141,6 +216,38 @@ defmodule Algora.Admin do
 
   defp update_claims(url, source_id) do
     Repo.update_all(from(t in Claim, where: t.url == ^url), set: [source_id: source_id])
+
+    :ok
+  rescue
+    error -> {:error, error}
+  end
+
+  defp update_user(user) do
+    Repo.update_all(from(u in User, where: u.provider == "github", where: u.provider_login == ^user["login"]),
+      set: [provider_meta: Util.normalize_struct(user), provider_id: to_string(user["id"])]
+    )
+
+    :ok
+  rescue
+    error -> {:error, error}
+  end
+
+  defp update_installation(installation) do
+    target_user =
+      Repo.get_by(User,
+        provider: "github",
+        provider_id: to_string(installation["target_id"])
+      )
+
+    Repo.update_all(
+      from(t in Installation,
+        where: t.provider == "github",
+        where: t.provider_id == ^to_string(installation["id"])
+      ),
+      set:
+        [provider_meta: Util.normalize_struct(installation)] ++
+          if(target_user, do: [provider_user_id: target_user.id], else: [])
+    )
 
     :ok
   rescue

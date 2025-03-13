@@ -1436,6 +1436,8 @@ defmodule Algora.Admin.Migration do
 
         :ok = time_step("Clearing tables", fn -> clear_tables!() end)
         {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
+        :ok = time_step("Backfilling users", fn -> Admin.backfill_users!() end)
+        :ok = time_step("Backfilling installations", fn -> Admin.backfill_installations!() end)
         :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
         :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
       end)

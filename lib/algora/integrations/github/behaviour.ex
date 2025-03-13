@@ -15,6 +15,7 @@ defmodule Algora.Github.Behaviour do
   @callback list_installations(token(), integer()) :: {:ok, map()} | {:error, String.t()}
   @callback find_installation(token(), integer(), integer()) :: {:ok, map()} | {:error, String.t()}
   @callback get_installation_token(integer()) :: {:ok, map()} | {:error, String.t()}
+  @callback get_installation(integer()) :: {:ok, map()} | {:error, String.t()}
   @callback list_installation_repos(token()) :: {:ok, [map()]} | {:error, String.t()}
   @callback create_issue_comment(token(), String.t(), String.t(), integer(), String.t()) ::
               {:ok, map()} | {:error, String.t()}

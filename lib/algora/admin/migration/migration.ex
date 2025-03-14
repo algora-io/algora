@@ -636,15 +636,24 @@ defmodule Algora.Admin.Migration do
       raise "User not found: #{inspect(row)}"
     end
 
-    %{
-      "id" => row["id"],
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"],
-      "active" => row["active"],
-      "template" => row["template"],
-      "type" => row["type"],
-      "user_id" => user["id"]
-    }
+    type =
+      case row["type"] do
+        "dev_bounty_created" -> "bounty_created"
+        "design_bounty_created" -> nil
+        type -> type
+      end
+
+    if type do
+      %{
+        "id" => row["id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"],
+        "active" => row["active"],
+        "template" => row["template"],
+        "type" => type,
+        "user_id" => user["id"]
+      }
+    end
   end
 
   defp transform({"OrgBalanceTransaction", Transaction}, row, db) do

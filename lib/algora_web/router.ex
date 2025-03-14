@@ -55,13 +55,13 @@ defmodule AlgoraWeb.Router do
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
       live "/bounties", BountiesLive, :index
+      live "/community", CommunityLive, :index
     end
 
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
       live "/home", User.DashboardLive, :index
-      live "/community", CommunityLive, :index
       live "/user/transactions", User.TransactionsLive, :index
       live "/user/settings", User.SettingsLive, :edit
       live "/user/installations", User.InstallationsLive, :index

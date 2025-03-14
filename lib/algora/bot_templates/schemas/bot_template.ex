@@ -23,8 +23,8 @@ defmodule Algora.BotTemplates.BotTemplate do
 
   def changeset(bot_template, attrs) do
     bot_template
-    |> cast(attrs, [:template, :type, :active, :org_id])
-    |> validate_required([:template, :type, :org_id])
+    |> cast(attrs, [:template, :type, :active, :user_id])
+    |> validate_required([:template, :type, :user_id])
     |> generate_id()
     |> foreign_key_constraint(:user_id)
     |> unique_constraint([:user_id, :type])

@@ -106,7 +106,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
                 <.input field={@form[:handle]} label="Handle" />
                 <p class="text-sm text-muted-foreground flex items-center gap-1.5">
                   <.icon name="tabler-alert-triangle" class="w-4 h-4" />
-                  Changing your handle can have unintended side effects.
+                  Changing your handle will break existing URLs and references to your organization pages. This includes links shared on social media, documentation, and other websites.
                 </p>
               </div>
               <.button class="ml-auto">Save</.button>

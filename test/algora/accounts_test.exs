@@ -25,7 +25,9 @@ defmodule Algora.AccountsTest do
     test "query" do
       user_1 = insert(:user)
       user_2 = insert(:user, tech_stack: ["rust", "c++"])
-      org_1 = insert(:organization, seeded: false)
+
+      org_1 = insert(:organization, featured: true)
+      _tx = insert(:transaction, user: org_1, net_amount: Money.new(1000, :USD), type: :debit, status: :succeeded)
 
       assert user_1.id |> Accounts.fetch_developer() |> elem(1) |> Map.get(:id) == user_1.id
       assert [sort_by_tech_stack: ["rust"]] |> Accounts.fetch_developer_by() |> elem(1) |> Map.get(:id) == user_2.id

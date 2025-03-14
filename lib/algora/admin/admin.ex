@@ -342,7 +342,10 @@ defmodule Algora.Admin do
         where: t.provider_id == ^to_string(installation["id"])
       ),
       set:
-        [provider_meta: Util.normalize_struct(installation)] ++
+        [
+          provider_meta: Util.normalize_struct(installation),
+          repository_selection: installation["repository_selection"]
+        ] ++
           if(target_user, do: [provider_user_id: target_user.id], else: [])
     )
 

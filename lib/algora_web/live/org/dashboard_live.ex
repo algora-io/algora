@@ -244,32 +244,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </.card_description>
             </.card_header>
             <.card_content>
-              <div class="flex flex-col gap-3">
-                <%= if @installations != [] do %>
-                  <%= for installation <- @installations do %>
-                    <div class="flex items-center gap-2">
-                      <img src={installation.avatar_url} class="w-9 h-9 rounded-lg" />
-                      <div>
-                        <p class="font-medium">{installation.provider_meta["account"]["login"]}</p>
-                        <p class="text-sm text-muted-foreground">
-                          Algora app is installed in
-                          <strong>{installation.repository_selection}</strong>
-                          repositories
-                        </p>
-                      </div>
-                    </div>
-                  <% end %>
-                  <.button phx-click="install_app" class="ml-auto gap-2">
-                    <Logos.github class="w-4 h-4 mr-2 -ml-1" />
-                    Manage {ngettext("installation", "installations", length(@installations))}
-                  </.button>
-                <% else %>
-                  <div class="flex flex-col gap-2">
-                    <.button phx-click="install_app" class="ml-auto gap-2">
-                      <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
-                    </.button>
-                  </div>
-                <% end %>
+              <div class="flex flex-col gap-2">
+                <.button phx-click="install_app" class="ml-auto gap-2">
+                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+                </.button>
               </div>
             </.card_content>
           </.card>

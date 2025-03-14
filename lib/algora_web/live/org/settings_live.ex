@@ -70,9 +70,9 @@ defmodule AlgoraWeb.Org.SettingsLive do
             <%= if @installations != [] do %>
               <%= for installation <- @installations do %>
                 <div class="flex items-center gap-2">
-                  <img src={installation.avatar_url} class="w-9 h-9 rounded-lg" />
+                  <img src={installation.provider_user.avatar_url} class="w-9 h-9 rounded-lg" />
                   <div>
-                    <p class="font-medium">{installation.provider_meta["account"]["login"]}</p>
+                    <p class="font-medium">{installation.provider_user.provider_login}</p>
                     <p class="text-sm text-muted-foreground">
                       Algora app is installed in <strong>{installation.repository_selection}</strong>
                       repositories

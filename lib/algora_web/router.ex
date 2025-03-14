@@ -58,6 +58,7 @@ defmodule AlgoraWeb.Router do
       live "/community", CommunityLive, :index
       live "/leaderboard", LeaderboardLive, :index
       live "/projects", OrgsLive, :index
+      live "/@/:handle", User.ProfileLive, :index
     end
 
     live_session :authenticated,
@@ -106,7 +107,7 @@ defmodule AlgoraWeb.Router do
       live "/auth/login", SignInLive, :index
       live "/payment/success", Payment.SuccessLive, :index
       live "/payment/canceled", Payment.CanceledLive, :index
-      live "/@/:handle", User.ProfileLive, :index
+
       live "/claims/:group_id", ClaimLive
       live "/swift", SwiftBountiesLive
       live "/:country_code", HomeLive, :index

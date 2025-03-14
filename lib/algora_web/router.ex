@@ -107,8 +107,6 @@ defmodule AlgoraWeb.Router do
       live "/pricing", PricingLive
     end
 
-    live "/open-source", OpenSourceLive, :index
-
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/swift", SwiftBountiesLive

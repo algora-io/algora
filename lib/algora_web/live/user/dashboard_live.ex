@@ -24,6 +24,13 @@ defmodule AlgoraWeb.User.DashboardLive do
         _ -> false
       end
 
+    query_opts = [
+      status: :open,
+      limit: page_size(),
+      tech_stack: socket.assigns.current_user.tech_stack,
+      amount_gt: Money.new(:USD, 200)
+    ]
+
     socket =
       socket
       |> assign(:view_mode, "compact")
@@ -31,8 +38,8 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hourly_rate, Money.new!(50, :USD))
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
-      |> assign(:has_more_bounties, false)
       |> assign(:has_active_account, has_active_account)
+      |> assign(:query_opts, query_opts)
       |> assign_bounties()
       |> assign_achievements()
 
@@ -300,21 +307,14 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   def handle_event("load_more", _params, socket) do
-    %{bounties: bounties, current_user: current_user} = socket.assigns
-
-    last_bounty = List.last(bounties)
-
-    cursor = %{
-      inserted_at: last_bounty.inserted_at,
-      id: last_bounty.id
-    }
+    %{bounties: bounties} = socket.assigns
 
     more_bounties =
       Bounties.list_bounties(
-        status: :open,
-        tech_stack: current_user.tech_stack,
-        limit: page_size(),
-        before: cursor
+        Keyword.put(socket.assigns.query_opts, :before, %{
+          inserted_at: List.last(bounties).inserted_at,
+          id: List.last(bounties).id
+        })
       )
 
     {:noreply,
@@ -328,12 +328,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   defp assign_bounties(socket) do
-    bounties =
-      Bounties.list_bounties(
-        status: :open,
-        tech_stack: socket.assigns.current_user.tech_stack,
-        limit: page_size()
-      )
+    bounties = Bounties.list_bounties(socket.assigns.query_opts)
 
     socket
     |> assign(:bounties, bounties)

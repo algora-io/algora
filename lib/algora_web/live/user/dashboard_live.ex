@@ -191,12 +191,6 @@ defmodule AlgoraWeb.User.DashboardLive do
       <!-- Achievements Section -->
       <div class="mt-8 flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
-        <.link
-          class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
-          href="#"
-        >
-          View all
-        </.link>
       </div>
       <nav class="pt-4">
         <ol role="list" class="space-y-6">
@@ -216,7 +210,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       {&personalize_status/1, "Personalize Algora", nil},
       {&setup_stripe_status/1, "Create Stripe account", ~p"/user/transactions"},
       {&earn_first_bounty_status/1, "Earn first bounty", ~p"/bounties"},
-      {&earn_through_referral_status/1, "Earn through referral", nil},
+      {&share_with_friend_status/1, "Share Algora with a friend", nil},
       {&earn_10k_status/1, "Earn $10K", ~p"/bounties"}
     ]
 
@@ -256,8 +250,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     end
   end
 
-  # TODO: implement referral earnings check
-  defp earn_through_referral_status(_socket), do: :upcoming
+  defp share_with_friend_status(_socket), do: :upcoming
 
   defp earn_10k_status(socket) do
     if earned?(socket.assigns.current_user, Money.new!(10_000, :USD)) do

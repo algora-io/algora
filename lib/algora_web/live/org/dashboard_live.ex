@@ -809,8 +809,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       {&install_app_status/1, "Install the Algora app", nil},
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
-      {&begin_collaboration_status/1, "Contract a contributor", nil},
-      {&complete_first_contract_status/1, "Complete a contract", nil}
+      {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 
     {achievements, _} =
@@ -853,17 +852,5 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
-  defp begin_collaboration_status(socket) do
-    case Contracts.list_contracts(client_id: socket.assigns.current_org.id, active_or_paid?: true, limit: 1) do
-      [] -> :upcoming
-      _ -> :completed
-    end
-  end
-
-  defp complete_first_contract_status(socket) do
-    case Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: :paid, limit: 1) do
-      [] -> :upcoming
-      _ -> :completed
-    end
-  end
+  defp share_with_friend_status(_socket), do: :upcoming
 end

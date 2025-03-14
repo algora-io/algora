@@ -15,7 +15,8 @@ defmodule AlgoraWeb.Constants do
       privacy_url: "https://console.algora.io/legal/privacy",
       terms_url: "https://console.algora.io/legal/terms",
       blog_url: "https://blog.algora.io",
-      contact_url: "https://docs.algora.io/contact"
+      contact_url: "https://docs.algora.io/contact",
+      algora_tv_url: "https://algora.tv"
     }
   end
 

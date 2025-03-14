@@ -14,7 +14,7 @@ defmodule Algora.Workspace.Repository do
     field :name, :string, null: false
     field :url, :string, null: false
     field :description, :string
-    field :language, :string
+    field :tech_stack, {:array, :string}, null: false, default: []
     field :og_image_url, :string, null: false
     field :og_image_updated_at, :utc_datetime_usec
 
@@ -37,7 +37,6 @@ defmodule Algora.Workspace.Repository do
       provider_id: to_string(meta["id"]),
       name: meta["name"],
       description: meta["description"],
-      language: meta["language"],
       og_image_url: default_og_image_url(meta["owner"]["login"], meta["name"]),
       og_image_updated_at: DateTime.utc_now(),
       url: meta["html_url"],
@@ -45,7 +44,7 @@ defmodule Algora.Workspace.Repository do
     }
 
     %Repository{provider: "github", provider_meta: meta}
-    |> cast(params, [:provider_id, :name, :url, :description, :language, :og_image_url, :og_image_updated_at, :user_id])
+    |> cast(params, [:provider_id, :name, :url, :description, :og_image_url, :og_image_updated_at, :user_id])
     |> generate_id()
     |> validate_required([:provider_id, :name, :url, :user_id])
     |> foreign_key_constraint(:user_id)

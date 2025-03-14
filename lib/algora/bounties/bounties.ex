@@ -957,7 +957,7 @@ defmodule Algora.Bounties do
 
       {:tech_stack, tech_stack}, query ->
         from([b, r: r] in query,
-          where: fragment("?::citext = ANY(?::citext[])", r.language, ^tech_stack)
+          where: fragment("? && ?::citext[]", r.tech_stack, ^tech_stack)
         )
 
       {:amount_gt, min_amount}, query ->
@@ -1033,10 +1033,11 @@ defmodule Algora.Bounties do
   def list_tech(criteria \\ []) do
     base_query()
     |> list_bounties_query(Keyword.put(criteria, :limit, :infinity))
-    |> where([b, r: r], not is_nil(r.language))
-    |> group_by([b, r: r], r.language)
-    |> select([b, r: r], {r.language, count(r.language)})
-    |> order_by([b, r: r], desc: count(r.language))
+    |> where([b, r: r], not is_nil(r.tech_stack))
+    |> join(:cross_lateral, [b, r: r], tech in fragment("SELECT UNNEST(?) as tech", r.tech_stack), as: :tech)
+    |> group_by([b, r: r, tech: tech], fragment("tech"))
+    |> select([b, r: r, tech: tech], {fragment("tech"), count(fragment("tech"))})
+    |> order_by([b, r: r, tech: tech], desc: count(fragment("tech")))
     |> Repo.all()
   end
 

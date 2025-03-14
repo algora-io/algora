@@ -11,6 +11,7 @@ defmodule Algora.Admin do
   alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Installation
+  alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
   require Logger
@@ -59,6 +60,27 @@ defmodule Algora.Admin do
     :ok
   end
 
+  def backfill_repo_tech_stack! do
+    query =
+      from(r in Repository,
+        where: fragment("?->>'languages_url' IS NOT NULL", r.provider_meta),
+        select: r
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_repo_tech_stack/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository tech stack backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
   def backfill_claims! do
     query =
       from(t in Claim,
@@ -87,7 +109,6 @@ defmodule Algora.Admin do
         join: b in assoc(t, :bounties),
         where: b.status == :open,
         where: fragment("?->>'url' IS NOT NULL", t.provider_meta),
-        distinct: t.id,
         select: t
       )
 
@@ -161,6 +182,20 @@ defmodule Algora.Admin do
 
       error ->
         Logger.error("Failed to backfill repo #{url}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_repo_tech_stack(repo) do
+    with {:ok, languages} <- Github.Client.fetch(token!(), repo.provider_meta["languages_url"]),
+         :ok <- update_repo_tech_stack(languages, repo.id) do
+      {:ok, languages}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill repo tech stack #{repo.provider_meta["languages_url"]}: #{inspect(error)}")
         {:error, error}
     end
   end
@@ -256,6 +291,20 @@ defmodule Algora.Admin do
     Repo.update_all(from(t in Ticket, where: fragment("?->>'repository_url' = ?", t.provider_meta, ^url)),
       set: [repository_id: repo_id]
     )
+
+    :ok
+  rescue
+    error -> {:error, error}
+  end
+
+  defp update_repo_tech_stack(languages, repo_id) do
+    top_languages =
+      languages
+      |> Enum.sort_by(fn {_lang, count} -> count end, :desc)
+      |> Enum.take(3)
+      |> Enum.map(fn {lang, _count} -> lang end)
+
+    Repo.update_all(from(r in Repository, where: r.id == ^repo_id), set: [tech_stack: top_languages])
 
     :ok
   rescue

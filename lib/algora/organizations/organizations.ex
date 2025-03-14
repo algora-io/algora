@@ -145,12 +145,46 @@ defmodule Algora.Organizations do
     Repo.fetch_by(User, clauses)
   end
 
+  @type criterion ::
+          {:limit, non_neg_integer()}
+          | {:before, %{priority: integer(), stargazers_count: integer(), id: String.t()}}
+
+  @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
+  defp apply_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {:limit, limit}, query ->
+        from([u] in query, limit: ^limit)
+
+      {:before, %{priority: priority, stargazers_count: stargazers_count, id: id}}, query ->
+        from([u] in query,
+          where: {u.priority, u.stargazers_count, u.id} < {^priority, ^stargazers_count, ^id}
+        )
+
+      _, query ->
+        query
+    end)
+  end
+
   def list_orgs(opts) do
-    Repo.all(
-      from u in User,
-        where: u.type == :organization,
-        limit: ^opts[:limit]
-    )
+    orgs_with_open_bounties =
+      from b in Algora.Bounties.Bounty,
+        where: b.status == :open,
+        select: b.owner_id
+
+    orgs_with_transactions =
+      from tx in Algora.Payments.Transaction,
+        where: tx.status == :succeeded,
+        where: tx.type == :debit,
+        select: tx.user_id
+
+    User
+    |> where([u], u.type == :organization)
+    |> where([u], not is_nil(u.handle))
+    |> where([u], u.featured == true)
+    |> where([u], u.id in subquery(orgs_with_open_bounties) or u.id in subquery(orgs_with_transactions))
+    |> order_by([u], desc: u.priority, desc: u.stargazers_count, desc: u.id)
+    |> apply_criteria(opts)
+    |> Repo.all()
   end
 
   def get_user_orgs(%User{} = user) do

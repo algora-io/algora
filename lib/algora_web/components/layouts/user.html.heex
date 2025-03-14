@@ -38,6 +38,21 @@
         </li>
         <li>
           <.link
+            navigate={~p"/projects"}
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              if(@active_tab == :projects,
+                do: "bg-gray-800 text-white",
+                else: "text-gray-400 hover:bg-gray-800 hover:text-white"
+              )
+            ]}
+          >
+            <.icon name="tabler-rocket" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Projects</span>
+          </.link>
+        </li>
+        <li>
+          <.link
             navigate={~p"/community"}
             class={[
               "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",

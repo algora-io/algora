@@ -231,7 +231,7 @@ defmodule Algora.Admin.Migration do
         "stargazers_count" => row["stargazers_count"],
         "domain" => row["domain"],
         "tech_stack" => row["tech"],
-        "featured" => true?(row["featured"]) and not true?(row["is_personal"]),
+        "featured" => true?(row["featured"]) and not true?(row["is_personal"]) and not nullish?(row["avatar_url"]),
         "priority" => row["priority"],
         "fee_pct" => row["fee_pct"],
         "seeded" => row["seeded"],

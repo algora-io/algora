@@ -24,6 +24,7 @@ defmodule AlgoraWeb.User.Nav do
         {User.InstallationsLive, _} -> :installations
         {AlgoraWeb.CommunityLive, _} -> :community
         {AlgoraWeb.BountiesLive, _} -> :bounties
+        {AlgoraWeb.OrgsLive, _} -> :projects
         {_, _} -> nil
       end
 

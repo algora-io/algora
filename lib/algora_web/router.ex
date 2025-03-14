@@ -70,7 +70,7 @@ defmodule AlgoraWeb.Router do
     end
 
     live_session :org,
-      layout: {AlgoraWeb.Layouts, :org},
+      layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
       live "/org/:org_handle", Org.DashboardLive, :index
       live "/org/:org_handle/home", Org.DashboardPublicLive, :index
@@ -81,7 +81,7 @@ defmodule AlgoraWeb.Router do
     end
 
     live_session :org_admin,
-      layout: {AlgoraWeb.Layouts, :org},
+      layout: {AlgoraWeb.Layouts, :user},
       on_mount: [
         {AlgoraWeb.UserAuth, :ensure_authenticated},
         {AlgoraWeb.UserAuth, :current_user},

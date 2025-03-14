@@ -50,7 +50,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <div class="flex lg:flex-row flex-col-reverse">
       <div class="flex-1 bg-background text-foreground lg:pr-96">
-        <div :if={not @has_active_account} class="relative h-full p-6">
+        <div :if={not @has_active_account} class="relative h-full p-4 sm:p-6 md:p-8">
           <.section>
             <.card>
               <.card_header>
@@ -70,7 +70,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </.section>
         </div>
         <!-- Contracts section -->
-        <div :if={length(@contracts) > 0} class="relative h-full p-6">
+        <div :if={length(@contracts) > 0} class="relative h-full p-4 sm:p-6 md:p-8">
           <div class="flex justify-between">
             <div class="flex flex-col space-y-1.5">
               <h2 class="text-2xl font-semibold leading-none tracking-tight">
@@ -92,7 +92,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
         </div>
         <!-- Bounties section -->
-        <div :if={length(@bounties) > 0} class="relative h-full p-6">
+        <div :if={length(@bounties) > 0} class="relative h-full p-4 sm:p-6 md:p-8">
           <.section title="Open bounties" subtitle="Bounties for you">
             <div id="bounties-container" phx-hook="InfiniteScroll">
               <.bounties bounties={@bounties} />
@@ -190,18 +190,18 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
         </div>
         <!-- Achievements Section -->
-        <div class="mt-8 flex items-center justify-between">
+        <div class="hidden lg:block mt-8">
           <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
+          <nav class="pt-4">
+            <ol role="list" class="space-y-6">
+              <%= for achievement <- @achievements do %>
+                <li>
+                  <.achievement achievement={achievement} />
+                </li>
+              <% end %>
+            </ol>
+          </nav>
         </div>
-        <nav class="pt-4">
-          <ol role="list" class="space-y-6">
-            <%= for achievement <- @achievements do %>
-              <li>
-                <.achievement achievement={achievement} />
-              </li>
-            <% end %>
-          </ol>
-        </nav>
       </aside>
     </div>
     """

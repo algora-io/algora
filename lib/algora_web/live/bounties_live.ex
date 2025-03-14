@@ -74,7 +74,7 @@ defmodule AlgoraWeb.BountiesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-6 p-6 lg:px-8">
+    <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
       <.section title="Bounties" subtitle="Open bounties for you">
         <div class="-mt-4 mb-4 flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
           <%= for {tech, count} <- @techs do %>

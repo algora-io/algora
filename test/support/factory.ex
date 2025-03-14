@@ -251,10 +251,8 @@ defmodule Algora.Factory do
       provider_id: sequence(:provider_id, &"#{&1 + offset(:installation)}"),
       provider_user_id: sequence(:provider_user_id, &"#{&1 + offset(:installation)}"),
       provider_meta: %{
-        "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
         "repository_selection" => "selected"
       },
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
       repository_selection: "selected"
     }
   end

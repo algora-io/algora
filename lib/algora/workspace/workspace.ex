@@ -286,10 +286,19 @@ defmodule Algora.Workspace do
   def get_installation(id), do: Repo.get(Installation, id)
   def get_installation!(id), do: Repo.get!(Installation, id)
 
-  def list_installations_by(fields), do: Repo.all(from(i in Installation, where: ^fields))
+  def list_installations_by(fields),
+    do:
+      Repo.all(
+        from(i in Installation,
+          where: ^fields,
+          join: connected_user in assoc(i, :connected_user),
+          join: provider_user in assoc(i, :provider_user),
+          select_merge: %{connected_user: connected_user, provider_user: provider_user}
+        )
+      )
 
   def list_user_installations(user_id) do
-    Repo.all(from(i in Installation, where: i.owner_id == ^user_id, preload: [:connected_user]))
+    list_installations_by(owner_id: user_id)
   end
 
   def fetch_command_response(ticket_id, command_type) do

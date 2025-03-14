@@ -22,6 +22,7 @@ defmodule Algora.Admin.Migration do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Admin
+  alias Algora.BotTemplates.BotTemplate
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -54,6 +55,7 @@ defmodule Algora.Admin.Migration do
     {"BountyCharge", Transaction},
     {"BountyTransfer", Tip},
     {"BountyTransfer", Transaction},
+    {"BotMessage", BotTemplate},
     {"OrgBalanceTransaction", Transaction},
     {"GithubInstallation", Installation},
     {"StripeAccount", Account},
@@ -625,6 +627,24 @@ defmodule Algora.Admin.Migration do
         &is_nil/1
       )
     end
+  end
+
+  defp transform({"BotMessage", BotTemplate}, row, db) do
+    user = find_by_index(db, "_MergedUser", "id", row["org_id"])
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
+    end
+
+    %{
+      "id" => row["id"],
+      "inserted_at" => row["created_at"],
+      "updated_at" => row["updated_at"],
+      "active" => row["active"],
+      "template" => row["template"],
+      "type" => row["type"],
+      "user_id" => user["id"]
+    }
   end
 
   defp transform({"OrgBalanceTransaction", Transaction}, row, db) do

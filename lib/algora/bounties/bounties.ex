@@ -4,6 +4,8 @@ defmodule Algora.Bounties do
   import Ecto.Query
 
   alias Algora.Accounts.User
+  alias Algora.BotTemplates
+  alias Algora.BotTemplates.BotTemplate
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -168,11 +170,62 @@ defmodule Algora.Bounties do
           claims :: list(Claim.t())
         ) :: String.t()
   def get_response_body(bounties, ticket_ref, attempts, claims) do
-    header =
-      Enum.map_join(bounties, "\n", fn bounty ->
-        "## 💎 #{bounty.amount} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
-      end)
+    custom_template =
+      Repo.one(
+        from bt in BotTemplate,
+          where: bt.type == :bounty_created,
+          where: bt.active == true,
+          join: u in assoc(bt, :user),
+          join: r in assoc(u, :repositories),
+          join: t in assoc(r, :tickets),
+          where: t.id == ^List.first(bounties).ticket_id
+      )
 
+    prize_pool = format_prize_pool(bounties)
+    attempts_table = format_attempts_table(attempts, claims)
+
+    template =
+      if custom_template do
+        custom_template.template
+      else
+        BotTemplates.get_default_template(:bounty_created)
+      end
+
+    template
+    |> String.replace("${PRIZE_POOL}", prize_pool)
+    |> String.replace("${ISSUE_NUMBER}", to_string(ticket_ref[:number]))
+    |> String.replace("${REPO_FULL_NAME}", "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}")
+    |> String.replace("${ATTEMPTS}", attempts_table)
+    |> String.replace("${FUND_URL}", AlgoraWeb.Endpoint.url())
+    |> String.replace("${TWEET_URL}", generate_tweet_url(bounties, ticket_ref))
+    |> String.replace("${ADDITIONAL_OPPORTUNITIES}", "")
+    |> String.trim()
+  end
+
+  defp generate_tweet_url(bounties, ticket_ref) do
+    total_amount = Enum.reduce(bounties, Money.new(0, :USD), &Money.add!(&2, &1.amount))
+
+    text =
+      "#{Money.to_string!(total_amount, no_fraction_if_integer: true)} bounty! 💎 https://github.com/#{ticket_ref[:owner]}/#{ticket_ref[:repo]}/issues/#{ticket_ref[:number]}"
+
+    uri = URI.parse("https://twitter.com/intent/tweet")
+
+    query =
+      URI.encode_query(%{
+        "text" => text,
+        "related" => "algoraio"
+      })
+
+    URI.to_string(%{uri | query: query})
+  end
+
+  defp format_prize_pool(bounties) do
+    Enum.map_join(bounties, "\n", fn bounty ->
+      "## 💎 #{Money.to_string!(bounty.amount, no_fraction_if_integer: true)} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
+    end)
+  end
+
+  defp format_attempts_table(attempts, claims) do
     solutions =
       []
       |> Enum.concat(Enum.map(claims, &claim_to_solution/1))
@@ -205,28 +258,16 @@ defmodule Algora.Bounties do
         "| #{primary_solution.indicator} #{users} | #{timestamp} | #{primary_solution.solution} | #{actions} |"
       end)
 
-    solutions_table =
-      if solutions == [] do
-        ""
-      else
-        """
+    if solutions == [] do
+      ""
+    else
+      """
 
-        | Attempt | Started (UTC) | Solution | Actions |
-        | --- | --- | --- | --- |
-        #{Enum.join(solutions, "\n")}
-        """
-      end
-
-    String.trim("""
-    #{header}
-    ### Steps to solve:
-    1. **Start working**: Comment `/attempt ##{ticket_ref[:number]}` with your implementation plan
-    2. **Submit work**: Create a pull request including `/claim ##{ticket_ref[:number]}` in the PR body to claim the bounty
-    3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
-
-    Thank you for contributing to #{ticket_ref[:owner]}/#{ticket_ref[:repo]}!
-    #{solutions_table}
-    """)
+      | Attempt | Started (UTC) | Solution | Actions |
+      | --- | --- | --- | --- |
+      #{Enum.join(solutions, "\n")}
+      """
+    end
   end
 
   def refresh_bounty_response(token, ticket_ref, ticket) do
@@ -1009,6 +1050,7 @@ defmodule Algora.Bounties do
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack
       },
+      ticket_id: t.id,
       ticket: %{
         id: t.id,
         title: t.title,

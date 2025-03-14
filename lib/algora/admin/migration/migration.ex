@@ -710,7 +710,6 @@ defmodule Algora.Admin.Migration do
       "provider" => "github",
       "provider_id" => row["github_id"],
       "provider_meta" => nil,
-      "avatar_url" => nil,
       "repository_selection" => nil,
       "owner_id" => nil,
       "connected_user_id" => connected_user["id"],

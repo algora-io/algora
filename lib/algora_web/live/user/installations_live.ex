@@ -19,14 +19,14 @@ defmodule AlgoraWeb.User.InstallationsLive do
                 <div class="flex items-center gap-4">
                   <div class="relative h-10 w-10">
                     <img
-                      alt={installation.provider_login}
+                      alt={installation.provider_user.provider_login}
                       class="rounded-lg"
-                      src={installation.avatar_url}
+                      src={installation.provider_user.avatar_url}
                     />
                   </div>
                   <div>
                     <div class="text-xl font-semibold tracking-tight text-gray-100">
-                      {installation.provider_login}
+                      {installation.provider_user.provider_login}
                     </div>
                     <div>
                       <div class="text-sm text-gray-300">
@@ -126,7 +126,7 @@ defmodule AlgoraWeb.User.InstallationsLive do
   end
 
   def mount(_params, _session, socket) do
-    installations = Workspace.list_user_installations(socket.assigns.current_user.id)
+    installations = Workspace.list_installations_by(owner_id: socket.assigns.current_user.id)
     {:ok, assign(socket, :installations, installations)}
   end
 end

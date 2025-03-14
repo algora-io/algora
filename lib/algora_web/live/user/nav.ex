@@ -9,8 +9,8 @@ defmodule AlgoraWeb.User.Nav do
   def on_mount(:default, _params, _session, socket) do
     {:cont,
      socket
-     |> assign(:nav, nav_items())
      |> assign(:contacts, [])
+     |> assign_nav_items()
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 
@@ -22,6 +22,7 @@ defmodule AlgoraWeb.User.Nav do
         {User.SettingsLive, _} -> :settings
         {User.TransactionsLive, _} -> :transactions
         {User.InstallationsLive, _} -> :installations
+        {User.ProfileLive, _} -> :profile
         {AlgoraWeb.CommunityLive, _} -> :community
         {AlgoraWeb.BountiesLive, _} -> :bounties
         {AlgoraWeb.OrgsLive, _} -> :projects
@@ -31,12 +32,13 @@ defmodule AlgoraWeb.User.Nav do
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def nav_items do
-    [
+  def assign_nav_items(socket) do
+    nav = [
       %{
         title: "Main",
         items: [
           %{href: "/", tab: :dashboard, icon: "tabler-home", label: "Dashboard"},
+          %{href: "/@/#{socket.assigns.current_user.handle}", tab: :profile, icon: "tabler-user", label: "Profile"},
           %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
           %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
           %{href: "/community", tab: :community, icon: "tabler-users", label: "Community"},
@@ -101,5 +103,7 @@ defmodule AlgoraWeb.User.Nav do
         ]
       }
     ]
+
+    assign(socket, :nav, nav)
   end
 end

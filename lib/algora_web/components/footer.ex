@@ -82,12 +82,12 @@ defmodule AlgoraWeb.Components.Footer do
                   </a>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/community"
+                    navigate={~p"/community"}
                   >
                     Community
-                  </a>
+                  </.link>
                 </li>
                 <li>
                   <a
@@ -135,12 +135,12 @@ defmodule AlgoraWeb.Components.Footer do
                   </a>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/pricing"
+                    navigate={~p"/pricing"}
                   >
                     Pricing
-                  </a>
+                  </.link>
                 </li>
               </ul>
             </div>

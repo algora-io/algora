@@ -132,7 +132,7 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
               <!-- Featured devs -->
-              <div class="mt-14 flex justify-start md:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0 overflow-x-auto scrollbar-thin xl:overflow-x-visible">
+              <div class="mt-14 flex justify-start md:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0 overflow-x-auto scrollbar-thin lg:overflow-x-visible">
                 <%= if length(@featured_devs) > 0 do %>
                   <div class="ml-auto w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                     <.dev_card dev={List.first(@featured_devs)} />

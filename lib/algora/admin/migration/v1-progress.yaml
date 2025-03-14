@@ -57,13 +57,13 @@
     - github_res_comment_id: -1
     - type: -1
 - "BotMessage":
-    - id: -1
-    - created_at: -1
-    - updated_at: -1
-    - active: -1
-    - template: -1
-    - type: -1
-    - org_id: -1
+    - id: 1
+    - created_at: 1
+    - updated_at: 1
+    - active: 1
+    - template: 1
+    - type: 1
+    - org_id: 1
 - "Bounty":
     - id: 1
     - created_at: 1

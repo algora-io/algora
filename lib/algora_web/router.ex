@@ -69,27 +69,29 @@ defmodule AlgoraWeb.Router do
       live "/user/installations", User.InstallationsLive, :index
     end
 
-    live_session :org,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
-      live "/org/:org_handle", Org.DashboardLive, :index
-      live "/org/:org_handle/home", Org.DashboardPublicLive, :index
-      live "/org/:org_handle/bounties", Org.BountiesLive, :index
-      live "/org/:org_handle/contracts/:id", Contract.ViewLive
-      live "/org/:org_handle/team", Org.TeamLive, :index
-      live "/org/:org_handle/leaderboard", Org.LeaderboardLive, :index
-    end
+    scope "/org/:org_handle" do
+      live_session :org,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
+        live "/", Org.DashboardLive, :index
+        live "/home", Org.DashboardPublicLive, :index
+        live "/bounties", Org.BountiesLive, :index
+        live "/contracts/:id", Contract.ViewLive
+        live "/team", Org.TeamLive, :index
+        live "/leaderboard", Org.LeaderboardLive, :index
+      end
 
-    live_session :org_admin,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [
-        {AlgoraWeb.UserAuth, :ensure_authenticated},
-        {AlgoraWeb.UserAuth, :current_user},
-        AlgoraWeb.Org.Nav,
-        {AlgoraWeb.OrgAuth, :ensure_admin}
-      ] do
-      live "/org/:org_handle/settings", Org.SettingsLive, :edit
-      live "/org/:org_handle/transactions", Org.TransactionsLive, :index
+      live_session :org_admin,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [
+          {AlgoraWeb.UserAuth, :ensure_authenticated},
+          {AlgoraWeb.UserAuth, :current_user},
+          AlgoraWeb.Org.Nav,
+          {AlgoraWeb.OrgAuth, :ensure_admin}
+        ] do
+        live "/settings", Org.SettingsLive, :edit
+        live "/transactions", Org.TransactionsLive, :index
+      end
     end
 
     live_session :onboarding,

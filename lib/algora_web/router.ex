@@ -57,6 +57,7 @@ defmodule AlgoraWeb.Router do
       live "/bounties", BountiesLive, :index
       live "/community", CommunityLive, :index
       live "/leaderboard", LeaderboardLive, :index
+      live "/projects", OrgsLive, :index
     end
 
     live_session :authenticated,

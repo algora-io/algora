@@ -58,12 +58,12 @@ defmodule AlgoraWeb.Components.Footer do
               <h3 class="text-base font-semibold leading-6 text-white">Community</h3>
               <ul role="list" class="mt-6 space-y-4">
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/home/projects#content"
+                    navigate={~p"/projects"}
                   >
                     Projects
-                  </a>
+                  </.link>
                 </li>
                 <li>
                   <.link

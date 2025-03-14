@@ -4,6 +4,7 @@ defmodule Algora.Bounties do
   import Ecto.Query
 
   alias Algora.Accounts.User
+  alias Algora.BotTemplates
   alias Algora.BotTemplates.BotTemplate
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
@@ -183,30 +184,22 @@ defmodule Algora.Bounties do
     prize_pool = format_prize_pool(bounties)
     attempts_table = format_attempts_table(attempts, claims)
 
-    message =
+    template =
       if custom_template do
         custom_template.template
-        |> String.replace("${PRIZE_POOL}", prize_pool)
-        |> String.replace("${ISSUE_NUMBER}", to_string(ticket_ref[:number]))
-        |> String.replace("${REPO_FULL_NAME}", "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}")
-        |> String.replace("${ATTEMPTS}", attempts_table)
-        |> String.replace("${FUND_URL}", AlgoraWeb.Endpoint.url())
-        |> String.replace("${TWEET_URL}", generate_tweet_url(bounties, ticket_ref))
-        |> String.replace("${ADDITIONAL_OPPORTUNITIES}", "")
       else
-        """
-        #{prize_pool}
-        ### Steps to solve:
-        1. **Start working**: Comment `/attempt ##{ticket_ref[:number]}` with your implementation plan
-        2. **Submit work**: Create a pull request including `/claim ##{ticket_ref[:number]}` in the PR body to claim the bounty
-        3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
-
-        Thank you for contributing to #{ticket_ref[:owner]}/#{ticket_ref[:repo]}!
-        #{attempts_table}
-        """
+        BotTemplates.get_default_template(:bounty_created)
       end
 
-    String.trim(message)
+    template
+    |> String.replace("${PRIZE_POOL}", prize_pool)
+    |> String.replace("${ISSUE_NUMBER}", to_string(ticket_ref[:number]))
+    |> String.replace("${REPO_FULL_NAME}", "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}")
+    |> String.replace("${ATTEMPTS}", attempts_table)
+    |> String.replace("${FUND_URL}", AlgoraWeb.Endpoint.url())
+    |> String.replace("${TWEET_URL}", generate_tweet_url(bounties, ticket_ref))
+    |> String.replace("${ADDITIONAL_OPPORTUNITIES}", "")
+    |> String.trim()
   end
 
   defp generate_tweet_url(bounties, ticket_ref) do

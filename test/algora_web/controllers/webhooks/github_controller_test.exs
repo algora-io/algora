@@ -575,6 +575,12 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
+        },
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number2}}
         }
       ])
 

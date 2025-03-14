@@ -1057,6 +1057,7 @@ defmodule Algora.Bounties do
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack
       },
+      ticket_id: t.id,
       ticket: %{
         id: t.id,
         title: t.title,

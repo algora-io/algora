@@ -47,17 +47,9 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties?#{%{tech: "go"}}"}
+                    navigate={~p"/bounties?#{%{tech: "c,c++"}}"}
                   >
-                    Go
-                  </.link>
-                </li>
-                <li>
-                  <.link
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties?#{%{tech: "swift"}}"}
-                  >
-                    Swift
+                    C / C++
                   </.link>
                 </li>
               </ul>
@@ -65,14 +57,6 @@ defmodule AlgoraWeb.Components.Footer do
             <div>
               <h3 class="text-base font-semibold leading-6 text-white">Community</h3>
               <ul role="list" class="mt-6 space-y-4">
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/events"
-                  >
-                    Activity
-                  </a>
-                </li>
                 <li>
                   <a
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"

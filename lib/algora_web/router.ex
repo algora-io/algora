@@ -92,14 +92,6 @@ defmodule AlgoraWeb.Router do
       live "/org/:org_handle/transactions", Org.TransactionsLive, :index
     end
 
-    live_session :default, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      live "/auth/login", SignInLive, :index
-      live "/payment/success", Payment.SuccessLive, :index
-      live "/payment/canceled", Payment.CanceledLive, :index
-      live "/@/:handle", User.ProfileLive, :index
-      live "/claims/:group_id", ClaimLive
-    end
-
     live_session :onboarding,
       on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
@@ -109,6 +101,11 @@ defmodule AlgoraWeb.Router do
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+      live "/auth/login", SignInLive, :index
+      live "/payment/success", Payment.SuccessLive, :index
+      live "/payment/canceled", Payment.CanceledLive, :index
+      live "/@/:handle", User.ProfileLive, :index
+      live "/claims/:group_id", ClaimLive
       live "/swift", SwiftBountiesLive
       live "/:country_code", HomeLive, :index
     end

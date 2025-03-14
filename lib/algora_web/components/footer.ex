@@ -90,12 +90,12 @@ defmodule AlgoraWeb.Components.Footer do
                   </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/home/leaderboard#content"
+                    navigate={~p"/leaderboard"}
                   >
                     Leaderboard
-                  </a>
+                  </.link>
                 </li>
                 <li>
                   <a

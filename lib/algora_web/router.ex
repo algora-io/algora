@@ -56,6 +56,7 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
       live "/bounties", BountiesLive, :index
       live "/community", CommunityLive, :index
+      live "/leaderboard", LeaderboardLive, :index
     end
 
     live_session :authenticated,

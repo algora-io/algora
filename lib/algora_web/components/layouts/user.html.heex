@@ -83,6 +83,19 @@
         </li>
         <li>
           <.link
+            href={AlgoraWeb.Constants.get(:algora_tv_url)}
+            target="_blank"
+            class={[
+              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+              "text-gray-400 hover:bg-gray-800 hover:text-white"
+            ]}
+          >
+            <.icon name="tabler-device-tv" class="h-6 w-6 shrink-0" />
+            <span class="sr-only">Algora TV</span>
+          </.link>
+        </li>
+        <li>
+          <.link
             navigate={~p"/user/settings"}
             class={[
               "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",

@@ -259,6 +259,13 @@ defmodule Algora.Factory do
     }
   end
 
+  def bot_template_factory do
+    %Algora.BotTemplates.BotTemplate{
+      id: Nanoid.generate(),
+      type: :bounty_created
+    }
+  end
+
   # Convenience API
   def insert!(factory_name, attributes \\ [])
 

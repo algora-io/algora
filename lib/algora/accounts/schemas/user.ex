@@ -97,6 +97,7 @@ defmodule Algora.Accounts.User do
     has_many :client_contracts, Contract, foreign_key: :client_id
     has_many :activities, {"user_activities", Activity}, foreign_key: :assoc_id
 
+    has_one :bot_template, Algora.BotTemplates.BotTemplate, foreign_key: :user_id
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
 
     timestamps()

@@ -8,10 +8,41 @@ defmodule AlgoraWeb.BountiesLive do
 
   require Logger
 
-  def mount(_params, _session, socket) do
+  @impl true
+  def handle_params(params, _uri, socket) do
+    selected_techs =
+      (params["tech"] || "") |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
+
+    valid_techs = Enum.map(socket.assigns.techs, fn {tech, _} -> String.downcase(tech) end)
+    # Only keep valid techs that exist in the available tech list
+    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
+
+    query_opts =
+      if selected_techs == [] do
+        Keyword.delete(socket.assigns.query_opts, :tech_stack)
+      else
+        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
+      end
+
+    {:noreply,
+     socket
+     |> assign(:selected_techs, selected_techs)
+     |> assign(:query_opts, query_opts)
+     |> assign_bounties()}
+  end
+
+  @impl true
+  def mount(params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
     end
+
+    # Parse selected techs from URL params and ensure lowercase
+    selected_techs =
+      (params["tech"] || "")
+      |> String.split(",")
+      |> Enum.reject(&(&1 == ""))
+      |> Enum.map(&String.downcase/1)
 
     query_opts =
       [
@@ -25,7 +56,10 @@ defmodule AlgoraWeb.BountiesLive do
         end
 
     techs = Bounties.list_tech(query_opts)
-    selected_techs = []
+
+    # Only keep valid techs that exist in the available tech list (case insensitive)
+    valid_techs = Enum.map(techs, fn {tech, _} -> String.downcase(tech) end)
+    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
 
     query_opts = if selected_techs == [], do: query_opts, else: Keyword.put(query_opts, :tech_stack, selected_techs)
 
@@ -37,6 +71,7 @@ defmodule AlgoraWeb.BountiesLive do
      |> assign_bounties()}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6 lg:px-8">
@@ -45,7 +80,7 @@ defmodule AlgoraWeb.BountiesLive do
           <%= for {tech, count} <- @techs do %>
             <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
               <.badge
-                variant={if tech in @selected_techs, do: "success", else: "outline"}
+                variant={if String.downcase(tech) in @selected_techs, do: "success", else: "outline"}
                 class="hover:bg-white/[4%] transition-colors"
               >
                 {tech} ({count})
@@ -80,10 +115,12 @@ defmodule AlgoraWeb.BountiesLive do
     """
   end
 
+  @impl true
   def handle_info(:bounties_updated, socket) do
     {:noreply, assign_bounties(socket)}
   end
 
+  @impl true
   def handle_event("load_more", _params, socket) do
     %{bounties: bounties} = socket.assigns
 
@@ -101,7 +138,10 @@ defmodule AlgoraWeb.BountiesLive do
      |> assign(:has_more_bounties, length(more_bounties) >= page_size())}
   end
 
+  @impl true
   def handle_event("toggle_tech", %{"tech" => tech}, socket) do
+    tech = String.downcase(tech)
+
     selected_techs =
       if tech in socket.assigns.selected_techs do
         List.delete(socket.assigns.selected_techs, tech)
@@ -116,8 +156,12 @@ defmodule AlgoraWeb.BountiesLive do
         Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
       end
 
+    # Update the URL with selected techs
+    tech_param = if selected_techs == [], do: nil, else: Enum.join(selected_techs, ",")
+
     {:noreply,
      socket
+     |> push_patch(to: ~p"/bounties?#{%{tech: tech_param}}")
      |> assign(:selected_techs, selected_techs)
      |> assign(:query_opts, query_opts)
      |> assign_bounties()}

@@ -106,20 +106,20 @@
       <.separator class="mx-auto my-4 w-2/3" />
 
       <ul role="list" class="space-y-1">
-        <%= for org <- @online_orgs do %>
+        <%= for contact <- @contacts do %>
           <li>
             <.link
               class="flex justify-center p-2"
-              navigate={Algora.Accounts.User.url(org)}
-              title={Algora.Accounts.User.handle(org)}
+              navigate={Algora.Accounts.User.url(contact)}
+              title={Algora.Accounts.User.handle(contact)}
             >
               <div class="relative inline-block">
                 <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                   <img
-                    alt={Algora.Accounts.User.handle(org)}
+                    alt={Algora.Accounts.User.handle(contact)}
                     loading="lazy"
                     decoding="async"
-                    src={org.avatar_url}
+                    src={contact.avatar_url}
                     class="h-full w-full object-cover"
                   />
                 </div>

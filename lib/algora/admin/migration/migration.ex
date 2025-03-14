@@ -1214,65 +1214,26 @@ defmodule Algora.Admin.Migration do
   defp serialize_value(%Decimal{} = value), do: Decimal.to_string(value)
 
   defp serialize_value(value) when is_map(value) or is_list(value) do
-    json = Jason.encode!(value, escape: :json)
-    # Handle empty arrays specifically
-    if json == "[]" do
-      "{}"
-    else
-      # Escape backslashes and double quotes for PostgreSQL COPY
-      String.replace(json, ["\\", "\""], fn
-        "\\" -> "\\\\"
-        "\"" -> "\\\""
-      end)
+    case Jason.encode(value) do
+      {:ok, json} ->
+        if json == "[]" do
+          "{}"
+        else
+          # Escape backslashes and double quotes for PostgreSQL COPY
+          String.replace(json, ["\\", "\""], fn
+            "\\" -> "\\\\"
+            "\"" -> "\\\""
+          end)
+        end
+
+      {:error, _} ->
+        inspect(value)
     end
-  rescue
-    _ ->
-      # Fallback to a safe string representation
-      value
-      |> inspect(limit: :infinity, printable_limit: :infinity)
-      |> String.replace(["\\", "\n", "\r", "\t"], fn
-        "\\" -> "\\\\"
-        "\n" -> "\\n"
-        "\r" -> "\\r"
-        "\t" -> "\\t"
-      end)
-      |> String.replace("\"", "\\\"")
   end
 
-  defp serialize_value(value) when is_nil(value), do: "\\N"
-
-  defp serialize_value(value) when is_binary(value) do
-    # Remove any surrounding quotes for numeric values
-    value =
-      if String.starts_with?(value, "\"") and String.ends_with?(value, "\"") do
-        String.slice(value, 1..-2//1)
-      else
-        value
-      end
-
-    String.replace(value, ["\\", "\n", "\r", "\t"], fn
-      "\\" -> "\\\\"
-      "\n" -> "\\n"
-      "\r" -> "\\r"
-      "\t" -> "\\t"
-    end)
-  end
+  defp serialize_value(nil), do: "\\N"
 
   defp serialize_value(value), do: to_string(value)
-
-  # defp extract_default_fields(schema) do
-  #   schema.__schema__(:fields)
-  #   |> Enum.filter(fn field ->
-  #     case schema.__schema__(:field, field) do
-  #       {:default, _} -> true
-  #       _ -> false
-  #     end
-  #   end)
-  #   |> Enum.map(fn field ->
-  #     {field, schema.__schema__(:field, field) |> elem(1)}
-  #   end)
-  #   |> Enum.into(%{})
-  # end
 
   defp update_url(url) do
     case url do

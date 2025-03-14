@@ -1445,6 +1445,7 @@ defmodule Algora.Admin.Migration do
   end
 
   def run!(timestamp, opts) do
+    Process.delete(:handles)
     Algora.Settings.set_migration_in_progress!(true)
 
     pwd = Path.join([:code.priv_dir(:algora), "db"])
@@ -1472,7 +1473,6 @@ defmodule Algora.Admin.Migration do
       :ok = time_step("Backfilling repo tech stack", fn -> Admin.backfill_repo_tech_stack!() end)
     end)
 
-    Process.delete(:handles)
     Algora.Settings.set_migration_in_progress!(false)
   end
 

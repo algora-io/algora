@@ -297,10 +297,6 @@ defmodule Algora.Workspace do
         )
       )
 
-  def list_user_installations(user_id) do
-    list_installations_by(owner_id: user_id)
-  end
-
   def fetch_command_response(ticket_id, command_type) do
     Repo.fetch_one(
       from cr in CommandResponse,

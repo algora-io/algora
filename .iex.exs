@@ -24,6 +24,7 @@ alias Algora.Repo
 alias Algora.Settings
 alias Algora.Workspace
 alias Algora.Workspace.Installation
+alias Algora.Workspace.Repository
 alias Algora.Workspace.Ticket
 
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity], auto_reload: true)

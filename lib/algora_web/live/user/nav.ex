@@ -34,22 +34,21 @@ defmodule AlgoraWeb.User.Nav do
   def nav_items do
     [
       %{
-        title: "Main Navigation",
+        title: "Main",
         items: [
-          %{href: "/events", tab: :activity, icon: "tabler-activity", label: "Activity"},
-          %{href: "/dashboard/orgs", tab: :projects, icon: "tabler-rocket", label: "Projects"},
-          %{
-            href: "/bounties/new",
-            tab: :bounties,
-            icon: "tabler-diamond",
-            label: "Community bounties"
-          },
+          %{href: "/", tab: :dashboard, icon: "tabler-home", label: "Dashboard"},
+          %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
+          %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
+          %{href: "/community", tab: :community, icon: "tabler-users", label: "Community"},
+          %{href: "/user/transactions", tab: :transactions, icon: "tabler-wallet", label: "Transactions"},
           %{
             href: "https://tv.algora.io",
-            tab: :media,
+            tab: :tv,
             icon: "tabler-device-tv",
-            label: "Media center"
-          }
+            label: "Algora TV",
+            target: "_blank"
+          },
+          %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"}
         ]
       },
       %{
@@ -81,7 +80,6 @@ defmodule AlgoraWeb.User.Nav do
         title: "Admin",
         items: [
           %{href: "/admin", tab: :admin, icon: "tabler-adjustments", label: "Admin"},
-          %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"},
           %{href: "/auth/logout", icon: "tabler-logout", label: "Logout"}
         ]
       },

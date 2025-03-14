@@ -48,160 +48,162 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex-1 bg-background text-foreground lg:pr-96">
-      <div :if={not @has_active_account} class="relative h-full p-6">
-        <.section>
-          <.card>
-            <.card_header>
-              <.card_title>Connect with Stripe</.card_title>
-              <.card_description>
-                Connect your Stripe account to receive payments for bounties and contracts
-              </.card_description>
-            </.card_header>
-            <.card_content>
-              <div class="flex flex-col gap-3">
-                <.button navigate={~p"/user/transactions"} class="ml-auto">
-                  Connect with Stripe <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2 -mr-1" />
-                </.button>
-              </div>
-            </.card_content>
-          </.card>
-        </.section>
-      </div>
-      <!-- Contracts section -->
-      <div :if={length(@contracts) > 0} class="relative h-full p-6">
-        <div class="flex justify-between">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Hourly contracts
-            </h2>
-            <p class="text-sm text-muted-foreground">Paid out weekly</p>
-          </div>
+    <div class="flex lg:flex-row flex-col-reverse">
+      <div class="flex-1 bg-background text-foreground lg:pr-96">
+        <div :if={not @has_active_account} class="relative h-full p-6">
+          <.section>
+            <.card>
+              <.card_header>
+                <.card_title>Connect with Stripe</.card_title>
+                <.card_description>
+                  Connect your Stripe account to receive payments for bounties and contracts
+                </.card_description>
+              </.card_header>
+              <.card_content>
+                <div class="flex flex-col gap-3">
+                  <.button navigate={~p"/user/transactions"} class="ml-auto">
+                    Connect with Stripe <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2 -mr-1" />
+                  </.button>
+                </div>
+              </.card_content>
+            </.card>
+          </.section>
         </div>
-        <div class="-ml-4">
-          <div class="relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for contract <- @contracts do %>
-                  <.contract_card contract={contract} />
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <!-- Bounties section -->
-      <div :if={length(@bounties) > 0} class="relative h-full p-6">
-        <.section title="Open bounties" subtitle="Bounties for you">
-          <div id="bounties-container" phx-hook="InfiniteScroll">
-            <.bounties bounties={@bounties} />
-            <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
-              <div class="animate-pulse text-muted-foreground">
-                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
-              </div>
+        <!-- Contracts section -->
+        <div :if={length(@contracts) > 0} class="relative h-full p-6">
+          <div class="flex justify-between">
+            <div class="flex flex-col space-y-1.5">
+              <h2 class="text-2xl font-semibold leading-none tracking-tight">
+                Hourly contracts
+              </h2>
+              <p class="text-sm text-muted-foreground">Paid out weekly</p>
             </div>
           </div>
-        </.section>
-      </div>
-    </div>
-    <!-- Sidebar -->
-    <aside class="fixed top-16 right-0 bottom-0 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
-      <!-- Availability Section -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <label for="available" class="text-sm font-medium">Available to work</label>
-          <.tooltip>
-            <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
-            <.tooltip_content side="bottom" class="max-w-xs text-sm">
-              When enabled, you will receive hourly contract offers
-            </.tooltip_content>
-          </.tooltip>
+          <div class="-ml-4">
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for contract <- @contracts do %>
+                    <.contract_card contract={contract} />
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <.switch
-          id="available"
-          name="available"
-          value={@available_to_work}
-          phx-click="toggle_availability"
-        />
+        <!-- Bounties section -->
+        <div :if={length(@bounties) > 0} class="relative h-full p-6">
+          <.section title="Open bounties" subtitle="Bounties for you">
+            <div id="bounties-container" phx-hook="InfiniteScroll">
+              <.bounties bounties={@bounties} />
+              <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+                <div class="animate-pulse text-muted-foreground">
+                  <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+                </div>
+              </div>
+            </div>
+          </.section>
+        </div>
       </div>
-      <div class="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
-          <div class="relative mt-2">
-            <span class="font-display absolute top-1/2 left-3 -translate-y-1/2">
-              $
-            </span>
+      <!-- Sidebar -->
+      <aside class="lg:fixed lg:top-16 lg:right-0 lg:bottom-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-border lg:bg-background p-4 pt-6 sm:p-6 md:p-8">
+        <!-- Availability Section -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <label for="available" class="text-sm font-medium">Available to work</label>
+            <.tooltip>
+              <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
+              <.tooltip_content side="bottom" class="max-w-xs text-sm">
+                When enabled, you will receive hourly contract offers
+              </.tooltip_content>
+            </.tooltip>
+          </div>
+          <.switch
+            id="available"
+            name="available"
+            value={@available_to_work}
+            phx-click="toggle_availability"
+          />
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-4">
+          <div>
+            <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
+            <div class="relative mt-2">
+              <span class="font-display absolute top-1/2 left-3 -translate-y-1/2">
+                $
+              </span>
+              <.input
+                type="number"
+                min="0"
+                id="hourly-rate"
+                name="hourly-rate"
+                value={@hourly_rate}
+                phx-keydown="handle_hourly_rate"
+                phx-debounce="200"
+                phx-hook="ClearInput"
+                class="font-display w-full border-input bg-background ps-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
             <.input
               type="number"
               min="0"
-              id="hourly-rate"
-              name="hourly-rate"
-              value={@hourly_rate}
-              phx-keydown="handle_hourly_rate"
+              max="168"
+              id="hours-per-week"
+              name="hours-per-week"
+              value={@hours_per_week}
+              phx-keydown="handle_hours_per_week"
               phx-debounce="200"
-              phx-hook="ClearInput"
-              class="font-display w-full border-input bg-background ps-6"
+              class="font-display mt-2 w-full border-input bg-background"
             />
           </div>
         </div>
-        <div>
-          <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
+        <!-- Tech Stack Section -->
+        <div class="mt-4">
+          <label for="tech-input" class="text-sm font-medium">Tech stack</label>
           <.input
-            type="number"
-            min="0"
-            max="168"
-            id="hours-per-week"
-            name="hours-per-week"
-            value={@hours_per_week}
-            phx-keydown="handle_hours_per_week"
+            id="tech-input"
+            name="tech-input"
+            value=""
+            type="text"
+            placeholder="Elixir, Phoenix, PostgreSQL, etc."
+            phx-keydown="handle_tech_input"
             phx-debounce="200"
-            class="font-display mt-2 w-full border-input bg-background"
+            phx-hook="ClearInput"
+            class="mt-2 w-full border-input bg-background"
           />
+          <div class="mt-4 flex flex-wrap gap-3">
+            <%= for tech <- @current_user.tech_stack do %>
+              <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+                {tech}
+                <button
+                  phx-click="remove_tech"
+                  phx-value-tech={tech}
+                  class="ml-1 text-foreground hover:text-foreground/80"
+                >
+                  ×
+                </button>
+              </div>
+            <% end %>
+          </div>
         </div>
-      </div>
-      <!-- Tech Stack Section -->
-      <div class="mt-4">
-        <label for="tech-input" class="text-sm font-medium">Tech stack</label>
-        <.input
-          id="tech-input"
-          name="tech-input"
-          value=""
-          type="text"
-          placeholder="Elixir, Phoenix, PostgreSQL, etc."
-          phx-keydown="handle_tech_input"
-          phx-debounce="200"
-          phx-hook="ClearInput"
-          class="mt-2 w-full border-input bg-background"
-        />
-        <div class="mt-4 flex flex-wrap gap-3">
-          <%= for tech <- @current_user.tech_stack do %>
-            <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
-              {tech}
-              <button
-                phx-click="remove_tech"
-                phx-value-tech={tech}
-                class="ml-1 text-foreground hover:text-foreground/80"
-              >
-                ×
-              </button>
-            </div>
-          <% end %>
+        <!-- Achievements Section -->
+        <div class="mt-8 flex items-center justify-between">
+          <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
         </div>
-      </div>
-      <!-- Achievements Section -->
-      <div class="mt-8 flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
-      </div>
-      <nav class="pt-4">
-        <ol role="list" class="space-y-6">
-          <%= for achievement <- @achievements do %>
-            <li>
-              <.achievement achievement={achievement} />
-            </li>
-          <% end %>
-        </ol>
-      </nav>
-    </aside>
+        <nav class="pt-4">
+          <ol role="list" class="space-y-6">
+            <%= for achievement <- @achievements do %>
+              <li>
+                <.achievement achievement={achievement} />
+              </li>
+            <% end %>
+          </ol>
+        </nav>
+      </aside>
+    </div>
     """
   end
 

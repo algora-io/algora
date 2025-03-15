@@ -1139,10 +1139,25 @@ defmodule Algora.Bounties do
         where: ltx.status == :succeeded,
         where: ltx.user_id == ^org_id or r.user_id == ^org_id
 
-    rewarded_bounties_query = rewards_query |> where([t], not is_nil(t.bounty_id)) |> distinct(:bounty_id)
-    rewarded_tips_query = rewards_query |> where([t], not is_nil(t.tip_id)) |> distinct(:tip_id)
-    rewarded_contracts_query = rewards_query |> where([t], not is_nil(t.contract_id)) |> distinct(:contract_id)
-    rewarded_users_query = rewards_query |> distinct(true) |> select([:user_id])
+    rewarded_bounties_query =
+      rewards_query
+      |> where([t], not is_nil(t.bounty_id))
+      |> distinct([:user_id, :bounty_id])
+
+    rewarded_tips_query =
+      rewards_query
+      |> where([t], not is_nil(t.tip_id))
+      |> distinct([:user_id, :tip_id])
+
+    rewarded_contracts_query =
+      rewards_query
+      |> where([t], not is_nil(t.contract_id))
+      |> distinct([:user_id, :contract_id])
+
+    rewarded_users_query =
+      rewards_query
+      |> distinct(true)
+      |> select([:user_id])
 
     rewarded_users_diff_query =
       from t in rewarded_users_query,

@@ -461,28 +461,30 @@ defmodule Algora.Admin.Migration do
       raise "User not found: #{inspect(row)}"
     end
 
-    %{
-      "id" => row["id"],
-      "status" =>
-        case row["status"] do
-          "accepted" -> :approved
-          _ -> :pending
-        end,
-      "type" =>
-        cond do
-          !nullish?(row["github_pull_request_id"]) -> "pull_request"
-          String.match?(row["github_url"], ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
-          true -> "pull_request"
-        end,
-      "url" => or_else(row["github_url"], "https://algora.io"),
-      "group_id" => row["id"],
-      "group_share" => nil,
-      "source_id" => nil,
-      "target_id" => task["id"],
-      "user_id" => user_id,
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"]
-    }
+    if bounty["type"] != "tip" do
+      %{
+        "id" => row["id"],
+        "status" =>
+          case row["status"] do
+            "accepted" -> :approved
+            _ -> :pending
+          end,
+        "type" =>
+          cond do
+            !nullish?(row["github_pull_request_id"]) -> "pull_request"
+            String.match?(row["github_url"], ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
+            true -> "pull_request"
+          end,
+        "url" => or_else(row["github_url"], "https://algora.io"),
+        "group_id" => row["id"],
+        "group_share" => nil,
+        "source_id" => nil,
+        "target_id" => task["id"],
+        "user_id" => user_id,
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"]
+      }
+    end
   end
 
   defp transform({"BountyCharge", Transaction}, row, db) do

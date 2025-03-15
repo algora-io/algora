@@ -169,8 +169,9 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <a
+              <.link
                 href="https://github.com/zed-industries/zed/issues/4440"
+                rel="noopener"
                 class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
               >
                 <div class="flex -space-x-4">
@@ -193,10 +194,11 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="font-display text-2xl font-semibold text-success-400">$500</div>
-              </a>
+              </.link>
 
-              <a
+              <.link
                 href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                rel="noopener"
                 class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
               >
                 <img class="h-20 w-20" src="https://github.com/PX4.png" alt="PX4" />
@@ -210,8 +212,9 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="font-display text-2xl font-semibold text-success-400">$1,000</div>
-              </a>
-              <a
+              </.link>
+
+              <.link
                 href="https://github.com/calcom/cal.com/issues/11953"
                 class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
               >
@@ -235,9 +238,9 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="font-display text-2xl font-semibold text-success-400">$500</div>
-              </a>
-              <a
-                href="https://console.algora.io/org/coollabsio"
+              </.link>
+              <.link
+                navigate={~p"/org/coollabsio"}
                 class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
               >
                 <img
@@ -253,7 +256,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="font-display text-2xl font-semibold text-success-400">$2,543</div>
-              </a>
+              </.link>
             </div>
 
             <div class="max-w-4xl mx-auto mt-12">

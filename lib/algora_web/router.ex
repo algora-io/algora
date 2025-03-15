@@ -20,6 +20,23 @@ defmodule AlgoraWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/admin" do
+    pipe_through [:browser]
+
+    live_session :admin,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav] do
+      live "/analytics", Admin.CompanyAnalyticsLive
+      live "/leaderboard", Admin.LeaderboardLive
+    end
+
+    live_dashboard "/dashboard",
+      metrics: AlgoraWeb.Telemetry,
+      additional_pages: [oban: Oban.LiveDashboard],
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
+  end
+
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
@@ -27,47 +44,14 @@ defmodule AlgoraWeb.Router do
 
     get "/set_context/:context", ContextController, :set
     get "/a/:table_prefix/:activity_id", ActivityController, :get
-
-    get "/callbacks/stripe/refresh", StripeCallbackController, :refresh
-    get "/callbacks/stripe/return", StripeCallbackController, :return
-    get "/callbacks/:provider/oauth", OAuthCallbackController, :new
-    get "/callbacks/:provider/installation", InstallationCallbackController, :new
     get "/auth/logout", OAuthCallbackController, :sign_out
-
     get "/tip", TipController, :create
 
-    scope "/admin" do
-      live_session :admin,
-        layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav] do
-        live "/analytics", Admin.CompanyAnalyticsLive
-        live "/leaderboard", Admin.LeaderboardLive
-      end
-
-      live_dashboard "/dashboard",
-        metrics: AlgoraWeb.Telemetry,
-        additional_pages: [oban: Oban.LiveDashboard],
-        layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
-    end
-
-    live_session :public,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
-      live "/bounties", BountiesLive, :index
-      live "/community", CommunityLive, :index
-      live "/leaderboard", LeaderboardLive, :index
-      live "/projects", OrgsLive, :index
-      live "/@/:handle", User.ProfileLive, :index
-    end
-
-    live_session :authenticated,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
-      live "/home", User.DashboardLive, :index
-      live "/user/transactions", User.TransactionsLive, :index
-      live "/user/settings", User.SettingsLive, :edit
-      live "/user/installations", User.InstallationsLive, :index
+    scope "/callbacks" do
+      get "/stripe/refresh", StripeCallbackController, :refresh
+      get "/stripe/return", StripeCallbackController, :return
+      get "/:provider/oauth", OAuthCallbackController, :new
+      get "/:provider/installation", InstallationCallbackController, :new
     end
 
     scope "/org/:org_handle" do
@@ -95,21 +79,43 @@ defmodule AlgoraWeb.Router do
       end
     end
 
+    live_session :authenticated,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
+      live "/home", User.DashboardLive, :index
+      live "/user/transactions", User.TransactionsLive, :index
+      live "/user/settings", User.SettingsLive, :edit
+      live "/user/installations", User.InstallationsLive, :index
+    end
+
+    live_session :public,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
+      live "/bounties", BountiesLive, :index
+      live "/community", CommunityLive, :index
+      live "/leaderboard", LeaderboardLive, :index
+      live "/projects", OrgsLive, :index
+      live "/@/:handle", User.ProfileLive, :index
+      live "/claims/:group_id", ClaimLive
+      live "/payment/success", Payment.SuccessLive, :index
+      live "/payment/canceled", Payment.CanceledLive, :index
+    end
+
     live_session :onboarding,
       on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
       live "/pricing", PricingLive
+      live "/swift", SwiftBountiesLive
     end
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/auth/login", SignInLive, :index
-      live "/payment/success", Payment.SuccessLive, :index
-      live "/payment/canceled", Payment.CanceledLive, :index
+    end
 
-      live "/claims/:group_id", ClaimLive
-      live "/swift", SwiftBountiesLive
+    live_session :wildcard,
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/:country_code", HomeLive, :index
     end
   end

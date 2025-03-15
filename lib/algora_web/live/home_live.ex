@@ -164,145 +164,159 @@ defmodule AlgoraWeb.HomeLive do
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
               Fund GitHub Issues
             </h2>
-            <p class="text-center text-lg text-muted-foreground mb-16">
+            <p class="text-center font-medium text-base text-muted-foreground mb-8">
               Support open source development with bounties on GitHub issues
             </p>
 
-            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
-                <img
-                  class="h-16 w-16 rounded-full bg-muted"
-                  src="https://github.com/schacon.png"
-                  alt="Scott Chacon"
-                />
-                <div class="text-sm leading-6">
-                  <div class="font-semibold text-foreground">Scott Chacon</div>
-                  <div class="text-muted-foreground">GitHub Cofounder</div>
-                  <div class="mt-1">
-                    Funded $500 for Vim replace mode in
-                    <a
-                      href="https://github.com/zed-industries/zed/issues/4440"
-                      class="font-medium text-success-400 hover:text-success-400/80"
-                    >
-                      Zed Editor
-                    </a>
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <a
+                href="https://github.com/zed-industries/zed/issues/4440"
+                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
+              >
+                <div class="flex -space-x-4">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://github.com/zed-industries.png"
+                    alt="Zed"
+                  />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://github.com/schacon.png"
+                    alt="Scott Chacon"
+                  />
+                </div>
+                <div class="text-sm leading-6 flex-1">
+                  <div class="text-xl font-semibold text-foreground">Scott Chacon</div>
+                  <div class="font-medium text-muted-foreground">GitHub Cofounder</div>
+                  <div class="font-medium text-foreground">
+                    Funded Vim replace mode in Zed Editor
                   </div>
                 </div>
-              </div>
-              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
-                <img
-                  class="h-16 w-16 rounded-full bg-muted"
-                  src="https://github.com/framer.png"
-                  alt="Framer"
-                />
-                <div class="text-sm leading-6">
-                  <div class="font-semibold text-foreground">Framer</div>
-                  <div class="text-muted-foreground">Design & Prototyping Tool</div>
-                  <div class="mt-1">
-                    Funded $500 for multiple round-robin hosts in
-                    <a
-                      href="https://github.com/calcom/cal.com/issues/11953"
-                      class="font-medium text-success-400 hover:text-success-400/80"
-                    >
-                      Cal.com
-                    </a>
+                <div class="font-display text-2xl font-semibold text-success-400">$500</div>
+              </a>
+
+              <a
+                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
+              >
+                <img class="h-20 w-20" src="https://github.com/PX4.png" alt="PX4" />
+                <div class="text-sm leading-6 flex-1">
+                  <div class="text-xl font-semibold text-foreground">PX4 Autopilot</div>
+                  <div class="font-medium text-muted-foreground">
+                    Open Source Autopilot for Drone Developers
+                  </div>
+                  <div class="font-medium text-foreground">
+                    Community funded collision prevention system
                   </div>
                 </div>
-              </div>
-              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
-                <img
-                  class="h-16 w-16 rounded-full bg-muted"
-                  src="https://github.com/PX4.png"
-                  alt="PX4"
-                />
-                <div class="text-sm leading-6">
-                  <div class="font-semibold text-foreground">PX4 Autopilot</div>
-                  <div class="text-muted-foreground">Open Source Drone Software</div>
-                  <div class="mt-1">
-                    Community funded $500 for collision prevention in
-                    <a
-                      href="https://github.com/PX4/PX4-Autopilot/issues/22464"
-                      class="font-medium text-success-400 hover:text-success-400/80"
-                    >
-                      PX4 Autopilot
-                    </a>
+                <div class="font-display text-2xl font-semibold text-success-400">$1,000</div>
+              </a>
+              <a
+                href="https://github.com/calcom/cal.com/issues/11953"
+                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
+              >
+                <div class="flex -space-x-4">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://github.com/calcom.png"
+                    alt="Cal.com"
+                  />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://github.com/framer.png"
+                    alt="Framer"
+                  />
+                </div>
+                <div class="text-sm leading-6 flex-1">
+                  <div class="text-xl font-semibold text-foreground">Framer</div>
+                  <div class="font-medium text-muted-foreground">Design & Prototyping Tool</div>
+                  <div class="font-medium text-foreground">
+                    Funded multiple round-robin hosts in Cal.com
                   </div>
                 </div>
-              </div>
-              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
+                <div class="font-display text-2xl font-semibold text-success-400">$500</div>
+              </a>
+              <a
+                href="https://console.algora.io/org/coollabsio"
+                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
+              >
                 <img
-                  class="h-16 w-16 rounded-full bg-muted"
+                  class="h-20 w-20 rounded-full"
                   src="https://github.com/coollabsio.png"
                   alt="Coolify"
                 />
-                <div class="text-sm leading-6">
-                  <div class="font-semibold text-foreground">Coolify</div>
-                  <div class="text-muted-foreground">Self-Hosted Heroku Alternative</div>
-                  <div class="mt-1">
-                    Community funded features through
-                    <a
-                      href="https://console.algora.io/org/coollabsio"
-                      class="font-medium text-success-400 hover:text-success-400/80"
-                    >
-                      Algora bounties
-                    </a>
+                <div class="text-sm leading-6 flex-1">
+                  <div class="text-xl font-semibold text-foreground">Coolify</div>
+                  <div class="font-medium text-muted-foreground">Self-Hosted Heroku Alternative</div>
+                  <div class="font-medium text-foreground">
+                    Community funded features
                   </div>
                 </div>
-              </div>
+                <div class="font-display text-2xl font-semibold text-success-400">$2,543</div>
+              </a>
             </div>
 
-            <div class="mt-16 grid grid-cols-1 gap-8 sm:gap-8 lg:grid-cols-2">
-              <.card class="bg-muted/30">
-                <.card_header>
-                  <div class="flex items-center gap-3">
-                    <.icon name="tabler-diamond" class="h-8 w-8" />
-                    <h2 class="text-2xl font-semibold">Post a bounty</h2>
-                  </div>
-                </.card_header>
-                <.card_content>
-                  <.simple_form for={@bounty_form} phx-submit="create_bounty">
-                    <div class="flex flex-col gap-6">
-                      <.input
-                        label="URL"
-                        field={@bounty_form[:url]}
-                        placeholder="https://github.com/owner/repo/issues/1337"
-                      />
-                      <.input
-                        label="Amount"
-                        icon="tabler-currency-dollar"
-                        field={@bounty_form[:amount]}
-                      />
-                      <div class="flex justify-end gap-4">
-                        <.button variant="subtle">Submit</.button>
-                      </div>
+            <div class="max-w-4xl mx-auto mt-12">
+              <h2 class="mb-8 text-xl font-bold text-card-foreground text-center">
+                <span>Fund any issue</span>
+                <span class="block sm:inline text-success">in seconds</span>
+              </h2>
+              <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <.card class="bg-muted/30">
+                  <.card_header>
+                    <div class="flex items-center gap-3">
+                      <.icon name="tabler-diamond" class="h-8 w-8" />
+                      <h2 class="text-2xl font-semibold">Post a bounty</h2>
                     </div>
-                  </.simple_form>
-                </.card_content>
-              </.card>
-
-              <.card class="bg-muted/30">
-                <.card_header>
-                  <div class="flex items-center gap-3">
-                    <.icon name="tabler-gift" class="h-8 w-8" />
-                    <h2 class="text-2xl font-semibold">Tip a developer</h2>
-                  </div>
-                </.card_header>
-                <.card_content>
-                  <.simple_form for={@tip_form} phx-submit="create_tip">
-                    <div class="flex flex-col gap-6">
-                      <.input
-                        label="GitHub handle"
-                        field={@tip_form[:github_handle]}
-                        placeholder="jsmith"
-                      />
-                      <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
-                      <div class="flex justify-end gap-4">
-                        <.button variant="subtle">Submit</.button>
+                  </.card_header>
+                  <.card_content>
+                    <.simple_form for={@bounty_form} phx-submit="create_bounty">
+                      <div class="flex flex-col gap-6">
+                        <.input
+                          label="URL"
+                          field={@bounty_form[:url]}
+                          placeholder="https://github.com/owner/repo/issues/1337"
+                        />
+                        <.input
+                          label="Amount"
+                          icon="tabler-currency-dollar"
+                          field={@bounty_form[:amount]}
+                        />
+                        <div class="flex justify-end gap-4">
+                          <.button variant="subtle">Submit</.button>
+                        </div>
                       </div>
+                    </.simple_form>
+                  </.card_content>
+                </.card>
+                <.card class="bg-muted/30">
+                  <.card_header>
+                    <div class="flex items-center gap-3">
+                      <.icon name="tabler-gift" class="h-8 w-8" />
+                      <h2 class="text-2xl font-semibold">Tip a developer</h2>
                     </div>
-                  </.simple_form>
-                </.card_content>
-              </.card>
+                  </.card_header>
+                  <.card_content>
+                    <.simple_form for={@tip_form} phx-submit="create_tip">
+                      <div class="flex flex-col gap-6">
+                        <.input
+                          label="GitHub handle"
+                          field={@tip_form[:github_handle]}
+                          placeholder="jsmith"
+                        />
+                        <.input
+                          label="Amount"
+                          icon="tabler-currency-dollar"
+                          field={@tip_form[:amount]}
+                        />
+                        <div class="flex justify-end gap-4">
+                          <.button variant="subtle">Submit</.button>
+                        </div>
+                      </div>
+                    </.simple_form>
+                  </.card_content>
+                </.card>
+              </div>
             </div>
           </div>
           <Footer.footer />

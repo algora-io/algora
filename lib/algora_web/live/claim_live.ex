@@ -78,7 +78,7 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.map(& &1.net_amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-        source_body_html = Algora.Markdown.render(primary_claim.source.description)
+        source_body_html = Algora.Markdown.render(if primary_claim.source, do: primary_claim.source.description)
 
         pledges =
           primary_claim.target.bounties
@@ -234,11 +234,7 @@ defmodule AlgoraWeb.ClaimLive do
   defp assign_line_items(socket) do
     line_items =
       Bounties.generate_line_items(%{amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)},
-        ticket_ref: %{
-          owner: socket.assigns.target.repository.user.provider_login,
-          repo: socket.assigns.target.repository.name,
-          number: socket.assigns.target.number
-        },
+        ticket_ref: ticket_ref(socket),
         claims: socket.assigns.claims
       )
 
@@ -246,11 +242,13 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   defp ticket_ref(socket) do
-    %{
-      owner: socket.assigns.target.repository.user.provider_login,
-      repo: socket.assigns.target.repository.name,
-      number: socket.assigns.target.number
-    }
+    if socket.assigns.target.repository do
+      %{
+        owner: socket.assigns.target.repository.user.provider_login,
+        repo: socket.assigns.target.repository.name,
+        number: socket.assigns.target.number
+      }
+    end
   end
 
   defp get_or_create_bounty(socket, data) do
@@ -299,7 +297,7 @@ defmodule AlgoraWeb.ClaimLive do
           <.card>
             <.card_header>
               <div class="flex items-center gap-4">
-                <.avatar class="h-12 w-12 rounded-full">
+                <.avatar :if={@source_or_target.repository} class="h-12 w-12 rounded-full">
                   <.avatar_image src={@source_or_target.repository.user.avatar_url} />
                   <.avatar_fallback>
                     {Algora.Util.initials(@source_or_target.repository.user.provider_login)}
@@ -313,9 +311,17 @@ defmodule AlgoraWeb.ClaimLive do
                   >
                     {@source_or_target.title}
                   </.link>
-                  <div class="text-sm text-muted-foreground">
+                  <div :if={@source_or_target.repository} class="text-sm text-muted-foreground">
                     {@source_or_target.repository.user.provider_login}/{@source_or_target.repository.name}#{@source_or_target.number}
                   </div>
+                  <.link
+                    :if={!@source_or_target.repository}
+                    href={@primary_claim.url}
+                    rel="noopener"
+                    class="block text-sm text-muted-foreground"
+                  >
+                    {@primary_claim.url}
+                  </.link>
                 </div>
               </div>
             </.card_header>

@@ -153,7 +153,97 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-          <!-- New Footer -->
+          <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
+              Fund GitHub Issues
+            </h2>
+            <p class="text-center text-lg text-muted-foreground mb-16">
+              Support open source development with bounties on GitHub issues
+            </p>
+
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
+                <img
+                  class="h-16 w-16 rounded-full bg-muted"
+                  src="https://github.com/schacon.png"
+                  alt="Scott Chacon"
+                />
+                <div class="text-sm leading-6">
+                  <div class="font-semibold text-foreground">Scott Chacon</div>
+                  <div class="text-muted-foreground">GitHub Cofounder</div>
+                  <div class="mt-1">
+                    Funded $500 for Vim replace mode in
+                    <a
+                      href="https://github.com/zed-industries/zed/issues/4440"
+                      class="font-medium text-success-400 hover:text-success-400/80"
+                    >
+                      Zed Editor
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
+                <img
+                  class="h-16 w-16 rounded-full bg-muted"
+                  src="https://github.com/framer.png"
+                  alt="Framer"
+                />
+                <div class="text-sm leading-6">
+                  <div class="font-semibold text-foreground">Framer</div>
+                  <div class="text-muted-foreground">Design & Prototyping Tool</div>
+                  <div class="mt-1">
+                    Funded $500 for multiple round-robin hosts in
+                    <a
+                      href="https://github.com/calcom/cal.com/issues/11953"
+                      class="font-medium text-success-400 hover:text-success-400/80"
+                    >
+                      Cal.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
+                <img
+                  class="h-16 w-16 rounded-full bg-muted"
+                  src="https://github.com/PX4.png"
+                  alt="PX4"
+                />
+                <div class="text-sm leading-6">
+                  <div class="font-semibold text-foreground">PX4 Autopilot</div>
+                  <div class="text-muted-foreground">Open Source Drone Software</div>
+                  <div class="mt-1">
+                    Community funded $500 for collision prevention in
+                    <a
+                      href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                      class="font-medium text-success-400 hover:text-success-400/80"
+                    >
+                      PX4 Autopilot
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border">
+                <img
+                  class="h-16 w-16 rounded-full bg-muted"
+                  src="https://github.com/coollabsio.png"
+                  alt="Coolify"
+                />
+                <div class="text-sm leading-6">
+                  <div class="font-semibold text-foreground">Coolify</div>
+                  <div class="text-muted-foreground">Self-Hosted Heroku Alternative</div>
+                  <div class="mt-1">
+                    Community funded features through
+                    <a
+                      href="https://console.algora.io/org/coollabsio"
+                      class="font-medium text-success-400 hover:text-success-400/80"
+                    >
+                      Algora bounties
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <Footer.footer />
         </div>
       </main>

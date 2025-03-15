@@ -1133,6 +1133,7 @@ defmodule Algora.Bounties do
         where: tx.status == :succeeded,
         join: ltx in assoc(tx, :linked_transaction),
         left_join: b in assoc(tx, :bounty),
+        as: :b,
         left_join: t in assoc(b, :ticket),
         left_join: r in assoc(t, :repository),
         where: ltx.type == :debit,
@@ -1148,6 +1149,11 @@ defmodule Algora.Bounties do
       rewards_query
       |> where([t], not is_nil(t.tip_id))
       |> distinct([:user_id, :tip_id])
+
+    rewarded_bonuses_query =
+      rewards_query
+      |> where([t, b: b], t.net_amount > b.amount)
+      |> distinct([:user_id, :bounty_id])
 
     rewarded_contracts_query =
       rewards_query
@@ -1170,6 +1176,7 @@ defmodule Algora.Bounties do
     total_awarded_amount = Repo.aggregate(rewards_query, :sum, :net_amount) || zero_money
     rewarded_bounties_count = Repo.aggregate(rewarded_bounties_query, :count, :id)
     rewarded_tips_count = Repo.aggregate(rewarded_tips_query, :count, :id)
+    rewarded_bonuses_count = Repo.aggregate(rewarded_bonuses_query, :count, :id)
     rewarded_contracts_count = Repo.aggregate(rewarded_contracts_query, :count, :id)
     solvers_diff = Repo.aggregate(rewarded_users_diff_query, :count, :user_id)
     solvers_count = Repo.aggregate(rewarded_users_query, :count, :user_id)
@@ -1180,7 +1187,7 @@ defmodule Algora.Bounties do
       open_bounties_count: open_bounties,
       total_awarded_amount: total_awarded_amount,
       rewarded_bounties_count: rewarded_bounties_count,
-      rewarded_tips_count: rewarded_tips_count,
+      rewarded_tips_count: rewarded_tips_count + rewarded_bonuses_count,
       rewarded_contracts_count: rewarded_contracts_count,
       solvers_count: solvers_count,
       solvers_diff: solvers_diff,

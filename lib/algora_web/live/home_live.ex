@@ -2,18 +2,22 @@ defmodule AlgoraWeb.HomeLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import Ecto.Changeset
   import Ecto.Query
   import Phoenix.LiveView.TagEngine
   import Tails, only: [classes: 1]
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Bounties
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
+  alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.TipForm
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
@@ -29,7 +33,10 @@ defmodule AlgoraWeb.HomeLive do
     {:ok,
      socket
      |> assign(:featured_devs, Accounts.list_featured_developers(country_code))
-     |> assign(:stats, stats)}
+     |> assign(:stats, stats)
+     |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+     |> assign(:pending_action, nil)}
   end
 
   @impl true
@@ -243,6 +250,60 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
             </div>
+
+            <div class="mt-16 grid grid-cols-1 gap-8 sm:gap-8 lg:grid-cols-2">
+              <.card class="bg-muted/30">
+                <.card_header>
+                  <div class="flex items-center gap-3">
+                    <.icon name="tabler-diamond" class="h-8 w-8" />
+                    <h2 class="text-2xl font-semibold">Post a bounty</h2>
+                  </div>
+                </.card_header>
+                <.card_content>
+                  <.simple_form for={@bounty_form} phx-submit="create_bounty">
+                    <div class="flex flex-col gap-6">
+                      <.input
+                        label="URL"
+                        field={@bounty_form[:url]}
+                        placeholder="https://github.com/owner/repo/issues/1337"
+                      />
+                      <.input
+                        label="Amount"
+                        icon="tabler-currency-dollar"
+                        field={@bounty_form[:amount]}
+                      />
+                      <div class="flex justify-end gap-4">
+                        <.button variant="subtle">Submit</.button>
+                      </div>
+                    </div>
+                  </.simple_form>
+                </.card_content>
+              </.card>
+
+              <.card class="bg-muted/30">
+                <.card_header>
+                  <div class="flex items-center gap-3">
+                    <.icon name="tabler-gift" class="h-8 w-8" />
+                    <h2 class="text-2xl font-semibold">Tip a developer</h2>
+                  </div>
+                </.card_header>
+                <.card_content>
+                  <.simple_form for={@tip_form} phx-submit="create_tip">
+                    <div class="flex flex-col gap-6">
+                      <.input
+                        label="GitHub handle"
+                        field={@tip_form[:github_handle]}
+                        placeholder="jsmith"
+                      />
+                      <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+                      <div class="flex justify-end gap-4">
+                        <.button variant="subtle">Submit</.button>
+                      </div>
+                    </div>
+                  </.simple_form>
+                </.card_content>
+              </.card>
+            </div>
           </div>
           <Footer.footer />
         </div>
@@ -251,7 +312,97 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  def dev_card(assigns) do
+  @impl true
+  def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+    changeset =
+      %BountyForm{}
+      |> BountyForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    amount = get_field(changeset, :amount)
+    ticket_ref = get_field(changeset, :ticket_ref)
+
+    if changeset.valid? do
+      if socket.assigns[:current_user] do
+        case Bounties.create_bounty(%{
+               creator: socket.assigns.current_user,
+               owner: socket.assigns.current_user,
+               amount: amount,
+               ticket_ref: ticket_ref
+             }) do
+          {:ok, _bounty} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Bounty created")
+             |> redirect(to: ~p"/")}
+
+          {:error, :already_exists} ->
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+
+          {:error, _reason} ->
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+      else
+        {:noreply,
+         socket
+         |> assign(:pending_action, {event, unsigned_params})
+         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+      end
+    else
+      {:noreply, assign(socket, :bounty_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
+    changeset =
+      %TipForm{}
+      |> TipForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    if changeset.valid? do
+      if socket.assigns[:current_user] do
+        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+             {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
+             {:ok, checkout_url} <-
+               Bounties.create_tip(%{
+                 creator: socket.assigns.current_user,
+                 owner: socket.assigns.current_user,
+                 recipient: recipient,
+                 amount: get_field(changeset, :amount)
+               }) do
+          {:noreply, redirect(socket, external: checkout_url)}
+        else
+          {:error, reason} ->
+            Logger.error("Failed to create tip: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+      else
+        {:noreply,
+         socket
+         |> assign(:pending_action, {event, unsigned_params})
+         |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+      end
+    else
+      {:noreply, assign(socket, :tip_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_info({:authenticated, user}, socket) do
+    socket = assign(socket, :current_user, user)
+
+    case socket.assigns.pending_action do
+      {event, params} ->
+        socket = assign(socket, :pending_action, nil)
+        handle_event(event, params, socket)
+
+      nil ->
+        {:noreply, socket}
+    end
+  end
+
+  defp dev_card(assigns) do
     ~H"""
     <div class="relative">
       <img
@@ -347,7 +498,7 @@ defmodule AlgoraWeb.HomeLive do
     ) || 0
   end
 
-  def logo_cloud(assigns) do
+  defp logo_cloud(assigns) do
     assigns =
       assign(
         assigns,

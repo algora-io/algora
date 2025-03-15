@@ -32,6 +32,10 @@ defmodule AlgoraWeb.User.Nav do
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
+  def assign_nav_items(%{assigns: %{current_user: nil}} = socket) do
+    socket
+  end
+
   def assign_nav_items(socket) do
     nav = [
       %{

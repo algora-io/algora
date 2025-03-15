@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Org.DashboardPublicLive do
+defmodule AlgoraWeb.Org.HomeLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 

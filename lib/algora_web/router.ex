@@ -59,7 +59,7 @@ defmodule AlgoraWeb.Router do
         layout: {AlgoraWeb.Layouts, :user},
         on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
         live "/", Org.DashboardLive, :index
-        live "/home", Org.DashboardPublicLive, :index
+        live "/home", Org.HomeLive, :index
         live "/bounties", Org.BountiesLive, :index
         live "/contracts/:id", Contract.ViewLive
         live "/team", Org.TeamLive, :index

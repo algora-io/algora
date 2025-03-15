@@ -215,7 +215,7 @@ defmodule AlgoraWeb.HomeLive do
           where: t.status == :succeeded,
           where: not is_nil(t.linked_transaction_id),
           where: not is_nil(t.bounty_id),
-          select: count(fragment("DISTINCT ?", t.bounty_id))
+          select: count(fragment("DISTINCT (?, ?)", t.bounty_id, t.user_id))
       ) || 0
 
     tips_subtotal =
@@ -225,7 +225,7 @@ defmodule AlgoraWeb.HomeLive do
           where: t.status == :succeeded,
           where: not is_nil(t.linked_transaction_id),
           where: not is_nil(t.tip_id),
-          select: count(fragment("DISTINCT ?", t.tip_id))
+          select: count(fragment("DISTINCT (?, ?)", t.tip_id, t.user_id))
       ) || 0
 
     bounties_subtotal + tips_subtotal + PlatformStats.get().extra_completed_bounties

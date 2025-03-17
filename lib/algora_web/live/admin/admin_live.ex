@@ -99,13 +99,13 @@ defmodule AlgoraWeb.Admin.AdminLive do
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <.stat_card
             title="Total Companies"
-            value={@analytics.total_companies}
+            value={@analytics.current_companies}
             change={@analytics.companies_change}
             trend={@analytics.companies_trend}
           />
           <.stat_card
             title="Active Companies"
-            value={@analytics.active_companies}
+            value={@analytics.active_current}
             change={@analytics.active_change}
             trend={@analytics.active_trend}
           />
@@ -242,7 +242,12 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
     case case_result do
       {:ok, mainthing} ->
-        {:noreply, socket |> assign(:mainthing, mainthing) |> put_flash(:info, "Notes saved successfully")}
+        {:noreply,
+         socket
+         |> assign(:mainthing, mainthing)
+         |> assign(:notes_preview, Markdown.render(mainthing.content))
+         |> assign(:notes_edit_mode, false)
+         |> put_flash(:info, "Notes saved successfully")}
 
       {:error, changeset} ->
         {:noreply, socket |> assign(:notes_form, to_form(changeset)) |> put_flash(:error, "Error saving notes")}

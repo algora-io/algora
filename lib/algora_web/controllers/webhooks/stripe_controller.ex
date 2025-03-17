@@ -202,7 +202,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           %{
             color: 0xEF4444,
             title: event.type,
-            # description: inspect(error),
+            description: inspect(error),
             footer: %{
               text: "Stripe",
               icon_url: "https://github.com/stripe.png"

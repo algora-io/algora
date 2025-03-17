@@ -6,17 +6,26 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
 
   alias Algora.Activities
   alias Algora.Analytics
+  alias Algora.Mainthing
+  alias Algora.MainthingContext
+  alias Algora.Markdown
 
   def mount(_params, _session, socket) do
     {:ok, analytics} = Analytics.get_company_analytics()
     funnel_data = Analytics.get_funnel_data()
     :ok = Activities.subscribe()
 
+    mainthing = MainthingContext.get_latest()
+    notes_changeset = Mainthing.changeset(%Mainthing{content: (mainthing && mainthing.content) || ""}, %{})
+
     {:ok,
      socket
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
      |> assign(:selected_period, "30d")
+     |> assign(:notes_form, to_form(notes_changeset))
+     |> assign(:notes_preview, (mainthing && Markdown.render(mainthing.content)) || "")
+     |> assign(:mainthing, mainthing)
      |> stream(:activities, [])
      |> start_async(:get_activities, fn -> Activities.all() end)}
   end
@@ -37,6 +46,41 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
           </.button>
         </div>
       </div>
+
+      <.card>
+        <.card_header>
+          <.card_title>Notes</.card_title>
+        </.card_header>
+        <.card_content>
+          <.simple_form for={@notes_form} phx-change="validate_notes" phx-submit="save_notes">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-2">
+                <h3 class="font-medium text-sm">Content</h3>
+                <div class="flex-1 [&>div]:h-full">
+                  <.input
+                    field={@notes_form[:content]}
+                    type="textarea"
+                    class="h-full scrollbar-thin"
+                    phx-debounce="300"
+                    rows={10}
+                  />
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <h3 class="font-medium text-sm">Preview</h3>
+                <div class="flex-1 rounded-lg border bg-muted/40 p-4">
+                  <div class="prose prose-sm max-w-none dark:prose-invert">
+                    {raw(@notes_preview)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <:actions>
+              <.button type="submit">Save Notes</.button>
+            </:actions>
+          </.simple_form>
+        </.card_content>
+      </.card>
 
       <div class="mx-auto h-500 flex">
         <div class="w-3/4 p-0">
@@ -168,5 +212,33 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
 
   def handle_info(%Activities.Activity{} = activity, socket) do
     {:noreply, stream_insert(socket, :activities, activity, at: 0)}
+  end
+
+  def handle_event("validate_notes", %{"mainthing" => %{"content" => content}}, socket) do
+    changeset =
+      %Mainthing{}
+      |> Mainthing.changeset(%{content: content})
+      |> Map.put(:action, :validate)
+
+    {:noreply,
+     socket
+     |> assign(:notes_form, to_form(changeset))
+     |> assign(:notes_preview, Markdown.render(content))}
+  end
+
+  def handle_event("save_notes", %{"mainthing" => params}, socket) do
+    case_result =
+      case socket.assigns.mainthing do
+        nil -> MainthingContext.create(params)
+        mainthing -> MainthingContext.update(mainthing, params)
+      end
+
+    case case_result do
+      {:ok, mainthing} ->
+        {:noreply, socket |> assign(:mainthing, mainthing) |> put_flash(:info, "Notes saved successfully")}
+
+      {:error, changeset} ->
+        {:noreply, socket |> assign(:notes_form, to_form(changeset)) |> put_flash(:error, "Error saving notes")}
+    end
   end
 end

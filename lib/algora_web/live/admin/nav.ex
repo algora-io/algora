@@ -30,21 +30,21 @@ defmodule AlgoraWeb.Admin.Nav do
       %{
         title: "Main",
         items: [
-          %{href: "/admin/analytics#notes", tab: :notes, icon: "tabler-notes", label: "Notes"},
+          %{href: "/admin#notes", tab: :notes, icon: "tabler-notes", label: "Notes"},
           %{
-            href: "/admin/analytics#analytics",
+            href: "/admin#analytics",
             tab: :analytics,
             icon: "tabler-chart-pie",
             label: "Analytics"
           },
-          %{href: "/admin/analytics#metrics", tab: :metrics, icon: "tabler-chart-dots", label: "Key Metrics"},
+          %{href: "/admin#metrics", tab: :metrics, icon: "tabler-chart-dots", label: "Key Metrics"},
           %{
-            href: "/admin/analytics#customers",
+            href: "/admin#customers",
             tab: :customers,
             icon: "tabler-user-dollar",
             label: "Customers"
           },
-          %{href: "/admin/analytics#funnel", tab: :funnel, icon: "tabler-filter", label: "Funnel"},
+          %{href: "/admin#funnel", tab: :funnel, icon: "tabler-filter", label: "Funnel"},
           %{href: "/admin/leaderboard", tab: :developers, icon: "tabler-user-code", label: "Developers"}
         ]
       },

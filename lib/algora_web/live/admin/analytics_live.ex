@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.Admin.AnalyticsLive do
+defmodule AlgoraWeb.Admin.AdminLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 

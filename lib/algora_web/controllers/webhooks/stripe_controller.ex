@@ -20,7 +20,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   @metadata_version Payments.metadata_version()
 
   @impl true
-  def handle_event(event) do
+  def handle_event(%Stripe.Event{} = event) do
     result =
       case process_event(event) do
         :ok -> :ok
@@ -47,11 +47,11 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       {:error, error}
   end
 
-  def process_event(%Stripe.Event{
-        type: "charge.succeeded",
-        data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
-      })
-      when is_binary(group_id) do
+  defp process_event(%Stripe.Event{
+         type: "charge.succeeded",
+         data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
+       })
+       when is_binary(group_id) do
     Repo.transact(fn ->
       {_, txs} =
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
@@ -105,10 +105,10 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end)
   end
 
-  def process_event(%Stripe.Event{
-        type: "transfer.created",
-        data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
-      }) do
+  defp process_event(%Stripe.Event{
+         type: "transfer.created",
+         data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
+       }) do
     with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
          {:ok, _transaction} <- maybe_update_transaction(transaction, transfer),
          {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transfer_id: transaction.id})) do
@@ -121,10 +121,10 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  def process_event(%Stripe.Event{
-        type: "checkout.session.completed",
-        data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
-      }) do
+  defp process_event(%Stripe.Event{
+         type: "checkout.session.completed",
+         data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
+       }) do
     with {:ok, setup_intent} <- Algora.PSP.SetupIntent.retrieve(setup_intent_id, %{}),
          pm_id = setup_intent.payment_method,
          {:ok, payment_method} <- Algora.PSP.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
@@ -135,11 +135,11 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  def process_event(%Stripe.Event{type: "checkout.session.completed"} = event) do
+  defp process_event(%Stripe.Event{type: "checkout.session.completed"} = event) do
     Logger.info("Stripe #{event.type} event: #{event.id}")
   end
 
-  def process_event(_event), do: :ok
+  defp process_event(_event), do: :ok
 
   defp maybe_update_transaction(transaction, transfer) do
     if transaction.status == :succeeded do
@@ -174,7 +174,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
               },
               %{
                 name: event.data.object.object,
-                value: event.data.object,
+                value: event.data.object.id,
                 inline: true
               }
             ],
@@ -202,7 +202,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           %{
             color: 0xEF4444,
             title: event.type,
-            description: inspect(error),
+            # description: inspect(error),
             footer: %{
               text: "Stripe",
               icon_url: "https://github.com/stripe.png"
@@ -214,8 +214,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
                 inline: true
               },
               %{
-                name: "Object",
-                value: inspect(event.data.object),
+                name: event.data.object.object,
+                value: event.data.object.id,
                 inline: true
               }
             ],

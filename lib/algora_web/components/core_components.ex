@@ -236,6 +236,14 @@ defmodule AlgoraWeb.CoreComponents do
           </div>
         </div>
       </:link>
+      <:link :if={@current_user.is_admin} href={~p"/admin"}>
+        <div class="flex items-center whitespace-nowrap">
+          <div class="mr-3 flex h-8 w-8 items-center justify-center">
+            <.icon name="tabler-adjustments-alt" class="h-5 w-5" />
+          </div>
+          <div class="font-semibold">Admin</div>
+        </div>
+      </:link>
       <:link href={~p"/auth/logout"}>
         <div class="flex items-center whitespace-nowrap">
           <div class="mr-3 flex h-8 w-8 items-center justify-center">

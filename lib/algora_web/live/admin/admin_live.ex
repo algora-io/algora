@@ -26,6 +26,8 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:notes_form, to_form(notes_changeset))
      |> assign(:notes_preview, (mainthing && Markdown.render(mainthing.content)) || "")
      |> assign(:mainthing, mainthing)
+     |> assign(:notes_edit_mode, false)
+     |> assign(:notes_full_screen, false)
      |> stream(:activities, [])
      |> start_async(:get_activities, fn -> Activities.all() end)}
   end
@@ -33,38 +35,58 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8">
-      <section id="notes">
+      <section id="notes" class={["transition-all duration-300", @notes_full_screen && "h-screen"]}>
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-2xl font-bold">Notes</h1>
+          <div class="flex gap-2">
+            <.button
+              type="button"
+              phx-click="notes-toggle"
+              variant={if @notes_edit_mode, do: "secondary", else: "default"}
+            >
+              {if @notes_edit_mode, do: "Preview", else: "Edit"}
+            </.button>
+            <.button type="button" variant="secondary" phx-click="notes-fullscreen-toggle">
+              {if @notes_full_screen, do: "Minimize", else: "Maximize"}
+            </.button>
+          </div>
         </div>
 
-        <.simple_form for={@notes_form} phx-change="validate_notes" phx-submit="save_notes">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex flex-col gap-2">
-              <h3 class="font-medium text-sm">Content</h3>
-              <div class="flex-1 [&>div]:h-full">
-                <.input
-                  field={@notes_form[:content]}
-                  type="textarea"
-                  class="h-full scrollbar-thin"
-                  phx-debounce="300"
-                  rows={10}
-                />
-              </div>
-            </div>
-            <div class="flex flex-col gap-2">
-              <h3 class="font-medium text-sm">Preview</h3>
-              <div class="flex-1 rounded-lg border bg-muted/40 p-4">
-                <div class="prose prose-sm max-w-none dark:prose-invert">
-                  {raw(@notes_preview)}
+        <div
+          id="notes-container"
+          class={[
+            "overflow-hidden transition-all duration-300",
+            if(@notes_full_screen, do: "max-h-none", else: "max-h-[500px]")
+          ]}
+        >
+          <div id="notes-edit" class={["hidden", @notes_edit_mode && "!block"]}>
+            <.simple_form for={@notes_form} phx-change="validate_notes" phx-submit="save_notes">
+              <div class="flex flex-col gap-2 h-full">
+                <h3 class="font-medium text-sm">Content</h3>
+                <div class="flex-1 [&>div]:h-full">
+                  <.input
+                    field={@notes_form[:content]}
+                    type="textarea"
+                    class="h-full scrollbar-thin"
+                    phx-debounce="300"
+                    rows={10}
+                  />
                 </div>
+              </div>
+              <:actions>
+                <.button type="submit">Save Notes</.button>
+              </:actions>
+            </.simple_form>
+          </div>
+
+          <div id="notes-preview" class={["h-full", !@notes_edit_mode && "!block"]}>
+            <div class="h-full rounded-lg border bg-muted/40 p-4 overflow-y-auto">
+              <div class="prose prose-sm max-w-none dark:prose-invert">
+                {raw(@notes_preview)}
               </div>
             </div>
           </div>
-          <:actions>
-            <.button type="submit">Save Notes</.button>
-          </:actions>
-        </.simple_form>
+        </div>
       </section>
 
       <section id="analytics">
@@ -229,6 +251,14 @@ defmodule AlgoraWeb.Admin.AdminLive do
       {:error, changeset} ->
         {:noreply, socket |> assign(:notes_form, to_form(changeset)) |> put_flash(:error, "Error saving notes")}
     end
+  end
+
+  def handle_event("notes-toggle", _, socket) do
+    {:noreply, assign(socket, :notes_edit_mode, !socket.assigns.notes_edit_mode)}
+  end
+
+  def handle_event("notes-fullscreen-toggle", _, socket) do
+    {:noreply, assign(socket, :notes_full_screen, !socket.assigns.notes_full_screen)}
   end
 
   def handle_info(%Activities.Activity{} = activity, socket) do

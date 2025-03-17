@@ -20,21 +20,20 @@ defmodule AlgoraWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/admin" do
+  scope "/admin", AlgoraWeb do
     pipe_through [:browser]
 
     live_session :admin,
       layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav] do
-      live "/analytics", AlgoraWeb.Admin.CompanyAnalyticsLive
-      live "/leaderboard", AlgoraWeb.Admin.LeaderboardLive
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
+      live "/", Admin.AdminLive
+      live "/leaderboard", Admin.LeaderboardLive
     end
 
     live_dashboard "/dashboard",
       metrics: AlgoraWeb.Telemetry,
       additional_pages: [oban: Oban.LiveDashboard],
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}]
   end
 
   scope "/", AlgoraWeb do

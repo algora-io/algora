@@ -82,54 +82,58 @@
       <.logo class="h-8 w-auto text-white" />
     </div>
     <nav class="mt-4">
-      <ul role="list" class="flex flex-col items-center space-y-1">
-        <%= for item <- @nav |> List.first() |> Map.get(:items) do %>
-          <li>
-            <.link
-              navigate={item.href}
-              target={Map.get(item, :target)}
-              class={[
-                "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-                if(@active_tab == item.tab,
-                  do: "bg-gray-800 text-white",
-                  else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-                )
-              ]}
-            >
-              <.icon name={item.icon} class="h-6 w-6 shrink-0" />
-              <span class="sr-only">{item.label}</span>
-            </.link>
-          </li>
-        <% end %>
-      </ul>
+      <%= for {section, index} <- Enum.with_index(@nav) do %>
+        <ul role="list" class="flex flex-col items-center space-y-1">
+          <%= for item <- section.items do %>
+            <li>
+              <.link
+                navigate={item.href}
+                target={Map.get(item, :target)}
+                class={[
+                  "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+                  if(@active_tab == item.tab,
+                    do: "bg-gray-800 text-white",
+                    else: "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  )
+                ]}
+              >
+                <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                <span class="sr-only">{item.label}</span>
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+        <.separator :if={index != length(@nav) - 1} class="mx-auto my-4 w-2/3" />
+      <% end %>
 
-      <.separator class="mx-auto my-4 w-2/3" />
-
-      <ul role="list" class="space-y-1">
-        <%= for contact <- @contacts do %>
-          <li>
-            <.link
-              class="flex justify-center p-2"
-              navigate={Algora.Accounts.User.url(contact)}
-              title={Algora.Accounts.User.handle(contact)}
-            >
-              <div class="relative inline-block">
-                <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
-                  <img
-                    alt={Algora.Accounts.User.handle(contact)}
-                    loading="lazy"
-                    decoding="async"
-                    src={contact.avatar_url}
-                    class="h-full w-full object-cover"
-                  />
+      <%= if @contacts != [] do %>
+        <.separator class="mx-auto my-4 w-2/3" />
+        <ul role="list" class="space-y-1">
+          <%= for contact <- @contacts do %>
+            <li>
+              <.link
+                class="flex justify-center p-2"
+                navigate={Algora.Accounts.User.url(contact)}
+                title={Algora.Accounts.User.handle(contact)}
+              >
+                <div class="relative inline-block">
+                  <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+                    <img
+                      alt={Algora.Accounts.User.handle(contact)}
+                      loading="lazy"
+                      decoding="async"
+                      src={contact.avatar_url}
+                      class="h-full w-full object-cover"
+                    />
+                  </div>
+                  <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                  </span>
                 </div>
-                <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
-                </span>
-              </div>
-            </.link>
-          </li>
-        <% end %>
-      </ul>
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
     </nav>
   </div>
 
@@ -137,7 +141,7 @@
     <div
       id="navbar"
       phx-hook="NavBar"
-      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between lg:justify-end gap-x-6 border-b border-border bg-background px-4 shadow-sm sm:px-6 lg:px-8"
+      class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 border-b border-border bg-background px-4 shadow-sm sm:px-6 lg:px-8"
     >
       <!-- Mobile menu button -->
       <div class="flex lg:hidden">
@@ -172,7 +176,20 @@
           <.icon name="tabler-menu" class="size-6 text-white" />
         </button>
       </div>
-      <div class="flex items-center gap-x-6">
+      <%= if Map.get(assigns, :admin_page?) && Map.get(assigns, :selected_period) do %>
+        <ul role="list">
+          <.button
+            :for={period <- ["7d", "30d", "90d"]}
+            variant={if @selected_period == period, do: "default", else: "outline"}
+            phx-click="select_period"
+            phx-value-period={period}
+            class="w-[5rem] mx-auto text-base font-semibold"
+          >
+            {period}
+          </.button>
+        </ul>
+      <% end %>
+      <div class="ml-auto flex items-center gap-x-6">
         <.link
           class="group w-fit outline-none"
           target="_blank"

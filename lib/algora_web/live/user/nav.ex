@@ -56,55 +56,6 @@ defmodule AlgoraWeb.User.Nav do
           },
           %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"}
         ]
-      },
-      %{
-        title: "User",
-        items: [
-          %{
-            href: "/user/installations",
-            tab: :installations,
-            icon: "tabler-apps",
-            label: "Installations"
-          },
-          %{
-            href: "/user/payouts",
-            tab: :earnings,
-            icon: "tabler-currency-dollar",
-            label: "Earnings"
-          }
-        ]
-      },
-      %{
-        title: "Resources",
-        items: [
-          %{href: "/onboarding", tab: :onboarding, icon: "tabler-rocket", label: "Get started"},
-          %{href: "https://docs.algora.io", icon: "tabler-book", label: "Documentation"},
-          %{href: "https://github.com/algora-io/sdk", icon: "tabler-code", label: "Algora SDK"}
-        ]
-      },
-      %{
-        title: "Admin",
-        items: [
-          %{href: "/admin", tab: :admin, icon: "tabler-adjustments", label: "Admin"},
-          %{href: "/auth/logout", icon: "tabler-logout", label: "Logout"}
-        ]
-      },
-      %{
-        title: "Community",
-        items: [
-          %{
-            href: "https://docs.algora.io/contact",
-            icon: "tabler-send",
-            label: "Talk to founders"
-          },
-          %{href: "https://algora.io/discord", icon: "tabler-brand-discord", label: "Discord"},
-          %{href: "https://twitter.com/algoraio", icon: "tabler-brand-x", label: "Twitter"},
-          %{
-            href: "https://youtube.com/@algora-io",
-            icon: "tabler-brand-youtube",
-            label: "YouTube"
-          }
-        ]
       }
     ]
 

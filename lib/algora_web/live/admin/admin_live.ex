@@ -35,7 +35,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8">
-      <section id="notes">
+      <section id="notes" class="scroll-mt-16">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-2xl font-bold">Notes</h1>
           <div class="flex gap-2">
@@ -94,13 +94,13 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </div>
       </section>
 
-      <section id="analytics">
+      <section id="analytics" class="scroll-mt-16">
         <div class="mb-4">
           <h1 class="text-2xl font-bold">Company Analytics</h1>
         </div>
       </section>
 
-      <section id="metrics">
+      <section id="metrics" class="scroll-mt-16">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <.stat_card
             title="Total Companies"
@@ -129,7 +129,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </div>
       </section>
 
-      <section id="customers">
+      <section id="customers" class="scroll-mt-16">
         <.card>
           <.card_header>
             <.card_title>Company Details</.card_title>
@@ -187,7 +187,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </.card>
       </section>
 
-      <section id="funnel">
+      <section id="funnel" class="scroll-mt-16">
         <div class="mx-auto h-500 flex">
           <div class="w-3/4 p-0">
             <.card>

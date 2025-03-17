@@ -23,6 +23,7 @@ defmodule Algora.Analytics do
     orgs_query =
       from u in User,
         where: u.type == :organization,
+        where: u.featured,
         select: %{
           count_all: count(u.id),
           count_current: u.id |> count() |> filter(u.inserted_at <= ^from and u.inserted_at >= ^period_start),
@@ -32,13 +33,11 @@ defmodule Algora.Analytics do
           active_current:
             u.id
             |> count()
-            |> filter(u.seeded and u.activated and u.inserted_at <= ^from and u.inserted_at >= ^period_start),
+            |> filter(u.inserted_at <= ^from and u.inserted_at >= ^period_start),
           active_previous:
             u.id
             |> count()
-            |> filter(
-              u.seeded and u.activated and u.inserted_at <= ^period_start and u.inserted_at >= ^previous_period_start
-            )
+            |> filter(u.inserted_at <= ^period_start and u.inserted_at >= ^previous_period_start)
         }
 
     contracts_query =
@@ -51,15 +50,13 @@ defmodule Algora.Analytics do
           success_current:
             b.id
             |> count()
-            |> filter(
-              b.inserted_at < ^from and b.inserted_at >= ^period_start and (b.status == :open or b.status == :paid)
-            ),
+            |> filter(b.inserted_at < ^from and b.inserted_at >= ^period_start and b.status == :paid),
           success_previous:
             b.id
             |> count()
             |> filter(
               b.inserted_at < ^period_start and b.inserted_at >= ^previous_period_start and
-                (b.status == :open or b.status == :paid)
+                b.status == :paid
             )
         }
 
@@ -79,8 +76,7 @@ defmodule Algora.Analytics do
           handle: u.handle,
           joined_at: u.inserted_at,
           total_bounties: b.id |> count() |> filter(b.inserted_at >= ^period_start),
-          successful_bounties:
-            b.id |> count() |> filter(b.status == :open or (b.status == :paid and b.inserted_at >= ^period_start)),
+          successful_bounties: b.id |> count() |> filter(b.status == :paid and b.inserted_at >= ^period_start),
           last_active_at: u.updated_at,
           avatar_url: u.avatar_url
         }
@@ -104,10 +100,12 @@ defmodule Algora.Analytics do
         {:ok,
          %{
            total_companies: orgs.count_all,
-           companies_change: orgs.count_current,
+           current_companies: orgs.count_current,
+           companies_change: orgs.count_current - orgs.count_previous,
            companies_trend: calculate_trend(orgs.count_current, orgs.count_previous),
            active_companies: orgs.active_all,
-           active_change: orgs.active_current,
+           active_current: orgs.active_current,
+           active_change: orgs.active_current - orgs.active_previous,
            active_trend: calculate_trend(orgs.active_current, orgs.active_previous),
            # TODO track time when contract is filled
            #

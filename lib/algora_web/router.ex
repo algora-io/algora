@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Router do
       live "/leaderboard", Admin.LeaderboardLive
     end
 
-    oban_dashboard("/admin/oban", resolver: AlgoraWeb.ObanDashboardResolver)
+    oban_dashboard("/oban", resolver: AlgoraWeb.ObanDashboardResolver)
   end
 
   scope "/", AlgoraWeb do

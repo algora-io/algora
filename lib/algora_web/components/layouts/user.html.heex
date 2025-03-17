@@ -82,7 +82,7 @@
       <.logo class="h-8 w-auto text-white" />
     </div>
     <nav class="mt-4">
-      <%= for section <- @nav do %>
+      <%= for {section, index} <- Enum.with_index(@nav) do %>
         <ul role="list" class="flex flex-col items-center space-y-1">
           <%= for item <- section.items do %>
             <li>
@@ -103,35 +103,37 @@
             </li>
           <% end %>
         </ul>
+        <.separator :if={index != length(@nav) - 1} class="mx-auto my-4 w-2/3" />
       <% end %>
 
-      <.separator class="mx-auto my-4 w-2/3" />
-
-      <ul role="list" class="space-y-1">
-        <%= for contact <- @contacts do %>
-          <li>
-            <.link
-              class="flex justify-center p-2"
-              navigate={Algora.Accounts.User.url(contact)}
-              title={Algora.Accounts.User.handle(contact)}
-            >
-              <div class="relative inline-block">
-                <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
-                  <img
-                    alt={Algora.Accounts.User.handle(contact)}
-                    loading="lazy"
-                    decoding="async"
-                    src={contact.avatar_url}
-                    class="h-full w-full object-cover"
-                  />
+      <%= if @contacts != [] do %>
+        <.separator class="mx-auto my-4 w-2/3" />
+        <ul role="list" class="space-y-1">
+          <%= for contact <- @contacts do %>
+            <li>
+              <.link
+                class="flex justify-center p-2"
+                navigate={Algora.Accounts.User.url(contact)}
+                title={Algora.Accounts.User.handle(contact)}
+              >
+                <div class="relative inline-block">
+                  <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+                    <img
+                      alt={Algora.Accounts.User.handle(contact)}
+                      loading="lazy"
+                      decoding="async"
+                      src={contact.avatar_url}
+                      class="h-full w-full object-cover"
+                    />
+                  </div>
+                  <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                  </span>
                 </div>
-                <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
-                </span>
-              </div>
-            </.link>
-          </li>
-        <% end %>
-      </ul>
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
     </nav>
   </div>
 

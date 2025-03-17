@@ -41,7 +41,6 @@ defmodule AlgoraWeb.Org.Nav do
 
     {:cont,
      socket
-     |> assign(:admin_page?, false)
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)

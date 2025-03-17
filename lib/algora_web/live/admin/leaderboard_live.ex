@@ -18,7 +18,11 @@ defmodule AlgoraWeb.Admin.LeaderboardLive do
 
   def handle_event("toggle-need-avatar", %{"user-id" => user_id}, socket) do
     {:ok, _user} =
-      user_id |> Accounts.get_user!() |> change() |> put_change(:need_avatar, true) |> Repo.update()
+      user_id
+      |> Accounts.get_user!()
+      |> change()
+      |> put_change(:need_avatar, true)
+      |> Repo.update()
 
     # Refresh the data
     top_earners = get_top_earners()
@@ -39,7 +43,7 @@ defmodule AlgoraWeb.Admin.LeaderboardLive do
             <.card_header>
               <div class="flex items-center justify-between">
                 <h3 class="text-2xl font-semibold text-gray-100">
-                  {CountryEmojis.get(country, "🌍")}
+                  {CountryEmojis.get(country)}
                   {if country, do: country, else: "Unknown Location"}
                 </h3>
                 <span class="font-display text-3xl font-semibold text-emerald-300">
@@ -96,7 +100,7 @@ defmodule AlgoraWeb.Admin.LeaderboardLive do
     user_totals =
       from u in Accounts.User,
         join: t in Transaction,
-        on: t.user_id == u.id and not is_nil(t.succeeded_at),
+        on: t.user_id == u.id and not is_nil(t.succeeded_at) and t.type == :credit,
         group_by: [u.id, u.name, u.provider_login, u.avatar_url, u.country, u.need_avatar],
         select: %{
           id: u.id,

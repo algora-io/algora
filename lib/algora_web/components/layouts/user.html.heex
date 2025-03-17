@@ -176,7 +176,7 @@
           <.icon name="tabler-menu" class="size-6 text-white" />
         </button>
       </div>
-      <%= if @admin_page? do %>
+      <%= if Map.get(assigns, :admin_page?) && Map.get(assigns, :selected_period) do %>
         <ul role="list">
           <.button
             :for={period <- ["7d", "30d", "90d"]}

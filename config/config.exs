@@ -26,6 +26,7 @@ config :algora, AlgoraWeb.Endpoint,
   live_view: [signing_salt: "lTPawhId"]
 
 config :algora, Oban,
+  notifier: Oban.Notifiers.PG,
   repo: Algora.Repo,
   queues: [
     event_consumers: 1,

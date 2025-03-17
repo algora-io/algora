@@ -5,11 +5,15 @@ defmodule AlgoraWeb.ContextController do
   alias AlgoraWeb.UserAuth
 
   def set(conn, %{"context" => context}) do
-    {:ok, _updated_user} =
-      Accounts.update_settings(conn.assigns.current_user, %{last_context: context})
+    case Accounts.set_context(conn.assigns.current_user, context) do
+      {:ok, user} ->
+        conn
+        |> assign(:current_user, user)
+        |> put_session(:last_context, context)
+        |> redirect(to: UserAuth.signed_in_path_from_context(context))
 
-    conn = put_session(conn, :last_context, context)
-
-    redirect(conn, to: UserAuth.signed_in_path(conn))
+      {:error, _} ->
+        redirect(conn, to: "/")
+    end
   end
 end

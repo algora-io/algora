@@ -2,34 +2,26 @@ defmodule AlgoraWeb.Org.BountiesLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts.User
   alias Algora.Bounties
-
-  on_mount AlgoraWeb.Org.BountyHook
+  alias Algora.Bounties.Bounty
+  alias Algora.Payments
 
   def mount(_params, _session, socket) do
-    bounties = Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 10)
-    claims = []
-
-    {:ok,
-     socket
-     |> assign(:bounties, bounties)
-     |> assign(:claims, claims)
-     |> assign(:open_count, length(bounties))
-     |> assign(:completed_count, 0)
-     |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))}
+    {:ok, socket}
   end
 
   def render(assigns) do
     ~H"""
-    <div class="max-w-7xl p-6">
+    <div class="max-w-7xl mx-auto p-6" id="bounties-container" phx-hook="InfiniteScroll">
       <div class="mb-6">
         <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
           <div>
             <h2 class="text-2xl font-bold dark:text-white">Bounties</h2>
             <p class="text-sm dark:text-gray-300">
               Create new bounties using the
-              <code class="text-base font-semibold text-cyan-300">
-                <span>/bounty</span> <span class="text-emerald-300">$AMOUNT</span>
+              <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
+                /bounty $1000
               </code>
               command on Github.
             </p>
@@ -48,66 +40,45 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 <button
                   type="button"
                   role="tab"
-                  aria-selected="true"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
-                  data-state="active"
+                  aria-selected={@current_status == :open}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :open, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
+                  data-state={if @current_status == :open, do: "active", else: "inactive"}
+                  phx-click="change-tab"
+                  phx-value-tab="open"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Open</div>
-                    <span class="min-w-[1ch] font-mono text-indigo-200 transition duration-300 ease-out">
-                      {@open_count}
+                    <span class={"min-w-[1ch] font-mono #{if @current_status == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
+                      {@stats.open_bounties_count}
                     </span>
                   </div>
                 </button>
                 <button
                   type="button"
                   role="tab"
-                  aria-selected="false"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium hover:bg-indigo-600/50"
-                  data-state="inactive"
+                  aria-selected={@current_status == :paid}
+                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :paid, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
+                  data-state={if @current_status == :paid, do: "active", else: "inactive"}
+                  phx-click="change-tab"
+                  phx-value-tab="completed"
                 >
                   <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                     <div class="truncate">Completed</div>
-                    <span class="min-w-[1ch] font-mono text-gray-400 transition duration-300 ease-out group-hover:text-indigo-200">
-                      {@completed_count}
+                    <span class={"min-w-[1ch] font-mono #{if @current_status == :paid, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
+                      {@stats.rewarded_bounties_count}
                     </span>
                   </div>
                 </button>
               </div>
             </div>
-            <!-- Checkboxes for hiding claimed and attempted bounties -->
-            <div class="mt-3 flex items-center space-x-4">
-              <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="hide-claimed"
-                    class="h-6 w-6 rounded-sm border bg-gray-600"
-                  />
-                  <label for="hide-claimed" class="text-sm font-medium leading-none">
-                    Hide claimed
-                  </label>
-                </div>
-                <div class="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="hide-attempted"
-                    class="h-6 w-6 rounded-sm border bg-gray-600"
-                  />
-                  <label for="hide-attempted" class="text-sm font-medium leading-none">
-                    Hide attempted
-                  </label>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-      <div class="overflow-hidden rounded-xl border border-white/15">
+      <div :if={@current_status == :open} class="overflow-hidden rounded-xl border border-white/15">
         <div class="scrollbar-thin w-full overflow-auto">
           <table class="w-full caption-bottom text-sm">
             <tbody class="[&_tr:last-child]:border-0">
-              <%= for bounty  <- @bounties do %>
+              <%= for %{bounty: bounty, claim_groups: claim_groups} <- @bounty_rows do %>
                 <tr
                   class="bg-white/[2%] from-white/[2%] via-white/[2%] to-white/[2%] border-b border-white/15 bg-gradient-to-br transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-white/[2%]"
                   data-state="false"
@@ -119,19 +90,19 @@ defmodule AlgoraWeb.Org.BountiesLive do
                           <div class="flex items-start justify-between">
                             <div class="cursor-pointer font-mono text-2xl">
                               <div class="font-extrabold text-emerald-300 hover:text-emerald-200">
-                                ${bounty.amount}
+                                {Money.to_string!(bounty.amount)}
                               </div>
                             </div>
                           </div>
                           <.link
                             rel="noopener"
                             class="group/issue inline-flex flex-col"
-                            href={"https://github.com/#{bounty.ticket.owner}/#{bounty.ticket.repo}/issues/#{bounty.ticket.number}"}
+                            href={Bounty.url(bounty)}
                           >
                             <div class="flex items-center gap-4">
                               <div class="truncate">
                                 <p class="truncate text-sm font-medium text-gray-300 group-hover/issue:text-gray-200 group-hover/issue:underline">
-                                  {bounty.ticket.owner}/{bounty.ticket.repo}#{bounty.ticket.number}
+                                  {Bounty.path(bounty)}
                                 </p>
                               </div>
                             </div>
@@ -147,17 +118,17 @@ defmodule AlgoraWeb.Org.BountiesLive do
                     </div>
                   </td>
                   <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <%= if length(@claims) > 0 do %>
+                    <%= if map_size(claim_groups) > 0 do %>
                       <div class="group flex cursor-pointer flex-col items-center gap-1">
                         <div class="flex cursor-pointer justify-center -space-x-3">
-                          <%= for claim <- @claims do %>
+                          <%= for {_group_id, claims} <- claim_groups do %>
                             <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800 group-hover:brightness-110">
                               <img
-                                alt={claim.user.username}
+                                alt={User.handle(hd(claims).user)}
                                 loading="lazy"
                                 decoding="async"
                                 class="rounded-full"
-                                src={claim.user.avatar_url}
+                                src={hd(claims).user.avatar_url}
                                 style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                               />
                             </div>
@@ -165,9 +136,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                         </div>
                         <div class="flex items-center gap-0.5">
                           <div class="whitespace-nowrap text-sm font-medium text-gray-300 group-hover:text-gray-100">
-                            {length(@claims)} {if length(@claims) == 1,
-                              do: "claim",
-                              else: "claims"}
+                            {map_size(claim_groups)} {ngettext(
+                              "claim",
+                              "claims",
+                              map_size(claim_groups)
+                            )}
                           </div>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -187,62 +160,55 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       </div>
                     <% end %>
                   </td>
-                  <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                    <div class="min-w-[180px]">
-                      <div class="flex items-center justify-end gap-2">
-                        <!-- Add action buttons here (edit, delete, menu) -->
-                      </div>
-                    </div>
-                  </td>
                 </tr>
-                <%= for claim <- @claims do %>
+                <%= for {_group_id, claims} <- claim_groups do %>
                   <tr
                     class="border-b border-white/15 bg-gray-950/50 transition-colors data-[state=selected]:bg-gray-100 hover:bg-gray-100/50 dark:data-[state=selected]:bg-gray-800 dark:hover:bg-gray-950/50"
                     data-state="false"
                   >
-                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
+                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
                       <div class="min-w-[250px]">
                         <div class="flex items-center gap-3">
                           <div class="flex -space-x-3">
-                            <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-gray-800">
-                              <img
-                                alt={claim.user.username}
-                                loading="lazy"
-                                decoding="async"
-                                class="rounded-full"
-                                src={claim.user.avatar_url}
-                                style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                              />
-                            </div>
+                            <%= for claim <- claims do %>
+                              <div class="relative h-10 w-10 flex-shrink-0 rounded-full ring-4 ring-background">
+                                <img
+                                  alt={User.handle(claim.user)}
+                                  loading="lazy"
+                                  decoding="async"
+                                  class="rounded-full"
+                                  src={claim.user.avatar_url}
+                                  style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
+                                />
+                              </div>
+                            <% end %>
                           </div>
                           <div>
                             <div class="text-sm font-medium text-gray-200">
-                              {claim.user.username}
+                              {claims
+                              |> Enum.map(fn c -> User.handle(c.user) end)
+                              |> Algora.Util.format_name_list()}
                             </div>
                             <div class="text-xs text-gray-400">
-                              {Algora.Util.time_ago(claim.inserted_at)}
+                              {Algora.Util.time_ago(hd(claims).inserted_at)}
                             </div>
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle"></td>
                     <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
                       <div class="min-w-[180px]">
                         <div class="flex items-center justify-end gap-4">
-                          <.link
-                            rel="noopener"
-                            class="inline-flex h-10 items-center justify-center rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100/80 dark:bg-white/15 dark:text-gray-50 dark:hover:bg-white/20"
-                            href={claim.pull_request_url}
+                          <.button
+                            :if={hd(claims).source}
+                            href={hd(claims).source.url}
+                            variant="secondary"
                           >
                             View
-                          </.link>
-                          <.link
-                            class="inline-flex h-10 items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600/90"
-                            href="#"
-                          >
+                          </.button>
+                          <.button href={~p"/claims/#{hd(claims).group_id}"}>
                             Reward
-                          </.link>
+                          </.button>
                         </div>
                       </div>
                     </td>
@@ -252,8 +218,162 @@ defmodule AlgoraWeb.Org.BountiesLive do
             </tbody>
           </table>
         </div>
+        <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+          <div class="animate-pulse text-gray-400">
+            <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+          </div>
+        </div>
+      </div>
+      <div :if={@current_status == :paid} class="relative">
+        <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transaction_rows do %>
+          <div class="mb-4 rounded-lg border border-border bg-card p-4">
+            <div class="flex gap-4">
+              <div class="flex-1">
+                <div class="mb-2 font-mono text-2xl font-extrabold text-success">
+                  {Money.to_string!(transaction.net_amount)}
+                </div>
+                <div :if={ticket.repository} class="mb-1 text-sm text-muted-foreground">
+                  {ticket.repository.user.provider_login}/{ticket.repository.name}#{ticket.number}
+                </div>
+                <div class="font-medium">
+                  {ticket.title}
+                </div>
+                <div class="mt-1 text-xs text-muted-foreground">
+                  {Algora.Util.time_ago(transaction.succeeded_at)}
+                </div>
+              </div>
+
+              <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+                <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
+                  Awarded to
+                </h3>
+                <img
+                  src={recipient.avatar_url}
+                  class="mb-2 h-16 w-16 rounded-full"
+                  alt={recipient.name}
+                />
+                <div class="text-center text-sm font-medium">
+                  {recipient.name}
+                  <div>
+                    {Algora.Misc.CountryEmojis.get(recipient.country)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        <div :if={@has_more_transactions} class="flex justify-center mt-4" id="load-more-indicator">
+          <div class="animate-pulse text-gray-400">
+            <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+          </div>
+        </div>
       </div>
     </div>
     """
   end
+
+  def handle_event("change-tab", %{"tab" => "completed"}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=completed")}
+  end
+
+  def handle_event("change-tab", %{"tab" => "open"}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=open")}
+  end
+
+  def handle_event("load_more", _params, socket) do
+    {:noreply,
+     case socket.assigns.current_status do
+       :open -> assign_more_bounties(socket)
+       :paid -> assign_more_transactions(socket)
+     end}
+  end
+
+  def handle_params(params, _uri, socket) do
+    current_org = socket.assigns.current_org
+    current_status = get_current_status(params)
+
+    stats = Bounties.fetch_stats(current_org.id)
+
+    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
+    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
+
+    {:noreply,
+     socket
+     |> assign(:current_status, current_status)
+     |> assign(:bounty_rows, to_bounty_rows(bounties))
+     |> assign(:transaction_rows, to_transaction_rows(transactions))
+     |> assign(:has_more_bounties, length(bounties) >= page_size())
+     |> assign(:has_more_transactions, length(transactions) >= page_size())
+     |> assign(:stats, stats)}
+  end
+
+  defp to_bounty_rows(bounties) do
+    claims_by_ticket =
+      bounties
+      |> Enum.map(& &1.ticket.id)
+      |> Bounties.list_claims()
+      |> Enum.group_by(& &1.target_id)
+      |> Map.new(fn {ticket_id, claims} ->
+        {ticket_id, Enum.group_by(claims, & &1.group_id)}
+      end)
+
+    Enum.map(bounties, fn bounty ->
+      %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
+    end)
+  end
+
+  defp to_transaction_rows(transactions), do: transactions
+
+  def assign_more_bounties(socket) do
+    %{rows: rows, current_org: current_org} = socket.assigns
+
+    last_bounty = List.last(rows).bounty
+
+    cursor = %{
+      inserted_at: last_bounty.inserted_at,
+      id: last_bounty.id
+    }
+
+    more_bounties =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: socket.assigns.current_status,
+        before: cursor
+      )
+
+    socket
+    |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
+    |> assign(:has_more, length(more_bounties) >= page_size())
+  end
+
+  defp assign_more_transactions(socket) do
+    %{transaction_rows: rows, current_org: current_org} = socket.assigns
+
+    last_transaction = List.last(rows).transaction
+
+    more_transactions =
+      Payments.list_sent_transactions(
+        current_org.id,
+        limit: page_size(),
+        before: %{
+          succeeded_at: last_transaction.succeeded_at,
+          id: last_transaction.id
+        }
+      )
+
+    socket
+    |> assign(:transaction_rows, rows ++ to_transaction_rows(more_transactions))
+    |> assign(:has_more_transactions, length(more_transactions) >= page_size())
+  end
+
+  defp get_current_status(params) do
+    case params["status"] do
+      "open" -> :open
+      "completed" -> :paid
+      _ -> :open
+    end
+  end
+
+  defp page_size, do: 10
 end

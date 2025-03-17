@@ -17,7 +17,7 @@ config :algora,
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,
   url: [host: "localhost"],
-  adapter: Bandit.PhoenixAdapter,
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
     formats: [html: AlgoraWeb.ErrorHTML, json: AlgoraWeb.ErrorJSON],
     layout: false
@@ -32,7 +32,14 @@ config :algora, Oban,
     comment_consumers: 1,
     github_og_image: 5,
     notify_bounty: 1,
-    notify_tip_intent: 1
+    notify_tip_intent: 1,
+    notify_claim: 1,
+    notify_transfer: 100,
+    prompt_payout_connect: 100,
+    transfers: 1,
+    activity_notifier: 1,
+    activity_mailer: 1,
+    activity_discord: 10
   ]
 
 # Configures the mailer

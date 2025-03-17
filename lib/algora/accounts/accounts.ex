@@ -5,6 +5,10 @@ defmodule Algora.Accounts do
 
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Bounties.Bounty
+  alias Algora.Github
+  alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias Algora.Payments.Transaction
   alias Algora.Repo
 
@@ -14,10 +18,12 @@ defmodule Algora.Accounts do
 
   @type criterion ::
           {:id, binary()}
+          | {:ids, [binary()]}
+          | {:org_id, binary()}
           | {:limit, non_neg_integer()}
           | {:handle, String.t()}
           | {:handles, [String.t()]}
-          | {:min_earnings, non_neg_integer()}
+          | {:earnings_gt, Money.t()}
           | {:sort_by_country, String.t()}
           | {:sort_by_tech_stack, [String.t()]}
 
@@ -26,6 +32,9 @@ defmodule Algora.Accounts do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([b] in query, where: b.id == ^id)
+
+      {:ids, ids}, query ->
+        from([b] in query, where: b.id in ^ids)
 
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
@@ -36,7 +45,7 @@ defmodule Algora.Accounts do
       {:handles, handles}, query ->
         from([b] in query, where: b.handle in ^handles)
 
-      {:min_earnings, min_amount}, query ->
+      {:earnings_gt, min_amount}, query ->
         from([b, earnings: e] in query,
           where:
             fragment(
@@ -76,13 +85,25 @@ defmodule Algora.Accounts do
       |> where([u], u.type == :individual)
       |> select([b], b.id)
 
+    filter_org_id =
+      if org_id = criteria[:org_id],
+        do: dynamic([linked_transaction: ltx, repository: r], ltx.user_id == ^org_id or r.user_id == ^org_id),
+        else: true
+
     earnings_query =
-      from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded,
-        group_by: t.user_id,
+      from tx in Transaction,
+        where: tx.type == :credit and tx.status == :succeeded,
+        left_join: ltx in assoc(tx, :linked_transaction),
+        as: :linked_transaction,
+        left_join: b in assoc(tx, :bounty),
+        left_join: t in assoc(b, :ticket),
+        left_join: r in assoc(t, :repository),
+        as: :repository,
+        where: ^filter_org_id,
+        group_by: tx.user_id,
         select: %{
-          user_id: t.user_id,
-          total_earned: sum(t.net_amount)
+          user_id: tx.user_id,
+          total_earned: sum(tx.net_amount)
         }
 
     bounties_query =
@@ -117,6 +138,8 @@ defmodule Algora.Accounts do
       id: u.id,
       handle: u.handle,
       name: u.name,
+      provider_login: u.provider_login,
+      provider_meta: u.provider_meta,
       avatar_url: u.avatar_url,
       bio: u.bio,
       country: u.country,
@@ -130,16 +153,6 @@ defmodule Algora.Accounts do
     })
     |> Repo.all()
     |> Enum.map(&User.after_load/1)
-    |> Enum.map(fn user ->
-      Map.merge(user, %{
-        flag: get_flag(user),
-        message: """
-        Hey 👋
-
-        I'm a #{Enum.join(Enum.take(user.tech_stack, 1), ", ")} dev who loves building cool stuff. Always excited to work on new projects - would love to chat!
-        """
-      })
-    end)
   end
 
   def list_developers(criteria \\ []) do
@@ -164,30 +177,14 @@ defmodule Algora.Accounts do
     end
   end
 
-  # HACK: eventually fetch dynamically
   def list_featured_developers(_country \\ nil) do
-    list_developers(handles: ["carver", "jianyang", "aly", "john", "bighead"])
-  end
+    case Algora.Settings.get_featured_developers() do
+      handles when is_list(handles) and handles != [] ->
+        list_developers(handles: handles)
 
-  def list_orgs(opts) do
-    query =
-      from u in User,
-        where: u.type == :organization and u.seeded == false and not is_nil(u.provider_login),
-        limit: ^Keyword.get(opts, :limit, 100),
-        order_by: [desc: u.priority, desc: u.stargazers_count]
-
-    query
-    |> Repo.all()
-    |> Enum.map(fn user ->
-      %{
-        name: user.name || user.handle,
-        handle: user.handle,
-        flag: get_flag(user),
-        amount: :rand.uniform(100_000),
-        tech_stack: Enum.take(user.tech_stack, 6),
-        avatar_url: user.avatar_url
-      }
-    end)
+      _ ->
+        list_developers(limit: 5)
+    end
   end
 
   def get_users_map(user_ids) when is_list(user_ids) do
@@ -254,7 +251,9 @@ defmodule Algora.Accounts do
       from(u in User,
         left_join: i in Identity,
         on: i.provider == "github" and i.provider_id == ^to_string(info["id"]),
-        where: u.provider == "github" and u.provider_id == ^to_string(info["id"]),
+        where:
+          (u.provider == "github" and u.provider_id == ^to_string(info["id"])) or
+            u.email == ^primary_email,
         select: {u, i}
       )
 
@@ -310,6 +309,16 @@ defmodule Algora.Accounts do
     Repo.one(query)
   end
 
+  def get_user_by_handle(handle) do
+    query =
+      from(u in User,
+        where: u.handle == ^handle,
+        select: u
+      )
+
+    Repo.one(query)
+  end
+
   def get_access_token(%User{} = user) do
     case Repo.one(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github")) do
       %Identity{provider_token: token} -> {:ok, token}
@@ -317,13 +326,30 @@ defmodule Algora.Accounts do
     end
   end
 
+  def has_fresh_token?(%User{} = user) do
+    # TODO: use refresh tokens and check expiration
+    case get_access_token(user) do
+      {:ok, token} ->
+        case Github.get_user(token, user.provider_id) do
+          {:ok, _} -> true
+          _ -> false
+        end
+
+      _ ->
+        false
+    end
+  end
+
   def get_random_access_tokens(n) when is_integer(n) and n > 0 do
-    Identity
-    |> where([i], i.provider == "github" and not is_nil(i.provider_token))
-    |> order_by(fragment("RANDOM()"))
-    |> limit(^n)
-    |> select([i], i.provider_token)
-    |> Repo.all()
+    case Identity
+         |> where([i], i.provider == "github" and not is_nil(i.provider_token))
+         |> order_by(fragment("RANDOM()"))
+         |> limit(^n)
+         |> select([i], i.provider_token)
+         |> Repo.all() do
+      [""] -> []
+      tokens -> tokens
+    end
   end
 
   defp update_github_token(%User{} = user, new_token) do
@@ -339,16 +365,95 @@ defmodule Algora.Accounts do
     {:ok, Repo.preload(user, :identities, force: true)}
   end
 
-  defp get_flag(user), do: Algora.Misc.CountryEmojis.get(user.country, "🌎")
+  def last_context(nil), do: "nil"
 
-  # TODO: implement this
-  def list_experts(tech_stack) do
-    experts_file = :algora |> :code.priv_dir() |> Path.join("dev/experts/#{tech_stack}.json")
+  def last_context(%User{last_context: nil} = user) do
+    orgs = Organizations.get_user_orgs(user)
 
-    with true <- File.exists?(experts_file),
-         {:ok, contents} <- File.read(experts_file),
-         {:ok, experts} <- Jason.decode(contents) do
-      experts
+    last_debit_query =
+      from(t in Transaction,
+        join: u in assoc(t, :user),
+        where: t.type == :debit,
+        where: u.id in ^Enum.map(orgs, & &1.id),
+        order_by: [desc: t.succeeded_at],
+        limit: 1,
+        select_merge: %{user: u}
+      )
+
+    last_bounty_query =
+      from(b in Bounty,
+        join: c in assoc(b, :creator),
+        where: c.id in ^Enum.map(orgs, & &1.id),
+        order_by: [desc: b.inserted_at],
+        limit: 1,
+        select_merge: %{creator: c}
+      )
+
+    last_sponsored_on_behalf_of =
+      cond do
+        last_debit = Repo.one(last_debit_query) -> last_debit.user
+        last_bounty = Repo.one(last_bounty_query) -> last_bounty.owner
+        true -> nil
+      end
+
+    last_context =
+      case last_sponsored_on_behalf_of do
+        %{type: :organization} -> last_sponsored_on_behalf_of.handle
+        _ -> default_context()
+      end
+
+    update_settings(user, %{last_context: last_context})
+
+    last_context
+  end
+
+  def last_context(%User{last_context: last_context}), do: last_context
+
+  def get_last_context_user(nil), do: nil
+
+  def get_last_context_user(%User{} = user) do
+    case last_context(user) do
+      "personal" -> user
+      last_context -> get_user_by_handle(last_context)
+    end
+  end
+
+  def default_context, do: "personal"
+
+  def set_context(%User{} = user, "personal") do
+    update_settings(user, %{last_context: "personal"})
+  end
+
+  def set_context(%User{} = user, context) do
+    membership =
+      Repo.one(
+        from(m in Member,
+          join: o in assoc(m, :org),
+          where: m.user_id == ^user.id and o.handle == ^context
+        )
+      )
+
+    if membership do
+      update_settings(user, %{last_context: context})
+    else
+      {:error, :unauthorized}
+    end
+  end
+
+  def get_contexts(nil), do: []
+
+  def get_contexts(%User{} = user) do
+    [user | Organizations.get_user_orgs(user)]
+  end
+
+  # TODO: fetch from db
+  def list_community(tech_stack) do
+    community_file = :algora |> :code.priv_dir() |> Path.join("dev/community/#{tech_stack}.json")
+
+    with true <- File.exists?(community_file),
+         {:ok, contents} <- File.read(community_file),
+         {:ok, community} <- Jason.decode(contents) do
+      community
     else
       _ -> []
     end
@@ -357,14 +462,14 @@ defmodule Algora.Accounts do
   # TODO: remove hardcoded techs
   def list_techs do
     tech_order = [
-      "Swift",
       "TypeScript",
       "Rust",
       "Scala",
-      "C++",
-      "Go",
       "Python",
+      "Go",
+      "C++",
       "Java",
+      "Swift",
       "PHP",
       "Elixir",
       "Haskell",
@@ -373,7 +478,7 @@ defmodule Algora.Accounts do
 
     :algora
     |> :code.priv_dir()
-    |> Path.join("dev/experts")
+    |> Path.join("dev/community")
     |> File.ls!()
     |> Enum.filter(&String.ends_with?(&1, ".json"))
     |> Enum.map(&String.trim_trailing(&1, ".json"))

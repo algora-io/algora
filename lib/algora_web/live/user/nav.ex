@@ -9,8 +9,8 @@ defmodule AlgoraWeb.User.Nav do
   def on_mount(:default, _params, _session, socket) do
     {:cont,
      socket
-     |> assign(:nav, nav_items())
-     |> assign(:online_orgs, [])
+     |> assign(:contacts, [])
+     |> assign_nav_items()
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 
@@ -22,33 +22,39 @@ defmodule AlgoraWeb.User.Nav do
         {User.SettingsLive, _} -> :settings
         {User.TransactionsLive, _} -> :transactions
         {User.InstallationsLive, _} -> :installations
-        {AlgoraWeb.ExpertsLive, _} -> :experts
+        {User.ProfileLive, _} -> :profile
+        {AlgoraWeb.CommunityLive, _} -> :community
         {AlgoraWeb.BountiesLive, _} -> :bounties
+        {AlgoraWeb.OrgsLive, _} -> :projects
         {_, _} -> nil
       end
 
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def nav_items do
-    [
+  def assign_nav_items(%{assigns: %{current_user: nil}} = socket) do
+    socket
+  end
+
+  def assign_nav_items(socket) do
+    nav = [
       %{
-        title: "Main Navigation",
+        title: "Main",
         items: [
-          %{href: "/events", tab: :activity, icon: "tabler-activity", label: "Activity"},
-          %{href: "/dashboard/orgs", tab: :projects, icon: "tabler-rocket", label: "Projects"},
-          %{
-            href: "/bounties/new",
-            tab: :bounties,
-            icon: "tabler-diamond",
-            label: "Community bounties"
-          },
+          %{href: "/", tab: :dashboard, icon: "tabler-home", label: "Dashboard"},
+          %{href: "/@/#{socket.assigns.current_user.handle}", tab: :profile, icon: "tabler-user", label: "Profile"},
+          %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
+          %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
+          %{href: "/community", tab: :community, icon: "tabler-users", label: "Community"},
+          %{href: "/user/transactions", tab: :transactions, icon: "tabler-wallet", label: "Transactions"},
           %{
             href: "https://tv.algora.io",
-            tab: :media,
+            tab: :tv,
             icon: "tabler-device-tv",
-            label: "Media center"
-          }
+            label: "Algora TV",
+            target: "_blank"
+          },
+          %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"}
         ]
       },
       %{
@@ -80,7 +86,6 @@ defmodule AlgoraWeb.User.Nav do
         title: "Admin",
         items: [
           %{href: "/admin", tab: :admin, icon: "tabler-adjustments", label: "Admin"},
-          %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"},
           %{href: "/auth/logout", icon: "tabler-logout", label: "Logout"}
         ]
       },
@@ -102,5 +107,7 @@ defmodule AlgoraWeb.User.Nav do
         ]
       }
     ]
+
+    assign(socket, :nav, nav)
   end
 end

@@ -13,6 +13,7 @@ defmodule AlgoraWeb.CoreComponents do
   use Gettext, backend: AlgoraWeb.Gettext
 
   alias AlgoraWeb.Components.UI.Accordion
+  alias AlgoraWeb.Components.UI.Alert
   alias AlgoraWeb.Components.UI.Avatar
   alias AlgoraWeb.Components.UI.Card
   alias AlgoraWeb.Components.UI.Dialog
@@ -121,6 +122,8 @@ defmodule AlgoraWeb.CoreComponents do
       </.dropdown>
   """
   attr :id, :string, required: true
+  attr :class, :string, default: nil
+  attr :border, :boolean, default: false
 
   slot :img do
     attr :src, :string
@@ -133,108 +136,11 @@ defmodule AlgoraWeb.CoreComponents do
   slot :link do
     attr :navigate, :string
     attr :href, :string
+    attr :patch, :string
     attr :method, :any
   end
 
   def dropdown(assigns) do
-    ~H"""
-    <!-- User account dropdown -->
-    <div class="relative inline-block w-full text-left">
-      <div>
-        <button
-          id={@id}
-          type="button"
-          class="group w-full rounded-md px-3.5 py-2 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
-          phx-click={show_dropdown("##{@id}-dropdown")}
-          phx-hook="Menu"
-          data-active-class="bg-accent"
-          aria-haspopup="true"
-        >
-          <span class="flex w-full items-center justify-between">
-            <span class="flex min-w-0 items-center justify-between space-x-3">
-              <%= for img <- @img do %>
-                <img
-                  class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-600"
-                  {assigns_to_attributes(img)}
-                />
-              <% end %>
-              <span class="flex min-w-0 flex-1 flex-col">
-                <span class="truncate text-sm font-medium text-gray-50">
-                  {render_slot(@title)}
-                </span>
-                <span class="truncate text-sm text-gray-400">{render_slot(@subtitle)}</span>
-              </span>
-            </span>
-            <.icon
-              name="tabler-selector"
-              class="ml-2 h-5 w-5 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
-            />
-          </span>
-        </button>
-      </div>
-      <div
-        id={"#{@id}-dropdown"}
-        phx-click-away={hide_dropdown("##{@id}-dropdown")}
-        class="absolute right-0 left-0 z-10 mt-1 hidden origin-top divide-y divide-border rounded-md bg-popover shadow-lg ring-1 ring-border"
-        role="menu"
-        aria-labelledby={@id}
-      >
-        <div class="py-1" role="none">
-          <%= for link <- @link do %>
-            <.link
-              tabindex="-1"
-              role="menuitem"
-              class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
-              {link}
-            >
-              {render_slot(link)}
-            </.link>
-          <% end %>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  @doc """
-  Returns a button triggered dropdown with aria keyboard and focus supporrt.
-
-  Accepts the follow slots:
-
-    * `:id` - The id to uniquely identify this dropdown
-    * `:img` - The optional img to show beside the button title
-    * `:title` - The button title
-    * `:subtitle` - The button subtitle
-
-  ## Examples
-
-      <.dropdown id={@id}>
-        <:img src={@current_user.avatar_url} alt={@current_user.handle}/>
-        <:title><%= @current_user.name %></:title>
-        <:subtitle>@<%= @current_user.handle %></:subtitle>
-
-        <:link navigate={~p"/"}>Dashboard</:link>
-        <:link navigate={~p"/user/settings"}Settings</:link>
-      </.dropdown>
-  """
-  attr :id, :string, required: true
-  attr :class, :string, default: nil
-
-  slot :img do
-    attr :src, :string
-    attr :alt, :string
-  end
-
-  slot :title
-  slot :subtitle
-
-  slot :link do
-    attr :navigate, :string
-    attr :href, :string
-    attr :method, :any
-  end
-
-  def dropdown2(assigns) do
     ~H"""
     <!-- User account dropdown -->
     <div class={classes(["relative w-full text-left", @class])}>
@@ -242,7 +148,12 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full rounded-md px-3.5 py-2 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+          class={
+            classes([
+              "group w-full rounded-md p-3 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring",
+              @border && "border border-input"
+            ])
+          }
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
           data-active-class="bg-accent"
@@ -251,10 +162,12 @@ defmodule AlgoraWeb.CoreComponents do
           <span class="flex w-full items-center justify-between">
             <span class="flex min-w-0 items-center justify-between space-x-3">
               <%= for img <- @img do %>
-                <img
-                  class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-600"
-                  {assigns_to_attributes(img)}
-                />
+                <.avatar class="h-10 w-10">
+                  <.avatar_image src={img[:src]} />
+                  <.avatar_fallback>
+                    {Algora.Util.initials(img[:alt])}
+                  </.avatar_fallback>
+                </.avatar>
               <% end %>
               <span class="flex min-w-0 flex-1 flex-col">
                 <span class="truncate text-sm font-medium text-gray-50">
@@ -265,7 +178,7 @@ defmodule AlgoraWeb.CoreComponents do
             </span>
             <.icon
               name="tabler-selector"
-              class="ml-2 h-5 w-5 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
+              class="ml-2 h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
             />
           </span>
         </button>
@@ -282,7 +195,8 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+              class="block p-3 text-sm text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring"
+              phx-click={hide_dropdown("##{@id}-dropdown")}
               {link}
             >
               {render_slot(link)}
@@ -296,23 +210,41 @@ defmodule AlgoraWeb.CoreComponents do
 
   def context_selector(assigns) do
     ~H"""
-    <.dropdown2 id="dashboard-dropdown">
-      <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-      <:title>{@current_user.name}</:title>
+    <.dropdown id="dashboard-dropdown">
+      <:img src={@current_context.avatar_url} alt={@current_context.handle} />
+      <:title>{@current_context.name}</:title>
 
       <:link
-        :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
-        href={~p"/set_context/#{org.handle}"}
+        :for={ctx <- @all_contexts}
+        :if={@current_context.id != ctx.id}
+        href={
+          if ctx.id == @current_user.id,
+            do: ~p"/set_context/personal",
+            else: ~p"/set_context/#{ctx.handle}"
+        }
       >
-        <div class="flex items-center">
-          <img src={org.avatar_url} alt={org.name} class="mr-3 h-8 w-8 rounded-full" />
-          <div class="truncate">
-            <div class="truncate font-semibold">{org.name}</div>
-            <div class="truncate text-sm text-gray-500">@{org.handle}</div>
+        <div class="flex items-center whitespace-nowrap">
+          <.avatar class="mr-3 h-8 w-8">
+            <.avatar_image src={ctx.avatar_url} />
+            <.avatar_fallback>
+              {Algora.Util.initials(ctx.name)}
+            </.avatar_fallback>
+          </.avatar>
+          <div>
+            <div class="font-semibold">{ctx.name}</div>
+            <div class="text-sm text-gray-500">@{ctx.handle}</div>
           </div>
         </div>
       </:link>
-    </.dropdown2>
+      <:link href={~p"/auth/logout"}>
+        <div class="flex items-center whitespace-nowrap">
+          <div class="mr-3 flex h-8 w-8 items-center justify-center">
+            <.icon name="tabler-logout" class="h-5 w-5" />
+          </div>
+          <div class="font-semibold">Logout</div>
+        </div>
+      </:link>
+    </.dropdown>
     """
   end
 
@@ -571,7 +503,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed right-4 bottom-4 z-50 hidden w-80 rounded-lg p-3 pr-8 shadow-md ring-1 sm:w-96",
+        "fixed right-4 bottom-4 z-[1000] hidden w-80 rounded-lg p-3 pr-8 shadow-md ring-1 sm:w-96",
         @kind == :info &&
           "bg-emerald-950 fill-success-foreground text-success-foreground ring ring-success/70",
         @kind == :warning &&
@@ -730,10 +662,7 @@ defmodule AlgoraWeb.CoreComponents do
   slot :inner_block
 
   def input(%{field: %FormField{} = field} = assigns) do
-    errors =
-      if Phoenix.Component.used_input?(field) and not assigns.hide_errors,
-        do: field.errors,
-        else: []
+    errors = if assigns.hide_errors, do: [], else: field.errors
 
     value =
       with %Money{} <- field.value,
@@ -765,12 +694,11 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           value={@value}
           checked={@checked}
-          class="rounded border-input text-primary focus:ring-ring"
+          class={classes(["rounded border-input text-primary focus:ring-ring", @class])}
           {@rest}
         />
         {@label}
       </label>
-      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -828,7 +756,7 @@ defmodule AlgoraWeb.CoreComponents do
         id={@id || @name}
         name={@name}
         class={[
-          "min-h-[6rem] py-[7px] px-[11px] mt-2 block w-full rounded-lg border-input bg-background",
+          "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
           "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
           "border-input focus:border-ring focus:ring-ring/5",
           @errors != [] && "border-destructive focus:border-destructive focus:ring-destructive/10",
@@ -857,8 +785,8 @@ defmodule AlgoraWeb.CoreComponents do
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
             "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-            "text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-            "border-input focus:border-ring focus:ring-ring/5",
+            "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
+            "border-input focus:border-ring focus:ring-ring",
             @errors != [] &&
               "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
             @icon && "pl-10",
@@ -1159,10 +1087,11 @@ defmodule AlgoraWeb.CoreComponents do
   """
   attr :name, :string, required: true
   attr :class, :string, default: nil
+  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the icon"
 
   def icon(%{name: "tabler-" <> _} = assigns) do
     ~H"""
-    <span class={[@name, @class]} />
+    <span class={[@name, @class]} {@rest} />
     """
   end
 
@@ -1235,10 +1164,8 @@ defmodule AlgoraWeb.CoreComponents do
           <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
           <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>
         </div>
-        <.button :if={@link} variant="outline">
-          <.link navigate={@link}>
-            View all
-          </.link>
+        <.button :if={@link} navigate={@link} variant="outline">
+          View all
         </.button>
       </div>
       {render_slot(@inner_block)}
@@ -1255,10 +1182,34 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  defp link?(assigns) do
+    Enum.any?([assigns[:href], assigns[:navigate], assigns[:patch]])
+  end
+
+  attr :href, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :patch, :string, default: nil
+  attr :replace, :boolean, default: false
+  slot :inner_block
+
+  def maybe_link(assigns) do
+    ~H"""
+    <%= if link?(assigns) do %>
+      <.link href={@href} navigate={@navigate} patch={@patch} replace={@replace}>
+        {render_slot(@inner_block)}
+      </.link>
+    <% else %>
+      <span>{render_slot(@inner_block)}</span>
+    <% end %>
+    """
+  end
+
   defdelegate accordion_item(assigns), to: Accordion
   defdelegate accordion_trigger(assigns), to: Accordion
   defdelegate accordion(assigns), to: Accordion
-  defdelegate alert(assigns), to: AlgoraWeb.Components.UI.Alert
+  defdelegate alert_description(assigns), to: Alert
+  defdelegate alert_title(assigns), to: Alert
+  defdelegate alert(assigns), to: Alert
   defdelegate avatar_fallback(assigns), to: Avatar
   defdelegate avatar_image(assigns), to: Avatar
   defdelegate avatar(assigns), to: Avatar
@@ -1286,6 +1237,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate drawer(assigns), to: Drawer
   defdelegate dropdown_menu_content(assigns), to: DropdownMenu
   defdelegate dropdown_menu_item(assigns), to: DropdownMenu
+  defdelegate dropdown_menu_label(assigns), to: DropdownMenu
   defdelegate dropdown_menu_separator(assigns), to: DropdownMenu
   defdelegate dropdown_menu_trigger(assigns), to: DropdownMenu
   defdelegate dropdown_menu(assigns), to: DropdownMenu
@@ -1305,7 +1257,6 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate popover_content(assigns), to: Popover
   defdelegate popover_trigger(assigns), to: Popover
   defdelegate popover(assigns), to: Popover
-  defdelegate radio_group_item(assigns), to: RadioGroup
   defdelegate radio_group(assigns), to: RadioGroup
   defdelegate scroll_area(assigns), to: AlgoraWeb.Components.UI.ScrollArea
   defdelegate select_content(assigns), to: Select

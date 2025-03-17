@@ -2,6 +2,7 @@ defmodule Algora.Payments.Transaction do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
   alias Algora.Contracts.Contract
   alias Algora.Types.Money
 
@@ -30,15 +31,18 @@ defmodule Algora.Payments.Transaction do
     field :succeeded_at, :utc_datetime_usec
     field :reversed_at, :utc_datetime_usec
     field :group_id, :string
+    field :idempotency_key, :string
 
     belongs_to :timesheet, Algora.Contracts.Timesheet
     belongs_to :contract, Contract
     belongs_to :original_contract, Contract
     belongs_to :user, Algora.Accounts.User
-    # belongs_to :claim, Algora.Bounties.Claim
+    belongs_to :claim, Algora.Bounties.Claim
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :tip, Algora.Bounties.Tip
     belongs_to :linked_transaction, Algora.Payments.Transaction
+
+    has_many :activities, {"transaction_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end
@@ -60,7 +64,8 @@ defmodule Algora.Payments.Transaction do
       :contract_id,
       :original_contract_id,
       :user_id,
-      :succeeded_at
+      :succeeded_at,
+      :idempotency_key
     ])
     |> validate_required([
       :id,
@@ -76,6 +81,7 @@ defmodule Algora.Payments.Transaction do
       :original_contract_id,
       :user_id
     ])
+    |> unique_constraint([:idempotency_key])
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:original_contract_id)

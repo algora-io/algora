@@ -7,7 +7,6 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   alias Algora.Accounts.User
   alias Algora.Payments
-  alias Algora.Stripe.ConnectCountries
   alias Algora.Util
 
   defmodule PayoutAccountForm do
@@ -16,7 +15,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
     import Ecto.Changeset
 
-    @countries ConnectCountries.list()
+    @countries Algora.PSP.ConnectCountries.list()
 
     embedded_schema do
       field :country, :string
@@ -37,11 +36,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
       Payments.subscribe()
     end
 
-    account =
-      case Payments.fetch_account(socket.assigns.current_user) do
-        {:ok, account} -> account
-        {:error, :not_found} -> nil
-      end
+    account = Payments.get_account(socket.assigns.current_user)
 
     {:ok,
      socket
@@ -79,8 +74,16 @@ defmodule AlgoraWeb.User.TransactionsLive do
 
   def handle_event("setup_payout_account", _params, socket) do
     case Payments.create_account_link(socket.assigns.account, AlgoraWeb.Endpoint.url()) do
-      {:ok, %{url: url}} -> {:noreply, redirect(socket, external: url)}
-      {:error, _reason} -> {:noreply, put_flash(socket, :error, "Something went wrong")}
+      {:ok, %{url: url}} ->
+        {:noreply, redirect(socket, external: url)}
+
+      # {:error, %Stripe.Error{} = error} ->
+      #  Algora.Notifier.notify_stripe_account_link_error(socket.assigns.current_user, error)
+      #  Algora.Signal.send_error(error, %StripeAccountLinkError{})
+      #  {:noreply, put_flash(socket, :error, "Failed to link payout account for your country")}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 
@@ -98,8 +101,13 @@ defmodule AlgoraWeb.User.TransactionsLive do
            {:ok, %{url: url}} <- Payments.create_account_link(account, AlgoraWeb.Endpoint.url()) do
         {:noreply, redirect(socket, external: url)}
       else
+        # {:error, %Stripe.Error{} = error} ->
+        #  Algora.Notifier.notify_stripe_account_link_error(socket.assigns.current_user, error)
+        #  Algora.Signal.send_error(error, %StripeAccountCreateError{})
+        #  {:noreply, put_flash(socket, :error, "Failed to create payout account")}
+
         {:error, _reason} ->
-          {:noreply, put_flash(socket, :error, "Failed to create payout account")}
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
       end
     else
       {:noreply, assign(socket, :payout_account_form, to_form(changeset))}
@@ -124,11 +132,15 @@ defmodule AlgoraWeb.User.TransactionsLive do
          |> assign(:show_manage_payout_drawer, false)
          |> put_flash(:info, "Payout account deleted successfully")}
 
+      # {:error, %Stripe.Error{} = error} ->
+      #  Algora.Signal.send_error(error, %StripeAccountDeleteError{})
+      #  {:noreply, put_flash(socket, :error, "Failed to delete payout account")}
+
       {:error, _reason} ->
         {:noreply,
          socket
          |> assign(:show_delete_confirmation, false)
-         |> put_flash(:error, "Failed to delete payout account")}
+         |> put_flash(:error, "Something went wrong")}
     end
   end
 
@@ -194,7 +206,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
         </div>
         <%= if @account do %>
           <div class="flex items-center gap-2">
-            <%= if @account.charges_enabled do %>
+            <%= if @account.payouts_enabled do %>
               <.badge variant="success" phx-click="show_manage_payout_drawer" class="cursor-pointer">
                 Payout account active
               </.badge>
@@ -266,7 +278,9 @@ defmodule AlgoraWeb.User.TransactionsLive do
                           <div class="flex items-center gap-3">
                             <.avatar class="h-8 w-8">
                               <.avatar_image src={linked_user.avatar_url} alt={linked_user.name} />
-                              <.avatar_fallback>{String.first(linked_user.name)}</.avatar_fallback>
+                              <.avatar_fallback>
+                                {Algora.Util.initials(linked_user.name)}
+                              </.avatar_fallback>
                             </.avatar>
                             <div class="font-medium">
                               <div>{linked_user.name}</div>
@@ -314,7 +328,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
               options={
                 PayoutAccountForm.countries()
                 |> Enum.map(fn {name, code} ->
-                  {Algora.Misc.CountryEmojis.get(code, "🌎") <> " " <> name, code}
+                  {Algora.Misc.CountryEmojis.get(code) <> " " <> name, code}
                 end)
               }
               helptext="Select the country where you or your business will legally operate."
@@ -359,7 +373,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
                   <div>
                     <dt class="text-sm font-medium text-muted-foreground">Country</dt>
                     <dd class="text-sm font-semibold">
-                      {ConnectCountries.from_code(@account.country)}
+                      {Algora.PSP.ConnectCountries.from_code(@account.country)}
                     </dd>
                   </div>
                   <div>
@@ -386,7 +400,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
               </.card_content>
             </.card>
 
-            <.card :if={@account.details_submitted}>
+            <.card :if={@account.details_submitted and @account.provider_meta}>
               <.card_header>
                 <.card_title>Payout Settings</.card_title>
               </.card_header>
@@ -410,7 +424,7 @@ defmodule AlgoraWeb.User.TransactionsLive do
                       {@account.default_currency |> String.upcase()}
                     </dd>
                   </div>
-                  <%= if bank_account = Enum.find(get_in(@account.provider_meta, ["external_accounts", "data"]), fn account -> account["default_for_currency"] end) do %>
+                  <%= if bank_account = Enum.find(get_in(@account.provider_meta, ["external_accounts", "data"]) || [], fn account -> account["default_for_currency"] end) do %>
                     <div>
                       <dt class="text-sm font-medium text-muted-foreground">Bank Account</dt>
                       <dd class="text-sm font-semibold">

@@ -4,31 +4,38 @@ defmodule Algora.Bounties.Bounty do
 
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
-  alias Algora.Payments.Transaction
 
   typed_schema "bounties" do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
+    field :number, :integer, default: 0
+    field :autopay_disabled, :boolean, default: false
+    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], default: :public
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
     belongs_to :creator, User
-    has_many :attempts, Algora.Bounties.Attempt
-    has_many :claims, Algora.Bounties.Claim
     has_many :transactions, Algora.Payments.Transaction
+    has_many :activities, {"bounty_activities", Algora.Activities.Activity}, foreign_key: :assoc_id
 
     timestamps()
   end
 
+  def preload(id) do
+    from a in __MODULE__,
+      preload: [:ticket, :owner, :creator],
+      where: a.id == ^id
+  end
+
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id])
+    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility])
     |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
     |> foreign_key_constraint(:ticket)
     |> foreign_key_constraint(:owner)
     |> foreign_key_constraint(:creator)
-    |> unique_constraint([:ticket_id, :owner_id])
+    |> unique_constraint([:ticket_id, :owner_id, :number])
     |> Algora.Validations.validate_money_positive(:amount)
   end
 
@@ -63,65 +70,12 @@ defmodule Algora.Bounties.Bounty do
     |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
   end
 
-  def open(query \\ Bounty) do
-    from b in query,
-      as: :bounties,
-      where:
-        not exists(
-          from(
-            t in Transaction,
-            where:
-              parent_as(:bounties).id == t.bounty_id and
-                not is_nil(t.succeeded_at) and
-                t.type == :transfer
-          )
-        )
-  end
-
-  def completed(query \\ Bounty) do
-    from b in query,
-      as: :bounties,
-      where:
-        exists(
-          from(
-            t in Transaction,
-            where:
-              parent_as(:bounties).id == t.bounty_id and
-                not is_nil(t.succeeded_at) and
-                t.type == :transfer
-          )
-        )
-  end
-
-  def rewarded(query \\ Bounty) do
-    from b in query,
-      as: :bounties,
-      where:
-        exists(
-          from(
-            t in Transaction,
-            where:
-              parent_as(:bounties).id == t.bounty_id and
-                not is_nil(t.succeeded_at) and
-                t.type == :transfer
-          )
-        )
-  end
-
   def order_by_most_recent(query \\ Bounty) do
     from(b in query, order_by: [desc: b.inserted_at])
   end
 
   def limit(query \\ Bounty, limit) do
     from(b in query, limit: ^limit)
-  end
-
-  def filter_by_org_id(query, nil), do: query
-
-  def filter_by_org_id(query, org_id) do
-    from b in query,
-      join: u in assoc(b, :owner),
-      where: u.id == ^org_id
   end
 
   def filter_by_tech_stack(query, []), do: query

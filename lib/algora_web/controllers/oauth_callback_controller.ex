@@ -45,14 +45,16 @@ defmodule AlgoraWeb.OAuthCallbackController do
           |> render(:success)
 
         :redirect ->
-          conn
-          |> put_flash(:info, welcome_message(user))
-          |> AlgoraWeb.UserAuth.put_current_user(user)
-          |> redirect(to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
+          conn =
+            conn
+            |> put_flash(:info, welcome_message(user))
+            |> AlgoraWeb.UserAuth.put_current_user(user)
+
+          redirect(conn, to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
       end
     else
       {:error, reason} ->
-        Logger.debug("failed GitHub exchange #{inspect(reason)}")
+        Logger.error("failed GitHub exchange #{inspect(reason)}")
         conn = put_flash(conn, :error, translate_error(reason))
 
         case type do
@@ -70,8 +72,8 @@ defmodule AlgoraWeb.OAuthCallbackController do
   end
 
   def new(conn, %{"provider" => "email", "email" => email, "token" => token, "return_to" => "/onboarding/org"}) do
-    case AlgoraWeb.UserAuth.verify_login_code(token) do
-      {:ok, %{email: ^email} = login_token} ->
+    case AlgoraWeb.UserAuth.verify_login_code(token, email) do
+      {:ok, login_token} ->
         conn
         |> put_session(:onboarding_email, login_token.email)
         |> put_session(:onboarding_domain, login_token.domain)
@@ -89,11 +91,11 @@ defmodule AlgoraWeb.OAuthCallbackController do
   end
 
   def new(conn, %{"provider" => "email", "email" => email, "token" => token} = params) do
-    with {:ok, %{email: ^email}} <- AlgoraWeb.UserAuth.verify_login_code(token),
+    with {:ok, _login_token} <- AlgoraWeb.UserAuth.verify_login_code(token, email),
          {:ok, user} <- get_or_register_user(email) do
       conn =
         if params["return_to"] do
-          put_session(conn, :user_return_to, params["return_to"])
+          put_session(conn, :user_return_to, String.trim_leading(params["return_to"], AlgoraWeb.Endpoint.url()))
         else
           conn
         end

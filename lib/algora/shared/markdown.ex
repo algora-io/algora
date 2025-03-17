@@ -1,0 +1,43 @@
+defmodule Algora.Markdown do
+  @moduledoc false
+
+  require Logger
+
+  @default_opts [
+    extension: [
+      strikethrough: true,
+      tagfilter: true,
+      table: true,
+      autolink: true,
+      tasklist: true,
+      footnotes: true,
+      shortcodes: true
+    ],
+    parse: [
+      smart: true,
+      relaxed_tasklist_matching: true,
+      relaxed_autolinks: true
+    ],
+    render: [
+      github_pre_lang: true,
+      unsafe_: true
+    ],
+    features: [
+      sanitize: true,
+      # TODO: sanitize and syntax_highlight_theme are currently incompatible
+      # since sanitization strips out the syntax highlighting classes
+      syntax_highlight_theme: "github_dark"
+    ]
+  ]
+
+  def render(md_or_doc, opts \\ []) do
+    case MDEx.to_html(md_or_doc, Keyword.merge(@default_opts, opts)) do
+      {:ok, html} ->
+        html
+
+      {:error, error} ->
+        Logger.error("Error converting markdown to html: #{inspect(error)}")
+        md_or_doc
+    end
+  end
+end

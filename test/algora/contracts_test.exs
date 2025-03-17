@@ -1,68 +1,22 @@
 defmodule Algora.ContractsTest do
   use Algora.DataCase
+  use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
   import Money.Sigil
 
+  alias Algora.Activities
   alias Algora.Contracts
+  alias Algora.Contracts.Contract
   alias Algora.Payments
+  alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction
-
-  def card_declined_error, do: %Stripe.Error{source: :stripe, code: :card_error, message: "Your card was declined."}
-
-  # Mock implementation for Stripe API calls
-  defmodule MockStripe do
-    @moduledoc false
-    def create_invoice(params) do
-      {:ok, %{id: "inv_mock", customer: params.customer}}
-    end
-
-    def create_invoice_item(params) do
-      {:ok, %{id: "ii_mock", amount: params.amount}}
-    end
-
-    def pay_invoice(_invoice_id, _params) do
-      {:ok, %{id: "inv_mock", paid: true, status: "paid"}}
-    end
-
-    def create_transfer(_params) do
-      {:ok, %{id: "tr_mock"}}
-    end
-  end
-
-  defmodule MockStripeWithFailure do
-    @moduledoc false
-    def create_invoice(params) do
-      {:ok, %{id: "inv_mock", customer: params.customer}}
-    end
-
-    def create_invoice_item(params) do
-      {:ok, %{id: "ii_mock", amount: params.amount}}
-    end
-
-    def create_transfer(_params) do
-      {:ok, %{id: "tr_mock"}}
-    end
-
-    def pay_invoice(_invoice_id, _params) do
-      {:error, Algora.ContractsTest.card_declined_error()}
-    end
-  end
-
-  setup do
-    # Set the mock implementation for tests
-    Application.put_env(:algora, :stripe_impl, MockStripe)
-
-    on_exit(fn ->
-      # Reset to default implementation after test
-      Application.delete_env(:algora, :stripe_impl)
-    end)
-  end
 
   defp setup_contract(attrs) do
     client = insert!(:organization)
     contractor = insert!(:user)
     customer = insert!(:customer, %{user: client})
+    _account = insert!(:account, %{user: contractor})
     _payment_method = insert!(:payment_method, %{customer: customer})
     contract = insert!(:contract, Map.merge(%{client: client, contractor: contractor}, attrs))
 
@@ -175,21 +129,104 @@ defmodule Algora.ContractsTest do
       assert Money.equal?(contract3.total_transferred, ~M[9_000]usd)
     end
 
+    test "produces activities" do
+      # Group a
+      contract_a_0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
+      {:ok, _txs0} = Contracts.prepay_contract(contract_a_0)
+
+      # First cycle
+      insert!(:timesheet, %{contract_id: contract_a_0.id, hours_worked: 30})
+      {:ok, contract_a_0} = Contracts.fetch_contract(contract_a_0.id)
+      {:ok, {_txs1, contract_a_1}} = Contracts.release_and_renew_contract(contract_a_0)
+
+      # Second cycle
+      insert!(:timesheet, %{contract_id: contract_a_1.id, hours_worked: 20})
+      {:ok, contract_a_1} = Contracts.fetch_contract(contract_a_1.id)
+      {:ok, {_txs2, _contract_a_2}} = Contracts.release_and_renew_contract(contract_a_1)
+
+      # Group b
+      contract_b_0 = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 30})
+      {:ok, _txs0} = Contracts.prepay_contract(contract_b_0)
+
+      # First cycle
+      insert!(:timesheet, %{contract_id: contract_b_0.id, hours_worked: 30})
+      {:ok, contract_b_0} = Contracts.fetch_contract(contract_b_0.id)
+      {:ok, {_txs1, contract_b_1}} = Contracts.release_and_renew_contract(contract_b_0)
+
+      # Second cycle
+      insert!(:timesheet, %{contract_id: contract_b_1.id, hours_worked: 20})
+      {:ok, contract_b_1} = Contracts.fetch_contract(contract_b_1.id)
+      {:ok, {_txs2, _contract_b_2}} = Contracts.release_and_renew_contract(contract_b_1)
+
+      assert_activity_names(
+        contract_a_0,
+        [:contract_prepaid, :contract_paid]
+      )
+
+      assert_activity_names(
+        contract_a_1,
+        [:contract_renewed, :contract_paid]
+      )
+
+      assert_activity_names(
+        "contract_activities",
+        [
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed,
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed
+        ]
+      )
+
+      assert_activity_names_for_user(
+        contract_a_0.contractor_id,
+        [
+          :contract_prepaid,
+          :contract_paid,
+          :contract_renewed,
+          :contract_paid,
+          :contract_renewed
+        ]
+      )
+
+      assert Activities.all_for_user(contract_a_0.client_id) !=
+               Activities.all_for_user(contract_b_0.client_id)
+
+      assert Activities.all_for_user(contract_a_0.contractor_id) !=
+               Activities.all_for_user(contract_b_0.contractor_id)
+
+      assert_enqueued(worker: Activities.Notifier, worker: "Algora.Activities.Notifier")
+
+      assert [contract_activity | _activities] = Enum.reverse(Activities.all())
+      assert contract_activity.assoc.id == contract_a_0.id
+      activity = Activities.get(contract_activity.assoc_name, contract_activity.id)
+      assert activity.assoc.__meta__.schema == Contract
+      # assert List.last(activities).notify_users == [contract_b_1.client.id, contract_b_1.contractor_id]
+    end
+
     test "prepayment fails when payment method is invalid" do
       contract = setup_contract(%{hourly_rate: ~M[100]usd, hours_per_week: 40})
 
-      payment_error = card_declined_error()
+      PaymentMethod
+      |> Repo.one!()
+      |> change(%{provider_id: "pm_card_declined"})
+      |> Repo.update!()
 
-      Application.put_env(:algora, :stripe_impl, MockStripeWithFailure)
+      {:ok, contract} = Contracts.fetch_contract(contract.id)
 
-      {:error, ^payment_error} = Contracts.prepay_contract(contract)
+      {:error, _} = Contracts.prepay_contract(contract)
 
       # Verify charge was marked as failed
       charge = Repo.one(from t in Transaction, where: t.contract_id == ^contract.id)
       assert charge.status == :failed
 
-      assert %{"error" => %{"code" => "card_error", "message" => "Your card was declined."}} =
-               charge.provider_meta
+      assert %{"error" => %{"code" => "card_declined"}} = charge.provider_meta
     end
 
     test "release payment handles exact prepayment hours correctly" do

@@ -2,6 +2,8 @@ defmodule Algora.Github do
   @moduledoc false
   @behaviour Algora.Github.Behaviour
 
+  require Logger
+
   @type token :: String.t()
 
   def client_id, do: Algora.config([:github, :client_id])
@@ -13,12 +15,12 @@ defmodule Algora.Github do
   def pat, do: Algora.config([:github, :pat])
   def pat_enabled, do: Algora.config([:github, :pat_enabled])
 
-  def install_url do
-    "https://github.com/apps/#{app_handle()}/installations/new"
-  end
+  def install_url_base, do: "https://github.com/apps/#{app_handle()}/installations"
+  def install_url_new, do: "#{install_url_base()}/new"
+  def install_url_select_target, do: "#{install_url_base()}/select_target"
 
-  defp oauth_state_ttl, do: 600
-  defp oauth_state_salt, do: "github-oauth-state"
+  defp oauth_state_ttl, do: Algora.config([:github, :oauth_state_ttl])
+  defp oauth_state_salt, do: Algora.config([:github, :oauth_state_salt])
 
   def generate_oauth_state(data) do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, oauth_state_salt(), data, max_age: oauth_state_ttl())
@@ -42,6 +44,27 @@ defmodule Algora.Github do
   end
 
   defp client, do: Application.get_env(:algora, :github_client, Algora.Github.Client)
+
+  def try_without_installation(function, args) do
+    if pat_enabled() do
+      apply(function, [pat() | args])
+    else
+      {_, module} = Function.info(function, :module)
+      {_, name} = Function.info(function, :name)
+      function_name = String.trim_leading("#{module}.#{name}", "Elixir.")
+
+      formatted_args =
+        Enum.map_join(args, ", ", fn
+          arg when is_binary(arg) -> "\"#{arg}\""
+          arg -> "#{arg}"
+        end)
+
+      Logger.warning("""
+      App installation not found and GITHUB_PAT_ENABLED is false, skipping Github call:
+      #{function_name}(#{formatted_args})
+      """)
+    end
+  end
 
   @impl true
   def get_repository(token, owner, repo), do: client().get_repository(token, owner, repo)
@@ -81,8 +104,17 @@ defmodule Algora.Github do
   def get_installation_token(installation_id), do: client().get_installation_token(installation_id)
 
   @impl true
+  def get_installation(installation_id), do: client().get_installation(installation_id)
+  @impl true
+  def list_installation_repos(token), do: client().list_installation_repos(token)
+
+  @impl true
   def create_issue_comment(token, owner, repo, number, body),
     do: client().create_issue_comment(token, owner, repo, number, body)
+
+  @impl true
+  def update_issue_comment(token, owner, repo, comment_id, body),
+    do: client().update_issue_comment(token, owner, repo, comment_id, body)
 
   @impl true
   def list_repository_events(token, owner, repo, opts \\ []),
@@ -91,4 +123,7 @@ defmodule Algora.Github do
   @impl true
   def list_repository_comments(token, owner, repo, opts \\ []),
     do: client().list_repository_comments(token, owner, repo, opts)
+
+  @impl true
+  def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)
 end

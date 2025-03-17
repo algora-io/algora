@@ -9,8 +9,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias Algora.Accounts.User
   alias AlgoraWeb.Components.Wordmarks
   alias Phoenix.LiveView.AsyncResult
+  alias Swoosh.Email
 
   require Logger
+
+  @steps [:tech_stack, :email, :preferences]
 
   # === SCHEMAS === #
 
@@ -32,7 +35,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:tech_stack])
-      |> validate_length(:tech_stack, min: 1, message: "Please select at least one technology")
+      |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
     end
   end
 
@@ -122,18 +125,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     @primary_key false
     embedded_schema do
-      field :hourly_rate_min, :integer
-      field :hourly_rate_max, :integer
-      field :hours_per_week, :integer
       field :hiring, :boolean
-      field :company_types, {:array, :string}
+      field :categories, {:array, :string}
     end
 
     def hiring_options do
       [{"Yes", "true"}, {"No", "false"}]
     end
 
-    def company_types_options do
+    def categories_options do
       [
         {"Open source company", "open_source"},
         {"Closed source company", "closed_source"},
@@ -143,49 +143,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
 
     def init do
-      to_form(PreferencesForm.changeset(%PreferencesForm{}, %{company_types: []}))
+      to_form(PreferencesForm.changeset(%PreferencesForm{}, %{categories: []}))
     end
 
     def changeset(form, attrs) do
       form
-      |> cast(attrs, [
-        :hourly_rate_min,
-        :hourly_rate_max,
-        :hours_per_week,
-        :hiring,
-        :company_types
-      ])
-      |> validate_required([:hourly_rate_min], message: "Please enter a minimum hourly rate")
-      |> validate_required([:hourly_rate_max], message: "Please enter a maximum hourly rate")
-      |> validate_required([:hours_per_week], message: "Please enter a number of hours per week")
+      |> cast(attrs, [:hiring, :categories])
       |> validate_required([:hiring], message: "Please select a hiring status")
-      |> validate_number(:hourly_rate_min, greater_than: 0)
-      |> validate_number(:hourly_rate_max, greater_than: 0)
-      |> validate_number(:hours_per_week, greater_than: 0)
-      |> validate_length(:company_types,
-        min: 1,
-        message: "Please select at least one company type"
-      )
-      |> validate_subset(
-        :company_types,
-        Enum.map(PreferencesForm.company_types_options(), &elem(&1, 1))
-      )
-      |> validate_rate_range()
-    end
-
-    defp validate_rate_range(changeset) do
-      min_rate = get_field(changeset, :hourly_rate_min)
-      max_rate = get_field(changeset, :hourly_rate_max)
-
-      if min_rate && max_rate && min_rate > max_rate do
-        add_error(changeset, :hourly_rate_min, "must be less than maximum rate")
-      else
-        changeset
-      end
+      |> validate_required([:categories], message: "Please select at least one category")
+      |> validate_length(:categories, min: 1, message: "Please select at least one category")
+      |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
     end
   end
-
-  @steps [:tech_stack, :email, :preferences]
 
   # === LIFECYCLE === #
 
@@ -222,15 +191,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         |> VerificationForm.changeset(%{code: login_code})
         |> to_form()
 
-      case AlgoraWeb.UserAuth.verify_login_code(login_code) do
-        {:ok, %{email: ^email}} ->
+      case AlgoraWeb.UserAuth.verify_login_code(login_code, email) do
+        {:ok, _login_token} ->
           {:ok,
            socket
            |> assign(:tech_stack_form, tech_stack_form)
            |> assign(:email_form, email_form)
            |> assign(:verification_form, verificaiton_form)
            |> assign(:preferences_form, PreferencesForm.init())
-           |> assign(:step, Enum.at(@steps, 2))
+           |> assign(:step, :preferences)
            |> assign(:steps, @steps)
            |> assign(:code_sent?, true)
            |> assign(:code_valid?, true)
@@ -239,12 +208,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
            |> assign_matching_devs()
            |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
            |> assign(:user_metadata, AsyncResult.loading())}
-
-        {:ok, _no_match} ->
-          {:ok,
-           socket
-           |> put_flash(:error, "Invalid onboarding token")
-           |> redirect(to: "/")}
 
         {:error, _invalid} ->
           {:ok,
@@ -280,9 +243,16 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_event("submit_tech_stack", %{"tech_stack_form" => params}, socket) do
+    tech_stack =
+      Jason.decode!(params["tech_stack"]) ++
+        case String.trim(params["tech_stack_input"]) do
+          "" -> []
+          tech_stack_input -> String.split(tech_stack_input, ",")
+        end
+
     changeset =
       %TechStackForm{}
-      |> TechStackForm.changeset(%{tech_stack: Jason.decode!(params["tech_stack"])})
+      |> TechStackForm.changeset(%{tech_stack: tech_stack})
       |> Map.put(:action, :validate)
 
     case changeset do
@@ -311,10 +281,15 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
         login_code = AlgoraWeb.UserAuth.generate_login_code(email, domain, tech_stack)
 
-        # TODO: Send email
-        Logger.info("Login code for #{email}: #{login_code}")
+        name = email |> String.split("@") |> List.first() |> String.capitalize()
 
-        Logger.info(AlgoraWeb.UserAuth.login_email(email, login_code))
+        {:ok, _} =
+          Email.new()
+          |> Email.to({name, email})
+          |> Email.from({"Algora", "info@algora.io"})
+          |> Email.subject("Algora sign-in verification code")
+          |> Email.text_body(AlgoraWeb.UserAuth.login_email(email, name, login_code))
+          |> Algora.Mailer.deliver()
 
         {:noreply,
          socket
@@ -329,10 +304,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
   end
 
-  def handle_event("submit_preferences", %{"preferences_form" => params}, socket) do
+  def handle_event("submit_preferences", params, socket) do
     changeset =
       %PreferencesForm{}
-      |> PreferencesForm.changeset(params)
+      |> PreferencesForm.changeset(params["preferences_form"] || %{})
       |> Map.put(:action, :validate)
 
     case changeset do
@@ -383,15 +358,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           |> String.replace(~r/[^a-zA-Z0-9]/, "")
           |> String.downcase()
 
-        # TODO: generate nicer handles or let the user choose
-
-        org_unique_handle = org_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
-        user_unique_handle = user_handle <> "-" <> String.slice(Nanoid.generate(), 0, 4)
+        org_unique_handle = org_handle
+        user_unique_handle = user_handle
 
         org_params =
           %{
-            # TODO: unset email
-            email: "admin@#{domain}",
             display_name: org_name,
             bio:
               get_in(metadata, [:org, :bio]) ||
@@ -403,9 +374,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
             tech_stack: tech_stack,
-            hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
-            hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
-            hours_per_week: preferences.hours_per_week,
+            categories: preferences.categories,
             website_url: get_in(metadata, [:org, :website_url]),
             twitter_url: get_in(metadata, [:org, :socials, :twitter]),
             github_url: get_in(metadata, [:org, :socials, :github]),
@@ -432,21 +401,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             role: :admin
           }
 
-        contract_params =
-          %{
-            start_date: DateTime.utc_now(),
-            status: :draft,
-            hourly_rate_min: Money.new!(preferences.hourly_rate_min, :USD),
-            hourly_rate_max: Money.new!(preferences.hourly_rate_max, :USD),
-            hours_per_week: preferences.hours_per_week
-          }
-
         params =
           %{
             organization: org_params,
             user: user_params,
-            member: member_params,
-            contract: contract_params
+            member: member_params
           }
 
         socket =
@@ -457,7 +416,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
-              # TODO try to recover
               Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
 
               socket
@@ -483,18 +441,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         code = get_field(changeset, :code)
         email = get_field(socket.assigns.email_form.source, :email)
 
-        case AlgoraWeb.UserAuth.verify_login_code(code) do
-          {:ok, %{email: ^email}} ->
+        case AlgoraWeb.UserAuth.verify_login_code(code, email) do
+          {:ok, _login_token} ->
             {:noreply,
              socket
              |> assign(:verification_form, to_form(changeset))
              |> assign(step: :preferences)}
-
-          {:ok, _different_email} ->
-            {:noreply,
-             socket
-             |> assign(:verification_form, to_form(changeset))
-             |> assign(:code_valid?, false)}
 
           {:error, _reason} ->
             {:noreply,
@@ -531,7 +483,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         limit: 5,
         sort_by_tech_stack: tech_stack,
         sort_by_country: socket.assigns.current_country,
-        min_earnings: Money.new!(200, "USD")
+        earnings_gt: Money.new!(200, "USD")
       )
 
     assign(socket, :matching_devs, matching_devs)
@@ -558,8 +510,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
           <.TechStack
             class="mt-4"
-            props={%{tech_stack: get_field(@tech_stack_form.source, :tech_stack) || []}}
+            tech={get_field(@tech_stack_form.source, :tech_stack) || []}
             socket={@socket}
+            form="tech_stack_form"
           />
 
           <.error :for={msg <- @tech_stack_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
@@ -608,8 +561,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         />
         <p class="mt-4 text-sm text-muted-foreground/75">
           By continuing, you agree to Algora's
-          <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
-          and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
+          <.link href="https://console.algora.io/legal/terms" class="text-primary hover:underline">
+            Terms of Service
+          </.link>
+          and <.link
+            href="https://console.algora.io/legal/privacy"
+            class="text-primary hover:underline"
+          >Privacy Policy</.link>.
         </p>
 
         <div class="flex justify-between">
@@ -637,7 +595,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </p>
 
         <div class="mt-6">
-          <.form for={@verification_form} phx-submit="submit_verification">
+          <.form for={@verification_form} phx-submit="submit_verification" class="space-y-6">
             <label class="mb-2 block text-sm font-medium">Verification Code</label>
             <.input
               field={@verification_form[:code]}
@@ -677,53 +635,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         <div class="space-y-8">
           <div>
-            <label class="mb-1 block text-lg font-semibold">Hourly Rate (USD)</label>
-            <p class="mb-3 text-sm text-muted-foreground">
-              Enter the range of hourly rates you're looking for
-            </p>
-            <div class="flex items-center gap-4">
-              <div class="flex-1">
-                <.input
-                  field={@preferences_form[:hourly_rate_min]}
-                  icon="tabler-currency-dollar"
-                  label="Min"
-                  placeholder="0"
-                  class="w-full border-input bg-background"
-                  hide_errors
-                />
-              </div>
-              <div class="flex-1">
-                <.input
-                  field={@preferences_form[:hourly_rate_max]}
-                  icon="tabler-currency-dollar"
-                  label="Max"
-                  placeholder="0"
-                  class="w-full border-input bg-background"
-                  hide_errors
-                />
-              </div>
-              <div class="flex-1">
-                <.input
-                  field={@preferences_form[:hours_per_week]}
-                  icon="tabler-clock"
-                  label="Hours per week"
-                  placeholder="40"
-                  class="w-full border-input bg-background"
-                  hide_errors
-                />
-              </div>
-            </div>
-            <.error :for={
-              msg <-
-                [:hourly_rate_min, :hourly_rate_max, :hours_per_week]
-                |> Enum.flat_map(&@preferences_form[&1].errors)
-                |> Enum.map(&translate_error(&1))
-            }>
-              {msg}
-            </.error>
-          </div>
-
-          <div>
             <label class="mb-1 block text-lg font-semibold">Are you hiring full-time?</label>
             <p class="mb-3 text-sm text-muted-foreground">
               We will match you with developers who are looking for full-time work
@@ -753,6 +664,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </label>
               <% end %>
             </div>
+            <.error :for={msg <- @preferences_form[:hiring].errors |> Enum.map(&translate_error(&1))}>
+              {msg}
+            </.error>
           </div>
 
           <div>
@@ -763,7 +677,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               Select all that apply
             </p>
             <div class="grid grid-cols-2 gap-4">
-              <%= for {label, value} <- PreferencesForm.company_types_options() do %>
+              <%= for {label, value} <- PreferencesForm.categories_options() do %>
                 <label class={[
                   "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
                   "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
@@ -771,10 +685,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 ]}>
                   <div class="sr-only">
                     <.input
-                      field={@preferences_form[:company_types]}
+                      field={@preferences_form[:categories]}
                       type="checkbox"
                       value={value}
-                      checked={value in (get_field(@preferences_form.source, :company_types) || [])}
+                      checked={value in (get_field(@preferences_form.source, :categories) || [])}
                       multiple
                     />
                   </div>
@@ -788,6 +702,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 </label>
               <% end %>
             </div>
+            <.error :for={
+              msg <- @preferences_form[:categories].errors |> Enum.map(&translate_error(&1))
+            }>
+              {msg}
+            </.error>
           </div>
         </div>
 
@@ -964,7 +883,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             <div class="flex-grow">
               <div class="flex justify-between">
                 <div>
-                  <div class="font-semibold">{dev.name} {dev.flag}</div>
+                  <div class="font-semibold">
+                    {dev.name} {Algora.Misc.CountryEmojis.get(dev.country)}
+                  </div>
                   <div class="text-sm text-muted-foreground">@{User.handle(dev)}</div>
                 </div>
                 <div class="flex flex-col items-end">

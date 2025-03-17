@@ -10,7 +10,10 @@ defmodule Algora.Factory do
     %Algora.Accounts.Identity{
       id: Nanoid.generate(),
       provider: "github",
-      provider_token: ""
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:identity)}"),
+      provider_token: sequence(:provider_token, &"token#{&1}"),
+      provider_email: sequence(:provider_email, &"identity#{&1}@example.com"),
+      provider_login: sequence(:provider_login, &"identity#{&1}")
     }
   end
 
@@ -34,7 +37,9 @@ defmodule Algora.Factory do
       twitter_url: "https://twitter.com/erich",
       github_url: "https://github.com/erich",
       linkedin_url: "https://linkedin.com/in/erich",
-      provider: "github"
+      provider: "github",
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:user)}"),
+      provider_login: sequence(:provider_login, &"erlich#{&1}")
     }
   end
 
@@ -66,7 +71,10 @@ defmodule Algora.Factory do
       twitter_url: "https://twitter.com/piedpiper",
       github_url: "https://github.com/piedpiper",
       discord_url: "https://discord.gg/piedpiper",
-      slack_url: "https://piedpiper.slack.com"
+      slack_url: "https://piedpiper.slack.com",
+      provider: "github",
+      provider_login: "piedpiper",
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:organization)}")
     }
   end
 
@@ -101,9 +109,11 @@ defmodule Algora.Factory do
       id: Nanoid.generate(),
       provider: "stripe",
       provider_id: sequence(:acct, &"acct_#{&1}"),
+      provider_meta: %{},
       name: "Kevin 'The Carver'",
       details_submitted: true,
       charges_enabled: true,
+      payouts_enabled: true,
       service_agreement: "recipient",
       country: "US",
       type: :express,
@@ -124,13 +134,15 @@ defmodule Algora.Factory do
       hours_per_week: 40,
       sequence_number: 1,
       start_date: days_from_now(0),
-      end_date: days_from_now(7)
+      end_date: days_from_now(7),
+      activities: []
     }
   end
 
   def transaction_factory do
     %Algora.Payments.Transaction{
-      id: Nanoid.generate()
+      id: Nanoid.generate(),
+      group_id: Nanoid.generate()
     }
   end
 
@@ -166,7 +178,7 @@ defmodule Algora.Factory do
     %Algora.Workspace.Repository{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:repository)}"),
       name: "middle-out",
       url: "https://github.com/piedpiper/middle-out",
       og_image_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-banner.jpg",
@@ -178,7 +190,7 @@ defmodule Algora.Factory do
     %Algora.Workspace.Ticket{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:ticket)}"),
       type: :issue,
       title: "Optimize compression algorithm for large files",
       description: "We need to improve performance when handling files over 1GB",
@@ -190,21 +202,37 @@ defmodule Algora.Factory do
 
   def bounty_factory do
     %Algora.Bounties.Bounty{
-      id: Nanoid.generate()
+      id: Nanoid.generate(),
+      status: :open,
+      amount: Money.new!(100, :USD)
+    }
+  end
+
+  def tip_factory do
+    %Algora.Bounties.Tip{
+      id: Nanoid.generate(),
+      status: :open,
+      amount: Money.new!(100, :USD)
+    }
+  end
+
+  def attempt_factory do
+    %Algora.Bounties.Attempt{
+      id: Nanoid.generate(),
+      status: :active,
+      warnings_count: 0
     }
   end
 
   def claim_factory do
+    id = Nanoid.generate()
+
     %Algora.Bounties.Claim{
-      id: Nanoid.generate(),
-      provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
-      type: :code,
+      id: id,
+      group_id: id,
+      type: :pull_request,
       status: :pending,
-      title: "Implemented compression optimization",
-      description: "Added parallel processing for large files",
-      url: "https://github.com/piedpiper/middle-out/pull/2",
-      provider_meta: %{}
+      url: sequence(:url, &"https://github.com/piedpiper/middle-out/pull/#{&1}")
     }
   end
 
@@ -220,19 +248,31 @@ defmodule Algora.Factory do
     %Installation{
       id: Nanoid.generate(),
       provider: "github",
-      provider_id: sequence(:provider_id, &"#{&1}"),
-      provider_user_id: sequence(:provider_user_id, &"#{&1}"),
+      provider_id: sequence(:provider_id, &"#{&1 + offset(:installation)}"),
+      provider_user_id: sequence(:provider_user_id, &"#{&1 + offset(:installation)}"),
       provider_meta: %{
-        "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
         "repository_selection" => "selected"
       },
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
       repository_selection: "selected"
     }
   end
 
+  def bot_template_factory do
+    %Algora.BotTemplates.BotTemplate{
+      id: Nanoid.generate(),
+      type: :bounty_created
+    }
+  end
+
   # Convenience API
-  def insert!(factory_name, attributes \\ []) do
+  def insert!(factory_name, attributes \\ [])
+
+  def insert!(factory_name, attributes) when factory_name in [:user, :organization] do
+    user = insert(:user, attributes)
+    %{user | name: user.display_name || user.handle}
+  end
+
+  def insert!(factory_name, attributes) do
     insert(factory_name, attributes)
   end
 
@@ -252,5 +292,16 @@ defmodule Algora.Factory do
       time,
       "Etc/UTC"
     )
+  end
+
+  defp offset(factory_name) do
+    # Convert each character to its ASCII value, multiply by position to ensure
+    # different orderings of same letters produce different results
+    factory_name
+    |> Atom.to_string()
+    |> String.to_charlist()
+    |> Enum.with_index(1)
+    |> Enum.reduce(0, fn {char, index}, acc -> acc + char * index end)
+    |> Kernel.*(1_000_000)
   end
 end

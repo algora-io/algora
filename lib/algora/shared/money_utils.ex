@@ -17,11 +17,16 @@ defmodule Algora.MoneyUtils do
     amount_int
   end
 
+  @spec to_stripe_currency(Money.t()) :: String.t()
+  def to_stripe_currency(money) do
+    money.currency |> to_string() |> String.downcase()
+  end
+
   # TODO: Find a way to make this obsolete
   # Why does ecto return {currency, amount} instead of Money.t()?
   def ensure_money_field(struct, field) do
     case Map.get(struct, field) do
-      {currency, amount} -> Map.put(struct, field, Money.new!(currency, amount))
+      {currency, amount} -> Map.put(struct, field, Money.new!(currency, amount, no_fraction_if_integer: true))
       _ -> struct
     end
   end

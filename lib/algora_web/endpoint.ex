@@ -46,32 +46,9 @@ defmodule AlgoraWeb.Endpoint do
     handler: AlgoraWeb.Webhooks.StripeController,
     secret: {Algora, :config, [[:stripe, :webhook_secret]]}
 
-  plug :parse_body
-
-  opts = [
-    parsers: [:urlencoded, :multipart, :json],
-    pass: ["*/*"],
-    json_decoder: Phoenix.json_library()
-  ]
-
-  defmodule BodyReader do
-    @moduledoc false
-    def cache_raw_body(conn, opts) do
-      with {:ok, body, conn} <- Plug.Conn.read_body(conn, opts) do
-        conn = update_in(conn.assigns[:raw_body], &[body | &1 || []])
-
-        {:ok, body, conn}
-      end
-    end
-  end
-
-  @parser_without_cache Plug.Parsers.init(opts)
-  @parser_with_cache Plug.Parsers.init([body_reader: {BodyReader, :cache_raw_body, []}] ++ opts)
-
-  # All endpoints that start with "webhooks" have their body cached.
-  defp parse_body(%{path_info: ["webhooks" | _]} = conn, _), do: Plug.Parsers.call(conn, @parser_with_cache)
-
-  defp parse_body(conn, _), do: Plug.Parsers.call(conn, @parser_without_cache)
+  plug AlgoraWeb.Plugs.GithubWebhooks,
+    at: "/webhooks/github",
+    handler: AlgoraWeb.Webhooks.GithubController
 
   plug Plug.MethodOverride
   plug Plug.Head

@@ -2,6 +2,8 @@ defmodule Algora.Payments.Customer do
   @moduledoc false
   use Algora.Schema
 
+  alias Algora.Activities.Activity
+
   @derive {Inspect, except: [:provider_meta]}
   typed_schema "customers" do
     field :provider, :string
@@ -16,13 +18,17 @@ defmodule Algora.Payments.Customer do
       foreign_key: :customer_id,
       where: [is_default: true]
 
+    has_many :activities, {"customer_activities", Activity}, foreign_key: :assoc_id
+
     timestamps()
   end
 
   def changeset(customer, attrs) do
     customer
     |> cast(attrs, [:user_id, :provider, :provider_id, :provider_meta, :name])
+    |> generate_id()
     |> validate_required([:user_id, :provider, :provider_id, :provider_meta, :name])
     |> unique_constraint(:user_id)
+    |> foreign_key_constraint(:user_id)
   end
 end

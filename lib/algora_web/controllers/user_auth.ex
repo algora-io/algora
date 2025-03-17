@@ -6,12 +6,30 @@ defmodule AlgoraWeb.UserAuth do
   import Plug.Conn
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Phoenix.LiveView
+
+  defp login_code_ttl, do: Algora.config([:login_code, :ttl])
+  defp login_code_salt, do: Algora.config([:login_code, :salt])
 
   def on_mount(:current_user, _params, session, socket) do
     case session do
       %{"user_id" => user_id} ->
-        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user(user_id) end)}
+        case socket.assigns[:current_user] do
+          %Accounts.User{} = _user ->
+            {:cont, socket}
+
+          nil ->
+            current_user = Accounts.get_user(user_id)
+            current_context = Accounts.get_last_context_user(current_user)
+            all_contexts = Accounts.get_contexts(current_user)
+
+            {:cont,
+             socket
+             |> Phoenix.Component.assign(:current_user, current_user)
+             |> Phoenix.Component.assign(:current_context, current_context)
+             |> Phoenix.Component.assign(:all_contexts, all_contexts)}
+        end
 
       %{} ->
         {:cont, Phoenix.Component.assign(socket, :current_user, nil)}
@@ -21,7 +39,11 @@ defmodule AlgoraWeb.UserAuth do
   def on_mount(:ensure_authenticated, _params, session, socket) do
     case get_authenticated_user(session, socket) do
       {:ok, user} ->
-        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> user end)}
+        {:cont,
+         socket
+         |> Phoenix.Component.assign_new(:current_user, fn -> user end)
+         |> Phoenix.Component.assign_new(:current_context, fn -> Accounts.get_last_context_user(user) end)
+         |> Phoenix.Component.assign_new(:all_contexts, fn -> Accounts.get_contexts(user) end)}
 
       {:error, :unauthenticated} ->
         {:halt, redirect_require_login(socket)}
@@ -35,7 +57,11 @@ defmodule AlgoraWeb.UserAuth do
           raise(AlgoraWeb.NotFoundError)
         end
 
-        {:cont, Phoenix.Component.assign_new(socket, :current_user, fn -> user end)}
+        {:cont,
+         socket
+         |> Phoenix.Component.assign_new(:current_user, fn -> user end)
+         |> Phoenix.Component.assign_new(:current_context, fn -> Accounts.get_last_context_user(user) end)
+         |> Phoenix.Component.assign_new(:all_contexts, fn -> Accounts.get_contexts(user) end)}
 
       {:error, :unauthenticated} ->
         {:halt, redirect_require_login(socket)}
@@ -47,7 +73,7 @@ defmodule AlgoraWeb.UserAuth do
       %{"user_id" => user_id} ->
         new_socket = Phoenix.Component.assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
 
-        case new_socket.assigns.current_user do
+        case new_socket.assigns[:current_user] do
           %Accounts.User{} = user ->
             {:ok, user}
 
@@ -89,16 +115,24 @@ defmodule AlgoraWeb.UserAuth do
 
     conn
     |> put_current_user(user)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: user_return_to || signed_in_path(user))
   end
 
   def put_current_user(conn, user) do
-    conn = assign(conn, :current_user, user)
+    user
+    |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
+    |> Algora.Repo.update()
+
+    conn =
+      conn
+      |> assign(:current_user, user)
+      |> assign(:current_context, Accounts.get_last_context_user(user))
+      |> assign(:all_contexts, Accounts.get_contexts(user))
 
     conn
     |> renew_session()
     |> put_session(:user_id, user.id)
-    |> put_session(:last_context, user.last_context)
+    |> put_session(:last_context, Accounts.last_context(user))
     |> put_session(:live_socket_id, "users_sessions:#{user.id}")
   end
 
@@ -129,7 +163,11 @@ defmodule AlgoraWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     user_id = get_session(conn, :user_id)
     user = user_id && Accounts.get_user(user_id)
-    assign(conn, :current_user, user)
+
+    conn
+    |> assign(:current_user, user)
+    |> assign(:current_context, Accounts.get_last_context_user(user))
+    |> assign(:all_contexts, Accounts.get_contexts(user))
   end
 
   @doc """
@@ -185,40 +223,69 @@ defmodule AlgoraWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
+  def signed_in_path_from_context("personal"), do: ~p"/home"
+  def signed_in_path_from_context(org_handle), do: ~p"/org/#{org_handle}"
+
+  def signed_in_path(%User{} = user) do
+    signed_in_path_from_context(Accounts.last_context(user))
+  end
+
   def signed_in_path(conn) do
-    case get_session(conn, :last_context) do
-      nil -> ~p"/home"
-      "personal" -> ~p"/home"
-      org_handle -> ~p"/org/#{org_handle}"
+    cond do
+      last_context = get_session(conn, :last_context) ->
+        signed_in_path_from_context(last_context)
+
+      user = conn.assigns[:current_user] ->
+        signed_in_path(user)
+
+      true ->
+        signed_in_path_from_context(Accounts.default_context())
     end
   end
 
-  defp login_code_ttl, do: 3600
-  defp login_code_salt, do: "algora-login-code"
+  def generate_login_code(email) do
+    sign_login_code(email)
+  end
 
-  def generate_login_code(email, domain \\ nil, tech_stack) do
-    payload = "#{email}:#{domain || ""}:#{Enum.join(tech_stack, ":")}"
+  def generate_login_code(email, domain, tech_stack) do
+    sign_login_code("#{email}:#{domain || ""}:#{Enum.join(tech_stack, ":")}")
+  end
+
+  def sign_login_code(payload) do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
   end
 
-  def verify_login_code(code) do
+  def verify_login_code(code, email) do
     case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
       {:ok, payload} ->
-        case String.split(payload, ":") do
-          [email, domain | tech_stack] ->
-            {:ok,
-             %{
-               email: email,
-               domain: if(domain != "", do: domain),
-               tech_stack: Enum.reject(tech_stack, &(&1 == "")),
-               token: code
-             }}
+        result =
+          case String.split(payload, ":") do
+            [email, domain | tech_stack] ->
+              {:ok,
+               %{
+                 email: email,
+                 domain: if(domain != "", do: domain),
+                 tech_stack: Enum.reject(tech_stack, &(&1 == "")),
+                 token: code
+               }}
 
-          [email] ->
-            {:ok, %{email: email, token: code}}
+            [email] ->
+              {:ok, %{email: email, token: code}}
 
-          _other ->
-            {:error, "invalid token payload"}
+            _other ->
+              {:error, :invalid_payload}
+          end
+
+        case result do
+          {:ok, data} ->
+            if data.email == email do
+              {:ok, data}
+            else
+              {:error, :invalid_email}
+            end
+
+          {:error, reason} ->
+            {:error, reason}
         end
 
       {:error, reason} ->
@@ -231,14 +298,8 @@ defmodule AlgoraWeb.UserAuth do
   def login_path(email, token, return_to),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"
 
-  def login_email(email, token) do
-    name = email |> String.split("@") |> List.first() |> String.capitalize()
-
+  def login_email(email, name, token) do
     """
-    From: "Algora <info@algora.io>"
-    To: "#{email}",
-    Subject: "Algora sign-in verification code"
-
     Hi #{name},
 
     We have received a login attempt and generated the following verification code:
@@ -249,7 +310,7 @@ defmodule AlgoraWeb.UserAuth do
 
     Or copy and paste this URL into your browser:
 
-    #{AlgoraWeb.Endpoint.url()}/#{login_path(email, token, ~p"/onboarding/org")}
+    #{AlgoraWeb.Endpoint.url()}#{login_path(email, token, ~p"/onboarding/org")}
 
     If you didn't request this link, you can safely ignore this email.
 
@@ -257,7 +318,7 @@ defmodule AlgoraWeb.UserAuth do
 
     For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
 
-    © 2023 Algora PBC.
+    © 2025 Algora PBC.
     """
   end
 end

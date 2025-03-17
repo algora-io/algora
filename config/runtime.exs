@@ -29,7 +29,9 @@ if config_env() == :prod do
     webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
     private_key: System.fetch_env!("GITHUB_PRIVATE_KEY"),
     pat: System.fetch_env!("GITHUB_PAT"),
-    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true"
+    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true",
+    oauth_state_ttl: String.to_integer(System.get_env("GITHUB_OAUTH_STATE_TTL", "600")),
+    oauth_state_salt: System.fetch_env!("GITHUB_OAUTH_STATE_SALT")
 
   config :stripity_stripe,
     api_key: System.fetch_env!("STRIPE_SECRET_KEY")
@@ -127,25 +129,22 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  # ## Configuring the mailer
-  #
-  # In production you need to configure the mailer to use a different adapter.
-  # Also, you may need to configure the Swoosh API client of your choice if you
-  # are not using SMTP. Here is an example of the configuration:
-  #
-  #     config :algora, Algora.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # For this example you need include a HTTP client required by Swoosh API client.
-  # Swoosh supports Hackney and Finch out of the box:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
-  #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  # TODO: remove after migration
+  if false do
+    config :algora, Algora.Mailer,
+      adapter: Swoosh.Adapters.Sendgrid,
+      api_key: System.get_env("SENDGRID_API_KEY")
+  end
+
+  config :swoosh, :api_client, Swoosh.ApiClient.Finch
 
   config :algora,
     bucket_name: System.fetch_env!("BUCKET_NAME"),
     auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
+
+  config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")
+
+  config :algora, :login_code,
+    ttl: String.to_integer(System.get_env("LOGIN_CODE_TTL", "3600")),
+    salt: System.fetch_env!("LOGIN_CODE_SALT")
 end

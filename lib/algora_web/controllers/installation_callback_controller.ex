@@ -77,5 +77,5 @@ defmodule AlgoraWeb.InstallationCallbackController do
     end
   end
 
-  defp redirect_url(conn), do: ~p"/org/#{conn.assigns.current_user.last_context}/settings"
+  defp redirect_url(conn), do: ~p"/org/#{Accounts.last_context(conn.assigns.current_user)}"
 end

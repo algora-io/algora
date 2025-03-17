@@ -7,30 +7,45 @@ defmodule AlgoraWeb.Org.Nav do
   alias Algora.Organizations
 
   def on_mount(:default, %{"org_handle" => org_handle}, _session, socket) do
+    current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
-    members = Organizations.list_org_members(current_org)
-    contractors = Organizations.list_org_contractors(current_org)
 
-    online_users =
-      (contractors ++ members)
-      |> Enum.uniq_by(& &1.id)
-      |> Enum.reject(&(&1.id == socket.assigns.current_user.id))
-      |> Enum.map(fn user ->
-        %{
-          id: user.id,
-          name: user.name || user.handle,
-          handle: user.handle,
-          avatar_url: user.avatar_url,
-          type: :individual
-        }
-      end)
+    current_user_role =
+      if is_nil(current_user) do
+        :none
+      else
+        case Organizations.fetch_member(current_org.id, current_user.id) do
+          {:ok, member} -> member.role
+          _ -> :none
+        end
+      end
+
+    # TODO: restore once chat is implemented
+    contacts = []
+
+    # members = Organizations.list_org_members(current_org) |> Enum.map(& &1.user)
+    # contractors = Organizations.list_org_contractors(current_org)
+    # contacts =
+    #   (contractors ++ members)
+    #   |> Enum.uniq_by(& &1.id)
+    #   |> Enum.reject(&(&1.id == socket.assigns.current_user.id))
+    #   |> Enum.map(fn user ->
+    #     %{
+    #       id: user.id,
+    #       name: user.name || user.handle,
+    #       handle: user.handle,
+    #       avatar_url: user.avatar_url,
+    #       type: :individual
+    #     }
+    #   end)
 
     {:cont,
      socket
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
-     |> assign(:nav, nav_items(current_org.handle))
-     |> assign(:online_users, online_users)
+     |> assign(:current_user_role, current_user_role)
+     |> assign(:nav, nav_items(current_org.handle, current_user_role))
+     |> assign(:contacts, contacts)
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 
@@ -38,10 +53,10 @@ defmodule AlgoraWeb.Org.Nav do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
         {AlgoraWeb.Org.DashboardLive, _} -> :dashboard
+        {AlgoraWeb.Org.HomeLive, _} -> :home
         {AlgoraWeb.Org.BountiesLive, _} -> :bounties
         {AlgoraWeb.Org.ProjectsLive, _} -> :projects
         {AlgoraWeb.Project.ViewLive, _} -> :projects
-        {AlgoraWeb.Org.JobsLive, _} -> :jobs
         {AlgoraWeb.Org.SettingsLive, _} -> :settings
         {AlgoraWeb.Org.MembersLive, _} -> :members
         {_, _} -> nil
@@ -50,44 +65,69 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def nav_items(org_handle) do
+  def nav_items(org_handle, current_user_role) do
     [
       %{
         title: "Overview",
-        items: [
-          %{
-            href: "/org/#{org_handle}",
-            tab: :dashboard,
-            icon: "tabler-home",
-            label: "Dashboard"
-          },
-          %{
-            href: "/org/#{org_handle}/bounties",
-            tab: :bounties,
-            icon: "tabler-diamond",
-            label: "Bounties"
-          },
-          %{href: "/org/#{org_handle}/jobs", tab: :jobs, icon: "tabler-briefcase", label: "Jobs"},
-          %{
-            href: "/org/#{org_handle}/team",
-            tab: :team,
-            icon: "tabler-users",
-            label: "Team"
-          },
-          %{
-            href: "/org/#{org_handle}/analytics",
-            tab: :analytics,
-            icon: "tabler-chart-bar",
-            label: "Analytics"
-          },
-          %{
-            href: "/org/#{org_handle}/settings",
-            tab: :settings,
-            icon: "tabler-settings",
-            label: "Settings"
-          }
-        ]
+        items: build_nav_items(org_handle, current_user_role)
       }
     ]
+  end
+
+  defp build_nav_items(org_handle, current_user_role) do
+    Enum.filter(
+      [
+        %{
+          href: "/org/#{org_handle}",
+          tab: :dashboard,
+          icon: "tabler-sparkles",
+          label: "Dashboard",
+          roles: [:admin, :mod]
+        },
+        %{
+          href: "/org/#{org_handle}/home",
+          tab: :home,
+          icon: "tabler-home",
+          label: "Home",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/bounties",
+          tab: :bounties,
+          icon: "tabler-diamond",
+          label: "Bounties",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/leaderboard",
+          tab: :leaderboard,
+          icon: "tabler-trophy",
+          label: "Leaderboard",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/team",
+          tab: :team,
+          icon: "tabler-users",
+          label: "Team",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/transactions",
+          tab: :transactions,
+          icon: "tabler-credit-card",
+          label: "Transactions",
+          roles: [:admin]
+        },
+        %{
+          href: "/org/#{org_handle}/settings",
+          tab: :settings,
+          icon: "tabler-settings",
+          label: "Settings",
+          roles: [:admin]
+        }
+      ],
+      fn item -> current_user_role in item[:roles] end
+    )
   end
 end

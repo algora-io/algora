@@ -2,13 +2,13 @@ defmodule Algora.Payments.Account do
   @moduledoc false
   use Algora.Schema
 
-  alias Algora.Stripe
+  alias Algora.Activities.Activity
 
   @derive {Inspect, except: [:provider_meta]}
   typed_schema "accounts" do
     field :provider, :string, null: false
     field :provider_id, :string, null: false
-    field :provider_meta, :map, null: false
+    field :provider_meta, :map
 
     field :name, :string
     field :details_submitted, :boolean, default: false, null: false
@@ -18,12 +18,13 @@ defmodule Algora.Payments.Account do
     field :payout_speed, :integer
     field :default_currency, :string
     field :service_agreement, :string
-    field :country, :string, null: false
+    field :country, :string
     field :type, Ecto.Enum, values: [:standard, :express], null: false
     field :stale, :boolean, default: false, null: false
 
     belongs_to :user, Algora.Accounts.User, null: false
 
+    has_many :activities, {"account_activities", Activity}, foreign_key: :assoc_id
     timestamps()
   end
 
@@ -58,7 +59,7 @@ defmodule Algora.Payments.Account do
       :user_id
     ])
     |> validate_inclusion(:type, [:standard, :express])
-    |> validate_inclusion(:country, Stripe.ConnectCountries.list_codes())
+    |> validate_inclusion(:country, Algora.PSP.ConnectCountries.list_codes())
     |> foreign_key_constraint(:user_id)
     |> generate_id()
   end

@@ -3,14 +3,16 @@ defmodule Algora.Contracts do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Activities
   alias Algora.Contracts.Contract
   alias Algora.Contracts.Timesheet
   alias Algora.FeeTier
   alias Algora.MoneyUtils
   alias Algora.Payments
+  alias Algora.Payments.Account
   alias Algora.Payments.Transaction
+  alias Algora.PSP.Invoice
   alias Algora.Repo
-  alias Algora.Stripe
   alias Algora.Util
 
   require Algora.SQL
@@ -24,11 +26,12 @@ defmodule Algora.Contracts do
   @type criterion ::
           {:id, binary()}
           | {:client_id, binary()}
+          | {:contractor_id, binary()}
           | {:original_contract_id, binary()}
           | {:open?, true}
           | {:active_or_paid?, true}
           | {:original?, true}
-          | {:status, :open | :paid}
+          | {:status, :draft | :active | :paid}
           | {:after, non_neg_integer()}
           | {:before, non_neg_integer()}
           | {:order, :asc | :desc}
@@ -43,12 +46,10 @@ defmodule Algora.Contracts do
 
   @spec get_payment_status(Contract.t()) :: payment_status()
   def get_payment_status(contract) do
-    zero = Money.zero(:USD)
-
-    case {contract.timesheet, contract.amount_credited} do
-      {nil, _} -> {:pending_timesheet, contract}
-      {_, ^zero} -> {:pending_release, contract}
-      {_, _} -> {:paid, contract}
+    cond do
+      is_nil(contract.timesheet) -> {:pending_timesheet, contract}
+      Money.positive?(contract.amount_credited) -> {:paid, contract}
+      true -> {:pending_release, contract}
     end
   end
 
@@ -377,7 +378,16 @@ defmodule Algora.Contracts do
     with {:ok, txs} <- initialize_prepayment_transaction(contract),
          {:ok, invoice} <- maybe_generate_invoice(contract, txs.charge),
          {:ok, _invoice} <- maybe_pay_invoice(contract, invoice, txs) do
+      Activities.insert(contract, %{type: :contract_prepaid})
+
       {:ok, txs}
+    else
+      error ->
+        Activities.insert(contract, %{
+          type: :contract_prepayment_failed
+        })
+
+        error
     end
   end
 
@@ -386,7 +396,7 @@ defmodule Algora.Contracts do
   defp maybe_generate_invoice(contract, charge) do
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
-    with {:ok, invoice} <- Stripe.create_invoice(invoice_params),
+    with {:ok, invoice} <- Invoice.create(invoice_params, %{idempotency_key: "contract-#{contract.id}"}),
          {:ok, _line_items} <- create_line_items(contract, invoice, charge.line_items) do
       {:ok, invoice}
     end
@@ -432,14 +442,19 @@ defmodule Algora.Contracts do
   end
 
   defp create_line_items(contract, invoice, line_items) do
-    Enum.reduce_while(line_items, {:ok, []}, fn line_item, {:ok, acc} ->
-      case Stripe.create_invoice_item(%{
-             invoice: invoice.id,
-             customer: contract.client.customer.provider_id,
-             amount: MoneyUtils.to_minor_units(line_item.amount),
-             currency: to_string(line_item.amount.currency),
-             description: line_item.description
-           }) do
+    line_items
+    |> Enum.with_index()
+    |> Enum.reduce_while({:ok, []}, fn {line_item, index}, {:ok, acc} ->
+      case Algora.PSP.Invoiceitem.create(
+             %{
+               invoice: invoice.id,
+               customer: contract.client.customer.provider_id,
+               amount: MoneyUtils.to_minor_units(line_item.amount),
+               currency: to_string(line_item.amount.currency),
+               description: line_item.description
+             },
+             %{idempotency_key: "contract-#{contract.id}-#{index}"}
+           ) do
         {:ok, item} -> {:cont, {:ok, [item | acc]}}
         {:error, error} -> {:halt, {:error, error}}
       end
@@ -451,7 +466,9 @@ defmodule Algora.Contracts do
   defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
-    case Stripe.pay_invoice(invoice.id, %{off_session: true, payment_method: pm_id}) do
+    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}, %{
+           idempotency_key: "contract-#{contract.id}"
+         }) do
       {:ok, stripe_invoice} ->
         if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}
@@ -471,18 +488,23 @@ defmodule Algora.Contracts do
 
   # TODO: do we need to lock the transactions here?
   defp transfer_funds(contract, %Transaction{type: :transfer} = transaction) when transaction.status != :succeeded do
-    case Stripe.create_transfer(%{
-           amount: MoneyUtils.to_minor_units(transaction.net_amount),
-           currency: to_string(transaction.net_amount.currency),
-           destination: transaction.user_id
-         }) do
-      {:ok, stripe_transfer} ->
-        update_transaction_status(transaction, stripe_transfer, :succeeded)
-        mark_contract_as_paid(contract)
-        {:ok, stripe_transfer}
-
+    with {:ok, account} <- Repo.fetch_by(Account, user_id: transaction.user_id),
+         {:ok, stripe_transfer} <-
+           Algora.PSP.Transfer.create(
+             %{
+               amount: MoneyUtils.to_minor_units(transaction.net_amount),
+               currency: to_string(transaction.net_amount.currency),
+               destination: account.provider_id
+             },
+             %{idempotency_key: transaction.id}
+           ) do
+      update_transaction_status(transaction, stripe_transfer, :succeeded)
+      mark_contract_as_paid(contract)
+      {:ok, stripe_transfer}
+    else
       {:error, error} ->
         update_transaction_status(transaction, {:error, error})
+        Activities.insert(contract, %{type: :contract_prepayment_failed})
         {:error, error}
     end
   end
@@ -496,10 +518,19 @@ defmodule Algora.Contracts do
     |> Repo.update()
   end
 
+  defp update_transaction_status(transaction, nil, status) do
+    transaction
+    |> change(%{
+      status: status,
+      succeeded_at: if(status == :succeeded, do: DateTime.utc_now())
+    })
+    |> Repo.update()
+  end
+
   defp update_transaction_status(transaction, record, status) do
     transaction
     |> change(%{
-      provider_id: record[:id],
+      provider_id: record.id,
       provider_meta: Util.normalize_struct(record),
       status: status,
       succeeded_at: if(status == :succeeded, do: DateTime.utc_now())
@@ -510,7 +541,10 @@ defmodule Algora.Contracts do
   defp mark_contract_as_paid(contract) do
     contract
     |> change(%{status: :paid})
-    |> Repo.update()
+    |> Repo.update_with_activity(%{
+      type: :contract_paid,
+      notify_users: []
+    })
   end
 
   defp renew_contract(contract) do
@@ -527,7 +561,10 @@ defmodule Algora.Contracts do
       hourly_rate: contract.hourly_rate,
       hours_per_week: contract.hours_per_week
     })
-    |> Repo.insert()
+    |> Repo.insert_with_activity(%{
+      type: :contract_renewed,
+      notify_users: []
+    })
   end
 
   def calculate_transfer_amount(contract) do
@@ -601,6 +638,7 @@ defmodule Algora.Contracts do
       on: tt.original_contract_id == c.original_contract_id,
       as: :tt
     )
+    |> join(:left, [c], act in assoc(c, :activities), as: :act)
     |> select_merge([ta: ta, tt: tt], %{
       amount_credited: Algora.SQL.money_or_zero(ta.amount_credited),
       amount_debited: Algora.SQL.money_or_zero(ta.amount_debited),
@@ -611,11 +649,12 @@ defmodule Algora.Contracts do
       total_transferred: Algora.SQL.money_or_zero(tt.total_transferred),
       total_withdrawn: Algora.SQL.money_or_zero(tt.total_withdrawn)
     })
-    |> preload([ts: ts, txs: txs, cl: cl, ct: ct, cu: cu, dpm: dpm],
+    |> preload([ts: ts, txs: txs, cl: cl, ct: ct, cu: cu, dpm: dpm, act: act],
       timesheet: ts,
       transactions: txs,
       client: {cl, customer: {cu, default_payment_method: dpm}},
-      contractor: ct
+      contractor: ct,
+      activities: act
     )
     |> Repo.all()
     |> Enum.map(&Contract.after_load/1)
@@ -626,6 +665,9 @@ defmodule Algora.Contracts do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([c] in query, where: c.id == ^id)
+
+      {:contractor_id, contractor_id}, query ->
+        from([c] in query, where: c.contractor_id == ^contractor_id)
 
       {:client_id, client_id}, query ->
         from([c] in query, where: c.client_id == ^client_id)

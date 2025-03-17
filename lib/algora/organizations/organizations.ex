@@ -3,11 +3,9 @@ defmodule Algora.Organizations do
   import Ecto.Query
 
   alias Algora.Accounts.User
-  alias Algora.Contracts.Contract
   alias Algora.Organizations.Member
   alias Algora.Organizations.Org
   alias Algora.Repo
-  alias Ecto.Multi
 
   def create_organization(params) do
     %User{type: :organization}
@@ -28,31 +26,108 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
-    org_changeset = Org.changeset(%User{type: :organization}, params.organization)
+    Repo.transact(fn repo ->
+      {:ok, user} =
+        case repo.get_by(User, email: params.user.email) do
+          nil ->
+            handle = generate_unique_handle(repo, params.user.handle)
 
-    user_changeset = User.org_registration_changeset(%User{type: :individual}, params.user)
+            %User{type: :individual}
+            |> User.org_registration_changeset(Map.put(params.user, :handle, handle))
+            |> repo.insert()
 
-    Multi.new()
-    |> Multi.insert(:org, org_changeset)
-    |> Multi.insert(:user, user_changeset)
-    |> Multi.merge(fn %{user: user, org: org} ->
-      member_changeset =
-        Member.changeset(
-          %Member{},
-          Map.merge(params.member, %{user: user, org: org})
-        )
+          existing_user ->
+            existing_user
+            |> User.org_registration_changeset(Map.delete(params.user, :handle))
+            |> repo.update()
+        end
 
-      contract_changeset =
-        Contract.draft_changeset(
-          %Contract{},
-          Map.put(params.contract, :client_id, org.id)
-        )
+      {:ok, org} =
+        case repo.one(
+               from o in User,
+                 join: m in assoc(o, :members),
+                 join: u in assoc(m, :user),
+                 where: o.handle in ^generate_unique_org_handle_candidates(params.organization.handle),
+                 where: u.id == ^user.id,
+                 limit: 1
+             ) do
+          nil ->
+            handle = generate_unique_org_handle(repo, params.organization.handle)
 
-      Multi.new()
-      |> Multi.insert(:member, member_changeset)
-      |> Multi.insert(:contract, contract_changeset)
+            %User{type: :organization}
+            |> Org.changeset(Map.put(params.organization, :handle, handle))
+            |> repo.insert()
+
+          existing_org ->
+            existing_org
+            |> Org.changeset(Map.delete(params.organization, :handle))
+            |> repo.update()
+        end
+
+      {:ok, member} =
+        case repo.get_by(Member, user_id: user.id, org_id: org.id) do
+          nil ->
+            %Member{}
+            |> Member.changeset(Map.merge(params.member, %{user_id: user.id, org_id: org.id}))
+            |> repo.insert()
+
+          existing_member ->
+            existing_member
+            |> Member.changeset(Map.merge(params.member, %{user_id: user.id, org_id: org.id}))
+            |> repo.update()
+        end
+
+      {:ok, %{org: org, user: user, member: member}}
     end)
-    |> Repo.transaction()
+  end
+
+  defp generate_unique_handle(repo, base_handle) do
+    0
+    |> Stream.iterate(&(&1 + 1))
+    |> Enum.reduce_while(base_handle, fn i, _handle -> {:halt, increment_handle(repo, base_handle, i)} end)
+  end
+
+  defp generate_unique_org_handle_candidates(base_handle) do
+    suffixes = ["hq", "team", "app", "labs", "co"]
+    prefixes = ["get", "try", "join", "go"]
+
+    List.flatten(
+      [base_handle] ++
+        Enum.map(suffixes, &"#{base_handle}#{&1}") ++
+        Enum.map(prefixes, &"#{&1}#{base_handle}")
+    )
+  end
+
+  defp generate_unique_org_handle(repo, base_handle) do
+    case try_candidates(repo, base_handle) do
+      nil -> increment_handle(repo, base_handle, 1)
+      handle -> handle
+    end
+  end
+
+  defp try_candidates(repo, base_handle) do
+    candidates = generate_unique_org_handle_candidates(base_handle)
+
+    Enum.reduce_while(candidates, nil, fn candidate, _acc ->
+      case repo.get_by(User, handle: candidate) do
+        nil -> {:halt, candidate}
+        _user -> {:cont, nil}
+      end
+    end)
+  end
+
+  defp increment_handle(repo, base_handle, n) do
+    candidate =
+      case n do
+        0 -> base_handle
+        n when n <= 42 -> "#{base_handle}#{n}"
+        _ -> raise "Too many attempts to generate unique handle"
+      end
+
+    case repo.get_by(User, handle: candidate) do
+      nil -> candidate
+      _user -> increment_handle(repo, base_handle, n + 1)
+    end
   end
 
   def get_org_by(fields), do: Repo.get_by(User, fields)
@@ -70,12 +145,46 @@ defmodule Algora.Organizations do
     Repo.fetch_by(User, clauses)
   end
 
+  @type criterion ::
+          {:limit, non_neg_integer()}
+          | {:before, %{priority: integer(), stargazers_count: integer(), id: String.t()}}
+
+  @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
+  defp apply_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {:limit, limit}, query ->
+        from([u] in query, limit: ^limit)
+
+      {:before, %{priority: priority, stargazers_count: stargazers_count, id: id}}, query ->
+        from([u] in query,
+          where: {u.priority, u.stargazers_count, u.id} < {^priority, ^stargazers_count, ^id}
+        )
+
+      _, query ->
+        query
+    end)
+  end
+
   def list_orgs(opts) do
-    Repo.all(
-      from u in User,
-        where: u.type == :organization,
-        limit: ^Keyword.fetch!(opts, :limit)
-    )
+    orgs_with_open_bounties =
+      from b in Algora.Bounties.Bounty,
+        where: b.status == :open,
+        select: b.owner_id
+
+    orgs_with_transactions =
+      from tx in Algora.Payments.Transaction,
+        where: tx.status == :succeeded,
+        where: tx.type == :debit,
+        select: tx.user_id
+
+    User
+    |> where([u], u.type == :organization)
+    |> where([u], not is_nil(u.handle))
+    |> where([u], u.featured == true)
+    |> where([u], u.id in subquery(orgs_with_open_bounties) or u.id in subquery(orgs_with_transactions))
+    |> order_by([u], desc: u.priority, desc: u.stargazers_count, desc: u.id)
+    |> apply_criteria(opts)
+    |> Repo.all()
   end
 
   def get_user_orgs(%User{} = user) do
@@ -88,15 +197,33 @@ defmodule Algora.Organizations do
 
   def list_org_members(org) do
     Repo.all(
-      from u in User,
-        join: m in assoc(u, :memberships),
-        where: m.org_id == ^org.id and m.user_id == u.id
+      from m in Member,
+        join: u in assoc(m, :user),
+        where: m.org_id == ^org.id and m.user_id == u.id,
+        select_merge: %{
+          user: u
+        },
+        order_by: [
+          fragment(
+            "CASE WHEN ? = 'admin' THEN 0 WHEN ? = 'mod' THEN 1 WHEN ? = 'expert' THEN 2 ELSE 3 END",
+            m.role,
+            m.role,
+            m.role
+          ),
+          asc: m.inserted_at,
+          asc: m.id
+        ]
     )
+  end
+
+  def fetch_member(org_id, user_id) do
+    Repo.fetch_by(Member, org_id: org_id, user_id: user_id)
   end
 
   def list_org_contractors(org) do
     Repo.all(
       from u in User,
+        distinct: true,
         join: c in assoc(u, :contractor_contracts),
         where: c.client_id == ^org.id and c.contractor_id == u.id
     )

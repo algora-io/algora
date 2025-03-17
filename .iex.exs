@@ -6,6 +6,9 @@ alias Algora.Accounts
 alias Algora.Accounts.Identity
 alias Algora.Accounts.User
 alias Algora.Admin
+alias Algora.Admin.Migration
+alias Algora.Bounties
+alias Algora.Bounties.Claim
 alias Algora.Contracts
 alias Algora.Contracts.Contract
 alias Algora.Contracts.Timesheet
@@ -18,6 +21,11 @@ alias Algora.Payments.Customer
 alias Algora.Payments.PaymentMethod
 alias Algora.Payments.Transaction
 alias Algora.Repo
+alias Algora.Settings
+alias Algora.Workspace
+alias Algora.Workspace.Installation
+alias Algora.Workspace.Repository
+alias Algora.Workspace.Ticket
 
 IEx.configure(inspect: [charlists: :as_lists, limit: :infinity], auto_reload: true)
 

@@ -14,6 +14,14 @@ defmodule Algora.MixProject do
         plt_local_path: "priv/plts/project.plt",
         plt_core_path: "priv/plts/core.plt",
         ignore_warnings: ".dialyzer_ignore.exs"
+      ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.cobertura": :test
       ]
     ]
   end
@@ -56,7 +64,7 @@ defmodule Algora.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.2"},
+      {:plug_cowboy, "~> 2.7"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.3", only: [:dev, :test], runtime: false},
       {:joken, "~> 2.5"},
@@ -67,7 +75,6 @@ defmodule Algora.MixProject do
       {:salad_ui, "~> 0.14.0"},
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
-      {:mox, "~> 1.0", only: :test},
       {:tzdata, "~> 1.1"},
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},
@@ -77,6 +84,9 @@ defmodule Algora.MixProject do
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:chameleon, "~> 2.2.0"},
       {:ex_machina, "~> 2.8.0", only: [:dev, :test]},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:dataloader, "~> 2.0.0"},
+      {:mdex, "~> 0.2"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
@@ -84,7 +94,9 @@ defmodule Algora.MixProject do
       # monitoring, logging
       {:appsignal_phoenix, "~> 2.6"},
       {:logfmt_ex, "~> 0.4"},
-      {:oban_live_dashboard, "~> 0.1.0"}
+      {:oban_live_dashboard, "~> 0.1.0"},
+      # TODO: delete after migration
+      {:yaml_elixir, "~> 2.9"}
     ]
   end
 

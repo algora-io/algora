@@ -3,16 +3,19 @@ defmodule Algora.Bounties.Tip do
   use Algora.Schema
 
   alias Algora.Accounts.User
+  alias Algora.Activities.Activity
 
   typed_schema "tips" do
     field :amount, Algora.Types.Money
-    field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
+    field :status, Ecto.Enum, values: [:open, :cancelled, :paid], default: :open, null: false
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
     belongs_to :creator, User
     belongs_to :recipient, User
     has_many :transactions, Algora.Payments.Transaction
+
+    has_many :activities, {"tip_activities", Activity}, foreign_key: :assoc_id
 
     timestamps()
   end
@@ -27,5 +30,11 @@ defmodule Algora.Bounties.Tip do
     |> foreign_key_constraint(:creator)
     |> foreign_key_constraint(:recipient)
     |> Algora.Validations.validate_money_positive(:amount)
+  end
+
+  def preload(id) do
+    from a in __MODULE__,
+      preload: [:ticket, :owner, :creator, :recipient],
+      where: a.id == ^id
   end
 end

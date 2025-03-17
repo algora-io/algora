@@ -9,8 +9,8 @@ defmodule Mix.Tasks.UpdateGithubUsers do
 
   require Logger
 
-  @input_dir "dev/experts/raw"
-  @output_dir "dev/experts"
+  @input_dir "dev/community/raw"
+  @output_dir "dev/community"
 
   def run(_) do
     Application.ensure_all_started(:algora)
@@ -35,17 +35,17 @@ defmodule Mix.Tasks.UpdateGithubUsers do
     Logger.info("Processing #{filename}")
 
     {:ok, content} = File.read(input_path)
-    {:ok, experts} = Jason.decode(content)
+    {:ok, users} = Jason.decode(content)
 
-    updated_experts =
-      experts
+    updated_users =
+      users
       |> Task.async_stream(
-        fn expert ->
-          id = expert["github_id"]
+        fn user ->
+          id = user["github_id"]
 
           case Github.get_user(Admin.token!(), id) do
             {:ok, user} ->
-              expert
+              user
               |> Map.put("github_handle", user["login"])
               |> maybe_update("bio", user["bio"])
               |> maybe_update("location", user["location"])
@@ -54,18 +54,18 @@ defmodule Mix.Tasks.UpdateGithubUsers do
 
             {:error, reason} ->
               Logger.warning("Failed to fetch user #{id}: #{inspect(reason)}")
-              expert
+              user
           end
         end,
         timeout: 10_000,
         max_concurrency: 5
       )
-      |> Enum.map(fn {:ok, expert} -> expert end)
+      |> Enum.map(fn {:ok, user} -> user end)
 
-    {:ok, json} = Jason.encode(updated_experts, pretty: true)
+    {:ok, json} = Jason.encode(updated_users, pretty: true)
     :ok = File.write(output_path, json)
 
-    Logger.info("Successfully updated #{length(updated_experts)} experts in #{filename}")
+    Logger.info("Successfully updated #{length(updated_users)} users in #{filename}")
   end
 
   defp maybe_update(map, key, value) do

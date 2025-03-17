@@ -7,7 +7,18 @@ defmodule AlgoraWeb.Org.Nav do
   alias Algora.Organizations
 
   def on_mount(:default, %{"org_handle" => org_handle}, _session, socket) do
+    current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
+
+    current_user_role =
+      if is_nil(current_user) do
+        :none
+      else
+        case Organizations.fetch_member(current_org.id, current_user.id) do
+          {:ok, member} -> member.role
+          _ -> :none
+        end
+      end
 
     # TODO: restore once chat is implemented
     contacts = []
@@ -32,7 +43,8 @@ defmodule AlgoraWeb.Org.Nav do
      socket
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
-     |> assign(:nav, nav_items(current_org.handle))
+     |> assign(:current_user_role, current_user_role)
+     |> assign(:nav, nav_items(current_org.handle, current_user_role))
      |> assign(:contacts, contacts)
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
@@ -40,8 +52,8 @@ defmodule AlgoraWeb.Org.Nav do
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
-        {AlgoraWeb.Org.DashboardLive, _} -> :quickstart
-        {AlgoraWeb.Org.DashboardPublicLive, _} -> :home
+        {AlgoraWeb.Org.DashboardLive, _} -> :dashboard
+        {AlgoraWeb.Org.HomeLive, _} -> :home
         {AlgoraWeb.Org.BountiesLive, _} -> :bounties
         {AlgoraWeb.Org.ProjectsLive, _} -> :projects
         {AlgoraWeb.Project.ViewLive, _} -> :projects
@@ -53,55 +65,69 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def nav_items(org_handle) do
+  def nav_items(org_handle, current_user_role) do
     [
       %{
         title: "Overview",
-        items: [
-          %{
-            href: "/org/#{org_handle}",
-            tab: :quickstart,
-            icon: "tabler-sparkles",
-            label: "Quickstart"
-          },
-          %{
-            href: "/org/#{org_handle}/home",
-            tab: :home,
-            icon: "tabler-home",
-            label: "Home"
-          },
-          %{
-            href: "/org/#{org_handle}/bounties",
-            tab: :bounties,
-            icon: "tabler-diamond",
-            label: "Bounties"
-          },
-          %{
-            href: "/org/#{org_handle}/leaderboard",
-            tab: :leaderboard,
-            icon: "tabler-trophy",
-            label: "Leaderboard"
-          },
-          %{
-            href: "/org/#{org_handle}/team",
-            tab: :team,
-            icon: "tabler-users",
-            label: "Team"
-          },
-          %{
-            href: "/org/#{org_handle}/transactions",
-            tab: :transactions,
-            icon: "tabler-credit-card",
-            label: "Transactions"
-          },
-          %{
-            href: "/org/#{org_handle}/settings",
-            tab: :settings,
-            icon: "tabler-settings",
-            label: "Settings"
-          }
-        ]
+        items: build_nav_items(org_handle, current_user_role)
       }
     ]
+  end
+
+  defp build_nav_items(org_handle, current_user_role) do
+    Enum.filter(
+      [
+        %{
+          href: "/org/#{org_handle}",
+          tab: :dashboard,
+          icon: "tabler-sparkles",
+          label: "Dashboard",
+          roles: [:admin, :mod]
+        },
+        %{
+          href: "/org/#{org_handle}/home",
+          tab: :home,
+          icon: "tabler-home",
+          label: "Home",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/bounties",
+          tab: :bounties,
+          icon: "tabler-diamond",
+          label: "Bounties",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/leaderboard",
+          tab: :leaderboard,
+          icon: "tabler-trophy",
+          label: "Leaderboard",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/team",
+          tab: :team,
+          icon: "tabler-users",
+          label: "Team",
+          roles: [:admin, :mod, :expert, :none]
+        },
+        %{
+          href: "/org/#{org_handle}/transactions",
+          tab: :transactions,
+          icon: "tabler-credit-card",
+          label: "Transactions",
+          roles: [:admin]
+        },
+        %{
+          href: "/org/#{org_handle}/settings",
+          tab: :settings,
+          icon: "tabler-settings",
+          label: "Settings",
+          roles: [:admin]
+        }
+      ],
+      fn item -> current_user_role in item[:roles] end
+    )
   end
 end

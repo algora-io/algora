@@ -4,8 +4,10 @@ defmodule Algora.Organizations.Member do
 
   alias Algora.Accounts.User
 
+  @roles [:admin, :mod, :expert]
+
   typed_schema "members" do
-    field :role, Ecto.Enum, values: [:admin, :mod, :expert]
+    field :role, Ecto.Enum, values: @roles
 
     belongs_to :org, User
     belongs_to :user, User
@@ -13,12 +15,15 @@ defmodule Algora.Organizations.Member do
     timestamps()
   end
 
+  def roles, do: @roles
+
   def changeset(member, params) do
     member
-    |> cast(params, [:role])
-    |> put_assoc(:org, params.org)
-    |> put_assoc(:user, params.user)
-    |> validate_required([:role, :org, :user])
+    |> cast(params, [:role, :org_id, :user_id])
+    |> validate_required([:role, :org_id, :user_id])
+    |> foreign_key_constraint(:org_id)
+    |> foreign_key_constraint(:user_id)
+    |> unique_constraint([:org_id, :user_id])
     |> generate_id()
   end
 

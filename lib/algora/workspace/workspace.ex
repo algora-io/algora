@@ -1,7 +1,9 @@
 defmodule Algora.Workspace do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Repo
@@ -17,6 +19,67 @@ defmodule Algora.Workspace do
   @type ticket_type :: :issue | :pull_request
   @type command_type :: :bounty | :attempt | :claim
   @type command_source :: :ticket | :comment
+
+  @doc """
+  Resolves a GitHub installation token for interacting with repositories.
+
+  This function attempts to obtain a valid GitHub access token through three methods in order:
+  1. If an installation_id is provided directly, it gets an installation token via the GitHub Apps API
+  2. If no installation_id is provided, it attempts to look up an installation_id by the repo owner
+  3. If no installation is found, it falls back to using the personal access token of the fallback user
+
+  ## Parameters
+    * `installation_id` - Optional GitHub App installation ID
+    * `repo_owner` - The GitHub username/org that owns the repository
+    * `fallback_user` - The user whose personal access token will be used if no installation token is available
+
+  ## Returns
+    * `{:ok, %{installation_id: integer() | nil, token: String.t()}}` - Successfully obtained token
+    * `{:error, atom()}` - Failed to obtain token
+
+  ## Examples
+      # Using provided installation ID
+      iex> resolve_installation_and_token(12345, "octocat", user)
+      {:ok, %{installation_id: 12345, token: "ghs_xxx..."}}
+
+      # Looking up installation ID by owner
+      iex> resolve_installation_and_token(nil, "octocat", user)
+      {:ok, %{installation_id: 67890, token: "ghs_xxx..."}}
+
+      # Falling back to user's personal access token
+      iex> resolve_installation_and_token(nil, "octocat", user)
+      {:ok, %{installation_id: nil, token: "ghp_xxx..."}}
+  """
+  @spec resolve_installation_and_token(integer() | nil, String.t(), User.t()) ::
+          {:ok, %{installation_id: integer() | nil, token: String.t()}} | {:error, atom()}
+  def resolve_installation_and_token(installation_id, repo_owner, fallback_user) do
+    resolved_installation_id = installation_id || get_installation_id_by_owner(repo_owner)
+
+    if resolved_installation_id do
+      case Github.get_installation_token(resolved_installation_id) do
+        {:ok, token} -> {:ok, %{installation_id: resolved_installation_id, token: token}}
+        error -> error
+      end
+    else
+      case Accounts.get_access_token(fallback_user) do
+        {:ok, token} -> {:ok, %{installation_id: nil, token: token}}
+        error -> error
+      end
+    end
+  end
+
+  @spec get_installation_id_by_owner(String.t()) :: integer() | nil
+  def get_installation_id_by_owner(repo_owner) do
+    installation =
+      Repo.one(
+        from i in Installation,
+          join: u in User,
+          on: u.id == i.provider_user_id and u.provider == i.provider,
+          where: u.provider == "github" and u.provider_login == ^repo_owner
+      )
+
+    if installation, do: installation.provider_id
+  end
 
   def ensure_ticket(token, owner, repo, number) do
     case get_ticket(owner, repo, number) do
@@ -63,9 +126,12 @@ defmodule Algora.Workspace do
         nil -> create_repository_from_github(token, owner, repo)
       end
 
-    case res do
-      {:ok, repository} -> maybe_schedule_og_image_update(repository)
-      error -> error
+    # TODO: remove after migration
+    if not Algora.Settings.migration_in_progress?() do
+      case res do
+        {:ok, repository} -> maybe_schedule_og_image_update(repository)
+        error -> error
+      end
     end
 
     res
@@ -89,10 +155,33 @@ defmodule Algora.Workspace do
 
   def create_repository_from_github(token, owner, repo) do
     with {:ok, repository} <- Github.get_repository(token, owner, repo),
-         {:ok, user} <- ensure_user(token, owner) do
-      repository
-      |> Repository.github_changeset(user)
-      |> Repo.insert()
+         {:ok, user} <- ensure_user_by_repo(token, repository, owner),
+         {:ok, user} <- sync_user(user, repository, owner, repo),
+         {:ok, repo} <- repository |> Repository.github_changeset(user) |> Repo.insert() do
+      {:ok, repo}
+    else
+      {:error,
+       %Ecto.Changeset{
+         errors: [provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}]
+       } = changeset} ->
+        Repo.fetch_by(Repository, provider: "github", provider_id: changeset.changes.provider_id)
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
+
+  def ensure_user_by_repo(token, repository, owner) do
+    case Repo.get_by(User, provider: "github", provider_id: to_string(repository["owner"]["id"])) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        if repository["owner"]["login"] != owner do
+          Logger.warning("might need to rename #{owner} -> #{repository["owner"]["login"]}")
+        end
+
+        ensure_user(token, repository["owner"]["login"])
     end
   end
 
@@ -103,11 +192,53 @@ defmodule Algora.Workspace do
     end
   end
 
+  def sync_user(user, repository, owner, repo) do
+    github_user = repository["owner"]
+
+    if github_user["login"] == user.provider_login and not is_nil(user.provider_id) do
+      {:ok, user}
+    else
+      if github_user["login"] != user.provider_login do
+        Logger.warning(
+          "renaming #{user.provider_login} -> #{github_user["login"]} (reason: #{owner}/#{repo} moved to #{repository["full_name"]})"
+        )
+      end
+
+      res =
+        user
+        |> change(%{
+          provider_id: to_string(github_user["id"]),
+          provider_login: github_user["login"],
+          provider_meta: Util.normalize_struct(github_user)
+        })
+        |> unique_constraint([:provider, :provider_id])
+        |> Repo.update()
+
+      case res do
+        {:ok, user} ->
+          {:ok, user}
+
+        error ->
+          Logger.error("#{owner}/#{repo} | failed to remap #{user.provider_login} -> #{github_user["login"]}")
+          error
+      end
+    end
+  end
+
   def create_user_from_github(token, owner) do
     with {:ok, user_data} <- Github.get_user_by_username(token, owner) do
       user_data
       |> User.github_changeset()
       |> Repo.insert()
+    end
+  end
+
+  def list_installation_repos_by(clauses) do
+    with {:ok, user} <- Repo.fetch_by(User, clauses),
+         {:ok, installation} <- Repo.fetch_by(Installation, connected_user_id: user.id),
+         {:ok, token} <- Github.get_installation_token(installation.provider_id),
+         {:ok, repos} <- Github.list_installation_repos(token) do
+      Enum.map(repos, & &1["full_name"])
     end
   end
 
@@ -155,11 +286,16 @@ defmodule Algora.Workspace do
   def get_installation(id), do: Repo.get(Installation, id)
   def get_installation!(id), do: Repo.get!(Installation, id)
 
-  def list_installations_by(fields), do: Repo.all(from(i in Installation, where: ^fields))
-
-  def list_user_installations(user_id) do
-    Repo.all(from(i in Installation, where: i.owner_id == ^user_id, preload: [:connected_user]))
-  end
+  def list_installations_by(fields),
+    do:
+      Repo.all(
+        from(i in Installation,
+          where: ^fields,
+          join: connected_user in assoc(i, :connected_user),
+          join: provider_user in assoc(i, :provider_user),
+          select_merge: %{connected_user: connected_user, provider_user: provider_user}
+        )
+      )
 
   def fetch_command_response(ticket_id, command_type) do
     Repo.fetch_one(

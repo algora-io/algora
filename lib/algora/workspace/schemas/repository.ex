@@ -14,6 +14,7 @@ defmodule Algora.Workspace.Repository do
     field :name, :string, null: false
     field :url, :string, null: false
     field :description, :string
+    field :tech_stack, {:array, :string}, null: false, default: []
     field :og_image_url, :string, null: false
     field :og_image_updated_at, :utc_datetime_usec
 

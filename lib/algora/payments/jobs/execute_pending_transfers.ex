@@ -2,7 +2,7 @@ defmodule Algora.Payments.Jobs.ExecutePendingTransfer do
   @moduledoc false
   use Oban.Worker,
     queue: :transfers,
-    max_attempts: 1
+    unique: [period: :infinity]
 
   alias Algora.Payments
 

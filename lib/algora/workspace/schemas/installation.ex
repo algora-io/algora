@@ -10,13 +10,13 @@ defmodule Algora.Workspace.Installation do
     field :provider, :string, null: false
     field :provider_id, :string, null: false
     field :provider_meta, :map
-    field :provider_user_id, :string
 
-    field :avatar_url, :string
     field :repository_selection, :string
 
-    belongs_to :owner, User, null: false
+    belongs_to :owner, User
     belongs_to :connected_user, User, null: false
+    # TODO: make non-nullable after migration
+    belongs_to :provider_user, User
 
     has_many :activities, {"installation_activities", Activity}, foreign_key: :assoc_id
     timestamps()
@@ -26,7 +26,6 @@ defmodule Algora.Workspace.Installation do
     params = %{
       owner_id: user.id,
       connected_user_id: org.id,
-      avatar_url: data["account"]["avatar_url"],
       repository_selection: data["repository_selection"],
       provider_id: to_string(data["id"]),
       provider_user_id: to_string(provider_user.id),
@@ -37,7 +36,6 @@ defmodule Algora.Workspace.Installation do
     |> cast(params, [
       :owner_id,
       :connected_user_id,
-      :avatar_url,
       :repository_selection,
       :provider_id,
       :provider_user_id,

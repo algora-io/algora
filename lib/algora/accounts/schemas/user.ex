@@ -21,7 +21,7 @@ defmodule Algora.Accounts.User do
     field :provider_login, :string
     field :provider_meta, :map, default: %{}
 
-    field :type, Ecto.Enum, values: [:individual, :organization], default: :individual
+    field :type, Ecto.Enum, values: [:individual, :organization, :bot], default: :individual
     field :email, :string
     field :name, :string
     field :display_name, :string
@@ -35,6 +35,7 @@ defmodule Algora.Accounts.User do
     field :stargazers_count, :integer, default: 0
     field :domain, :string
     field :tech_stack, {:array, :string}, default: []
+    field :categories, {:array, :string}, default: []
     field :featured, :boolean, default: false
     field :priority, :integer, default: 0
     field :fee_pct, :integer, default: 19
@@ -43,6 +44,12 @@ defmodule Algora.Accounts.User do
     field :max_open_attempts, :integer, default: 3
     field :manual_assignment, :boolean, default: false
     field :is_admin, :boolean, default: false
+    field :last_active_at, :utc_datetime_usec
+
+    field :seeking_bounties, :boolean, default: false
+    field :seeking_contracts, :boolean, default: false
+    field :seeking_jobs, :boolean, default: false
+    field :hiring, :boolean, default: false
 
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money
@@ -52,15 +59,11 @@ defmodule Algora.Accounts.User do
     field :completed_bounties_count, :integer, virtual: true
     field :contributed_projects_count, :integer, virtual: true
 
-    ## TODO: remove temporary fields
-    field :message, :string, virtual: true
-    field :flag, :string, virtual: true
-
     field :need_avatar, :boolean, default: false
 
     field :bounty_mode, Ecto.Enum,
-      values: [:community, :experts_only, :public],
-      default: :community
+      values: [:community, :exclusive, :public],
+      default: :public
 
     field :website_url, :string
     field :twitter_url, :string
@@ -86,7 +89,6 @@ defmodule Algora.Accounts.User do
     has_many :received_tips, Tip, foreign_key: :recipient_id
     has_many :attempts, Algora.Bounties.Attempt
     has_many :claims, Algora.Bounties.Claim
-    has_many :projects, Algora.Projects.Project
     has_many :repositories, Algora.Workspace.Repository
     has_many :transactions, Algora.Payments.Transaction, foreign_key: :user_id
     has_many :owned_installations, Installation, foreign_key: :owner_id
@@ -160,8 +162,6 @@ defmodule Algora.Accounts.User do
       |> validate_email()
       |> unique_constraint(:email)
       |> unique_constraint(:handle)
-      # TODO: fetch tech stack from github
-      |> put_change(:tech_stack, ["Swift"])
       |> put_assoc(:identities, [identity_changeset])
     else
       %User{}
@@ -177,14 +177,12 @@ defmodule Algora.Accounts.User do
 
     if identity_changeset.valid? do
       params = %{
-        "handle" => info["login"],
-        "email" => primary_email,
-        "display_name" => get_change(identity_changeset, :provider_name),
-        "bio" => info["bio"],
-        "location" => info["location"],
-        "avatar_url" => info["avatar_url"],
-        "website_url" => info["blog"],
-        "github_url" => info["html_url"],
+        "display_name" => user.display_name || get_change(identity_changeset, :provider_name),
+        "bio" => user.bio || info["bio"],
+        "location" => user.location || info["location"],
+        "avatar_url" => user.avatar_url || info["avatar_url"],
+        "website_url" => user.website_url || info["blog"],
+        "github_url" => user.github_url || info["html_url"],
         "provider" => "github",
         "provider_id" => to_string(info["id"]),
         "provider_login" => info["login"],
@@ -193,8 +191,6 @@ defmodule Algora.Accounts.User do
 
       user
       |> cast(params, [
-        :handle,
-        :email,
         :display_name,
         :bio,
         :location,
@@ -207,8 +203,7 @@ defmodule Algora.Accounts.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:email, :display_name, :handle])
-      |> validate_handle()
+      |> validate_required([:display_name])
       |> validate_email()
     else
       user
@@ -229,13 +224,17 @@ defmodule Algora.Accounts.User do
       :handle,
       :domain,
       :tech_stack,
+      :categories,
       :hourly_rate_min,
       :hourly_rate_max,
+      :hours_per_week,
       :last_context
     ])
     |> generate_id()
     |> validate_required([:type, :handle, :email, :display_name])
     |> validate_email()
+    |> unique_constraint(:handle)
+    |> unique_constraint(:email)
   end
 
   def settings_changeset(%User{} = user, params) do
@@ -270,8 +269,12 @@ defmodule Algora.Accounts.User do
   end
 
   def validate_handle(changeset) do
+    reserved_words =
+      ~w(personal org admin support help security team staff official auth tip home dashboard bounties community user payment claims orgs projects jobs leaderboard onboarding pricing developers companies contracts community blog docs open hiring sdk api)
+
     changeset
     |> validate_format(:handle, ~r/^[a-zA-Z0-9_-]{2,32}$/)
+    |> validate_exclusion(:handle, reserved_words, message: "is reserved")
     |> unsafe_validate_unique(:handle, Algora.Repo)
     |> unique_constraint(:handle)
   end
@@ -281,7 +284,7 @@ defmodule Algora.Accounts.User do
       provider_id: to_string(meta["id"]),
       provider_login: meta["login"],
       type: type_from_provider(:github, meta["type"]),
-      display_name: meta["name"],
+      display_name: meta["name"] || meta["login"],
       bio: meta["bio"],
       location: meta["location"],
       avatar_url: meta["avatar_url"],
@@ -327,8 +330,4 @@ defmodule Algora.Accounts.User do
   def url(%{handle: handle, type: :organization}), do: "#{Endpoint.url()}/org/#{handle}"
   def url(%{handle: handle}) when is_binary(handle), do: "#{Endpoint.url()}/org/#{handle}"
   def url(%{provider_login: handle}), do: "https://github.com/#{handle}"
-
-  def last_context(%{last_context: last_context}), do: last_context || default_context()
-
-  def default_context, do: "personal"
 end

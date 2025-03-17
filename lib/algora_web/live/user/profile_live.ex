@@ -130,7 +130,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                               </.link>
                               <.icon name="tabler-chevron-right" class="h-4 w-4" />
                               <.link
-                                href={"https://github.com/#{bounty.repository.owner.login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
+                                href={"https://github.com/#{bounty.repository.owner.provider_login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
                                 class="hover:underline"
                               >
                                 {bounty.repository.name}#{bounty.ticket.number}
@@ -138,7 +138,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                             </div>
 
                             <.link
-                              href={"https://github.com/#{bounty.repository.owner.login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
+                              href={"https://github.com/#{bounty.repository.owner.provider_login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
                               class="group flex items-center gap-2"
                             >
                               <div class="font-display text-xl font-semibold text-success">
@@ -190,7 +190,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
                       <.avatar_fallback>
-                        {String.first(review.reviewer.name)}
+                        {Algora.Util.initials(review.reviewer.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="flex flex-col">

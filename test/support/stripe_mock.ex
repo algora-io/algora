@@ -82,4 +82,34 @@ defmodule Algora.Support.StripeMock do
        }}
     end
   end
+
+  defmodule Customer do
+    @moduledoc false
+    def create(_params) do
+      {:ok, %Stripe.Customer{id: "cus_#{Algora.Util.random_int()}"}}
+    end
+  end
+
+  defmodule Account do
+    @moduledoc false
+    def retrieve(id) do
+      {:ok,
+       %Stripe.Account{
+         id: id,
+         charges_enabled: true,
+         payouts_enabled: true,
+         default_currency: "usd",
+         details_submitted: true,
+         country: "US",
+         settings: %{
+           payouts: %{
+             schedule: %{
+               interval: "daily",
+               delay_days: 3
+             }
+           }
+         }
+       }}
+    end
+  end
 end

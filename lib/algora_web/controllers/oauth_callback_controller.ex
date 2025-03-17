@@ -45,10 +45,12 @@ defmodule AlgoraWeb.OAuthCallbackController do
           |> render(:success)
 
         :redirect ->
-          conn
-          |> put_flash(:info, welcome_message(user))
-          |> AlgoraWeb.UserAuth.put_current_user(user)
-          |> redirect(to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
+          conn =
+            conn
+            |> put_flash(:info, welcome_message(user))
+            |> AlgoraWeb.UserAuth.put_current_user(user)
+
+          redirect(conn, to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
       end
     else
       {:error, reason} ->
@@ -70,8 +72,8 @@ defmodule AlgoraWeb.OAuthCallbackController do
   end
 
   def new(conn, %{"provider" => "email", "email" => email, "token" => token, "return_to" => "/onboarding/org"}) do
-    case AlgoraWeb.UserAuth.verify_login_code(token) do
-      {:ok, %{email: ^email} = login_token} ->
+    case AlgoraWeb.UserAuth.verify_login_code(token, email) do
+      {:ok, login_token} ->
         conn
         |> put_session(:onboarding_email, login_token.email)
         |> put_session(:onboarding_domain, login_token.domain)
@@ -89,7 +91,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
   end
 
   def new(conn, %{"provider" => "email", "email" => email, "token" => token} = params) do
-    with {:ok, %{email: ^email}} <- AlgoraWeb.UserAuth.verify_login_code(token),
+    with {:ok, _login_token} <- AlgoraWeb.UserAuth.verify_login_code(token, email),
          {:ok, user} <- get_or_register_user(email) do
       conn =
         if params["return_to"] do

@@ -57,11 +57,13 @@ defmodule AlgoraWeb.Org.LeaderboardLive do
                         <.avatar>
                           <.avatar_image src={earner.avatar_url} />
                           <.avatar_fallback>
-                            {String.slice(User.handle(earner), 0, 2)}
+                            {Algora.Util.initials(User.handle(earner))}
                           </.avatar_fallback>
                         </.avatar>
                         <div>
-                          <div class="font-medium">{earner.name} {earner.flag}</div>
+                          <div class="font-medium">
+                            {earner.name} {Algora.Misc.CountryEmojis.get(earner.country)}
+                          </div>
                           <div class="text-sm text-muted-foreground">@{User.handle(earner)}</div>
                         </div>
                       </div>

@@ -5,28 +5,44 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   import Ecto.Query
 
   alias Algora.Accounts
+  alias Algora.Activities.SendDiscord
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Tip
   alias Algora.Github
   alias Algora.Github.Webhook
+  alias Algora.Organizations.Member
+  alias Algora.Payments.Customer
+  alias Algora.PSP.Invoice
   alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.CommandResponse
   alias Algora.Workspace.Installation
 
   require Logger
 
-  # TODO: persist & alert about failed deliveries
-  # TODO: auto-retry failed deliveries with exponential backoff
+  # TODO: auto-retry failed deliveries with backoff
 
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
          {:ok, commands} <- process_commands(webhook),
          :ok <- process_event(webhook, commands) do
       Logger.debug("✅ #{inspect(webhook.event_action)}")
+      notify_event(webhook, :ok)
       :ok
+    else
+      {:error, reason} ->
+        Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(reason)}")
+        notify_event(webhook, {:error, reason})
+        {:error, reason}
     end
+  rescue
+    error ->
+      Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(error)}")
+      notify_event(webhook, {:error, error})
+      {:error, error}
   end
 
   defp ensure_human_author(%Webhook{author: author}) do
@@ -36,29 +52,69 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  # TODO: cache installation tokens
-  # TODO: check org permissions on algora
-  defp get_permissions(%Webhook{payload: payload, author: author}) do
-    with {:ok, access_token} <- Github.get_installation_token(payload["installation"]["id"]),
-         {:ok, %{"permission" => permission}} <-
-           Github.get_repository_permissions(
-             access_token,
-             payload["repository"]["owner"]["login"],
-             payload["repository"]["name"],
-             author["login"]
-           ) do
-      {:ok, permission}
+  defp authorize_user(%Webhook{} = webhook) do
+    case check_org_permissions(webhook) do
+      {:ok, role} -> {:ok, role}
+      {:error, :unauthorized} -> check_repo_permissions(webhook)
     end
   end
 
-  defp process_event(
-         %Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}},
-         _commands
-       ) do
-    :ok
+  defp check_repo_permissions(%Webhook{payload: payload, author: author}) do
+    repo = payload["repository"]
+
+    with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
+         {:ok, %{"permission" => permission}} <-
+           Github.get_repository_permissions(token, repo["owner"]["login"], repo["name"], author["login"]) do
+      case permission do
+        "admin" -> {:ok, :admin}
+        "write" -> {:ok, :mod}
+        _ -> {:error, :unauthorized}
+      end
+    end
   end
 
-  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload}, _commands) do
+  defp check_org_permissions(%Webhook{payload: payload, author: author}) do
+    installation_id = payload["installation"]["id"]
+
+    with {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, installation} <- Repo.fetch_by(Installation, provider: "github", provider_id: to_string(installation_id)),
+         {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
+      member =
+        Repo.one(
+          from m in Member,
+            join: o in assoc(m, :org),
+            where: o.id == ^installation.connected_user_id and m.user_id == ^user.id
+        )
+
+      case member do
+        %Member{role: :admin} -> {:ok, :admin}
+        %Member{role: :mod} -> {:ok, :mod}
+        _ -> {:error, :unauthorized}
+      end
+    end
+  end
+
+  defp process_event(%Webhook{event_action: "issues.closed"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
+  defp process_event(%Webhook{event_action: "issues.deleted"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
+  defp process_event(%Webhook{event_action: "issues.reopened"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
+  defp process_event(%Webhook{event_action: "pull_request.reopened"} = webhook, _commands),
+    do: handle_ticket_state_change(webhook)
+
+  defp process_event(
+         %Webhook{event_action: "pull_request.closed", payload: %{"pull_request" => %{"merged_at" => nil}}} = webhook,
+         _commands
+       ),
+       do: handle_ticket_state_change(webhook)
+
+  defp process_event(%Webhook{event_action: "pull_request.closed", payload: payload} = webhook, _commands) do
+    _res = handle_ticket_state_change(webhook)
+
     with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, source} <-
            Workspace.ensure_ticket(
@@ -110,11 +166,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         primary_claim = List.first(claims)
 
         installation =
-          Repo.one(
-            from i in Installation,
-              where: i.provider == "github",
-              where: i.provider_id == ^to_string(payload["installation"]["id"])
-          )
+          Repo.get_by(Installation, provider: "github", provider_id: to_string(payload["installation"]["id"]))
 
         bounties =
           Repo.all(
@@ -132,7 +184,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         autopayable_bounty =
           Enum.find(
             bounties,
-            &(not is_nil(installation) and
+            &(not &1.autopay_disabled and
+                not is_nil(installation) and
                 &1.owner.id == installation.connected_user_id and
                 not is_nil(&1.owner.customer) and
                 not is_nil(&1.owner.customer.default_payment_method))
@@ -158,7 +211,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      claims: claims
                    ),
                  {:ok, _invoice} <-
-                   Algora.PSP.Invoice.pay(
+                   Invoice.pay(
                      invoice,
                      %{
                        payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
@@ -241,15 +294,25 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   defp process_event(_webhook, _commands), do: :ok
 
-  defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:bounty, args})
-       when event_action in ["issues.opened", "issues.edited", "issue_comment.created", "issue_comment.edited"] do
+  defp execute_command(%Webhook{event_action: event_action, payload: payload, author: author} = webhook, {:bounty, args})
+       when event_action in [
+              "issues.opened",
+              "issues.edited",
+              "issue_comment.created",
+              "issue_comment.edited",
+              "pull_request.opened",
+              "pull_request.edited"
+            ] do
     amount = args[:amount]
 
     {command_source, command_id} =
       case webhook.event do
         "issue_comment" -> {:comment, payload["comment"]["id"]}
         "issues" -> {:ticket, payload["issue"]["id"]}
+        "pull_request" -> {:ticket, payload["pull_request"]["id"]}
       end
+
+    ticket_number = get_github_ticket(webhook)["number"]
 
     # TODO: perform compensating action if needed
     # ❌ comment1.created (:set) -> comment2.created (:increase) -> comment2.edited (:increase)
@@ -265,12 +328,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       end
 
     # TODO: community bounties?
-    with {:ok, "admin"} <- get_permissions(webhook),
+    with {:ok, role} when role in [:admin, :mod] <- authorize_user(webhook),
          {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, installation} <-
            Workspace.fetch_installation_by(provider: "github", provider_id: to_string(payload["installation"]["id"])),
          {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
-         {:ok, creator} <- Workspace.ensure_user(token, payload["repository"]["owner"]["login"]) do
+         {:ok, creator} <- Workspace.ensure_user(token, author["login"]) do
       Bounties.create_bounty(
         %{
           creator: creator,
@@ -279,7 +342,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           ticket_ref: %{
             owner: payload["repository"]["owner"]["login"],
             repo: payload["repository"]["name"],
-            number: payload["issue"]["number"]
+            number: ticket_number
           }
         },
         strategy: strategy,
@@ -288,7 +351,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         command_source: command_source
       )
     else
-      {:ok, _permission} ->
+      {:ok, _role} ->
         {:error, :unauthorized}
 
       {:error, _reason} = error ->
@@ -299,29 +362,117 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:tip, args})
        when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
-    recipient = args[:recipient]
 
-    # TODO: handle missing amount
-    # TODO: handle missing recipient
-    # TODO: handle tip to self
-    # TODO: handle autopay with cooldown
-    # TODO: community tips?
-    case get_permissions(webhook) do
-      {:ok, "admin"} ->
-        Bounties.create_tip_intent(
-          %{
-            recipient: recipient,
-            amount: amount,
-            ticket_ref: %{
-              owner: payload["repository"]["owner"]["login"],
-              repo: payload["repository"]["name"],
-              number: payload["issue"]["number"]
-            }
-          },
-          installation_id: payload["installation"]["id"]
-        )
+    ticket_ref = %{
+      owner: payload["repository"]["owner"]["login"],
+      repo: payload["repository"]["name"],
+      number: payload["issue"]["number"]
+    }
 
-      {:ok, _permission} ->
+    case authorize_user(webhook) do
+      {:ok, role} when role in [:admin, :mod] ->
+        installation =
+          Repo.get_by(Installation, provider: "github", provider_id: to_string(payload["installation"]["id"]))
+
+        customer =
+          Repo.one(
+            from c in Customer,
+              left_join: p in assoc(c, :default_payment_method),
+              where: c.user_id == ^installation.connected_user_id,
+              select_merge: %{default_payment_method: p}
+          )
+
+        {:ok, recipient} = get_tip_recipient(webhook, {:tip, args})
+
+        {:ok, token} = Github.get_installation_token(payload["installation"]["id"])
+
+        {:ok, ticket} = Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number)
+
+        autopay_cooldown_expired? = fn ->
+          from(t in Tip,
+            join: recipient in assoc(t, :recipient),
+            where: recipient.provider_login == ^recipient,
+            where: t.ticket_id == ^ticket.id,
+            where: t.status != :cancelled,
+            order_by: [desc: t.inserted_at],
+            limit: 1
+          )
+          |> Repo.one()
+          |> case do
+            nil -> true
+            tip -> DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > :timer.hours(1)
+          end
+        end
+
+        autopayable? =
+          not is_nil(installation) and
+            not is_nil(customer) and
+            not is_nil(customer.default_payment_method) and
+            not is_nil(recipient) and
+            not is_nil(amount) and
+            autopay_cooldown_expired?.()
+
+        idempotency_key = "tip-#{recipient}-#{webhook.delivery}"
+
+        autopay_result =
+          if autopayable? do
+            with {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
+                 {:ok, creator} <- Workspace.ensure_user(token, payload["repository"]["owner"]["login"]),
+                 {:ok, recipient} <- Workspace.ensure_user(token, recipient),
+                 {:ok, tip} <-
+                   Bounties.do_create_tip(
+                     %{creator: creator, owner: owner, recipient: recipient, amount: amount},
+                     ticket_ref: ticket_ref,
+                     installation_id: payload["installation"]["id"]
+                   ),
+                 {:ok, invoice} <-
+                   Bounties.create_invoice(
+                     %{
+                       owner: owner,
+                       amount: amount,
+                       idempotency_key: idempotency_key
+                     },
+                     ticket_ref: ticket_ref,
+                     tip_id: tip.id,
+                     recipient: recipient
+                   ),
+                 {:ok, _invoice} <-
+                   Invoice.pay(
+                     invoice,
+                     %{
+                       payment_method: customer.default_payment_method.provider_id,
+                       off_session: true
+                     },
+                     %{idempotency_key: idempotency_key}
+                   ) do
+              Logger.info("Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).")
+              {:ok, tip}
+            else
+              {:error, reason} ->
+                Logger.error(
+                  "Autopay failed (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}): #{inspect(reason)}"
+                )
+
+                {:error, reason}
+            end
+          end
+
+        case autopay_result do
+          {:ok, tip} ->
+            {:ok, tip}
+
+          _ ->
+            Bounties.create_tip_intent(
+              %{
+                recipient: recipient,
+                amount: amount,
+                ticket_ref: ticket_ref
+              },
+              installation_id: payload["installation"]["id"]
+            )
+        end
+
+      {:ok, _role} ->
         {:error, :unauthorized}
 
       {:error, _reason} = error ->
@@ -451,5 +602,169 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           {:halt, error}
       end
     end)
+  end
+
+  defp get_tip_recipient(%Webhook{payload: payload, author: author}, {:tip, args}) do
+    res =
+      case args[:recipient] do
+        nil ->
+          with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
+               {:ok, user} <- Workspace.ensure_user(token, payload["issue"]["user"]["login"]) do
+            {:ok, user.provider_login}
+          end
+
+        recipient ->
+          {:ok, recipient}
+      end
+
+    case res do
+      {:ok, recipient} ->
+        {:ok, ensure_valid_recipient(recipient, author)}
+
+      error ->
+        error
+    end
+  end
+
+  defp ensure_valid_recipient(recipient, author) do
+    if recipient == author["login"], do: nil, else: recipient
+  end
+
+  defp handle_ticket_state_change(%Webhook{payload: payload, event_action: event_action} = webhook) do
+    github_ticket = get_github_ticket(webhook)
+
+    state =
+      if event_action == "issues.deleted" do
+        :closed
+      else
+        String.to_existing_atom(github_ticket["state"])
+      end
+
+    case Workspace.get_ticket(
+           payload["repository"]["owner"]["login"],
+           payload["repository"]["name"],
+           github_ticket["number"]
+         ) do
+      nil ->
+        :ok
+
+      ticket ->
+        case ticket
+             |> change(
+               state: state,
+               closed_at: Util.to_date!(github_ticket["closed_at"]),
+               merged_at: Util.to_date!(github_ticket["merged_at"])
+             )
+             |> Repo.update() do
+          {:ok, _} -> :ok
+          {:error, reason} -> {:error, reason}
+        end
+    end
+  end
+
+  defp notify_event(%Webhook{event_action: event_action, author: author, payload: payload} = webhook, :ok) do
+    with github_ticket when not is_nil(github_ticket) <- get_github_ticket(webhook),
+         ticket when not is_nil(ticket) <-
+           Workspace.get_ticket(
+             payload["repository"]["owner"]["login"],
+             payload["repository"]["name"],
+             github_ticket["number"]
+           ) do
+      discord_payload = %{
+        payload: %{
+          embeds: [
+            %{
+              color: 0x64748B,
+              title: event_action,
+              author: %{
+                name: payload["repository"]["owner"]["login"],
+                icon_url: payload["repository"]["owner"]["avatar_url"],
+                url: github_ticket["html_url"]
+              },
+              footer: %{
+                text: author["login"],
+                icon_url: author["avatar_url"]
+              },
+              fields: [
+                %{
+                  name: "Ticket",
+                  value: "#{payload["repository"]["name"]}##{github_ticket["number"]}: #{github_ticket["title"]}",
+                  inline: false
+                }
+              ],
+              url: github_ticket["html_url"],
+              timestamp: DateTime.utc_now()
+            }
+          ]
+        }
+      }
+
+      case discord_payload |> SendDiscord.changeset() |> Repo.insert() do
+        {:ok, _} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Error sending discord notification: #{inspect(reason)}")
+          {:error, reason}
+      end
+    else
+      _ -> :ok
+    end
+  end
+
+  defp notify_event(%Webhook{event_action: event_action, author: author, payload: payload} = webhook, {:error, error}) do
+    case get_github_ticket(webhook) do
+      github_ticket when not is_nil(github_ticket) ->
+        discord_payload = %{
+          payload: %{
+            embeds: [
+              %{
+                color: 0xEF4444,
+                title: event_action,
+                description: inspect(error),
+                author: %{
+                  name: payload["repository"]["owner"]["login"],
+                  icon_url: payload["repository"]["owner"]["avatar_url"],
+                  url: github_ticket["html_url"]
+                },
+                footer: %{
+                  text: author["login"],
+                  icon_url: author["avatar_url"]
+                },
+                fields: [
+                  %{
+                    name: "Ticket",
+                    value: "#{payload["repository"]["name"]}##{github_ticket["number"]}: #{github_ticket["title"]}",
+                    inline: false
+                  }
+                ],
+                url: github_ticket["html_url"],
+                timestamp: DateTime.utc_now()
+              }
+            ]
+          }
+        }
+
+        case discord_payload |> SendDiscord.changeset() |> Repo.insert() do
+          {:ok, _} ->
+            :ok
+
+          {:error, reason} ->
+            Logger.error("Error sending discord notification: #{inspect(reason)}")
+            {:error, reason}
+        end
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp get_github_ticket(%Webhook{event: event, payload: payload}) do
+    case event do
+      "issues" -> payload["issue"]
+      "issue_comment" -> payload["issue"]
+      "pull_request" -> payload["pull_request"]
+      _ -> nil
+    end
   end
 end

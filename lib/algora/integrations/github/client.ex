@@ -10,17 +10,8 @@ defmodule Algora.Github.Client do
 
   def http(host, method, path, headers, body) do
     # TODO: remove after migration
-    if System.get_env("MIGRATION", "false") == "true" do
-      cache_path = ".local/github/#{path}.json"
-
-      with :error <- read_from_cache(cache_path),
-           {:ok, response_body} <- do_http_request(host, method, path, headers, body) do
-        write_to_cache(cache_path, response_body)
-        {:ok, response_body}
-      else
-        {:ok, cached_data} -> {:ok, cached_data}
-        {:error, reason} -> {:error, reason}
-      end
+    if Algora.Settings.migration_in_progress?() do
+      run_cached(path, fn -> do_http_request(host, method, path, headers, body) end)
     else
       do_http_request(host, method, path, headers, body)
     end
@@ -32,9 +23,25 @@ defmodule Algora.Github.Client do
 
     with {:ok, encoded_body} <- Jason.encode(body),
          request = Finch.build(method, url, headers, encoded_body),
-         {:ok, %Finch.Response{body: body}} <- Finch.request(request, Algora.Finch),
+         {:ok, %Finch.Response{body: body}} <- request_with_follow_redirects(request),
          {:ok, decoded_body} <- Jason.decode(body) do
       maybe_handle_error(decoded_body)
+    end
+  end
+
+  defp request_with_follow_redirects(request) do
+    case Finch.request(request, Algora.Finch) do
+      {:ok, %Finch.Response{status: status, headers: headers}} when status in [301, 302, 307] ->
+        case List.keyfind(headers, "location", 0) do
+          {"location", location} ->
+            request_with_follow_redirects(Finch.build(request.method, location, request.headers, request.body))
+
+          nil ->
+            {:error, "Redirect response missing location header"}
+        end
+
+      res ->
+        res
     end
   end
 
@@ -47,20 +54,47 @@ defmodule Algora.Github.Client do
 
   defp maybe_handle_error(body), do: {:ok, body}
 
-  defp read_from_cache(cache_path) do
-    if File.exists?(cache_path) do
-      case File.read(cache_path) do
-        {:ok, content} -> Jason.decode(content)
-        {:error, _} -> :error
-      end
-    else
-      :error
+  defp run_cached(path, fun) do
+    case read_from_cache(path) do
+      :not_found ->
+        Logger.warning("❌ Cache miss for #{path}")
+        write_to_cache!(fun.(), path)
+
+      res ->
+        res
     end
   end
 
-  defp write_to_cache(cache_path, data) do
+  defp get_cache_path(path), do: Path.join([:code.priv_dir(:algora), "github", path <> ".bin"])
+
+  defp maybe_retry({:ok, %{"message" => "Moved Permanently"}}), do: :not_found
+  defp maybe_retry({:ok, data}), do: {:ok, data}
+  defp maybe_retry({:error, "404 Not Found"}), do: {:error, "404 Not Found"}
+  defp maybe_retry(_error), do: :not_found
+
+  def read_from_cache(path) do
+    cache_path = get_cache_path(path)
+
+    if File.exists?(cache_path) do
+      case File.read(cache_path) do
+        {:ok, content} ->
+          content
+          |> :erlang.binary_to_term()
+          |> maybe_retry()
+
+        {:error, _} ->
+          :not_found
+      end
+    else
+      :not_found
+    end
+  end
+
+  defp write_to_cache!(data, path) do
+    cache_path = get_cache_path(path)
     File.mkdir_p!(Path.dirname(cache_path))
-    File.write!(cache_path, Jason.encode!(data))
+    File.write!(cache_path, :erlang.term_to_binary(data))
+    data
   end
 
   def fetch(access_token, url, method \\ "GET", body \\ nil)
@@ -156,6 +190,23 @@ defmodule Algora.Github.Client do
     with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
          {:ok, %{"token" => token}} <- fetch(jwt, path, "POST") do
       {:ok, token}
+    end
+  end
+
+  @impl true
+  def get_installation(installation_id) do
+    path = "/app/installations/#{installation_id}"
+
+    with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
+         {:ok, %{"token" => token}} <- fetch(jwt, path, "GET") do
+      {:ok, token}
+    end
+  end
+
+  @impl true
+  def list_installation_repos(access_token) do
+    with {:ok, %{"repositories" => repos}} <- fetch(access_token, "/installation/repositories", "GET") do
+      {:ok, repos}
     end
   end
 

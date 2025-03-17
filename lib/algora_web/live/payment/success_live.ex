@@ -2,7 +2,7 @@ defmodule AlgoraWeb.Payment.SuccessLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts.User
+  alias Algora.Accounts
 
   def mount(_params, _session, socket) do
     socket =
@@ -12,14 +12,14 @@ defmodule AlgoraWeb.Payment.SuccessLive do
 
         current_user ->
           to =
-            case User.last_context(current_user) do
+            case Accounts.last_context(current_user) do
               "personal" -> ~p"/user/transactions"
               org_handle -> ~p"/org/#{org_handle}/transactions"
             end
 
           socket
           |> put_flash(:info, "Your payment has been completed successfully!")
-          |> push_navigate(to: to)
+          |> redirect(to: to)
       end
 
     {:ok, socket}

@@ -12,7 +12,8 @@ defmodule Algora.Support.GithubMock do
        "title" => "title #{number}",
        "body" => "body #{number}",
        "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}"
+       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}",
+       "state" => "open"
      }}
   end
 
@@ -22,14 +23,27 @@ defmodule Algora.Support.GithubMock do
      %{
        "id" => random_id(),
        "name" => repo,
-       "html_url" => "https://github.com/#{owner}/#{repo}"
+       "html_url" => "https://github.com/#{owner}/#{repo}",
+       "owner" => %{
+         "login" => owner
+       }
      }}
   end
 
   @impl true
   def get_repository(_access_token, id) do
-    name = "repo_#{id}"
-    {:ok, %{"id" => id, "name" => name, "html_url" => "https://github.com/owner_#{random_id()}/#{name}"}}
+    owner = "owner_#{random_id()}"
+    name = "repo_#{random_id()}"
+
+    {:ok,
+     %{
+       "id" => id,
+       "name" => name,
+       "html_url" => "https://github.com/#{owner}/#{name}",
+       "owner" => %{
+         "login" => owner
+       }
+     }}
   end
 
   @impl true
@@ -40,7 +54,8 @@ defmodule Algora.Support.GithubMock do
        "title" => "title #{number}",
        "body" => "body #{number}",
        "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}"
+       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}",
+       "state" => "open"
      }}
   end
 
@@ -89,6 +104,16 @@ defmodule Algora.Support.GithubMock do
   @impl true
   def get_installation_token(_installation_id) do
     {:ok, %{"token" => "token_#{random_id()}"}}
+  end
+
+  @impl true
+  def get_installation(_installation_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
+  def list_installation_repos(_access_token) do
+    {:ok, []}
   end
 
   @impl true

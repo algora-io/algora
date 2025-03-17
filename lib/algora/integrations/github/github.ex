@@ -19,8 +19,8 @@ defmodule Algora.Github do
   def install_url_new, do: "#{install_url_base()}/new"
   def install_url_select_target, do: "#{install_url_base()}/select_target"
 
-  defp oauth_state_ttl, do: 600
-  defp oauth_state_salt, do: "github-oauth-state"
+  defp oauth_state_ttl, do: Algora.config([:github, :oauth_state_ttl])
+  defp oauth_state_salt, do: Algora.config([:github, :oauth_state_salt])
 
   def generate_oauth_state(data) do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, oauth_state_salt(), data, max_age: oauth_state_ttl())
@@ -102,6 +102,11 @@ defmodule Algora.Github do
 
   @impl true
   def get_installation_token(installation_id), do: client().get_installation_token(installation_id)
+
+  @impl true
+  def get_installation(installation_id), do: client().get_installation(installation_id)
+  @impl true
+  def list_installation_repos(token), do: client().list_installation_repos(token)
 
   @impl true
   def create_issue_comment(token, owner, repo, number, body),

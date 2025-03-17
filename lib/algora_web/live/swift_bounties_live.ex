@@ -11,59 +11,13 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Repo
-  alias Algora.Types.USD
-  alias Algora.Validations
   alias Algora.Workspace
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.TipForm
   alias AlgoraWeb.UserAuth
 
   require Logger
-
-  defmodule BountyForm do
-    @moduledoc false
-    use Ecto.Schema
-
-    import Ecto.Changeset
-
-    embedded_schema do
-      field :url, :string
-      field :amount, USD
-
-      embeds_one :ticket_ref, TicketRef, primary_key: false do
-        field :owner, :string
-        field :repo, :string
-        field :number, :integer
-        field :type, :string
-      end
-    end
-
-    def changeset(form, attrs \\ %{}) do
-      form
-      |> cast(attrs, [:url, :amount])
-      |> validate_required([:url, :amount])
-      |> Validations.validate_money_positive(:amount)
-      |> Validations.validate_ticket_ref(:url, :ticket_ref)
-    end
-  end
-
-  defmodule TipForm do
-    @moduledoc false
-    use Ecto.Schema
-
-    import Ecto.Changeset
-
-    embedded_schema do
-      field :github_handle, :string
-      field :amount, USD
-    end
-
-    def changeset(form, attrs \\ %{}) do
-      form
-      |> cast(attrs, [:github_handle, :amount])
-      |> validate_required([:github_handle, :amount])
-      |> Validations.validate_money_positive(:amount)
-    end
-  end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -82,11 +36,11 @@ defmodule AlgoraWeb.SwiftBountiesLive do
           |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
           |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
           |> assign(:pending_action, nil)
-          |> assign_tickets()
+          |> assign_bounties()
           |> assign_active_repos()
 
         current_user ->
-          push_navigate(socket, to: UserAuth.signed_in_path(current_user))
+          redirect(socket, to: UserAuth.signed_in_path(current_user))
       end
 
     {:ok, socket}
@@ -468,7 +422,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     </div>
 
     <div class="container mx-auto max-w-7xl space-y-12 px-6">
-      <%= if Enum.empty?(@tickets) do %>
+      <%= if Enum.empty?(@bounties) do %>
         <.card class="rounded-[2rem] bg-card py-12 text-center">
           <.card_header>
             <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -486,7 +440,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             <.card_title>Open Bounties</.card_title>
           </.card_header>
           <.card_content>
-            <.bounties tickets={@tickets} />
+            <.bounties bounties={@bounties} />
             <div class="hidden justify-center pt-4">
               <.button variant="ghost" phx-click="load_more">
                 <.icon name="tabler-arrow-down" class="mr-2 h-4 w-4" /> Load More
@@ -616,7 +570,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
             {:noreply,
              socket
              |> put_flash(:info, "Bounty created")
-             |> push_navigate(to: ~p"/home")}
+             |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
             {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
@@ -683,18 +637,18 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_tickets(socket)}
+    {:noreply, assign_bounties(socket)}
   end
 
-  defp assign_tickets(socket) do
-    tickets =
-      Bounties.PrizePool.list(
+  defp assign_bounties(socket) do
+    bounties =
+      Bounties.list_bounties(
         status: :open,
         tech_stack: ["Swift"],
         limit: 100
       )
 
-    assign(socket, :tickets, tickets)
+    assign(socket, :bounties, bounties)
   end
 
   defp assign_active_repos(socket) do

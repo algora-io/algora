@@ -14,6 +14,7 @@ defmodule Algora.Payments do
   alias Algora.PSP
   alias Algora.Repo
   alias Algora.Util
+  alias Algora.Workspace.Ticket
 
   require Logger
 
@@ -28,20 +29,24 @@ defmodule Algora.Payments do
   end
 
   @spec create_stripe_session(
+          user :: User.t(),
           line_items :: [PSP.Session.line_item_data()],
           payment_intent_data :: PSP.Session.payment_intent_data()
         ) ::
           {:ok, PSP.session()} | {:error, PSP.error()}
-  def create_stripe_session(line_items, payment_intent_data) do
-    PSP.Session.create(%{
-      mode: "payment",
-      billing_address_collection: "required",
-      line_items: line_items,
-      invoice_creation: %{enabled: true},
-      success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
-      cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
-      payment_intent_data: payment_intent_data
-    })
+  def create_stripe_session(user, line_items, payment_intent_data) do
+    with {:ok, customer} <- fetch_or_create_customer(user) do
+      PSP.Session.create(%{
+        mode: "payment",
+        customer: customer.provider_id,
+        billing_address_collection: "required",
+        line_items: line_items,
+        invoice_creation: %{enabled: true},
+        success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
+        cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
+        payment_intent_data: payment_intent_data
+      })
+    end
   end
 
   def get_transaction_fee_pct, do: Decimal.new("0.04")
@@ -219,6 +224,11 @@ defmodule Algora.Payments do
     Repo.fetch_by(Account, user_id: user.id)
   end
 
+  @spec get_account(user :: User.t()) :: Account.t() | nil
+  def get_account(user) do
+    Repo.get_by(Account, user_id: user.id)
+  end
+
   @spec create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   def create_account(user, country) do
@@ -294,8 +304,9 @@ defmodule Algora.Payments do
          {:ok, updated_account} <- update_account(account, stripe_account) do
       user = Accounts.get_user(account.user_id)
 
-      if user && stripe_account.charges_enabled do
+      if user && stripe_account.payouts_enabled do
         Accounts.update_settings(user, %{country: stripe_account.country})
+        enqueue_pending_transfers(account.user_id)
       end
 
       {:ok, updated_account}
@@ -323,23 +334,21 @@ defmodule Algora.Payments do
           {:ok, PSP.transfer()} | {:error, :not_found} | {:error, :duplicate_transfer_attempt}
   def execute_pending_transfer(credit_id) do
     with {:ok, credit} <- Repo.fetch_by(Transaction, id: credit_id, type: :credit, status: :succeeded) do
-      transfers =
-        Repo.all(
-          from(t in Transaction,
-            where: t.user_id == ^credit.user_id,
-            where: t.group_id == ^credit.group_id,
-            where: t.type == :transfer,
-            where: t.status in [:initialized, :processing, :succeeded]
-          )
-        )
+      case fetch_active_account(credit.user_id) do
+        {:ok, account} ->
+          with {:ok, transaction} <- fetch_or_create_transfer(credit),
+               {:ok, transfer} <- execute_transfer(transaction, account) do
+            broadcast()
+            {:ok, transfer}
+          else
+            error ->
+              Logger.error("Failed to execute transfer: #{inspect(error)}")
+              error
+          end
 
-      amount_transferred = Enum.reduce(transfers, Money.zero(:USD), fn t, acc -> Money.add!(acc, t.net_amount) end)
-
-      if Money.positive?(amount_transferred) do
-        Logger.error("Duplicate transfer attempt at transaction #{credit_id}")
-        {:error, :duplicate_transfer_attempt}
-      else
-        initialize_and_execute_transfer(credit)
+        _ ->
+          Logger.error("Attempted to execute transfer to inactive account")
+          {:error, :no_active_account}
       end
     end
   end
@@ -357,6 +366,36 @@ defmodule Algora.Payments do
         where: is_nil(tr.id)
       )
     )
+  end
+
+  def list_sent_transactions(user_id, opts \\ []) do
+    query =
+      from tx in Transaction,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        join: ltx in assoc(tx, :linked_transaction),
+        where: ltx.user_id == ^user_id,
+        join: recipient in assoc(tx, :user),
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        left_join: o in assoc(r, :user),
+        select: %{transaction: tx, recipient: recipient, ticket: %{t | repository: %{r | user: o}}},
+        order_by: [desc: tx.succeeded_at]
+
+    query =
+      if cursor = opts[:before] do
+        from [tx] in query,
+          where: {tx.succeeded_at, tx.id} < {^cursor.succeeded_at, ^cursor.id}
+      else
+        query
+      end
+
+    query = from q in query, limit: ^opts[:limit]
+
+    Repo.all(query)
   end
 
   @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}
@@ -390,51 +429,41 @@ defmodule Algora.Payments do
     end
   end
 
-  @spec initialize_and_execute_transfer(credit :: Transaction.t()) :: {:ok, PSP.transfer()} | {:error, term()}
-  defp initialize_and_execute_transfer(%Transaction{} = credit) do
-    case fetch_active_account(credit.user_id) do
-      {:ok, account} ->
-        with {:ok, transaction} <- initialize_transfer(credit),
-             {:ok, transfer} <- execute_transfer(transaction, account) do
-          broadcast()
-          {:ok, transfer}
-        else
-          error ->
-            Logger.error("Failed to execute transfer: #{inspect(error)}")
-            error
-        end
+  def fetch_or_create_transfer(%Transaction{} = credit) do
+    idempotency_key = "credit_#{credit.id}"
 
-      _ ->
-        Logger.error("Attempted to execute transfer to inactive account")
-        {:error, :no_active_account}
+    case Repo.get_by(Transaction, idempotency_key: idempotency_key) do
+      nil ->
+        %Transaction{}
+        |> change(%{
+          id: Nanoid.generate(),
+          provider: "stripe",
+          type: :transfer,
+          status: :initialized,
+          tip_id: credit.tip_id,
+          bounty_id: credit.bounty_id,
+          contract_id: credit.contract_id,
+          claim_id: credit.claim_id,
+          user_id: credit.user_id,
+          gross_amount: credit.net_amount,
+          net_amount: credit.net_amount,
+          total_fee: Money.zero(:USD),
+          group_id: credit.group_id,
+          idempotency_key: idempotency_key
+        })
+        |> Algora.Validations.validate_positive(:gross_amount)
+        |> Algora.Validations.validate_positive(:net_amount)
+        |> unique_constraint(:idempotency_key)
+        |> foreign_key_constraint(:user_id)
+        |> foreign_key_constraint(:tip_id)
+        |> foreign_key_constraint(:bounty_id)
+        |> foreign_key_constraint(:contract_id)
+        |> foreign_key_constraint(:claim_id)
+        |> Repo.insert()
+
+      transfer ->
+        {:ok, transfer}
     end
-  end
-
-  def initialize_transfer(%Transaction{} = credit) do
-    %Transaction{}
-    |> change(%{
-      id: Nanoid.generate(),
-      provider: "stripe",
-      type: :transfer,
-      status: :initialized,
-      tip_id: credit.tip_id,
-      bounty_id: credit.bounty_id,
-      contract_id: credit.contract_id,
-      claim_id: credit.claim_id,
-      user_id: credit.user_id,
-      gross_amount: credit.net_amount,
-      net_amount: credit.net_amount,
-      total_fee: Money.zero(:USD),
-      group_id: credit.group_id
-    })
-    |> Algora.Validations.validate_positive(:gross_amount)
-    |> Algora.Validations.validate_positive(:net_amount)
-    |> foreign_key_constraint(:user_id)
-    |> foreign_key_constraint(:tip_id)
-    |> foreign_key_constraint(:bounty_id)
-    |> foreign_key_constraint(:contract_id)
-    |> foreign_key_constraint(:claim_id)
-    |> Repo.insert()
   end
 
   def execute_transfer(%Transaction{} = transaction, account) do
@@ -450,7 +479,7 @@ defmodule Algora.Payments do
       |> Map.merge(if transaction.group_id, do: %{transfer_group: transaction.group_id}, else: %{})
       |> Map.merge(if charge && charge.provider_id, do: %{source_transaction: charge.provider_id}, else: %{})
 
-    case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.id}) do
+    case PSP.Transfer.create(transfer_params, %{idempotency_key: transaction.idempotency_key}) do
       {:ok, transfer} ->
         transaction
         |> change(%{

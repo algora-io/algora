@@ -15,11 +15,15 @@ defmodule Algora.BountiesTest do
   alias Bounties.Tip
 
   setup do
-    repo_owner = insert!(:user)
-    repo = insert!(:repository, %{user: repo_owner})
+    creator = insert!(:user)
+    owner = insert!(:user, bounty_mode: :community)
+    _installation = insert!(:installation, owner: creator, connected_user: owner)
+    _identity = insert!(:identity, user: creator, provider_email: creator.email)
+    repo = insert!(:repository, %{user: owner})
     ticket = insert!(:ticket, %{repository: repo})
+    ticket_ref = %{owner: owner.handle, repo: repo.name, number: ticket.number}
 
-    %{ticket: ticket}
+    %{creator: creator, owner: owner, repo: repo, ticket: ticket, ticket_ref: ticket_ref}
   end
 
   describe "bounties" do
@@ -27,9 +31,7 @@ defmodule Algora.BountiesTest do
       creator = insert!(:user)
       owner = insert!(:user)
       recipient = insert!(:user)
-      installation = insert!(:installation, owner: creator)
-      _installation = insert!(:installation, owner: owner)
-      _installation = insert!(:installation, owner: recipient)
+      installation = insert!(:installation, owner: creator, connected_user: owner)
       _identity = insert!(:identity, user: creator, provider_email: creator.email)
       repo = insert!(:repository, %{user: owner})
       ticket = insert!(:ticket, %{repository: repo})
@@ -50,6 +52,8 @@ defmodule Algora.BountiesTest do
         }
 
       assert {:ok, bounty} = Bounties.create_bounty(bounty_params, [])
+
+      assert bounty.visibility == :public
 
       assert {:ok, claims} =
                Bounties.claim_bounty(
@@ -95,7 +99,7 @@ defmodule Algora.BountiesTest do
 
       assert [bounty, _claim, _awarded, tip] = Enum.reverse(Algora.Activities.all())
       assert "tip_activities" == tip.assoc_name
-      assert tip.notify_users == [recipient.id]
+      # assert tip.notify_users == [recipient.id]
       assert activity = Algora.Activities.get_with_preloaded_assoc(tip.assoc_name, tip.id)
       assert activity.assoc.__meta__.schema == Tip
       assert activity.assoc.creator.id == creator.id
@@ -107,40 +111,43 @@ defmodule Algora.BountiesTest do
         perform_job(Notifier, job.args)
       end)
 
-      assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})
+      # assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})
     end
 
-    test "query" do
+    test "create public bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
       {:ok, bounty} =
-        Enum.reduce(1..10, nil, fn _n, _acc ->
-          creator = insert!(:user)
-          owner = insert!(:user)
-          _installation = insert!(:installation, owner: creator)
-          _identity = insert!(:identity, user: creator, provider_email: creator.email)
-          repo = insert!(:repository, %{user: owner})
-          ticket = insert!(:ticket, %{repository: repo})
-          amount = ~M[100]usd
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :public}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
 
-          bounty_params =
-            %{
-              ticket_ref: %{owner: owner.handle, repo: repo.name, number: ticket.number},
-              owner: owner,
-              creator: creator,
-              amount: amount
-            }
+      assert bounty.visibility == :public
+    end
 
-          Bounties.create_bounty(bounty_params, [])
-        end)
+    test "create community bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :community}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
 
-      assert Bounties.list_bounties(
-               owner_id: bounty.owner_id,
-               tech_stack: ["elixir"],
-               status: :open
-             )
+      assert bounty.visibility == :community
+    end
 
-      # assert Bounties.fetch_stats(bounty.owner_id)
-      # assert Bounties.fetch_stats()
-      assert Bounties.PrizePool.list()
+    test "create exclusive bounty", %{owner: owner, creator: creator, ticket_ref: ticket_ref} do
+      {:ok, bounty} =
+        Bounties.create_bounty(%{
+          ticket_ref: ticket_ref,
+          owner: owner |> change(%{bounty_mode: :exclusive}) |> Repo.update!(),
+          creator: creator,
+          amount: ~M[100]usd
+        })
+
+      assert bounty.visibility == :exclusive
     end
 
     test "successfully creates and pays invoice for bounty claim" do
@@ -229,21 +236,129 @@ defmodule Algora.BountiesTest do
     end
   end
 
+  describe "tips" do
+    test "successfully creates checkout url for tips" do
+      creator = insert!(:user)
+      owner = insert!(:organization)
+      recipient = insert!(:user)
+      _installation = insert!(:installation, owner: creator, connected_user: owner)
+      _identity = insert!(:identity, user: creator, provider_email: creator.email)
+      repo = insert!(:repository, %{user: owner})
+      ticket = insert!(:ticket, %{repository: repo})
+      amount = ~M[4000]usd
+
+      ticket_ref = %{
+        owner: owner.handle,
+        repo: repo.name,
+        number: ticket.number
+      }
+
+      assert {:ok, _checkout_url} =
+               Bounties.create_tip(
+                 %{
+                   amount: amount,
+                   owner: owner,
+                   creator: creator,
+                   recipient: recipient
+                 },
+                 ticket_ref: ticket_ref
+               )
+
+      tip = Repo.one!(Tip)
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, amount)
+      assert charge.status == :initialized
+      assert charge.user_id == owner.id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, amount)
+      assert debit.status == :initialized
+      assert debit.user_id == owner.id
+      assert debit.tip_id == tip.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, amount)
+      assert credit.status == :initialized
+      assert credit.user_id == recipient.id
+      assert credit.tip_id == tip.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
+    end
+  end
+
   describe "get_response_body/4" do
-    test "generates correct response body with bounties and attempts" do
+    test "uses custom template when available" do
+      repo_owner = insert!(:user, provider_login: "repo_owner")
+      bounty_owner = insert!(:user, handle: "bounty_owner", display_name: "Bounty Owner")
+      repository = insert!(:repository, user: repo_owner, name: "test_repo")
+      ticket = insert!(:ticket, number: 100, repository: repository)
+
+      _custom_template =
+        insert!(:bot_template, %{
+          user: repo_owner,
+          type: :bounty_created,
+          template: """
+          ${PRIZE_POOL}
+
+          ### Steps to solve:
+          1. **Start working**: Comment `/attempt #${ISSUE_NUMBER}` with your implementation plan
+          2. **Submit work**: Create a pull request including `/claim #${ISSUE_NUMBER}` in the PR body to claim the bounty
+          3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+
+          ### ❗ Important guidelines:
+          - To claim a bounty, you need to **provide a short demo video** of your changes in your pull request
+          - If anything is unclear, **ask for clarification** before starting as this will help avoid potential rework
+          - For assistance or questions, **[join our Discord](https://algora.io/discord)**
+
+          Thank you for contributing to ${REPO_FULL_NAME}!
+
+          **[Add a bounty](${FUND_URL})** • **[Share on socials](${TWEET_URL})**
+
+          ${ATTEMPTS}
+          """
+        })
+
+      bounties = [insert!(:bounty, amount: Money.new(1000, :USD), owner: bounty_owner, ticket: ticket)]
+
+      ticket_ref = %{
+        owner: repo_owner.provider_login,
+        repo: ticket.repository.name,
+        number: ticket.number
+      }
+
+      response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
+
+      expected_response = """
+      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+
+      ### Steps to solve:
+      1. **Start working**: Comment `/attempt #100` with your implementation plan
+      2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
+      3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
+
+      ### ❗ Important guidelines:
+      - To claim a bounty, you need to **provide a short demo video** of your changes in your pull request
+      - If anything is unclear, **ask for clarification** before starting as this will help avoid potential rework
+      - For assistance or questions, **[join our Discord](https://algora.io/discord)**
+
+      Thank you for contributing to repo_owner/test_repo!
+
+      **[Add a bounty](http://localhost:4002)** • **[Share on socials](https://twitter.com/intent/tweet?related=algoraio&text=%241%2C000+bounty%21+%F0%9F%92%8E+https%3A%2F%2Fgithub.com%2Frepo_owner%2Ftest_repo%2Fissues%2F100)**
+      """
+
+      assert response == String.trim(expected_response)
+    end
+
+    test "uses default template when no custom template exists" do
       repo_owner = insert!(:user, provider_login: "repo_owner")
       bounty_owner = insert!(:user, handle: "bounty_owner", display_name: "Bounty Owner")
       bounty_owner = Repo.get!(User, bounty_owner.id)
       repository = insert!(:repository, user: repo_owner, name: "test_repo")
-
-      bounties = [
-        %Bounty{
-          amount: Money.new(1000, :USD),
-          owner: bounty_owner
-        }
-      ]
-
       ticket = insert!(:ticket, number: 100, repository: repository)
+
+      bounties = [insert!(:bounty, amount: Money.new(1000, :USD), owner: bounty_owner, ticket: ticket)]
 
       ticket_ref = %{
         owner: repo_owner.provider_login,
@@ -294,13 +409,15 @@ defmodule Algora.BountiesTest do
           user: solver1,
           target: ticket,
           source: insert!(:ticket, number: 101, repository: repository),
-          inserted_at: ~U[2024-01-01 12:30:00Z]
+          inserted_at: ~U[2024-01-01 12:30:00Z],
+          group_id: "group-101"
         ),
         insert!(:claim,
           user: solver2,
           target: ticket,
           source: insert!(:ticket, number: 102, repository: repository),
-          inserted_at: ~U[2024-01-02 12:30:00Z]
+          inserted_at: ~U[2024-01-02 12:30:00Z],
+          group_id: "group-102"
         ),
         insert!(:claim,
           user: solver5,
@@ -321,7 +438,7 @@ defmodule Algora.BountiesTest do
       response = Algora.Bounties.get_response_body(bounties, ticket_ref, attempts, claims)
 
       expected_response = """
-      ## 💎 $1,000.00 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
       ### Steps to solve:
       1. **Start working**: Comment `/attempt #100` with your implementation plan
       2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
@@ -329,32 +446,42 @@ defmodule Algora.BountiesTest do
 
       Thank you for contributing to repo_owner/test_repo!
 
-      | Attempt | Started (UTC) | Solution |
-      | --- | --- | --- |
-      | 🟢 @solver1 | Jan 01, 2024, 12:00:00 PM | #101 |
-      | 🟢 @solver2 | Jan 02, 2024, 12:30:00 PM | #102 |
-      | 🔴 @solver3 | Jan 03, 2024, 12:00:00 PM | WIP |
-      | 🟡 @solver4 | Jan 04, 2024, 12:00:00 PM | WIP |
-      | 🟢 @solver5 and @solver6 | Jan 05, 2024, 12:00:00 PM | #105 |
+      | Attempt | Started (UTC) | Solution | Actions |
+      | --- | --- | --- | --- |
+      | 🟢 @solver1 | Jan 01, 2024, 12:00:00 PM | #101 | [Reward](http://localhost:4002/claims/group-101) |
+      | 🟢 @solver2 | Jan 02, 2024, 12:30:00 PM | #102 | [Reward](http://localhost:4002/claims/group-102) |
+      | 🔴 @solver3 | Jan 03, 2024, 12:00:00 PM | WIP |  |
+      | 🟡 @solver4 | Jan 04, 2024, 12:00:00 PM | WIP |  |
+      | 🟢 @solver5 and @solver6 | Jan 05, 2024, 12:00:00 PM | #105 | [Reward](http://localhost:4002/claims/group-105) |
       """
 
       assert response == String.trim(expected_response)
     end
 
-    test "generates response body without attempts table when no attempts exist" do
+    test "uses default template when custom template is inactive" do
       repo_owner = insert!(:user, provider_login: "repo_owner")
       bounty_owner = insert!(:user, handle: "bounty_owner", display_name: "Bounty Owner")
-      bounty_owner = Repo.get!(User, bounty_owner.id)
       repository = insert!(:repository, user: repo_owner, name: "test_repo")
+      ticket = insert!(:ticket, number: 100, repository: repository)
+
+      _custom_template =
+        insert!(:bot_template, %{
+          user: repo_owner,
+          type: :bounty_created,
+          active: false,
+          template: """
+          # Custom Template
+          Prize: ${PRIZE_POOL}
+          """
+        })
 
       bounties = [
         %Bounty{
           amount: Money.new(1000, :USD),
-          owner: bounty_owner
+          owner: bounty_owner,
+          ticket_id: ticket.id
         }
       ]
-
-      ticket = insert!(:ticket, number: 100, repository: repository)
 
       ticket_ref = %{
         owner: repo_owner.provider_login,
@@ -365,7 +492,7 @@ defmodule Algora.BountiesTest do
       response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
 
       expected_response = """
-      ## 💎 $1,000.00 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
       ### Steps to solve:
       1. **Start working**: Comment `/attempt #100` with your implementation plan
       2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty

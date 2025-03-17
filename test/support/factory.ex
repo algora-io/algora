@@ -208,6 +208,14 @@ defmodule Algora.Factory do
     }
   end
 
+  def tip_factory do
+    %Algora.Bounties.Tip{
+      id: Nanoid.generate(),
+      status: :open,
+      amount: Money.new!(100, :USD)
+    }
+  end
+
   def attempt_factory do
     %Algora.Bounties.Attempt{
       id: Nanoid.generate(),
@@ -243,16 +251,28 @@ defmodule Algora.Factory do
       provider_id: sequence(:provider_id, &"#{&1 + offset(:installation)}"),
       provider_user_id: sequence(:provider_user_id, &"#{&1 + offset(:installation)}"),
       provider_meta: %{
-        "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
         "repository_selection" => "selected"
       },
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
       repository_selection: "selected"
     }
   end
 
+  def bot_template_factory do
+    %Algora.BotTemplates.BotTemplate{
+      id: Nanoid.generate(),
+      type: :bounty_created
+    }
+  end
+
   # Convenience API
-  def insert!(factory_name, attributes \\ []) do
+  def insert!(factory_name, attributes \\ [])
+
+  def insert!(factory_name, attributes) when factory_name in [:user, :organization] do
+    user = insert(:user, attributes)
+    %{user | name: user.display_name || user.handle}
+  end
+
+  def insert!(factory_name, attributes) do
     insert(factory_name, attributes)
   end
 

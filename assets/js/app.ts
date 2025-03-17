@@ -461,6 +461,64 @@ const Hooks = {
       });
     },
   },
+  InfiniteScroll: {
+    mounted() {
+      this.setupObserver();
+    },
+
+    updated() {
+      // Disconnect previous observer before creating a new one
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+      this.setupObserver();
+    },
+
+    setupObserver() {
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            this.pushEvent("load_more");
+          }
+        },
+        {
+          root: null, // viewport
+          rootMargin: "0px 0px 400px 0px", // trigger when indicator is 400px from viewport
+          threshold: 0.1,
+        }
+      );
+
+      // Look for the indicator inside this.el rather than document-wide
+      const loadMoreIndicator = this.el.querySelector("#load-more-indicator");
+      if (loadMoreIndicator) {
+        this.observer.observe(loadMoreIndicator);
+      }
+    },
+
+    destroyed() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    },
+  },
+  AvatarImage: {
+    mounted() {
+      this.handleError = () => {
+        this.errored = true;
+        this.el.style.display = "none";
+      };
+      this.el.addEventListener("error", this.handleError);
+    },
+    updated() {
+      if (this.errored) {
+        this.el.style.display = "none";
+      }
+    },
+    destroyed() {
+      this.el.removeEventListener("error", this.handleError);
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling
@@ -643,3 +701,5 @@ window.addEventListener("phx:open_popup", (e: CustomEvent) => {
     newWindow.focus();
   }
 });
+
+export default Hooks;

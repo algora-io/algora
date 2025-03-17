@@ -30,6 +30,7 @@ erich =
           provider: "github",
           provider_login: github_user["login"],
           provider_id: to_string(github_user["id"]),
+          provider_meta: Util.normalize_struct(github_user),
           handle: github_user["login"],
           display_name: github_user["name"],
           avatar_url: github_user["avatar_url"],
@@ -144,7 +145,12 @@ carver =
       tech_stack: ["Python", "Go", "Rust", "Terraform"],
       hourly_rate_min: Money.new!(200, :USD),
       hourly_rate_max: Money.new!(300, :USD),
-      hours_per_week: 30
+      hours_per_week: 30,
+      provider_meta: %{
+        "company" => "Chaos Engineering LLC",
+        "location" => "San Francisco, CA",
+        "twitter_handle" => "the_real_carver"
+      }
     }
   )
 
@@ -159,13 +165,12 @@ for user <- pied_piper_members do
 end
 
 if customer_id = Algora.config([:stripe, :test_customer_id]) do
-  {:ok, cus} = Algora.PSP.Customer.retrieve(customer_id)
-  {:ok, pm} = Algora.PSP.PaymentMethod.retrieve(cus.invoice_settings.default_payment_method)
+  {:ok, cus} = Stripe.Customer.retrieve(customer_id)
+  {:ok, pm} = Stripe.PaymentMethod.retrieve(cus.invoice_settings.default_payment_method)
 
   customer =
-    upsert!(
+    insert!(
       :customer,
-      [:provider, :provider_id],
       %{
         provider_id: cus.id,
         provider_meta: Util.normalize_struct(cus),
@@ -175,9 +180,8 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
     )
 
   _payment_method =
-    upsert!(
+    insert!(
       :payment_method,
-      [:provider, :provider_id],
       %{
         provider_id: pm.id,
         provider_meta: Util.normalize_struct(pm),
@@ -188,7 +192,7 @@ if customer_id = Algora.config([:stripe, :test_customer_id]) do
 end
 
 if account_id = Algora.config([:stripe, :test_account_id]) do
-  {:ok, acct} = Algora.PSP.Account.retrieve(account_id)
+  {:ok, acct} = Stripe.Account.retrieve(account_id)
 
   upsert!(
     :account,
@@ -199,6 +203,7 @@ if account_id = Algora.config([:stripe, :test_account_id]) do
       name: acct.business_profile.name,
       details_submitted: acct.details_submitted,
       charges_enabled: acct.charges_enabled,
+      payouts_enabled: acct.payouts_enabled,
       country: acct.country,
       type: String.to_atom(acct.type),
       user_id: carver.id
@@ -321,7 +326,12 @@ big_head =
       country: "IT",
       hourly_rate_min: Money.new!(150, :USD),
       hourly_rate_max: Money.new!(200, :USD),
-      hours_per_week: 25
+      hours_per_week: 25,
+      provider_meta: %{
+        "company" => "Stanford University",
+        "location" => "Palo Alto, CA",
+        "twitter_handle" => "bighead_stanford"
+      }
     }
   )
 
@@ -340,7 +350,12 @@ jian_yang =
       country: "HK",
       hourly_rate_min: Money.new!(125, :USD),
       hourly_rate_max: Money.new!(175, :USD),
-      hours_per_week: 35
+      hours_per_week: 35,
+      provider_meta: %{
+        "company" => "@SeeFood",
+        "location" => "Hong Kong",
+        "twitter_handle" => "jianyang"
+      }
     }
   )
 
@@ -359,7 +374,12 @@ john =
       country: "GB",
       hourly_rate_min: Money.new!(140, :USD),
       hourly_rate_max: Money.new!(190, :USD),
-      hours_per_week: 40
+      hours_per_week: 40,
+      provider_meta: %{
+        "company" => "DataRack Solutions",
+        "location" => "London, UK",
+        "twitter_handle" => "johnstafford_tech"
+      }
     }
   )
 
@@ -378,7 +398,12 @@ aly =
       country: "IN",
       hourly_rate_min: Money.new!(160, :USD),
       hourly_rate_max: Money.new!(220, :USD),
-      hours_per_week: 35
+      hours_per_week: 35,
+      provider_meta: %{
+        "company" => "Distributed Systems Inc.",
+        "location" => "Bangalore, India",
+        "twitter_handle" => "aly_distributed"
+      }
     }
   )
 
@@ -535,7 +560,7 @@ for {repo_name, issues} <- repos do
             target_id: issue.id,
             source_id: pull_request.id,
             type: :pull_request,
-            status: if(paid, do: :approved, else: :pending),
+            status: :approved,
             url: "https://github.com/piedpiper/#{repo_name}/pull/#{index}"
           })
 

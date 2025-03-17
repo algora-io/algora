@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   use Oban.Testing, repo: Algora.Repo
 
   import Algora.Factory
+  import Ecto.Changeset
   import Ecto.Query
   import ExUnit.CaptureLog
   import Money.Sigil
@@ -11,6 +12,8 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs.NotifyBounty
+  alias Algora.Bounties.Jobs.NotifyTipIntent
+  alias Algora.Bounties.Tip
   alias Algora.Github.Webhook
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -18,14 +21,25 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   alias AlgoraWeb.Webhooks.GithubController
 
   setup do
-    admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))
     unauthorized_user = insert!(:user, provider_login: sequence(:provider_login, &"unauthorized#{&1}"))
+    repo_admin = insert!(:user, provider_login: sequence(:provider_login, &"admin#{&1}"))
+    org_admin = insert!(:user)
+    org_mod = insert!(:user)
+    org_expert = insert!(:user)
+
     org = insert!(:organization)
+    insert!(:member, user: org_admin, org: org, role: :admin)
+    insert!(:member, user: org_mod, org: org, role: :mod)
+    insert!(:member, user: org_expert, org: org, role: :expert)
+
     repository = insert!(:repository, user: org)
-    installation = insert!(:installation, owner: admin, connected_user: org)
+    installation = insert!(:installation, owner: repo_admin, connected_user: org)
 
     %{
-      admin: admin,
+      repo_admin: repo_admin,
+      org_admin: org_admin,
+      org_mod: org_mod,
+      org_expert: org_expert,
       unauthorized_user: unauthorized_user,
       org: org,
       installation: installation,
@@ -34,70 +48,87 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
   end
 
   describe "create bounties" do
-    test "handles bounty command with unauthorized user", ctx do
+    test "handles bounty command as unauthorized user", ctx do
       scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
       {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
       assert {:error, :unauthorized} = result
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
+    test "handles bounty command as org expert", ctx do
+      scenario = [%{event_action: "issue_comment.created", user_type: :unauthorized, body: "/bounty $100"}]
+      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
+      assert {:error, :unauthorized} = result
+      assert Repo.aggregate(Bounty, :count) == 0
+    end
+
+    test "handles bounty command as org mod", ctx do
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :org_mod, body: "/bounty $100"}])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+    end
+
+    test "handles bounty command as org admin", ctx do
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :org_admin, body: "/bounty $100"}])
+      assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
+    end
+
     test "handles bounty command without amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty"}])
       assert Repo.aggregate(Bounty, :count) == 0
     end
 
     test "handles bounty command with $ prefix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty $100"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty $100"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     test "handles bounty command with $ suffix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100$"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100$"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     test "handles bounty command without $ symbol", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100]usd)
     end
 
     test "handles bounty command with decimal amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.50"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     test "handles bounty command with partial decimal amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.5"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.5"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     test "handles bounty command with decimal amount and $ prefix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty $100.50"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty $100.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     test "handles bounty command with partial decimal amount and $ prefix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty $100.5"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty $100.5"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     test "handles bounty command with decimal amount and $ suffix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.50$"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.50$"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.50]usd)
     end
 
     test "handles bounty command with partial decimal amount and $ suffix", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 100.5$"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 100.5$"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[100.5]usd)
     end
 
     test "handles bounty command with comma separator", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 1,000"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 1,000"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000]usd)
     end
 
     test "handles bounty command with comma separator and decimal amount", ctx do
-      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :admin, body: "/bounty 1,000.50"}])
+      process_scenario!(ctx, [%{event_action: "issue_comment.created", user_type: :repo_admin, body: "/bounty 1,000.50"}])
       assert Money.equal?(Repo.one(Bounty).amount, ~M[1000.50]usd)
     end
   end
@@ -109,7 +140,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"comment" => %{"id" => comment_id}}
         }
@@ -123,7 +154,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.edited",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $200",
           params: %{"comment" => %{"id" => comment_id}}
         }
@@ -138,7 +169,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"comment" => %{"id" => comment_id}}
         }
@@ -152,13 +183,295 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $200",
           params: %{"comment" => %{"id" => comment_id + 1}}
         }
       ])
 
       assert Money.equal?(Repo.one(Bounty).amount, ~M[300]usd)
+    end
+  end
+
+  describe "create tips" do
+    test "rejects tip command when user is unauthorized", ctx do
+      scenario = [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :unauthorized,
+          body: "/tip $100 @jsmith"
+        }
+      ]
+
+      {result, _log} = with_log(fn -> process_scenario(ctx, scenario) end)
+      assert {:error, :unauthorized} = result
+
+      assert [] = all_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "generates tip payment link when amount and recipient are provided in correct order", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100 @jsmith",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}&org_id=#{ctx[:installation].connected_user_id}) to complete your tip via Stripe."
+    end
+
+    test "generates tip payment link when recipient and amount are provided in reverse order", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip @jsmith $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}&org_id=#{ctx[:installation].connected_user_id}) to complete your tip via Stripe."
+    end
+
+    test "generates tip payment link when amount is provided and recipient is inferred from issue", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100",
+          params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => "jsmith"}}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~
+               "Please visit [Algora](#{AlgoraWeb.Endpoint.url()}/tip?amount=100&recipient=jsmith&owner=#{ctx[:org].provider_login}&repo=#{ctx[:repository].name}&number=#{issue_number}&org_id=#{ctx[:installation].connected_user_id}) to complete your tip via Stripe."
+    end
+
+    test "prompts for recipient when attempting to tip issue author who is the tipper", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100",
+          params: %{"issue" => %{"number" => issue_number, "user" => %{"login" => ctx[:repo_admin].provider_login}}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~ "Please specify a recipient to tip (e.g. `/tip $100 @jsmith`)"
+    end
+
+    test "prompts for amount when only recipient is provided", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip @jsmith",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert [job] = all_enqueued(worker: NotifyTipIntent)
+      assert {:ok, _comment} = perform_job(NotifyTipIntent, job.args)
+
+      assert job.args["body"] =~ "Please specify an amount to tip (e.g. `/tip $100 @jsmith`)"
+    end
+
+    test "handles autopay", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      tip = Repo.one!(Tip)
+
+      charge = Repo.one!(from t in Transaction, where: t.type == :charge)
+      assert Money.equal?(charge.net_amount, Money.new(:USD, 100))
+      assert charge.status == :initialized
+      assert charge.user_id == ctx[:org].id
+
+      debit = Repo.one!(from t in Transaction, where: t.type == :debit)
+      assert Money.equal?(debit.net_amount, Money.new(:USD, 100))
+      assert debit.status == :initialized
+      assert debit.user_id == ctx[:org].id
+      assert debit.tip_id == tip.id
+
+      credit = Repo.one!(from t in Transaction, where: t.type == :credit)
+      assert Money.equal?(credit.net_amount, Money.new(:USD, 100))
+      assert credit.status == :initialized
+      assert credit.user_id == ctx[:unauthorized_user].id
+      assert credit.tip_id == tip.id
+
+      transfer = Repo.one(from t in Transaction, where: t.type == :transfer)
+      assert is_nil(transfer)
+    end
+
+    test "does not autopay when payment method is not default", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: false, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      assert Repo.aggregate(Transaction, :count) == 0
+      assert_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "respects cooldown period for autopay tips to same recipient", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      # Create first tip
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # First tip should be autopaid
+      # charge, debit, credit
+      assert Repo.aggregate(Transaction, :count) == 3
+
+      # Try to create second tip within cooldown period
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $50 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # Second tip should not be autopaid, transaction count should remain same
+      assert Repo.aggregate(Transaction, :count) == 3
+      assert_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "allows autopay after cooldown period expires", ctx do
+      issue_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      # Create first tip
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # First tip should be autopaid
+      # charge, debit, credit
+      assert Repo.aggregate(Transaction, :count) == 3
+
+      # Simulate passage of time beyond cooldown period
+      first_tip = Repo.one!(Tip)
+
+      Repo.update!(
+        Ecto.Changeset.change(first_tip,
+          inserted_at: DateTime.add(first_tip.inserted_at, -(:timer.hours(1) + 1), :millisecond)
+        )
+      )
+
+      # Create second tip after cooldown
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $50 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # Second tip should be autopaid, transaction count should increase
+      # 2 sets of charge, debit, credit
+      assert Repo.aggregate(Transaction, :count) == 6
+      refute_enqueued(worker: NotifyTipIntent)
+    end
+
+    test "cooldown applies per recipient", ctx do
+      issue_number = :rand.uniform(1000)
+      other_user = insert!(:user)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, is_default: true, customer: customer)
+
+      # Create tip for first recipient
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $100 @#{ctx[:unauthorized_user].provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # First tip should be autopaid
+      assert Repo.aggregate(Transaction, :count) == 3
+
+      # Create tip for different recipient within cooldown period
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/tip $50 @#{other_user.provider_login}",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      # Second tip should be autopaid since it's for a different recipient
+      assert Repo.aggregate(Transaction, :count) == 6
+      refute_enqueued(worker: NotifyTipIntent)
     end
   end
 
@@ -170,7 +483,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -198,7 +511,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -227,13 +540,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
         },
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number2}}
         }
@@ -259,9 +572,15 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
+        },
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number2}}
         }
       ])
 
@@ -297,7 +616,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         }
@@ -378,7 +697,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -406,7 +725,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -434,7 +753,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -465,7 +784,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -521,7 +840,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -531,6 +850,46 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           body: "/claim #{issue_number}",
           params: %{"pull_request" => %{"number" => pr_number}}
         },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number, "merged_at" => DateTime.to_iso8601(DateTime.utc_now())}}
+        }
+      ])
+
+      bounty = Repo.one!(Bounty)
+      claim = Repo.one!(Claim)
+      assert claim.target_id == bounty.ticket_id
+      assert claim.status == :approved
+      assert Repo.aggregate(Transaction, :count) == 0
+    end
+
+    test "does not autopay when autopay is disabled", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      customer = insert!(:customer, user: ctx[:org])
+      _payment_method = insert!(:payment_method, customer: customer)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        },
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        }
+      ])
+
+      Bounty |> Repo.one!() |> change(%{autopay_disabled: true}) |> Repo.update!()
+
+      process_scenario!(ctx, [
         %{
           event_action: "pull_request.closed",
           user_type: :unauthorized,
@@ -557,13 +916,13 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number1}}
         },
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $200",
           params: %{"issue" => %{"number" => issue_number2}}
         },
@@ -629,7 +988,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -685,7 +1044,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       process_scenario!(ctx, [
         %{
           event_action: "issue_comment.created",
-          user_type: :admin,
+          user_type: :repo_admin,
           body: "/bounty $100",
           params: %{"issue" => %{"number" => issue_number}}
         },
@@ -744,6 +1103,241 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     end
   end
 
+  describe "ticket state updates" do
+    test "updates ticket state on issues.opened", ctx do
+      issue_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number, "state" => "open"}}
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on issues.closed", ctx do
+      issue_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number, "state" => "open"}}
+        },
+        %{
+          event_action: "issues.closed",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at)
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.state == :closed
+      assert DateTime.compare(ticket.closed_at, closed_at) == :eq
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on issues.reopened", ctx do
+      issue_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issues.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number, "state" => "open"}}
+        },
+        %{
+          event_action: "issues.closed",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at)
+            }
+          }
+        },
+        %{
+          event_action: "issues.reopened",
+          user_type: :repo_admin,
+          params: %{
+            "issue" => %{
+              "number" => issue_number,
+              "state" => "open",
+              "closed_at" => nil
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: issue_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on pull_request.opened", ctx do
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on pull_request.closed without merge", ctx do
+      pr_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at),
+              "merged_at" => nil
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :closed
+      assert DateTime.compare(ticket.closed_at, closed_at) == :eq
+      assert ticket.merged_at == nil
+    end
+
+    test "updates ticket state on pull_request.closed with merge", ctx do
+      pr_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+      merged_at = DateTime.add(closed_at, -1, :second)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at),
+              "merged_at" => DateTime.to_iso8601(merged_at)
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :closed
+      assert DateTime.compare(ticket.closed_at, closed_at) == :eq
+      assert DateTime.compare(ticket.merged_at, merged_at) == :eq
+    end
+
+    test "updates ticket state on pull_request.reopened", ctx do
+      pr_number = :rand.uniform(1000)
+      closed_at = DateTime.utc_now()
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open"
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.closed",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "closed",
+              "closed_at" => DateTime.to_iso8601(closed_at),
+              "merged_at" => nil
+            }
+          }
+        },
+        %{
+          event_action: "pull_request.reopened",
+          user_type: :repo_admin,
+          params: %{
+            "pull_request" => %{
+              "number" => pr_number,
+              "state" => "open",
+              "closed_at" => nil,
+              "merged_at" => nil
+            }
+          }
+        }
+      ])
+
+      ticket = Repo.get_by!(Ticket, number: pr_number)
+      assert ticket.state == :open
+      assert ticket.closed_at == nil
+      assert ticket.merged_at == nil
+    end
+  end
+
   defp mock_body(body \\ ""), do: "Lorem\r\nipsum\r\n dolor #{body} sit\r\namet"
 
   defp mock_user(user) do
@@ -757,7 +1351,10 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
     author =
       case ctx[:user_type] do
         :unauthorized -> ctx[:unauthorized_user]
-        _ -> ctx[:admin]
+        :org_admin -> ctx[:org_admin]
+        :org_mod -> ctx[:org_mod]
+        :org_expert -> ctx[:org_expert]
+        :repo_admin -> ctx[:repo_admin]
       end
 
     [event, action] = String.split(ctx[:event_action], ".")
@@ -768,7 +1365,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       event: event,
       event_action: "#{event}.#{action}",
       hook_id: "123456789",
-      delivery: "00000000-0000-0000-0000-000000000000",
+      delivery: Ecto.UUID.generate(),
       signature: "sha1=0000000000000000000000000000000000000000",
       signature_256: "sha256=0000000000000000000000000000000000000000000000000000000000000000",
       user_agent: "GitHub-Hookshot/0000000",
@@ -823,8 +1420,9 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           "issue" => %{
             "id" => 123,
             "number" => 123,
+            "state" => "open",
             "body" => mock_body(),
-            "user" => mock_user(ctx[:admin])
+            "user" => mock_user(ctx[:repo_admin])
           }
         },
         ctx[:params]
@@ -841,6 +1439,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           "issue" => %{
             "id" => 123,
             "number" => 123,
+            "state" => "open",
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author])
           }
@@ -859,6 +1458,7 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
           "pull_request" => %{
             "id" => 123,
             "number" => 123,
+            "state" => "open",
             "body" => mock_body(ctx[:body]),
             "user" => mock_user(ctx[:author]),
             "merged_at" => nil

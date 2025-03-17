@@ -26,11 +26,12 @@ defmodule Algora.Contracts do
   @type criterion ::
           {:id, binary()}
           | {:client_id, binary()}
+          | {:contractor_id, binary()}
           | {:original_contract_id, binary()}
           | {:open?, true}
           | {:active_or_paid?, true}
           | {:original?, true}
-          | {:status, :open | :paid}
+          | {:status, :draft | :active | :paid}
           | {:after, non_neg_integer()}
           | {:before, non_neg_integer()}
           | {:order, :asc | :desc}
@@ -542,7 +543,7 @@ defmodule Algora.Contracts do
     |> change(%{status: :paid})
     |> Repo.update_with_activity(%{
       type: :contract_paid,
-      notify_users: [contract.client_id, contract.contractor_id]
+      notify_users: []
     })
   end
 
@@ -562,7 +563,7 @@ defmodule Algora.Contracts do
     })
     |> Repo.insert_with_activity(%{
       type: :contract_renewed,
-      notify_users: [contract.client_id, contract.contractor_id]
+      notify_users: []
     })
   end
 
@@ -664,6 +665,9 @@ defmodule Algora.Contracts do
     Enum.reduce(criteria, query, fn
       {:id, id}, query ->
         from([c] in query, where: c.id == ^id)
+
+      {:contractor_id, contractor_id}, query ->
+        from([c] in query, where: c.contractor_id == ^contractor_id)
 
       {:client_id, client_id}, query ->
         from([c] in query, where: c.client_id == ^client_id)

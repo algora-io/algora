@@ -9,6 +9,8 @@ defmodule Algora.Bounties.Bounty do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
     field :number, :integer, default: 0
+    field :autopay_disabled, :boolean, default: false
+    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], default: :public
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
@@ -27,7 +29,7 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id])
+    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility])
     |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
     |> foreign_key_constraint(:ticket)

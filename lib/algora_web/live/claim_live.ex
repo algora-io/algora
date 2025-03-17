@@ -78,7 +78,7 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.map(& &1.net_amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-        source_body_html = Algora.Markdown.render(primary_claim.source.description)
+        source_body_html = Algora.Markdown.render(if primary_claim.source, do: primary_claim.source.description)
 
         pledges =
           primary_claim.target.bounties
@@ -195,15 +195,6 @@ defmodule AlgoraWeb.ClaimLive do
      |> assign_line_items()}
   end
 
-  def handle_event("split_bounty", _params, socket) do
-    # TODO: Implement split bounty
-    Logger.error(
-      "Attempt to split bounty #{socket.assigns.target.repository.user.provider_login}/#{socket.assigns.target.repository.name}#{socket.assigns.target.number}"
-    )
-
-    {:noreply, socket}
-  end
-
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
     changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
 
@@ -243,11 +234,7 @@ defmodule AlgoraWeb.ClaimLive do
   defp assign_line_items(socket) do
     line_items =
       Bounties.generate_line_items(%{amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)},
-        ticket_ref: %{
-          owner: socket.assigns.target.repository.user.provider_login,
-          repo: socket.assigns.target.repository.name,
-          number: socket.assigns.target.number
-        },
+        ticket_ref: ticket_ref(socket),
         claims: socket.assigns.claims
       )
 
@@ -255,11 +242,13 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   defp ticket_ref(socket) do
-    %{
-      owner: socket.assigns.target.repository.user.provider_login,
-      repo: socket.assigns.target.repository.name,
-      number: socket.assigns.target.number
-    }
+    if socket.assigns.target.repository do
+      %{
+        owner: socket.assigns.target.repository.user.provider_login,
+        repo: socket.assigns.target.repository.name,
+        number: socket.assigns.target.number
+      }
+    end
   end
 
   defp get_or_create_bounty(socket, data) do
@@ -308,10 +297,10 @@ defmodule AlgoraWeb.ClaimLive do
           <.card>
             <.card_header>
               <div class="flex items-center gap-4">
-                <.avatar class="h-12 w-12 rounded-full">
+                <.avatar :if={@source_or_target.repository} class="h-12 w-12 rounded-full">
                   <.avatar_image src={@source_or_target.repository.user.avatar_url} />
                   <.avatar_fallback>
-                    {String.first(@source_or_target.repository.user.provider_login)}
+                    {Algora.Util.initials(@source_or_target.repository.user.provider_login)}
                   </.avatar_fallback>
                 </.avatar>
                 <div>
@@ -322,9 +311,17 @@ defmodule AlgoraWeb.ClaimLive do
                   >
                     {@source_or_target.title}
                   </.link>
-                  <div class="text-sm text-muted-foreground">
+                  <div :if={@source_or_target.repository} class="text-sm text-muted-foreground">
                     {@source_or_target.repository.user.provider_login}/{@source_or_target.repository.name}#{@source_or_target.number}
                   </div>
+                  <.link
+                    :if={!@source_or_target.repository}
+                    href={@primary_claim.url}
+                    rel="noopener"
+                    class="block text-sm text-muted-foreground"
+                  >
+                    {@primary_claim.url}
+                  </.link>
                 </div>
               </div>
             </.card_header>
@@ -394,7 +391,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <div class="flex items-center gap-4">
                         <.avatar>
                           <.avatar_image src={claim.user.avatar_url} />
-                          <.avatar_fallback>{String.first(claim.user.name)}</.avatar_fallback>
+                          <.avatar_fallback>{Algora.Util.initials(claim.user.name)}</.avatar_fallback>
                         </.avatar>
                         <div>
                           <p class="font-medium">{claim.user.name}</p>
@@ -427,7 +424,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <.avatar>
                         <.avatar_image src={sponsor.sponsor.avatar_url} />
                         <.avatar_fallback>
-                          {String.first(sponsor.sponsor.name)}
+                          {Algora.Util.initials(sponsor.sponsor.name)}
                         </.avatar_fallback>
                       </.avatar>
                       <div>
@@ -532,7 +529,7 @@ defmodule AlgoraWeb.ClaimLive do
 
                     <div>
                       <.label>On behalf of</.label>
-                      <.dropdown2 id="context-dropdown" class="mt-2">
+                      <.dropdown id="context-dropdown" class="mt-2" border>
                         <:img src={@selected_context.avatar_url} />
                         <:title>{@selected_context.name}</:title>
                         <:subtitle>@{@selected_context.handle}</:subtitle>
@@ -553,7 +550,7 @@ defmodule AlgoraWeb.ClaimLive do
                             </div>
                           </div>
                         </:link>
-                      </.dropdown2>
+                      </.dropdown>
                     </div>
 
                     <div>

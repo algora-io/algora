@@ -64,7 +64,7 @@ defmodule AlgoraWeb.Contract.Modals.DisputeDrawer do
                         {Money.to_string!(@contract.amount_debited)}
                       </dd>
                     </div>
-                    <div class="flex justify-between">
+                    <div :if={@contract.start_date} class="flex justify-between">
                       <dt class="text-muted-foreground">Contract Period</dt>
                       <dd class="font-semibold">
                         {Calendar.strftime(@contract.start_date, "%b %d")} - {Calendar.strftime(

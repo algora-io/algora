@@ -1,13 +1,13 @@
-defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
+defmodule AlgoraWeb.Admin.AnalyticsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Activity
 
   alias Algora.Activities
+  alias Algora.Admin.Mainthings
+  alias Algora.Admin.Mainthings.Mainthing
   alias Algora.Analytics
-  alias Algora.Mainthing
-  alias Algora.MainthingContext
   alias Algora.Markdown
 
   def mount(_params, _session, socket) do
@@ -15,7 +15,7 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
     funnel_data = Analytics.get_funnel_data()
     :ok = Activities.subscribe()
 
-    mainthing = MainthingContext.get_latest()
+    mainthing = Mainthings.get_latest()
     notes_changeset = Mainthing.changeset(%Mainthing{content: (mainthing && mainthing.content) || ""}, %{})
 
     {:ok,
@@ -210,10 +210,6 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
     {:noreply, stream(socket, :activities, fetched)}
   end
 
-  def handle_info(%Activities.Activity{} = activity, socket) do
-    {:noreply, stream_insert(socket, :activities, activity, at: 0)}
-  end
-
   def handle_event("validate_notes", %{"mainthing" => %{"content" => content}}, socket) do
     changeset =
       %Mainthing{}
@@ -229,8 +225,8 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
   def handle_event("save_notes", %{"mainthing" => params}, socket) do
     case_result =
       case socket.assigns.mainthing do
-        nil -> MainthingContext.create(params)
-        mainthing -> MainthingContext.update(mainthing, params)
+        nil -> Mainthings.create(params)
+        mainthing -> Mainthings.update(mainthing, params)
       end
 
     case case_result do
@@ -240,5 +236,9 @@ defmodule AlgoraWeb.Admin.CompanyAnalyticsLive do
       {:error, changeset} ->
         {:noreply, socket |> assign(:notes_form, to_form(changeset)) |> put_flash(:error, "Error saving notes")}
     end
+  end
+
+  def handle_info(%Activities.Activity{} = activity, socket) do
+    {:noreply, stream_insert(socket, :activities, activity, at: 0)}
   end
 end

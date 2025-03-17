@@ -1,4 +1,4 @@
-defmodule Algora.Mainthing do
+defmodule Algora.Admin.Mainthings.Mainthing do
   @moduledoc false
   use Algora.Schema
 

@@ -1,9 +1,9 @@
-defmodule Algora.MainthingContext do
+defmodule Algora.Admin.Mainthings do
   @moduledoc false
 
   import Ecto.Query
 
-  alias Algora.Mainthing
+  alias Algora.Admin.Mainthings.Mainthing
   alias Algora.Repo
 
   @doc """

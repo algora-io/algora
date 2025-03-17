@@ -94,13 +94,10 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </div>
       </section>
 
-      <section id="analytics" class="scroll-mt-16">
-        <div class="mb-4">
-          <h1 class="text-2xl font-bold">Company Analytics</h1>
-        </div>
-      </section>
-
       <section id="metrics" class="scroll-mt-16">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold">Metrics</h1>
+        </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <.stat_card
             title="Total Companies"
@@ -130,61 +127,57 @@ defmodule AlgoraWeb.Admin.AdminLive do
       </section>
 
       <section id="customers" class="scroll-mt-16">
-        <.card>
-          <.card_header>
-            <.card_title>Company Details</.card_title>
-          </.card_header>
-          <.card_content>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="border-b border-border">
-                    <th class="p-4 text-left">Company</th>
-                    <th class="p-4 text-left">Joined</th>
-                    <th class="p-4 text-left">Status</th>
-                    <th class="p-4 text-left">Bounties</th>
-                    <th class="p-4 text-left">Success Rate</th>
-                    <th class="p-4 text-left">Last Active</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <%= for company <- @analytics.companies do %>
-                    <tr class="border-b border-border">
-                      <td class="p-4">
-                        <div class="flex items-center gap-3">
-                          <.avatar class="h-8 w-8">
-                            <.avatar_image src={company.avatar_url} />
-                          </.avatar>
-                          <div>
-                            <div class="font-medium">{company.name}</div>
-                            <div class="text-sm text-muted-foreground">@{company.handle}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="p-4 text-sm">
-                        {Calendar.strftime(company.joined_at, "%b %d, %Y")}
-                      </td>
-                      <td class="p-4">
-                        <.badge variant={status_color(company.status)}>
-                          {company.status}
-                        </.badge>
-                      </td>
-                      <td class="p-4 text-sm">
-                        {company.total_bounties}
-                      </td>
-                      <td class="p-4 text-sm">
-                        {company.success_rate}%
-                      </td>
-                      <td class="p-4 text-sm text-muted-foreground">
-                        {Calendar.strftime(company.last_active_at, "%b %d, %Y")}
-                      </td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </.card_content>
-        </.card>
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold">Customers</h1>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-border">
+                <th class="p-4 text-left">Company</th>
+                <th class="p-4 text-left">Joined</th>
+                <th class="p-4 text-left">Status</th>
+                <th class="p-4 text-left">Bounties</th>
+                <th class="p-4 text-left">Success Rate</th>
+                <th class="p-4 text-left">Last Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for company <- @analytics.companies do %>
+                <tr class="border-b border-border">
+                  <td class="p-4">
+                    <div class="flex items-center gap-3">
+                      <.avatar class="h-8 w-8">
+                        <.avatar_image src={company.avatar_url} />
+                      </.avatar>
+                      <div>
+                        <div class="font-medium">{company.name}</div>
+                        <div class="text-sm text-muted-foreground">@{company.handle}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="p-4 text-sm">
+                    {Calendar.strftime(company.joined_at, "%b %d, %Y")}
+                  </td>
+                  <td class="p-4">
+                    <.badge variant={status_color(company.status)}>
+                      {company.status}
+                    </.badge>
+                  </td>
+                  <td class="p-4 text-sm">
+                    {company.total_bounties}
+                  </td>
+                  <td class="p-4 text-sm">
+                    {company.success_rate}%
+                  </td>
+                  <td class="p-4 text-sm text-muted-foreground">
+                    {Calendar.strftime(company.last_active_at, "%b %d, %Y")}
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section id="funnel" class="scroll-mt-16">
@@ -192,7 +185,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
           <div class="w-3/4 p-0">
             <.card>
               <.card_header>
-                <.card_title>Company Funnel</.card_title>
+                <.card_title>Funnel</.card_title>
               </.card_header>
               <.card_content>
                 <div class="h-[400px]" phx-update="ignore" id="funnel-chart">

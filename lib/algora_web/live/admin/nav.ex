@@ -32,12 +32,6 @@ defmodule AlgoraWeb.Admin.Nav do
         title: "Main",
         items: [
           %{href: "/admin#notes", tab: :notes, icon: "tabler-notes", label: "Notes"},
-          %{
-            href: "/admin#analytics",
-            tab: :analytics,
-            icon: "tabler-chart-pie",
-            label: "Analytics"
-          },
           %{href: "/admin#metrics", tab: :metrics, icon: "tabler-chart-dots", label: "Key Metrics"},
           %{
             href: "/admin#customers",

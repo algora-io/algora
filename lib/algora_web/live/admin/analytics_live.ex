@@ -125,8 +125,8 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
           trend={@analytics.time_to_fill_trend}
         />
         <.stat_card
-          title="Contract Success Rate"
-          value={"#{@analytics.contract_success_rate}%"}
+          title="Bounty Success Rate"
+          value={"#{@analytics.bounty_success_rate}%"}
           change={@analytics.success_rate_change}
           trend={@analytics.success_rate_trend}
         />
@@ -144,7 +144,7 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
                   <th class="p-4 text-left">Company</th>
                   <th class="p-4 text-left">Joined</th>
                   <th class="p-4 text-left">Status</th>
-                  <th class="p-4 text-left">Contracts</th>
+                  <th class="p-4 text-left">Bounties</th>
                   <th class="p-4 text-left">Success Rate</th>
                   <th class="p-4 text-left">Last Active</th>
                 </tr>
@@ -172,7 +172,7 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
                       </.badge>
                     </td>
                     <td class="p-4 text-sm">
-                      {company.total_contracts}
+                      {company.total_bounties}
                     </td>
                     <td class="p-4 text-sm">
                       {company.success_rate}%
@@ -206,10 +206,6 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
      |> assign(:selected_period, period)}
   end
 
-  def handle_async(:get_activities, {:ok, fetched}, socket) do
-    {:noreply, stream(socket, :activities, fetched)}
-  end
-
   def handle_event("validate_notes", %{"mainthing" => %{"content" => content}}, socket) do
     changeset =
       %Mainthing{}
@@ -240,5 +236,9 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
 
   def handle_info(%Activities.Activity{} = activity, socket) do
     {:noreply, stream_insert(socket, :activities, activity, at: 0)}
+  end
+
+  def handle_async(:get_activities, {:ok, fetched}, socket) do
+    {:noreply, stream(socket, :activities, fetched)}
   end
 end

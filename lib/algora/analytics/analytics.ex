@@ -3,6 +3,7 @@ defmodule Algora.Analytics do
   import Ecto.Query
 
   alias Algora.Accounts.User
+  alias Algora.Bounties.Bounty
   alias Algora.Contracts.Contract
   alias Algora.Repo
 
@@ -65,18 +66,22 @@ defmodule Algora.Analytics do
 
     companies_query =
       from u in User,
-        where: u.inserted_at >= ^period_start and u.type == :organization,
-        right_join: c in Contract,
-        on: c.client_id == u.id,
-        group_by: u.id,
+        where: u.inserted_at >= ^period_start,
+        where: u.type == :organization,
+        where: u.featured,
+        left_join: b in Bounty,
+        on: b.owner_id == u.id,
+        distinct: [u.id],
+        group_by: [u.id, b.id],
+        order_by: [desc: b.inserted_at],
         select: %{
           id: u.id,
           name: u.name,
           handle: u.handle,
           joined_at: u.inserted_at,
-          total_contracts: c.id |> count() |> filter(c.inserted_at >= ^period_start),
-          successful_contracts:
-            c.id |> count() |> filter(c.status == :active or (c.status == :paid and c.inserted_at >= ^period_start)),
+          total_bounties: b.id |> count() |> filter(b.inserted_at >= ^period_start),
+          successful_bounties:
+            b.id |> count() |> filter(b.status == :open or (b.status == :paid and b.inserted_at >= ^period_start)),
           last_active_at: u.updated_at,
           avatar_url: u.avatar_url
         }
@@ -112,15 +117,15 @@ defmodule Algora.Analytics do
            avg_time_to_fill: 0.0,
            time_to_fill_change: -0.0,
            time_to_fill_trend: :down,
-           contract_success_rate: current_success_rate,
-           previous_contract_success_rate: previous_success_rate,
+           bounty_success_rate: current_success_rate,
+           previous_bounty_success_rate: previous_success_rate,
            success_rate_change: current_success_rate - previous_success_rate,
            success_rate_trend: calculate_trend(current_success_rate, previous_success_rate),
            companies:
              Enum.map(companies, fn company ->
                Map.merge(company, %{
-                 success_rate: calculate_success_rate(company.successful_contracts, company.total_contracts),
-                 status: if(company.successful_contracts > 0, do: :active, else: :inactive)
+                 success_rate: calculate_success_rate(company.successful_bounties, company.total_bounties),
+                 status: if(company.successful_bounties > 0, do: :active, else: :inactive)
                })
              end)
          }}

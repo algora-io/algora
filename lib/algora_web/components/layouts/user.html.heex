@@ -82,26 +82,28 @@
       <.logo class="h-8 w-auto text-white" />
     </div>
     <nav class="mt-4">
-      <ul role="list" class="flex flex-col items-center space-y-1">
-        <%= for item <- @nav |> List.first() |> Map.get(:items) do %>
-          <li>
-            <.link
-              navigate={item.href}
-              target={Map.get(item, :target)}
-              class={[
-                "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-                if(@active_tab == item.tab,
-                  do: "bg-gray-800 text-white",
-                  else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-                )
-              ]}
-            >
-              <.icon name={item.icon} class="h-6 w-6 shrink-0" />
-              <span class="sr-only">{item.label}</span>
-            </.link>
-          </li>
-        <% end %>
-      </ul>
+      <%= for section <- @nav do %>
+        <ul role="list" class="flex flex-col items-center space-y-1">
+          <%= for item <- section.items do %>
+            <li>
+              <.link
+                navigate={item.href}
+                target={Map.get(item, :target)}
+                class={[
+                  "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+                  if(@active_tab == item.tab,
+                    do: "bg-gray-800 text-white",
+                    else: "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  )
+                ]}
+              >
+                <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                <span class="sr-only">{item.label}</span>
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
 
       <.separator class="mx-auto my-4 w-2/3" />
 

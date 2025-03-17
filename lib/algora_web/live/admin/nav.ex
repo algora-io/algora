@@ -45,51 +45,14 @@ defmodule AlgoraWeb.Admin.Nav do
             label: "Customers"
           },
           %{href: "/admin/analytics#funnel", tab: :funnel, icon: "tabler-filter", label: "Funnel"},
-          %{href: "/admin/leaderboard", tab: :developers, icon: "tabler-user-code", label: "Developers"},
-          %{href: "/admin/dashboard", tab: :dashboard, icon: "tabler-dashboard", label: "Dashboard"},
-          %{href: "/admin/dashboard/oban", tab: :oban, icon: "tabler-server-2", label: "Oban"}
+          %{href: "/admin/leaderboard", tab: :developers, icon: "tabler-user-code", label: "Developers"}
         ]
       },
       %{
         title: "User",
         items: [
-          %{
-            href: "/user/installations",
-            tab: :installations,
-            icon: "tabler-apps",
-            label: "Installations"
-          },
-          %{
-            href: "/user/payouts",
-            tab: :earnings,
-            icon: "tabler-currency-dollar",
-            label: "Earnings"
-          }
-        ]
-      },
-      %{
-        title: "Resources",
-        items: [
-          %{href: "/onboarding", tab: :onboarding, icon: "tabler-rocket", label: "Get started"},
-          %{href: "https://docs.algora.io", icon: "tabler-book", label: "Documentation"},
-          %{href: "https://github.com/algora-io/sdk", icon: "tabler-code", label: "Algora SDK"}
-        ]
-      },
-      %{
-        title: "Community",
-        items: [
-          %{
-            href: "https://docs.algora.io/contact",
-            icon: "tabler-send",
-            label: "Talk to founders"
-          },
-          %{href: "https://algora.io/discord", icon: "tabler-brand-discord", label: "Discord"},
-          %{href: "https://twitter.com/algoraio", icon: "tabler-brand-x", label: "Twitter"},
-          %{
-            href: "https://youtube.com/@algora-io",
-            icon: "tabler-brand-youtube",
-            label: "YouTube"
-          }
+          %{href: "/admin/dashboard", tab: :dashboard, icon: "tabler-dashboard", label: "Dashboard"},
+          %{href: "/admin/dashboard/oban", tab: :oban, icon: "tabler-clock", label: "Job Queue"}
         ]
       }
     ]

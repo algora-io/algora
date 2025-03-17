@@ -68,18 +68,8 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
       </section>
 
       <section id="company-analytics">
-        <div class="mb-4 flex items-center justify-between">
+        <div class="mb-4">
           <h1 class="text-2xl font-bold">Company Analytics</h1>
-          <div class="flex gap-2">
-            <.button
-              :for={period <- ["7d", "30d", "90d"]}
-              variant={if @selected_period == period, do: "default", else: "outline"}
-              phx-click="select_period"
-              phx-value-period={period}
-            >
-              {period}
-            </.button>
-          </div>
         </div>
 
         <div class="mx-auto h-500 flex">
@@ -194,6 +184,18 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
           </.card_content>
         </.card>
       </section>
+      
+    <!-- Add the floating period selector -->
+      <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
+        <.button
+          :for={period <- ["7d", "30d", "90d"]}
+          variant={if @selected_period == period, do: "default", else: "outline"}
+          phx-click="select_period"
+          phx-value-period={period}
+        >
+          {period}
+        </.button>
+      </div>
     </div>
     """
   end

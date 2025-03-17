@@ -28,6 +28,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:mainthing, mainthing)
      |> assign(:notes_edit_mode, false)
      |> assign(:notes_full_screen, false)
+     |> assign(:plausible_url, Application.get_env(:algora, :plausible_url))
      |> stream(:activities, [])
      |> start_async(:get_activities, fn -> Activities.all() end)}
   end
@@ -201,6 +202,19 @@ defmodule AlgoraWeb.Admin.AdminLive do
             </.card>
           </.scroll_area>
         </div>
+      </section>
+
+      <section id="traffic" class="scroll-mt-16">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold">Traffic</h1>
+        </div>
+        <iframe
+          :if={@plausible_url}
+          src={@plausible_url}
+          plausible-embed=""
+          loading="lazy"
+          style="width: 1; min-width: 100%; height: 609px;"
+        />
       </section>
     </div>
     """

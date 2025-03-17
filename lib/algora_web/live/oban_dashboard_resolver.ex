@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.ObanDashboardResolver do
+  @moduledoc false
   @behaviour Oban.Web.Resolver
 
   @impl true

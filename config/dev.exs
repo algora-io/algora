@@ -132,3 +132,5 @@ config :algora, :login_code,
   salt: System.get_env("LOGIN_CODE_SALT", "algora-login-code")
 
 config :algora, :plausible_url, System.get_env("PLAUSIBLE_URL")
+
+config :algora, :assets_url, System.get_env("ASSETS_URL")

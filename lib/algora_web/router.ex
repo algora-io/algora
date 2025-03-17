@@ -21,6 +21,12 @@ defmodule AlgoraWeb.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/asset" do
+    forward "/", ReverseProxyPlug,
+      upstream: "#{Application.compile_env(:algora, :assets_url)}",
+      response_mode: :buffer
+  end
+
   scope "/admin", AlgoraWeb do
     pipe_through [:browser]
 

@@ -59,6 +59,7 @@ defmodule Algora.MixProject do
       {:tabler_icons, github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
+      {:httpoison, "~> 2.2"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
@@ -87,6 +88,7 @@ defmodule Algora.MixProject do
       {:excoveralls, "~> 0.18", only: :test},
       {:dataloader, "~> 2.0.0"},
       {:mdex, "~> 0.2"},
+      {:reverse_proxy_plug, "~> 3.0"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

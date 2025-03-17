@@ -21,7 +21,7 @@ defmodule Algora.Activities.DiscordViews do
               "https://github.com/#{bounty.ticket.repository.user.provider_login}/#{bounty.ticket.repository.name}/issues/#{bounty.ticket.number}"
           },
           footer: %{
-            text: "Created by #{bounty.creator.name}",
+            text: bounty.creator.name,
             icon_url: bounty.creator.avatar_url
           },
           thumbnail: %{url: bounty.owner.avatar_url},

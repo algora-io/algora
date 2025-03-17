@@ -72,7 +72,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         }
       }
 
-      assert {:ok, _} = StripeController.handle_event(event)
+      assert :ok = StripeController.handle_event(event)
 
       assert Repo.get(Transaction, bounty_credit_tx.id).status == :succeeded
       assert Repo.get(Transaction, tip_credit_tx.id).status == :succeeded
@@ -115,7 +115,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         }
       }
 
-      assert {:ok, _} = StripeController.handle_event(event)
+      assert :ok = StripeController.handle_event(event)
 
       assert Repo.get(Transaction, credit_tx.id).status == :succeeded
       assert Repo.get(Transaction, debit_tx.id).status == :succeeded
@@ -156,7 +156,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         }
       }
 
-      assert {:ok, _} = StripeController.handle_event(event)
+      assert :ok = StripeController.handle_event(event)
 
       assert Repo.get(Transaction, credit_tx.id).status == :succeeded
       assert Repo.get(Transaction, debit_tx.id).status == :succeeded
@@ -187,7 +187,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         }
       }
 
-      assert {:ok, nil} = StripeController.handle_event(event)
+      assert :ok = StripeController.handle_event(event)
 
       updated_tx = Repo.get(Transaction, transaction.id)
       assert updated_tx.status == :succeeded

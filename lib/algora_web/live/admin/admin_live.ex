@@ -35,7 +35,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8">
-      <section id="notes" class={["transition-all duration-300", @notes_full_screen && "h-screen"]}>
+      <section id="notes">
         <div class="mb-4 flex items-center justify-between">
           <h1 class="text-2xl font-bold">Notes</h1>
           <div class="flex gap-2">
@@ -56,30 +56,35 @@ defmodule AlgoraWeb.Admin.AdminLive do
           id="notes-container"
           class={[
             "overflow-hidden transition-all duration-300",
-            if(@notes_full_screen, do: "max-h-none", else: "max-h-[500px]")
+            if(@notes_full_screen,
+              do: "max-h-none",
+              else: "max-h-[60svh] overflow-y-auto scrollbar-thin"
+            )
           ]}
         >
           <div id="notes-edit" class={["hidden", @notes_edit_mode && "!block"]}>
             <.simple_form for={@notes_form} phx-change="validate_notes" phx-submit="save_notes">
-              <div class="flex flex-col gap-2 h-full">
-                <h3 class="font-medium text-sm">Content</h3>
-                <div class="flex-1 [&>div]:h-full">
-                  <.input
-                    field={@notes_form[:content]}
-                    type="textarea"
-                    class="h-full scrollbar-thin"
-                    phx-debounce="300"
-                    rows={10}
-                  />
-                </div>
+              <div class={[
+                if(@notes_full_screen, do: "[&>div]:h-full", else: "[&>div]:h-[60svh]")
+              ]}>
+                <.input
+                  field={@notes_form[:content]}
+                  type="textarea"
+                  class="h-full scrollbar-thin"
+                  phx-debounce="300"
+                  rows={10}
+                />
               </div>
-              <:actions>
+              <div class="flex justify-end">
                 <.button type="submit">Save Notes</.button>
-              </:actions>
+              </div>
             </.simple_form>
           </div>
 
-          <div id="notes-preview" class={["h-full", !@notes_edit_mode && "!block"]}>
+          <div
+            id="notes-preview"
+            class={["h-full", if(@notes_edit_mode, do: "hidden", else: "block")]}
+          >
             <div class="h-full rounded-lg border bg-muted/40 p-4 overflow-y-auto">
               <div class="prose prose-sm max-w-none dark:prose-invert">
                 {raw(@notes_preview)}

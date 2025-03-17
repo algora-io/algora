@@ -25,7 +25,7 @@ defmodule AlgoraWeb.Router do
 
     live_session :admin,
       layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav] do
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
       live "/analytics", Admin.AnalyticsLive
       live "/leaderboard", Admin.LeaderboardLive
     end

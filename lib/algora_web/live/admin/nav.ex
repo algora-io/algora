@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Admin.Nav do
     {:cont,
      socket
      |> assign(:contacts, [])
+     |> assign(:admin_page?, true)
      |> assign_nav_items()
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end

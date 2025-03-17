@@ -184,17 +184,6 @@ defmodule AlgoraWeb.Admin.AdminLive do
           </.scroll_area>
         </div>
       </section>
-
-      <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
-        <.button
-          :for={period <- ["7d", "30d", "90d"]}
-          variant={if @selected_period == period, do: "default", else: "outline"}
-          phx-click="select_period"
-          phx-value-period={period}
-        >
-          {period}
-        </.button>
-      </div>
     </div>
     """
   end

@@ -9,6 +9,7 @@ defmodule AlgoraWeb.User.Nav do
   def on_mount(:default, _params, _session, socket) do
     {:cont,
      socket
+     |> assign(:admin_page?, false)
      |> assign(:contacts, [])
      |> assign_nav_items()
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}

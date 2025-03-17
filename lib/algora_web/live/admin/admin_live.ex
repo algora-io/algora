@@ -62,11 +62,9 @@ defmodule AlgoraWeb.Admin.AdminLive do
             )
           ]}
         >
-          <div id="notes-edit" class={["hidden", @notes_edit_mode && "!block"]}>
+          <div id="notes-edit" class={if @notes_edit_mode, do: "block", else: "hidden"}>
             <.simple_form for={@notes_form} phx-change="validate_notes" phx-submit="save_notes">
-              <div class={[
-                if(@notes_full_screen, do: "[&>div]:h-full", else: "[&>div]:h-[60svh]")
-              ]}>
+              <div>
                 <.input
                   field={@notes_form[:content]}
                   type="textarea"

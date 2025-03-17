@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Activities.SendDiscord
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Tip
@@ -19,7 +20,34 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   @metadata_version Payments.metadata_version()
 
   @impl true
-  def handle_event(%Stripe.Event{
+  def handle_event(event) do
+    result =
+      case process_event(event) do
+        :ok -> :ok
+        {:ok, _} -> :ok
+        {:error, reason} -> {:error, reason}
+        :error -> {:error, :unknown_error}
+      end
+
+    case result do
+      :ok ->
+        Logger.debug("✅ #{inspect(event.type)}")
+        notify_event(event, :ok)
+        :ok
+
+      {:error, reason} ->
+        Logger.error("❌ #{inspect(event.type)}: #{inspect(reason)}")
+        notify_event(event, {:error, reason})
+        {:error, reason}
+    end
+  rescue
+    error ->
+      Logger.error("❌ #{inspect(event.type)}: #{inspect(error)}")
+      notify_event(event, {:error, error})
+      {:error, error}
+  end
+
+  def process_event(%Stripe.Event{
         type: "charge.succeeded",
         data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
       })
@@ -77,8 +105,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end)
   end
 
-  @impl true
-  def handle_event(%Stripe.Event{
+  def process_event(%Stripe.Event{
         type: "transfer.created",
         data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
       }) do
@@ -94,8 +121,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  @impl true
-  def handle_event(%Stripe.Event{
+  def process_event(%Stripe.Event{
         type: "checkout.session.completed",
         data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
       }) do
@@ -109,13 +135,11 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  @impl true
-  def handle_event(%Stripe.Event{type: "checkout.session.completed"} = event) do
+  def process_event(%Stripe.Event{type: "checkout.session.completed"} = event) do
     Logger.info("Stripe #{event.type} event: #{event.id}")
   end
 
-  @impl true
-  def handle_event(_event), do: :ok
+  def process_event(_event), do: :ok
 
   defp maybe_update_transaction(transaction, transfer) do
     if transaction.status == :succeeded do
@@ -128,6 +152,87 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         provider_meta: Util.normalize_struct(transfer)
       })
       |> Repo.update()
+    end
+  end
+
+  defp notify_event(%Stripe.Event{} = event, :ok) do
+    discord_payload = %{
+      payload: %{
+        embeds: [
+          %{
+            color: 0x64748B,
+            title: event.type,
+            footer: %{
+              text: "Stripe",
+              icon_url: "https://github.com/stripe.png"
+            },
+            fields: [
+              %{
+                name: "Event",
+                value: event.id,
+                inline: true
+              },
+              %{
+                name: event.data.object.object,
+                value: event.data.object,
+                inline: true
+              }
+            ],
+            url: "https://dashboard.stripe.com/payments?status[0]=successful",
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+
+    case discord_payload |> SendDiscord.changeset() |> Repo.insert() do
+      {:ok, _} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.error("Error sending discord notification: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp notify_event(%Stripe.Event{} = event, {:error, error}) do
+    discord_payload = %{
+      payload: %{
+        embeds: [
+          %{
+            color: 0xEF4444,
+            title: event.type,
+            description: inspect(error),
+            footer: %{
+              text: "Stripe",
+              icon_url: "https://github.com/stripe.png"
+            },
+            fields: [
+              %{
+                name: "Event",
+                value: event.id,
+                inline: true
+              },
+              %{
+                name: "Object",
+                value: inspect(event.data.object),
+                inline: true
+              }
+            ],
+            url: "https://dashboard.stripe.com/payments?status[0]=failed",
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+
+    case discord_payload |> SendDiscord.changeset() |> Repo.insert() do
+      {:ok, _} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.error("Error sending discord notification: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 end

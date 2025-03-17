@@ -13,12 +13,15 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Payments.Transaction
   alias Algora.PSP.ConnectCountries
   alias Algora.Repo
+  alias Algora.Workspace
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
+
+  require Logger
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do

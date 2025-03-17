@@ -67,37 +67,13 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
         </.simple_form>
       </section>
 
-      <section id="company-analytics">
+      <section id="analytics">
         <div class="mb-4">
           <h1 class="text-2xl font-bold">Company Analytics</h1>
         </div>
-
-        <div class="mx-auto h-500 flex">
-          <div class="w-3/4 p-0">
-            <.card>
-              <.card_header>
-                <.card_title>Company Funnel</.card_title>
-              </.card_header>
-              <.card_content>
-                <div class="h-[400px]" phx-update="ignore" id="funnel-chart">
-                  <canvas id="funnelChart"></canvas>
-                </div>
-              </.card_content>
-            </.card>
-          </div>
-          <.scroll_area class="w-1/4 ml-4 pr-4">
-            <.card class="h-[500px]">
-              <.card_header>
-                <.card_title>Recent Activities</.card_title>
-              </.card_header>
-              <.activities_timeline id="admin-activities-timeline" activities={@streams.activities} />
-            </.card>
-          </.scroll_area>
-        </div>
       </section>
-      
-    <!-- Key Metrics -->
-      <section id="key-metrics">
+
+      <section id="metrics">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <.stat_card
             title="Total Companies"
@@ -125,9 +101,8 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
           />
         </div>
       </section>
-      
-    <!-- Company Table -->
-      <section id="company-details">
+
+      <section id="customers">
         <.card>
           <.card_header>
             <.card_title>Company Details</.card_title>
@@ -184,8 +159,32 @@ defmodule AlgoraWeb.Admin.AnalyticsLive do
           </.card_content>
         </.card>
       </section>
-      
-    <!-- Add the floating period selector -->
+
+      <section id="funnel">
+        <div class="mx-auto h-500 flex">
+          <div class="w-3/4 p-0">
+            <.card>
+              <.card_header>
+                <.card_title>Company Funnel</.card_title>
+              </.card_header>
+              <.card_content>
+                <div class="h-[400px]" phx-update="ignore" id="funnel-chart">
+                  <canvas id="funnelChart"></canvas>
+                </div>
+              </.card_content>
+            </.card>
+          </div>
+          <.scroll_area class="w-1/4 ml-4 pr-4">
+            <.card class="h-[500px]">
+              <.card_header>
+                <.card_title>Recent Activities</.card_title>
+              </.card_header>
+              <.activities_timeline id="admin-activities-timeline" activities={@streams.activities} />
+            </.card>
+          </.scroll_area>
+        </div>
+      </section>
+
       <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2">
         <.button
           :for={period <- ["7d", "30d", "90d"]}

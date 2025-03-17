@@ -30,20 +30,24 @@ defmodule AlgoraWeb.Admin.Nav do
       %{
         title: "Main",
         items: [
-          %{href: "/admin/analytics#notes", tab: :notes, icon: "tabler-notebook", label: "Notes"},
+          %{href: "/admin/analytics#notes", tab: :notes, icon: "tabler-notes", label: "Notes"},
           %{
-            href: "/admin/analytics#company-analytics",
-            tab: :company_analytics,
-            icon: "tabler-chart-area-line",
-            label: "Company Analytics"
+            href: "/admin/analytics#analytics",
+            tab: :analytics,
+            icon: "tabler-chart-pie",
+            label: "Analytics"
           },
-          %{href: "/admin/analytics#key-metrics", tab: :key_metrics, icon: "tabler-chart-dots", label: "Key Metrics"},
+          %{href: "/admin/analytics#metrics", tab: :metrics, icon: "tabler-chart-dots", label: "Key Metrics"},
           %{
-            href: "/admin/analytics#company-details",
-            tab: :company_details,
-            icon: "tabler-building",
-            label: "Company Details"
-          }
+            href: "/admin/analytics#customers",
+            tab: :customers,
+            icon: "tabler-user-dollar",
+            label: "Customers"
+          },
+          %{href: "/admin/analytics#funnel", tab: :funnel, icon: "tabler-filter", label: "Funnel"},
+          %{href: "/admin/leaderboard", tab: :developers, icon: "tabler-user-code", label: "Developers"},
+          %{href: "/admin/dashboard", tab: :dashboard, icon: "tabler-dashboard", label: "Dashboard"},
+          %{href: "/admin/dashboard/oban", tab: :oban, icon: "tabler-server-2", label: "Oban"}
         ]
       },
       %{

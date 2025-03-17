@@ -34,7 +34,7 @@ defmodule AlgoraWeb.Router do
       metrics: AlgoraWeb.Telemetry,
       additional_pages: [oban: Oban.LiveDashboard],
       layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.User.Nav]
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav]
   end
 
   scope "/", AlgoraWeb do

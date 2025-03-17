@@ -4,7 +4,6 @@ defmodule Algora.Analytics do
 
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
-  alias Algora.Contracts.Contract
   alias Algora.Repo
 
   require Algora.SQL
@@ -43,24 +42,24 @@ defmodule Algora.Analytics do
         }
 
     contracts_query =
-      from u in Contract,
-        where: u.inserted_at >= ^previous_period_start,
+      from b in Bounty,
+        where: b.inserted_at >= ^previous_period_start,
         select: %{
-          count_current: u.id |> count() |> filter(u.inserted_at < ^from and u.inserted_at >= ^period_start),
+          count_current: b.id |> count() |> filter(b.inserted_at < ^from and b.inserted_at >= ^period_start),
           count_previous:
-            u.id |> count() |> filter(u.inserted_at < ^period_start and u.inserted_at >= ^previous_period_start),
+            b.id |> count() |> filter(b.inserted_at < ^period_start and b.inserted_at >= ^previous_period_start),
           success_current:
-            u.id
+            b.id
             |> count()
             |> filter(
-              u.inserted_at < ^from and u.inserted_at >= ^period_start and (u.status == :active or u.status == :paid)
+              b.inserted_at < ^from and b.inserted_at >= ^period_start and (b.status == :open or b.status == :paid)
             ),
           success_previous:
-            u.id
+            b.id
             |> count()
             |> filter(
-              u.inserted_at < ^period_start and u.inserted_at >= ^previous_period_start and
-                (u.status == :active or u.status == :paid)
+              b.inserted_at < ^period_start and b.inserted_at >= ^previous_period_start and
+                (b.status == :open or b.status == :paid)
             )
         }
 

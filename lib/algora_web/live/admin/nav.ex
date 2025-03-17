@@ -40,6 +40,7 @@ defmodule AlgoraWeb.Admin.Nav do
             label: "Customers"
           },
           %{href: "/admin#funnel", tab: :funnel, icon: "tabler-filter", label: "Funnel"},
+          %{href: "/admin#traffic", tab: :traffic, icon: "tabler-traffic-lights", label: "Traffic"},
           %{href: "/admin/leaderboard", tab: :developers, icon: "tabler-user-code", label: "Developers"}
         ]
       },

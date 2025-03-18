@@ -712,10 +712,7 @@ defmodule AlgoraWeb.HomeLive do
                         />
                       </a>
                       <div>
-                        <a
-                          class="text-base font-medium text-gray-100"
-                          href={~p"/org/triggerdotdev"}
-                        >
+                        <a class="text-base font-medium text-gray-100" href={~p"/org/triggerdotdev"}>
                           Trigger.dev (YC W23)
                         </a>
                         <a
@@ -855,8 +852,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1087,8 +1083,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

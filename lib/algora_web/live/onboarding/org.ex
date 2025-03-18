@@ -371,8 +371,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               get_in(metadata, [:org, :bio]) ||
                 get_in(metadata, [:org, :og_description]) ||
                 get_in(metadata, [:org, :og_title]),
-            avatar_url:
-              get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
+            avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
             handle: org_unique_handle,
             domain: domain,
             og_title: get_in(metadata, [:org, :og_title]),
@@ -420,9 +419,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
-              Logger.error(
-                "error onboarding organization: #{inspect(name)} #{inspect(changeset)}"
-              )
+              Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
 
               socket
               |> put_flash(:error, "Something went wrong. Please try again.")
@@ -567,16 +564,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         />
         <p class="mt-4 text-sm text-muted-foreground/75">
           By continuing, you agree to Algora's
-          <.link
-            href={AlgoraWeb.Constants.terms_url()}
-            class="text-primary hover:underline"
-          >
+          <.link href={AlgoraWeb.Constants.terms_url()} class="text-primary hover:underline">
             Terms of Service
           </.link>
-          and <.link
-            href={AlgoraWeb.Constants.privacy_url()}
-            class="text-primary hover:underline"
-          >Privacy Policy</.link>.
+          and <.link href={AlgoraWeb.Constants.privacy_url()} class="text-primary hover:underline">Privacy Policy</.link>.
         </p>
 
         <div class="flex justify-between">
@@ -779,96 +770,65 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
           <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/qdrant"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
           <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/remotion"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
           <img
             src="https://algora.io/banners/remotion.png"
             alt="Remotion"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/zio"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
           <img
             src="https://algora.io/banners/zio.png"
             alt="ZIO"
             class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/triggerdotdev"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/tembo"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
           <img
             src="https://algora.io/banners/tembo.png"
             alt="Tembo"
             class="w-[13rem] col-auto saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/maybe-finance"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
           <img
             src="https://algora.io/banners/maybe.png"
             alt="Maybe"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/golemcloud"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/aidenybai"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/tailcallhq"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/highlight"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/dittofeed"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"
@@ -924,12 +884,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    {:noreply,
-     assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+    {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
   end
 
   def handle_async(:fetch_metadata, {:exit, reason}, socket) do
-    {:noreply,
-     assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
+    {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 end

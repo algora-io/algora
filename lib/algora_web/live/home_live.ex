@@ -61,7 +61,7 @@ defmodule AlgoraWeb.HomeLive do
             aria-hidden="true"
           >
             <div
-              class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-primary to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+              class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
               style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
             >
             </div>
@@ -91,7 +91,7 @@ defmodule AlgoraWeb.HomeLive do
 
           <div class="absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl" aria-hidden="true">
             <div
-              class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-primary to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+              class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
               style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
             >
             </div>
@@ -101,10 +101,13 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl 2xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
-                  The open source Upwork alternative.
+                  The open source Upwork for engineers
                 </h1>
-                <p class="mt-8 text-pretty text-lg font-medium text-muted-foreground sm:max-w-md sm:text-xl/8 lg:max-w-none">
-                  GitHub bounties, contract work and jobs for developers.
+                <p class="mt-8 font-display text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
+                  Discover GitHub bounties, contract work and jobs
+                </p>
+                <p class="mt-4 font-display text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
+                  Hire top 1% of open source developers
                 </p>
                 <!-- CTA buttons -->
                 <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
@@ -286,64 +289,6 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </.form>
               </div>
-            </div>
-          </div>
-          <div class="mx-auto max-w-4xl px-6 lg:px-8 mt-16">
-            <h2 class="mb-8 text-xl font-bold text-card-foreground text-center">
-              <span>Fund any issue</span>
-              <span class="block sm:inline text-success">in seconds</span>
-            </h2>
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <.card class="bg-muted/30">
-                <.card_header>
-                  <div class="flex items-center gap-3">
-                    <.icon name="tabler-diamond" class="h-8 w-8" />
-                    <h2 class="text-2xl font-semibold">Post a bounty</h2>
-                  </div>
-                </.card_header>
-                <.card_content>
-                  <.simple_form for={@bounty_form} phx-submit="create_bounty">
-                    <div class="flex flex-col gap-6">
-                      <.input
-                        label="URL"
-                        field={@bounty_form[:url]}
-                        placeholder="https://github.com/owner/repo/issues/1337"
-                      />
-                      <.input
-                        label="Amount"
-                        icon="tabler-currency-dollar"
-                        field={@bounty_form[:amount]}
-                      />
-                      <div class="flex justify-end gap-4">
-                        <.button variant="subtle">Submit</.button>
-                      </div>
-                    </div>
-                  </.simple_form>
-                </.card_content>
-              </.card>
-              <.card class="bg-muted/30">
-                <.card_header>
-                  <div class="flex items-center gap-3">
-                    <.icon name="tabler-gift" class="h-8 w-8" />
-                    <h2 class="text-2xl font-semibold">Tip a developer</h2>
-                  </div>
-                </.card_header>
-                <.card_content>
-                  <.simple_form for={@tip_form} phx-submit="create_tip">
-                    <div class="flex flex-col gap-6">
-                      <.input
-                        label="GitHub handle"
-                        field={@tip_form[:github_handle]}
-                        placeholder="jsmith"
-                      />
-                      <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
-                      <div class="flex justify-end gap-4">
-                        <.button variant="subtle">Submit</.button>
-                      </div>
-                    </div>
-                  </.simple_form>
-                </.card_content>
-              </.card>
             </div>
           </div>
         </section>
@@ -790,7 +735,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
-              <span class="block sm:inline">UpWork alternative.</span>
+              <span class="block sm:inline">UpWork on GitHub</span>
             </h2>
             <div class="flex justify-center gap-4">
               <.button navigate="/onboarding/org">
@@ -839,7 +784,8 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply,
+             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1070,7 +1016,8 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money),
+    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

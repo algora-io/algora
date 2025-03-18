@@ -16,6 +16,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Workspace
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
+  alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
@@ -198,8 +199,8 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="text-2xl font-semibold text-foreground">GitHub cofounder funds new feature in Zed Editor</div>
                   <div class="text-lg font-medium text-muted-foreground">Zed Editor, Scott Chacon</div>
                 </div>
-                <.button size="lg">View issue</.button>
-              </.link>
+                <.button size="lg" variant="secondary"><Logos.github class="size-4 mr-4 -ml-2" /> View issue</.button>
+                </.link>
 
               <.link
                 href="https://github.com/PX4/PX4-Autopilot/issues/22464"
@@ -223,11 +224,34 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="text-2xl font-semibold text-foreground">DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot</div>
                   <div class="text-lg font-medium text-muted-foreground">Alex Klimaj, CEO/CTO of ARK Electronics, and Andrew Wilkins, CEO of Ascend Engineering</div>
                 </div>
-                <%!-- https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg --%>
-                <%!-- https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg --%>
-                <%!-- https://avatars.githubusercontent.com/u/2019539?v=4 --%>
-                <.button size="lg">View issue</.button>
+                <.button size="lg" variant="secondary"><Logos.github class="size-4 mr-4 -ml-2" /> View issue</.button>
               </.link>
+
+              <div
+                class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-6 ring-2 ring-success/20 hover:bg-card/70 transition-colors"
+              >
+                <div class="col-span-2 text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">Fund any issue <span class="text-success">in seconds</span></div>
+                  <div class="text-lg font-medium text-muted-foreground">Help improve the OSS you love and rely on</div>
+                </div>
+                <.form for={@bounty_form} phx-submit="create_bounty" class="col-span-3 grid grid-cols-3 gap-6 w-full">
+                      <.input
+                        label="URL"
+                        field={@bounty_form[:url]}
+                        placeholder="https://github.com/owner/repo/issues/1337"
+                      />
+                      <.input
+                        label="Amount"
+                        icon="tabler-currency-dollar"
+                        field={@bounty_form[:amount]}
+                        class="placeholder:text-success"
+                      />
+                      <div class="flex flex-col items-center gap-2">
+                        <div class="text-sm text-muted-foreground">No credit card required</div>
+                        <.button size="lg" class="w-full" >Fund issue</.button>
+                      </div>
+                  </.form>
+              </div>
             </div>
           </div>
           <div class="mx-auto max-w-4xl px-6 lg:px-8 mt-16">

@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Constants do
+  use AlgoraWeb, :verified_routes
   @moduledoc false
   def constants do
     %{

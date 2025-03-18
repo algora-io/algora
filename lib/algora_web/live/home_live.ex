@@ -410,14 +410,14 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
-                    <div class="flex flex-col items-center justify-center gap-4 text-5xl font-semibold font-display">
+                    <div class="flex flex-col gap-4 text-5xl font-semibold font-display">
                       <div>
-                        Monthly active
+                        Used bounties
                       </div>
-                      <div>
+                      <div class="text-success">
                         every month
                       </div>
-                      <div>
+                      <div class="text-success">
                         for 2+ years
                       </div>
                     </div>
@@ -435,13 +435,11 @@ defmodule AlgoraWeb.HomeLive do
                     </li>
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-8 text-success" />
-                      <span class="text-success tabular-nums font-bold">24</span>
-                      Improvements
+                      <span class="text-success tabular-nums font-bold">24</span> Improvements
                     </li>
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-8 text-success" />
-                      <span class="text-success tabular-nums font-bold">21</span>
-                      Bugs
+                      <span class="text-success tabular-nums font-bold">21</span> Bugs
                     </li>
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-8 text-success" />
@@ -450,20 +448,134 @@ defmodule AlgoraWeb.HomeLive do
                     </li>
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-8 text-success" />
-                      <span class="text-success tabular-nums font-bold">13</span>
-                      UI updates
+                      <span class="text-success tabular-nums font-bold">13</span> UI updates
                     </li>
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-8 text-success" />
-                      <span class="text-success tabular-nums font-bold">68</span>
-                      New Features
+                      <span class="text-success tabular-nums font-bold">68</span> New Features
                     </li>
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-8 text-success" />
-                      <span class="text-success tabular-nums font-bold">18</span>
-                      Integrations
+                      <span class="text-success tabular-nums font-bold">18</span> Integrations
                     </li>
                   </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-5 order-first lg:order-last">
+                  <div class="relative flex aspect-[1091/1007] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <img
+                      src={~p"/images/people/josh-pigford.png"}
+                      alt="Josh Pigford"
+                      class="object-cover"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-6 order-last lg:order-first">
+                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                    <span class="text-success">Let's offer a bounty</span>
+                    to say "Hey, someone please prioritize this, who has the skillset for it? I think long term I'd like to make it a
+                    <span class="text-success">very consistent</span>
+                    part of our development process.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">Josh Pigford</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Co-founder & CEO at Maybe
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <%!-- <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $23,760
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        218
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        46
+                      </dd>
+                    </div>
+                  </dl> --%>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-6">
+                  <div class="relative flex items-center justify-center">
+                    <img
+                      src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+                      alt="John A De Goes"
+                      class="object-cover size-84 rounded-2xl"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-5">
+                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                    We used Algora extensively at Ziverge to reward over
+                    <span class="text-success">$70,000</span>
+                    in bounties and introduce a whole
+                    <span class="text-success">new generation of contributors</span>
+                    to the ZIO ecosystem.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">John A De Goes</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Founder & CEO at Ziverge
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <%!-- <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $77,175
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        359
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        79
+                      </dd>
+                    </div>
+                  </dl> --%>
                 </div>
               </div>
             </div>

@@ -107,7 +107,7 @@ defmodule AlgoraWeb.HomeLive do
                   Discover GitHub bounties, contract work and jobs
                 </p>
                 <p class="mt-4 font-display text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
-                  Hire the top 1% of open source developers
+                  Hire the top 1% open source developers
                 </p>
                 <!-- CTA buttons -->
                 <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
@@ -161,7 +161,7 @@ defmodule AlgoraWeb.HomeLive do
               Support open source development with bounties on GitHub issues
             </p>
 
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 gap-8">
               <.link
                 href="https://github.com/zed-industries/zed/issues/4440"
                 rel="noopener"
@@ -215,7 +215,7 @@ defmodule AlgoraWeb.HomeLive do
                     DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
                   </div>
                   <div class="text-lg font-medium text-muted-foreground">
-                    Alex Klimaj, CEO/CTO of ARK Electronics, and Andrew Wilkins, CEO of Ascend Engineering
+                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
                   </div>
                 </div>
                 <.button size="lg" variant="secondary">
@@ -223,7 +223,7 @@ defmodule AlgoraWeb.HomeLive do
                 </.button>
               </.link>
 
-              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-6 ring-2 ring-success/20 hover:bg-card/70 transition-colors">
+              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-12 ring-2 ring-success/20 hover:bg-card/70 transition-colors">
                 <div class="col-span-2 text-base leading-6 flex-1">
                   <div class="text-2xl font-semibold text-foreground">
                     Fund any issue <span class="text-success">in seconds</span>
@@ -275,8 +275,8 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
-              Y Combinator companies use Algora to build products faster
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-loose">
+              Y Combinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
             <.yc_logo_cloud />

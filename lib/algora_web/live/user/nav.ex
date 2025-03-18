@@ -42,13 +42,23 @@ defmodule AlgoraWeb.User.Nav do
         title: "Main",
         items: [
           %{href: "/", tab: :dashboard, icon: "tabler-home", label: "Dashboard"},
-          %{href: "/@/#{socket.assigns.current_user.handle}", tab: :profile, icon: "tabler-user", label: "Profile"},
+          %{
+            href: "/@/#{socket.assigns.current_user.handle}",
+            tab: :profile,
+            icon: "tabler-user",
+            label: "Profile"
+          },
           %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
           %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
           %{href: "/community", tab: :community, icon: "tabler-users", label: "Community"},
-          %{href: "/user/transactions", tab: :transactions, icon: "tabler-wallet", label: "Transactions"},
           %{
-            href: "https://tv.algora.io",
+            href: "/user/transactions",
+            tab: :transactions,
+            icon: "tabler-wallet",
+            label: "Transactions"
+          },
+          %{
+            href: AlgoraWeb.Constants.get(:algora_tv_url),
             tab: :tv,
             icon: "tabler-device-tv",
             label: "Algora TV",

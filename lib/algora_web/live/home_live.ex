@@ -333,7 +333,7 @@ defmodule AlgoraWeb.HomeLive do
               Use bounties in your own repositories to manage contract work efficiently. Pay only for completed tasks, with full GitHub integration.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-12 gap-y-8 lg:grid-cols-10">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-5 order-first lg:order-last">
                   <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
@@ -343,11 +343,11 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                 </div>
-                <div class="lg:col-span-5 order-last lg:order-first">
+                <div class="lg:col-span-6 order-last lg:order-first">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
                     I posted our bounty on Upwork to try it, overall it's 1000x more friction than OSS bounties with Algora.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-3xl font-semibold text-foreground">Louis Beaumont</div>
@@ -357,6 +357,32 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                     </div>
                   </div>
+                  <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $23,760
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        218
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        46
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
               </div>
             </div>
@@ -845,8 +871,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1077,8 +1102,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

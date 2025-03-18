@@ -151,4 +151,6 @@ if config_env() == :prod do
   config :algora, :plausible_url, System.get_env("PLAUSIBLE_URL")
 
   config :algora, :assets_url, System.get_env("ASSETS_URL")
+
+  config :algora, :ingest_url, System.get_env("INGEST_URL")
 end

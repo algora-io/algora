@@ -796,7 +796,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
-              <span class="block sm:inline">UpWork on GitHub</span>
+              <span class="block sm:inline">Upwork for engineers</span>
             </h2>
             <div class="flex justify-center gap-4">
               <.button navigate="/onboarding/org">

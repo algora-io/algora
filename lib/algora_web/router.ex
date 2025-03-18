@@ -28,16 +28,18 @@ defmodule AlgoraWeb.Router do
     redirect(from, to, :temporary)
   end
 
-  scope "/asset" do
-    forward "/", AlgoraWeb.Plugs.RewriteAssetsPlug,
+  scope "/" do
+    forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug,
       upstream: "#{Application.compile_env(:algora, :assets_url)}",
       response_mode: :buffer
-  end
 
-  scope "/docs" do
-    forward "/", AlgoraWeb.Plugs.RewriteDocsPlug,
-      upstream: "https://docs.algora.io/docs",
+    forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug,
+      upstream: "#{Application.compile_env(:algora, :ingest_url)}",
       response_mode: :buffer
+
+    # forward "/docs", AlgoraWeb.Plugs.RewriteDocsPlug,
+    #   upstream: "https://docs.algora.io",
+    #   response_mode: :buffer
   end
 
   scope "/admin", AlgoraWeb do

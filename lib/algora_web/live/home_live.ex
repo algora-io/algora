@@ -52,7 +52,7 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-primary/5 to-background">
+        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-background to-black">
           <!-- Background pattern -->
           <div
             class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
@@ -233,6 +233,11 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="col-span-2 text-base leading-6 flex-1">
                   <div class="text-2xl font-semibold text-foreground">Fund any issue <span class="text-success">in seconds</span></div>
                   <div class="text-lg font-medium text-muted-foreground">Help improve the OSS you love and rely on</div>
+                  <div class="pt-1 col-span-3 text-sm text-muted-foreground space-y-0.5">
+                        <div><.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" /> Pay when PRs are merged</div>
+                        <div><.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" /> Pool bounties with other sponsors</div>
+                        <div><.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" /> Algora handles invoices, payouts, compliance & 1099s</div>
+                      </div>
                 </div>
                 <.form for={@bounty_form} phx-submit="create_bounty" class="col-span-3 grid grid-cols-3 gap-6 w-full">
                       <.input
@@ -250,6 +255,7 @@ defmodule AlgoraWeb.HomeLive do
                         <div class="text-sm text-muted-foreground">No credit card required</div>
                         <.button size="lg" class="w-full" >Fund issue</.button>
                       </div>
+
                   </.form>
               </div>
             </div>

@@ -148,16 +148,16 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32 z-10">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Fund GitHub Issues
             </h2>
-            <p class="text-center font-medium text-base text-muted-foreground mb-8">
+            <p class="text-center font-medium text-base text-muted-foreground mb-16">
               Support open source development with bounties on GitHub issues
             </p>
 
-            <div class="grid grid-cols-1 gap-8">
+            <div class="grid grid-cols-1 gap-16">
               <.link
                 href="https://github.com/zed-industries/zed/issues/4440"
                 rel="noopener"
@@ -221,7 +221,7 @@ defmodule AlgoraWeb.HomeLive do
 
               <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-12 ring-2 ring-success/20 hover:bg-card/70 transition-colors">
                 <div class="col-span-2 text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
+                  <div class="text-3xl font-semibold text-foreground">
                     Fund any issue <span class="text-success">in seconds</span>
                   </div>
                   <div class="text-lg font-medium text-muted-foreground">
@@ -271,11 +271,54 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-loose">
+            <img
+              src="https://www.firecrawl.dev/images/yc.svg"
+              class="h-24 mx-auto"
+              alt="Y Combinator Logo"
+            />
+            <h2 class="mt-8 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-loose">
               Y Combinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
               <.yc_logo_cloud />
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-12 gap-y-8 lg:grid-cols-10">
+                <div class="lg:col-span-4">
+                  <div class="relative flex aspect-square size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <img
+                      src="https://media.licdn.com/dms/image/v2/D4D03AQEgJ8LaoTna5A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1705829974466?e=1747872000&v=beta&t=95CP-kabFE8TKb73sSuCMYK6brUajTFFxaUNQstV54g"
+                      alt="Tal Borenstein"
+                      class="object-cover"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-6">
+                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                    Keep has 90+ integrations to alert our customers about critical events. Of these,
+                    <.link
+                      href="https://github.com/keephq/keep/issues?q=state%3Aclosed%20label%3A%22%F0%9F%92%8E%20Bounty%22%20%20label%3A%22%F0%9F%92%B0%20Rewarded%22%20label%3AProvider%20"
+                      rel="noopener"
+                      class="text-success inline-flex items-center text-success hover:text-success-300"
+                    >
+                      42 integrations <.icon name="tabler-external-link" class="size-5 ml-1 mb-4" />
+                    </.link>
+                    were built by <span class="text-success">22 developers</span>
+                    using <span class="text-success">bounties on Algora</span>.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">Tal Borenstein</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Co-founder & CEO at Keep
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1075,21 +1118,16 @@ defmodule AlgoraWeb.HomeLive do
     ~H"""
     <div>
       <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
-        <a class="relative flex items-center justify-center" href={~p"/org/browser-use"}>
-          <img
-            src="https://raw.githubusercontent.com/browser-use/browser-use/main/static/browser-use-dark.png"
-            alt="Browser Use"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
-          <svg
-            width="110"
-            height="14"
-            viewBox="0 0 123 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+        <.link
+          class="font-bold text-xl whitespace-nowrap flex items-center"
+          navigate={~p"/org/browser-use"}
+        >
+          <img class="size-6 mr-2" src="https://browser-use.com/logo.svg" /><span class="sm:inline hidden">
+            Browser Use
+          </span>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/outerbase"}>
+          <svg viewBox="0 0 123 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
             <path
               fill-rule="evenodd"
               clip-rule="evenodd"
@@ -1146,22 +1184,22 @@ defmodule AlgoraWeb.HomeLive do
             >
             </path>
           </svg>
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/triggerdotdev"}>
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/traceloop"}>
           <img
             src="https://cdn.prod.website-files.com/664553b7af7a800a7911b9f0/664553f95f4ec29495eb8eb9_traceloop%20logo%20dark%20bg.png"
             alt="Traceloop"
             class="w-[13rem] col-auto saturate-0"
           />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/trieve"}>
           <span class="self-center ml-2 rtl:ml-0 rtl:mr-2 text-lg md:text-2xl font-bold whitespace-nowrap">
             <img
               src="https://cdn.trieve.ai/trieve-logo.png"
@@ -1169,48 +1207,74 @@ defmodule AlgoraWeb.HomeLive do
               class="h-12 w-12 inline"
             /> Trieve
           </span>
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/twentyhq"}>
           <span class="self-center ml-2 rtl:ml-0 rtl:mr-2 text-lg md:text-2xl font-bold whitespace-nowrap">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               viewBox="0 0 40 40"
+              class="size-8 inline"
             >
-              <g id="ss11151339769_1">
-                <path d="M 0 40 L 0 0 L 40 0 L 40 40 Z" fill="transparent" /><path
-                  d="M 34.95 0 L 5.05 0 C 2.262 0 0 2.262 0 5.05 L 0 34.95 C 0 37.738 2.262 40 5.05 40 L 34.95 40 C 37.738 40 40 37.738 40 34.95 L 40 5.05 C 40 2.262 37.738 0 34.95 0 Z M 8.021 14.894 C 8.021 12.709 9.794 10.935 11.979 10.935 L 19.6 10.935 C 19.712 10.935 19.815 11.003 19.862 11.106 C 19.909 11.209 19.888 11.329 19.812 11.415 L 18.141 13.229 C 17.85 13.544 17.441 13.726 17.012 13.726 L 12 13.726 C 11.344 13.726 10.812 14.259 10.812 14.915 L 10.812 17.909 C 10.812 18.294 10.5 18.606 10.115 18.606 L 8.721 18.606 C 8.335 18.606 8.024 18.294 8.024 17.909 L 8.024 14.894 Z M 31.729 25.106 C 31.729 27.291 29.956 29.065 27.771 29.065 L 24.532 29.065 C 22.347 29.065 20.574 27.291 20.574 25.106 L 20.574 19.438 C 20.574 19.053 20.718 18.682 20.979 18.397 L 22.868 16.347 C 22.947 16.262 23.071 16.232 23.182 16.274 C 23.291 16.318 23.365 16.421 23.365 16.538 L 23.365 25.088 C 23.365 25.744 23.897 26.276 24.553 26.276 L 27.753 26.276 C 28.409 26.276 28.941 25.744 28.941 25.088 L 28.941 14.915 C 28.941 14.259 28.409 13.726 27.753 13.726 L 24.032 13.726 C 23.606 13.726 23.2 13.906 22.909 14.218 L 11.812 26.276 L 18.479 26.276 C 18.865 26.276 19.176 26.588 19.176 26.974 L 19.176 28.368 C 19.176 28.753 18.865 29.065 18.479 29.065 L 9.494 29.065 C 8.679 29.065 8.018 28.403 8.018 27.588 L 8.018 26.85 C 8.018 26.479 8.156 26.124 8.409 25.85 L 20.85 12.335 C 21.674 11.441 22.829 10.935 24.044 10.935 L 27.768 10.935 C 29.953 10.935 31.726 12.709 31.726 14.894 L 31.726 25.106 Z"
-                  fill="rgb(0,0,0)"
-                />
-              </g>
+              <path
+                fill="currentColor"
+                d="M 34.95 0 L 5.05 0 C 2.262 0 0 2.262 0 5.05 L 0 34.95 C 0 37.738 2.262 40 5.05 40 L 34.95 40 C 37.738 40 40 37.738 40 34.95 L 40 5.05 C 40 2.262 37.738 0 34.95 0 Z M 8.021 14.894 C 8.021 12.709 9.794 10.935 11.979 10.935 L 19.6 10.935 C 19.712 10.935 19.815 11.003 19.862 11.106 C 19.909 11.209 19.888 11.329 19.812 11.415 L 18.141 13.229 C 17.85 13.544 17.441 13.726 17.012 13.726 L 12 13.726 C 11.344 13.726 10.812 14.259 10.812 14.915 L 10.812 17.909 C 10.812 18.294 10.5 18.606 10.115 18.606 L 8.721 18.606 C 8.335 18.606 8.024 18.294 8.024 17.909 L 8.024 14.894 Z M 31.729 25.106 C 31.729 27.291 29.956 29.065 27.771 29.065 L 24.532 29.065 C 22.347 29.065 20.574 27.291 20.574 25.106 L 20.574 19.438 C 20.574 19.053 20.718 18.682 20.979 18.397 L 22.868 16.347 C 22.947 16.262 23.071 16.232 23.182 16.274 C 23.291 16.318 23.365 16.421 23.365 16.538 L 23.365 25.088 C 23.365 25.744 23.897 26.276 24.553 26.276 L 27.753 26.276 C 28.409 26.276 28.941 25.744 28.941 25.088 L 28.941 14.915 C 28.941 14.259 28.409 13.726 27.753 13.726 L 24.032 13.726 C 23.606 13.726 23.2 13.906 22.909 14.218 L 11.812 26.276 L 18.479 26.276 C 18.865 26.276 19.176 26.588 19.176 26.974 L 19.176 28.368 C 19.176 28.753 18.865 29.065 18.479 29.065 L 9.494 29.065 C 8.679 29.065 8.018 28.403 8.018 27.588 L 8.018 26.85 C 8.018 26.479 8.156 26.124 8.409 25.85 L 20.85 12.335 C 21.674 11.441 22.829 10.935 24.044 10.935 L 27.768 10.935 C 29.953 10.935 31.726 12.709 31.726 14.894 L 31.726 25.106 Z"
+              />
             </svg>
             Twenty
           </span>
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/aidenybai"}>
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
             class="col-auto w-44 saturate-0"
           />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
-          <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/moonrepo"}>
+          <img
+            src="https://moonrepo.dev/img/logo.svg"
+            alt="moon"
+            class="themedComponent_siVc themedComponent--light_hHel"
+          />
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
+        </.link>
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"
             class="col-auto w-40 brightness-0 invert"
           />
-        </a>
+        </.link>
+
+        <.link
+          class="relative flex items-center justify-center brightness-0 invert"
+          navigate={~p"/org/onyx-dot-app"}
+        >
+          <img
+            src="https://onyx.app/Onyx.png"
+            alt="Onyx Logo"
+            class="object-contain"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
+        </.link>
+
+        <.link
+          class="active:scale-95 active:opacity-80 transition-[transform,opacity] gap-1.5 flex items-center hover:!cursor-pointer brightness-0 invert"
+          aria-label="Logo"
+          navigate={~p"/org/mendableai"}
+        >
+          <span class="text-2xl">🔥</span>
+          <span class="text-2xl leading-none tracking-tight font-medium text-[#36322f]">
+            Firecrawl
+          </span>
+        </.link>
       </div>
     </div>
     """

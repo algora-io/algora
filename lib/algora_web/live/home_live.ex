@@ -195,7 +195,7 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
                 <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">GitHub cofounder bounties new feature in Zed Editor</div>
+                  <div class="text-2xl font-semibold text-foreground">GitHub cofounder funds new feature in Zed Editor</div>
                   <div class="text-lg font-medium text-muted-foreground">Zed Editor, Scott Chacon</div>
                 </div>
                 <.button size="lg">View issue</.button>
@@ -220,58 +220,12 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
                 <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">DefenceTech CEOs bounty collision prevention fix in PX4 Drone Autopilot</div>
+                  <div class="text-2xl font-semibold text-foreground">DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot</div>
                   <div class="text-lg font-medium text-muted-foreground">Alex Klimaj, CEO/CTO of ARK Electronics, and Andrew Wilkins, CEO of Ascend Engineering</div>
                 </div>
                 <%!-- https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg --%>
                 <%!-- https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg --%>
                 <%!-- https://avatars.githubusercontent.com/u/2019539?v=4 --%>
-                <.button size="lg">View issue</.button>
-              </.link>
-
-              <.link
-                href="https://github.com/calcom/cal.com/issues/11953"
-                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
-              >
-                <div class="flex -space-x-4">
-                  <img
-                    class="h-20 w-20 rounded-full z-0"
-                    src="https://github.com/calcom.png"
-                    alt="Cal.com"
-                  />
-                  <img
-                    class="h-20 w-20 rounded-full z-10"
-                    src="https://github.com/framer.png"
-                    alt="Framer"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">Framer</div>
-                  <div class="text-lg font-medium text-muted-foreground">Design & Prototyping Tool</div>
-                  <div class="text-lg font-medium text-foreground">
-                    Funded multiple round-robin hosts in Cal.com
-                  </div>
-                </div>
-                <.button size="lg">View issue</.button>
-              </.link>
-              <.link
-                navigate={~p"/org/coollabsio"}
-                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
-              >
-                <img
-                  class="h-20 w-20 rounded-full"
-                  src="https://github.com/coollabsio.png"
-                  alt="Coolify"
-                />
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">Coolify</div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Self-Hosted Heroku Alternative
-                  </div>
-                  <div class="text-lg font-medium text-foreground">
-                    Community funded features
-                  </div>
-                </div>
                 <.button size="lg">View issue</.button>
               </.link>
             </div>

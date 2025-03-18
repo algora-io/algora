@@ -132,14 +132,14 @@ defmodule AlgoraWeb.SignInLive do
           <div class="absolute bottom-8 text-center text-xs sm:text-sm text-muted-foreground max-w-[calc(100vw-2rem)] sm:max-w-sm w-full mx-auto">
             By continuing, you agree to our
             <.link
-              href="https://console.algora.io/legal/terms"
+              href={AlgoraWeb.Constants.terms_url()}
               class="font-medium text-foreground/90 hover:text-foreground"
             >
               terms
             </.link>
             {" "} and
             <.link
-              href="https://console.algora.io/legal/privacy"
+              href={AlgoraWeb.Constants.privacy_url()}
               class="font-medium text-foreground/90 hover:text-foreground"
             >
               privacy policy.
@@ -234,7 +234,12 @@ defmodule AlgoraWeb.SignInLive do
 
           {:error, _reason} ->
             # capture_error reason
-            {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
+            {:noreply,
+             put_flash(
+               socket,
+               :error,
+               "We had trouble sending mail to #{email}. Please try again"
+             )}
         end
 
       nil ->

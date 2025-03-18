@@ -567,11 +567,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         />
         <p class="mt-4 text-sm text-muted-foreground/75">
           By continuing, you agree to Algora's
-          <.link href="https://console.algora.io/legal/terms" class="text-primary hover:underline">
+          <.link
+            href={AlgoraWeb.Constants.terms_url()}
+            class="text-primary hover:underline"
+          >
             Terms of Service
           </.link>
           and <.link
-            href="https://console.algora.io/legal/privacy"
+            href={AlgoraWeb.Constants.privacy_url()}
             class="text-primary hover:underline"
           >Privacy Policy</.link>.
         </p>

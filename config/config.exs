@@ -12,7 +12,16 @@ config :algora,
   description:
     "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
   ecto_repos: [Algora.Repo],
-  generators: [timestamp_type: :utc_datetime_usec]
+  generators: [timestamp_type: :utc_datetime_usec],
+  redirects: [
+    {"/discord", "https://discord.gg/9RXD2nqbnG"},
+    {"/sdk", "https://github.com/algora-io/sdk"},
+    {"/healthcare", "https://blog.algora.io/post/healthcare"},
+    {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},
+    {"/create/org", "/onboarding/org"},
+    {"/onboarding/org", "/onboarding/org"},
+    {"/onboarding/solver", "/onboarding/dev"}
+  ]
 
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,

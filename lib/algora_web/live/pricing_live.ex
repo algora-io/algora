@@ -242,10 +242,7 @@ defmodule AlgoraWeb.PricingLive do
                       />
                     </a>
                     <div>
-                      <a
-                        class="text-base font-medium text-gray-100"
-                        href={~p"/org/triggerdotdev"}
-                      >
+                      <a class="text-base font-medium text-gray-100" href={~p"/org/triggerdotdev"}>
                         Trigger.dev (YC W23)
                       </a>
                       <a
@@ -576,16 +573,10 @@ defmodule AlgoraWeb.PricingLive do
         <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
           <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/qdrant"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
           <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/remotion"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
           <img
             src="https://algora.io/banners/remotion.png"
             alt="Remotion"
@@ -599,72 +590,48 @@ defmodule AlgoraWeb.PricingLive do
             class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/triggerdotdev"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/tembo"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
           <img
             src="https://algora.io/banners/tembo.png"
             alt="Tembo"
             class="w-[13rem] col-auto saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/maybe-finance"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
           <img
             src="https://algora.io/banners/maybe.png"
             alt="Maybe"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/golemcloud"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/aidenybai"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/tailcallhq"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/highlight"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href={~p"/org/dittofeed"}
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"

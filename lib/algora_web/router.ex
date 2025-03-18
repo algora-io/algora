@@ -1,11 +1,11 @@
 defmodule AlgoraWeb.Router do
   use AlgoraWeb, :router
 
+  import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2, require_authenticated_admin: 2]
   import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
   import Oban.Web.Router
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
-  import AlgoraWeb.RedirectPlug
 
   pipeline :browser do
     plug :accepts, ["html"]

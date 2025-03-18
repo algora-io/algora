@@ -1,4 +1,5 @@
 defmodule AlgoraWeb.Plugs.RewriteDocsPlug do
+  @moduledoc false
   def init(options), do: options
 
   def call(%Plug.Conn{} = conn, _ \\ []) do

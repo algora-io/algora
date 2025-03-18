@@ -1,16 +1,20 @@
 defmodule AlgoraWeb.RedirectPlug do
+  @moduledoc false
   import Plug.Conn
+
   alias Phoenix.Controller
 
   def init(opts) do
-    cond do
-      opts[:to] -> nil
-      true -> raise ArgumentError, "expected :to option"
+    if opts[:to] do
+      nil
+    else
+      raise ArgumentError, "expected :to option"
     end
 
-    cond do
-      opts[:type] -> nil
-      true -> raise ArgumentError, "expected :type option"
+    if opts[:type] do
+      nil
+    else
+      raise ArgumentError, "expected :type option"
     end
 
     case opts[:type] do

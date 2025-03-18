@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Constants do
-  use AlgoraWeb, :verified_routes
   @moduledoc false
+  use AlgoraWeb, :verified_routes
+
   def constants do
     %{
       email: "info@algora.io",

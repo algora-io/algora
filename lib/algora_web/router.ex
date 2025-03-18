@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
   import Oban.Web.Router
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
+  import AlgoraWeb.RedirectPlug
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -19,6 +20,12 @@ defmodule AlgoraWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  @redirects Application.compile_env(:algora, :redirects, [])
+
+  for {from, to} <- @redirects do
+    redirect(from, to, :temporary)
   end
 
   scope "/asset" do

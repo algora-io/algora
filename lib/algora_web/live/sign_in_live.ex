@@ -132,14 +132,14 @@ defmodule AlgoraWeb.SignInLive do
           <div class="absolute bottom-8 text-center text-xs sm:text-sm text-muted-foreground max-w-[calc(100vw-2rem)] sm:max-w-sm w-full mx-auto">
             By continuing, you agree to our
             <.link
-              href={AlgoraWeb.Constants.terms_url()}
+              href={AlgoraWeb.Constants.get(:terms_url)}
               class="font-medium text-foreground/90 hover:text-foreground"
             >
               terms
             </.link>
             {" "} and
             <.link
-              href={AlgoraWeb.Constants.privacy_url()}
+              href={AlgoraWeb.Constants.get(:privacy_url)}
               class="font-medium text-foreground/90 hover:text-foreground"
             >
               privacy policy.

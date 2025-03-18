@@ -564,10 +564,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         />
         <p class="mt-4 text-sm text-muted-foreground/75">
           By continuing, you agree to Algora's
-          <.link href={AlgoraWeb.Constants.terms_url()} class="text-primary hover:underline">
+          <.link href={AlgoraWeb.Constants.get(:terms_url)} class="text-primary hover:underline">
             Terms of Service
           </.link>
-          and <.link href={AlgoraWeb.Constants.privacy_url()} class="text-primary hover:underline">Privacy Policy</.link>.
+          and <.link href={AlgoraWeb.Constants.get(:privacy_url)} class="text-primary hover:underline">Privacy Policy</.link>.
         </p>
 
         <div class="flex justify-between">

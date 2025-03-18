@@ -276,7 +276,7 @@ defmodule AlgoraWeb.HomeLive do
               class="h-24 mx-auto"
               alt="Y Combinator Logo"
             />
-            <h2 class="mt-8 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-[5rem]">
+            <h2 class="mt-8 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
               YCombinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">

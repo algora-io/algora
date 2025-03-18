@@ -24,6 +24,8 @@ defmodule AlgoraWeb.HomeLive do
 
   require Logger
 
+  #
+
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
     Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
@@ -196,11 +198,17 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
                 <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">GitHub cofounder funds new feature in Zed Editor</div>
-                  <div class="text-lg font-medium text-muted-foreground">Zed Editor, Scott Chacon</div>
+                  <div class="text-2xl font-semibold text-foreground">
+                    GitHub cofounder funds new feature in Zed Editor
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Zed Editor, Scott Chacon
+                  </div>
                 </div>
-                <.button size="lg" variant="secondary"><Logos.github class="size-4 mr-4 -ml-2" /> View issue</.button>
-                </.link>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
 
               <.link
                 href="https://github.com/PX4/PX4-Autopilot/issues/22464"
@@ -213,7 +221,7 @@ defmodule AlgoraWeb.HomeLive do
                     src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
                     alt="Alex Klimaj"
                   />
-                <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
                   <img
                     class="h-20 w-20 rounded-full z-10"
                     src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
@@ -221,42 +229,62 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
                 <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot</div>
-                  <div class="text-lg font-medium text-muted-foreground">Alex Klimaj, CEO/CTO of ARK Electronics, and Andrew Wilkins, CEO of Ascend Engineering</div>
+                  <div class="text-2xl font-semibold text-foreground">
+                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Alex Klimaj, CEO/CTO of ARK Electronics, and Andrew Wilkins, CEO of Ascend Engineering
+                  </div>
                 </div>
-                <.button size="lg" variant="secondary"><Logos.github class="size-4 mr-4 -ml-2" /> View issue</.button>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
               </.link>
 
-              <div
-                class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-6 ring-2 ring-success/20 hover:bg-card/70 transition-colors"
-              >
+              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-6 ring-2 ring-success/20 hover:bg-card/70 transition-colors">
                 <div class="col-span-2 text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">Fund any issue <span class="text-success">in seconds</span></div>
-                  <div class="text-lg font-medium text-muted-foreground">Help improve the OSS you love and rely on</div>
+                  <div class="text-2xl font-semibold text-foreground">
+                    Fund any issue <span class="text-success">in seconds</span>
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Help improve the OSS you love and rely on
+                  </div>
                   <div class="pt-1 col-span-3 text-sm text-muted-foreground space-y-0.5">
-                        <div><.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" /> Pay when PRs are merged</div>
-                        <div><.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" /> Pool bounties with other sponsors</div>
-                        <div><.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" /> Algora handles invoices, payouts, compliance & 1099s</div>
-                      </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pay when PRs are merged
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pool bounties with other sponsors
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Algora handles invoices, payouts, compliance & 1099s
+                    </div>
+                  </div>
                 </div>
-                <.form for={@bounty_form} phx-submit="create_bounty" class="col-span-3 grid grid-cols-3 gap-6 w-full">
-                      <.input
-                        label="URL"
-                        field={@bounty_form[:url]}
-                        placeholder="https://github.com/owner/repo/issues/1337"
-                      />
-                      <.input
-                        label="Amount"
-                        icon="tabler-currency-dollar"
-                        field={@bounty_form[:amount]}
-                        class="placeholder:text-success"
-                      />
-                      <div class="flex flex-col items-center gap-2">
-                        <div class="text-sm text-muted-foreground">No credit card required</div>
-                        <.button size="lg" class="w-full" >Fund issue</.button>
-                      </div>
-
-                  </.form>
+                <.form
+                  for={@bounty_form}
+                  phx-submit="create_bounty"
+                  class="col-span-3 grid grid-cols-3 gap-6 w-full"
+                >
+                  <.input
+                    label="URL"
+                    field={@bounty_form[:url]}
+                    placeholder="https://github.com/owner/repo/issues/1337"
+                  />
+                  <.input
+                    label="Amount"
+                    icon="tabler-currency-dollar"
+                    field={@bounty_form[:amount]}
+                    class="placeholder:text-success"
+                  />
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="text-sm text-muted-foreground">No credit card required</div>
+                    <.button size="lg" class="w-full">Fund issue</.button>
+                  </div>
+                </.form>
               </div>
             </div>
           </div>
@@ -320,7 +348,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-muted/20 border-t py-16 sm:py-24">
+        <section class="bg-black border-t py-16 sm:py-24">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
               Streamline Contract Work
@@ -524,7 +552,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-muted/20 border-t py-16 sm:py-24">
+        <section class="bg-black border-t py-16 sm:py-24">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
               Hire with Confidence
@@ -758,39 +786,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-muted/20 border-t py-16 sm:py-24">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
-              Frequently asked questions
-            </h2>
-            <div class="mx-auto max-w-3xl space-y-4">
-              <%= for item <- @faq_items do %>
-                <div class="rounded-lg border bg-background/50">
-                  <button
-                    phx-click={
-                      %JS{}
-                      |> JS.toggle(to: "#faq-#{item.id}")
-                      |> JS.toggle_class("rotate-180", to: "#icon-#{item.id}")
-                    }
-                    class="flex w-full justify-between p-4 text-left"
-                  >
-                    <span class="font-medium text-foreground">{item.question}</span>
-                    <.icon
-                      id={"icon-#{item.id}"}
-                      name="tabler-chevron-down"
-                      class="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200"
-                    />
-                  </button>
-                  <div id={"faq-#{item.id}"} class="hidden p-4 pt-0 text-muted-foreground">
-                    {Phoenix.HTML.raw(item.answer)}
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        </section>
-
-        <section class="bg-background border-t py-16 sm:py-24">
+        <section class="bg-black border-t py-16 sm:py-24">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
@@ -807,7 +803,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="bg-muted/20">
+        <div class="bg-black">
           <Footer.footer />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?
@@ -843,8 +839,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1075,8 +1070,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

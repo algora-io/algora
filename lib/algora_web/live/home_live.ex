@@ -91,7 +91,7 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <section class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-black to-background">
+        <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-br from-black to-background">
           <.pattern />
           <!-- Hero content -->
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
@@ -148,7 +148,8 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32 z-10">
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+          <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Fund GitHub Issues
@@ -268,7 +269,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
@@ -323,7 +324,8 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+          <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Build product faster
@@ -331,7 +333,36 @@ defmodule AlgoraWeb.HomeLive do
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
               Use bounties in your own repositories to manage contract work efficiently. Pay only for completed tasks, with full GitHub integration.
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-12 gap-y-8 lg:grid-cols-10">
+                <div class="lg:col-span-4 order-first lg:order-last">
+                  <div class="relative flex aspect-square size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <img
+                      src={~p"/images/people/louis-beaumont.png"}
+                      alt="Louis Beaumont"
+                      class="object-cover"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-6 order-last lg:order-first">
+                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                    I posted our bounty on Upwork to try it, overall it's 1000x more friction than OSS bounties with Algora.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">Louis Beaumont</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Co-founder & CEO at Screenpipe
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <%!-- <div class="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <div class="flex flex-col items-center text-center">
                 <.icon name="tabler-git-pull-request" class="h-12 w-12 mb-4 text-primary" />
                 <h3 class="text-lg font-semibold mb-2">Native GitHub Workflow</h3>
@@ -523,11 +554,11 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
               </div>
-            </div>
+            </div> --%>
           </div>
         </section>
 
-        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
@@ -779,7 +810,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="relative isolate bg-gradient-to-br from-black to-background">
+        <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
           <Footer.footer />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?

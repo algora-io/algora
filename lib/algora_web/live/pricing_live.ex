@@ -228,7 +228,7 @@ defmodule AlgoraWeb.PricingLive do
                   <div class="flex items-center gap-4">
                     <a
                       class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
-                      href="https://console.algora.io/org/triggerdotdev"
+                      href={~p"/org/triggerdotdev"}
                     >
                       <img
                         alt="Trigger.dev"
@@ -244,7 +244,7 @@ defmodule AlgoraWeb.PricingLive do
                     <div>
                       <a
                         class="text-base font-medium text-gray-100"
-                        href="https://console.algora.io/org/triggerdotdev"
+                        href={~p"/org/triggerdotdev"}
                       >
                         Trigger.dev (YC W23)
                       </a>
@@ -573,18 +573,18 @@ defmodule AlgoraWeb.PricingLive do
     ~H"""
     <div>
       <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
+        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
           <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/qdrant"
+          href={~p"/org/qdrant"}
         >
           <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/remotion"
+          href={~p"/org/remotion"}
         >
           <img
             src="https://algora.io/banners/remotion.png"
@@ -592,7 +592,7 @@ defmodule AlgoraWeb.PricingLive do
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
+        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
           <img
             src="https://algora.io/banners/zio.png"
             alt="ZIO"
@@ -601,7 +601,7 @@ defmodule AlgoraWeb.PricingLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/triggerdotdev"
+          href={~p"/org/triggerdotdev"}
         >
           <img
             src="https://algora.io/banners/triggerdotdev.png"
@@ -611,7 +611,7 @@ defmodule AlgoraWeb.PricingLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tembo"
+          href={~p"/org/tembo"}
         >
           <img
             src="https://algora.io/banners/tembo.png"
@@ -621,7 +621,7 @@ defmodule AlgoraWeb.PricingLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/maybe-finance"
+          href={~p"/org/maybe-finance"}
         >
           <img
             src="https://algora.io/banners/maybe.png"
@@ -631,13 +631,13 @@ defmodule AlgoraWeb.PricingLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/golemcloud"
+          href={~p"/org/golemcloud"}
         >
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/aidenybai"
+          href={~p"/org/aidenybai"}
         >
           <img
             src="https://algora.io/banners/million.png"
@@ -647,13 +647,13 @@ defmodule AlgoraWeb.PricingLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tailcallhq"
+          href={~p"/org/tailcallhq"}
         >
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/highlight"
+          href={~p"/org/highlight"}
         >
           <img
             src="https://algora.io/banners/highlight.png"
@@ -663,7 +663,7 @@ defmodule AlgoraWeb.PricingLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/dittofeed"
+          href={~p"/org/dittofeed"}
         >
           <img
             src="https://algora.io/banners/dittofeed.png"

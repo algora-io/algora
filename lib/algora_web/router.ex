@@ -117,6 +117,8 @@ defmodule AlgoraWeb.Router do
       live "/claims/:group_id", ClaimLive
       live "/payment/success", Payment.SuccessLive, :index
       live "/payment/canceled", Payment.CanceledLive, :index
+      live "/legal/terms", Legal.TermsLive, :index
+      live "/legal/privacy", Legal.PrivacyLive, :index
     end
 
     live_session :onboarding,

@@ -14,8 +14,8 @@ defmodule AlgoraWeb.Constants do
       docs_url: "https://docs.algora.io",
       demo_url: "https://www.youtube.com/watch?v=Ts5GhlEROrs",
       sdk_url: ~p"/sdk",
-      privacy_url: "https://console.algora.io/legal/privacy",
-      terms_url: "https://console.algora.io/legal/terms",
+      privacy_url: ~p"/legal/privacy",
+      terms_url: ~p"/legal/terms",
       blog_url: "https://blog.algora.io",
       contact_url: "https://docs.algora.io/contact",
       algora_tv_url: "https://algora.tv"

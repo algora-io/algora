@@ -345,9 +345,11 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
                 <div class="lg:col-span-6 order-last lg:order-first">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
-                    I posted our bounty on Upwork to try it, overall it's 1000x more friction than OSS bounties with Algora.
+                    I posted our bounty on <span class="text-success">Upwork</span>
+                    to try it, overall it's <span class="text-success">1000x more friction</span>
+                    than OSS bounties with Algora.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-3xl font-semibold text-foreground">Louis Beaumont</div>
@@ -357,7 +359,7 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                     </div>
                   </div>
-                  <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                  <%!-- <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
                     <div class="flex flex-col-reverse">
                       <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
                         Total awarded
@@ -380,6 +382,77 @@ defmodule AlgoraWeb.HomeLive do
                       </dt>
                       <dd class="font-display text-5xl font-bold tracking-tight text-white">
                         46
+                      </dd>
+                    </div>
+                  </dl> --%>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-5">
+                  <div class="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <img src="https://github.com/calcom.png" alt="Cal.com" class="object-cover" />
+                  </div>
+                </div>
+                <div class="lg:col-span-6">
+                  <ul class="text-3xl font-display font-bold leading-[3rem]">
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">14</span> High Priority tickets
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">24</span> Improvements
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">21</span> Bugs
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">36</span> Medium priority tickets
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">13</span> UI updates
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">68</span> New Features
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <span class="text-success">18</span> Integrations
+                    </li>
+                  </ul>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">Cal.com</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Monthly active every month for 2+ years
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $12,000
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        161
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        86
                       </dd>
                     </div>
                   </dl>

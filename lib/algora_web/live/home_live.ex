@@ -52,7 +52,7 @@ defmodule AlgoraWeb.HomeLive do
       aria-hidden="true"
     >
       <div
-        class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+        class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-gray-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
         style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
       >
       </div>
@@ -76,7 +76,7 @@ defmodule AlgoraWeb.HomeLive do
 
     <div class="absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl" aria-hidden="true">
       <div
-        class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+        class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-gray-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
         style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
       >
       </div>
@@ -162,7 +162,7 @@ defmodule AlgoraWeb.HomeLive do
               <.link
                 href="https://github.com/zed-industries/zed/issues/4440"
                 rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
               >
                 <div class="flex -space-x-4">
                   <img
@@ -192,7 +192,7 @@ defmodule AlgoraWeb.HomeLive do
               <.link
                 href="https://github.com/PX4/PX4-Autopilot/issues/22464"
                 rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-card/50 p-6 ring-1 ring-border hover:bg-card/70 transition-colors"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
               >
                 <div class="flex items-center -space-x-6">
                   <img
@@ -220,7 +220,7 @@ defmodule AlgoraWeb.HomeLive do
                 </.button>
               </.link>
 
-              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-card/50 p-12 ring-2 ring-success/20 hover:bg-card/70 transition-colors">
+              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-black p-12 ring-2 ring-success/20 transition-colors">
                 <div class="col-span-2 text-base leading-6 flex-1">
                   <div class="text-3xl font-semibold text-foreground">
                     Fund any issue <span class="text-success">in seconds</span>
@@ -335,8 +335,8 @@ defmodule AlgoraWeb.HomeLive do
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-12 gap-y-8 lg:grid-cols-10">
-                <div class="lg:col-span-4 order-first lg:order-last">
-                  <div class="relative flex aspect-square size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                <div class="lg:col-span-5 order-first lg:order-last">
+                  <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
                       src={~p"/images/people/louis-beaumont.png"}
                       alt="Louis Beaumont"
@@ -344,7 +344,7 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                 </div>
-                <div class="lg:col-span-6 order-last lg:order-first">
+                <div class="lg:col-span-5 order-last lg:order-first">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
                     I posted our bounty on Upwork to try it, overall it's 1000x more friction than OSS bounties with Algora.
                   </h3>

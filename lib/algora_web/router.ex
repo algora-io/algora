@@ -22,8 +22,14 @@ defmodule AlgoraWeb.Router do
   end
 
   scope "/asset" do
-    forward "/", ReverseProxyPlug,
+    forward "/", AlgoraWeb.Plugs.RewriteAssetsPlug,
       upstream: "#{Application.compile_env(:algora, :assets_url)}",
+      response_mode: :buffer
+  end
+
+  scope "/docs" do
+    forward "/", AlgoraWeb.Plugs.RewriteDocsPlug,
+      upstream: "https://docs.algora.io/docs",
       response_mode: :buffer
   end
 

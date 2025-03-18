@@ -24,8 +24,6 @@ defmodule AlgoraWeb.HomeLive do
 
   require Logger
 
-  #
-
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
     Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
@@ -47,6 +45,45 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:pending_action, nil)}
   end
 
+  defp pattern(assigns) do
+    ~H"""
+    <div
+      class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
+      aria-hidden="true"
+    >
+      <div
+        class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
+      >
+      </div>
+    </div>
+
+    <div class="[mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)] absolute inset-x-0 -z-10 h-screen w-full stroke-border">
+      <defs>
+        <pattern
+          id="grid-pattern"
+          width="200"
+          height="200"
+          x="50%"
+          y="-1"
+          patternUnits="userSpaceOnUse"
+        >
+          <path d="M.5 200V.5H200" fill="none" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" stroke-width="0" fill="url(#grid-pattern)" opacity="0.25" />
+    </div>
+
+    <div class="absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl" aria-hidden="true">
+      <div
+        class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
+      >
+      </div>
+    </div>
+    """
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -54,48 +91,8 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-black to-background">
-          <!-- Background pattern -->
-          <div
-            class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
-            aria-hidden="true"
-          >
-            <div
-              class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-              style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-            >
-            </div>
-          </div>
-
-          <div class="[mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)] absolute inset-x-0 -z-10 h-screen w-full stroke-border">
-            <defs>
-              <pattern
-                id="grid-pattern"
-                width="200"
-                height="200"
-                x="50%"
-                y="-1"
-                patternUnits="userSpaceOnUse"
-              >
-                <path d="M.5 200V.5H200" fill="none" />
-              </pattern>
-            </defs>
-            <rect
-              width="100%"
-              height="100%"
-              stroke-width="0"
-              fill="url(#grid-pattern)"
-              opacity="0.25"
-            />
-          </div>
-
-          <div class="absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl" aria-hidden="true">
-            <div
-              class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-slate-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-              style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-            >
-            </div>
-          </div>
+        <section class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-black to-background">
+          <.pattern />
           <!-- Hero content -->
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
@@ -126,7 +123,6 @@ defmodule AlgoraWeb.HomeLive do
                     Developers
                   </.button>
                 </div>
-
               </div>
               <!-- Featured devs -->
               <div class="mt-14 flex justify-start md:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0 overflow-x-auto scrollbar-thin lg:overflow-x-visible">
@@ -150,9 +146,9 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Fund GitHub Issues
@@ -272,20 +268,19 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-
-        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+          <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-loose">
               Y Combinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
-            <.yc_logo_cloud />
-          </div>
+              <.yc_logo_cloud />
+            </div>
           </div>
         </section>
 
-
-        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Build product faster
@@ -489,7 +484,8 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+        <section class="relative isolate bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+          <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
               Hire with Confidence
@@ -723,7 +719,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-background border-t py-16 sm:py-32">
+        <section class="relative isolate bg-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
@@ -740,7 +736,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="bg-gradient-to-br from-black to-background">
+        <div class="relative isolate bg-gradient-to-br from-black to-background">
           <Footer.footer />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?
@@ -776,8 +772,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1008,8 +1003,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

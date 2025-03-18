@@ -98,7 +98,7 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl 2xl:max-w-3xl">
                 <h1 class="font-display text-pretty text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
-                  The open source UpWork alternative.
+                  The open source Upwork alternative.
                 </h1>
                 <p class="mt-8 text-pretty text-lg font-medium text-muted-foreground sm:max-w-md sm:text-xl/8 lg:max-w-none">
                   GitHub bounties, freelancing and full-time jobs.
@@ -821,6 +821,9 @@ defmodule AlgoraWeb.HomeLive do
 
         <div class="bg-muted/20">
           <Footer.footer />
+          <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
+            Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?
+          </div>
         </div>
       </main>
     </div>
@@ -852,7 +855,8 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply,
+             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -878,7 +882,8 @@ defmodule AlgoraWeb.HomeLive do
     if changeset.valid? do
       if socket.assigns[:current_user] do
         with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
-             {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
+             {:ok, recipient} <-
+               Workspace.ensure_user(token, get_field(changeset, :github_handle)),
              {:ok, checkout_url} <-
                Bounties.create_tip(%{
                  creator: socket.assigns.current_user,
@@ -1023,7 +1028,10 @@ defmodule AlgoraWeb.HomeLive do
             %{
               name: "ZIO",
               url: "https://zio.dev",
-              args: %{src: ~p"/images/wordmarks/zio.png", class: "mt-4 max-h-10 brightness-0 invert"}
+              args: %{
+                src: ~p"/images/wordmarks/zio.png",
+                class: "mt-4 max-h-10 brightness-0 invert"
+              }
             },
             %{
               name: "Tailcall",
@@ -1032,7 +1040,12 @@ defmodule AlgoraWeb.HomeLive do
               args: %{class: "max-h-12", fill: "#fff"}
             },
             %{name: "Cal.com", url: "https://cal.com", component: &Wordmarks.calcom/1},
-            %{name: "Qdrant", url: "https://qdrant.tech", component: &Wordmarks.qdrant/1, args: %{class: "max-h-9"}},
+            %{
+              name: "Qdrant",
+              url: "https://qdrant.tech",
+              component: &Wordmarks.qdrant/1,
+              args: %{class: "max-h-9"}
+            },
             %{
               name: "Golem Cloud",
               url: "https://www.golem.cloud",
@@ -1074,7 +1087,8 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money),
+    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

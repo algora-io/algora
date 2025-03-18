@@ -93,10 +93,9 @@ defmodule AlgoraWeb.HomeLive do
       <main>
         <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-br from-black to-background">
           <.pattern />
-          <!-- Hero content -->
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
-            <div class="mx-auto gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl 2xl:max-w-3xl">
+            <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
+              <div class="xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
                 <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
                   The open source Upwork for engineers
                 </h1>
@@ -846,7 +845,8 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply,
+             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1077,7 +1077,8 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money),
+    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

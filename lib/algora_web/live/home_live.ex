@@ -54,7 +54,7 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-background to-black">
+        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-black to-background">
           <!-- Background pattern -->
           <div
             class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
@@ -173,7 +173,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </div>
 
-        <section id="fund-github-issues" class="bg-black border-t py-16 sm:py-24">
+        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Fund GitHub Issues
@@ -293,10 +293,10 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-black border-t py-16 sm:py-24">
+        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
-              Streamline Contract Work
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+              Build product faster
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
               Use bounties in your own repositories to manage contract work efficiently. Pay only for completed tasks, with full GitHub integration.
@@ -497,7 +497,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-black border-t py-16 sm:py-24">
+        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
               Hire with Confidence
@@ -731,7 +731,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="bg-black border-t py-16 sm:py-24">
+        <section class="bg-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
@@ -748,7 +748,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="bg-black">
+        <div class="bg-gradient-to-br from-black to-background">
           <Footer.footer />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?

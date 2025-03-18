@@ -51,7 +51,7 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-primary/5 to-muted/20">
+        <div class="relative isolate overflow-hidden min-h-screen bg-gradient-to-br from-primary/5 to-background">
           <!-- Background pattern -->
           <div
             class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
@@ -101,7 +101,7 @@ defmodule AlgoraWeb.HomeLive do
                   The open source Upwork alternative.
                 </h1>
                 <p class="mt-8 text-pretty text-lg font-medium text-muted-foreground sm:max-w-md sm:text-xl/8 lg:max-w-none">
-                  GitHub bounties, freelancing and full-time jobs.
+                  GitHub bounties, contract work and jobs for developers.
                 </p>
                 <!-- CTA buttons -->
                 <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">

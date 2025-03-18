@@ -107,7 +107,7 @@ defmodule AlgoraWeb.HomeLive do
                   Discover GitHub bounties, contract work and jobs
                 </p>
                 <p class="mt-4 font-display text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
-                  Hire top 1% of open source developers
+                  Hire the top 1% of open source developers
                 </p>
                 <!-- CTA buttons -->
                 <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
@@ -126,28 +126,7 @@ defmodule AlgoraWeb.HomeLive do
                     Developers
                   </.button>
                 </div>
-                <!-- Stats -->
-                <dl class="mt-16 grid grid-cols-2 gap-8 sm:grid-cols-4">
-                  <%= for stat <- @stats do %>
-                    <div class="flex flex-col gap-y-2">
-                      <dt class="text-sm leading-6 text-muted-foreground whitespace-nowrap">
-                        {stat.label}
-                      </dt>
-                      <dd class="font-display text-3xl font-semibold tracking-tight text-foreground">
-                        {stat.value}
-                      </dd>
-                    </div>
-                  <% end %>
-                </dl>
-                <!-- Logos -->
-                <div class="mt-16">
-                  <h2 class="text-sm font-semibold leading-8 text-foreground">
-                    Trusted by the world's most innovative teams
-                  </h2>
-                  <div class="mt-6 grid grid-cols-3 sm:grid-cols-5 gap-6 -ml-[5%] sm:-ml-[2.5%]">
-                    <.logo_cloud />
-                  </div>
-                </div>
+
               </div>
               <!-- Featured devs -->
               <div class="mt-14 flex justify-start md:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0 overflow-x-auto scrollbar-thin lg:overflow-x-visible">
@@ -292,6 +271,19 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
         </section>
+
+
+        <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+              Y Combinator companies use Algora to build products faster
+            </h2>
+            <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
+            <.yc_logo_cloud />
+          </div>
+          </div>
+        </section>
+
 
         <section class="bg-gradient-to-br from-black to-background border-t py-16 sm:py-32">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -1083,5 +1075,82 @@ defmodule AlgoraWeb.HomeLive do
           ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">full list of supported countries</a>.)
       }
     ]
+  end
+
+  defp yc_logo_cloud(assigns) do
+    ~H"""
+    <div>
+      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
+        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
+          <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
+          <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
+          <img
+            src="https://algora.io/banners/remotion.png"
+            alt="Remotion"
+            class="col-auto w-full saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
+          <img
+            src="https://algora.io/banners/zio.png"
+            alt="ZIO"
+            class="w-[10rem] col-auto brightness-0 invert"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
+          <img
+            src="https://algora.io/banners/triggerdotdev.png"
+            alt="Trigger.dev"
+            class="col-auto w-full saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
+          <img
+            src="https://algora.io/banners/tembo.png"
+            alt="Tembo"
+            class="w-[13rem] col-auto saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
+          <img
+            src="https://algora.io/banners/maybe.png"
+            alt="Maybe"
+            class="col-auto w-full saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
+          <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
+          <img
+            src="https://algora.io/banners/million.png"
+            alt="Million"
+            class="col-auto w-44 saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
+          <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
+          <img
+            src="https://algora.io/banners/highlight.png"
+            alt="Highlight"
+            class="col-auto w-44 saturate-0"
+          />
+        </a>
+        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
+          <img
+            src="https://algora.io/banners/dittofeed.png"
+            alt="Dittofeed"
+            class="col-auto w-40 brightness-0 invert"
+          />
+        </a>
+      </div>
+    </div>
+    """
   end
 end

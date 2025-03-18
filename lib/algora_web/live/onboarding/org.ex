@@ -152,7 +152,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_required([:hiring], message: "Please select a hiring status")
       |> validate_required([:categories], message: "Please select at least one category")
       |> validate_length(:categories, min: 1, message: "Please select at least one category")
-      |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
+      |> validate_subset(
+        :categories,
+        Enum.map(PreferencesForm.categories_options(), &elem(&1, 1))
+      )
     end
   end
 
@@ -368,7 +371,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               get_in(metadata, [:org, :bio]) ||
                 get_in(metadata, [:org, :og_description]) ||
                 get_in(metadata, [:org, :og_title]),
-            avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
+            avatar_url:
+              get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
             handle: org_unique_handle,
             domain: domain,
             og_title: get_in(metadata, [:org, :og_title]),
@@ -416,7 +420,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
-              Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
+              Logger.error(
+                "error onboarding organization: #{inspect(name)} #{inspect(changeset)}"
+              )
 
               socket
               |> put_flash(:error, "Something went wrong. Please try again.")
@@ -767,18 +773,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         You're in good company
       </h2>
       <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
+        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
           <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/qdrant"
+          href={~p"/org/qdrant"}
         >
           <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/remotion"
+          href={~p"/org/remotion"}
         >
           <img
             src="https://algora.io/banners/remotion.png"
@@ -786,7 +792,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
+        <a class="relative flex items-center justify-center" href={~p"/org/zio"}
+        >
           <img
             src="https://algora.io/banners/zio.png"
             alt="ZIO"
@@ -795,7 +802,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/triggerdotdev"
+          href={~p"/org/triggerdotdev"}
         >
           <img
             src="https://algora.io/banners/triggerdotdev.png"
@@ -805,7 +812,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tembo"
+          href={~p"/org/tembo"}
         >
           <img
             src="https://algora.io/banners/tembo.png"
@@ -815,7 +822,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/maybe-finance"
+          href={~p"/org/maybe-finance"}
         >
           <img
             src="https://algora.io/banners/maybe.png"
@@ -825,13 +832,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/golemcloud"
+          href={~p"/org/golemcloud"}
         >
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/aidenybai"
+          href={~p"/org/aidenybai"}
         >
           <img
             src="https://algora.io/banners/million.png"
@@ -841,13 +848,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tailcallhq"
+          href={~p"/org/tailcallhq"}
         >
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/highlight"
+          href={~p"/org/highlight"}
         >
           <img
             src="https://algora.io/banners/highlight.png"
@@ -857,7 +864,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a
           class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/dittofeed"
+          href={~p"/org/dittofeed"}
         >
           <img
             src="https://algora.io/banners/dittofeed.png"
@@ -914,10 +921,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+    {:noreply,
+     assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
   end
 
   def handle_async(:fetch_metadata, {:exit, reason}, socket) do
-    {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
+    {:noreply,
+     assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 end

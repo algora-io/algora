@@ -698,7 +698,7 @@ defmodule AlgoraWeb.HomeLive do
                     <div class="flex items-center gap-4">
                       <a
                         class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
-                        href="https://console.algora.io/org/triggerdotdev"
+                        href={~p"/org/triggerdotdev"}
                       >
                         <img
                           alt="Trigger.dev"
@@ -714,7 +714,7 @@ defmodule AlgoraWeb.HomeLive do
                       <div>
                         <a
                           class="text-base font-medium text-gray-100"
-                          href="https://console.algora.io/org/triggerdotdev"
+                          href={~p"/org/triggerdotdev"}
                         >
                           Trigger.dev (YC W23)
                         </a>

@@ -276,10 +276,10 @@ defmodule AlgoraWeb.HomeLive do
               class="h-24 mx-auto"
               alt="Y Combinator Logo"
             />
-            <h2 class="mt-8 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-loose">
-              Y Combinator companies use Algora<br />to build product and hire engineers
+            <h2 class="mt-8 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 leading-[5rem]">
+              YCombinator companies use Algora<br />to build product and hire engineers
             </h2>
-            <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
+            <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">
               <.yc_logo_cloud />
             </div>
 
@@ -1117,17 +1117,18 @@ defmodule AlgoraWeb.HomeLive do
   defp yc_logo_cloud(assigns) do
     ~H"""
     <div>
-      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
+      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
         <.link
-          class="font-bold text-xl whitespace-nowrap flex items-center"
+          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/browser-use"}
         >
-          <img class="size-6 mr-2" src="https://browser-use.com/logo.svg" /><span class="sm:inline hidden">
+          <img class="size-7 mr-4" src="https://browser-use.com/logo.svg" />
+          <span class="sm:inline hidden">
             Browser Use
           </span>
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/outerbase"}>
-          <svg viewBox="0 0 123 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+          <svg viewBox="0 0 123 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[80%]">
             <path
               fill-rule="evenodd"
               clip-rule="evenodd"
@@ -1189,67 +1190,65 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
-            class="col-auto w-full saturate-0"
+            class="col-auto w-[90%] saturate-0"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/traceloop"}>
           <img
             src="https://cdn.prod.website-files.com/664553b7af7a800a7911b9f0/664553f95f4ec29495eb8eb9_traceloop%20logo%20dark%20bg.png"
             alt="Traceloop"
-            class="w-[13rem] col-auto saturate-0"
+            class="w-[90%] col-auto saturate-0"
           />
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/trieve"}>
-          <span class="self-center ml-2 rtl:ml-0 rtl:mr-2 text-lg md:text-2xl font-bold whitespace-nowrap">
-            <img
-              src="https://cdn.trieve.ai/trieve-logo.png"
-              alt="Trieve logo"
-              class="h-12 w-12 inline"
-            /> Trieve
-          </span>
+        <.link
+          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center"
+          navigate={~p"/org/trieve"}
+        >
+          <img
+            src="https://cdn.trieve.ai/trieve-logo.png"
+            alt="Trieve logo"
+            class="size-12 mr-2 brightness-0 invert"
+          /> Trieve
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/twentyhq"}>
-          <span class="self-center ml-2 rtl:ml-0 rtl:mr-2 text-lg md:text-2xl font-bold whitespace-nowrap">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 0 40 40"
-              class="size-8 inline"
-            >
-              <path
-                fill="currentColor"
-                d="M 34.95 0 L 5.05 0 C 2.262 0 0 2.262 0 5.05 L 0 34.95 C 0 37.738 2.262 40 5.05 40 L 34.95 40 C 37.738 40 40 37.738 40 34.95 L 40 5.05 C 40 2.262 37.738 0 34.95 0 Z M 8.021 14.894 C 8.021 12.709 9.794 10.935 11.979 10.935 L 19.6 10.935 C 19.712 10.935 19.815 11.003 19.862 11.106 C 19.909 11.209 19.888 11.329 19.812 11.415 L 18.141 13.229 C 17.85 13.544 17.441 13.726 17.012 13.726 L 12 13.726 C 11.344 13.726 10.812 14.259 10.812 14.915 L 10.812 17.909 C 10.812 18.294 10.5 18.606 10.115 18.606 L 8.721 18.606 C 8.335 18.606 8.024 18.294 8.024 17.909 L 8.024 14.894 Z M 31.729 25.106 C 31.729 27.291 29.956 29.065 27.771 29.065 L 24.532 29.065 C 22.347 29.065 20.574 27.291 20.574 25.106 L 20.574 19.438 C 20.574 19.053 20.718 18.682 20.979 18.397 L 22.868 16.347 C 22.947 16.262 23.071 16.232 23.182 16.274 C 23.291 16.318 23.365 16.421 23.365 16.538 L 23.365 25.088 C 23.365 25.744 23.897 26.276 24.553 26.276 L 27.753 26.276 C 28.409 26.276 28.941 25.744 28.941 25.088 L 28.941 14.915 C 28.941 14.259 28.409 13.726 27.753 13.726 L 24.032 13.726 C 23.606 13.726 23.2 13.906 22.909 14.218 L 11.812 26.276 L 18.479 26.276 C 18.865 26.276 19.176 26.588 19.176 26.974 L 19.176 28.368 C 19.176 28.753 18.865 29.065 18.479 29.065 L 9.494 29.065 C 8.679 29.065 8.018 28.403 8.018 27.588 L 8.018 26.85 C 8.018 26.479 8.156 26.124 8.409 25.85 L 20.85 12.335 C 21.674 11.441 22.829 10.935 24.044 10.935 L 27.768 10.935 C 29.953 10.935 31.726 12.709 31.726 14.894 L 31.726 25.106 Z"
-              />
-            </svg>
-            Twenty
-          </span>
+        <.link
+          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center"
+          navigate={~p"/org/twentyhq"}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 40 40"
+            class="size-7 mr-4"
+          >
+            <path
+              fill="currentColor"
+              d="M 34.95 0 L 5.05 0 C 2.262 0 0 2.262 0 5.05 L 0 34.95 C 0 37.738 2.262 40 5.05 40 L 34.95 40 C 37.738 40 40 37.738 40 34.95 L 40 5.05 C 40 2.262 37.738 0 34.95 0 Z M 8.021 14.894 C 8.021 12.709 9.794 10.935 11.979 10.935 L 19.6 10.935 C 19.712 10.935 19.815 11.003 19.862 11.106 C 19.909 11.209 19.888 11.329 19.812 11.415 L 18.141 13.229 C 17.85 13.544 17.441 13.726 17.012 13.726 L 12 13.726 C 11.344 13.726 10.812 14.259 10.812 14.915 L 10.812 17.909 C 10.812 18.294 10.5 18.606 10.115 18.606 L 8.721 18.606 C 8.335 18.606 8.024 18.294 8.024 17.909 L 8.024 14.894 Z M 31.729 25.106 C 31.729 27.291 29.956 29.065 27.771 29.065 L 24.532 29.065 C 22.347 29.065 20.574 27.291 20.574 25.106 L 20.574 19.438 C 20.574 19.053 20.718 18.682 20.979 18.397 L 22.868 16.347 C 22.947 16.262 23.071 16.232 23.182 16.274 C 23.291 16.318 23.365 16.421 23.365 16.538 L 23.365 25.088 C 23.365 25.744 23.897 26.276 24.553 26.276 L 27.753 26.276 C 28.409 26.276 28.941 25.744 28.941 25.088 L 28.941 14.915 C 28.941 14.259 28.409 13.726 27.753 13.726 L 24.032 13.726 C 23.606 13.726 23.2 13.906 22.909 14.218 L 11.812 26.276 L 18.479 26.276 C 18.865 26.276 19.176 26.588 19.176 26.974 L 19.176 28.368 C 19.176 28.753 18.865 29.065 18.479 29.065 L 9.494 29.065 C 8.679 29.065 8.018 28.403 8.018 27.588 L 8.018 26.85 C 8.018 26.479 8.156 26.124 8.409 25.85 L 20.85 12.335 C 21.674 11.441 22.829 10.935 24.044 10.935 L 27.768 10.935 C 29.953 10.935 31.726 12.709 31.726 14.894 L 31.726 25.106 Z"
+            />
+          </svg>
+          Twenty
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/aidenybai"}>
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
-            class="col-auto w-44 saturate-0"
+            class="col-auto w-[80%] saturate-0"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/moonrepo"}>
-          <img
-            src="https://moonrepo.dev/img/logo.svg"
-            alt="moon"
-            class="themedComponent_siVc themedComponent--light_hHel"
-          />
+          <img src="https://moonrepo.dev/img/logo.svg" alt="moon" class="w-[80%]" />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
-            class="col-auto w-44 saturate-0"
+            class="col-auto w-[90%] saturate-0"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"
-            class="col-auto w-40 brightness-0 invert"
+            class="col-auto w-[80%] brightness-0 invert"
           />
         </.link>
 
@@ -1257,23 +1256,16 @@ defmodule AlgoraWeb.HomeLive do
           class="relative flex items-center justify-center brightness-0 invert"
           navigate={~p"/org/onyx-dot-app"}
         >
-          <img
-            src="https://onyx.app/Onyx.png"
-            alt="Onyx Logo"
-            class="object-contain"
-            sizes="(max-width: 768px) 100vw, 33vw"
-          />
+          <img src="https://onyx.app/Onyx.png" alt="Onyx Logo" class="object-contain w-[60%]" />
         </.link>
 
         <.link
-          class="active:scale-95 active:opacity-80 transition-[transform,opacity] gap-1.5 flex items-center hover:!cursor-pointer brightness-0 invert"
+          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
           aria-label="Logo"
           navigate={~p"/org/mendableai"}
         >
-          <span class="text-2xl">🔥</span>
-          <span class="text-2xl leading-none tracking-tight font-medium text-[#36322f]">
-            Firecrawl
-          </span>
+          🔥
+          Firecrawl
         </.link>
       </div>
     </div>

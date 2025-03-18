@@ -12,6 +12,7 @@ defmodule AlgoraWeb.Constants do
       # TODO: update this to the new repo
       github_repo_url: "https://github.com/algora-io/tv",
       docs_url: "https://docs.algora.io",
+      docs_supported_countries_url: "https://docs.algora.io/bounties/payments#supported-countries-regions",
       demo_url: "https://www.youtube.com/watch?v=Ts5GhlEROrs",
       sdk_url: ~p"/sdk",
       privacy_url: ~p"/legal/privacy",

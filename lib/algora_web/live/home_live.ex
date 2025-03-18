@@ -391,71 +391,79 @@ defmodule AlgoraWeb.HomeLive do
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-5">
-                  <div class="relative flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
-                    <img src="https://github.com/calcom.png" alt="Cal.com" class="object-cover" />
-                  </div>
-                </div>
                 <div class="lg:col-span-6">
-                  <ul class="text-3xl font-display font-bold leading-[3rem]">
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">14</span> High Priority tickets
-                    </li>
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">24</span> Improvements
-                    </li>
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">21</span> Bugs
-                    </li>
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">36</span> Medium priority tickets
-                    </li>
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">13</span> UI updates
-                    </li>
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">68</span> New Features
-                    </li>
-                    <li class="flex items-center gap-x-4">
-                      <span class="text-success">18</span> Integrations
-                    </li>
-                  </ul>
+                  <div class="relative flex -space-x-4">
+                    <img
+                      src="https://github.com/calcom.png"
+                      alt="Cal.com"
+                      class="size-40 rounded-2xl"
+                    />
+                    <img
+                      src="https://media.licdn.com/dms/image/v2/C4D03AQFy5iED85Z9mQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1650904368312?e=1747872000&v=beta&t=3gbV5Eru74Gxt8zvLZ0cKRD2YkQYHQ3qjBPvqJH31AQ"
+                      alt="PeerRich"
+                      class="size-40 rounded-full"
+                    />
+                    <img
+                      src="https://media.licdn.com/dms/image/v2/D4E03AQEHMtneifrVfQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1708121831533?e=1747872000&v=beta&t=heIzHASUcd-OhZ4ZeEm-6smGjX66YcEAOqKQoCeXbgo"
+                      alt="Bailey Pumfleet"
+                      class="size-40 rounded-full"
+                    />
+                  </div>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-col items-center justify-center gap-4 text-5xl font-semibold font-display">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">Cal.com</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
-                          Monthly active every month for 2+ years
-                        </div>
+                        Monthly active
+                      </div>
+                      <div>
+                        every month
+                      </div>
+                      <div>
+                        for 2+ years
                       </div>
                     </div>
                   </div>
-                  <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
-                    <div class="flex flex-col-reverse">
-                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
-                        Total awarded
-                      </dt>
-                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
-                        $12,000
-                      </dd>
-                    </div>
-                    <div class="flex flex-col-reverse">
-                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
-                        Bounties completed
-                      </dt>
-                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
-                        161
-                      </dd>
-                    </div>
-                    <div class="flex flex-col-reverse">
-                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
-                        Contributors rewarded
-                      </dt>
-                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
-                        86
-                      </dd>
-                    </div>
-                  </dl>
+                </div>
+                <div class="lg:col-span-5">
+                  <div class="text-3xl font-display font-semibold leading-[3rem]">
+                    Shipped by <span class="text-success">86 contributors</span>
+                  </div>
+                  <ul class="text-3xl font-display font-semibold leading-[3rem]">
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">14</span>
+                      High Priority tickets
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">24</span>
+                      Improvements
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">21</span>
+                      Bugs
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">36</span>
+                      Medium priority tickets
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">13</span>
+                      UI updates
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">68</span>
+                      New Features
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">18</span>
+                      Integrations
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>

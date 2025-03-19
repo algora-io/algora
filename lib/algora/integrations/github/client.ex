@@ -115,50 +115,6 @@ defmodule Algora.Github.Client do
     )
   end
 
-  def search(access_token, q, opts \\ []) do
-    per_page = opts[:per_page] || 10
-    since = opts[:since] || "2025-03-18T00:00:00Z"
-
-    search_query =
-      if opts[:since] do
-        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc updated:>#{opts[:since]}"
-      else
-        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc"
-      end
-
-    query = """
-    query issues($search_query: String!) {
-      search(first: #{per_page}, type: ISSUE, query: $search_query) {
-        issueCount
-        pageInfo {
-          hasNextPage
-        }
-        nodes {
-          __typename
-          ... on Issue {
-            url
-            updatedAt
-            comments(first: 3, orderBy: {field: UPDATED_AT, direction: ASC}) {
-              nodes {
-                databaseId
-                author {
-                  login
-                }
-                body
-              }
-            }
-          }
-        }
-      }
-    }
-    """
-
-    body = %{query: query, variables: %{search_query: search_query}}
-    IO.puts(query)
-    IO.puts(search_query)
-    fetch(access_token, "/graphql", "POST", body)
-  end
-
   defp build_query(opts), do: if(opts == [], do: "", else: "?" <> URI.encode_query(opts))
 
   @impl true

@@ -33,8 +33,11 @@ defmodule Algora.Github.Poller.Search do
   # Server callbacks
   @impl true
   def init(opts) do
+    provider = Keyword.fetch!(opts, :provider)
+
     {:ok,
      %{
+       provider: provider,
        cursor: nil,
        paused: not Algora.config([:auto_start_pollers])
      }, {:continue, :setup}}
@@ -72,8 +75,8 @@ defmodule Algora.Github.Poller.Search do
   end
 
   @impl true
-  def handle_call(:get_repo_info, _from, state) do
-    {:reply, {state.repo_owner, state.repo_name}, state}
+  def handle_call(:get_provider, _from, state) do
+    {:reply, state.provider, state}
   end
 
   @impl true
@@ -117,9 +120,13 @@ defmodule Algora.Github.Poller.Search do
   end
 
   def fetch_tickets(state) do
-    Github.Client.search(Admin.token!(), "bounty",
-      since: DateTime.to_iso8601(state.cursor.timestamp)
-    )
+    case search("bounty", since: DateTime.to_iso8601(state.cursor.timestamp)) do
+      {:ok, %{"data" => %{"search" => %{"nodes" => tickets}}}} ->
+        {:ok, tickets}
+
+      _ ->
+        {:error, :no_tickets_found}
+    end
   end
 
   defp get_or_create_cursor() do
@@ -132,7 +139,7 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp update_last_polled(search_cursor, %{"id" => id, "updated_at" => updated_at}) do
+  defp update_last_polled(search_cursor, %{"updatedAt" => updated_at}) do
     with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
          {:ok, cursor} <-
            Search.update_search_cursor(search_cursor, %{
@@ -145,22 +152,27 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp process_ticket(
-         %{"updated_at" => updated_at, "body" => body, "html_url" => html_url} = ticket
-       ) do
+  defp process_ticket(%{"updatedAt" => updated_at, "url" => url} = ticket) do
     with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
-         {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(html_url),
-         {:ok, commands} <- Command.parse(body) do
+         {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url) do
       Logger.info("Latency: #{DateTime.diff(DateTime.utc_now(), updated_at, :second)}s")
 
-      Enum.reduce_while(commands, :ok, fn command, _acc ->
+      commands =
+        Enum.flat_map(ticket["comments"]["nodes"], fn comment ->
+          case Command.parse(comment["body"]) do
+            {:ok, [command | _]} -> [{comment, command}]
+            _ -> []
+          end
+        end)
+
+      Enum.reduce_while(commands, :ok, fn {comment, command}, _acc ->
         res =
           %{
-            ticket: ticket,
+            comment: comment,
             command: Util.term_to_base64(command),
             ticket_ref: Util.term_to_base64(ticket_ref)
           }
-          |> Github.Poller.CommentConsumer.new()
+          |> Github.Poller.SearchConsumer.new()
           |> Oban.insert()
 
         case res do
@@ -176,5 +188,47 @@ defmodule Algora.Github.Poller.Search do
 
         :ok
     end
+  end
+
+  defp search(q, opts \\ []) do
+    per_page = opts[:per_page] || 10
+    since = opts[:since] || "2025-03-18T00:00:00Z"
+
+    search_query =
+      if opts[:since] do
+        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc updated:>#{opts[:since]}"
+      else
+        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc"
+      end
+
+    query = """
+    query issues($search_query: String!) {
+      search(first: #{per_page}, type: ISSUE, query: $search_query) {
+        issueCount
+        pageInfo {
+          hasNextPage
+        }
+        nodes {
+          __typename
+          ... on Issue {
+            url
+            updatedAt
+            comments(first: 3, orderBy: {field: UPDATED_AT, direction: ASC}) {
+              nodes {
+                databaseId
+                author {
+                  login
+                }
+                body
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+
+    body = %{query: query, variables: %{search_query: search_query}}
+    Github.Client.fetch(Admin.token!(), "/graphql", "POST", body)
   end
 end

@@ -41,7 +41,10 @@ defmodule Algora.Github.Poller.SearchConsumer do
   end
 
   defp run_command({:bounty, args}, ticket_ref, comment) do
-    case Accounts.fetch_user_by(provider_id: to_string(comment["user"]["id"])) do
+    case Accounts.fetch_user_by(
+           provider: "github",
+           provider_login: to_string(comment["author"]["login"])
+         ) do
       {:ok, user} ->
         Bounties.create_bounty(
           %{
@@ -54,7 +57,7 @@ defmodule Algora.Github.Poller.SearchConsumer do
               number: ticket_ref[:number]
             }
           },
-          command_id: comment["id"],
+          command_id: comment["databaseId"],
           command_source: :comment
         )
 

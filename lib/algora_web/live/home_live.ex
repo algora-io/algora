@@ -108,8 +108,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section
-          :if={1 == 2}
+        <%!-- <section
           class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40"
         >
           <.pattern />
@@ -230,7 +229,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-        </section>
+        </section> --%>
 
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />

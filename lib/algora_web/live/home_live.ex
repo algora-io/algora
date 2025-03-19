@@ -575,8 +575,8 @@ defmodule AlgoraWeb.HomeLive do
 
             <%!-- mogery --%>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
-                <div class="lg:col-span-4">
+              <div class="grid gap-x-16 gap-y-8 lg:grid-cols-12">
+                <div class="lg:col-span-3">
                   <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <iframe
                       src="https://www.youtube.com/embed/j4fLNIJCywk"
@@ -591,7 +591,7 @@ defmodule AlgoraWeb.HomeLive do
                     </iframe>
                   </div>
                 </div>
-                <div class="lg:col-span-8">
+                <div class="lg:col-span-9">
                   <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <iframe
                       src="https://www.youtube.com/embed/HhTT-GX5tjQ"
@@ -677,6 +677,54 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
+          <.pattern />
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+              Did you know?
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground mb-16">
+              You can tip your favorite open source contributors with Algora.
+            </p>
+
+            <div class="grid grid-cols-2 gap-16">
+              <.form
+                for={@tip_form}
+                phx-submit="create_tip"
+                class="col-span-3 grid grid-cols-3 gap-6 w-full"
+              >
+                <.input
+                  label="GitHub handle"
+                  field={@tip_form[:github_handle]}
+                  placeholder="github.com/handle"
+                />
+                <.input
+                  label="Amount"
+                  icon="tabler-currency-dollar"
+                  field={@tip_form[:amount]}
+                  class="placeholder:text-success"
+                />
+                <div class="flex flex-col items-center gap-2">
+                  <div class="text-sm text-muted-foreground">No credit card required</div>
+                  <.button size="lg" class="w-full">Tip contributor</.button>
+                </div>
+              </.form>
+              <div class="flex flex-col gap-4">
+                <img
+                  src={~p"/images/screenshots/tip-remotion.png"}
+                  alt="Tip contributor"
+                  class="w-full rounded-2xl"
+                />
+                <img
+                  src={~p"/images/screenshots/tip.png"}
+                  alt="Tip contributor"
+                  class="w-full rounded-2xl"
+                />
               </div>
             </div>
           </div>

@@ -205,7 +205,8 @@ defmodule Algora.Github.Client do
 
   @impl true
   def list_installation_repos(access_token) do
-    with {:ok, %{"repositories" => repos}} <- fetch(access_token, "/installation/repositories", "GET") do
+    with {:ok, %{"repositories" => repos}} <-
+           fetch(access_token, "/installation/repositories", "GET") do
       {:ok, repos}
     end
   end
@@ -242,6 +243,8 @@ defmodule Algora.Github.Client do
 
   @impl true
   def add_labels(access_token, owner, repo, number, labels) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{labels: labels})
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{
+      labels: labels
+    })
   end
 end

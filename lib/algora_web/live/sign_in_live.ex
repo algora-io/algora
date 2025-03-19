@@ -15,13 +15,32 @@ defmodule AlgoraWeb.SignInLive do
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col min-h-[426px]">
           <div :if={!@secret_code}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
-              Welcome back
+              <%= if @mode == :signup do %>
+                Create an account
+              <% else %>
+                Welcome back
+              <% end %>
             </h2>
             <p class="mt-2 text-base/6 text-muted-foreground">
-              Sign in to your account
+              <%= if @mode == :signup do %>
+                Sign up to get started
+              <% else %>
+                Sign in to your account
+              <% end %>
             </p>
 
-            <div class="mt-6">
+            <div :if={@mode == :signup} class="mt-6">
+              <label class="mb-2 block text-sm/6 font-semibold">I am a...</label>
+              <div class="grid grid-cols-2 gap-4">
+                <.button navigate={~p"/onboarding/org"}>
+                  Company
+                </.button>
+                <.button navigate={~p"/onboarding/dev"}>
+                  Developer
+                </.button>
+              </div>
+            </div>
+            <div :if={@mode == :login} class="mt-6">
               <label class="mb-2 block text-sm/6 font-semibold">I am a...</label>
               <div class="grid grid-cols-2 gap-4">
                 <label class={[
@@ -79,7 +98,7 @@ defmodule AlgoraWeb.SignInLive do
             </p>
           </div>
 
-          <div class="mt-8">
+          <div :if={@mode == :login} class="mt-8">
             <div id="company-form" class={if @user_type == "developer", do: "hidden"}>
               <.simple_form
                 :if={!@secret_code}
@@ -120,13 +139,23 @@ defmodule AlgoraWeb.SignInLive do
           </div>
 
           <div :if={!@secret_code} class="mt-8 text-center text-sm text-muted-foreground">
-            Don't have an account?
-            <.link
-              navigate={~p"/"}
-              class="underline font-medium text-foreground/90 hover:text-foreground"
-            >
-              Sign up now
-            </.link>
+            <%= if @mode == :signup do %>
+              Already have an account?
+              <.link
+                navigate={~p"/auth/login"}
+                class="underline font-medium text-foreground/90 hover:text-foreground"
+              >
+                Sign in now
+              </.link>
+            <% else %>
+              Don't have an account?
+              <.link
+                navigate={~p"/auth/signup"}
+                class="underline font-medium text-foreground/90 hover:text-foreground"
+              >
+                Sign up now
+              </.link>
+            <% end %>
           </div>
 
           <div class="absolute bottom-8 text-center text-xs sm:text-sm text-muted-foreground max-w-[calc(100vw-2rem)] sm:max-w-sm w-full mx-auto">
@@ -207,12 +236,17 @@ defmodule AlgoraWeb.SignInLive do
      |> assign(:authorize_url, authorize_url)
      |> assign(:secret_code, nil)
      |> assign(:user_type, "company")
+     |> assign(:mode, socket.assigns.live_action)
      |> assign_form(changeset)}
   end
 
   @impl true
   def handle_params(params, _uri, socket) do
-    socket = assign(socket, :return_to, params["return_to"])
+    socket =
+      socket
+      |> assign(:return_to, params["return_to"])
+      |> assign(:mode, socket.assigns.live_action)
+
     {:noreply, socket}
   end
 

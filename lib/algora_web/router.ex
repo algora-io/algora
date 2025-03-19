@@ -131,7 +131,8 @@ defmodule AlgoraWeb.Router do
 
     live_session :root,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      live "/auth/login", SignInLive, :index
+      live "/auth/login", SignInLive, :login
+      live "/auth/signup", SignInLive, :signup
     end
 
     live_session :wildcard,

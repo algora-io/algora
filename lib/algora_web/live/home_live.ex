@@ -300,7 +300,7 @@ defmodule AlgoraWeb.HomeLive do
                     <.link
                       href="https://github.com/keephq/keep/issues?q=state%3Aclosed%20label%3A%22%F0%9F%92%8E%20Bounty%22%20%20label%3A%22%F0%9F%92%B0%20Rewarded%22%20label%3AProvider%20"
                       rel="noopener"
-                      class="text-success inline-flex items-center text-success hover:text-success-300"
+                      class="text-success inline-flex items-center hover:text-success-300"
                     >
                       42 integrations <.icon name="tabler-external-link" class="size-5 ml-1 mb-4" />
                     </.link>
@@ -779,8 +779,8 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl text-center mb-4">
-              Hire with Confidence
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4">
+              Hire by building product
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
               Find your next team member through real-world collaboration. Use bounties to evaluate developers based on actual contributions to your codebase.
@@ -1064,7 +1064,8 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply,
+             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1295,7 +1296,8 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money),
+    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

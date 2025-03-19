@@ -68,8 +68,7 @@ defmodule AlgoraWeb.Components.UI.Button do
         "bg-destructive/50 hover:bg-destructive/30 text-destructive-foreground border-destructive/80 hover:border-destructive focus-visible:outline-destructive-600 data-[state=open]:bg-destructive-500/80 data-[state=open]:outline-destructive-600 shadow border",
       "hover:destructive" =>
         "bg-background border-input hover:bg-destructive/30 text-accent-foreground hover:border-destructive focus-visible:outline-destructive-600 data-[state=open]:bg-destructive-500/80 data-[state=open]:outline-destructive-600 shadow border",
-      "outline" =>
-        "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+      "outline" => "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
       "subtle" =>
         "bg-foreground hover:bg-foreground/90 text-background border-background/20 hover:border-background/40 focus-visible:outline-background shadow border",
       "secondary" =>

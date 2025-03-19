@@ -669,11 +669,11 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-8">
-                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                  <div class="relative flex aspect-[955/1080] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <img
                       src={~p"/images/screenshots/bounty-to-hire-golem.png"}
                       alt="Golem bounty to hire"
-                      class="object-cover size-84 rounded-2xl"
+                      class="object-cover rounded-2xl"
                     />
                   </div>
                 </div>
@@ -802,8 +802,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1034,8 +1033,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

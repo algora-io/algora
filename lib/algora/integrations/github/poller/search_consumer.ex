@@ -10,12 +10,7 @@ defmodule Algora.Github.Poller.SearchConsumer do
 
   @impl Oban.Worker
   def perform(%Oban.Job{
-        args:
-          %{
-            "comment" => comment,
-            "command" => encoded_command,
-            "ticket_ref" => encoded_ticket_ref
-          } = _args
+        args: %{"comment" => comment, "command" => encoded_command, "ticket_ref" => encoded_ticket_ref} = _args
       }) do
     command = Util.base64_to_term!(encoded_command)
     ticket_ref = Util.base64_to_term!(encoded_ticket_ref)

@@ -34,9 +34,7 @@ defmodule Algora.Github.Client do
       {:ok, %Finch.Response{status: status, headers: headers}} when status in [301, 302, 307] ->
         case List.keyfind(headers, "location", 0) do
           {"location", location} ->
-            request_with_follow_redirects(
-              Finch.build(request.method, location, request.headers, request.body)
-            )
+            request_with_follow_redirects(Finch.build(request.method, location, request.headers, request.body))
 
           nil ->
             {:error, "Redirect response missing location header"}
@@ -101,8 +99,7 @@ defmodule Algora.Github.Client do
 
   def fetch(access_token, url, method \\ "GET", body \\ nil)
 
-  def fetch(access_token, "https://api.github.com" <> path, method, body),
-    do: fetch(access_token, path, method, body)
+  def fetch(access_token, "https://api.github.com" <> path, method, body), do: fetch(access_token, path, method, body)
 
   def fetch(access_token, path, method, body) do
     http(

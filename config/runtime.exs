@@ -28,8 +28,9 @@ if config_env() == :prod do
     app_id: System.fetch_env!("GITHUB_APP_ID"),
     webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
     private_key: System.fetch_env!("GITHUB_PRIVATE_KEY"),
-    pat: System.fetch_env!("GITHUB_PAT"),
-    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true",
+    pat: System.get_env("GITHUB_PAT"),
+    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true",
+    bot_handle: System.get_env("GITHUB_BOT_HANDLE"),
     oauth_state_ttl: String.to_integer(System.get_env("GITHUB_OAUTH_STATE_TTL", "600")),
     oauth_state_salt: System.fetch_env!("GITHUB_OAUTH_STATE_SALT")
 

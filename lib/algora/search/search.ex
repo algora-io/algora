@@ -2,8 +2,8 @@ defmodule Algora.Search do
   @moduledoc false
   import Ecto.Query, warn: false
 
-  alias Algora.Search.SearchCursor
   alias Algora.Repo
+  alias Algora.Search.SearchCursor
 
   def get_search_cursor(provider) do
     Repo.get_by(SearchCursor, provider: provider)

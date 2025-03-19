@@ -4,12 +4,12 @@ defmodule Algora.Github.Poller.Search do
 
   import Ecto.Query, warn: false
 
-  alias Algora.Search
+  alias Algora.Admin
   alias Algora.Github
   alias Algora.Github.Command
   alias Algora.Parser
-  alias Algora.Admin
   alias Algora.Repo
+  alias Algora.Search
   alias Algora.Util
 
   require Logger
@@ -129,7 +129,7 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp get_or_create_cursor() do
+  defp get_or_create_cursor do
     case Search.get_search_cursor("github") do
       nil ->
         Search.create_search_cursor(%{provider: "github", timestamp: DateTime.utc_now()})
@@ -152,20 +152,27 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp process_ticket(%{"updatedAt" => updated_at, "url" => url} = ticket) do
+  defp process_ticket(%{"updatedAt" => updated_at, "url" => url} = ticket, state) do
+    dbg(ticket)
+
     with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
          {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url) do
       Logger.info("Latency: #{DateTime.diff(DateTime.utc_now(), updated_at, :second)}s")
 
-      commands =
-        Enum.flat_map(ticket["comments"]["nodes"], fn comment ->
-          case Command.parse(comment["body"]) do
-            {:ok, [command | _]} -> [{comment, command}]
-            _ -> []
-          end
-        end)
+      ticket["comments"]["nodes"]
+      |> Enum.reject(fn comment ->
+        comment["author"]["login"] == Github.bot_handle() or
+          DateTime.before?(updated_at, state.cursor.timestamp)
+      end)
+      |> Enum.flat_map(fn comment ->
+        dbg(comment)
 
-      Enum.reduce_while(commands, :ok, fn {comment, command}, _acc ->
+        case Command.parse(comment["body"]) do
+          {:ok, [command | _]} -> [{comment, command}]
+          _ -> []
+        end
+      end)
+      |> Enum.reduce_while(:ok, fn {comment, command}, _acc ->
         res =
           %{
             comment: comment,
@@ -182,17 +189,15 @@ defmodule Algora.Github.Poller.Search do
       end)
     else
       {:error, reason} ->
-        Logger.error(
-          "Failed to parse commands from ticket: #{inspect(ticket)}. Reason: #{inspect(reason)}"
-        )
+        Logger.error("Failed to parse commands from ticket: #{inspect(ticket)}. Reason: #{inspect(reason)}")
 
         :ok
     end
   end
 
-  defp search(q, opts \\ []) do
+  def search(q, opts \\ []) do
     per_page = opts[:per_page] || 10
-    since = opts[:since] || "2025-03-18T00:00:00Z"
+    since = opts[:since]
 
     search_query =
       if opts[:since] do
@@ -200,6 +205,8 @@ defmodule Algora.Github.Poller.Search do
       else
         "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc"
       end
+
+    dbg(search_query)
 
     query = """
     query issues($search_query: String!) {
@@ -213,7 +220,7 @@ defmodule Algora.Github.Poller.Search do
           ... on Issue {
             url
             updatedAt
-            comments(first: 3, orderBy: {field: UPDATED_AT, direction: ASC}) {
+            comments(last: 3, orderBy: {field: UPDATED_AT, direction: DESC}) {
               nodes {
                 databaseId
                 author {

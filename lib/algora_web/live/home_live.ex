@@ -592,7 +592,7 @@ defmodule AlgoraWeb.HomeLive do
                     <div class="text-right">
                       <div class="text-base font-medium text-foreground">Nicolas Camara</div>
                       <div class="pt-1 text-sm font-medium text-muted-foreground">
-                        Co-founder at Firecrawl
+                        Founder & CTO
                       </div>
                     </div>
                     <img
@@ -613,7 +613,7 @@ defmodule AlgoraWeb.HomeLive do
                     <div>
                       <div class="text-base font-semibold text-foreground">Gergő Móricz</div>
                       <div class="pt-2 text-sm font-medium text-muted-foreground">
-                        Software Engineer at Firecrawl
+                        Software Engineer
                       </div>
                     </div>
                   </div>
@@ -655,9 +655,53 @@ defmodule AlgoraWeb.HomeLive do
 
             <%!-- john --%>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+              <.link
+                class="flex justify-center items-center"
+                aria-label="Logo"
+                navigate={~p"/org/golemcloud"}
+              >
+                <Wordmarks.golemcloud class="w-32" />
+              </.link>
+              <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
+                $15,000 Open source bounty to hire
+              </h2>
+              <div class="flex items-center justify-center gap-8">
+                <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-right">
+                      <div class="text-base font-medium text-foreground">John A De Goes</div>
+                      <div class="pt-1 text-sm font-medium text-muted-foreground">
+                        Founder & CEO
+                      </div>
+                    </div>
+                    <img
+                      src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+                      alt="John A De Goes"
+                      class="size-12 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+                <.icon name="tabler-arrows-diff" class="size-8 text-success-400" />
+                <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
+                  <div class="flex items-center gap-4">
+                    <img
+                      src="https://github.com/mschuwalow.png"
+                      alt="Maxim Schuwalow"
+                      class="size-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-semibold text-foreground">Maxim Schuwalow</div>
+                      <div class="pt-2 text-sm font-medium text-muted-foreground">
+                        Software Engineer
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-12 grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
                 <div class="lg:col-span-5">
-                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
                     <div
                       class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
                       phx-click={JS.hide(to: "#poster-overlay")}
@@ -686,7 +730,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-7">
-                  <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                  <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
                     <img
                       src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
                       alt="Golem bounty to hire"
@@ -819,7 +863,8 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply,
+             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1050,7 +1095,8 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money),
+    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

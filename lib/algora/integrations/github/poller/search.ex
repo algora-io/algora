@@ -91,7 +91,7 @@ defmodule Algora.Github.Poller.Search do
   def poll(state) do
     with {:ok, tickets} <- fetch_tickets(state),
          if(length(tickets) > 0, do: Logger.debug("Processing #{length(tickets)} tickets")),
-         {:ok, updated_cursor} <- process_batch(tickets, state.cursor) do
+         {:ok, updated_cursor} <- process_batch(tickets, state) do
       {:ok, %{state | cursor: updated_cursor}}
     else
       {:error, reason} ->
@@ -100,19 +100,19 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp process_batch([], search_cursor), do: {:ok, search_cursor}
+  defp process_batch([], state), do: {:ok, state.cursor}
 
-  defp process_batch(tickets, search_cursor) do
+  defp process_batch(tickets, state) do
     Repo.transact(fn ->
-      with :ok <- process_tickets(tickets) do
-        update_last_polled(search_cursor, List.last(tickets))
+      with :ok <- process_tickets(tickets, state) do
+        update_last_polled(state.cursor, List.last(tickets))
       end
     end)
   end
 
-  defp process_tickets(tickets) do
+  defp process_tickets(tickets, state) do
     Enum.reduce_while(tickets, :ok, fn ticket, _acc ->
-      case process_ticket(ticket) do
+      case process_ticket(ticket, state) do
         {:ok, _} -> {:cont, :ok}
         error -> {:halt, error}
       end
@@ -161,8 +161,18 @@ defmodule Algora.Github.Poller.Search do
 
       ticket["comments"]["nodes"]
       |> Enum.reject(fn comment ->
-        comment["author"]["login"] == Github.bot_handle() or
-          DateTime.before?(updated_at, state.cursor.timestamp)
+        already_processed? =
+          case DateTime.from_iso8601(comment["updatedAt"]) do
+            {:ok, comment_updated_at, _} ->
+              DateTime.before?(comment_updated_at, state.cursor.timestamp)
+
+            {:error, _} ->
+              true
+          end
+
+        bot? = comment["author"]["login"] == Github.bot_handle()
+
+        bot? or already_processed?
       end)
       |> Enum.flat_map(fn comment ->
         dbg(comment)
@@ -222,6 +232,7 @@ defmodule Algora.Github.Poller.Search do
             updatedAt
             comments(last: 3, orderBy: {field: UPDATED_AT, direction: DESC}) {
               nodes {
+                updatedAt
                 databaseId
                 author {
                   login

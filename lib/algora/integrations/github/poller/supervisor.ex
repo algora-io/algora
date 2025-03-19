@@ -31,7 +31,7 @@ defmodule Algora.Github.Poller.Supervisor do
     :ok
   end
 
-  def add_provider(provider, opts \\ []) do
+  def add_provider(provider \\ "github", opts \\ []) do
     DynamicSupervisor.start_child(__MODULE__, {SearchPoller, [provider: provider] ++ opts})
   end
 
@@ -42,7 +42,7 @@ defmodule Algora.Github.Poller.Supervisor do
     end
   end
 
-  def remove_provider(provider) do
+  def remove_provider(provider \\ "github") do
     with :ok <- terminate_child(provider),
          {:ok, _cursor} <- Search.delete_search_cursor(provider) do
       :ok

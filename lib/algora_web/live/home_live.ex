@@ -653,7 +653,7 @@ defmodule AlgoraWeb.HomeLive do
             <%!-- john --%>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
-                <div class="lg:col-span-4">
+                <div class="lg:col-span-5">
                   <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <iframe
                       src="https://www.youtube.com/embed/xObOGcUdtY0"
@@ -668,10 +668,10 @@ defmodule AlgoraWeb.HomeLive do
                     </iframe>
                   </div>
                 </div>
-                <div class="lg:col-span-8">
-                  <div class="relative flex aspect-[955/1080] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                <div class="lg:col-span-7">
+                  <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <img
-                      src={~p"/images/screenshots/bounty-to-hire-golem.png"}
+                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
                       alt="Golem bounty to hire"
                       class="object-cover rounded-2xl"
                     />
@@ -802,7 +802,8 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply,
+             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1033,7 +1034,8 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money),
+    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

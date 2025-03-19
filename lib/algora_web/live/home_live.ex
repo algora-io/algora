@@ -108,7 +108,10 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section :if={1 == 2} class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
+        <section
+          :if={1 == 2}
+          class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40"
+        >
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
@@ -566,7 +569,113 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
 
+            <%!-- mogery --%>
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+                <div class="lg:col-span-4">
+                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/j4fLNIJCywk"
+                      title="High school student solves #opensource bounties"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div class="lg:col-span-8">
+                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/HhTT-GX5tjQ"
+                      title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+                <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+                  <div class="lg:col-span-6">
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
+                      <div class="flex items-center gap-4">
+                        <img
+                          src="https://pbs.twimg.com/profile_images/1599993355089465344/R6Al_s_H_400x400.jpg"
+                          alt="Nicolas Camara"
+                          class="size-40 rounded-2xl object-cover"
+                        />
+                        <div>
+                          <div class="text-3xl font-semibold text-foreground">Nicolas Camara</div>
+                          <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                            Co-founder at Firecrawl
+                          </div>
+                          <div class="pt-1 text-lg text-muted-foreground">YC S22</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="lg:col-span-6">
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
+                      <div class="flex items-center gap-4">
+                        <img
+                          src="https://github.com/mogery.png"
+                          alt="Gergő Móricz"
+                          class="size-40 rounded-2xl object-cover"
+                        />
+                        <div>
+                          <div class="text-3xl font-semibold text-foreground">Gergő Móricz</div>
+                          <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                            Software Engineer at Firecrawl
+                          </div>
+                          <div class="pt-1 text-lg text-muted-foreground">YC S22</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <%!-- john --%>
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+                <div class="lg:col-span-4">
+                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/xObOGcUdtY0"
+                      title="$15,000 Open source bounty to hire a Rust engineer"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div class="lg:col-span-8">
+                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <img
+                      src={~p"/images/screenshots/bounty-to-hire-golem.png"}
+                      alt="Golem bounty to hire"
+                      class="object-cover size-84 rounded-2xl"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -626,8 +735,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -858,8 +966,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

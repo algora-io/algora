@@ -5,7 +5,6 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2, require_authenticated_admin: 2]
   import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
   import Oban.Web.Router
-  import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]

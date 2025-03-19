@@ -26,10 +26,10 @@ defmodule Algora.Stargazer do
     state
   end
 
-  defp fetch_count do
+  def fetch_count do
     with {:ok, %Finch.Response{status: 200, body: body}} <-
            :get
-           |> Finch.build(AlgoraWeb.Constants.get(:github_repo_url))
+           |> Finch.build(AlgoraWeb.Constants.get(:github_repo_api_url))
            |> Finch.request(Algora.Finch),
          {:ok, %{"stargazers_count" => count}} <- Jason.decode(body) do
       count

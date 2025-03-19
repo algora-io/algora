@@ -27,33 +27,51 @@ defmodule AlgoraWeb.Components.Header do
         <div class="hidden lg:flex lg:gap-x-12">
           <.link
             href={AlgoraWeb.Constants.get(:docs_url)}
-            class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            class="text-sm/6 font-medium text-foreground/80 hover:text-foreground"
           >
             Docs
           </.link>
           <.link
             href={AlgoraWeb.Constants.get(:blog_url)}
-            class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
           >
             Blog
           </.link>
           <.link
             navigate={~p"/pricing"}
-            class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
+            class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
           >
             Pricing
           </.link>
-          <.link
-            href={AlgoraWeb.Constants.get(:github_url)}
-            class="text-sm/6 font-semibold text-muted-foreground hover:text-foreground"
-          >
-            GitHub
-          </.link>
         </div>
 
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-          <.button navigate={~p"/auth/login"} variant="subtle">
+        <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-2">
+          <.link
+            :if={Algora.Stargazer.count()}
+            class="group w-fit outline-none flex items-center"
+            target="_blank"
+            rel="noopener"
+            href={AlgoraWeb.Constants.get(:github_url)}
+          >
+            <div class="rounded-[3px] hidden shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+              <div class="flex w-full items-center justify-center gap-x-1">
+                <AlgoraWeb.Components.Logos.github class="mr-0.5 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition" />
+                <span class="hidden xl:block">Star</span>
+                <span class="font-semibold text-foreground/80 group-hover:text-foreground">
+                  {Algora.Stargazer.count()}
+                </span>
+              </div>
+            </div>
+          </.link>
+          <.button
+            navigate={~p"/auth/login"}
+            variant="ghost"
+            class="font-semibold text-foreground/80 hover:text-foreground"
+          >
             Sign in
+          </.button>
+          <.button navigate={~p"/auth/signup"} variant="subtle" class="font-semibold">
+            Sign up
           </.button>
         </div>
       </nav>

@@ -45,26 +45,29 @@ defmodule AlgoraWeb.Components.Header do
           </.link>
         </div>
 
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-4">
-        <.link
-          :if={Algora.Stargazer.count()}
-          class="group w-fit outline-none"
-          target="_blank"
-          rel="noopener"
-          href={AlgoraWeb.Constants.get(:github_url)}
-        >
-          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent p-2 text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
-            <div class="flex w-full items-center justify-center gap-x-1">
-              <AlgoraWeb.Components.Logos.github class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
-              <span class="hidden xl:block">Star</span>
-              <span class="font-semibold text-gray-300">
-                {Algora.Stargazer.count()}
-              </span>
+        <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-2">
+          <.link
+            :if={Algora.Stargazer.count()}
+            class="group w-fit outline-none"
+            target="_blank"
+            rel="noopener"
+            href={AlgoraWeb.Constants.get(:github_url)}
+          >
+            <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent p-2 text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+              <div class="flex w-full items-center justify-center gap-x-1">
+                <AlgoraWeb.Components.Logos.github class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
+                <span class="hidden xl:block">Star</span>
+                <span class="font-semibold text-gray-300">
+                  {Algora.Stargazer.count()}
+                </span>
+              </div>
             </div>
-          </div>
-        </.link>
-          <.button navigate={~p"/auth/login"} variant="subtle">
+          </.link>
+          <.button navigate={~p"/auth/login"} variant="ghost">
             Sign in
+          </.button>
+          <.button navigate={~p"/auth/signup"} variant="subtle">
+            Sign up
           </.button>
         </div>
       </nav>

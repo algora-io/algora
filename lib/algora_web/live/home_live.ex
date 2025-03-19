@@ -580,6 +580,128 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
 
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-6 order-first lg:order-last">
+                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/FXQVD02rfg8?si=rt3r_8-aFt2ZKla8"
+                      title="YouTube video player"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div class="lg:col-span-5 order-last lg:order-first">
+                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                    It was the easiest hire because we already knew how great he was
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">Eric Allam</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Co-founder & CTO at Trigger.dev (YC W23)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <%!-- <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $77,175
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        359
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        79
+                      </dd>
+                    </div>
+                  </dl> --%>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-6">
+                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <iframe
+                      src="https://www.youtube.com/embed/3wZGDuoPajk"
+                      title="YouTube video player"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerpolicy="strict-origin-when-cross-origin"
+                      allowfullscreen
+                      width="100%"
+                      height="100%"
+                    >
+                    </iframe>
+                  </div>
+                </div>
+                <div class="lg:col-span-5">
+                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                    Bounties help us control our burn rate, get work done & meet new hires. I've made 3 full-time hires from Algora
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-3xl font-semibold text-foreground">Tushar Mathur</div>
+                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                          Founder & CEO at Tailcall
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <%!-- <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $77,175
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        359
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        79
+                      </dd>
+                    </div>
+                  </dl> --%>
+                </div>
+              </div>
+            </div>
+
             <%!-- <div class="pt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <div class="flex flex-col items-center text-center">
                 <.icon name="tabler-git-pull-request" class="h-12 w-12 mb-4 text-primary" />

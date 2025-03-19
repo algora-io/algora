@@ -63,7 +63,11 @@ defmodule AlgoraWeb.Components.Header do
               </div>
             </div>
           </.link>
-          <.button navigate={~p"/auth/login"} variant="ghost" class="font-semibold text-foreground/80 hover:text-foreground">
+          <.button
+            navigate={~p"/auth/login"}
+            variant="ghost"
+            class="font-semibold text-foreground/80 hover:text-foreground"
+          >
             Sign in
           </.button>
           <.button navigate={~p"/auth/signup"} variant="subtle" class="font-semibold">

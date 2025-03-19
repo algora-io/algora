@@ -4,7 +4,9 @@ defmodule Algora.Github.Poller.SearchConsumer do
 
   alias Algora.Accounts
   alias Algora.Bounties
+  alias Algora.Repo
   alias Algora.Util
+  alias Algora.Workspace.CommandResponse
 
   require Logger
 
@@ -41,6 +43,16 @@ defmodule Algora.Github.Poller.SearchConsumer do
            provider_login: to_string(comment["author"]["login"])
          ) do
       {:ok, user} ->
+        strategy =
+          case Repo.get_by(CommandResponse,
+                 provider: "github",
+                 provider_command_id: to_string(comment["databaseId"]),
+                 command_source: :comment
+               ) do
+            nil -> :increase
+            _ -> :set
+          end
+
         Bounties.create_bounty(
           %{
             creator: user,
@@ -53,7 +65,8 @@ defmodule Algora.Github.Poller.SearchConsumer do
             }
           },
           command_id: comment["databaseId"],
-          command_source: :comment
+          command_source: :comment,
+          strategy: strategy
         )
 
       {:error, _reason} = error ->

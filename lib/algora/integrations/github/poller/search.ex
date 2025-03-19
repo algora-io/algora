@@ -153,8 +153,6 @@ defmodule Algora.Github.Poller.Search do
   end
 
   defp process_ticket(%{"updatedAt" => updated_at, "url" => url} = ticket, state) do
-    dbg(ticket)
-
     with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
          {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url) do
       Logger.info("Latency: #{DateTime.diff(DateTime.utc_now(), updated_at, :second)}s")
@@ -175,8 +173,6 @@ defmodule Algora.Github.Poller.Search do
         bot? or already_processed?
       end)
       |> Enum.flat_map(fn comment ->
-        dbg(comment)
-
         case Command.parse(comment["body"]) do
           {:ok, [command | _]} -> [{comment, command}]
           _ -> []
@@ -215,8 +211,6 @@ defmodule Algora.Github.Poller.Search do
       else
         "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc"
       end
-
-    dbg(search_query)
 
     query = """
     query issues($search_query: String!) {

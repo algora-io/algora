@@ -142,7 +142,8 @@ defmodule Algora.Workspace do
 
     needs_update? =
       Repository.has_default_og_image?(repository) ||
-        (repository.og_image_updated_at && DateTime.before?(repository.og_image_updated_at, one_day_ago))
+        (repository.og_image_updated_at &&
+           DateTime.before?(repository.og_image_updated_at, one_day_ago))
 
     if needs_update? do
       %{repository_id: repository.id}
@@ -162,7 +163,9 @@ defmodule Algora.Workspace do
     else
       {:error,
        %Ecto.Changeset{
-         errors: [provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}]
+         errors: [
+           provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}
+         ]
        } = changeset} ->
         Repo.fetch_by(Repository, provider: "github", provider_id: changeset.changes.provider_id)
 
@@ -220,6 +223,7 @@ defmodule Algora.Workspace do
 
         error ->
           Logger.error("#{owner}/#{repo} | failed to remap #{user.provider_login} -> #{github_user["login"]}")
+
           error
       end
     end
@@ -384,14 +388,21 @@ defmodule Algora.Workspace do
             {:error, reason}
         end
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Failed to refresh command response #{ticket.id}: #{inspect(reason)}")
         {:error, :command_response_not_found}
     end
   end
 
   defp post_response(token, ticket_ref, command_id, command_source, ticket, body) do
     with {:ok, comment} <-
-           Github.create_issue_comment(token, ticket_ref[:owner], ticket_ref[:repo], ticket_ref[:number], body) do
+           Github.create_issue_comment(
+             token,
+             ticket_ref[:owner],
+             ticket_ref[:repo],
+             ticket_ref[:number],
+             body
+           ) do
       create_command_response(%{
         comment: comment,
         command_source: command_source,
@@ -435,6 +446,7 @@ defmodule Algora.Workspace do
 
       {:error, reason} ->
         Logger.error("Failed to update command response #{command_response.id}: #{inspect(reason)}")
+
         {:ok, command_response}
     end
   end

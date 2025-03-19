@@ -575,7 +575,51 @@ defmodule AlgoraWeb.HomeLive do
 
             <%!-- mogery --%>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid gap-x-16 gap-y-8 lg:grid-cols-12">
+              <.link
+                class="font-bold font-display text-xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+                aria-label="Logo"
+                navigate={~p"/org/mendableai"}
+              >
+                🔥
+                Firecrawl
+              </.link>
+              <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4 !leading-[1.25]">
+                Open source contributor to full-time engineer
+              </h2>
+              <div class="flex items-center justify-center gap-8">
+                <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-right">
+                      <div class="text-base font-medium text-foreground">Nicolas Camara</div>
+                      <div class="pt-1 text-sm font-medium text-muted-foreground">
+                        Co-founder at Firecrawl
+                      </div>
+                    </div>
+                    <img
+                      src="https://pbs.twimg.com/profile_images/1599993355089465344/R6Al_s_H_400x400.jpg"
+                      alt="Nicolas Camara"
+                      class="size-12 rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+                <.icon name="tabler-arrows-diff" class="size-8 text-success-400" />
+                <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
+                  <div class="flex items-center gap-4">
+                    <img
+                      src="https://github.com/mogery.png"
+                      alt="Gergő Móricz"
+                      class="size-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <div class="text-base font-semibold text-foreground">Gergő Móricz</div>
+                      <div class="pt-2 text-sm font-medium text-muted-foreground">
+                        Software Engineer at Firecrawl
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-12 grid gap-x-16 gap-y-8 lg:grid-cols-12">
                 <div class="lg:col-span-3">
                   <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <iframe
@@ -604,47 +648,6 @@ defmodule AlgoraWeb.HomeLive do
                       height="100%"
                     >
                     </iframe>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-                <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
-                  <div class="lg:col-span-6">
-                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
-                      <div class="flex items-center gap-4">
-                        <img
-                          src="https://pbs.twimg.com/profile_images/1599993355089465344/R6Al_s_H_400x400.jpg"
-                          alt="Nicolas Camara"
-                          class="size-40 rounded-2xl object-cover"
-                        />
-                        <div>
-                          <div class="text-3xl font-semibold text-foreground">Nicolas Camara</div>
-                          <div class="pt-2 text-2xl font-medium text-muted-foreground">
-                            Co-founder at Firecrawl
-                          </div>
-                          <div class="pt-1 text-lg text-muted-foreground">YC S22</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="lg:col-span-6">
-                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
-                      <div class="flex items-center gap-4">
-                        <img
-                          src="https://github.com/mogery.png"
-                          alt="Gergő Móricz"
-                          class="size-40 rounded-2xl object-cover"
-                        />
-                        <div>
-                          <div class="text-3xl font-semibold text-foreground">Gergő Móricz</div>
-                          <div class="pt-2 text-2xl font-medium text-muted-foreground">
-                            Software Engineer at Firecrawl
-                          </div>
-                          <div class="pt-1 text-lg text-muted-foreground">YC S22</div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>

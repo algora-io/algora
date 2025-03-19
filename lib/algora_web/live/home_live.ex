@@ -862,8 +862,7 @@ defmodule AlgoraWeb.HomeLive do
              |> redirect(to: ~p"/")}
 
           {:error, :already_exists} ->
-            {:noreply,
-             put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+            {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
 
           {:error, _reason} ->
             {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -965,11 +964,12 @@ defmodule AlgoraWeb.HomeLive do
   defp get_total_paid_out do
     subtotal =
       Repo.one(
-        from t in Transaction,
+        from(t in Transaction,
           where: t.type == :credit,
           where: t.status == :succeeded,
           where: not is_nil(t.linked_transaction_id),
           select: sum(t.net_amount)
+        )
       ) || Money.new(0, :USD)
 
     subtotal |> Money.add!(PlatformStats.get().extra_paid_out) |> Money.round(currency_digits: 0)
@@ -978,22 +978,24 @@ defmodule AlgoraWeb.HomeLive do
   defp get_completed_bounties_count do
     bounties_subtotal =
       Repo.one(
-        from t in Transaction,
+        from(t in Transaction,
           where: t.type == :credit,
           where: t.status == :succeeded,
           where: not is_nil(t.linked_transaction_id),
           where: not is_nil(t.bounty_id),
           select: count(fragment("DISTINCT (?, ?)", t.bounty_id, t.user_id))
+        )
       ) || 0
 
     tips_subtotal =
       Repo.one(
-        from t in Transaction,
+        from(t in Transaction,
           where: t.type == :credit,
           where: t.status == :succeeded,
           where: not is_nil(t.linked_transaction_id),
           where: not is_nil(t.tip_id),
           select: count(fragment("DISTINCT (?, ?)", t.tip_id, t.user_id))
+        )
       ) || 0
 
     bounties_subtotal + tips_subtotal + PlatformStats.get().extra_completed_bounties
@@ -1002,11 +1004,12 @@ defmodule AlgoraWeb.HomeLive do
   defp get_contributors_count do
     subtotal =
       Repo.one(
-        from t in Transaction,
+        from(t in Transaction,
           where: t.type == :credit,
           where: t.status == :succeeded,
           where: not is_nil(t.linked_transaction_id),
           select: count(fragment("DISTINCT ?", t.user_id))
+        )
       ) || 0
 
     subtotal + PlatformStats.get().extra_contributors
@@ -1014,7 +1017,7 @@ defmodule AlgoraWeb.HomeLive do
 
   defp get_countries_count do
     Repo.one(
-      from u in User,
+      from(u in User,
         join: t in Transaction,
         on: t.user_id == u.id,
         where: t.type == :credit,
@@ -1022,6 +1025,7 @@ defmodule AlgoraWeb.HomeLive do
         where: not is_nil(t.linked_transaction_id),
         where: not is_nil(u.country) and u.country != "",
         select: count(fragment("DISTINCT ?", u.country))
+      )
     ) || 0
   end
 
@@ -1094,8 +1098,7 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp format_money(money),
-    do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 

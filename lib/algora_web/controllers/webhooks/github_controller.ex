@@ -64,7 +64,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
     with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, %{"permission" => permission}} <-
-           Github.get_repository_permissions(token, repo["owner"]["login"], repo["name"], author["login"]) do
+           Github.get_repository_permissions(
+             token,
+             repo["owner"]["login"],
+             repo["name"],
+             author["login"]
+           ) do
       case permission do
         "admin" -> {:ok, :admin}
         "write" -> {:ok, :mod}
@@ -77,7 +82,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     installation_id = payload["installation"]["id"]
 
     with {:ok, token} <- Github.get_installation_token(installation_id),
-         {:ok, installation} <- Repo.fetch_by(Installation, provider: "github", provider_id: to_string(installation_id)),
+         {:ok, installation} <-
+           Repo.fetch_by(Installation,
+             provider: "github",
+             provider_id: to_string(installation_id)
+           ),
          {:ok, user} <- Workspace.ensure_user(token, author["login"]) do
       member =
         Repo.one(
@@ -166,7 +175,10 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         primary_claim = List.first(claims)
 
         installation =
-          Repo.get_by(Installation, provider: "github", provider_id: to_string(payload["installation"]["id"]))
+          Repo.get_by(Installation,
+            provider: "github",
+            provider_id: to_string(payload["installation"]["id"])
+          )
 
         bounties =
           Repo.all(
@@ -220,6 +232,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      %{idempotency_key: idempotency_key}
                    ) do
               Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
+
               :ok
             else
               {:error, reason} ->
@@ -314,9 +327,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
     ticket_number = get_github_ticket(webhook)["number"]
 
-    # TODO: perform compensating action if needed
-    # ❌ comment1.created (:set) -> comment2.created (:increase) -> comment2.edited (:increase)
-    # ✅ comment1.created (:set) -> comment2.created (:increase) -> comment2.edited (:decrease + :increase)
     strategy =
       case Repo.get_by(CommandResponse,
              provider: "github",
@@ -331,7 +341,10 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     with {:ok, role} when role in [:admin, :mod] <- authorize_user(webhook),
          {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, installation} <-
-           Workspace.fetch_installation_by(provider: "github", provider_id: to_string(payload["installation"]["id"])),
+           Workspace.fetch_installation_by(
+             provider: "github",
+             provider_id: to_string(payload["installation"]["id"])
+           ),
          {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
          {:ok, creator} <- Workspace.ensure_user(token, author["login"]) do
       Bounties.create_bounty(
@@ -372,7 +385,10 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     case authorize_user(webhook) do
       {:ok, role} when role in [:admin, :mod] ->
         installation =
-          Repo.get_by(Installation, provider: "github", provider_id: to_string(payload["installation"]["id"]))
+          Repo.get_by(Installation,
+            provider: "github",
+            provider_id: to_string(payload["installation"]["id"])
+          )
 
         customer =
           Repo.one(
@@ -386,7 +402,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
         {:ok, token} = Github.get_installation_token(payload["installation"]["id"])
 
-        {:ok, ticket} = Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number)
+        {:ok, ticket} =
+          Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number)
 
         autopay_cooldown_expired? = fn ->
           from(t in Tip,
@@ -399,8 +416,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           )
           |> Repo.one()
           |> case do
-            nil -> true
-            tip -> DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > :timer.hours(1)
+            nil ->
+              true
+
+            tip ->
+              DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > :timer.hours(1)
           end
         end
 
@@ -417,7 +437,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         autopay_result =
           if autopayable? do
             with {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
-                 {:ok, creator} <- Workspace.ensure_user(token, payload["repository"]["owner"]["login"]),
+                 {:ok, creator} <-
+                   Workspace.ensure_user(token, payload["repository"]["owner"]["login"]),
                  {:ok, recipient} <- Workspace.ensure_user(token, recipient),
                  {:ok, tip} <-
                    Bounties.do_create_tip(
@@ -446,6 +467,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      %{idempotency_key: idempotency_key}
                    ) do
               Logger.info("Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).")
+
               {:ok, tip}
             else
               {:error, reason} ->
@@ -572,8 +594,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
          |> Enum.reject(&is_nil/1)
          # keep only the first claim command if multiple claims are present
          |> Enum.reduce([], fn
-           {:claim, _} = claim, acc -> if Enum.any?(acc, &match?({:claim, _}, &1)), do: acc, else: [claim | acc]
-           command, acc -> [command | acc]
+           {:claim, _} = claim, acc ->
+             if Enum.any?(acc, &match?({:claim, _}, &1)), do: acc, else: [claim | acc]
+
+           command, acc ->
+             [command | acc]
          end)
          |> Enum.reverse()}
 
@@ -599,6 +624,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
         error ->
           Logger.error("Command execution failed for #{event_action}(#{hook_id}): #{inspect(command)}: #{inspect(error)}")
+
           {:halt, error}
       end
     end)

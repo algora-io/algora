@@ -14,6 +14,7 @@ defmodule Algora.Github do
   def private_key, do: [:github, :private_key] |> Algora.config() |> String.replace("\\n", "\n")
   def pat, do: Algora.config([:github, :pat])
   def pat_enabled, do: Algora.config([:github, :pat_enabled])
+  def bot_handle, do: Algora.config([:github, :bot_handle])
 
   def install_url_base, do: "https://github.com/apps/#{app_handle()}/installations"
   def install_url_new, do: "#{install_url_base()}/new"

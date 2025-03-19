@@ -34,7 +34,9 @@ defmodule Algora.Github.Client do
       {:ok, %Finch.Response{status: status, headers: headers}} when status in [301, 302, 307] ->
         case List.keyfind(headers, "location", 0) do
           {"location", location} ->
-            request_with_follow_redirects(Finch.build(request.method, location, request.headers, request.body))
+            request_with_follow_redirects(
+              Finch.build(request.method, location, request.headers, request.body)
+            )
 
           nil ->
             {:error, "Redirect response missing location header"}
@@ -99,7 +101,8 @@ defmodule Algora.Github.Client do
 
   def fetch(access_token, url, method \\ "GET", body \\ nil)
 
-  def fetch(access_token, "https://api.github.com" <> path, method, body), do: fetch(access_token, path, method, body)
+  def fetch(access_token, "https://api.github.com" <> path, method, body),
+    do: fetch(access_token, path, method, body)
 
   def fetch(access_token, path, method, body) do
     http(
@@ -110,6 +113,50 @@ defmodule Algora.Github.Client do
         if(access_token, do: [{"Authorization", "Bearer #{access_token}"}], else: []),
       body
     )
+  end
+
+  def search(access_token, q, opts \\ []) do
+    per_page = opts[:per_page] || 10
+    since = opts[:since] || "2025-03-18T00:00:00Z"
+
+    search_query =
+      if opts[:since] do
+        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc updated:>#{opts[:since]}"
+      else
+        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc"
+      end
+
+    query = """
+    query issues($search_query: String!) {
+      search(first: #{per_page}, type: ISSUE, query: $search_query) {
+        issueCount
+        pageInfo {
+          hasNextPage
+        }
+        nodes {
+          __typename
+          ... on Issue {
+            url
+            updatedAt
+            comments(first: 3, orderBy: {field: UPDATED_AT, direction: ASC}) {
+              nodes {
+                databaseId
+                author {
+                  login
+                }
+                body
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+
+    body = %{query: query, variables: %{search_query: search_query}}
+    IO.puts(query)
+    IO.puts(search_query)
+    fetch(access_token, "/graphql", "POST", body)
   end
 
   defp build_query(opts), do: if(opts == [], do: "", else: "?" <> URI.encode_query(opts))
@@ -205,7 +252,8 @@ defmodule Algora.Github.Client do
 
   @impl true
   def list_installation_repos(access_token) do
-    with {:ok, %{"repositories" => repos}} <- fetch(access_token, "/installation/repositories", "GET") do
+    with {:ok, %{"repositories" => repos}} <-
+           fetch(access_token, "/installation/repositories", "GET") do
       {:ok, repos}
     end
   end
@@ -242,6 +290,8 @@ defmodule Algora.Github.Client do
 
   @impl true
   def add_labels(access_token, owner, repo, number, labels) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{labels: labels})
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{
+      labels: labels
+    })
   end
 end

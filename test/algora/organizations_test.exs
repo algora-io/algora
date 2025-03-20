@@ -187,4 +187,18 @@ defmodule Algora.OrganizationsTest do
       assert result3.org.handle == "piedpiperhq"
     end
   end
+
+  describe "init_preview/1" do
+    test "creates a new user and org if they don't exist" do
+      assert {:ok, %{user: user, org: org}} = Algora.Organizations.init_preview("acme", "repo")
+
+      assert is_nil(org.handle)
+      assert org.type == :organization
+      assert org.last_context == "repo/acme/repo"
+
+      assert is_nil(user.handle)
+      assert user.type == :individual
+      assert user.last_context == "preview/#{org.id}/acme/repo"
+    end
+  end
 end

@@ -1,37 +1,36 @@
 defmodule AlgoraWeb.Org.PreviewNav do
   @moduledoc false
   use Phoenix.Component
+  use AlgoraWeb, :verified_routes
 
   import Phoenix.LiveView
 
-  alias Algora.Accounts.User
-  alias Algora.Github.TokenPool
-  alias Algora.Workspace
+  alias Algora.Organizations
 
   def on_mount(:default, %{"repo_owner" => repo_owner, "repo_name" => repo_name}, _session, socket) do
-    token = TokenPool.get_token()
-    {:ok, _repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
-    {:ok, user} = Workspace.ensure_user(token, repo_owner)
+    current_context = socket.assigns[:current_context]
 
-    current_org = %User{
-      id: Ecto.UUID.generate(),
-      provider: "github",
-      provider_login: repo_owner,
-      name: user.name,
-      handle: user.handle,
-      avatar_url: user.avatar_url
-    }
+    if current_context && current_context.last_context == "repo/#{repo_owner}/#{repo_name}" do
+      {:cont,
+       socket
+       |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+       |> assign(:current_org, current_context)
+       |> assign(:current_user_role, :admin)
+       |> assign(:nav, nav_items(repo_owner, repo_name))
+       |> assign(:contacts, [])
+       |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+    else
+      case Organizations.init_preview(repo_owner, repo_name) do
+        {:ok, %{user: user, org: _org}} ->
+          token = AlgoraWeb.UserAuth.sign_preview_code(user.id)
+          path = AlgoraWeb.UserAuth.preview_path(user.id, token, ~p"/go/#{repo_owner}/#{repo_name}")
 
-    {:cont,
-     socket
-     |> assign(:current_context, current_org)
-     |> assign(:all_contexts, [current_org])
-     |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
-     |> assign(:current_org, current_org)
-     |> assign(:current_user_role, :admin)
-     |> assign(:nav, nav_items(repo_owner, repo_name))
-     |> assign(:contacts, [])
-     |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+          {:halt, redirect(socket, to: path)}
+
+        {:error, reason} ->
+          {:cont, put_flash(socket, :error, "Failed to initialize preview: #{inspect(reason)}")}
+      end
+    end
   end
 
   defp handle_active_tab_params(_params, _url, socket) do

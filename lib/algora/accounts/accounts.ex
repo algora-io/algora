@@ -413,8 +413,20 @@ defmodule Algora.Accounts do
 
   def get_last_context_user(%User{} = user) do
     case last_context(user) do
-      "personal" -> user
-      last_context -> get_user_by_handle(last_context)
+      "personal" ->
+        user
+
+      "preview/" <> ctx ->
+        case String.split(ctx, "/") do
+          [id, _repo_owner, _repo_name] -> get_user(id)
+          _ -> nil
+        end
+
+      "repo/" <> _repo_full_name ->
+        user
+
+      last_context ->
+        get_user_by_handle(last_context)
     end
   end
 

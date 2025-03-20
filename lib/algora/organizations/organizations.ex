@@ -3,9 +3,11 @@ defmodule Algora.Organizations do
   import Ecto.Query
 
   alias Algora.Accounts.User
+  alias Algora.Github.TokenPool
   alias Algora.Organizations.Member
   alias Algora.Organizations.Org
   alias Algora.Repo
+  alias Algora.Workspace
 
   def create_organization(params) do
     %User{type: :organization}
@@ -227,5 +229,32 @@ defmodule Algora.Organizations do
         join: c in assoc(u, :contractor_contracts),
         where: c.client_id == ^org.id and c.contractor_id == u.id
     )
+  end
+
+  def init_preview(repo_owner, repo_name) do
+    token = TokenPool.get_token()
+
+    {:ok, _repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
+    {:ok, owner} = Workspace.ensure_user(token, repo_owner)
+
+    Repo.transact(fn repo ->
+      {:ok, org} =
+        repo.insert(%User{
+          type: :organization,
+          id: Nanoid.generate(),
+          display_name: owner.name,
+          avatar_url: owner.avatar_url,
+          last_context: "repo/#{repo_owner}/#{repo_name}"
+        })
+
+      {:ok, user} =
+        repo.insert(%User{
+          type: :individual,
+          id: Nanoid.generate(),
+          last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}"
+        })
+
+      {:ok, %{org: org, user: user}}
+    end)
   end
 end

@@ -63,6 +63,7 @@ defmodule AlgoraWeb.Router do
     get "/a/:table_prefix/:activity_id", ActivityController, :get
     get "/auth/logout", OAuthCallbackController, :sign_out
     get "/tip", TipController, :create
+    get "/preview", OrgPreviewCallbackController, :new
 
     scope "/callbacks" do
       get "/stripe/refresh", StripeCallbackController, :refresh

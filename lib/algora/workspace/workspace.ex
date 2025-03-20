@@ -53,18 +53,15 @@ defmodule Algora.Workspace do
   @spec resolve_installation_and_token(integer() | nil, String.t(), User.t()) ::
           {:ok, %{installation_id: integer() | nil, token: String.t()}} | {:error, atom()}
   def resolve_installation_and_token(installation_id, repo_owner, fallback_user) do
-    resolved_installation_id = installation_id || get_installation_id_by_owner(repo_owner)
-
-    if resolved_installation_id do
-      case Github.get_installation_token(resolved_installation_id) do
-        {:ok, token} -> {:ok, %{installation_id: resolved_installation_id, token: token}}
-        error -> error
-      end
+    with id when not is_nil(id) <- installation_id || get_installation_id_by_owner(repo_owner),
+         {:ok, token} <- Github.get_installation_token(id) do
+      {:ok, %{installation_id: id, token: token}}
     else
-      case Accounts.get_access_token(fallback_user) do
-        {:ok, token} -> {:ok, %{installation_id: nil, token: token}}
-        error -> error
-      end
+      _ ->
+        case Accounts.get_access_token(fallback_user) do
+          {:ok, token} -> {:ok, %{installation_id: nil, token: token}}
+          error -> error
+        end
     end
   end
 

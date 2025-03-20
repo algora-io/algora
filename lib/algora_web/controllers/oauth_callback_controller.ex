@@ -30,8 +30,6 @@ defmodule AlgoraWeb.OAuthCallbackController do
 
     type = if(socket_id, do: :popup, else: :redirect)
 
-    dbg(res)
-
     with {:ok, data} <- res,
          {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,

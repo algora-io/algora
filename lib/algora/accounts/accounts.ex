@@ -267,12 +267,15 @@ defmodule Algora.Accounts do
         records -> Enum.find(records, fn {user, _} -> user.id == current_user.id end)
       end
 
+    # TODO: figure out why name is not updating
     dbg(account)
 
-    case account do
-      nil -> create_user(info, primary_email, emails, token)
-      {user, _identity} -> update_user(user, info, primary_email, emails, token)
-    end
+    dbg(
+      case account do
+        nil -> create_user(info, primary_email, emails, token)
+        {user, _identity} -> update_user(user, info, primary_email, emails, token)
+      end
+    )
   end
 
   def register_org(params) do

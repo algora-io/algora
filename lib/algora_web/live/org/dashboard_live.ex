@@ -500,16 +500,27 @@ defmodule AlgoraWeb.Org.DashboardLive do
         |> Organizations.generate_handle_from_email()
         |> Organizations.ensure_unique_handle()
 
-      {:ok, user} =
-        socket.assigns.current_user
-        |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
-        |> Repo.update()
+      case Repo.get_by(User, email: socket.assigns.email) do
+        nil ->
+          {:ok, user} =
+            socket.assigns.current_user
+            |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
+            |> Repo.update()
 
-      {:noreply,
-       socket
-       |> assign(:current_user, user)
-       |> assign_achievements()
-       |> put_flash(:info, "Logged in successfully!")}
+          {:noreply,
+           socket
+           |> assign(:current_user, user)
+           |> assign_achievements()
+           |> put_flash(:info, "Logged in successfully!")}
+
+        user ->
+          token = AlgoraWeb.UserAuth.generate_login_code(user.email)
+
+          {:noreply,
+           socket
+           |> redirect(to: AlgoraWeb.UserAuth.login_path(user.email, token))
+           |> put_flash(:info, "Logged in successfully!")}
+      end
     else
       throttle()
       {:noreply, put_flash(socket, :error, "Invalid login code")}

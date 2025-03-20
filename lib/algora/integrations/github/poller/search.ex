@@ -119,8 +119,8 @@ defmodule Algora.Github.Poller.Search do
     end)
   end
 
-  def fetch_tickets(state) do
-    case search("bounty", since: DateTime.to_iso8601(state.cursor.timestamp)) do
+  defp fetch_tickets(state) do
+    case search("bounty", since: DateTime.to_iso8601(state.cursor.timestamp), per_page: @per_page) do
       {:ok, %{"data" => %{"search" => %{"nodes" => tickets}}}} ->
         {:ok, tickets}
 
@@ -201,15 +201,14 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  def search(q, opts \\ []) do
-    per_page = opts[:per_page] || 10
-    since = opts[:since]
+  defp search(q, opts \\ []) do
+    per_page = opts[:per_page] || @per_page
 
     search_query =
-      if opts[:since] do
-        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc updated:>#{opts[:since]}"
+      if since = opts[:since] do
+        "#{q} in:comment is:issue sort:updated-asc updated:>#{since}"
       else
-        "#{q} in:comment is:issue repo:acme-incorporated/webapp sort:updated-asc"
+        "#{q} in:comment is:issue sort:updated-asc"
       end
 
     query = """

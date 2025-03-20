@@ -320,8 +320,9 @@ defmodule Algora.Accounts.User do
     validate_inclusion(changeset, :timezone, Tzdata.zone_list())
   end
 
-  defp type_from_provider(:github, "Organization"), do: :organization
-  defp type_from_provider(:github, _), do: :individual
+  def type_from_provider(:github, "Bot"), do: :bot
+  def type_from_provider(:github, "Organization"), do: :organization
+  def type_from_provider(:github, _), do: :individual
 
   def handle(%{handle: handle}) when is_binary(handle), do: handle
   def handle(%{provider_login: handle}), do: handle

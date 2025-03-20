@@ -236,6 +236,7 @@ defmodule Algora.Organizations do
 
     {:ok, _repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
     {:ok, owner} = Workspace.ensure_user(token, repo_owner)
+    {:ok, _contributors} = Workspace.ensure_contributors(token, repo_owner, repo_name)
 
     Repo.transact(fn repo ->
       {:ok, org} =
@@ -251,6 +252,7 @@ defmodule Algora.Organizations do
         repo.insert(%User{
           type: :individual,
           id: Nanoid.generate(),
+          display_name: "You",
           last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}"
         })
 

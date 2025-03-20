@@ -137,6 +137,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def list_repository_contributors(_access_token, _owner, _repo) do
+    {:ok, []}
+  end
+
+  @impl true
   def add_labels(_access_token, _owner, _repo, _number, _labels) do
     {:ok, []}
   end

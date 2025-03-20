@@ -232,7 +232,7 @@ defmodule AlgoraWeb.CoreComponents do
           </.avatar>
           <div>
             <div class="font-semibold">{ctx.name}</div>
-            <div class="text-sm text-gray-500">@{ctx.handle}</div>
+            <div :if={ctx.handle} class="text-sm text-gray-500">@{ctx.handle}</div>
           </div>
         </div>
       </:link>

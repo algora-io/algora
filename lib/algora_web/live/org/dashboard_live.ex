@@ -16,6 +16,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
+  alias Algora.Workspace.Contributor
   alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Forms.BountyForm
@@ -39,11 +40,24 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       bounties = Bounties.list_bounties(owner_id: current_org.id)
 
+      contributors =
+        case current_org.last_context do
+          "repo/" <> repo ->
+            case String.split(repo, "/") do
+              [repo_owner, repo_name] -> Workspace.list_repository_contributors(repo_owner, repo_name)
+              _ -> []
+            end
+
+          _ ->
+            top_earners
+        end
+
       {:ok,
        socket
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
        |> assign(:matching_devs, top_earners)
+       |> assign(:contributors, dbg(contributors))
        |> assign(:bounties, bounties)
        |> assign(:has_more_bounties, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
@@ -193,14 +207,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
 
         <.section
-          :if={@matching_devs != []}
           title={"#{@current_org.name} Contributors"}
           subtitle="Engage your top contributors with tips or contract opportunities"
         >
           <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
-                <%= for user <- @matching_devs do %>
+                <%= for %Contributor{user: user} <- dbg(@contributors) do %>
                   <.matching_dev user={user} contracts={@contracts} current_org={@current_org} />
                 <% end %>
               </tbody>

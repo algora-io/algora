@@ -225,7 +225,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
 
         <.section
-          :if={@bounties != []}
           title={"#{@current_org.name} Bounties"}
           subtitle="List of bounties posted by #{@current_org.name}"
         >

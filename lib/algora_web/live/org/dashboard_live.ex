@@ -619,7 +619,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp achievement_todo(%{achievement: %{id: :connect_github_status}} = assigns) do
     ~H"""
-    <.button :if={!@current_user.provider_login} href={@oauth_url} class="ml-auto gap-2">
+    <.button :if={!@current_user.provider_login} href={Github.authorize_url()} class="ml-auto gap-2">
       <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Connect GitHub
     </.button>
     """
@@ -926,7 +926,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.achievement_todo
                 achievement={achievement}
                 current_user={@current_user}
-                oauth_url={@oauth_url}
                 secret_code={@secret_code}
                 login_form={@login_form}
               />

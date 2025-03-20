@@ -11,6 +11,7 @@ defmodule Algora.Github.Poller.Search do
   alias Algora.Repo
   alias Algora.Search
   alias Algora.Util
+  alias Algora.Workspace
 
   require Logger
 
@@ -157,20 +158,25 @@ defmodule Algora.Github.Poller.Search do
          {:ok, [ticket_ref: ticket_ref], _, _, _, _} <- Parser.full_ticket_ref(url) do
       Logger.info("Latency: #{DateTime.diff(DateTime.utc_now(), updated_at, :second)}s")
 
+      installation_token =
+        if installation_id = Workspace.get_installation_id_by_owner(ticket_ref[:owner]) do
+          case Github.get_installation_token(installation_id) do
+            {:ok, token} -> token
+            _error -> nil
+          end
+        end
+
       ticket["comments"]["nodes"]
       |> Enum.reject(fn comment ->
         already_processed? =
           case DateTime.from_iso8601(comment["updatedAt"]) do
-            {:ok, comment_updated_at, _} ->
-              DateTime.before?(comment_updated_at, state.cursor.timestamp)
-
-            {:error, _} ->
-              true
+            {:ok, comment_updated_at, _} -> DateTime.before?(comment_updated_at, state.cursor.timestamp)
+            {:error, _} -> true
           end
 
         bot? = comment["author"]["login"] == Github.bot_handle()
 
-        bot? or already_processed?
+        not is_nil(installation_token) or bot? or already_processed?
       end)
       |> Enum.flat_map(fn comment ->
         case Command.parse(comment["body"]) do

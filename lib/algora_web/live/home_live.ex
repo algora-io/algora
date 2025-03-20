@@ -10,6 +10,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties
+  alias Algora.Github
   alias Algora.Payments.Transaction
   alias Algora.PSP.ConnectCountries
   alias Algora.Repo
@@ -35,8 +36,13 @@ defmodule AlgoraWeb.HomeLive do
       %{label: "Countries", value: format_number(get_countries_count())}
     ]
 
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
+    end
+
     {:ok,
      socket
+     |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign(:featured_devs, Accounts.list_featured_developers(country_code))
      |> assign(:stats, stats)
      |> assign(:faq_items, get_faq_items())

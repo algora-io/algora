@@ -11,6 +11,9 @@ defmodule Algora.Accounts do
   alias Algora.Organizations.Member
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Workspace.Contributor
+  alias Algora.Workspace.Installation
+  alias Algora.Workspace.Repository
 
   require Algora.SQL
 
@@ -282,6 +285,35 @@ defmodule Algora.Accounts do
     |> Repo.insert()
   end
 
+  def migrate_user(old_user, new_user) do
+    Repo.delete_all(from(i in Identity, where: i.user_id == ^old_user.id))
+
+    Repo.update_all(
+      from(r in Repository, where: r.user_id == ^old_user.id),
+      set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(c in Contributor, where: c.user_id == ^old_user.id),
+      set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.owner_id == ^old_user.id),
+      set: [owner_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.provider_user_id == ^old_user.id),
+      set: [provider_user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.connected_user_id == ^old_user.id),
+      set: [connected_user_id: new_user.id]
+    )
+  end
+
   def update_user(user, info, primary_email, emails, token) do
     Repo.transact(fn ->
       if old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"])) do
@@ -289,17 +321,7 @@ defmodule Algora.Accounts do
         |> change(provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil)
         |> Repo.update()
 
-        Repo.delete_all(from(i in Identity, where: i.user_id == ^old_user.id))
-
-        Repo.update_all(
-          from(r in Algora.Workspace.Repository, where: r.user_id == ^old_user.id),
-          set: [user_id: user.id]
-        )
-
-        Repo.update_all(
-          from(c in Algora.Workspace.Contributor, where: c.user_id == ^old_user.id),
-          set: [user_id: user.id]
-        )
+        migrate_user(old_user, user)
       end
 
       with {:ok, _} <-

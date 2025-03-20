@@ -226,7 +226,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
         <.section
           title={"#{@current_org.name} Bounties"}
-          subtitle="List of bounties posted by #{@current_org.name}"
+          subtitle={"List of bounties posted by #{@current_org.name}"}
         >
           <div id="bounties-container" phx-hook="InfiniteScroll">
             <div class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">

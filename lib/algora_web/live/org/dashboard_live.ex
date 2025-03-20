@@ -22,6 +22,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
+  alias Swoosh.Email
 
   require Logger
 
@@ -66,6 +67,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
        |> assign(:show_contract_modal, false)
        |> assign(:selected_developer, nil)
+       |> assign(:secret_code, nil)
+       |> assign_login_form(User.login_changeset(%User{}, %{}))
        |> assign_payable_bounties()
        |> assign_contracts()
        |> assign_achievements()}
@@ -471,6 +474,70 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
+    code = Nanoid.generate()
+
+    changeset = User.login_changeset(%User{}, %{})
+
+    case send_login_code_to_user(socket.assigns.current_user, code) do
+      {:ok, _id} ->
+        {:noreply,
+         socket
+         |> assign(:secret_code, code)
+         |> assign(:email, email)
+         |> assign_login_form(changeset)}
+
+      {:error, reason} ->
+        Logger.error("Failed to send login code to #{email}: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
+    end
+  end
+
+  def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
+    if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
+      # TODO: update user
+      # email = socket.assigns.email
+      # last_context = ...
+
+      {:noreply, put_flash(socket, :info, "Logged in successfully!")}
+    else
+      throttle()
+      {:noreply, put_flash(socket, :error, "Invalid login code")}
+    end
+  end
+
+  defp throttle, do: :timer.sleep(1000)
+
+  defp assign_login_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :login_form, to_form(changeset))
+  end
+
+  @from_name "Algora"
+  @from_email "info@algora.io"
+
+  defp send_login_code_to_user(user, code) do
+    email =
+      Email.new()
+      |> Email.to({user.display_name, user.email})
+      |> Email.from({@from_name, @from_email})
+      |> Email.subject("Login code for Algora")
+      |> Email.text_body("""
+      Here is your login code for Algora!
+
+       #{code}
+
+      If you didn't request this link, you can safely ignore this email.
+
+      --------------------------------------------------------------------------------
+
+      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
+
+      © 2025 Algora PBC.
+      """)
+
+    Algora.Mailer.deliver(email)
+  end
+
   defp assign_payable_bounties(socket) do
     org = socket.assigns.current_org
 
@@ -512,6 +579,42 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp achievement_todo(%{achievement: %{id: :complete_signup_status}} = assigns) do
     ~H"""
+    <.simple_form
+      :if={!@secret_code}
+      for={@login_form}
+      id="send_login_code_form"
+      phx-submit="send_login_code"
+    >
+      <.input
+        field={@login_form[:email]}
+        type="email"
+        label="Email"
+        placeholder="you@example.com"
+        required
+      />
+      <.button phx-disable-with="Signing in..." class="w-full py-5">
+        Sign in
+      </.button>
+    </.simple_form>
+    <.simple_form
+      :if={@secret_code}
+      for={@login_form}
+      id="send_login_code_form"
+      phx-submit="send_login_code"
+    >
+      <.input field={@login_form[:login_code]} type="text" label="Login code" required />
+      <.button phx-disable-with="Signing in..." class="w-full py-5">
+        Submit
+      </.button>
+    </.simple_form>
+    """
+  end
+
+  defp achievement_todo(%{achievement: %{id: :connect_github_status}} = assigns) do
+    ~H"""
+    <.button :if={!@current_user.provider_login} href={@oauth_url} class="ml-auto gap-2">
+      <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Connect GitHub
+    </.button>
     """
   end
 
@@ -811,9 +914,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <nav class="pt-6">
         <ol role="list" class="space-y-6">
           <%= for achievement <- @achievements do %>
-            <li>
+            <li class="space-y-6">
               <.achievement achievement={achievement} />
-              <.achievement_todo achievement={achievement} />
+              <.achievement_todo
+                achievement={achievement}
+                secret_code={@secret_code}
+                login_form={@login_form}
+              />
             </li>
           <% end %>
         </ol>

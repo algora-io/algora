@@ -3,9 +3,7 @@ defmodule Algora.Github.Poller.Supervisor do
   use DynamicSupervisor
 
   alias Algora.Github.Poller.Search, as: SearchPoller
-  alias Algora.Github.TokenPool
   alias Algora.Search
-  alias Algora.Workspace
 
   require Logger
 

@@ -45,11 +45,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
           "repo/" <> repo ->
             case String.split(repo, "/") do
               [repo_owner, repo_name] -> Workspace.list_repository_contributors(repo_owner, repo_name)
-              _ -> []
+              _ -> Workspace.list_contributors(current_org.provider_login)
             end
 
           _ ->
-            top_earners
+            Workspace.list_contributors(current_org.provider_login)
         end
 
       {:ok,
@@ -57,7 +57,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
        |> assign(:matching_devs, top_earners)
-       |> assign(:contributors, dbg(contributors))
+       |> assign(:contributors, contributors)
        |> assign(:bounties, bounties)
        |> assign(:has_more_bounties, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
@@ -188,25 +188,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </.card>
         </.section>
 
-        <.section :if={@installations == []}>
-          <.card>
-            <.card_header>
-              <.card_title>GitHub Integration</.card_title>
-              <.card_description :if={@installations == []}>
-                Install the Algora app to enable slash commands in your GitHub repositories
-              </.card_description>
-            </.card_header>
-            <.card_content>
-              <div class="flex flex-col gap-2">
-                <.button phx-click="install_app" class="ml-auto gap-2">
-                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
-                </.button>
-              </div>
-            </.card_content>
-          </.card>
-        </.section>
-
         <.section
+          :if={@contributors != []}
           title={"#{@current_org.name} Contributors"}
           subtitle="Engage your top contributors with tips or contract opportunities"
         >
@@ -238,6 +221,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
 
         <.section
+          :if={@bounties != []}
           title={"#{@current_org.name} Bounties"}
           subtitle="List of bounties posted by #{@current_org.name}"
         >
@@ -300,6 +284,24 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {create_bounty(assigns)}
             {create_tip(assigns)}
           </div>
+        </.section>
+
+        <.section :if={@installations == [] && 1 == 2}>
+          <.card>
+            <.card_header>
+              <.card_title>GitHub Integration</.card_title>
+              <.card_description :if={@installations == []}>
+                Install the Algora app to enable slash commands in your GitHub repositories
+              </.card_description>
+            </.card_header>
+            <.card_content>
+              <div class="flex flex-col gap-2">
+                <.button phx-click="install_app" class="ml-auto gap-2">
+                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+                </.button>
+              </div>
+            </.card_content>
+          </.card>
         </.section>
       </div>
     </div>

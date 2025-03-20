@@ -508,6 +508,20 @@ defmodule Algora.Workspace do
     )
   end
 
+  def list_contributors(repo_owner) do
+    Repo.all(
+      from(c in Contributor,
+        join: r in assoc(c, :repository),
+        where: r.provider == "github",
+        join: ro in assoc(r, :user),
+        where: ro.provider_login == ^repo_owner,
+        join: u in assoc(c, :user),
+        select_merge: %{user: u},
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+      )
+    )
+  end
+
   def fetch_contributor(repository_id, user_id) do
     Repo.fetch_by(Contributor, repository_id: repository_id, user_id: user_id)
   end

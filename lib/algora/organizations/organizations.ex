@@ -28,24 +28,24 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
-    Repo.transact(fn repo ->
+    Repo.transact(fn ->
       {:ok, user} =
-        case repo.get_by(User, email: params.user.email) do
+        case Repo.get_by(User, email: params.user.email) do
           nil ->
-            handle = generate_unique_handle(repo, params.user.handle)
+            handle = ensure_unique_handle(params.user.handle)
 
             %User{type: :individual}
             |> User.org_registration_changeset(Map.put(params.user, :handle, handle))
-            |> repo.insert()
+            |> Repo.insert()
 
           existing_user ->
             existing_user
             |> User.org_registration_changeset(Map.delete(params.user, :handle))
-            |> repo.update()
+            |> Repo.update()
         end
 
       {:ok, org} =
-        case repo.one(
+        case Repo.one(
                from o in User,
                  join: m in assoc(o, :members),
                  join: u in assoc(m, :user),
@@ -54,39 +54,49 @@ defmodule Algora.Organizations do
                  limit: 1
              ) do
           nil ->
-            handle = generate_unique_org_handle(repo, params.organization.handle)
+            handle = ensure_unique_org_handle(params.organization.handle)
 
             %User{type: :organization}
             |> Org.changeset(Map.put(params.organization, :handle, handle))
-            |> repo.insert()
+            |> Repo.insert()
 
           existing_org ->
             existing_org
             |> Org.changeset(Map.delete(params.organization, :handle))
-            |> repo.update()
+            |> Repo.update()
         end
 
       {:ok, member} =
-        case repo.get_by(Member, user_id: user.id, org_id: org.id) do
+        case Repo.get_by(Member, user_id: user.id, org_id: org.id) do
           nil ->
             %Member{}
             |> Member.changeset(Map.merge(params.member, %{user_id: user.id, org_id: org.id}))
-            |> repo.insert()
+            |> Repo.insert()
 
           existing_member ->
             existing_member
             |> Member.changeset(Map.merge(params.member, %{user_id: user.id, org_id: org.id}))
-            |> repo.update()
+            |> Repo.update()
         end
 
       {:ok, %{org: org, user: user, member: member}}
     end)
   end
 
-  defp generate_unique_handle(repo, base_handle) do
+  def generate_handle_from_email(email) do
+    email
+    |> String.split("@")
+    |> List.first()
+    |> String.split("+")
+    |> List.first()
+    |> String.replace(~r/[^a-zA-Z0-9]/, "")
+    |> String.downcase()
+  end
+
+  def ensure_unique_handle(base_handle) do
     0
     |> Stream.iterate(&(&1 + 1))
-    |> Enum.reduce_while(base_handle, fn i, _handle -> {:halt, increment_handle(repo, base_handle, i)} end)
+    |> Enum.reduce_while(base_handle, fn i, _handle -> {:halt, increment_handle(base_handle, i)} end)
   end
 
   defp generate_unique_org_handle_candidates(base_handle) do
@@ -100,25 +110,25 @@ defmodule Algora.Organizations do
     )
   end
 
-  defp generate_unique_org_handle(repo, base_handle) do
-    case try_candidates(repo, base_handle) do
-      nil -> increment_handle(repo, base_handle, 1)
+  def ensure_unique_org_handle(base_handle) do
+    case try_candidates(base_handle) do
+      nil -> increment_handle(base_handle, 1)
       handle -> handle
     end
   end
 
-  defp try_candidates(repo, base_handle) do
+  defp try_candidates(base_handle) do
     candidates = generate_unique_org_handle_candidates(base_handle)
 
     Enum.reduce_while(candidates, nil, fn candidate, _acc ->
-      case repo.get_by(User, handle: candidate) do
+      case Repo.get_by(User, handle: candidate) do
         nil -> {:halt, candidate}
         _user -> {:cont, nil}
       end
     end)
   end
 
-  defp increment_handle(repo, base_handle, n) do
+  defp increment_handle(base_handle, n) do
     candidate =
       case n do
         0 -> base_handle
@@ -126,9 +136,9 @@ defmodule Algora.Organizations do
         _ -> raise "Too many attempts to generate unique handle"
       end
 
-    case repo.get_by(User, handle: candidate) do
+    case Repo.get_by(User, handle: candidate) do
       nil -> candidate
-      _user -> increment_handle(repo, base_handle, n + 1)
+      _user -> increment_handle(base_handle, n + 1)
     end
   end
 

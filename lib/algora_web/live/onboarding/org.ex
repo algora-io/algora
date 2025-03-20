@@ -352,17 +352,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               handle
           end
 
-        user_handle =
-          email
-          |> String.split("@")
-          |> List.first()
-          |> String.split("+")
-          |> List.first()
-          |> String.replace(~r/[^a-zA-Z0-9]/, "")
-          |> String.downcase()
-
-        org_unique_handle = org_handle
-        user_unique_handle = user_handle
+        user_handle = Organizations.generate_handle_from_email(email)
 
         org_params =
           %{
@@ -372,7 +362,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 get_in(metadata, [:org, :og_description]) ||
                 get_in(metadata, [:org, :og_title]),
             avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
-            handle: org_unique_handle,
+            handle: org_handle,
             domain: domain,
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
@@ -393,9 +383,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             email: email,
             display_name: user_handle,
             avatar_url: get_in(metadata, [:avatar_url]),
-            handle: user_unique_handle,
+            handle: user_handle,
             tech_stack: tech_stack,
-            last_context: org_unique_handle,
+            last_context: org_handle,
             timezone: socket.assigns.timezone
           }
 

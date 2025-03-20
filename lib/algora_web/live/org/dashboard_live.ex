@@ -13,6 +13,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Bounties.Claim
   alias Algora.Contracts
   alias Algora.Github
+  alias Algora.Organizations
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
@@ -199,7 +200,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
-                <%= for %Contributor{user: user} <- dbg(@contributors) do %>
+                <%= for %Contributor{user: user} <- @contributors do %>
                   <.matching_dev user={user} contracts={@contracts} current_org={@current_org} />
                 <% end %>
               </tbody>
@@ -479,7 +480,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     changeset = User.login_changeset(%User{}, %{})
 
-    case send_login_code_to_user(socket.assigns.current_user, code) do
+    case send_login_code_to_user(email, code) do
       {:ok, _id} ->
         {:noreply,
          socket
@@ -495,9 +496,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
-      # TODO: update user
-      # email = socket.assigns.email
-      # last_context = ...
+      handle =
+        socket.assigns.email
+        |> Organizations.generate_handle_from_email()
+        |> Organizations.ensure_unique_handle()
+
+      socket.assigns.current_user
+      |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
+      |> Repo.update()
 
       {:noreply, put_flash(socket, :info, "Logged in successfully!")}
     else
@@ -515,10 +521,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @from_name "Algora"
   @from_email "info@algora.io"
 
-  defp send_login_code_to_user(user, code) do
+  defp send_login_code_to_user(email, code) do
     email =
       Email.new()
-      |> Email.to({user.display_name, user.email})
+      |> Email.to(email)
       |> Email.from({@from_name, @from_email})
       |> Email.subject("Login code for Algora")
       |> Email.text_body("""

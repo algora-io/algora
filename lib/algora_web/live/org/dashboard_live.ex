@@ -501,11 +501,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
         |> Organizations.generate_handle_from_email()
         |> Organizations.ensure_unique_handle()
 
-      socket.assigns.current_user
-      |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
-      |> Repo.update()
+      {:ok, user} =
+        socket.assigns.current_user
+        |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
+        |> Repo.update()
 
-      {:noreply, put_flash(socket, :info, "Logged in successfully!")}
+      {:noreply, socket |> assign(:current_user, user) |> put_flash(:info, "Logged in successfully!")}
     else
       throttle()
       {:noreply, put_flash(socket, :error, "Invalid login code")}
@@ -924,6 +925,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.achievement achievement={achievement} />
               <.achievement_todo
                 achievement={achievement}
+                current_user={@current_user}
+                oauth_url={@oauth_url}
                 secret_code={@secret_code}
                 login_form={@login_form}
               />

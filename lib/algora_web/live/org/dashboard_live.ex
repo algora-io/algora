@@ -192,22 +192,27 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </.card>
         </.section>
 
-        <.section>
-          <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {create_bounty(assigns)}
-            {create_tip(assigns)}
+        <.section
+          :if={@matching_devs != []}
+          title={"#{@current_org.name} Contributors"}
+          subtitle="Engage your top contributors with tips or contract opportunities"
+        >
+          <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for user <- @matching_devs do %>
+                  <.matching_dev user={user} contracts={@contracts} current_org={@current_org} />
+                <% end %>
+              </tbody>
+            </table>
           </div>
         </.section>
 
-        <div :if={@matching_devs != []} class="relative h-full">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Contributors
-            </h2>
-            <p class="text-sm text-muted-foreground">
-              Engage your top contributors with tips or contract opportunities
-            </p>
-          </div>
+        <.section
+          :if={@matching_devs != []}
+          title="Algora Experts"
+          subtitle="Meet Algora experts versed in your tech stack"
+        >
           <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
@@ -217,31 +222,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </tbody>
             </table>
           </div>
-        </div>
-
-        <div :if={@matching_devs != []} class="relative h-full">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Experts
-            </h2>
-            <p class="text-sm text-muted-foreground">
-              Meet Algora experts versed in your tech stack
-            </p>
-          </div>
-          <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for user <- @matching_devs do %>
-                  <.matching_dev user={user} contracts={@contracts} current_org={@current_org} />
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
+        </.section>
 
         <.section
-          title="Recommended bounties"
-          subtitle="AI-curated issues from your repositories with suggested bounty amounts"
+          title={"#{@current_org.name} Bounties"}
+          subtitle="List of bounties posted by #{@current_org.name}"
         >
           <div id="bounties-container" phx-hook="InfiniteScroll">
             <div class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
@@ -294,6 +279,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
               </div>
             </div>
+          </div>
+        </.section>
+
+        <.section>
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {create_bounty(assigns)}
+            {create_tip(assigns)}
           </div>
         </.section>
       </div>

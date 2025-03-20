@@ -37,11 +37,15 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
       end
 
+      bounties = Bounties.list_bounties(owner_id: current_org.id)
+
       {:ok,
        socket
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
        |> assign(:matching_devs, top_earners)
+       |> assign(:bounties, bounties)
+       |> assign(:has_more_bounties, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
@@ -198,13 +202,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <div :if={@matching_devs != []} class="relative h-full">
           <div class="flex flex-col space-y-1.5">
             <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Contracts
+              Contributors
             </h2>
             <p class="text-sm text-muted-foreground">
-              Engage top-performing developers with contract opportunities
+              Engage your top contributors with tips or contract opportunities
             </p>
           </div>
-          <div class="pt-3 relative w-full overflow-auto">
+          <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for user <- @matching_devs do %>
@@ -214,6 +218,84 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </table>
           </div>
         </div>
+
+        <div :if={@matching_devs != []} class="relative h-full">
+          <div class="flex flex-col space-y-1.5">
+            <h2 class="text-2xl font-semibold leading-none tracking-tight">
+              Experts
+            </h2>
+            <p class="text-sm text-muted-foreground">
+              Meet Algora experts versed in your tech stack
+            </p>
+          </div>
+          <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for user <- @matching_devs do %>
+                  <.matching_dev user={user} contracts={@contracts} current_org={@current_org} />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <.section
+          title="Recommended bounties"
+          subtitle="AI-curated issues from your repositories with suggested bounty amounts"
+        >
+          <div id="bounties-container" phx-hook="InfiniteScroll">
+            <div class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
+              <ul class="divide-y divide-border">
+                <%= for bounty <- @bounties do %>
+                  <.link href={bounty.ticket.url} class="block whitespace-nowrap hover:bg-muted/50">
+                    <li class="flex items-center py-2 px-3">
+                      <div class="flex-shrink-0 mr-3">
+                        <.avatar class="h-8 w-8">
+                          <.avatar_image src={bounty.repository.owner.avatar_url} />
+                          <.avatar_fallback>
+                            {Algora.Util.initials(User.handle(bounty.repository.owner))}
+                          </.avatar_fallback>
+                        </.avatar>
+                      </div>
+
+                      <div class="flex-grow min-w-0 mr-4">
+                        <div class="flex items-center text-sm">
+                          <span class="font-semibold mr-1">{bounty.repository.owner.name}</span>
+                          <.icon
+                            name="tabler-chevron-right"
+                            class="mr-1 size-3 text-muted-foreground"
+                          />
+                          <span class="font-semibold mr-1 text-muted-foreground">
+                            {bounty.repository.name}
+                          </span>
+                          <span class="text-muted-foreground mr-2">#{bounty.ticket.number}</span>
+                          <span class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
+                            {Money.to_string!(bounty.amount)}
+                          </span>
+                          <span class="text-foreground">{bounty.ticket.title}</span>
+                        </div>
+                      </div>
+
+                      <div class="flex-shrink-0 flex gap-2">
+                        <.button variant="secondary">
+                          Skip
+                        </.button>
+                        <.button>
+                          Confirm
+                        </.button>
+                      </div>
+                    </li>
+                  </.link>
+                <% end %>
+              </ul>
+            </div>
+            <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+              <div class="animate-pulse text-muted-foreground">
+                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+              </div>
+            </div>
+          </div>
+        </.section>
       </div>
     </div>
     {sidebar(assigns)}
@@ -410,9 +492,46 @@ defmodule AlgoraWeb.Org.DashboardLive do
               View contract
             </.button>
           <% else %>
-            <.button phx-click="offer_contract" phx-value-user_id={@user.id}>
-              Offer contract
-            </.button>
+            <div class="flex gap-2">
+              <.button phx-click="offer_contract" phx-value-user_id={@user.id} variant="secondary">
+                Tip
+              </.button>
+              <.button phx-click="offer_contract" phx-value-user_id={@user.id}>
+                Contract
+              </.button>
+              <.dropdown_menu>
+                <.dropdown_menu_trigger>
+                  <.button variant="ghost" size="icon">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-4 w-4"
+                    >
+                      <circle cx="12" cy="12" r="1" />
+                      <circle cx="12" cy="5" r="1" />
+                      <circle cx="12" cy="19" r="1" />
+                    </svg>
+                    <span class="sr-only">Open menu</span>
+                  </.button>
+                </.dropdown_menu_trigger>
+                <.dropdown_menu_content>
+                  <.dropdown_menu_item>
+                    View Profile
+                  </.dropdown_menu_item>
+                  <.dropdown_menu_separator />
+                  <.dropdown_menu_item phx-click="remove">
+                    Remove
+                  </.dropdown_menu_item>
+                </.dropdown_menu_content>
+              </.dropdown_menu>
+            </div>
           <% end %>
         </div>
       </td>

@@ -270,7 +270,7 @@ defmodule Algora.Accounts.User do
 
   def validate_handle(changeset) do
     reserved_words =
-      ~w(personal org admin support help security team staff official auth tip home dashboard bounties community user payment claims orgs projects jobs leaderboard onboarding pricing developers companies contracts community blog docs open hiring sdk api)
+      ~w(personal org admin support help security team staff official auth tip home dashboard bounties community user payment claims orgs projects jobs leaderboard onboarding pricing developers companies contracts community blog docs open hiring sdk api repo go preview)
 
     changeset
     |> validate_format(:handle, ~r/^[a-zA-Z0-9_-]{2,32}$/)

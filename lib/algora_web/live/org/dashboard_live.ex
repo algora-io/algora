@@ -505,11 +505,37 @@ defmodule AlgoraWeb.Org.DashboardLive do
     assign(socket, :contracts, contracts)
   end
 
+  defp achievement_todo(%{achievement: %{status: status}} = assigns) when status != :current do
+    ~H"""
+    """
+  end
+
+  defp achievement_todo(%{achievement: %{id: :complete_signup_status}} = assigns) do
+    ~H"""
+    """
+  end
+
+  defp achievement_todo(%{achievement: %{id: :install_app_status}} = assigns) do
+    ~H"""
+    <.button phx-click="install_app" class="ml-auto gap-2">
+      <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+    </.button>
+    """
+  end
+
+  defp achievement_todo(assigns) do
+    ~H"""
+    """
+  end
+
   defp assign_achievements(socket) do
+    current_org = socket.assigns.current_org
+
     status_fns = [
       {&personalize_status/1, "Personalize Algora", nil},
       {&complete_signup_status/1, "Complete signup", nil},
-      {&install_app_status/1, "Install the Algora app", nil},
+      {&connect_github_status/1, "Connect GitHub", nil},
+      {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
       {&share_with_friend_status/1, "Share Algora with a friend", nil}
@@ -517,13 +543,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {achievements, _} =
       Enum.reduce_while(status_fns, {[], false}, fn {status_fn, name, path}, {acc, found_current} ->
+        id = Function.info(status_fn)[:name]
         status = status_fn.(socket)
 
         result =
           cond do
-            found_current -> {acc ++ [%{status: status, name: name, path: path}], found_current}
-            status == :completed -> {acc ++ [%{status: status, name: name, path: path}], false}
-            true -> {acc ++ [%{status: :current, name: name, path: path}], true}
+            found_current -> {acc ++ [%{id: id, status: status, name: name, path: path}], found_current}
+            status == :completed -> {acc ++ [%{id: id, status: status, name: name, path: path}], false}
+            true -> {acc ++ [%{id: id, status: :current, name: name, path: path}], true}
           end
 
         {:cont, result}
@@ -537,6 +564,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp complete_signup_status(socket) do
     case socket.assigns.current_user do
       %User{handle: handle} when is_binary(handle) -> :completed
+      _ -> :upcoming
+    end
+  end
+
+  defp connect_github_status(socket) do
+    case socket.assigns.current_user do
+      %User{provider_login: login} when is_binary(login) -> :completed
       _ -> :upcoming
     end
   end
@@ -779,6 +813,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <%= for achievement <- @achievements do %>
             <li>
               <.achievement achievement={achievement} />
+              <.achievement_todo achievement={achievement} />
             </li>
           <% end %>
         </ol>

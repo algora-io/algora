@@ -1,5 +1,6 @@
 defmodule Algora.Accounts do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts.Identity
@@ -283,20 +284,23 @@ defmodule Algora.Accounts do
 
   def update_user(user, info, primary_email, emails, token) do
     Repo.transact(fn ->
-      Repo.update_all(
-        from(u in User,
-          where: u.provider == "github",
-          where: u.provider_id == ^to_string(info["id"])
-        ),
-        set: [provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil]
-      )
+      if old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"])) do
+        old_user
+        |> change(provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil)
+        |> Repo.update()
 
-      Repo.delete_all(
-        from(i in Identity,
-          where: i.provider == "github",
-          where: i.provider_id == ^to_string(info["id"])
+        Repo.delete_all(from(i in Identity, where: i.user_id == ^old_user.id))
+
+        Repo.update_all(
+          from(r in Algora.Workspace.Repository, where: r.user_id == ^old_user.id),
+          set: [user_id: user.id]
         )
-      )
+
+        Repo.update_all(
+          from(c in Algora.Workspace.Contributor, where: c.user_id == ^old_user.id),
+          set: [user_id: user.id]
+        )
+      end
 
       with {:ok, _} <-
              user

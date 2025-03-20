@@ -505,7 +505,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
         |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
         |> Repo.update()
 
-      {:noreply, socket |> assign(:current_user, user) |> put_flash(:info, "Logged in successfully!")}
+      {:noreply,
+       socket
+       |> assign(:current_user, user)
+       |> assign_achievements()
+       |> put_flash(:info, "Logged in successfully!")}
     else
       throttle()
       {:noreply, put_flash(socket, :error, "Invalid login code")}
@@ -598,8 +602,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         placeholder="you@example.com"
         required
       />
-      <.button phx-disable-with="Signing in..." class="w-full py-5">
-        Sign in
+      <.button phx-disable-with="Signing up..." class="w-full py-5">
+        Sign up
       </.button>
     </.simple_form>
     <.simple_form

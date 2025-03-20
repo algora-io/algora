@@ -71,6 +71,14 @@ defmodule AlgoraWeb.Router do
       get "/:provider/installation", InstallationCallbackController, :new
     end
 
+    scope "/go/:repo_owner/:repo_name" do
+      live_session :preview,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.PreviewNav] do
+        live "/", Org.DashboardLive, :preview
+      end
+    end
+
     scope "/org/:org_handle" do
       live_session :org,
         layout: {AlgoraWeb.Layouts, :user},

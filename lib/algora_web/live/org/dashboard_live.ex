@@ -506,6 +506,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp assign_achievements(socket) do
     status_fns = [
       {&personalize_status/1, "Personalize Algora", nil},
+      {&complete_signup_status/1, "Complete signup", nil},
       {&install_app_status/1, "Install the Algora app", nil},
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
@@ -530,6 +531,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp personalize_status(_socket), do: :completed
+
+  defp complete_signup_status(socket) do
+    case socket.assigns.current_user do
+      %User{handle: handle} when is_binary(handle) -> :completed
+      _ -> :upcoming
+    end
+  end
 
   defp install_app_status(socket) do
     case socket.assigns.installations do

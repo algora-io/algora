@@ -207,7 +207,7 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp search(q, opts \\ []) do
+  defp search(q, opts) do
     per_page = opts[:per_page] || @per_page
 
     search_query =

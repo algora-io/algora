@@ -652,22 +652,23 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   defp assign_active_repos(socket) do
-    active_pollers =
-      Enum.reduce(Algora.Github.Poller.Supervisor.which_children(), [], fn {_, pid, _, _}, acc ->
-        {owner, name} = GenServer.call(pid, :get_repo_info)
+    active_pollers = []
+    # active_pollers =
+    #   Enum.reduce(Algora.Github.Poller.Supervisor.which_children(), [], fn {_, pid, _, _}, acc ->
+    #     {owner, name} = GenServer.call(pid, :get_repo_info)
 
-        case Algora.Github.Poller.Supervisor.find_child(owner, name) do
-          {_, pid, _, _} ->
-            if GenServer.call(pid, :is_paused) do
-              acc
-            else
-              [{owner, name} | acc]
-            end
+    #     case Algora.Github.Poller.Supervisor.find_child(owner, name) do
+    #       {_, pid, _, _} ->
+    #         if GenServer.call(pid, :is_paused) do
+    #           acc
+    #         else
+    #           [{owner, name} | acc]
+    #         end
 
-          _ ->
-            acc
-        end
-      end)
+    #       _ ->
+    #         acc
+    #     end
+    #   end)
 
     # Build dynamic OR conditions for each owner/name pair
     conditions =

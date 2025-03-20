@@ -4,8 +4,6 @@ defmodule AlgoraWeb.HomeLive do
 
   import Ecto.Changeset
   import Ecto.Query
-  import Phoenix.LiveView.TagEngine
-  import Tails, only: [classes: 1]
 
   alias Algora.Accounts
   alias Algora.Accounts.User
@@ -17,7 +15,6 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Workspace
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
@@ -1033,75 +1030,6 @@ defmodule AlgoraWeb.HomeLive do
         select: count(fragment("DISTINCT ?", u.country))
       )
     ) || 0
-  end
-
-  defp logo_cloud(assigns) do
-    assigns =
-      assign(
-        assigns,
-        :orgs,
-        Enum.map(
-          [
-            %{
-              name: "ZIO",
-              url: "https://zio.dev",
-              args: %{
-                src: ~p"/images/wordmarks/zio.png",
-                class: "mt-4 max-h-10 brightness-0 invert"
-              }
-            },
-            %{
-              name: "Tailcall",
-              url: "https://tailcall.run",
-              component: &Wordmarks.tailcall/1,
-              args: %{class: "max-h-12", fill: "#fff"}
-            },
-            %{name: "Cal.com", url: "https://cal.com", component: &Wordmarks.calcom/1},
-            %{
-              name: "Qdrant",
-              url: "https://qdrant.tech",
-              component: &Wordmarks.qdrant/1,
-              args: %{class: "max-h-9"}
-            },
-            %{
-              name: "Golem Cloud",
-              url: "https://www.golem.cloud",
-              component: &Wordmarks.golemcloud/1,
-              args: %{class: "max-h-9"}
-            },
-            %{
-              name: "Remotion",
-              url: "https://remotion.dev",
-              args: %{
-                src: "https://algora.io/banners/remotion.png",
-                class: "max-h-10 brightness-0 invert sm:hidden"
-              }
-            }
-          ],
-          fn org ->
-            org
-            |> Map.put_new(:args, %{})
-            |> update_in([:args, :class], &classes(["max-h-6 w-full object-contain", &1]))
-            |> put_in([:args, :alt], org.name)
-          end
-        )
-      )
-
-    ~H"""
-    <%= for org <- @orgs do %>
-      <div class="flex items-center justify-center">
-        <%= if org[:component] do %>
-          {component(
-            org.component,
-            org.args,
-            {__ENV__.module, __ENV__.function, __ENV__.file, __ENV__.line}
-          )}
-        <% else %>
-          <img {org.args} />
-        <% end %>
-      </div>
-    <% end %>
-    """
   end
 
   defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)

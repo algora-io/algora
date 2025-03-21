@@ -37,7 +37,7 @@ defmodule AlgoraWeb.CommunityLive do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
       <.section title="Community" subtitle="Meet the Algora community">
-        <div class="-mt-4 mb-4 flex flex-wrap gap-2">
+        <div class="mb-4 flex flex-wrap gap-2">
           <%= for tech <- @techs do %>
             <div
               phx-click="select_tech"

@@ -217,7 +217,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title={"#{@current_org.name} Contributors"}
           subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
-          <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
+          <div class="relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %Contributor{user: user} <- @contributors do %>
@@ -233,7 +233,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title="Algora Experts"
           subtitle="Meet Algora experts versed in your tech stack"
         >
-          <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
+          <div class="relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for user <- @matching_devs do %>
@@ -244,7 +244,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <div class="max-w-7xl mx-auto p-6" id="bounties-container" phx-hook="InfiniteScroll">
+        <div id="bounties-container" phx-hook="InfiniteScroll">
           <div class="mb-6">
             <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
               <div>
@@ -365,7 +365,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </div>
 
-        <.section>
+        <.section
+          title={"#{@current_org.name} Ecosystem"}
+          subtitle="Help maintain and grow your ecosystem by creating bounties and tips in your dependencies"
+        >
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
             {create_bounty(assigns)}
             {create_tip(assigns)}

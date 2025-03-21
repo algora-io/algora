@@ -324,7 +324,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   defp to_transaction_rows(transactions), do: transactions
 
-  def assign_more_bounties(socket) do
+  defp assign_more_bounties(socket) do
     %{rows: rows, current_org: current_org} = socket.assigns
 
     last_bounty = List.last(rows).bounty

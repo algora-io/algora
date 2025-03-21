@@ -3,6 +3,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Achievement
+  import AlgoraWeb.Components.Bounties
   import Ecto.Changeset
   import Ecto.Query
 
@@ -14,6 +15,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Contracts
   alias Algora.Github
   alias Algora.Organizations
+  alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
@@ -32,7 +34,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     %{current_org: current_org} = socket.assigns
 
     if socket.assigns.current_user_role in [:admin, :mod] do
-      top_earners = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
+      _top_earners = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
 
       installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
@@ -58,7 +60,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
        socket
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
-       |> assign(:matching_devs, top_earners)
+       #  |> assign(:matching_devs, top_earners)
+       |> assign(:matching_devs, [])
        |> assign(:contributors, contributors)
        |> assign(:bounties, bounties)
        |> assign(:has_more_bounties, false)
@@ -224,63 +227,129 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
-        <.section
-          title={"#{@current_org.name} Bounties"}
-          subtitle={"List of bounties posted by #{@current_org.name}"}
-        >
-          <div id="bounties-container" phx-hook="InfiniteScroll">
-            <div class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
-              <ul class="divide-y divide-border">
-                <%= for bounty <- @bounties do %>
-                  <.link href={bounty.ticket.url} class="block whitespace-nowrap hover:bg-muted/50">
-                    <li class="flex items-center py-2 px-3">
-                      <div class="flex-shrink-0 mr-3">
-                        <.avatar class="h-8 w-8">
-                          <.avatar_image src={bounty.repository.owner.avatar_url} />
-                          <.avatar_fallback>
-                            {Algora.Util.initials(User.handle(bounty.repository.owner))}
-                          </.avatar_fallback>
-                        </.avatar>
+        <div class="max-w-7xl mx-auto p-6" id="bounties-container" phx-hook="InfiniteScroll">
+          <div class="mb-6">
+            <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
+              <div>
+                <h2 class="text-2xl font-bold dark:text-white">Bounties</h2>
+                <p class="text-sm dark:text-gray-300">
+                  Create new bounties using the
+                  <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
+                    /bounty $1000
+                  </code>
+                  command on Github.
+                </p>
+              </div>
+              <div class="pb-4 md:pb-0">
+                <!-- Tab buttons for Open and Completed bounties -->
+                <div dir="ltr" data-orientation="horizontal">
+                  <div
+                    role="tablist"
+                    aria-orientation="horizontal"
+                    class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-md bg-white/5 p-1 text-white/50 dark:bg-gray-800 dark:text-gray-400"
+                    tabindex="0"
+                    data-orientation="horizontal"
+                    style="outline: none;"
+                  >
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={@current_status == :open}
+                      class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :open, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
+                      data-state={if @current_status == :open, do: "active", else: "inactive"}
+                      phx-click="change-tab"
+                      phx-value-tab="open"
+                    >
+                      <div class="relative flex items-center gap-2.5 text-sm md:text-base">
+                        <div class="truncate">Open</div>
+                        <span class={"min-w-[1ch] font-mono #{if @current_status == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
+                          {@stats.open_bounties_count}
+                        </span>
                       </div>
-
-                      <div class="flex-grow min-w-0 mr-4">
-                        <div class="flex items-center text-sm">
-                          <span class="font-semibold mr-1">{bounty.repository.owner.name}</span>
-                          <.icon
-                            name="tabler-chevron-right"
-                            class="mr-1 size-3 text-muted-foreground"
-                          />
-                          <span class="font-semibold mr-1 text-muted-foreground">
-                            {bounty.repository.name}
-                          </span>
-                          <span class="text-muted-foreground mr-2">#{bounty.ticket.number}</span>
-                          <span class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
-                            {Money.to_string!(bounty.amount)}
-                          </span>
-                          <span class="text-foreground">{bounty.ticket.title}</span>
-                        </div>
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={@current_status == :paid}
+                      class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :paid, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
+                      data-state={if @current_status == :paid, do: "active", else: "inactive"}
+                      phx-click="change-tab"
+                      phx-value-tab="completed"
+                    >
+                      <div class="relative flex items-center gap-2.5 text-sm md:text-base">
+                        <div class="truncate">Completed</div>
+                        <span class={"min-w-[1ch] font-mono #{if @current_status == :paid, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
+                          {@stats.rewarded_bounties_count}
+                        </span>
                       </div>
-
-                      <div class="flex-shrink-0 flex gap-2">
-                        <.button variant="secondary">
-                          Skip
-                        </.button>
-                        <.button>
-                          Confirm
-                        </.button>
-                      </div>
-                    </li>
-                  </.link>
-                <% end %>
-              </ul>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
-              <div class="animate-pulse text-muted-foreground">
+          </div>
+          <div
+            :if={@current_status == :open}
+            class="overflow-hidden rounded-xl border border-white/15"
+          >
+            <div id="bounties-container" phx-hook="InfiniteScroll">
+              <.bounties bounties={@bounties} />
+              <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+                <div class="animate-pulse text-muted-foreground">
+                  <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div :if={@current_status == :paid} class="relative">
+            <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transaction_rows do %>
+              <div class="mb-4 rounded-lg border border-border bg-card p-4">
+                <div class="flex gap-4">
+                  <div class="flex-1">
+                    <div class="mb-2 font-mono text-2xl font-extrabold text-success">
+                      {Money.to_string!(transaction.net_amount)}
+                    </div>
+                    <div :if={ticket.repository} class="mb-1 text-sm text-muted-foreground">
+                      {ticket.repository.user.provider_login}/{ticket.repository.name}#{ticket.number}
+                    </div>
+                    <div class="font-medium">
+                      {ticket.title}
+                    </div>
+                    <div class="mt-1 text-xs text-muted-foreground">
+                      {Algora.Util.time_ago(transaction.succeeded_at)}
+                    </div>
+                  </div>
+
+                  <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+                    <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
+                      Awarded to
+                    </h3>
+                    <img
+                      src={recipient.avatar_url}
+                      class="mb-2 h-16 w-16 rounded-full"
+                      alt={recipient.name}
+                    />
+                    <div class="text-center text-sm font-medium">
+                      {recipient.name}
+                      <div>
+                        {Algora.Misc.CountryEmojis.get(recipient.country)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+            <div
+              :if={@has_more_transactions}
+              class="flex justify-center mt-4"
+              id="load-more-indicator"
+            >
+              <div class="animate-pulse text-gray-400">
                 <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
               </div>
             </div>
           </div>
-        </.section>
+        </div>
 
         <.section>
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -382,6 +451,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  @impl true
   def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
     if socket.assigns.has_fresh_token? do
       changeset =
@@ -416,6 +486,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  @impl true
   def handle_event("offer_contract", %{"user_id" => user_id}, socket) do
     developer = Enum.find(socket.assigns.matching_devs, &(&1.id == user_id))
 
@@ -425,15 +496,18 @@ defmodule AlgoraWeb.Org.DashboardLive do
      |> assign(:show_contract_modal, true)}
   end
 
+  @impl true
   def handle_event("offer_contract", _params, socket) do
     # When no user_id is provided, use the user from the current row
     {:noreply, put_flash(socket, :error, "Please select a developer first")}
   end
 
+  @impl true
   def handle_event("close_contract_drawer", _params, socket) do
     {:noreply, assign(socket, :show_contract_modal, false)}
   end
 
+  @impl true
   def handle_event("validate_contract", %{"contract_form" => params}, socket) do
     changeset =
       %ContractForm{}
@@ -443,6 +517,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     {:noreply, assign(socket, :contract_form, to_form(changeset))}
   end
 
+  @impl true
   def handle_event("create_contract", %{"contract_form" => params}, socket) do
     changeset = ContractForm.changeset(%ContractForm{}, params)
 
@@ -474,6 +549,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  @impl true
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
     code = Nanoid.generate()
 
@@ -493,6 +569,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
       handle =
@@ -527,11 +604,120 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  @impl true
+  def handle_event("change-tab", %{"tab" => "completed"}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}?status=completed")}
+  end
+
+  @impl true
+  def handle_event("change-tab", %{"tab" => "open"}, socket) do
+    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}?status=open")}
+  end
+
+  @impl true
+  def handle_event("load_more", _params, socket) do
+    {:noreply,
+     case socket.assigns.current_status do
+       :open -> assign_more_bounties(socket)
+       :paid -> assign_more_transactions(socket)
+     end}
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    current_org = socket.assigns.current_org
+    current_status = get_current_status(params)
+
+    stats = Bounties.fetch_stats(current_org.id)
+
+    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
+    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
+
+    {:noreply,
+     socket
+     |> assign(:current_status, current_status)
+     |> assign(:bounty_rows, to_bounty_rows(bounties))
+     |> assign(:transaction_rows, to_transaction_rows(transactions))
+     |> assign(:has_more_bounties, length(bounties) >= page_size())
+     |> assign(:has_more_transactions, length(transactions) >= page_size())
+     |> assign(:stats, stats)}
+  end
+
   defp throttle, do: :timer.sleep(1000)
 
   defp assign_login_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :login_form, to_form(changeset))
   end
+
+  defp to_bounty_rows(bounties) do
+    claims_by_ticket =
+      bounties
+      |> Enum.map(& &1.ticket.id)
+      |> Bounties.list_claims()
+      |> Enum.group_by(& &1.target_id)
+      |> Map.new(fn {ticket_id, claims} ->
+        {ticket_id, Enum.group_by(claims, & &1.group_id)}
+      end)
+
+    Enum.map(bounties, fn bounty ->
+      %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
+    end)
+  end
+
+  defp to_transaction_rows(transactions), do: transactions
+
+  defp assign_more_bounties(socket) do
+    %{rows: rows, current_org: current_org} = socket.assigns
+
+    last_bounty = List.last(rows).bounty
+
+    cursor = %{
+      inserted_at: last_bounty.inserted_at,
+      id: last_bounty.id
+    }
+
+    more_bounties =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: socket.assigns.current_status,
+        before: cursor
+      )
+
+    socket
+    |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
+    |> assign(:has_more, length(more_bounties) >= page_size())
+  end
+
+  defp assign_more_transactions(socket) do
+    %{transaction_rows: rows, current_org: current_org} = socket.assigns
+
+    last_transaction = List.last(rows).transaction
+
+    more_transactions =
+      Payments.list_sent_transactions(
+        current_org.id,
+        limit: page_size(),
+        before: %{
+          succeeded_at: last_transaction.succeeded_at,
+          id: last_transaction.id
+        }
+      )
+
+    socket
+    |> assign(:transaction_rows, rows ++ to_transaction_rows(more_transactions))
+    |> assign(:has_more_transactions, length(more_transactions) >= page_size())
+  end
+
+  defp get_current_status(params) do
+    case params["status"] do
+      "open" -> :open
+      "completed" -> :paid
+      _ -> :open
+    end
+  end
+
+  defp page_size, do: 10
 
   @from_name "Algora"
   @from_email "info@algora.io"

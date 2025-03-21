@@ -1031,7 +1031,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="bounty"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
             >
               <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
             </.button>
@@ -1049,7 +1049,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               :if={@contract_for_user && @contract_for_user.status == :active}
               navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
-              class="bg-emerald-800/10 text-emerald-400 drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-emerald-400/50 focus:border-emerald-400/50"
+              class="bg-emerald-800/10 text-emerald-400 drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
@@ -1067,7 +1067,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="contract"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>

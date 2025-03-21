@@ -965,18 +965,18 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="bounty"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-600/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-600/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-600/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-600/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
             >
-              <.icon name="tabler-diamond" class="size-5 text-current mr-2 -ml-1" /> Bounty
+              <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
             </.button>
             <.button
               phx-click="share_opportunity"
               phx-value-user_id={@user.id}
               phx-value-type="tip"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-600/10 hover:text-red-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-600/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-rose-600/10 hover:text-rose-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-rose-600/10 focus:text-rose-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-rose-400/50 focus:border-rose-400/50"
             >
-              <.icon name="tabler-heart" class="size-5 text-current mr-2 -ml-1" /> Tip
+              <.icon name="tabler-heart" class="size-4 text-current mr-2 -ml-1" /> Tip
             </.button>
 
             <.button
@@ -985,9 +985,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 ~p"/org/#{@current_org.handle}/contracts/#{contract_for_user(@contracts, @user).id}"
               }
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-600/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-600/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-600/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-600/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
-              <.icon name="tabler-contract" class="size-5 text-current mr-2 -ml-1" /> Contract
+              <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
             <.button
               :if={!contract_for_user(@contracts, @user)}
@@ -995,9 +995,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="contract"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-600/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-600/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-600/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-600/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
-              <.icon name="tabler-contract" class="size-5 text-current mr-2 -ml-1" /> Contract
+              <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
             <.dropdown_menu>
               <.dropdown_menu_trigger>
@@ -1193,11 +1193,65 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp share_drawer_content(%{share_drawer_type: "bounty"} = assigns) do
     ~H"""
+    <.card>
+      <.card_header>
+        <.card_title>Bounty Details</.card_title>
+      </.card_header>
+      <.card_content>
+        <div class="space-y-4">
+          <.input
+            label="URL"
+            field={@bounty_form[:url]}
+            placeholder="https://github.com/owner/repo/issues/123"
+          />
+          <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+        </div>
+      </.card_content>
+    </.card>
+
+    <div class="ml-auto flex gap-4">
+      <.button variant="secondary" phx-click="close_share_drawer" type="button">
+        Cancel
+      </.button>
+      <.button type="submit">
+        Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+      </.button>
+    </div>
     """
   end
 
   defp share_drawer_content(%{share_drawer_type: "tip"} = assigns) do
     ~H"""
+    <.card>
+      <.card_header>
+        <.card_title>Tip Details</.card_title>
+      </.card_header>
+      <.card_content>
+        <div class="space-y-4">
+          <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+          <.input
+            label="URL"
+            field={@bounty_form[:url]}
+            placeholder="https://github.com/owner/repo/issues/123"
+            helptext="We'll add a comment to the issue with your tip to notify the developer."
+          />
+          <.input
+            label="Message (optional)"
+            field={@tip_form[:message]}
+            placeholder="Thanks for your great work!"
+          />
+        </div>
+      </.card_content>
+    </.card>
+
+    <div class="ml-auto flex gap-4">
+      <.button variant="secondary" phx-click="close_share_drawer" type="button">
+        Cancel
+      </.button>
+      <.button type="submit">
+        Send Tip <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+      </.button>
+    </div>
     """
   end
 
@@ -1289,6 +1343,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
               :if={@selected_developer}
               share_drawer_type={@share_drawer_type}
               contract_form={@contract_form}
+              tip_form={@tip_form}
+              bounty_form={@bounty_form}
             />
           </div>
         </.form>

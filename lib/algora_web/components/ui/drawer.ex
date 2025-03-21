@@ -114,7 +114,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   def drawer_content(assigns) do
     ~H"""
-    <div class={classes(["overflow-y-auto px-1 -mx-1", @class])} {@rest}>
+    <div class={classes(["overflow-y-auto scrollbar-thin px-1 -mx-1", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

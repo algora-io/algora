@@ -1231,9 +1231,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
           <.input
             label="URL"
-            field={@bounty_form[:url]}
+            field={@tip_form[:url]}
             placeholder="https://github.com/owner/repo/issues/123"
-            helptext="We'll add a comment to the issue with your tip to notify the developer."
+            helptext="We'll add a comment to the issue to notify the developer."
           />
           <.input
             label="Message (optional)"

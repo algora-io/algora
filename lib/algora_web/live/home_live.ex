@@ -44,6 +44,7 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:stats, stats)
      |> assign(:faq_items, get_faq_items())
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     # TODO: add url
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:pending_action, nil)}
   end

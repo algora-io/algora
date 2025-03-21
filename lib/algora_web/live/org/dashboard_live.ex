@@ -34,15 +34,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
     %{current_org: current_org} = socket.assigns
 
     if socket.assigns.current_user_role in [:admin, :mod] do
-      _top_earners = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
-
-      installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
-
       if connected?(socket) do
         Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
       end
 
-      bounties = Bounties.list_bounties(owner_id: current_org.id)
+      _top_earners = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
+
+      installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
       contributors =
         case current_org.last_context do
@@ -63,7 +61,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
        #  |> assign(:matching_devs, top_earners)
        |> assign(:matching_devs, [])
        |> assign(:contributors, contributors)
-       |> assign(:bounties, bounties)
        |> assign(:has_more_bounties, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -79,6 +76,26 @@ defmodule AlgoraWeb.Org.DashboardLive do
     else
       {:ok, redirect(socket, to: ~p"/org/#{current_org.handle}/home")}
     end
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    current_org = socket.assigns.current_org
+    current_status = get_current_status(params)
+
+    stats = Bounties.fetch_stats(current_org.id)
+
+    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
+    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
+
+    {:noreply,
+     socket
+     |> assign(:current_status, current_status)
+     |> assign(:bounty_rows, to_bounty_rows(bounties))
+     |> assign(:transaction_rows, to_transaction_rows(transactions))
+     |> assign(:has_more_bounties, length(bounties) >= page_size())
+     |> assign(:has_more_transactions, length(transactions) >= page_size())
+     |> assign(:stats, stats)}
   end
 
   @impl true
@@ -198,7 +215,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.section
           :if={@contributors != []}
           title={"#{@current_org.name} Contributors"}
-          subtitle="Engage your top contributors with tips or contract opportunities"
+          subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
           <div class="pt-3 relative w-full overflow-auto max-h-[450px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
@@ -288,12 +305,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </div>
             </div>
           </div>
-          <div
-            :if={@current_status == :open}
-            class="overflow-hidden rounded-xl border border-white/15"
-          >
+          <div :if={@current_status == :open} class="relative">
             <div id="bounties-container" phx-hook="InfiniteScroll">
-              <.bounties bounties={@bounties} />
+              <.bounties bounties={@bounty_rows} />
               <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
                 <div class="animate-pulse text-muted-foreground">
                   <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
@@ -623,46 +637,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
      end}
   end
 
-  @impl true
-  def handle_params(params, _uri, socket) do
-    current_org = socket.assigns.current_org
-    current_status = get_current_status(params)
-
-    stats = Bounties.fetch_stats(current_org.id)
-
-    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
-    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
-
-    {:noreply,
-     socket
-     |> assign(:current_status, current_status)
-     |> assign(:bounty_rows, to_bounty_rows(bounties))
-     |> assign(:transaction_rows, to_transaction_rows(transactions))
-     |> assign(:has_more_bounties, length(bounties) >= page_size())
-     |> assign(:has_more_transactions, length(transactions) >= page_size())
-     |> assign(:stats, stats)}
-  end
-
   defp throttle, do: :timer.sleep(1000)
 
   defp assign_login_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :login_form, to_form(changeset))
   end
 
-  defp to_bounty_rows(bounties) do
-    claims_by_ticket =
-      bounties
-      |> Enum.map(& &1.ticket.id)
-      |> Bounties.list_claims()
-      |> Enum.group_by(& &1.target_id)
-      |> Map.new(fn {ticket_id, claims} ->
-        {ticket_id, Enum.group_by(claims, & &1.group_id)}
-      end)
-
-    Enum.map(bounties, fn bounty ->
-      %{bounty: bounty, claim_groups: Map.get(claims_by_ticket, bounty.ticket.id, %{})}
-    end)
-  end
+  defp to_bounty_rows(bounties), do: bounties
 
   defp to_transaction_rows(transactions), do: transactions
 

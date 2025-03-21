@@ -24,9 +24,7 @@ defmodule AlgoraWeb.OrgPreviewCallbackController do
           conn
         end
 
-      conn
-      |> put_flash(:info, "Welcome to Algora!")
-      |> AlgoraWeb.UserAuth.log_in_user(user)
+      AlgoraWeb.UserAuth.log_in_user(conn, user)
     else
       {:error, reason} ->
         Logger.debug("failed preview exchange #{inspect(reason)}")

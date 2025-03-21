@@ -45,19 +45,6 @@ erich =
     |> Map.merge(if(github_user && github_user["email"], do: %{email: github_user["email"]}, else: %{}))
   )
 
-upsert!(
-  :identity,
-  [:provider, :provider_id],
-  %{
-    user_id: erich.id,
-    provider: erich.provider,
-    provider_id: erich.provider_id,
-    provider_email: erich.email,
-    provider_login: erich.handle,
-    provider_name: erich.name
-  }
-)
-
 richard =
   upsert!(
     :user,

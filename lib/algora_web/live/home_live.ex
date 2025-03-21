@@ -833,16 +833,20 @@ defmodule AlgoraWeb.HomeLive do
       url = get_field(changeset, :url)
 
       case url |> parse_github_url() |> dbg() do
-        {:ok, {owner, repo}} ->
-          {:noreply, push_navigate(socket, to: ~p"/go/#{owner}/#{repo}")}
+        {:ok, {repo_owner, repo_name}} ->
+          token = Github.TokenPool.get_token()
+
+          case Workspace.ensure_repository(token, repo_owner, repo_name) do
+            {:ok, _repo} ->
+              {:noreply, push_navigate(socket, to: ~p"/go/#{repo_owner}/#{repo_name}")}
+
+            {:error, reason} ->
+              Logger.error("Failed to create repository: #{inspect(reason)}")
+              {:noreply, assign(socket, :repo_form, to_form(add_error(changeset, :url, "Repository not found")))}
+          end
 
         {:error, message} ->
-          {:noreply,
-           assign(
-             socket,
-             :repo_form,
-             to_form(add_error(changeset, :url, message))
-           )}
+          {:noreply, assign(socket, :repo_form, to_form(add_error(changeset, :url, message)))}
       end
     else
       {:noreply, assign(socket, :repo_form, to_form(changeset))}

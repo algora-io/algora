@@ -6,11 +6,15 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
+  alias Algora.Contracts.Contract
   alias Algora.Github
   alias Algora.Organizations
   alias Algora.Organizations.Member
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Workspace.Contributor
+  alias Algora.Workspace.Installation
+  alias Algora.Workspace.Repository
 
   require Algora.SQL
 
@@ -246,7 +250,7 @@ defmodule Algora.Accounts do
   @doc """
   Registers a user from their GitHub information.
   """
-  def register_github_user(primary_email, info, emails, token) do
+  def register_github_user(current_user, primary_email, info, emails, token) do
     query =
       from(u in User,
         left_join: i in Identity,
@@ -257,10 +261,16 @@ defmodule Algora.Accounts do
         select: {u, i}
       )
 
-    case Repo.one(query) do
+    account =
+      case Repo.all(query) do
+        [] -> nil
+        [{user, identity}] -> {user, identity}
+        records -> Enum.find(records, fn {user, _} -> user.id == current_user.id end)
+      end
+
+    case account do
       nil -> create_user(info, primary_email, emails, token)
-      {user, nil} -> update_user(user, info, primary_email, emails, token)
-      {user, _identity} -> update_github_token(user, token)
+      {user, identity} -> update_user(user, identity, info, primary_email, emails, token)
     end
   end
 
@@ -274,15 +284,74 @@ defmodule Algora.Accounts do
     |> Repo.insert()
   end
 
-  def update_user(user, info, primary_email, emails, token) do
-    with {:ok, _} <-
-           user
-           |> Identity.github_registration_changeset(info, primary_email, emails, token)
-           |> Repo.insert() do
-      user
-      |> User.github_registration_changeset(info, primary_email, emails, token)
-      |> Repo.update()
-    end
+  def update_user(user, identity, info, primary_email, emails, token) do
+    old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
+
+    identity_changeset = Identity.github_registration_changeset(user, info, primary_email, emails, token)
+
+    user_changeset = User.github_registration_changeset(user, info, primary_email, emails, token)
+
+    Repo.transact(fn ->
+      delete_result =
+        if identity do
+          Repo.delete(identity)
+        else
+          {:ok, nil}
+        end
+
+      migrate_result =
+        if old_user && old_user.id != user.id do
+          {:ok, old_user} =
+            old_user
+            |> change(provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil)
+            |> Repo.update()
+
+          # TODO: enqueue job
+          migrate_user(old_user, user)
+
+          {:ok, old_user}
+        else
+          {:ok, nil}
+        end
+
+      with {:ok, _} <- delete_result,
+           {:ok, _} <- migrate_result,
+           {:ok, _} <- Repo.insert(identity_changeset) do
+        Repo.update(user_changeset)
+      end
+    end)
+  end
+
+  def migrate_user(old_user, new_user) do
+    Repo.update_all(
+      from(r in Repository, where: r.user_id == ^old_user.id),
+      set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(c in Contributor, where: c.user_id == ^old_user.id),
+      set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(c in Contract, where: c.contractor_id == ^old_user.id),
+      set: [contractor_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.owner_id == ^old_user.id),
+      set: [owner_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.provider_user_id == ^old_user.id),
+      set: [provider_user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.connected_user_id == ^old_user.id),
+      set: [connected_user_id: new_user.id]
+    )
   end
 
   # def get_user_by_provider_email(provider, email) when provider in [:github] do
@@ -352,19 +421,6 @@ defmodule Algora.Accounts do
     end
   end
 
-  defp update_github_token(%User{} = user, new_token) do
-    identity =
-      Repo.one!(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github"))
-
-    {:ok, _} =
-      identity
-      |> change()
-      |> put_change(:provider_token, new_token)
-      |> Repo.update()
-
-    {:ok, Repo.preload(user, :identities, force: true)}
-  end
-
   def last_context(nil), do: "nil"
 
   def last_context(%User{last_context: nil} = user) do
@@ -413,8 +469,20 @@ defmodule Algora.Accounts do
 
   def get_last_context_user(%User{} = user) do
     case last_context(user) do
-      "personal" -> user
-      last_context -> get_user_by_handle(last_context)
+      "personal" ->
+        user
+
+      "preview/" <> ctx ->
+        case String.split(ctx, "/") do
+          [id, _repo_owner, _repo_name] -> get_user(id)
+          _ -> nil
+        end
+
+      "repo/" <> _repo_full_name ->
+        user
+
+      last_context ->
+        get_user_by_handle(last_context)
     end
   end
 

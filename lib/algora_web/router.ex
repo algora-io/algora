@@ -63,12 +63,21 @@ defmodule AlgoraWeb.Router do
     get "/a/:table_prefix/:activity_id", ActivityController, :get
     get "/auth/logout", OAuthCallbackController, :sign_out
     get "/tip", TipController, :create
+    get "/preview", OrgPreviewCallbackController, :new
 
     scope "/callbacks" do
       get "/stripe/refresh", StripeCallbackController, :refresh
       get "/stripe/return", StripeCallbackController, :return
       get "/:provider/oauth", OAuthCallbackController, :new
       get "/:provider/installation", InstallationCallbackController, :new
+    end
+
+    scope "/go/:repo_owner/:repo_name" do
+      live_session :preview,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.PreviewNav] do
+        live "/", Org.DashboardLive, :preview
+      end
     end
 
     scope "/org/:org_handle" do

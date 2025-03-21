@@ -33,7 +33,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
     with {:ok, data} <- res,
          {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
-         {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
+         {:ok, user} <- Accounts.register_github_user(conn.assigns[:current_user], primary, info, emails, token) do
       if socket_id do
         Phoenix.PubSub.broadcast(Algora.PubSub, "auth:#{socket_id}", {:authenticated, user})
       end

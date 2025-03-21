@@ -1,10 +1,18 @@
 defmodule AlgoraWeb.InstallationCallbackController do
   use AlgoraWeb, :controller
 
+  import Ecto.Changeset
+  import Ecto.Query
+
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Organizations
+  alias Algora.Organizations.Member
+  alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace
+  alias AlgoraWeb.UserAuth
 
   require Logger
 
@@ -23,10 +31,10 @@ defmodule AlgoraWeb.InstallationCallbackController do
           :info,
           "Installation request submitted! The Algora app will be activated upon approval from your organization administrator."
         )
-        |> redirect(to: redirect_url(conn))
+        |> redirect(to: UserAuth.signed_in_path(conn))
 
       {:error, _reason} ->
-        redirect(conn, to: redirect_url(conn))
+        redirect(conn, to: UserAuth.signed_in_path(conn))
     end
   end
 
@@ -49,33 +57,108 @@ defmodule AlgoraWeb.InstallationCallbackController do
   defp handle_installation(conn, setup_action, installation_id) do
     user = conn.assigns.current_user
 
-    case do_handle_installation(user, installation_id) do
-      {:ok, _org} ->
+    case do_handle_installation(conn, user, installation_id) do
+      {:ok, conn} ->
         conn
         |> put_flash(:info, if(setup_action == :install, do: "Installation successful!", else: "Installation updated!"))
-        |> redirect(to: redirect_url(conn))
+        |> redirect(to: UserAuth.signed_in_path(conn))
 
       {:error, error} ->
         Logger.error("❌ Installation callback failed: #{inspect(error)}")
 
         conn
         |> put_flash(:error, "#{inspect(error)}")
-        |> redirect(to: redirect_url(conn))
+        |> redirect(to: UserAuth.signed_in_path(conn))
     end
   end
 
-  defp do_handle_installation(user, installation_id) do
+  defp get_followers_count(token, user) do
+    if followers_count = user.provider_meta["followers_count"] do
+      followers_count
+    else
+      case Github.get_user(token, user.provider_id) do
+        {:ok, user} -> user["followers"]
+        _ -> 0
+      end
+    end
+  end
+
+  defp get_total_followers_count(token, users) do
+    users
+    |> Enum.map(&get_followers_count(token, &1))
+    |> Enum.sum()
+  end
+
+  defp featured_follower_threshold, do: 50
+
+  defp do_handle_installation(conn, user, installation_id) do
     # TODO: replace :last_context with a new :last_installation_target field
     # TODO: handle nil user
     # TODO: handle nil last_context
     with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
-         {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]),
-         {:ok, org} <- Organizations.fetch_org_by(handle: user.last_context),
-         {:ok, _} <- Workspace.upsert_installation(installation, user, org, provider_user) do
-      {:ok, org}
+         {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]) do
+      total_followers_count = get_total_followers_count(access_token, [user, provider_user])
+
+      case user.last_context do
+        "preview/" <> ctx ->
+          case String.split(ctx, "/") do
+            [id, _repo_owner, _repo_name] ->
+              existing_org =
+                Repo.one(
+                  from(u in User,
+                    where: u.provider == "github",
+                    where: u.provider_id == ^to_string(installation["account"]["id"])
+                  )
+                )
+
+              {:ok, org} =
+                case existing_org do
+                  %User{} = org -> {:ok, org}
+                  nil -> Repo.fetch(User, id)
+                end
+
+              {:ok, _member} =
+                case Repo.get_by(Member, user_id: user.id, org_id: org.id) do
+                  %Member{} = member -> {:ok, member}
+                  nil -> Repo.insert(%Member{id: Nanoid.generate(), user: user, org: org, role: :admin})
+                end
+
+              {:ok, org} =
+                org
+                |> change(
+                  handle: Organizations.ensure_unique_org_handle(installation["account"]["login"]),
+                  featured: if(org.featured, do: true, else: total_followers_count > featured_follower_threshold()),
+                  provider: "github",
+                  provider_id: to_string(installation["account"]["id"]),
+                  provider_meta: Util.normalize_struct(installation["account"])
+                )
+                |> Repo.update()
+
+              {:ok, user} =
+                user
+                |> change(last_context: org.handle)
+                |> Repo.update()
+
+              {:ok, _} = Workspace.upsert_installation(installation, user, org, provider_user)
+
+              {:ok, UserAuth.put_current_user(conn, user)}
+
+            _ ->
+              {:error, :invalid_last_context}
+          end
+
+        last_context ->
+          {:ok, org} = Organizations.fetch_org_by(handle: last_context)
+
+          {:ok, org} =
+            org
+            |> change(featured: if(org.featured, do: true, else: total_followers_count > featured_follower_threshold()))
+            |> Repo.update()
+
+          {:ok, _} = Workspace.upsert_installation(installation, user, org, provider_user)
+          {:ok, conn}
+      end
     end
   end
-
-  defp redirect_url(conn), do: ~p"/org/#{Accounts.last_context(conn.assigns.current_user)}"
 end

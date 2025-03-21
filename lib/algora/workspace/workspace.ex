@@ -9,6 +9,7 @@ defmodule Algora.Workspace do
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace.CommandResponse
+  alias Algora.Workspace.Contributor
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
@@ -446,5 +447,82 @@ defmodule Algora.Workspace do
 
         {:ok, command_response}
     end
+  end
+
+  def ensure_contributors(token, owner, repo) do
+    case list_repository_contributors(owner, repo) do
+      [] ->
+        with {:ok, repository} <- ensure_repository(token, owner, repo),
+             {:ok, contributors} <- Github.list_repository_contributors(token, owner, repo) do
+          Repo.transact(fn ->
+            Enum.reduce_while(contributors, {:ok, []}, fn contributor, {:ok, acc} ->
+              case create_contributor_from_github(repository, contributor) do
+                {:ok, created} -> {:cont, {:ok, [created | acc]}}
+                error -> {:halt, error}
+              end
+            end)
+          end)
+        end
+
+      contributors ->
+        {:ok, contributors}
+    end
+  end
+
+  defp ensure_user_by_contributor(contributor) do
+    case Repo.get_by(User, provider: "github", provider_id: to_string(contributor["id"])) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        contributor
+        |> Contributor.github_user_changeset()
+        |> Repo.insert()
+    end
+  end
+
+  def create_contributor_from_github(repository, contributor) do
+    with {:ok, user} <- ensure_user_by_contributor(contributor) do
+      %Contributor{}
+      |> Contributor.changeset(%{
+        contributions: contributor["contributions"],
+        repository_id: repository.id,
+        user_id: user.id
+      })
+      |> Repo.insert()
+    end
+  end
+
+  def list_repository_contributors(repo_owner, repo_name) do
+    Repo.all(
+      from(c in Contributor,
+        join: r in assoc(c, :repository),
+        where: r.provider == "github",
+        where: r.name == ^repo_name,
+        join: ro in assoc(r, :user),
+        where: ro.provider_login == ^repo_owner,
+        join: u in assoc(c, :user),
+        select_merge: %{user: u},
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+      )
+    )
+  end
+
+  def list_contributors(repo_owner) do
+    Repo.all(
+      from(c in Contributor,
+        join: r in assoc(c, :repository),
+        where: r.provider == "github",
+        join: ro in assoc(r, :user),
+        where: ro.provider_login == ^repo_owner,
+        join: u in assoc(c, :user),
+        select_merge: %{user: u},
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+      )
+    )
+  end
+
+  def fetch_contributor(repository_id, user_id) do
+    Repo.fetch_by(Contributor, repository_id: repository_id, user_id: user_id)
   end
 end

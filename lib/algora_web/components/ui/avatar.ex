@@ -14,7 +14,7 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   end
 
   attr :class, :string, default: nil
-  attr :src, :string, required: true
+  attr :src, :string, default: nil
   attr :rest, :global
 
   def avatar_image(assigns) do
@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Components.UI.Avatar do
     ~H"""
     <img
       id={@id}
-      src={@src}
+      src={@src || "http://console.algora.io/placeholder-avatar.png"}
       class={classes(["aspect-square h-full w-full bg-muted", @class])}
       phx-hook="AvatarImage"
       {@rest}

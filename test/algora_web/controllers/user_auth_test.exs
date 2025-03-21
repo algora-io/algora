@@ -81,4 +81,47 @@ defmodule AlgoraWeb.UserAuthTest do
       assert {:error, :invalid} = UserAuth.verify_login_code("", "test@example.com")
     end
   end
+
+  describe "verify_preview_code/2" do
+    test "successfully verifies simple id token" do
+      id = "123"
+      code = UserAuth.sign_preview_code(id)
+
+      assert {:ok, result} = UserAuth.verify_preview_code(code, id)
+      assert result == id
+    end
+
+    test "rejects invalid id" do
+      id = "123"
+      code = UserAuth.sign_preview_code(id)
+
+      assert {:error, :invalid_id} = UserAuth.verify_preview_code(code, "wrong")
+    end
+
+    test "rejects tampered tokens" do
+      code = "tampered.token.here"
+      assert {:error, :invalid} = UserAuth.verify_preview_code(code, "123")
+    end
+
+    test "rejects expired tokens" do
+      id = "123"
+      original_config = Application.get_env(:algora, :login_code)
+      Application.put_env(:algora, :login_code, Keyword.put(original_config, :ttl, 1))
+
+      code = UserAuth.sign_preview_code(id)
+      Process.sleep(1500)
+
+      assert {:error, :expired} = UserAuth.verify_preview_code(code, id)
+
+      Application.put_env(:algora, :login_code, original_config)
+    end
+
+    test "handles nil input" do
+      assert {:error, :missing} = UserAuth.verify_preview_code(nil, "123")
+    end
+
+    test "handles empty string input" do
+      assert {:error, :invalid} = UserAuth.verify_preview_code("", "123")
+    end
+  end
 end

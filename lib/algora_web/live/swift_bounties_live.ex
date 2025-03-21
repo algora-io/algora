@@ -590,6 +590,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
+    # TODO: add url
     changeset =
       %TipForm{}
       |> TipForm.changeset(params)

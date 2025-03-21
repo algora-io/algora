@@ -232,7 +232,7 @@ defmodule AlgoraWeb.CoreComponents do
           </.avatar>
           <div>
             <div class="font-semibold">{ctx.name}</div>
-            <div class="text-sm text-gray-500">@{ctx.handle}</div>
+            <div :if={ctx.handle} class="text-sm text-gray-500">@{ctx.handle}</div>
           </div>
         </div>
       </:link>
@@ -791,15 +791,17 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           id={@id || @name}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-          class={[
-            "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-            "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
-            "border-input focus:border-ring focus:ring-ring",
-            @errors != [] &&
-              "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
-            @icon && "pl-10",
-            @class
-          ]}
+          class={
+            classes([
+              "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
+              "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
+              "border-input focus:border-ring focus:ring-ring",
+              @errors != [] &&
+                "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
+              @icon && "pl-10",
+              @class
+            ])
+          }
           autocomplete="off"
           {@rest}
         />
@@ -1167,7 +1169,7 @@ defmodule AlgoraWeb.CoreComponents do
   def section(assigns) do
     ~H"""
     <div class="relative h-full">
-      <div :if={@title} class="flex items-end justify-between pb-6">
+      <div :if={@title} class="flex items-end justify-between pb-2">
         <div class="flex flex-col space-y-1.5">
           <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
           <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>

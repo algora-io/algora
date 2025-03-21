@@ -8,6 +8,8 @@ defmodule Algora.Contracts.Contract do
   alias Algora.MoneyUtils
   alias Algora.Validations
 
+  @type status :: :draft | :active | :paid | :cancelled | :disputed
+
   typed_schema "contracts" do
     field :status, Ecto.Enum, values: [:draft, :active, :paid, :cancelled, :disputed]
     field :sequence_number, :integer, default: 1

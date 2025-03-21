@@ -121,6 +121,7 @@ defmodule Algora.Bounties do
         opts \\ []
       ) do
     command_id = opts[:command_id]
+    shared_with = opts[:shared_with] || []
 
     Repo.transact(fn ->
       with {:ok, %{installation_id: installation_id, token: token}} <-
@@ -137,7 +138,7 @@ defmodule Algora.Bounties do
                     amount: amount,
                     ticket: ticket,
                     visibility: opts[:visibility],
-                    shared_with: opts[:shared_with]
+                    shared_with: shared_with
                   })
 
                 :set ->
@@ -145,7 +146,7 @@ defmodule Algora.Bounties do
                   |> Bounty.changeset(%{
                     amount: amount,
                     visibility: opts[:visibility],
-                    shared_with: opts[:shared_with]
+                    shared_with: shared_with
                   })
                   |> Repo.update()
 
@@ -154,7 +155,7 @@ defmodule Algora.Bounties do
                   |> Bounty.changeset(%{
                     amount: Money.add!(existing.amount, amount),
                     visibility: opts[:visibility],
-                    shared_with: opts[:shared_with]
+                    shared_with: shared_with
                   })
                   |> Repo.update()
               end),

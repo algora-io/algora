@@ -3,7 +3,7 @@ defmodule Algora.Repo.Migrations.AddSharedWithToBounties do
 
   def change do
     alter table(:bounties) do
-      add :shared_with, {:array, :citext}, default: [], null: false
+      add :shared_with, {:array, :citext}, default: "{}", null: false
     end
   end
 end

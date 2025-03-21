@@ -1274,6 +1274,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             placeholder="https://github.com/owner/repo/issues/123"
             helptext="We'll add a comment to the issue to notify the developer."
           />
+          <%!-- # TODO: implement --%>
           <.input
             label="Review (optional)"
             field={@tip_form[:message]}

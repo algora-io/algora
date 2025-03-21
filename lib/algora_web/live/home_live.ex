@@ -15,12 +15,34 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Workspace
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
+  alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
 
   require Logger
+
+  defmodule RepoForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :url, :string
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:url])
+      |> validate_required([:url])
+      |> validate_format(:url, ~r{^https?://github\.com/[^/]+/[^/\s]+$}i,
+        message: "Must be a valid GitHub repository URL (e.g. github.com/owner/repo)"
+      )
+    end
+  end
 
   @impl true
   def mount(%{"country_code" => country_code}, _session, socket) do
@@ -46,6 +68,7 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      # TODO: add url
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+     |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:pending_action, nil)}
   end
 
@@ -64,29 +87,29 @@ defmodule AlgoraWeb.HomeLive do
                 <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
                   The open source Upwork for engineers
                 </h1>
-                <p class="mt-8 font-display text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
+                <p class="mt-8 text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
                   Discover GitHub bounties, contract work and jobs
                 </p>
-                <p class="mt-4 font-display text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
+                <p class="mt-4 text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
                   Hire the top 1% open source developers
                 </p>
                 <!-- CTA buttons -->
-                <div class="mt-10 flex flex-col sm:flex-row text-center sm:items-center gap-6">
-                  <.button
-                    navigate={~p"/onboarding/org"}
-                    variant="default"
-                    class="px-12 py-8 text-xl font-semibold"
-                  >
-                    Companies
-                  </.button>
-                  <.button
-                    navigate={~p"/onboarding/dev"}
-                    variant="secondary"
-                    class="px-12 py-8 text-xl font-semibold"
-                  >
-                    Developers
-                  </.button>
-                </div>
+                <.form for={@repo_form} phx-submit="submit_repo" class="mt-10 w-full max-w-2xl">
+                  <div class="relative">
+                    <.input
+                      field={@repo_form[:url]}
+                      placeholder="https://github.com/your/repo"
+                      class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 border-emerald-500 font-display"
+                    />
+                    <Logos.github class="h-10 w-10 absolute left-3 top-3 text-muted-foreground/50" />
+                    <.button
+                      type="submit"
+                      class="absolute right-2 top-2 bottom-2 px-8 h-[3rem] text-xl font-semibold"
+                    >
+                      Get Started
+                    </.button>
+                  </div>
+                </.form>
               </div>
               <!-- Featured devs -->
               <div class="mt-14 flex justify-start md:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0 overflow-x-auto scrollbar-thin lg:overflow-x-visible">
@@ -111,129 +134,6 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
         </section>
-
-        <%!-- <section
-          class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40"
-        >
-          <.pattern />
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
-              Fund GitHub Issues
-            </h2>
-            <p class="text-center font-medium text-base text-muted-foreground mb-16">
-              Support open source development with bounties on GitHub issues
-            </p>
-
-            <div class="grid grid-cols-1 gap-16">
-              <.link
-                href="https://github.com/zed-industries/zed/issues/4440"
-                rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
-              >
-                <div class="flex -space-x-4">
-                  <img
-                    class="h-20 w-20 rounded-full z-0"
-                    src="https://github.com/zed-industries.png"
-                    alt="Zed"
-                  />
-                  <img
-                    class="h-20 w-20 rounded-full z-10"
-                    src="https://github.com/schacon.png"
-                    alt="Scott Chacon"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
-                    GitHub cofounder funds new feature in Zed Editor
-                  </div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Zed Editor, Scott Chacon
-                  </div>
-                </div>
-                <.button size="lg" variant="secondary">
-                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
-                </.button>
-              </.link>
-
-              <.link
-                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
-                rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
-              >
-                <div class="flex items-center -space-x-6">
-                  <img
-                    class="h-20 w-20 rounded-full z-0"
-                    src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
-                    alt="Alex Klimaj"
-                  />
-                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
-                  <img
-                    class="h-20 w-20 rounded-full z-10"
-                    src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
-                    alt="Andrew Wilkins"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
-                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
-                  </div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
-                  </div>
-                </div>
-                <.button size="lg" variant="secondary">
-                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
-                </.button>
-              </.link>
-
-              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-black p-12 ring-2 ring-success/20 transition-colors">
-                <div class="col-span-2 text-base leading-6 flex-1">
-                  <div class="text-3xl font-semibold text-foreground">
-                    Fund any issue <span class="text-success">in seconds</span>
-                  </div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Help improve the OSS you love and rely on
-                  </div>
-                  <div class="pt-1 col-span-3 text-sm text-muted-foreground space-y-0.5">
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Pay when PRs are merged
-                    </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Pool bounties with other sponsors
-                    </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Algora handles invoices, payouts, compliance & 1099s
-                    </div>
-                  </div>
-                </div>
-                <.form
-                  for={@bounty_form}
-                  phx-submit="create_bounty"
-                  class="col-span-3 grid grid-cols-3 gap-6 w-full"
-                >
-                  <.input
-                    label="URL"
-                    field={@bounty_form[:url]}
-                    placeholder="https://github.com/owner/repo/issues/1337"
-                  />
-                  <.input
-                    label="Amount"
-                    icon="tabler-currency-dollar"
-                    field={@bounty_form[:amount]}
-                    class="placeholder:text-success"
-                  />
-                  <div class="flex flex-col items-center gap-2">
-                    <div class="text-sm text-muted-foreground">No credit card required</div>
-                    <.button size="lg" class="w-full">Fund issue</.button>
-                  </div>
-                </.form>
-              </div>
-            </div>
-          </div>
-        </section> --%>
 
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />
@@ -915,6 +815,30 @@ defmodule AlgoraWeb.HomeLive do
       end
     else
       {:noreply, assign(socket, :tip_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("submit_repo", %{"repo_form" => params}, socket) do
+    changeset =
+      %RepoForm{}
+      |> RepoForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    if changeset.valid? do
+      # Extract owner and repo from URL
+      url = get_field(changeset, :url)
+
+      case Regex.run(~r{github\.com/([^/]+)/([^/\s]+)}, url) do
+        [_, owner, repo] ->
+          {:noreply, push_navigate(socket, to: ~p"/go/#{owner}/#{repo}")}
+
+        _ ->
+          {:noreply,
+           assign(socket, :repo_form, to_form(RepoForm.add_error(changeset, :url, "Invalid GitHub repository URL")))}
+      end
+    else
+      {:noreply, assign(socket, :repo_form, to_form(changeset))}
     end
   end
 

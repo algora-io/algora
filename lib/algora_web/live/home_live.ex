@@ -38,9 +38,6 @@ defmodule AlgoraWeb.HomeLive do
       form
       |> cast(attrs, [:url])
       |> validate_required([:url])
-      |> validate_format(:url, ~r{^https?://github\.com/[^/]+/[^/\s]+$}i,
-        message: "Must be a valid GitHub repository URL (e.g. github.com/owner/repo)"
-      )
     end
   end
 
@@ -98,7 +95,7 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="relative">
                     <.input
                       field={@repo_form[:url]}
-                      placeholder="https://github.com/your/repo"
+                      placeholder="github.com/your/repo"
                       class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 border-emerald-500 font-display"
                     />
                     <Logos.github class="h-10 w-10 absolute left-3 top-3 text-muted-foreground/50" />
@@ -818,6 +815,13 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
+  def parse_github_url(url) do
+    case Regex.run(~r{(?:github\.com/)?([^/\s]+)/([^/\s]+)}, url) do
+      [_, owner, repo] -> {:ok, {owner, repo}}
+      _ -> {:error, "Must be a valid GitHub repository URL (e.g. github.com/owner/repo) or owner/repo format"}
+    end
+  end
+
   @impl true
   def handle_event("submit_repo", %{"repo_form" => params}, socket) do
     changeset =
@@ -826,15 +830,19 @@ defmodule AlgoraWeb.HomeLive do
       |> Map.put(:action, :validate)
 
     if changeset.valid? do
-      # Extract owner and repo from URL
       url = get_field(changeset, :url)
 
-      case Regex.run(~r{github\.com/([^/]+)/([^/\s]+)}, url) do
-        [_, owner, repo] ->
+      case url |> parse_github_url() |> dbg() do
+        {:ok, {owner, repo}} ->
           {:noreply, push_navigate(socket, to: ~p"/go/#{owner}/#{repo}")}
 
-        _ ->
-          {:noreply, assign(socket, :repo_form, to_form(add_error(changeset, :url, "Invalid GitHub repository URL")))}
+        {:error, message} ->
+          {:noreply,
+           assign(
+             socket,
+             :repo_form,
+             to_form(add_error(changeset, :url, message))
+           )}
       end
     else
       {:noreply, assign(socket, :repo_form, to_form(changeset))}

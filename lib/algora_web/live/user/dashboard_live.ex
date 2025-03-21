@@ -27,6 +27,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     query_opts = [
       status: :open,
       limit: page_size(),
+      current_user: socket.assigns.current_user,
       tech_stack: socket.assigns.current_user.tech_stack,
       amount_gt: Money.new(:USD, 200)
     ]

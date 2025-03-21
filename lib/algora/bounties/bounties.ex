@@ -35,7 +35,7 @@ defmodule Algora.Bounties do
           | {:tech_stack, [String.t()]}
           | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
           | {:amount_gt, Money.t()}
-          | {:current_user_id, String.t()}
+          | {:current_user, User.t()}
 
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "bounties:all", :bounties_updated)
@@ -1017,13 +1017,39 @@ defmodule Algora.Bounties do
           :open ->
             query = where(query, [t: t], t.state == :open)
 
-            case criteria[:owner_id] do
-              nil ->
-                where(query, [b, o: o], b.visibility == :public and o.featured == true)
+            query =
+              case criteria[:current_user] do
+                nil ->
+                  where(query, [b], b.visibility != :exclusive)
 
-              _org_id ->
-                where(query, [b], b.visibility in [:public, :community])
-            end
+                user ->
+                  dbg([user.id, user.email, to_string(user.provider_id)])
+
+                  where(
+                    query,
+                    [b],
+                    b.visibility != :exclusive or
+                      (b.visibility == :exclusive and
+                         fragment(
+                           "? && ARRAY[?, ?, ?]::citext[]",
+                           b.shared_with,
+                           ^user.id,
+                           ^user.email,
+                           ^to_string(user.provider_id)
+                         ))
+                  )
+              end
+
+            query =
+              case criteria[:owner_id] do
+                nil ->
+                  where(query, [b, o: o], (b.visibility == :public and o.featured == true) or b.visibility == :exclusive)
+
+                _org_id ->
+                  query
+              end
+
+            query
 
           _ ->
             query
@@ -1051,19 +1077,6 @@ defmodule Algora.Bounties do
               ^to_string(min_amount.currency),
               ^min_amount.amount
             )
-        )
-
-      {:current_user_id, user_id}, query ->
-        from([b] in query,
-          where:
-            b.visibility != :exclusive or
-              (b.visibility == :exclusive and
-                 fragment(
-                   "? = ANY(array(select unnest(?) || array[?]))",
-                   ^user_id,
-                   b.shared_with,
-                   b.owner_id
-                 ))
         )
 
       _, query ->

@@ -515,7 +515,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
                  }
                },
                visibility: :exclusive,
-               shared_with: [socket.assigns.selected_developer.id]
+               shared_with:
+                 case socket.assigns.selected_developer do
+                   %User{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
+                   %User{id: id} -> [id]
+                   _ -> raise "Developer not selected"
+                 end
              ) do
         {:noreply,
          socket

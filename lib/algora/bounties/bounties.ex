@@ -1034,6 +1034,9 @@ defmodule Algora.Bounties do
           where: {b.inserted_at, b.id} < {^inserted_at, ^id}
         )
 
+      {:tech_stack, []}, query ->
+        query
+
       {:tech_stack, tech_stack}, query ->
         from([b, r: r] in query,
           where: fragment("? && ?::citext[]", r.tech_stack, ^tech_stack)

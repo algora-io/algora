@@ -822,7 +822,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp assign_contracts(socket) do
-    contracts = Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: :draft)
+    contracts = Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: {:in, [:draft, :active]})
 
     assign(socket, :contracts, contracts)
   end

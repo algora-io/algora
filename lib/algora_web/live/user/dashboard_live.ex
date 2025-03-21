@@ -276,7 +276,8 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply,
      socket
      |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))
+     |> assign(:query_opts, Keyword.put(socket.assigns.query_opts, :tech_stack, tech_stack))
+     |> assign_bounties()
      |> push_event("clear-input", %{selector: "[phx-keydown='handle_tech_input']"})}
   end
 
@@ -290,7 +291,8 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply,
      socket
      |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
+     |> assign(:query_opts, Keyword.put(socket.assigns.query_opts, :tech_stack, tech_stack))
+     |> assign_bounties()}
   end
 
   def handle_event("view_mode", %{"value" => mode}, socket) do

@@ -72,6 +72,25 @@ defmodule AlgoraWeb.InstallationCallbackController do
     end
   end
 
+  defp get_followers_count(token, user) do
+    if followers_count = user.provider_meta["followers_count"] do
+      followers_count
+    else
+      case Github.get_user(token, user.provider_id) do
+        {:ok, user} -> user["followers"]
+        _ -> 0
+      end
+    end
+  end
+
+  defp get_total_followers_count(token, users) do
+    users
+    |> Enum.map(&get_followers_count(token, &1))
+    |> Enum.sum()
+  end
+
+  defp featured_follower_threshold, do: 50
+
   defp do_handle_installation(conn, user, installation_id) do
     # TODO: replace :last_context with a new :last_installation_target field
     # TODO: handle nil user
@@ -79,6 +98,8 @@ defmodule AlgoraWeb.InstallationCallbackController do
     with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
          {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]) do
+      total_followers_count = get_total_followers_count(access_token, [user, provider_user])
+
       case user.last_context do
         "preview/" <> ctx ->
           case String.split(ctx, "/") do
@@ -107,6 +128,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
                 org
                 |> change(
                   handle: Organizations.ensure_unique_org_handle(installation["account"]["login"]),
+                  featured: if(org.featured, do: true, else: total_followers_count > featured_follower_threshold()),
                   provider: "github",
                   provider_id: to_string(installation["account"]["id"]),
                   provider_meta: Util.normalize_struct(installation["account"])
@@ -128,6 +150,12 @@ defmodule AlgoraWeb.InstallationCallbackController do
 
         last_context ->
           {:ok, org} = Organizations.fetch_org_by(handle: last_context)
+
+          {:ok, org} =
+            org
+            |> change(featured: if(org.featured, do: true, else: total_followers_count > featured_follower_threshold()))
+            |> Repo.update()
+
           {:ok, _} = Workspace.upsert_installation(installation, user, org, provider_user)
           {:ok, conn}
       end

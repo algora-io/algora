@@ -27,6 +27,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     query_opts = [
       status: :open,
       limit: page_size(),
+      current_user: socket.assigns.current_user,
       tech_stack: socket.assigns.current_user.tech_stack,
       amount_gt: Money.new(:USD, 200)
     ]
@@ -50,7 +51,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <div class="flex lg:flex-row flex-col-reverse">
       <div class="flex-1 bg-background text-foreground lg:pr-96">
-        <div :if={not @has_active_account} class="relative h-full p-4 sm:p-6 md:p-8">
+        <div :if={not @has_active_account} class="p-4 sm:p-6 md:p-8">
           <.section>
             <.card>
               <.card_header>
@@ -70,7 +71,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </.section>
         </div>
         <!-- Contracts section -->
-        <div :if={length(@contracts) > 0} class="relative h-full p-4 sm:p-6 md:p-8">
+        <div :if={length(@contracts) > 0} class="p-4 sm:p-6 md:p-8">
           <div class="flex justify-between">
             <div class="flex flex-col space-y-1.5">
               <h2 class="text-2xl font-semibold leading-none tracking-tight">
@@ -92,7 +93,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
         </div>
         <!-- Bounties section -->
-        <div :if={length(@bounties) > 0} class="relative h-full p-4 sm:p-6 md:p-8">
+        <div :if={length(@bounties) > 0} class="p-4 sm:p-6 md:p-8">
           <.section title="Open bounties" subtitle="Bounties for you">
             <div id="bounties-container" phx-hook="InfiniteScroll">
               <.bounties bounties={@bounties} />
@@ -276,7 +277,8 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply,
      socket
      |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))
+     |> assign(:query_opts, Keyword.put(socket.assigns.query_opts, :tech_stack, tech_stack))
+     |> assign_bounties()
      |> push_event("clear-input", %{selector: "[phx-keydown='handle_tech_input']"})}
   end
 
@@ -290,7 +292,8 @@ defmodule AlgoraWeb.User.DashboardLive do
     {:noreply,
      socket
      |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
+     |> assign(:query_opts, Keyword.put(socket.assigns.query_opts, :tech_stack, tech_stack))
+     |> assign_bounties()}
   end
 
   def handle_event("view_mode", %{"value" => mode}, socket) do

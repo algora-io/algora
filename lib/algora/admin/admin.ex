@@ -16,6 +16,17 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def alert(message) do
+    %{
+      title: "Alert: #{message}",
+      body: message,
+      name: "Algora Alert",
+      email: "info@algora.io"
+    }
+    |> Algora.Activities.SendEmail.changeset()
+    |> Repo.insert()
+  end
+
   def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
 
   def run(worker) do

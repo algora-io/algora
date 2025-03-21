@@ -14,10 +14,11 @@ defmodule Algora.AccountsTest do
         "name" => "Github User"
       }
 
-      {:ok, user} = Accounts.register_github_user(email, info, [email], "token123")
-      {:ok, user_again} = Accounts.register_github_user(email, info, [email], "token123")
+      {:ok, user} = Accounts.register_github_user(nil, email, info, [email], "token123")
+      {:ok, user_again} = Accounts.register_github_user(user, email, info, [email], "token123")
 
-      assert_activity_names([:identity_created])
+      assert user.id == user_again.id
+      assert_activity_names([:identity_created, :identity_created])
       assert_activity_names_for_user(user.id, [:identity_created])
       assert_activity_names_for_user(user_again.id, [:identity_created])
     end

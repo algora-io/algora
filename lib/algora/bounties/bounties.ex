@@ -35,6 +35,7 @@ defmodule Algora.Bounties do
           | {:tech_stack, [String.t()]}
           | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
           | {:amount_gt, Money.t()}
+          | {:current_user, User.t()}
 
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "bounties:all", :bounties_updated)
@@ -44,16 +45,24 @@ defmodule Algora.Bounties do
     Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
   end
 
-  @spec do_create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
+  @spec do_create_bounty(%{
+          creator: User.t(),
+          owner: User.t(),
+          amount: Money.t(),
+          ticket: Ticket.t(),
+          visibility: Bounty.visibility(),
+          shared_with: [String.t()]
+        }) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
+  defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket} = params) do
     changeset =
       Bounty.changeset(%Bounty{}, %{
         amount: amount,
         ticket_id: ticket.id,
         owner_id: owner.id,
         creator_id: creator.id,
-        visibility: owner.bounty_mode
+        visibility: params[:visibility] || owner.bounty_mode,
+        shared_with: params[:shared_with] || []
       })
 
     changeset
@@ -96,7 +105,9 @@ defmodule Algora.Bounties do
             strategy: strategy(),
             installation_id: integer(),
             command_id: integer(),
-            command_source: :ticket | :comment
+            command_source: :ticket | :comment,
+            visibility: Bounty.visibility() | nil,
+            shared_with: [String.t()] | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -110,6 +121,7 @@ defmodule Algora.Bounties do
         opts \\ []
       ) do
     command_id = opts[:command_id]
+    shared_with = opts[:shared_with] || []
 
     Repo.transact(fn ->
       with {:ok, %{installation_id: installation_id, token: token}} <-
@@ -119,9 +131,33 @@ defmodule Algora.Bounties do
            {:ok, strategy} <- strategy_to_action(existing, opts[:strategy]),
            {:ok, bounty} <-
              (case strategy do
-                :create -> do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
-                :set -> existing |> Bounty.changeset(%{amount: amount}) |> Repo.update()
-                :increase -> existing |> Bounty.changeset(%{amount: Money.add!(existing.amount, amount)}) |> Repo.update()
+                :create ->
+                  do_create_bounty(%{
+                    creator: creator,
+                    owner: owner,
+                    amount: amount,
+                    ticket: ticket,
+                    visibility: opts[:visibility],
+                    shared_with: shared_with
+                  })
+
+                :set ->
+                  existing
+                  |> Bounty.changeset(%{
+                    amount: amount,
+                    visibility: opts[:visibility],
+                    shared_with: shared_with
+                  })
+                  |> Repo.update()
+
+                :increase ->
+                  existing
+                  |> Bounty.changeset(%{
+                    amount: Money.add!(existing.amount, amount),
+                    visibility: opts[:visibility],
+                    shared_with: shared_with
+                  })
+                  |> Repo.update()
               end),
            {:ok, _job} <-
              notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref},
@@ -315,7 +351,10 @@ defmodule Algora.Bounties do
       ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
       installation_id: opts[:installation_id],
       command_id: opts[:command_id],
-      command_source: opts[:command_source]
+      command_source: opts[:command_source],
+      bounty_id: bounty.id,
+      visibility: bounty.visibility,
+      shared_with: bounty.shared_with
     }
     |> Jobs.NotifyBounty.new()
     |> Oban.insert()
@@ -979,13 +1018,37 @@ defmodule Algora.Bounties do
           :open ->
             query = where(query, [t: t], t.state == :open)
 
-            case criteria[:owner_id] do
-              nil ->
-                where(query, [b, o: o], b.visibility == :public and o.featured == true)
+            query =
+              case criteria[:current_user] do
+                nil ->
+                  where(query, [b], b.visibility != :exclusive)
 
-              _org_id ->
-                where(query, [b], b.visibility in [:public, :community])
-            end
+                user ->
+                  where(
+                    query,
+                    [b],
+                    b.visibility != :exclusive or
+                      (b.visibility == :exclusive and
+                         fragment(
+                           "? && ARRAY[?, ?, ?]::citext[]",
+                           b.shared_with,
+                           ^user.id,
+                           ^user.email,
+                           ^to_string(user.provider_id)
+                         ))
+                  )
+              end
+
+            query =
+              case criteria[:owner_id] do
+                nil ->
+                  where(query, [b, o: o], (b.visibility == :public and o.featured == true) or b.visibility == :exclusive)
+
+                _org_id ->
+                  query
+              end
+
+            query
 
           _ ->
             query
@@ -995,6 +1058,9 @@ defmodule Algora.Bounties do
         from([b] in query,
           where: {b.inserted_at, b.id} < {^inserted_at, ^id}
         )
+
+      {:tech_stack, []}, query ->
+        query
 
       {:tech_stack, tech_stack}, query ->
         from([b, r: r] in query,

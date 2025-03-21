@@ -126,5 +126,8 @@ defmodule Algora.Github do
     do: client().list_repository_comments(token, owner, repo, opts)
 
   @impl true
+  def list_repository_contributors(token, owner, repo), do: client().list_repository_contributors(token, owner, repo)
+
+  @impl true
   def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)
 end

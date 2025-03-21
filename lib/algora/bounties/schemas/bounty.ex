@@ -5,12 +5,15 @@ defmodule Algora.Bounties.Bounty do
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
 
+  @type visibility :: :community | :exclusive | :public
+
   typed_schema "bounties" do
     field :amount, Algora.Types.Money
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
     field :number, :integer, default: 0
     field :autopay_disabled, :boolean, default: false
-    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], default: :public
+    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :public
+    field :shared_with, {:array, :string}, null: false, default: []
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
@@ -29,7 +32,7 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility])
+    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility, :shared_with])
     |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
     |> foreign_key_constraint(:ticket)

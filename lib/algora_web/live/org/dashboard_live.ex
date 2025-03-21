@@ -503,16 +503,20 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       with %{valid?: true} <- changeset,
            {:ok, _bounty} <-
-             Bounties.create_bounty(%{
-               creator: socket.assigns.current_user,
-               owner: socket.assigns.current_org,
-               amount: amount,
-               ticket_ref: %{
-                 owner: ticket_ref.owner,
-                 repo: ticket_ref.repo,
-                 number: ticket_ref.number
-               }
-             }) do
+             Bounties.create_bounty(
+               %{
+                 creator: socket.assigns.current_user,
+                 owner: socket.assigns.current_org,
+                 amount: amount,
+                 ticket_ref: %{
+                   owner: ticket_ref.owner,
+                   repo: ticket_ref.repo,
+                   number: ticket_ref.number
+                 }
+               },
+               visibility: :exclusive,
+               shared_with: [socket.assigns.selected_developer.id]
+             ) do
         {:noreply,
          socket
          |> assign_achievements()

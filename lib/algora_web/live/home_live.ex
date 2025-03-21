@@ -834,8 +834,7 @@ defmodule AlgoraWeb.HomeLive do
           {:noreply, push_navigate(socket, to: ~p"/go/#{owner}/#{repo}")}
 
         _ ->
-          {:noreply,
-           assign(socket, :repo_form, to_form(RepoForm.add_error(changeset, :url, "Invalid GitHub repository URL")))}
+          {:noreply, assign(socket, :repo_form, to_form(add_error(changeset, :url, "Invalid GitHub repository URL")))}
       end
     else
       {:noreply, assign(socket, :repo_form, to_form(changeset))}

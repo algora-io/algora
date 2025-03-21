@@ -1114,6 +1114,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div class="flex flex-col gap-6">
             <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
             <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+            <.input
+              label="URL"
+              field={@tip_form[:url]}
+              placeholder="https://github.com/owner/repo/issues/123"
+              helptext="We'll add a comment to the issue to notify the developer."
+            />
             <p class="text-sm text-muted-foreground">
               <span class="font-semibold">Tip:</span>
               You can also comment <code class="px-1 py-0.5 text-success">/tip $100 @username</code>

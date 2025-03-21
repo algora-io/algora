@@ -1023,8 +1023,6 @@ defmodule Algora.Bounties do
                   where(query, [b], b.visibility != :exclusive)
 
                 user ->
-                  dbg([user.id, user.email, to_string(user.provider_id)])
-
                   where(
                     query,
                     [b],

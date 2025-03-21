@@ -219,7 +219,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title={"#{@current_org.name} Contributors"}
           subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
-          <div class="relative w-full overflow-auto max-h-[450px] scrollbar-thin">
+          <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %Contributor{user: user} <- @contributors do %>
@@ -235,7 +235,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title="Algora Experts"
           subtitle="Meet Algora experts versed in your tech stack"
         >
-          <div class="relative w-full overflow-auto max-h-[450px] scrollbar-thin">
+          <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for user <- @experts do %>
@@ -259,7 +259,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   command on Github.
                 </p>
               </div>
-              <div class="pb-4 md:pb-0">
+              <div :if={length(@bounty_rows) + length(@transaction_rows) > 0} class="pb-4 md:pb-0">
                 <!-- Tab buttons for Open and Completed bounties -->
                 <div dir="ltr" data-orientation="horizontal">
                   <div
@@ -308,62 +308,113 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </div>
           </div>
           <div :if={@current_status == :open} class="relative">
-            <div id="bounties-container" phx-hook="InfiniteScroll">
-              <.bounties bounties={@bounty_rows} />
-              <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
-                <div class="animate-pulse text-muted-foreground">
-                  <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div :if={@current_status == :paid} class="relative">
-            <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transaction_rows do %>
-              <div class="mb-4 rounded-lg border border-border bg-card p-4">
-                <div class="flex gap-4">
-                  <div class="flex-1">
-                    <div class="mb-2 font-mono text-2xl font-extrabold text-success">
-                      {Money.to_string!(transaction.net_amount)}
-                    </div>
-                    <div :if={ticket.repository} class="mb-1 text-sm text-muted-foreground">
-                      {ticket.repository.user.provider_login}/{ticket.repository.name}#{ticket.number}
-                    </div>
-                    <div class="font-medium">
-                      {ticket.title}
-                    </div>
-                    <div class="mt-1 text-xs text-muted-foreground">
-                      {Algora.Util.time_ago(transaction.succeeded_at)}
-                    </div>
+            <%= if Enum.empty?(@bounty_rows) do %>
+              <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                <.card_header>
+                  <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                    <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
                   </div>
-
-                  <div class="flex w-32 flex-col items-center border-l border-border pl-4">
-                    <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
-                      Awarded to
-                    </h3>
-                    <img
-                      src={recipient.avatar_url}
-                      class="mb-2 h-16 w-16 rounded-full"
-                      alt={recipient.name}
-                    />
-                    <div class="text-center text-sm font-medium">
-                      {recipient.name}
-                      <div>
-                        {Algora.Misc.CountryEmojis.get(recipient.country)}
-                      </div>
-                    </div>
+                  <.card_title>No bounties yet</.card_title>
+                  <.card_description class="pt-2">
+                    <%= if @installations == [] do %>
+                      Install Algora in {@current_org.name} to create new bounties using the
+                      <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
+                        /bounty $1000
+                      </code>
+                      command on Github
+                      <.button
+                        :if={@installations == []}
+                        phx-click="install_app"
+                        class="mt-4 flex mx-auto"
+                      >
+                        <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install Algora
+                      </.button>
+                    <% else %>
+                      Create new bounties using the
+                      <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
+                        /bounty $1000
+                      </code>
+                      command on Github
+                    <% end %>
+                  </.card_description>
+                </.card_header>
+              </.card>
+            <% else %>
+              <div id="bounties-container" phx-hook="InfiniteScroll">
+                <.bounties bounties={@bounty_rows} />
+                <div
+                  :if={@has_more_bounties}
+                  class="flex justify-center mt-4"
+                  id="load-more-indicator"
+                >
+                  <div class="animate-pulse text-muted-foreground">
+                    <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
                   </div>
                 </div>
               </div>
             <% end %>
-            <div
-              :if={@has_more_transactions}
-              class="flex justify-center mt-4"
-              id="load-more-indicator"
-            >
-              <div class="animate-pulse text-gray-400">
-                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+          </div>
+          <div :if={@current_status == :paid} class="relative">
+            <%= if Enum.empty?(@bounty_rows) do %>
+              <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                <.card_header>
+                  <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                    <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <.card_title>No completed bounties yet</.card_title>
+                  <.card_description>
+                    Completed bounties will appear here once completed
+                  </.card_description>
+                </.card_header>
+              </.card>
+            <% else %>
+              <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transaction_rows do %>
+                <div class="mb-4 rounded-lg border border-border bg-card p-4">
+                  <div class="flex gap-4">
+                    <div class="flex-1">
+                      <div class="mb-2 font-mono text-2xl font-extrabold text-success">
+                        {Money.to_string!(transaction.net_amount)}
+                      </div>
+                      <div :if={ticket.repository} class="mb-1 text-sm text-muted-foreground">
+                        {ticket.repository.user.provider_login}/{ticket.repository.name}#{ticket.number}
+                      </div>
+                      <div class="font-medium">
+                        {ticket.title}
+                      </div>
+                      <div class="mt-1 text-xs text-muted-foreground">
+                        {Algora.Util.time_ago(transaction.succeeded_at)}
+                      </div>
+                    </div>
+
+                    <div class="flex w-32 flex-col items-center border-l border-border pl-4">
+                      <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
+                        Awarded to
+                      </h3>
+                      <img
+                        src={recipient.avatar_url}
+                        class="mb-2 h-16 w-16 rounded-full"
+                        alt={recipient.name}
+                      />
+                      <div class="text-center text-sm font-medium">
+                        {recipient.name}
+                        <div>
+                          {Algora.Misc.CountryEmojis.get(recipient.country)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+              <div
+                :if={@has_more_transactions}
+                class="flex justify-center mt-4"
+                id="load-more-indicator"
+              >
+                <div class="animate-pulse text-gray-400">
+                  <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+                </div>
               </div>
-            </div>
+            <% end %>
           </div>
         </div>
 
@@ -899,9 +950,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
     <tr class="border-b transition-colors">
       <td class="py-4 align-middle">
         <div class="flex items-center justify-between gap-4">
-          <div class="flex items-start gap-4">
+          <div class="flex items-center gap-4">
             <.link navigate={User.url(@user)}>
-              <.avatar class="h-20 w-20 rounded-full">
+              <.avatar class="h-12 w-12 rounded-full">
                 <.avatar_image src={@user.avatar_url} alt={@user.name} />
                 <.avatar_fallback class="rounded-lg">
                   {Algora.Util.initials(@user.name)}
@@ -950,13 +1001,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </div>
               </div>
 
-              <div class="pt-1.5 flex flex-wrap gap-2">
+              <%!-- <div class="pt-1.5 flex flex-wrap gap-2">
                 <%= for tech <- @user.tech_stack do %>
                   <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
                     {tech}
                   </div>
                 <% end %>
-              </div>
+              </div> --%>
             </div>
           </div>
           <div class="flex gap-2">
@@ -974,7 +1025,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="tip"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-rose-600/10 hover:text-rose-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-rose-600/10 focus:text-rose-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-rose-400/50 focus:border-rose-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-600/10 hover:text-red-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-600/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
             >
               <.icon name="tabler-heart" class="size-4 text-current mr-2 -ml-1" /> Tip
             </.button>
@@ -1236,7 +1287,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             helptext="We'll add a comment to the issue to notify the developer."
           />
           <.input
-            label="Message (optional)"
+            label="Review (optional)"
             field={@tip_form[:message]}
             placeholder="Thanks for your great work!"
           />

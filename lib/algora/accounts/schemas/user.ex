@@ -129,7 +129,7 @@ defmodule Algora.Accounts.User do
       params = %{
         "handle" => info["login"],
         "email" => primary_email,
-        "display_name" => get_change(identity_changeset, :provider_name),
+        "display_name" => info["name"],
         "bio" => info["bio"],
         "location" => info["location"],
         "avatar_url" => info["avatar_url"],
@@ -176,18 +176,36 @@ defmodule Algora.Accounts.User do
       Identity.github_registration_changeset(user, info, primary_email, emails, token)
 
     if identity_changeset.valid? do
-      params = %{
-        "display_name" => user.display_name || get_change(identity_changeset, :provider_name),
-        "bio" => user.bio || info["bio"],
-        "location" => user.location || info["location"],
-        "avatar_url" => user.avatar_url || info["avatar_url"],
-        "website_url" => user.website_url || info["blog"],
-        "github_url" => user.github_url || info["html_url"],
-        "provider" => "github",
-        "provider_id" => to_string(info["id"]),
-        "provider_login" => info["login"],
-        "provider_meta" => info
-      }
+      params =
+        case user.provider_id do
+          nil ->
+            %{
+              "display_name" => info["name"],
+              "bio" => info["bio"],
+              "location" => info["location"],
+              "avatar_url" => info["avatar_url"],
+              "website_url" => info["blog"],
+              "github_url" => info["html_url"],
+              "provider" => "github",
+              "provider_id" => to_string(info["id"]),
+              "provider_login" => info["login"],
+              "provider_meta" => info
+            }
+
+          _ ->
+            %{
+              "display_name" => user.display_name || info["name"],
+              "bio" => user.bio || info["bio"],
+              "location" => user.location || info["location"],
+              "avatar_url" => user.avatar_url || info["avatar_url"],
+              "website_url" => user.website_url || info["blog"],
+              "github_url" => user.github_url || info["html_url"],
+              "provider" => "github",
+              "provider_id" => to_string(info["id"]),
+              "provider_login" => info["login"],
+              "provider_meta" => info
+            }
+        end
 
       user
       |> cast(params, [

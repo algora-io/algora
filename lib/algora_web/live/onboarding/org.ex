@@ -7,6 +7,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Organizations
   alias AlgoraWeb.Components.Wordmarks
   alias Phoenix.LiveView.AsyncResult
   alias Swoosh.Email

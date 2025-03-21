@@ -6,6 +6,7 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
+  alias Algora.Contracts.Contract
   alias Algora.Github
   alias Algora.Organizations
   alias Algora.Organizations.Member
@@ -294,6 +295,11 @@ defmodule Algora.Accounts do
     Repo.update_all(
       from(c in Contributor, where: c.user_id == ^old_user.id),
       set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(c in Contract, where: c.contractor_id == ^old_user.id),
+      set: [contractor_id: new_user.id]
     )
 
     Repo.update_all(

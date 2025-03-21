@@ -957,57 +957,60 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </div>
             </div>
           </div>
-          <%= if contract_for_user(@contracts, @user) do %>
+          <div class="flex gap-2">
             <.button
-              variant="secondary"
+              phx-click="offer_bounty"
+              phx-value-user_id={@user.id}
+              variant="none"
+              class="group flex items-center justify-center bg-card text-foreground transition-colors duration-75 hover:bg-emerald-500/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-500/10 focus:text-emerald-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50"
+            >
+              Bounty
+            </.button>
+            <.button
+              phx-click="offer_tip"
+              phx-value-user_id={@user.id}
+              variant="none"
+              class="group flex items-center justify-center bg-card text-foreground transition-colors duration-75 hover:bg-red-500/10 hover:text-red-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-500/10 focus:text-red-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50"
+            >
+              Tip
+            </.button>
+
+            <.button
+              :if={contract_for_user(@contracts, @user)}
               navigate={
                 ~p"/org/#{@current_org.handle}/contracts/#{contract_for_user(@contracts, @user).id}"
               }
+              variant="none"
+              class="group flex items-center justify-center bg-card text-foreground transition-colors duration-75 hover:bg-blue-500/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-500/10 focus:text-blue-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50"
             >
-              View contract
+              Contract
             </.button>
-          <% else %>
-            <div class="flex gap-2">
-              <.button phx-click="offer_contract" phx-value-user_id={@user.id} variant="secondary">
-                Tip
-              </.button>
-              <.button phx-click="offer_contract" phx-value-user_id={@user.id}>
-                Contract
-              </.button>
-              <.dropdown_menu>
-                <.dropdown_menu_trigger>
-                  <.button variant="ghost" size="icon">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="h-4 w-4"
-                    >
-                      <circle cx="12" cy="12" r="1" />
-                      <circle cx="12" cy="5" r="1" />
-                      <circle cx="12" cy="19" r="1" />
-                    </svg>
-                    <span class="sr-only">Open menu</span>
-                  </.button>
-                </.dropdown_menu_trigger>
-                <.dropdown_menu_content>
-                  <.dropdown_menu_item>
-                    View Profile
-                  </.dropdown_menu_item>
-                  <.dropdown_menu_separator />
-                  <.dropdown_menu_item phx-click="remove">
-                    Remove
-                  </.dropdown_menu_item>
-                </.dropdown_menu_content>
-              </.dropdown_menu>
-            </div>
-          <% end %>
+            <.button
+              :if={!contract_for_user(@contracts, @user)}
+              phx-click="offer_contract"
+              phx-value-user_id={@user.id}
+              variant="none"
+              class="group flex items-center justify-center bg-card text-foreground transition-colors duration-75 hover:bg-blue-500/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-500/10 focus:text-blue-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50"
+            >
+              Contract
+            </.button>
+            <.dropdown_menu>
+              <.dropdown_menu_trigger>
+                <.button variant="ghost" size="icon">
+                  <.icon name="tabler-dots" class="h-4 w-4" />
+                </.button>
+              </.dropdown_menu_trigger>
+              <.dropdown_menu_content>
+                <.dropdown_menu_item>
+                  View Profile
+                </.dropdown_menu_item>
+                <.dropdown_menu_separator />
+                <.dropdown_menu_item phx-click="remove">
+                  Remove
+                </.dropdown_menu_item>
+              </.dropdown_menu_content>
+            </.dropdown_menu>
+          </div>
         </div>
       </td>
     </tr>

@@ -122,4 +122,11 @@ defmodule Algora.Util do
   # TODO: Implement this for all countries
   def locale_from_country_code("gr"), do: "el"
   def locale_from_country_code(country_code), do: country_code
+
+  def parse_github_url(url) do
+    case Regex.run(~r{(?:github\.com/)?([^/\s]+)/([^/\s]+)}, url) do
+      [_, owner, repo] -> {:ok, {owner, repo}}
+      _ -> {:error, "Must be a valid GitHub repository URL (e.g. github.com/owner/repo) or owner/repo format"}
+    end
+  end
 end

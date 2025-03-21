@@ -815,13 +815,6 @@ defmodule AlgoraWeb.HomeLive do
     end
   end
 
-  def parse_github_url(url) do
-    case Regex.run(~r{(?:github\.com/)?([^/\s]+)/([^/\s]+)}, url) do
-      [_, owner, repo] -> {:ok, {owner, repo}}
-      _ -> {:error, "Must be a valid GitHub repository URL (e.g. github.com/owner/repo) or owner/repo format"}
-    end
-  end
-
   @impl true
   def handle_event("submit_repo", %{"repo_form" => params}, socket) do
     changeset =
@@ -832,7 +825,7 @@ defmodule AlgoraWeb.HomeLive do
     if changeset.valid? do
       url = get_field(changeset, :url)
 
-      case url |> parse_github_url() |> dbg() do
+      case url |> Algora.Util.parse_github_url() |> dbg() do
         {:ok, {repo_owner, repo_name}} ->
           token = Github.TokenPool.get_token()
 

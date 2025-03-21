@@ -825,7 +825,7 @@ defmodule AlgoraWeb.HomeLive do
     if changeset.valid? do
       url = get_field(changeset, :url)
 
-      case url |> Algora.Util.parse_github_url() |> dbg() do
+      case Algora.Util.parse_github_url(url) do
         {:ok, {repo_owner, repo_name}} ->
           token = Github.TokenPool.get_token()
 

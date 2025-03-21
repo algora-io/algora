@@ -270,7 +270,7 @@ defmodule Algora.Accounts do
 
     case account do
       nil -> create_user(info, primary_email, emails, token)
-      {user, _identity} -> update_user(user, info, primary_email, emails, token)
+      {user, identity} -> update_user(user, identity, info, primary_email, emails, token)
     end
   end
 
@@ -284,9 +284,45 @@ defmodule Algora.Accounts do
     |> Repo.insert()
   end
 
-  def migrate_user(old_user, new_user) do
-    Repo.delete_all(from(i in Identity, where: i.user_id == ^old_user.id))
+  def update_user(user, identity, info, primary_email, emails, token) do
+    old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
 
+    identity_changeset = Identity.github_registration_changeset(user, info, primary_email, emails, token)
+
+    user_changeset = User.github_registration_changeset(user, info, primary_email, emails, token)
+
+    Repo.transact(fn ->
+      delete_result =
+        if identity do
+          Repo.delete(identity)
+        else
+          {:ok, nil}
+        end
+
+      migrate_result =
+        if old_user && old_user.id != user.id do
+          {:ok, old_user} =
+            old_user
+            |> change(provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil)
+            |> Repo.update()
+
+          # TODO: enqueue job
+          migrate_user(old_user, user)
+
+          {:ok, old_user}
+        else
+          {:ok, nil}
+        end
+
+      with {:ok, _} <- delete_result,
+           {:ok, _} <- migrate_result,
+           {:ok, _} <- Repo.insert(identity_changeset) do
+        Repo.update(user_changeset)
+      end
+    end)
+  end
+
+  def migrate_user(old_user, new_user) do
     Repo.update_all(
       from(r in Repository, where: r.user_id == ^old_user.id),
       set: [user_id: new_user.id]
@@ -316,29 +352,6 @@ defmodule Algora.Accounts do
       from(i in Installation, where: i.connected_user_id == ^old_user.id),
       set: [connected_user_id: new_user.id]
     )
-  end
-
-  def update_user(user, info, primary_email, emails, token) do
-    old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
-
-    Repo.transact(fn ->
-      if old_user && old_user.id != user.id do
-        old_user
-        |> change(provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil)
-        |> Repo.update()
-
-        migrate_user(old_user, user)
-      end
-
-      with {:ok, _} <-
-             user
-             |> Identity.github_registration_changeset(info, primary_email, emails, token)
-             |> Repo.insert() do
-        user
-        |> User.github_registration_changeset(info, primary_email, emails, token)
-        |> Repo.update()
-      end
-    end)
   end
 
   # def get_user_by_provider_email(provider, email) when provider in [:github] do

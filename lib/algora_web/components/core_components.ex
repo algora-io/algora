@@ -791,15 +791,17 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           id={@id || @name}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-          class={[
-            "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-            "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
-            "border-input focus:border-ring focus:ring-ring",
-            @errors != [] &&
-              "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
-            @icon && "pl-10",
-            @class
-          ]}
+          class={
+            classes([
+              "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
+              "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
+              "border-input focus:border-ring focus:ring-ring",
+              @errors != [] &&
+                "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
+              @icon && "pl-10",
+              @class
+            ])
+          }
           autocomplete="off"
           {@rest}
         />

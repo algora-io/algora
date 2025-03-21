@@ -319,8 +319,10 @@ defmodule Algora.Accounts do
   end
 
   def update_user(user, info, primary_email, emails, token) do
+    old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
+
     Repo.transact(fn ->
-      if old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"])) do
+      if old_user && old_user.id != user.id do
         old_user
         |> change(provider: nil, provider_id: nil, provider_login: nil, provider_meta: nil)
         |> Repo.update()

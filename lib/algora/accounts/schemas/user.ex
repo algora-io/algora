@@ -177,38 +177,32 @@ defmodule Algora.Accounts.User do
 
     if identity_changeset.valid? do
       params =
-        case user.provider_id do
-          nil ->
-            %{
-              "display_name" => info["name"],
-              "bio" => info["bio"],
-              "location" => info["location"],
-              "avatar_url" => info["avatar_url"],
-              "website_url" => info["blog"],
-              "github_url" => info["html_url"],
-              "provider" => "github",
-              "provider_id" => to_string(info["id"]),
-              "provider_login" => info["login"],
-              "provider_meta" => info
-            }
+        %{
+          "handle" => user.handle || Algora.Organizations.ensure_unique_handle(info["login"]),
+          "email" => user.email || primary_email,
+          "display_name" => user.display_name || info["name"],
+          "bio" => user.bio || info["bio"],
+          "location" => user.location || info["location"],
+          "avatar_url" => user.avatar_url || info["avatar_url"],
+          "website_url" => user.website_url || info["blog"],
+          "github_url" => user.github_url || info["html_url"],
+          "provider" => "github",
+          "provider_id" => to_string(info["id"]),
+          "provider_login" => info["login"],
+          "provider_meta" => info
+        }
 
-          _ ->
-            %{
-              "display_name" => user.display_name || info["name"],
-              "bio" => user.bio || info["bio"],
-              "location" => user.location || info["location"],
-              "avatar_url" => user.avatar_url || info["avatar_url"],
-              "website_url" => user.website_url || info["blog"],
-              "github_url" => user.github_url || info["html_url"],
-              "provider" => "github",
-              "provider_id" => to_string(info["id"]),
-              "provider_login" => info["login"],
-              "provider_meta" => info
-            }
+      params =
+        if is_nil(user.provider_id) do
+          Map.put(params, "display_name", info["name"])
+        else
+          params
         end
 
       user
       |> cast(params, [
+        :handle,
+        :email,
         :display_name,
         :bio,
         :location,
@@ -221,8 +215,11 @@ defmodule Algora.Accounts.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:display_name])
+      |> validate_required([:email, :display_name, :handle])
+      |> validate_handle()
       |> validate_email()
+      |> unique_constraint(:email)
+      |> unique_constraint(:handle)
     else
       user
       |> change()

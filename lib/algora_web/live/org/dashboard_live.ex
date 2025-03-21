@@ -1046,12 +1046,20 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.button>
 
             <.button
-              :if={@contract_for_user}
+              :if={@contract_for_user && @contract_for_user.status == :active}
               navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="bg-emerald-800/10 text-emerald-400 drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
+            </.button>
+            <.button
+              :if={@contract_for_user && @contract_for_user.status == :draft}
+              navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
+              variant="none"
+              class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#f8717180] focus:bg-gray-800/10 focus:text-gray-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-gray-400/50 focus:border-gray-400/50"
+            >
+              <.icon name="tabler-clock" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
             <.button
               :if={!@contract_for_user}

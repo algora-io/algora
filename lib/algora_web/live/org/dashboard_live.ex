@@ -463,6 +463,26 @@ defmodule AlgoraWeb.Org.DashboardLive do
      end}
   end
 
+  @impl true
+  def handle_event("remove_contributor", %{"user_id" => user_id}, socket) do
+    current_org = socket.assigns.current_org
+
+    if incomplete?(socket.assigns.achievements, :install_app_status) do
+      {:noreply, put_flash(socket, :error, "Please install the app first")}
+    else
+      Repo.delete_all(
+        from c in Contributor,
+          where: c.user_id == ^user_id,
+          join: r in assoc(c, :repository),
+          join: u in assoc(r, :user),
+          where: u.provider == ^current_org.provider and u.provider_id == ^current_org.provider_id
+      )
+
+      contributors = Enum.reject(socket.assigns.contributors, &(&1.user.id == user_id))
+      {:noreply, assign(socket, :contributors, contributors)}
+    end
+  end
+
   def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
     if socket.assigns.has_fresh_token? do
       changeset =
@@ -888,6 +908,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
     assign(socket, :achievements, Enum.reject(achievements, &(&1.status == :completed)))
   end
 
+  defp incomplete?(achievements, id) do
+    Enum.any?(achievements, &(&1.id == id and &1.status != :completed))
+  end
+
   defp personalize_status(_socket), do: :completed
 
   defp complete_signup_status(socket) do
@@ -1045,7 +1069,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   </.link>
                 </.dropdown_menu_item>
                 <.dropdown_menu_separator />
-                <.dropdown_menu_item phx-click="remove">
+                <.dropdown_menu_item phx-click="remove_contributor" phx-value-user_id={@user.id}>
                   Remove
                 </.dropdown_menu_item>
               </.dropdown_menu_content>
@@ -1381,7 +1405,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.form for={@contract_form} phx-change="validate_contract" phx-submit="create_contract">
           <div class="flex flex-col gap-8">
             <.share_drawer_developer_info selected_developer={@selected_developer} />
-            <%= if @achievements |> Enum.any?(& &1.id == :connect_github_status and &1.status != :completed ) do %>
+            <%= if incomplete?(@achievements, :connect_github_status) do %>
               <div class="relative">
                 <div class="absolute inset-0 z-10 bg-background/50" />
                 <div class="pointer-events-none">

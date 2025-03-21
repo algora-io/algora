@@ -1040,7 +1040,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </.dropdown_menu_trigger>
               <.dropdown_menu_content>
                 <.dropdown_menu_item>
-                  View Profile
+                  <.link href={User.url(@user)}>
+                    View Profile
+                  </.link>
                 </.dropdown_menu_item>
                 <.dropdown_menu_separator />
                 <.dropdown_menu_item phx-click="remove">

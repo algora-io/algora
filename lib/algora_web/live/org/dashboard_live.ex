@@ -680,7 +680,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         {:cont, result}
       end)
 
-    assign(socket, :achievements, achievements)
+    assign(socket, :achievements, Enum.reject(achievements, &(&1.status == :completed)))
   end
 
   defp personalize_status(_socket), do: :completed

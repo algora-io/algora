@@ -427,24 +427,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {create_tip(assigns)}
           </div>
         </.section>
-
-        <.section :if={@installations == [] && 1 == 2}>
-          <.card>
-            <.card_header>
-              <.card_title>GitHub Integration</.card_title>
-              <.card_description :if={@installations == []}>
-                Install the Algora app to enable slash commands in your GitHub repositories
-              </.card_description>
-            </.card_header>
-            <.card_content>
-              <div class="flex flex-col gap-2">
-                <.button phx-click="install_app" class="ml-auto gap-2">
-                  <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
-                </.button>
-              </div>
-            </.card_content>
-          </.card>
-        </.section>
       </div>
     </div>
     {sidebar(assigns)}

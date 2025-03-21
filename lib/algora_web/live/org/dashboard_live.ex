@@ -1379,13 +1379,40 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.form for={@contract_form} phx-change="validate_contract" phx-submit="create_contract">
           <div class="flex flex-col gap-8">
             <.share_drawer_developer_info selected_developer={@selected_developer} />
-            <.share_drawer_content
-              :if={@selected_developer}
-              share_drawer_type={@share_drawer_type}
-              contract_form={@contract_form}
-              tip_form={@tip_form}
-              bounty_form={@bounty_form}
-            />
+            <%= if @achievements |> Enum.any?(& &1.id == :connect_github_status and &1.status != :completed ) do %>
+              <div class="relative">
+                <div class="absolute inset-0 z-10 bg-background/50" />
+                <div class="pointer-events-none">
+                  <.share_drawer_content
+                    :if={@selected_developer}
+                    share_drawer_type={@share_drawer_type}
+                    contract_form={@contract_form}
+                    tip_form={@tip_form}
+                    bounty_form={@bounty_form}
+                  />
+                </div>
+                <.alert
+                  variant="default"
+                  class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-auto flex flex-col items-center justify-center gap-2 text-center"
+                >
+                  <.alert_title>Connect GitHub</.alert_title>
+                  <.alert_description>
+                    Connect your GitHub account to create a {@share_drawer_type}.
+                  </.alert_description>
+                  <.button phx-click="close_share_drawer" type="button" variant="subtle">
+                    Go back
+                  </.button>
+                </.alert>
+              </div>
+            <% else %>
+              <.share_drawer_content
+                :if={@selected_developer}
+                share_drawer_type={@share_drawer_type}
+                contract_form={@contract_form}
+                tip_form={@tip_form}
+                bounty_form={@bounty_form}
+              />
+            <% end %>
           </div>
         </.form>
       </.drawer_content>

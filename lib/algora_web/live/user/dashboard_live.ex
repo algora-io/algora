@@ -50,7 +50,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <div class="flex lg:flex-row flex-col-reverse">
       <div class="flex-1 bg-background text-foreground lg:pr-96">
-        <div :if={not @has_active_account} class="relative h-full p-4 sm:p-6 md:p-8">
+        <div :if={not @has_active_account} class="relative p-4 sm:p-6 md:p-8">
           <.section>
             <.card>
               <.card_header>

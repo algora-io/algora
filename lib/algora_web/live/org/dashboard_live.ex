@@ -223,7 +223,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %Contributor{user: user} <- @contributors do %>
-                  <.developer_card user={user} contracts={@contracts} current_org={@current_org} />
+                  <.developer_card
+                    user={user}
+                    contract_for_user={contract_for_user(@contracts, user)}
+                    current_org={@current_org}
+                  />
                 <% end %>
               </tbody>
             </table>
@@ -239,7 +243,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for user <- @experts do %>
-                  <.developer_card user={user} contracts={@contracts} current_org={@current_org} />
+                  <.developer_card
+                    user={user}
+                    contract_for_user={contract_for_user(@contracts, user)}
+                    current_org={@current_org}
+                  />
                 <% end %>
               </tbody>
             </table>
@@ -1023,7 +1031,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="bounty"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-600/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-600/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
             >
               <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
             </.button>
@@ -1032,28 +1040,26 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="tip"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-600/10 hover:text-red-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-600/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-800/10 hover:text-red-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-800/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
             >
               <.icon name="tabler-heart" class="size-4 text-current mr-2 -ml-1" /> Tip
             </.button>
 
             <.button
-              :if={contract_for_user(@contracts, @user)}
-              navigate={
-                ~p"/org/#{@current_org.handle}/contracts/#{contract_for_user(@contracts, @user).id}"
-              }
+              :if={@contract_for_user}
+              navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-600/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-600/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
             <.button
-              :if={!contract_for_user(@contracts, @user)}
+              :if={!@contract_for_user}
               phx-click="share_opportunity"
               phx-value-user_id={@user.id}
               phx-value-type="contract"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-600/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-600/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-400 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>

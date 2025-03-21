@@ -104,7 +104,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
-      <div class="container mx-auto max-w-7xl space-y-8 p-8">
+      <div class="container mx-auto max-w-7xl space-y-8 lg:space-y-16 p-8">
         <.section :if={@payable_bounties != %{}}>
           <.card>
             <.card_header>
@@ -255,10 +255,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
 
         <div id="bounties-container" phx-hook="InfiniteScroll">
-          <div class="mb-6">
+          <div class="mb-2">
             <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
               <div>
-                <h2 class="text-2xl font-bold dark:text-white">Bounties</h2>
+                <h2 class="text-2xl font-bold dark:text-white">{@current_org.name} Bounties</h2>
                 <p class="text-sm dark:text-gray-300">
                   Create new bounties using the
                   <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">

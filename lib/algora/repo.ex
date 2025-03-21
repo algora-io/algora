@@ -61,8 +61,10 @@ defmodule Algora.Repo do
           end
 
         case result do
+          :ok -> nil
           {:ok, result} -> result
           {:error, reason} -> repo.rollback(reason)
+          error -> repo.rollback(error)
         end
       end,
       opts

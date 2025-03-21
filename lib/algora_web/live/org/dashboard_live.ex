@@ -499,7 +499,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
                creator: socket.assigns.current_user,
                owner: socket.assigns.current_org,
                amount: amount,
-               ticket_ref: ticket_ref
+               ticket_ref: %{
+                 owner: ticket_ref.owner,
+                 repo: ticket_ref.repo,
+                 number: ticket_ref.number
+               }
              }) do
         {:noreply,
          socket
@@ -528,8 +532,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
     if socket.assigns.has_fresh_token? do
       changeset =
         %TipForm{}
-        |> TipForm.changeset(params)
+        |> TipForm.changeset(Map.put(params, "github_handle", socket.assigns.current_user.provider_login))
         |> Map.put(:action, :validate)
+
+      ticket_ref = get_field(changeset, :ticket_ref)
 
       with %{valid?: true} <- changeset,
            {:ok, checkout_url} <-
@@ -540,7 +546,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
                  recipient: socket.assigns.selected_developer,
                  amount: get_field(changeset, :amount)
                },
-               ticket_ref: get_field(changeset, :ticket_ref)
+               ticket_ref: %{
+                 owner: ticket_ref.owner,
+                 repo: ticket_ref.repo,
+                 number: ticket_ref.number
+               }
              ) do
         {:noreply, redirect(socket, external: checkout_url)}
       else
@@ -1220,91 +1230,95 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp share_drawer_content(%{share_drawer_type: "contract"} = assigns) do
     ~H"""
-    <.card>
-      <.card_header>
-        <.card_title>Contract Details</.card_title>
-      </.card_header>
-      <.card_content>
-        <div class="space-y-4">
-          <.input label="Hourly Rate" icon="tabler-currency-dollar" field={@form[:hourly_rate]} />
-          <.input label="Hours per Week" field={@form[:hours_per_week]} />
-        </div>
-      </.card_content>
-    </.card>
+    <.form for={@contract_form} phx-submit="create_contract">
+      <.card>
+        <.card_header>
+          <.card_title>Contract Details</.card_title>
+        </.card_header>
+        <.card_content>
+          <div class="space-y-4">
+            <.input
+              label="Hourly Rate"
+              icon="tabler-currency-dollar"
+              field={@contract_form[:hourly_rate]}
+            />
+            <.input label="Hours per Week" field={@contract_form[:hours_per_week]} />
+          </div>
+        </.card_content>
+      </.card>
 
-    <div class="ml-auto flex gap-4">
-      <.button variant="secondary" phx-click="close_share_drawer" type="button">
-        Cancel
-      </.button>
-      <.button type="submit">
-        Send Contract Offer <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-      </.button>
-    </div>
+      <div class="ml-auto flex gap-4">
+        <.button variant="secondary" phx-click="close_share_drawer" type="button">
+          Cancel
+        </.button>
+        <.button type="submit">
+          Send Contract Offer <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+        </.button>
+      </div>
+    </.form>
     """
   end
 
   defp share_drawer_content(%{share_drawer_type: "bounty"} = assigns) do
     ~H"""
-    <.card>
-      <.card_header>
-        <.card_title>Bounty Details</.card_title>
-      </.card_header>
-      <.card_content>
-        <div class="space-y-4">
-          <.input
-            label="URL"
-            field={@form[:url]}
-            placeholder="https://github.com/owner/repo/issues/123"
-          />
-          <.input label="Amount" icon="tabler-currency-dollar" field={@form[:amount]} />
-        </div>
-      </.card_content>
-    </.card>
+    <.form for={@bounty_form} phx-submit="create_bounty">
+      <.card>
+        <.card_header>
+          <.card_title>Bounty Details</.card_title>
+        </.card_header>
+        <.card_content>
+          <div class="space-y-4">
+            <.input
+              label="URL"
+              field={@bounty_form[:url]}
+              placeholder="https://github.com/owner/repo/issues/123"
+            />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+          </div>
+        </.card_content>
+      </.card>
 
-    <div class="ml-auto flex gap-4">
-      <.button variant="secondary" phx-click="close_share_drawer" type="button">
-        Cancel
-      </.button>
-      <.button type="submit">
-        Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-      </.button>
-    </div>
+      <div class="ml-auto flex gap-4">
+        <.button variant="secondary" phx-click="close_share_drawer" type="button">
+          Cancel
+        </.button>
+        <.button type="submit">
+          Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+        </.button>
+      </div>
+    </.form>
     """
   end
 
   defp share_drawer_content(%{share_drawer_type: "tip"} = assigns) do
     ~H"""
-    <.card>
-      <.card_header>
-        <.card_title>Tip Details</.card_title>
-      </.card_header>
-      <.card_content>
-        <div class="space-y-4">
-          <.input label="Amount" icon="tabler-currency-dollar" field={@form[:amount]} />
-          <.input
-            label="URL"
-            field={@form[:url]}
-            placeholder="https://github.com/owner/repo/issues/123"
-            helptext="We'll add a comment to the issue to notify the developer."
-          />
-          <%!-- # TODO: implement --%>
-          <.input
-            label="Review (optional)"
-            field={@form[:message]}
-            placeholder="Thanks for your great work!"
-          />
-        </div>
-      </.card_content>
-    </.card>
+    <.form for={@tip_form} phx-submit="create_tip">
+      <.card>
+        <.card_header>
+          <.card_title>Tip Details</.card_title>
+        </.card_header>
+        <.card_content>
+          <div class="space-y-4">
+            <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+            <.input
+              label="URL"
+              field={@tip_form[:url]}
+              placeholder="https://github.com/owner/repo/issues/123"
+              helptext="We'll add a comment to the issue to notify the developer."
+            />
+          </div>
+        </.card_content>
+      </.card>
 
-    <div class="ml-auto flex gap-4">
-      <.button variant="secondary" phx-click="close_share_drawer" type="button">
-        Cancel
-      </.button>
-      <.button type="submit">
-        Send Tip <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-      </.button>
-    </div>
+      <div class="ml-auto flex gap-4">
+        <.button variant="secondary" phx-click="close_share_drawer" type="button">
+          Cancel
+        </.button>
+        <.button type="submit">
+          Send Tip <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+        </.button>
+      </div>
+    </.form>
     """
   end
 
@@ -1381,27 +1395,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp share_drawer(assigns) do
-    assigns =
-      case assigns.share_drawer_type do
-        nil ->
-          assigns
-
-        "contract" ->
-          assigns
-          |> assign(:phx_submit, "create_contract")
-          |> assign(:form, assigns.contract_form)
-
-        "tip" ->
-          assigns
-          |> assign(:phx_submit, "create_tip")
-          |> assign(:form, assigns.tip_form)
-
-        "bounty" ->
-          assigns
-          |> assign(:phx_submit, "create_bounty")
-          |> assign(:form, assigns.bounty_form)
-      end
-
     ~H"""
     <.drawer show={@show_share_drawer} direction="right" on_cancel="close_share_drawer">
       <.share_drawer_header
@@ -1410,41 +1403,43 @@ defmodule AlgoraWeb.Org.DashboardLive do
         share_drawer_type={@share_drawer_type}
       />
       <.drawer_content :if={@selected_developer} class="mt-4">
-        <.form for={@form} phx-submit={@phx_submit}>
-          <div class="flex flex-col gap-8">
-            <.share_drawer_developer_info selected_developer={@selected_developer} />
-            <%= if incomplete?(@achievements, :connect_github_status) do %>
-              <div class="relative">
-                <div class="absolute inset-0 z-10 bg-background/50" />
-                <div class="pointer-events-none">
-                  <.share_drawer_content
-                    :if={@selected_developer}
-                    share_drawer_type={@share_drawer_type}
-                    form={@form}
-                  />
-                </div>
-                <.alert
-                  variant="default"
-                  class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-auto flex flex-col items-center justify-center gap-2 text-center"
-                >
-                  <.alert_title>Connect GitHub</.alert_title>
-                  <.alert_description>
-                    Connect your GitHub account to create a {@share_drawer_type}.
-                  </.alert_description>
-                  <.button phx-click="close_share_drawer" type="button" variant="subtle">
-                    Go back
-                  </.button>
-                </.alert>
+        <div class="flex flex-col gap-8">
+          <.share_drawer_developer_info selected_developer={@selected_developer} />
+          <%= if incomplete?(@achievements, :connect_github_status) do %>
+            <div class="relative">
+              <div class="absolute inset-0 z-10 bg-background/50" />
+              <div class="pointer-events-none">
+                <.share_drawer_content
+                  :if={@selected_developer}
+                  share_drawer_type={@share_drawer_type}
+                  bounty_form={@bounty_form}
+                  tip_form={@tip_form}
+                  contract_form={@contract_form}
+                />
               </div>
-            <% else %>
-              <.share_drawer_content
-                :if={@selected_developer}
-                share_drawer_type={@share_drawer_type}
-                form={@form}
-              />
-            <% end %>
-          </div>
-        </.form>
+              <.alert
+                variant="default"
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-auto flex flex-col items-center justify-center gap-2 text-center"
+              >
+                <.alert_title>Connect GitHub</.alert_title>
+                <.alert_description>
+                  Connect your GitHub account to create a {@share_drawer_type}.
+                </.alert_description>
+                <.button phx-click="close_share_drawer" type="button" variant="subtle">
+                  Go back
+                </.button>
+              </.alert>
+            </div>
+          <% else %>
+            <.share_drawer_content
+              :if={@selected_developer}
+              share_drawer_type={@share_drawer_type}
+              bounty_form={@bounty_form}
+              tip_form={@tip_form}
+              contract_form={@contract_form}
+            />
+          <% end %>
+        </div>
       </.drawer_content>
     </.drawer>
     """

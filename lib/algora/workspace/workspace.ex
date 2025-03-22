@@ -158,7 +158,7 @@ defmodule Algora.Workspace do
          {:ok, user} <- ensure_user_by_repo(token, repository, owner),
          {:ok, user} <- sync_user(user, repository, owner, repo),
          {:ok, repo} <- repository |> Repository.github_changeset(user) |> Repo.insert() do
-      {:ok, repo}
+      {:ok, %{repo | user: user}}
     else
       {:error,
        %Ecto.Changeset{
@@ -166,7 +166,13 @@ defmodule Algora.Workspace do
            provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}
          ]
        } = changeset} ->
-        Repo.fetch_by(Repository, provider: "github", provider_id: changeset.changes.provider_id)
+        Repo.fetch_one(
+          from r in Repository,
+            where: r.provider == "github",
+            where: r.provider_id == ^changeset.changes.provider_id,
+            join: u in assoc(r, :user),
+            preload: [user: u]
+        )
 
       {:error, _reason} = error ->
         error

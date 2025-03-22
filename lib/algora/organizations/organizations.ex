@@ -244,26 +244,29 @@ defmodule Algora.Organizations do
   def init_preview(repo_owner, repo_name) do
     token = TokenPool.get_token()
 
-    {:ok, _repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
+    {:ok, repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
     {:ok, owner} = Workspace.ensure_user(token, repo_owner)
-    {:ok, _contributors} = Workspace.ensure_contributors(token, repo_owner, repo_name)
+    {:ok, _contributors} = Workspace.ensure_contributors(token, repo)
+    {:ok, _languages} = Workspace.ensure_repo_tech_stack(token, repo)
 
-    Repo.transact(fn repo ->
+    Repo.transact(fn _ ->
       {:ok, org} =
-        repo.insert(%User{
+        Repo.insert(%User{
           type: :organization,
           id: Nanoid.generate(),
           display_name: owner.name,
           avatar_url: owner.avatar_url,
-          last_context: "repo/#{repo_owner}/#{repo_name}"
+          last_context: "repo/#{repo_owner}/#{repo_name}",
+          tech_stack: repo.tech_stack
         })
 
       {:ok, user} =
-        repo.insert(%User{
+        Repo.insert(%User{
           type: :individual,
           id: Nanoid.generate(),
           display_name: "You",
-          last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}"
+          last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}",
+          tech_stack: repo.tech_stack
         })
 
       {:ok, %{org: org, user: user}}

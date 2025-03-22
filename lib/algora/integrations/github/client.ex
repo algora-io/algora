@@ -242,6 +242,11 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def list_repository_languages(access_token, owner, repo) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/languages")
+  end
+
+  @impl true
   def list_repository_contributors(access_token, owner, repo) do
     fetch(access_token, "/repos/#{owner}/#{repo}/contributors")
   end

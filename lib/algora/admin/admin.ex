@@ -78,11 +78,7 @@ defmodule Algora.Admin do
   end
 
   def backfill_repo_tech_stack! do
-    query =
-      from(r in Repository,
-        where: fragment("?->>'languages_url' IS NOT NULL", r.provider_meta),
-        select: r
-      )
+    query = from(r in Repository, join: u in assoc(r, :user), select: %{r | user: u})
 
     {success, failure} =
       query
@@ -229,10 +225,10 @@ defmodule Algora.Admin do
   end
 
   def backfill_repo_tech_stack(repo) do
-    with {:ok, languages} <- Github.Client.fetch(token!(), repo.provider_meta["languages_url"]),
-         :ok <- update_repo_tech_stack(languages, repo.id) do
-      {:ok, languages}
-    else
+    case Workspace.ensure_repo_tech_stack(token!(), repo) do
+      {:ok, languages} ->
+        {:ok, languages}
+
       {:error, "404 Not Found"} = error ->
         error
 
@@ -243,7 +239,7 @@ defmodule Algora.Admin do
   end
 
   def backfill_repo_contributors(repo) do
-    case Workspace.ensure_contributors(token!(), repo.user.provider_login, repo.name) do
+    case Workspace.ensure_contributors(token!(), repo) do
       {:ok, contributors} ->
         {:ok, contributors}
 

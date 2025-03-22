@@ -1,16 +1,35 @@
 defmodule AlgoraWeb.User.DashboardLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
   import AlgoraWeb.Components.Achievement
   import AlgoraWeb.Components.Bounties
+  import Ecto.Changeset
 
   alias Algora.Accounts.User
   alias Algora.Bounties
-  alias Algora.Bounties.Bounty
   alias Algora.Payments
   alias Algora.Payments.Account
+  alias Algora.Repo
 
+  defmodule SettingsForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :tech_stack, {:array, :string}
+    end
+
+    def changeset(form, attrs) do
+      cast(form, attrs, [:tech_stack])
+    end
+  end
+
+  @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
@@ -32,6 +51,11 @@ defmodule AlgoraWeb.User.DashboardLive do
       amount_gt: Money.new(:USD, 200)
     ]
 
+    settings_form =
+      %SettingsForm{}
+      |> SettingsForm.changeset(%{tech_stack: socket.assigns.current_user.tech_stack})
+      |> to_form()
+
     socket =
       socket
       |> assign(:view_mode, "compact")
@@ -41,12 +65,14 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:contracts, contracts)
       |> assign(:has_active_account, has_active_account)
       |> assign(:query_opts, query_opts)
+      |> assign(:settings_form, settings_form)
       |> assign_bounties()
       |> assign_achievements()
 
     {:ok, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="flex lg:flex-row flex-col-reverse">
@@ -162,34 +188,21 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
         </div> --%>
         <!-- Tech Stack Section -->
-        <div class="mt-4">
-          <label for="tech-input" class="text-sm font-medium">Tech stack</label>
-          <.input
-            id="tech-input"
-            name="tech-input"
-            value=""
-            type="text"
-            placeholder="Elixir, Phoenix, PostgreSQL, etc."
-            phx-keydown="handle_tech_input"
-            phx-debounce="200"
-            phx-hook="ClearInput"
-            class="mt-2 w-full border-input bg-background"
+        <.form for={@settings_form}>
+          <h2 class="mb-2 text-xl font-semibold">
+            Tech stack
+          </h2>
+          <.TechStack
+            class="mt-4"
+            tech={get_field(@settings_form.source, :tech_stack)}
+            socket={@socket}
+            form="settings_form"
           />
-          <div class="mt-4 flex flex-wrap gap-3">
-            <%= for tech <- @current_user.tech_stack do %>
-              <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
-                {tech}
-                <button
-                  phx-click="remove_tech"
-                  phx-value-tech={tech}
-                  class="ml-1 text-foreground hover:text-foreground/80"
-                >
-                  ×
-                </button>
-              </div>
-            <% end %>
-          </div>
-        </div>
+
+          <.error :for={msg <- @settings_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
+            {msg}
+          </.error>
+        </.form>
         <!-- Achievements Section -->
         <div class="hidden lg:block mt-8">
           <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
@@ -271,39 +284,17 @@ defmodule AlgoraWeb.User.DashboardLive do
     end
   end
 
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
-    tech_stack = Enum.uniq([String.trim(tech) | socket.assigns.tech_stack])
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack, tech_stack)
-     |> assign(:query_opts, Keyword.put(socket.assigns.query_opts, :tech_stack, tech_stack))
-     |> assign_bounties()
-     |> push_event("clear-input", %{selector: "[phx-keydown='handle_tech_input']"})}
-  end
-
-  def handle_event("handle_tech_input", _params, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_event("remove_tech", %{"tech" => tech}, socket) do
-    tech_stack = List.delete(socket.assigns.tech_stack, tech)
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack, tech_stack)
-     |> assign(:query_opts, Keyword.put(socket.assigns.query_opts, :tech_stack, tech_stack))
-     |> assign_bounties()}
-  end
-
+  @impl true
   def handle_event("view_mode", %{"value" => mode}, socket) do
     {:noreply, assign(socket, :view_mode, mode)}
   end
 
+  @impl true
   def handle_event("view_contract", %{"org" => _org_handle}, socket) do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("load_more", _params, socket) do
     %{bounties: bounties} = socket.assigns
 
@@ -321,6 +312,20 @@ defmodule AlgoraWeb.User.DashboardLive do
      |> assign(:has_more_bounties, length(more_bounties) >= page_size())}
   end
 
+  @impl true
+  def handle_event("tech_stack_changed", params, socket) do
+    case socket.assigns.current_user
+         |> User.settings_changeset(%{tech_stack: params["tech_stack"]})
+         |> Repo.update() do
+      {:ok, user} ->
+        {:noreply, assign(socket, :current_user, user)}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :settings_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
   def handle_info(:bounties_updated, socket) do
     {:noreply, assign_bounties(socket)}
   end
@@ -335,86 +340,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   defp page_size, do: 10
 
-  def compact_view(assigns) do
-    ~H"""
-    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 py-0 align-middle">
-        <div class="flex items-center gap-4">
-          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
-            {Money.to_string!(@bounty.amount)}
-          </div>
-
-          <.link
-            href={@bounty.ticket.url}
-            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
-          >
-            {@bounty.ticket.title}
-          </.link>
-
-          <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
-            <.link navigate={User.url(@bounty.owner)} class="font-semibold hover:underline">
-              {@bounty.owner.name}
-            </.link>
-            <.icon name="tabler-chevron-right" class="h-4 w-4" />
-            <.link href={@bounty.ticket.url} class="hover:underline">
-              {Bounty.path(@bounty)}
-            </.link>
-          </div>
-        </div>
-      </td>
-    </tr>
-    """
-  end
-
-  def default_view(assigns) do
-    ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 align-middle">
-        <div class="flex items-center gap-4">
-          <.link navigate={User.url(@bounty.owner)}>
-            <.avatar class="h-14 w-14 rounded-xl">
-              <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
-              <.avatar_fallback>
-                {Algora.Util.initials(@bounty.owner.name)}
-              </.avatar_fallback>
-            </.avatar>
-          </.link>
-
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-1 text-sm text-muted-foreground">
-              <.link navigate={User.url(@bounty.owner)} class="font-semibold hover:underline">
-                {@bounty.owner.name}
-              </.link>
-              <.icon name="tabler-chevron-right" class="h-4 w-4" />
-              <.link href={@bounty.ticket.url} class="hover:underline">
-                {Bounty.path(@bounty)}
-              </.link>
-            </div>
-
-            <.link href={@bounty.ticket.url} class="group flex items-center gap-2">
-              <div class="font-display text-xl font-semibold text-success">
-                {Money.to_string!(@bounty.amount)}
-              </div>
-              <div class="line-clamp-1 text-foreground group-hover:underline">
-                {@bounty.ticket.title}
-              </div>
-            </.link>
-
-            <div class="flex flex-wrap gap-2">
-              <%= for tag <- @bounty.owner.tech_stack do %>
-                <span class="text-sm text-muted-foreground">
-                  {tag}
-                </span>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>
-    """
-  end
-
-  def contract_card(assigns) do
+  defp contract_card(assigns) do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
       <td class="p-4 align-middle">

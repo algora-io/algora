@@ -659,6 +659,126 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+              Fund GitHub Issues
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground mb-16">
+              Support open source development with bounties on GitHub issues
+            </p>
+
+            <div class="grid grid-cols-1 gap-16">
+              <.link
+                href="https://github.com/zed-industries/zed/issues/4440"
+                rel="noopener"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+              >
+                <div class="flex -space-x-4">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://github.com/zed-industries.png"
+                    alt="Zed"
+                  />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://github.com/schacon.png"
+                    alt="Scott Chacon"
+                  />
+                </div>
+                <div class="text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">
+                    GitHub cofounder funds new feature in Zed Editor
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Zed Editor, Scott Chacon
+                  </div>
+                </div>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
+
+              <.link
+                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                rel="noopener"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+              >
+                <div class="flex items-center -space-x-6">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
+                    alt="Alex Klimaj"
+                  />
+                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
+                    alt="Andrew Wilkins"
+                  />
+                </div>
+                <div class="text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">
+                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                  </div>
+                </div>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
+              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-black p-12 ring-2 ring-success/20 ransition-colors">
+                <div class="col-span-2 text-base leading-6 flex-1">
+                  <div class="text-3xl font-semibold text-foreground">
+                    Fund any issue <span class="text-success">in seconds</span>
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Help improve the OSS you love and rely on
+                  </div>
+                  <div class="pt-1 col-span-3 text-sm text-muted-foreground space-y-0.5">
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pay when PRs are merged
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pool bounties with other sponsors
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Algora handles invoices, payouts, compliance & 1099s
+                    </div>
+                  </div>
+                </div>
+                <.form
+                  for={@bounty_form}
+                  phx-submit="create_bounty"
+                  class="col-span-3 grid grid-cols-3 gap-6 w-full"
+                >
+                  <.input
+                    label="URL"
+                    field={@bounty_form[:url]}
+                    placeholder="https://github.com/owner/repo/issues/1337"
+                  />
+                  <.input
+                    label="Amount"
+                    icon="tabler-currency-dollar"
+                    field={@bounty_form[:amount]}
+                    class="placeholder:text-success"
+                  />
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="text-sm text-muted-foreground">No credit card required</div>
+                    <.button size="lg" class="w-full">Fund issue</.button>
+                  </div>
+                </.form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
+          <.pattern />
           <div class="mx-auto max-w-8xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?

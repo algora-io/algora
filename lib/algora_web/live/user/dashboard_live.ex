@@ -109,7 +109,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       <!-- Sidebar -->
       <aside class="lg:fixed lg:top-16 lg:right-0 lg:bottom-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-border lg:bg-background p-4 pt-6 sm:p-6 md:p-8">
         <!-- Availability Section -->
-        <div class="flex items-center justify-between">
+        <%!-- <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <label for="available" class="text-sm font-medium">Available to work</label>
             <.tooltip>
@@ -160,7 +160,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               class="font-display mt-2 w-full border-input bg-background"
             />
           </div>
-        </div>
+        </div> --%>
         <!-- Tech Stack Section -->
         <div class="mt-4">
           <label for="tech-input" class="text-sm font-medium">Tech stack</label>

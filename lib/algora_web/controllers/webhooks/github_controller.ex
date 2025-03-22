@@ -372,6 +372,11 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
+  defp execute_command(%Webhook{event_action: event_action} = webhook, {:bonus, _args})
+       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+    Algora.Admin.alert("Bonus command received: #{webhook.hook_id}")
+  end
+
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:tip, args})
        when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]

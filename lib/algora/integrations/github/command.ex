@@ -10,7 +10,8 @@ defmodule Algora.Github.Command do
       tip: "/tip <amount> @username or /tip @username <amount>",
       claim: "/claim <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)",
       split: "/split @username",
-      attempt: "/attempt <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)"
+      attempt: "/attempt <issue-ref> (e.g. #123, repo#123, owner/repo#123, or full GitHub URL)",
+      bonus: "/bonus <amount>"
     }
 
     def command do
@@ -19,7 +20,8 @@ defmodule Algora.Github.Command do
         tip_command(),
         claim_command(),
         split_command(),
-        attempt_command()
+        attempt_command(),
+        bonus_command()
       ])
     end
 
@@ -31,6 +33,16 @@ defmodule Algora.Github.Command do
       |> concat(amount())
       |> tag(:bounty)
       |> label(@usage.bounty)
+    end
+
+    def bonus_command do
+      "/bonus"
+      |> string()
+      |> ignore()
+      |> concat(ignore(whitespace()))
+      |> concat(amount())
+      |> tag(:bonus)
+      |> label(@usage.bonus)
     end
 
     def tip_command do

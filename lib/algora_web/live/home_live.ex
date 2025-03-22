@@ -130,6 +130,92 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
+          <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+            <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
+              <div class="w-[40%]">
+                <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
+                  <div
+                    class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
+                    phx-click={JS.hide(to: "#poster-overlay")}
+                    id="poster-overlay"
+                  >
+                    <img
+                      src={~p"/images/people/john-de-goes.jpg"}
+                      alt="John A De Goes"
+                      class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
+                    />
+                    <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+                      <.icon name="tabler-player-play-filled" class="size-8 text-white" />
+                    </div>
+                  </div>
+                  <iframe
+                    src="https://www.youtube.com/embed/xObOGcUdtY0?autoplay=1"
+                    title="$15,000 Open source bounty to hire a Rust engineer"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                    width="100%"
+                    height="100%"
+                  >
+                  </iframe>
+                </div>
+              </div>
+              <div class="w-[60%]">
+                <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
+                  <img
+                    src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                    alt="Golem bounty to hire"
+                    class="object-cover rounded-2xl"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="mt-10 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
+            Pay developers on GitHub
+          </h2>
+          <div class="flex items-center justify-center gap-8">
+            <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
+              <div class="flex items-center gap-4">
+                <div class="text-right">
+                  <div class="text-base font-medium text-foreground">John A De Goes</div>
+                  <div class="pt-1 text-sm font-medium text-muted-foreground">
+                    Founder & CEO
+                  </div>
+                </div>
+                <img
+                  src={~p"/images/people/john-de-goes.jpg"}
+                  alt="John A De Goes"
+                  class="size-12 rounded-full object-cover"
+                />
+              </div>
+            </div>
+            <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
+            <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
+              <div class="flex items-center gap-4">
+                <img
+                  src="https://github.com/mschuwalow.png"
+                  alt="Maxim Schuwalow"
+                  class="size-12 rounded-full object-cover"
+                />
+                <div>
+                  <div class="text-base font-semibold text-foreground">Maxim Schuwalow</div>
+                  <div class="pt-2 text-sm font-medium text-muted-foreground">
+                    Software Engineer
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <.link
+            class="flex justify-center items-center mt-8"
+            aria-label="Logo"
+            navigate={~p"/org/golemcloud"}
+          >
+            <Wordmarks.golemcloud class="w-32" />
+          </.link>
         </section>
 
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
@@ -260,92 +346,6 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />
           <%!-- john --%>
-          <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-            <.link
-              class="flex justify-center items-center"
-              aria-label="Logo"
-              navigate={~p"/org/golemcloud"}
-            >
-              <Wordmarks.golemcloud class="w-32" />
-            </.link>
-            <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
-              $15,000 Open source bounty to hire
-            </h2>
-            <div class="flex items-center justify-center gap-8">
-              <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
-                <div class="flex items-center gap-4">
-                  <div class="text-right">
-                    <div class="text-base font-medium text-foreground">John A De Goes</div>
-                    <div class="pt-1 text-sm font-medium text-muted-foreground">
-                      Founder & CEO
-                    </div>
-                  </div>
-                  <img
-                    src={~p"/images/people/john-de-goes.jpg"}
-                    alt="John A De Goes"
-                    class="size-12 rounded-full object-cover"
-                  />
-                </div>
-              </div>
-              <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
-              <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-                <div class="flex items-center gap-4">
-                  <img
-                    src="https://github.com/mschuwalow.png"
-                    alt="Maxim Schuwalow"
-                    class="size-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <div class="text-base font-semibold text-foreground">Maxim Schuwalow</div>
-                    <div class="pt-2 text-sm font-medium text-muted-foreground">
-                      Software Engineer
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
-              <div class="w-[40%]">
-                <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
-                  <div
-                    class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
-                    phx-click={JS.hide(to: "#poster-overlay")}
-                    id="poster-overlay"
-                  >
-                    <img
-                      src={~p"/images/people/john-de-goes.jpg"}
-                      alt="John A De Goes"
-                      class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
-                    />
-                    <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                      <.icon name="tabler-player-play-filled" class="size-8 text-white" />
-                    </div>
-                  </div>
-                  <iframe
-                    src="https://www.youtube.com/embed/xObOGcUdtY0?autoplay=1"
-                    title="$15,000 Open source bounty to hire a Rust engineer"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allowfullscreen
-                    width="100%"
-                    height="100%"
-                  >
-                  </iframe>
-                </div>
-              </div>
-              <div class="w-[60%]">
-                <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
-                  <img
-                    src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                    alt="Golem bounty to hire"
-                    class="object-cover rounded-2xl"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
 
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">

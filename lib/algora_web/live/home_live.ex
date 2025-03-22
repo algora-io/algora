@@ -788,12 +788,12 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="flex flex-row gap-8 lg:gap-8">
-              <div class="w-[52%] relative rounded-2xl bg-black/50 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+              <div class="w-[52%] relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
                 <h3 class="text-center col-span-3 text-3xl font-semibold text-foreground">
                   Tip any contributor <span class="text-blue-500">in seconds</span>
                 </h3>
-                <div class="pt-4 grid lg:grid-cols-2 gap-8 lg:gap-12">
-                  <div class="text-base leading-6">
+                <div class="grid items-center lg:grid-cols-7 gap-8 lg:gap-12 h-full">
+                  <div class="col-span-3 text-base leading-6">
                     <p class="mt-4 text-lg font-medium text-muted-foreground">
                       Support the maintainers behind your favorite open source projects
                     </p>
@@ -813,7 +813,7 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </div>
 
-                  <.form for={@tip_form} phx-submit="create_tip" class="space-y-6">
+                  <.form for={@tip_form} phx-submit="create_tip" class="col-span-4 space-y-6">
                     <div class="grid lg:grid-cols-2 gap-y-6 gap-x-3">
                       <.input
                         label="GitHub Username"

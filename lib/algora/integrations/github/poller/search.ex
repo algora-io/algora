@@ -235,8 +235,9 @@ defmodule Algora.Github.Poller.Search do
                 databaseId
                 author {
                   login
-                }
+                  }
                 body
+                url
               }
             }
           }

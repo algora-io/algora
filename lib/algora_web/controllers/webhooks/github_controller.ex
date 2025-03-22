@@ -372,11 +372,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(%Webhook{event_action: event_action} = webhook, {:bonus, _args})
-       when event_action in ["issue_comment.created", "issue_comment.edited"] do
-    Algora.Admin.alert("Bonus command received: #{webhook.hook_id}")
-  end
-
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:tip, args})
        when event_action in ["issue_comment.created", "issue_comment.edited"] do
     amount = args[:amount]
@@ -579,7 +574,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp execute_command(_webhook, _command), do: {:ok, nil}
+  defp execute_command(webhook, command) do
+    github_ticket = get_github_ticket(webhook)
+
+    Algora.Admin.alert(
+      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}"
+    )
+  end
 
   def build_command({:claim, args}, commands) do
     splits = Keyword.get_values(commands, :split)

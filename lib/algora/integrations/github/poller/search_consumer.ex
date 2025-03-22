@@ -20,11 +20,6 @@ defmodule Algora.Github.Poller.SearchConsumer do
     run_command(command, ticket_ref, comment)
   end
 
-  defp run_command({:claim, _args}, _ticket_ref, _comment) do
-    # TODO: implement claim command
-    :ok
-  end
-
   defp run_command({:tip, args}, ticket_ref, _comment) do
     Bounties.create_tip_intent(%{
       recipient: args[:recipient],
@@ -73,5 +68,11 @@ defmodule Algora.Github.Poller.SearchConsumer do
         Logger.error("Failed to create bounty: #{inspect(error)}")
         error
     end
+  end
+
+  defp run_command(command, ticket_ref, comment) do
+    Algora.Admin.alert(
+      "Received unknown command: #{inspect(command)}. Ticket ref: #{inspect(ticket_ref)}. URL: #{comment["url"]}"
+    )
   end
 end

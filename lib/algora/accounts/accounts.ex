@@ -15,6 +15,7 @@ defmodule Algora.Accounts do
   alias Algora.Workspace.Contributor
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Repository
+  alias Algora.Workspace.Ticket
 
   require Algora.SQL
 
@@ -120,13 +121,17 @@ defmodule Algora.Accounts do
         }
 
     projects_query =
-      from t in Transaction,
-        join: lt in assoc(t, :linked_transaction),
-        where: t.type == :credit and t.status == :succeeded and lt.type == :debit,
-        group_by: t.user_id,
+      from tx in Transaction,
+        where: tx.type == :credit and tx.status == :succeeded,
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        group_by: tx.user_id,
         select: %{
-          user_id: t.user_id,
-          projects_count: count(fragment("DISTINCT ?", lt.user_id))
+          user_id: tx.user_id,
+          projects_count: count(fragment("DISTINCT ?", r.user_id))
         }
 
     User

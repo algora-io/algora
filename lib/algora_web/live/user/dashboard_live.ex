@@ -43,14 +43,6 @@ defmodule AlgoraWeb.User.DashboardLive do
         _ -> false
       end
 
-    query_opts = [
-      status: :open,
-      limit: page_size(),
-      current_user: socket.assigns.current_user,
-      tech_stack: socket.assigns.current_user.tech_stack,
-      amount_gt: Money.new(:USD, 200)
-    ]
-
     settings_form =
       %SettingsForm{}
       |> SettingsForm.changeset(%{tech_stack: socket.assigns.current_user.tech_stack})
@@ -64,7 +56,6 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
       |> assign(:has_active_account, has_active_account)
-      |> assign(:query_opts, query_opts)
       |> assign(:settings_form, settings_form)
       |> assign_bounties()
       |> assign_achievements()
@@ -314,20 +305,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   @impl true
   def handle_event("load_more", _params, socket) do
-    %{bounties: bounties} = socket.assigns
-
-    more_bounties =
-      Bounties.list_bounties(
-        Keyword.put(socket.assigns.query_opts, :before, %{
-          inserted_at: List.last(bounties).inserted_at,
-          id: List.last(bounties).id
-        })
-      )
-
-    {:noreply,
-     socket
-     |> assign(:bounties, bounties ++ more_bounties)
-     |> assign(:has_more_bounties, length(more_bounties) >= page_size())}
+    {:noreply, assign_more_bounties(socket)}
   end
 
   @impl true
@@ -336,7 +314,7 @@ defmodule AlgoraWeb.User.DashboardLive do
          |> User.settings_changeset(%{tech_stack: params["tech_stack"]})
          |> Repo.update() do
       {:ok, user} ->
-        {:noreply, assign(socket, :current_user, user)}
+        {:noreply, socket |> assign(:current_user, user) |> assign_bounties()}
 
       {:error, changeset} ->
         {:noreply, assign(socket, :settings_form, to_form(changeset))}
@@ -345,15 +323,41 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   @impl true
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_bounties(socket)}
+    {:noreply, socket}
   end
 
   defp assign_bounties(socket) do
-    bounties = Bounties.list_bounties(socket.assigns.query_opts)
+    query_opts = [
+      status: :open,
+      limit: page_size(),
+      current_user: socket.assigns.current_user,
+      tech_stack: socket.assigns.current_user.tech_stack,
+      amount_gt: Money.new(:USD, 200)
+    ]
+
+    bounties = Bounties.list_bounties(query_opts)
 
     socket
     |> assign(:bounties, bounties)
+    |> assign(:query_opts, query_opts)
     |> assign(:has_more_bounties, length(bounties) >= page_size())
+  end
+
+  defp assign_more_bounties(socket) do
+    %{bounties: bounties} = socket.assigns
+
+    query_opts =
+      Keyword.put(socket.assigns.query_opts, :before, %{
+        inserted_at: List.last(bounties).inserted_at,
+        id: List.last(bounties).id
+      })
+
+    more_bounties = Bounties.list_bounties(query_opts)
+
+    socket
+    |> assign(:bounties, bounties ++ more_bounties)
+    |> assign(:query_opts, query_opts)
+    |> assign(:has_more_bounties, length(more_bounties) >= page_size())
   end
 
   defp page_size, do: 10

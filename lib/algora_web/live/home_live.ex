@@ -176,7 +176,7 @@ defmodule AlgoraWeb.HomeLive do
                       <div>
                         <div class="text-3xl font-semibold text-foreground">Tal Borenstein</div>
                         <div class="pt-2 text-2xl font-medium text-muted-foreground">
-                          Co-founder & CEO at Keep
+                          Co-founder & CEO at Keep (YC W23)
                         </div>
                       </div>
                     </div>
@@ -476,7 +476,7 @@ defmodule AlgoraWeb.HomeLive do
             <%!-- mogery --%>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <.link
-                class="font-bold font-display text-xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+                class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
                 aria-label="Logo"
                 navigate={~p"/org/mendableai"}
               >
@@ -502,7 +502,7 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                 </div>
-                <.icon name="tabler-arrows-diff" class="size-8 text-success-400" />
+                <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
                 <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
                   <div class="flex items-center gap-4">
                     <img
@@ -519,8 +519,8 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
               </div>
-              <div class="pt-12 grid gap-x-16 gap-y-8 lg:grid-cols-12">
-                <div class="lg:col-span-3">
+              <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
+                <div class="w-[24%]">
                   <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
                     <iframe
                       src="https://www.youtube.com/embed/j4fLNIJCywk"
@@ -535,8 +535,22 @@ defmodule AlgoraWeb.HomeLive do
                     </iframe>
                   </div>
                 </div>
-                <div class="lg:col-span-9">
+                <div class="w-[76%]">
                   <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
+                    <div
+                      class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
+                      phx-click={JS.hide(to: "#poster-overlay-mogery")}
+                      id="poster-overlay-mogery"
+                    >
+                      <img
+                        src={~p"/images/people/mogery.png"}
+                        alt="Gergő Móricz"
+                        class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
+                      />
+                      <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+                        <.icon name="tabler-player-play-filled" class="size-8 text-white" />
+                      </div>
+                    </div>
                     <iframe
                       src="https://www.youtube.com/embed/HhTT-GX5tjQ"
                       title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
@@ -575,13 +589,13 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                     </div>
                     <img
-                      src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+                      src={~p"/images/people/john-de-goes.jpg"}
                       alt="John A De Goes"
                       class="size-12 rounded-full object-cover"
                     />
                   </div>
                 </div>
-                <.icon name="tabler-arrows-diff" class="size-8 text-success-400" />
+                <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
                 <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
                   <div class="flex items-center gap-4">
                     <img
@@ -599,8 +613,8 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
 
-              <div class="pt-12 grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
-                <div class="lg:col-span-5">
+              <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
+                <div class="w-[40%]">
                   <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
                     <div
                       class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
@@ -608,7 +622,7 @@ defmodule AlgoraWeb.HomeLive do
                       id="poster-overlay"
                     >
                       <img
-                        src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+                        src={~p"/images/people/john-de-goes.jpg"}
                         alt="John A De Goes"
                         class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
                       />
@@ -629,7 +643,7 @@ defmodule AlgoraWeb.HomeLive do
                     </iframe>
                   </div>
                 </div>
-                <div class="lg:col-span-7">
+                <div class="w-[60%]">
                   <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
                     <img
                       src={~p"/images/screenshots/bounty-to-hire-golem2.png"}

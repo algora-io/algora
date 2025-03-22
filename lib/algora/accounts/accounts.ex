@@ -110,13 +110,13 @@ defmodule Algora.Accounts do
           total_earned: sum(tx.net_amount)
         }
 
-    bounties_query =
+    transactions_query =
       from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded and not is_nil(t.bounty_id),
+        where: t.type == :credit and t.status == :succeeded,
         group_by: t.user_id,
         select: %{
           user_id: t.user_id,
-          bounties_count: count(fragment("DISTINCT ?", t.bounty_id))
+          transactions_count: count(t.id)
         }
 
     projects_query =
@@ -132,12 +132,12 @@ defmodule Algora.Accounts do
     User
     |> join(:inner, [u], b in subquery(base_users), as: :base, on: u.id == b.id)
     |> join(:left, [u], e in subquery(earnings_query), as: :earnings, on: e.user_id == u.id)
-    |> join(:left, [u], b in subquery(bounties_query), as: :bounties, on: b.user_id == u.id)
+    |> join(:left, [u], t in subquery(transactions_query), as: :transactions, on: t.user_id == u.id)
     |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
     |> apply_criteria(criteria)
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
     |> order_by([u], desc: u.id)
-    |> select([u, earnings: e, bounties: b, projects: p], %{
+    |> select([u, earnings: e, transactions: t, projects: p], %{
       type: u.type,
       id: u.id,
       handle: u.handle,
@@ -149,7 +149,7 @@ defmodule Algora.Accounts do
       country: u.country,
       tech_stack: u.tech_stack,
       total_earned: Algora.SQL.money_or_zero(e.total_earned),
-      completed_bounties_count: coalesce(b.bounties_count, 0),
+      transactions_count: coalesce(t.transactions_count, 0),
       contributed_projects_count: coalesce(p.projects_count, 0),
       hourly_rate_min: u.hourly_rate_min,
       hourly_rate_max: u.hourly_rate_max,

@@ -56,7 +56,7 @@ defmodule Algora.Accounts.User do
     field :hours_per_week, :integer
 
     field :total_earned, Money, virtual: true
-    field :completed_bounties_count, :integer, virtual: true
+    field :transactions_count, :integer, virtual: true
     field :contributed_projects_count, :integer, virtual: true
 
     field :need_avatar, :boolean, default: false

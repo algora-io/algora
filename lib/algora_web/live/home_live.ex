@@ -667,57 +667,59 @@ defmodule AlgoraWeb.HomeLive do
               You can tip your favorite open source contributors with Algora.
             </p>
 
-            <div class="grid grid-cols-3 gap-16">
-              <div class="col-span-2 relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-black p-12 ring-2 ring-blue-500/20 transition-colors">
-                <div class="col-span-2 text-base leading-6 flex-1">
-                  <div class="text-3xl font-semibold text-foreground">
-                    Tip any contributor <span class="text-blue-500">in seconds</span>
-                  </div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Support the maintainers behind your favorite open source projects
-                  </div>
-                  <div class="pt-1 col-span-3 text-sm text-muted-foreground space-y-0.5">
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-blue-400" />
-                      Send tips directly to GitHub usernames
+            <div class="grid lg:grid-cols-3 gap-8 lg:gap-16">
+              <div class="lg:col-span-2 relative rounded-2xl bg-black/50 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+                <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+                  <div class="text-base leading-6">
+                    <h3 class="text-3xl font-semibold text-foreground">
+                      Tip any contributor <span class="text-blue-500">in seconds</span>
+                    </h3>
+                    <p class="mt-4 text-lg font-medium text-muted-foreground">
+                      Support the maintainers behind your favorite open source projects
+                    </p>
+                    <div class="mt-6 space-y-3">
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
+                        <span>Send tips directly to GitHub usernames</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
+                        <span>No GitHub account required for the recipient</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
+                        <span>Algora handles payouts, compliance & 1099s</span>
+                      </div>
                     </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-blue-400" />
-                      No GitHub account required for the recipient
-                    </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-blue-400" />
-                      Algora handles payouts, compliance & 1099s
-                    </div>
                   </div>
+
+                  <.form for={@tip_form} phx-submit="create_tip" class="space-y-6">
+                    <.input
+                      label="GitHub Username"
+                      field={@tip_form[:github_handle]}
+                      placeholder="jsmith"
+                    />
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@tip_form[:amount]}
+                      class="placeholder:text-blue-500"
+                    />
+                    <div class="flex flex-col gap-2">
+                      <.button size="lg" class="w-full" variant="blue">Tip contributor</.button>
+                      <div class="text-sm text-center text-muted-foreground">
+                        No credit card required
+                      </div>
+                    </div>
+                  </.form>
                 </div>
-                <.form
-                  for={@tip_form}
-                  phx-submit="create_tip"
-                  class="col-span-3 grid grid-cols-3 gap-6 w-full"
-                >
-                  <.input
-                    label="GitHub Username"
-                    field={@tip_form[:github_handle]}
-                    placeholder="jsmith"
-                  />
-                  <.input
-                    label="Amount"
-                    icon="tabler-currency-dollar"
-                    field={@tip_form[:amount]}
-                    class="placeholder:text-blue-500"
-                  />
-                  <div class="flex flex-col items-center gap-2">
-                    <div class="text-sm text-muted-foreground">No credit card required</div>
-                    <.button size="lg" class="w-full" variant="blue">Tip contributor</.button>
-                  </div>
-                </.form>
               </div>
-              <div class="flex flex-col gap-4">
+
+              <div class="hidden lg:block">
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
-                  class="w-full rounded-2xl"
+                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10"
                 />
               </div>
             </div>

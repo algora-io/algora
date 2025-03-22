@@ -622,8 +622,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
         }
 
         case Contracts.create_contract(contract_params) do
-          {:ok, _contract} ->
-            # TODO: send email
+          {:ok, contract} ->
+            Algora.Admin.alert(
+              "Contract offer from #{socket.assigns.current_org.handle} to #{socket.assigns.selected_developer.handle} for #{data.hourly_rate}/hour x #{data.hours_per_week} hours/week. ID: #{contract.id}"
+            )
+
             {:noreply,
              socket
              |> assign(:show_share_drawer, false)

@@ -129,4 +129,12 @@ defmodule Algora.Util do
       _ -> {:error, "Must be a valid GitHub repository URL (e.g. github.com/owner/repo) or owner/repo format"}
     end
   end
+
+  def path_from_url(url) do
+    url
+    |> URI.parse()
+    |> then(& &1.path)
+    |> String.replace(~r/^\/[^\/]+\//, "")
+    |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
+  end
 end

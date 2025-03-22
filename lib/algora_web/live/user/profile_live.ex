@@ -8,6 +8,7 @@ defmodule AlgoraWeb.User.ProfileLive do
   alias Algora.Reviews
   alias Algora.Reviews.Review
 
+  @impl true
   def mount(%{"handle" => handle}, _session, socket) do
     {:ok, user} = Accounts.fetch_developer_by(handle: handle)
 
@@ -16,9 +17,10 @@ defmodule AlgoraWeb.User.ProfileLive do
      |> assign(:user, user)
      |> assign(:page_title, "#{user.name}")
      |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
-     |> assign(:transactions, Payments.list_received_transactions(user.id, limit: 10))}
+     |> assign_transactions()}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-6xl space-y-6 p-6">
@@ -106,16 +108,16 @@ defmodule AlgoraWeb.User.ProfileLive do
             <div class="relative -ml-4 w-full overflow-auto">
               <table class="w-full caption-bottom text-sm">
                 <tbody>
-                  <%= for %{transaction: transaction, ticket: ticket} <- @transactions do %>
+                  <%= for %{transaction: transaction, ticket: ticket, project: project} <- @transactions do %>
                     <tr class="border-b transition-colors hover:bg-muted/10">
                       <td class="p-4 align-middle">
                         <div class="flex items-center gap-4">
-                          <.link navigate={User.url(ticket.repository.user)}>
+                          <.link navigate={User.url(project)}>
                             <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
                               <img
                                 class="aspect-square h-full w-full"
-                                alt={ticket.repository.user.name}
-                                src={ticket.repository.user.avatar_url}
+                                alt={project.name}
+                                src={project.avatar_url}
                               />
                             </span>
                           </.link>
@@ -123,31 +125,43 @@ defmodule AlgoraWeb.User.ProfileLive do
                           <div class="flex flex-col gap-1">
                             <div class="flex items-center gap-1 text-sm text-muted-foreground">
                               <.link
-                                navigate={User.url(ticket.repository.user)}
+                                navigate={User.url(project)}
                                 class="font-semibold hover:underline"
                               >
-                                {ticket.repository.user.name}
+                                {project.name}
                               </.link>
                               <.icon name="tabler-chevron-right" class="h-4 w-4" />
                               <.link
+                                :if={ticket.repository}
                                 href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
                                 class="hover:underline"
                               >
                                 {ticket.repository.name}#{ticket.number}
                               </.link>
+                              <.link
+                                :if={!ticket.repository}
+                                href={ticket.url}
+                                class="hover:underline"
+                              >
+                                {Algora.Util.path_from_url(ticket.url)}
+                              </.link>
                             </div>
 
-                            <.link
-                              href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
-                              class="group flex items-center gap-2"
-                            >
-                              <div class="font-display text-xl font-semibold text-success">
-                                {Money.to_string!(transaction.net_amount)}
+                            <.maybe_link href={
+                              if ticket.repository,
+                                do:
+                                  "https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}",
+                                else: ticket.url
+                            }>
+                              <div class="group flex items-center gap-2">
+                                <div class="font-display text-xl font-semibold text-success">
+                                  {Money.to_string!(transaction.net_amount)}
+                                </div>
+                                <div class="line-clamp-1 text-foreground group-hover:underline">
+                                  {ticket.title}
+                                </div>
                               </div>
-                              <div class="line-clamp-1 text-foreground group-hover:underline">
-                                {ticket.title}
-                              </div>
-                            </.link>
+                            </.maybe_link>
                           </div>
                         </div>
                       </td>
@@ -208,5 +222,24 @@ defmodule AlgoraWeb.User.ProfileLive do
       </div>
     </div>
     """
+  end
+
+  defp assign_transactions(socket) do
+    transactions = Payments.list_received_transactions(socket.assigns.user.id, limit: 100)
+
+    assign(socket, :transactions, to_transaction_rows(transactions))
+  end
+
+  defp to_transaction_rows(transactions) do
+    Enum.map(transactions, fn tx ->
+      Map.put(
+        tx,
+        :project,
+        case tx.ticket.repository do
+          nil -> tx.sender
+          repo -> repo.user
+        end
+      )
+    end)
   end
 end

@@ -175,10 +175,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     if Accounts.get_user_by_email(email) do
       # user already exists, so onboarding is complete
       # allow user to login with token until expiry
-      {:ok,
-       socket
-       |> put_flash(:info, "Welcome back to Algora!")
-       |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))}
+      {:ok, redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code))}
     else
       tech_stack_form =
         %TechStackForm{}
@@ -405,9 +402,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         socket =
           case Algora.Organizations.onboard_organization(params) do
             {:ok, %{org: org}} ->
-              socket
-              |> put_flash(:info, "Welcome to Algora!")
-              |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
+              redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
               Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")

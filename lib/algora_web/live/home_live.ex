@@ -135,6 +135,222 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+              Fund GitHub Issues
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground mb-16">
+              Support open source development with bounties on GitHub issues
+            </p>
+
+            <div class="grid grid-cols-1 gap-16">
+              <.link
+                href="https://github.com/zed-industries/zed/issues/4440"
+                rel="noopener"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+              >
+                <div class="flex -space-x-4">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://github.com/zed-industries.png"
+                    alt="Zed"
+                  />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://github.com/schacon.png"
+                    alt="Scott Chacon"
+                  />
+                </div>
+                <div class="text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">
+                    GitHub cofounder funds new feature in Zed Editor
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Zed Editor, Scott Chacon
+                  </div>
+                </div>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
+
+              <.link
+                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                rel="noopener"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+              >
+                <div class="flex items-center -space-x-6">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
+                    alt="Alex Klimaj"
+                  />
+                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
+                    alt="Andrew Wilkins"
+                  />
+                </div>
+                <div class="text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">
+                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                  </div>
+                </div>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
+              <div class="relative grid items-center grid-cols-5 w-full gap-x-12 rounded-xl bg-black/25 p-12 ring-2 ring-success/20 ransition-colors">
+                <div class="col-span-2 text-base leading-6 flex-1">
+                  <div class="text-3xl font-semibold text-foreground">
+                    Fund any issue
+                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+                      in seconds
+                    </span>
+                  </div>
+                  <div class="pt-2 text-lg font-medium text-muted-foreground">
+                    Help improve the OSS you love and rely on
+                  </div>
+                  <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pay when PRs are merged
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pool bounties with other sponsors
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Algora handles invoices, payouts, compliance & 1099s
+                    </div>
+                  </div>
+                </div>
+                <.form
+                  for={@bounty_form}
+                  phx-submit="create_bounty"
+                  class="col-span-3 grid gap-6 w-full"
+                >
+                  <.input
+                    label="URL"
+                    field={@bounty_form[:url]}
+                    placeholder="https://github.com/owner/repo/issues/1337"
+                  />
+                  <.input
+                    label="Amount"
+                    icon="tabler-currency-dollar"
+                    field={@bounty_form[:amount]}
+                    class="placeholder:text-success"
+                  />
+                  <div class="flex flex-col items-center gap-2">
+                    <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                      Fund issue
+                    </.button>
+                    <div class="text-sm text-muted-foreground">No credit card required</div>
+                  </div>
+                </.form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
+          <.pattern />
+          <%!-- john --%>
+          <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+            <.link
+              class="flex justify-center items-center"
+              aria-label="Logo"
+              navigate={~p"/org/golemcloud"}
+            >
+              <Wordmarks.golemcloud class="w-32" />
+            </.link>
+            <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
+              $15,000 Open source bounty to hire
+            </h2>
+            <div class="flex items-center justify-center gap-8">
+              <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
+                <div class="flex items-center gap-4">
+                  <div class="text-right">
+                    <div class="text-base font-medium text-foreground">John A De Goes</div>
+                    <div class="pt-1 text-sm font-medium text-muted-foreground">
+                      Founder & CEO
+                    </div>
+                  </div>
+                  <img
+                    src={~p"/images/people/john-de-goes.jpg"}
+                    alt="John A De Goes"
+                    class="size-12 rounded-full object-cover"
+                  />
+                </div>
+              </div>
+              <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
+              <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
+                <div class="flex items-center gap-4">
+                  <img
+                    src="https://github.com/mschuwalow.png"
+                    alt="Maxim Schuwalow"
+                    class="size-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <div class="text-base font-semibold text-foreground">Maxim Schuwalow</div>
+                    <div class="pt-2 text-sm font-medium text-muted-foreground">
+                      Software Engineer
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
+              <div class="w-[40%]">
+                <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
+                  <div
+                    class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
+                    phx-click={JS.hide(to: "#poster-overlay")}
+                    id="poster-overlay"
+                  >
+                    <img
+                      src={~p"/images/people/john-de-goes.jpg"}
+                      alt="John A De Goes"
+                      class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
+                    />
+                    <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+                      <.icon name="tabler-player-play-filled" class="size-8 text-white" />
+                    </div>
+                  </div>
+                  <iframe
+                    src="https://www.youtube.com/embed/xObOGcUdtY0?autoplay=1"
+                    title="$15,000 Open source bounty to hire a Rust engineer"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                    width="100%"
+                    height="100%"
+                  >
+                  </iframe>
+                </div>
+              </div>
+              <div class="w-[60%]">
+                <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
+                  <img
+                    src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                    alt="Golem bounty to hire"
+                    class="object-cover rounded-2xl"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
+          <.pattern />
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
               src="https://www.firecrawl.dev/images/yc.svg"
               class="h-24 mx-auto"
@@ -194,7 +410,7 @@ defmodule AlgoraWeb.HomeLive do
               Build product faster
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Use bounties in your own repositories to manage contract work efficiently. Pay only for completed tasks, with full GitHub integration.
+              Use bounties for outcome-based contract work with full GitHub integration.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
@@ -564,219 +780,6 @@ defmodule AlgoraWeb.HomeLive do
                     </iframe>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <%!-- john --%>
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <.link
-                class="flex justify-center items-center"
-                aria-label="Logo"
-                navigate={~p"/org/golemcloud"}
-              >
-                <Wordmarks.golemcloud class="w-32" />
-              </.link>
-              <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
-                $15,000 Open source bounty to hire
-              </h2>
-              <div class="flex items-center justify-center gap-8">
-                <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
-                  <div class="flex items-center gap-4">
-                    <div class="text-right">
-                      <div class="text-base font-medium text-foreground">John A De Goes</div>
-                      <div class="pt-1 text-sm font-medium text-muted-foreground">
-                        Founder & CEO
-                      </div>
-                    </div>
-                    <img
-                      src={~p"/images/people/john-de-goes.jpg"}
-                      alt="John A De Goes"
-                      class="size-12 rounded-full object-cover"
-                    />
-                  </div>
-                </div>
-                <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
-                <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-                  <div class="flex items-center gap-4">
-                    <img
-                      src="https://github.com/mschuwalow.png"
-                      alt="Maxim Schuwalow"
-                      class="size-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <div class="text-base font-semibold text-foreground">Maxim Schuwalow</div>
-                      <div class="pt-2 text-sm font-medium text-muted-foreground">
-                        Software Engineer
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
-                <div class="w-[40%]">
-                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
-                    <div
-                      class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
-                      phx-click={JS.hide(to: "#poster-overlay")}
-                      id="poster-overlay"
-                    >
-                      <img
-                        src={~p"/images/people/john-de-goes.jpg"}
-                        alt="John A De Goes"
-                        class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
-                      />
-                      <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                        <.icon name="tabler-player-play-filled" class="size-8 text-white" />
-                      </div>
-                    </div>
-                    <iframe
-                      src="https://www.youtube.com/embed/xObOGcUdtY0?autoplay=1"
-                      title="$15,000 Open source bounty to hire a Rust engineer"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
-                  </div>
-                </div>
-                <div class="w-[60%]">
-                  <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
-                    <img
-                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                      alt="Golem bounty to hire"
-                      class="object-cover rounded-2xl"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
-              Fund GitHub Issues
-            </h2>
-            <p class="text-center font-medium text-base text-muted-foreground mb-16">
-              Support open source development with bounties on GitHub issues
-            </p>
-
-            <div class="grid grid-cols-1 gap-16">
-              <.link
-                href="https://github.com/zed-industries/zed/issues/4440"
-                rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
-              >
-                <div class="flex -space-x-4">
-                  <img
-                    class="h-20 w-20 rounded-full z-0"
-                    src="https://github.com/zed-industries.png"
-                    alt="Zed"
-                  />
-                  <img
-                    class="h-20 w-20 rounded-full z-10"
-                    src="https://github.com/schacon.png"
-                    alt="Scott Chacon"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
-                    GitHub cofounder funds new feature in Zed Editor
-                  </div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Zed Editor, Scott Chacon
-                  </div>
-                </div>
-                <.button size="lg" variant="secondary">
-                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
-                </.button>
-              </.link>
-
-              <.link
-                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
-                rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
-              >
-                <div class="flex items-center -space-x-6">
-                  <img
-                    class="h-20 w-20 rounded-full z-0"
-                    src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
-                    alt="Alex Klimaj"
-                  />
-                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
-                  <img
-                    class="h-20 w-20 rounded-full z-10"
-                    src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
-                    alt="Andrew Wilkins"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
-                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
-                  </div>
-                  <div class="text-lg font-medium text-muted-foreground">
-                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
-                  </div>
-                </div>
-                <.button size="lg" variant="secondary">
-                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
-                </.button>
-              </.link>
-              <div class="relative grid items-center grid-cols-5 w-full gap-x-12 rounded-xl bg-black/25 p-12 ring-2 ring-success/20 ransition-colors">
-                <div class="col-span-2 text-base leading-6 flex-1">
-                  <div class="text-3xl font-semibold text-foreground">
-                    Fund any issue
-                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-                      in seconds
-                    </span>
-                  </div>
-                  <div class="pt-2 text-lg font-medium text-muted-foreground">
-                    Help improve the OSS you love and rely on
-                  </div>
-                  <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Pay when PRs are merged
-                    </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Pool bounties with other sponsors
-                    </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Algora handles invoices, payouts, compliance & 1099s
-                    </div>
-                  </div>
-                </div>
-                <.form
-                  for={@bounty_form}
-                  phx-submit="create_bounty"
-                  class="col-span-3 grid gap-6 w-full"
-                >
-                  <.input
-                    label="URL"
-                    field={@bounty_form[:url]}
-                    placeholder="https://github.com/owner/repo/issues/1337"
-                  />
-                  <.input
-                    label="Amount"
-                    icon="tabler-currency-dollar"
-                    field={@bounty_form[:amount]}
-                    class="placeholder:text-success"
-                  />
-                  <div class="flex flex-col items-center gap-2">
-                    <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
-                      Fund issue
-                    </.button>
-                    <div class="text-sm text-muted-foreground">No credit card required</div>
-                  </div>
-                </.form>
               </div>
             </div>
           </div>

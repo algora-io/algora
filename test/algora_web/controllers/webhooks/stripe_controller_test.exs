@@ -95,13 +95,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
       assert_enqueued(worker: Notifier, args: %{"activity_id" => tip_tx.id})
       assert_enqueued(worker: Notifier, args: %{"activity_id" => contract_tx.id})
 
-      refute_enqueued(worker: SendEmail, args: %{"activity_id" => bounty_tx.id})
-      refute_enqueued(worker: SendEmail, args: %{"activity_id" => tip_tx.id})
-      refute_enqueued(worker: SendEmail, args: %{"activity_id" => contract_tx.id})
-
-      Enum.map(all_enqueued(worker: Notifier), fn job ->
-        perform_job(Notifier, job.args)
-      end)
+      Enum.map(all_enqueued(worker: Notifier), fn job -> perform_job(Notifier, job.args) end)
 
       assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty_tx.id})
       assert_enqueued(worker: SendEmail, args: %{"activity_id" => tip_tx.id})

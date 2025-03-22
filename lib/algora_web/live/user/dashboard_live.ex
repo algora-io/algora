@@ -119,8 +119,14 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
         </div>
         <!-- Bounties section -->
-        <div :if={length(@bounties) > 0} class="p-4 sm:p-6 md:p-8">
-          <.section title="Open bounties" subtitle="Bounties for you">
+        <div class="p-4 sm:p-6 md:p-8">
+          <div class="flex items-end justify-between pb-2">
+            <div class="flex flex-col space-y-1.5">
+              <h2 class="text-2xl font-semibold leading-none tracking-tight">Open bounties</h2>
+              <p class="text-sm text-muted-foreground">Bounties for you</p>
+            </div>
+          </div>
+          <%= if length(@bounties) > 0 do %>
             <div id="bounties-container" phx-hook="InfiniteScroll">
               <.bounties bounties={@bounties} />
               <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
@@ -129,7 +135,19 @@ defmodule AlgoraWeb.User.DashboardLive do
                 </div>
               </div>
             </div>
-          </.section>
+          <% else %>
+            <.card class="text-center">
+              <.card_header>
+                <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                  <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
+                </div>
+                <.card_title>No bounties for your tech stack</.card_title>
+                <.card_description>
+                  Update your tech stack to see bounties for other tech stacks
+                </.card_description>
+              </.card_header>
+            </.card>
+          <% end %>
         </div>
       </div>
       <!-- Sidebar -->

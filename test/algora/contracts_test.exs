@@ -160,26 +160,22 @@ defmodule Algora.ContractsTest do
 
       assert_activity_names(
         contract_a_0,
-        [:contract_prepaid, :contract_paid]
+        [:contract_prepaid]
       )
 
       assert_activity_names(
         contract_a_1,
-        [:contract_renewed, :contract_paid]
+        [:contract_renewed]
       )
 
       assert_activity_names(
         "contract_activities",
         [
           :contract_prepaid,
-          :contract_paid,
           :contract_renewed,
-          :contract_paid,
           :contract_renewed,
           :contract_prepaid,
-          :contract_paid,
           :contract_renewed,
-          :contract_paid,
           :contract_renewed
         ]
       )
@@ -188,9 +184,7 @@ defmodule Algora.ContractsTest do
         contract_a_0.contractor_id,
         [
           :contract_prepaid,
-          :contract_paid,
           :contract_renewed,
-          :contract_paid,
           :contract_renewed
         ]
       )

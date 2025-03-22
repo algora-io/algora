@@ -670,13 +670,15 @@ defmodule Algora.Bounties do
       end
 
     with {:ok, ticket} <- ticket_res do
-      Tip.changeset(%Tip{}, %{
+      %Tip{}
+      |> Tip.changeset(%{
         amount: amount,
         owner_id: owner.id,
         creator_id: creator.id,
         recipient_id: recipient.id,
         ticket_id: if(ticket, do: ticket.id)
       })
+      |> Repo.insert()
     end
   end
 

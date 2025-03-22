@@ -349,20 +349,6 @@ defmodule Algora.Admin do
     error -> {:error, error}
   end
 
-  defp update_repo_tech_stack(languages, repo_id) do
-    top_languages =
-      languages
-      |> Enum.sort_by(fn {_lang, count} -> count end, :desc)
-      |> Enum.take(3)
-      |> Enum.map(fn {lang, _count} -> lang end)
-
-    Repo.update_all(from(r in Repository, where: r.id == ^repo_id), set: [tech_stack: top_languages])
-
-    :ok
-  rescue
-    error -> {:error, error}
-  end
-
   defp update_claims(url, source_id) do
     Repo.update_all(from(t in Claim, where: t.url == ^url), set: [source_id: source_id])
 

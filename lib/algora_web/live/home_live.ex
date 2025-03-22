@@ -881,7 +881,7 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
-          <Footer.footer />
+          <Footer.footer tip_form={@tip_form} />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?
           </div>

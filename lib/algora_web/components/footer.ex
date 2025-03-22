@@ -167,7 +167,65 @@ defmodule AlgoraWeb.Components.Footer do
             </div>
           </div>
         </div>
-        <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 md:flex md:justify-between lg:mt-24">
+
+        <div class="mt-8 sm:mt-10 md:flex md:justify-between lg:mt-12">
+          <div class="relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-emerald-500/20 transition-colors backdrop-blur-sm">
+            <div class="grid items-center lg:grid-cols-7 gap-4 h-full">
+              <div class="col-span-4 text-base leading-6">
+                <h3 class="col-span-3 text-3xl font-semibold text-foreground">
+                  Tip any contributor
+                  <span class="text-emerald-500 drop-shadow-[0_1px_5px_#34d39980]">in seconds</span>
+                </h3>
+                <p class="mt-4 text-lg font-medium text-muted-foreground">
+                  Support the maintainers behind your favorite open source projects
+                </p>
+                <div class="mt-6 space-y-3">
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <.icon name="tabler-check" class="h-5 w-5 text-emerald-400 flex-none" />
+                    <span>Send tips directly to GitHub usernames</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <.icon name="tabler-check" class="h-5 w-5 text-emerald-400 flex-none" />
+                    <span>No GitHub account required for the recipient</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <.icon name="tabler-check" class="h-5 w-5 text-emerald-400 flex-none" />
+                    <span>Algora handles payouts, compliance & 1099s</span>
+                  </div>
+                </div>
+              </div>
+
+              <.form for={@tip_form} phx-submit="create_tip" class="col-span-3 space-y-6">
+                <div class="grid lg:grid-cols-2 gap-y-6 gap-x-3">
+                  <.input
+                    label="GitHub Username"
+                    field={@tip_form[:github_handle]}
+                    placeholder="jsmith"
+                  />
+                  <.input
+                    label="Amount"
+                    icon="tabler-currency-dollar"
+                    field={@tip_form[:amount]}
+                    class="placeholder:text-emerald-500"
+                  />
+                </div>
+                <.input
+                  label="URL"
+                  field={@tip_form[:url]}
+                  placeholder="https://github.com/owner/repo/issues/123"
+                  helptext="We'll comment to notify the developer."
+                />
+                <div class="flex flex-col gap-2">
+                  <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                    Tip contributor
+                  </.button>
+                </div>
+              </.form>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 sm:mt-10 md:flex md:justify-between lg:mt-12">
           <div class="flex gap-4 sm:gap-6 md:order-2">
             <a
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
@@ -205,6 +263,7 @@ defmodule AlgoraWeb.Components.Footer do
               <.icon name="tabler-mail-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
             </a>
           </div>
+
           <p class="mt-8 text-sm font-medium leading-5 text-gray-400 md:order-1 md:mt-0 md:text-base">
             © {Date.utc_today().year} Algora, Public Benefit Corporation
           </p>

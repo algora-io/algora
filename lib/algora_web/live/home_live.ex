@@ -793,13 +793,13 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="flex flex-row gap-8 lg:gap-8">
-              <div class="w-[52%] relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
-                <h3 class="text-center col-span-3 text-3xl font-semibold text-foreground">
-                  Tip any contributor
-                  <span class="text-blue-500 drop-shadow-[0_1px_5px_#60a5fa80]">in seconds</span>
-                </h3>
-                <div class="grid items-center lg:grid-cols-7 gap-8 lg:gap-12 h-full">
+              <div class="w-[65%] relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+                <div class="grid items-center lg:grid-cols-7 gap-8 h-full">
                   <div class="col-span-3 text-base leading-6">
+                    <h3 class="col-span-3 text-3xl font-semibold text-foreground">
+                      Tip any contributor <br class="hidden lg:block" />
+                      <span class="text-blue-500 drop-shadow-[0_1px_5px_#60a5fa80]">instantly</span>
+                    </h3>
                     <p class="mt-4 text-lg font-medium text-muted-foreground">
                       Support the maintainers behind your favorite open source projects
                     </p>
@@ -852,11 +852,11 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
 
-              <div class="w-[48%]">
+              <div class="w-[35%]">
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
-                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10"
+                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10 p-12 bg-[#0d1017]"
                 />
               </div>
             </div>

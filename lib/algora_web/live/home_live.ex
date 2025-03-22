@@ -659,7 +659,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
           <.pattern />
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="mx-auto max-w-8xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?
             </h2>
@@ -667,13 +667,13 @@ defmodule AlgoraWeb.HomeLive do
               You can tip your favorite open source contributors with Algora.
             </p>
 
-            <div class="grid lg:grid-cols-3 gap-8 lg:gap-16">
-              <div class="lg:col-span-2 relative rounded-2xl bg-black/50 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
-                <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+            <div class="flex flex-row gap-8 lg:gap-8">
+              <div class="w-[52%] relative rounded-2xl bg-black/50 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+                <h3 class="text-center col-span-3 text-3xl font-semibold text-foreground">
+                  Tip any contributor <span class="text-blue-500">in seconds</span>
+                </h3>
+                <div class="pt-4 grid lg:grid-cols-2 gap-8 lg:gap-12">
                   <div class="text-base leading-6">
-                    <h3 class="text-3xl font-semibold text-foreground">
-                      Tip any contributor <span class="text-blue-500">in seconds</span>
-                    </h3>
                     <p class="mt-4 text-lg font-medium text-muted-foreground">
                       Support the maintainers behind your favorite open source projects
                     </p>
@@ -694,28 +694,33 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
 
                   <.form for={@tip_form} phx-submit="create_tip" class="space-y-6">
+                    <div class="grid lg:grid-cols-2 gap-y-6 gap-x-3">
+                      <.input
+                        label="GitHub Username"
+                        field={@tip_form[:github_handle]}
+                        placeholder="jsmith"
+                      />
+                      <.input
+                        label="Amount"
+                        icon="tabler-currency-dollar"
+                        field={@tip_form[:amount]}
+                        class="placeholder:text-blue-500"
+                      />
+                    </div>
                     <.input
-                      label="GitHub Username"
-                      field={@tip_form[:github_handle]}
-                      placeholder="jsmith"
-                    />
-                    <.input
-                      label="Amount"
-                      icon="tabler-currency-dollar"
-                      field={@tip_form[:amount]}
-                      class="placeholder:text-blue-500"
+                      label="URL"
+                      field={@tip_form[:url]}
+                      placeholder="https://github.com/owner/repo/issues/123"
+                      helptext="We'll comment to notify the developer."
                     />
                     <div class="flex flex-col gap-2">
                       <.button size="lg" class="w-full" variant="blue">Tip contributor</.button>
-                      <div class="text-sm text-center text-muted-foreground">
-                        No credit card required
-                      </div>
                     </div>
                   </.form>
                 </div>
               </div>
 
-              <div class="hidden lg:block">
+              <div class="w-[48%]">
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"

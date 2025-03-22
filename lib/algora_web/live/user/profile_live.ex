@@ -4,7 +4,7 @@ defmodule AlgoraWeb.User.ProfileLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
-  alias Algora.Bounties
+  alias Algora.Payments
   alias Algora.Reviews
   alias Algora.Reviews.Review
 
@@ -15,8 +15,8 @@ defmodule AlgoraWeb.User.ProfileLive do
      socket
      |> assign(:user, user)
      |> assign(:page_title, "#{user.name}")
-     |> assign(:completed_bounties, Bounties.list_bounties_awarded_to_user(user.id, limit: 10))
-     |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))}
+     |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
+     |> assign(:transactions, Payments.list_received_transactions(user.id, limit: 10))}
   end
 
   def render(assigns) do
@@ -89,7 +89,7 @@ defmodule AlgoraWeb.User.ProfileLive do
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- Completed Bounties Column -->
         <div class="space-y-4">
-          <%= if Enum.empty?(@completed_bounties) do %>
+          <%= if Enum.empty?(@transactions) do %>
             <.card class="text-center">
               <.card_header>
                 <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -106,16 +106,16 @@ defmodule AlgoraWeb.User.ProfileLive do
             <div class="relative -ml-4 w-full overflow-auto">
               <table class="w-full caption-bottom text-sm">
                 <tbody>
-                  <%= for bounty <- @completed_bounties do %>
+                  <%= for %{transaction: transaction, ticket: ticket} <- @transactions do %>
                     <tr class="border-b transition-colors hover:bg-muted/10">
                       <td class="p-4 align-middle">
                         <div class="flex items-center gap-4">
-                          <.link navigate={User.url(bounty.owner)}>
+                          <.link navigate={User.url(ticket.repository.user)}>
                             <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
                               <img
                                 class="aspect-square h-full w-full"
-                                alt={bounty.owner.name}
-                                src={bounty.owner.avatar_url}
+                                alt={ticket.repository.user.name}
+                                src={ticket.repository.user.avatar_url}
                               />
                             </span>
                           </.link>
@@ -123,29 +123,29 @@ defmodule AlgoraWeb.User.ProfileLive do
                           <div class="flex flex-col gap-1">
                             <div class="flex items-center gap-1 text-sm text-muted-foreground">
                               <.link
-                                navigate={User.url(bounty.owner)}
+                                navigate={User.url(ticket.repository.user)}
                                 class="font-semibold hover:underline"
                               >
-                                {bounty.owner.name}
+                                {ticket.repository.user.name}
                               </.link>
                               <.icon name="tabler-chevron-right" class="h-4 w-4" />
                               <.link
-                                href={"https://github.com/#{bounty.repository.owner.provider_login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
+                                href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
                                 class="hover:underline"
                               >
-                                {bounty.repository.name}#{bounty.ticket.number}
+                                {ticket.repository.name}#{ticket.number}
                               </.link>
                             </div>
 
                             <.link
-                              href={"https://github.com/#{bounty.repository.owner.provider_login}/#{bounty.repository.name}/issues/#{bounty.ticket.number}"}
+                              href={"https://github.com/#{ticket.repository.user.provider_login}/#{ticket.repository.name}/issues/#{ticket.number}"}
                               class="group flex items-center gap-2"
                             >
                               <div class="font-display text-xl font-semibold text-success">
-                                {Money.to_string!(bounty.amount)}
+                                {Money.to_string!(transaction.net_amount)}
                               </div>
                               <div class="line-clamp-1 text-foreground group-hover:underline">
-                                {bounty.ticket.title}
+                                {ticket.title}
                               </div>
                             </.link>
                           </div>

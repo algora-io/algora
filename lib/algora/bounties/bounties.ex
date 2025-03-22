@@ -1162,19 +1162,6 @@ defmodule Algora.Bounties do
     )
   end
 
-  def awarded_to_user(user_id) do
-    from b in Bounty,
-      join: t in Transaction,
-      on: t.bounty_id == b.id,
-      where: t.user_id == ^user_id and t.type == :credit and t.status == :succeeded
-  end
-
-  def list_bounties_awarded_to_user(user_id, criteria \\ []) do
-    user_id
-    |> awarded_to_user()
-    |> list_bounties_with(criteria)
-  end
-
   def list_bounties(criteria \\ []) do
     list_bounties_with(base_query(), criteria)
   end

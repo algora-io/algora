@@ -1055,7 +1055,7 @@ defmodule Algora.Bounties do
 
       {:tech_stack, tech_stack}, query ->
         from([b, r: r] in query,
-          where: fragment("? && ?::citext[]", r.tech_stack, ^tech_stack)
+          where: fragment("? && ?::citext[]", r.tech_stack, ^tech_stack) or r.tech_stack == ^[]
         )
 
       {:amount_gt, min_amount}, query ->

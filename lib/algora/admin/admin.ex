@@ -17,14 +17,20 @@ defmodule Algora.Admin do
   require Logger
 
   def alert(message) do
-    %{
-      title: "Alert: #{message}",
-      body: message,
-      name: "Algora Alert",
-      email: "info@algora.io"
-    }
-    |> Algora.Activities.SendEmail.changeset()
-    |> Repo.insert()
+    email_job =
+      Algora.Activities.SendEmail.changeset(%{
+        title: "Alert: #{message}",
+        body: message,
+        name: "Algora Alert",
+        email: "info@algora.io"
+      })
+
+    discord_job =
+      Algora.Activities.SendDiscord.changeset(%{
+        payload: %{embeds: [%{color: 0xEF4444, title: message, timestamp: DateTime.utc_now()}]}
+      })
+
+    Oban.insert_all([email_job, discord_job])
   end
 
   def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")

@@ -33,6 +33,9 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       notify_event(webhook, :ok)
       :ok
     else
+      {:error, :bot_event} ->
+        :ok
+
       {:error, reason} ->
         Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(reason)}")
         notify_event(webhook, {:error, reason})

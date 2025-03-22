@@ -680,16 +680,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
           {:noreply,
            socket
            |> assign(:current_user, user)
-           |> assign_achievements()
-           |> put_flash(:info, "Logged in successfully!")}
+           |> assign_achievements()}
 
         user ->
           token = AlgoraWeb.UserAuth.generate_login_code(user.email)
 
-          {:noreply,
-           socket
-           |> redirect(to: AlgoraWeb.UserAuth.login_path(user.email, token))
-           |> put_flash(:info, "Logged in successfully!")}
+          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.login_path(user.email, token))}
       end
     else
       throttle()

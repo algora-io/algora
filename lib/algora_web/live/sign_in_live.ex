@@ -297,10 +297,7 @@ defmodule AlgoraWeb.SignInLive do
             AlgoraWeb.UserAuth.login_path(user.email, token)
         end
 
-      {:noreply,
-       socket
-       |> redirect(to: path)
-       |> put_flash(:info, "Logged in successfully!")}
+      {:noreply, redirect(socket, to: path)}
     else
       throttle()
       {:noreply, put_flash(socket, :error, "Invalid login code")}

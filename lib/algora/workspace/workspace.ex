@@ -115,7 +115,8 @@ defmodule Algora.Workspace do
         join: u in assoc(r, :user),
         where: r.provider == "github",
         where: r.name == ^repo,
-        where: u.provider_login == ^owner
+        where: u.provider_login == ^owner,
+        preload: [user: u]
       )
 
     res =
@@ -449,11 +450,27 @@ defmodule Algora.Workspace do
     end
   end
 
-  def ensure_contributors(token, owner, repo) do
-    case list_repository_contributors(owner, repo) do
+  def ensure_repo_tech_stack(token, repository) do
+    with {:ok, languages} <- Github.list_repository_languages(token, repository.user.provider_login, repository.name) do
+      top_languages =
+        languages
+        |> Enum.sort_by(fn {_lang, count} -> count end, :desc)
+        |> Enum.take(3)
+        |> Enum.map(fn {lang, _count} -> lang end)
+
+      Repo.update_all(from(r in Repository, where: r.id == ^repository.id), set: [tech_stack: top_languages])
+
+      {:ok, top_languages}
+    end
+  rescue
+    error -> {:error, error}
+  end
+
+  def ensure_contributors(token, repository) do
+    case list_repository_contributors(repository.user.provider_login, repository.name) do
       [] ->
-        with {:ok, repository} <- ensure_repository(token, owner, repo),
-             {:ok, contributors} <- Github.list_repository_contributors(token, owner, repo) do
+        with {:ok, contributors} <-
+               Github.list_repository_contributors(token, repository.user.provider_login, repository.name) do
           Repo.transact(fn ->
             Enum.reduce_while(contributors, {:ok, []}, fn contributor, {:ok, acc} ->
               case create_contributor_from_github(repository, contributor) do

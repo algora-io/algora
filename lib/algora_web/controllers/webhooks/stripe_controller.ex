@@ -196,7 +196,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       }
     }
 
-    case discord_payload |> SendDiscord.changeset() |> Repo.insert() do
+    case discord_payload |> SendDiscord.changeset() |> Oban.insert() do
       {:ok, _} ->
         :ok
 
@@ -237,7 +237,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       }
     }
 
-    case discord_payload |> SendDiscord.changeset() |> Repo.insert() do
+    case discord_payload |> SendDiscord.changeset() |> Oban.insert() do
       {:ok, _} ->
         :ok
 

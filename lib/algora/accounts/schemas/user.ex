@@ -263,7 +263,8 @@ defmodule Algora.Accounts.User do
       :bio,
       :country,
       :location,
-      :timezone
+      :timezone,
+      :tech_stack
     ])
     |> validate_required([:handle, :display_name])
     |> validate_handle()

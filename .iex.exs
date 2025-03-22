@@ -9,7 +9,9 @@ alias Algora.Admin
 alias Algora.Admin.Migration
 alias Algora.Analytics
 alias Algora.Bounties
+alias Algora.Bounties.Bounty
 alias Algora.Bounties.Claim
+alias Algora.Bounties.Tip
 alias Algora.Contracts
 alias Algora.Contracts.Contract
 alias Algora.Contracts.Timesheet

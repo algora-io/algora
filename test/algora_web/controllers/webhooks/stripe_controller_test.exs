@@ -5,6 +5,8 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
   import Algora.Factory
   import Ecto.Query
 
+  alias Algora.Activities.Notifier
+  alias Algora.Activities.SendEmail
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Tip
@@ -24,44 +26,78 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
     {:ok, customer: customer, metadata: metadata, sender: sender, recipient: recipient}
   end
 
+  defp create_transaction_pair(opts) do
+    credit_id = Nanoid.generate()
+    debit_id = Nanoid.generate()
+
+    debit_tx =
+      insert(
+        :transaction,
+        id: debit_id,
+        linked_transaction_id: credit_id,
+        status: :initialized,
+        type: :debit,
+        user_id: opts[:sender_id],
+        bounty_id: opts[:bounty_id],
+        tip_id: opts[:tip_id],
+        contract_id: opts[:contract_id],
+        group_id: opts[:group_id]
+      )
+
+    credit_tx =
+      insert(
+        :transaction,
+        id: credit_id,
+        linked_transaction_id: debit_id,
+        status: :initialized,
+        type: :credit,
+        user_id: opts[:recipient_id],
+        bounty_id: opts[:bounty_id],
+        tip_id: opts[:tip_id],
+        contract_id: opts[:contract_id],
+        group_id: opts[:group_id]
+      )
+
+    %{debit: debit_tx, credit: credit_tx}
+  end
+
   describe "handle_event/1 for charge.succeeded" do
     test "updates transaction statuses and marks associated records as paid", %{
       metadata: metadata,
-      sender: sender,
-      recipient: recipient
+      sender: sender
     } do
       group_id = "#{Algora.Util.random_int()}"
+      recipient1 = insert(:user)
+      recipient2 = insert(:user)
+      recipient3 = insert(:user)
 
       bounty = insert(:bounty, status: :open, owner_id: sender.id, ticket: insert(:ticket))
-      tip = insert(:tip, status: :open, owner_id: sender.id, recipient: recipient)
-      contract = insert(:contract, status: :active, client: sender, contractor: recipient)
+      tip = insert(:tip, status: :open, owner_id: sender.id, recipient: recipient2)
+      contract = insert(:contract, status: :active, client: sender, contractor: recipient3)
 
-      bounty_credit_tx =
-        insert(:transaction, %{
-          type: :credit,
-          status: :initialized,
-          group_id: group_id,
-          user_id: recipient.id,
-          bounty_id: bounty.id
-        })
+      %{credit: bounty_credit_tx} =
+        create_transaction_pair(
+          sender_id: sender.id,
+          recipient_id: recipient1.id,
+          bounty_id: bounty.id,
+          group_id: group_id
+        )
 
-      tip_credit_tx =
-        insert(:transaction, %{
-          type: :credit,
-          status: :initialized,
-          group_id: group_id,
-          user_id: recipient.id,
-          tip_id: tip.id
-        })
+      %{credit: tip_credit_tx} =
+        create_transaction_pair(
+          sender_id: sender.id,
+          recipient_id: recipient2.id,
+          tip_id: tip.id,
+          group_id: group_id
+        )
 
-      contract_credit_tx =
-        insert(:transaction, %{
-          type: :credit,
-          status: :initialized,
-          group_id: group_id,
-          user_id: recipient.id,
-          contract_id: contract.id
-        })
+      %{credit: contract_credit_tx} =
+        create_transaction_pair(
+          sender_id: sender.id,
+          recipient_id: recipient3.id,
+          contract_id: contract.id,
+          group_id: group_id
+        )
 
       event = %Stripe.Event{
         type: "charge.succeeded",
@@ -81,6 +117,30 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
       assert Repo.get(Bounty, bounty.id).status == :paid
       assert Repo.get(Tip, tip.id).status == :paid
       assert Repo.get(Contract, contract.id).status == :paid
+
+      assert_activity_names([:transaction_succeeded, :transaction_succeeded, :transaction_succeeded])
+
+      assert_activity_names_for_user(recipient1.id, [:transaction_succeeded])
+      assert_activity_names_for_user(recipient2.id, [:transaction_succeeded])
+      assert_activity_names_for_user(recipient3.id, [:transaction_succeeded])
+
+      assert [bounty_tx, tip_tx, contract_tx] = Enum.reverse(Algora.Activities.all())
+
+      assert_enqueued(worker: Notifier, args: %{"activity_id" => bounty_tx.id})
+      assert_enqueued(worker: Notifier, args: %{"activity_id" => tip_tx.id})
+      assert_enqueued(worker: Notifier, args: %{"activity_id" => contract_tx.id})
+
+      refute_enqueued(worker: SendEmail, args: %{"activity_id" => bounty_tx.id})
+      refute_enqueued(worker: SendEmail, args: %{"activity_id" => tip_tx.id})
+      refute_enqueued(worker: SendEmail, args: %{"activity_id" => contract_tx.id})
+
+      Enum.map(all_enqueued(worker: Notifier), fn job ->
+        perform_job(Notifier, job.args)
+      end)
+
+      assert_enqueued(worker: SendEmail, args: %{"activity_id" => bounty_tx.id})
+      assert_enqueued(worker: SendEmail, args: %{"activity_id" => tip_tx.id})
+      assert_enqueued(worker: SendEmail, args: %{"activity_id" => contract_tx.id})
     end
 
     test "updates transaction status and enqueues PromptPayoutConnect job", %{

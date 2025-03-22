@@ -539,12 +539,7 @@ defmodule Algora.Contracts do
   end
 
   defp mark_contract_as_paid(contract) do
-    contract
-    |> change(%{status: :paid})
-    |> Repo.update_with_activity(%{
-      type: :contract_paid,
-      notify_users: []
-    })
+    change(contract, %{status: :paid})
   end
 
   defp renew_contract(contract) do

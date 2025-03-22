@@ -66,6 +66,16 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
       Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
 
+      activities_result =
+        txs
+        |> Enum.filter(&(&1.type == :credit))
+        |> Enum.reduce_while(:ok, fn tx, :ok ->
+          case Algora.Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
+            {:ok, _} -> {:cont, :ok}
+            error -> {:halt, error}
+          end
+        end)
+
       jobs_result =
         txs
         |> Enum.filter(&(&1.type == :credit))
@@ -90,6 +100,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         end)
 
       with txs when txs != [] <- txs,
+           :ok <- activities_result,
            :ok <- jobs_result do
         Payments.broadcast()
         {:ok, nil}

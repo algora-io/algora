@@ -404,14 +404,15 @@ defmodule Algora.Payments do
         where: tx.user_id == ^user_id,
         where: tx.type == :credit,
         where: not is_nil(tx.succeeded_at),
-        # join: ltx in assoc(tx, :linked_transaction),
+        join: ltx in assoc(tx, :linked_transaction),
+        join: sender in assoc(ltx, :user),
         left_join: bounty in assoc(tx, :bounty),
         left_join: tip in assoc(tx, :tip),
         join: t in Ticket,
         on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
         left_join: r in assoc(t, :repository),
         left_join: o in assoc(r, :user),
-        select: %{transaction: tx, ticket: %{t | repository: %{r | user: o}}},
+        select: %{transaction: tx, sender: sender, ticket: %{t | repository: %{r | user: o}}},
         order_by: [desc: tx.succeeded_at]
 
     query =

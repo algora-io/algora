@@ -54,12 +54,9 @@ defmodule Algora.Bounties.Bounty do
     "#{name}##{number}"
   end
 
+  # DEPRECATED
   def path(%{ticket: %{provider: "github", url: url}}) do
-    url
-    |> URI.parse()
-    |> then(& &1.path)
-    |> String.replace(~r/^\/[^\/]+\//, "")
-    |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
+    Algora.Util.path_from_url(url)
   end
 
   def full_path(%{repository: %{name: name, owner: %{login: login}}, ticket: %{number: number}}) do

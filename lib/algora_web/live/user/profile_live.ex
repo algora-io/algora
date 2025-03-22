@@ -52,15 +52,6 @@ defmodule AlgoraWeb.User.ProfileLive do
               <% end %>
             </div>
           </div>
-
-          <div class="flex-shrink-0 space-y-3">
-            <.button class="w-full">
-              <.icon name="tabler-currency-dollar" class="mr-2 h-4 w-4" /> Pay
-            </.button>
-            <.button class="w-full" variant="outline">
-              <.icon name="tabler-mail" class="mr-2 h-4 w-4" /> Invite
-            </.button>
-          </div>
         </div>
       </div>
       <!-- Stats Grid -->

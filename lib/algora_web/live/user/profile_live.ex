@@ -12,12 +12,15 @@ defmodule AlgoraWeb.User.ProfileLive do
   def mount(%{"handle" => handle}, _session, socket) do
     {:ok, user} = Accounts.fetch_developer_by(handle: handle)
 
+    transactions = Payments.list_received_transactions(user.id, limit: page_size())
+
     {:ok,
      socket
      |> assign(:user, user)
      |> assign(:page_title, "#{user.name}")
      |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
-     |> assign_transactions()}
+     |> assign(:transactions, to_transaction_rows(transactions))
+     |> assign(:has_more_transactions, length(transactions) >= page_size())}
   end
 
   @impl true
@@ -90,7 +93,7 @@ defmodule AlgoraWeb.User.ProfileLive do
       <!-- Replace the entire .tabs section with this: -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- Completed Bounties Column -->
-        <div class="space-y-4">
+        <div class="space-y-4" id="transactions-container" phx-hook="InfiniteScroll">
           <%= if Enum.empty?(@transactions) do %>
             <.card class="text-center">
               <.card_header>
@@ -170,6 +173,15 @@ defmodule AlgoraWeb.User.ProfileLive do
                 </tbody>
               </table>
             </div>
+            <div
+              :if={@has_more_transactions}
+              class="flex justify-center mt-4"
+              id="load-more-indicator"
+            >
+              <div class="animate-pulse text-muted-foreground">
+                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+              </div>
+            </div>
           <% end %>
         </div>
         <!-- Reviews Column -->
@@ -224,11 +236,32 @@ defmodule AlgoraWeb.User.ProfileLive do
     """
   end
 
-  defp assign_transactions(socket) do
-    transactions = Payments.list_received_transactions(socket.assigns.user.id, limit: 100)
-
-    assign(socket, :transactions, to_transaction_rows(transactions))
+  @impl true
+  def handle_event("load_more", _params, socket) do
+    {:noreply, assign_more_transactions(socket)}
   end
+
+  defp assign_more_transactions(socket) do
+    %{transactions: rows, user: user} = socket.assigns
+
+    last_transaction = List.last(rows).transaction
+
+    more_transactions =
+      Payments.list_received_transactions(
+        user.id,
+        limit: page_size(),
+        before: %{
+          succeeded_at: last_transaction.succeeded_at,
+          id: last_transaction.id
+        }
+      )
+
+    socket
+    |> assign(:transactions, rows ++ to_transaction_rows(more_transactions))
+    |> assign(:has_more_transactions, length(more_transactions) >= page_size())
+  end
+
+  defp page_size, do: 10
 
   defp to_transaction_rows(transactions) do
     Enum.map(transactions, fn tx ->

@@ -295,7 +295,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
     stats = Bounties.fetch_stats(current_org.id)
 
     bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
-    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
+    transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
 
     {:noreply,
      socket
@@ -353,7 +353,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
     last_transaction = List.last(rows).transaction
 
     more_transactions =
-      Payments.list_sent_transactions(
+      Payments.list_hosted_transactions(
         current_org.id,
         limit: page_size(),
         before: %{

@@ -70,7 +70,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
         txs
         |> Enum.filter(&(&1.type == :credit))
         |> Enum.reduce_while(:ok, fn tx, :ok ->
-          case Algora.Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
+          case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
             {:ok, _} -> {:cont, :ok}
             error -> {:halt, error}
           end

@@ -27,7 +27,7 @@ defmodule Algora.Admin do
 
     discord_job =
       Algora.Activities.SendDiscord.changeset(%{
-        payload: %{embeds: [%{color: 0xEF4444, title: message, timestamp: DateTime.utc_now()}]}
+        payload: %{embeds: [%{color: 0xEF4444, title: "Alert", description: message, timestamp: DateTime.utc_now()}]}
       })
 
     Oban.insert_all([email_job, discord_job])

@@ -96,12 +96,12 @@ defmodule AlgoraWeb.HomeLive do
                     <.input
                       field={@repo_form[:url]}
                       placeholder="github.com/your/repo"
-                      class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 border-emerald-500 font-display"
+                      class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 ring-2 ring-emerald-500 font-display rounded-xl"
                     />
                     <Logos.github class="h-10 w-10 absolute left-3 top-3 text-muted-foreground/50" />
                     <.button
                       type="submit"
-                      class="absolute right-2 top-2 bottom-2 px-8 h-[3rem] text-xl font-semibold"
+                      class="absolute right-2 top-2 bottom-2 px-8 h-[3rem] text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980]"
                     >
                       Get Started
                     </.button>
@@ -728,10 +728,13 @@ defmodule AlgoraWeb.HomeLive do
                   <Logos.github class="size-4 mr-4 -ml-2" /> View issue
                 </.button>
               </.link>
-              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-black p-12 ring-2 ring-success/20 ransition-colors">
+              <div class="relative grid grid-cols-5 items-center w-full gap-x-4 rounded-xl bg-black/25 p-12 ring-2 ring-success/20 ransition-colors">
                 <div class="col-span-2 text-base leading-6 flex-1">
                   <div class="text-3xl font-semibold text-foreground">
-                    Fund any issue <span class="text-success">in seconds</span>
+                    Fund any issue
+                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+                      in seconds
+                    </span>
                   </div>
                   <div class="text-lg font-medium text-muted-foreground">
                     Help improve the OSS you love and rely on
@@ -769,7 +772,9 @@ defmodule AlgoraWeb.HomeLive do
                   />
                   <div class="flex flex-col items-center gap-2">
                     <div class="text-sm text-muted-foreground">No credit card required</div>
-                    <.button size="lg" class="w-full">Fund issue</.button>
+                    <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                      Fund issue
+                    </.button>
                   </div>
                 </.form>
               </div>
@@ -790,7 +795,8 @@ defmodule AlgoraWeb.HomeLive do
             <div class="flex flex-row gap-8 lg:gap-8">
               <div class="w-[52%] relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
                 <h3 class="text-center col-span-3 text-3xl font-semibold text-foreground">
-                  Tip any contributor <span class="text-blue-500">in seconds</span>
+                  Tip any contributor
+                  <span class="text-blue-500 drop-shadow-[0_1px_5px_#60a5fa80]">in seconds</span>
                 </h3>
                 <div class="grid items-center lg:grid-cols-7 gap-8 lg:gap-12 h-full">
                   <div class="col-span-3 text-base leading-6">
@@ -834,7 +840,13 @@ defmodule AlgoraWeb.HomeLive do
                       helptext="We'll comment to notify the developer."
                     />
                     <div class="flex flex-col gap-2">
-                      <.button size="lg" class="w-full" variant="blue">Tip contributor</.button>
+                      <.button
+                        size="lg"
+                        class="w-full drop-shadow-[0_1px_5px_#60a5fa80]"
+                        variant="blue"
+                      >
+                        Tip contributor
+                      </.button>
                     </div>
                   </.form>
                 </div>

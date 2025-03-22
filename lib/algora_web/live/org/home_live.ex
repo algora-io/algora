@@ -14,7 +14,7 @@ defmodule AlgoraWeb.Org.HomeLive do
     open_bounties = Bounties.list_bounties(owner_id: org.id, status: :open, limit: page_size())
     top_earners = Accounts.list_developers(org_id: org.id, limit: 10, earnings_gt: Money.zero(:USD))
     stats = Bounties.fetch_stats(org.id)
-    transactions = Payments.list_sent_transactions(org.id, limit: page_size())
+    transactions = Payments.list_hosted_transactions(org.id, limit: page_size())
 
     socket =
       socket

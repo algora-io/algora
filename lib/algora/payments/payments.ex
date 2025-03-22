@@ -368,19 +368,19 @@ defmodule Algora.Payments do
     )
   end
 
-  def list_sent_transactions(user_id, opts \\ []) do
+  def list_hosted_transactions(user_id, opts \\ []) do
     query =
       from tx in Transaction,
         where: tx.type == :credit,
         where: not is_nil(tx.succeeded_at),
         join: ltx in assoc(tx, :linked_transaction),
-        where: ltx.user_id == ^user_id,
         join: recipient in assoc(tx, :user),
         left_join: bounty in assoc(tx, :bounty),
         left_join: tip in assoc(tx, :tip),
         join: t in Ticket,
         on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
         left_join: r in assoc(t, :repository),
+        where: ltx.user_id == ^user_id or r.user_id == ^user_id,
         left_join: o in assoc(r, :user),
         select: %{transaction: tx, recipient: recipient, ticket: %{t | repository: %{r | user: o}}},
         order_by: [desc: tx.succeeded_at]

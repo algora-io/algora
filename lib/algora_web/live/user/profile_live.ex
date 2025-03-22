@@ -71,7 +71,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         <div class="rounded-lg border border-border bg-card p-6">
           <div class="mb-2 flex items-center gap-2">
             <div class="font-display text-2xl font-bold">
-              {@user.completed_bounties_count}
+              {@user.transactions_count}
             </div>
           </div>
           <div class="text-sm text-muted-foreground">Bounties Solved</div>

@@ -92,6 +92,31 @@ defmodule Algora.Admin do
     :ok
   end
 
+  def backfill_repo_contributors! do
+    query =
+      from(r in Repository,
+        where: fragment("?->>'contributors_url' IS NOT NULL", r.provider_meta),
+        join: u in assoc(r, :user),
+        join: t in assoc(r, :tickets),
+        join: b in assoc(t, :bounties),
+        distinct: fragment("?->>'contributors_url'", r.provider_meta),
+        select: %{r | user: u}
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_repo_contributors/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository contributors backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
   def backfill_claims! do
     query =
       from(t in Claim,
@@ -207,6 +232,20 @@ defmodule Algora.Admin do
 
       error ->
         Logger.error("Failed to backfill repo tech stack #{repo.provider_meta["languages_url"]}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_repo_contributors(repo) do
+    case Workspace.ensure_contributors(token!(), repo.user.provider_login, repo.name) do
+      {:ok, contributors} ->
+        {:ok, contributors}
+
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill repo contributors #{repo.provider_meta["contributors_url"]}: #{inspect(error)}")
         {:error, error}
     end
   end

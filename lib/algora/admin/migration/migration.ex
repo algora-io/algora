@@ -1434,6 +1434,7 @@ defmodule Algora.Admin.Migration do
       :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
       :ok = time_step("Backfilling tickets", fn -> Admin.backfill_tickets!() end)
       :ok = time_step("Backfilling repo tech stack", fn -> Admin.backfill_repo_tech_stack!() end)
+      :ok = time_step("Backfilling repo contributors", fn -> Admin.backfill_repo_contributors!() end)
     end)
 
     Algora.Settings.set_migration_in_progress!(false)

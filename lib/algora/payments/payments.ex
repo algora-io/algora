@@ -398,6 +398,35 @@ defmodule Algora.Payments do
     Repo.all(query)
   end
 
+  def list_received_transactions(user_id, opts \\ []) do
+    query =
+      from tx in Transaction,
+        where: tx.user_id == ^user_id,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        # join: ltx in assoc(tx, :linked_transaction),
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        left_join: o in assoc(r, :user),
+        select: %{transaction: tx, ticket: %{t | repository: %{r | user: o}}},
+        order_by: [desc: tx.succeeded_at]
+
+    query =
+      if cursor = opts[:before] do
+        from [tx] in query,
+          where: {tx.succeeded_at, tx.id} < {^cursor.succeeded_at, ^cursor.id}
+      else
+        query
+      end
+
+    query = from q in query, limit: ^opts[:limit]
+
+    Repo.all(query)
+  end
+
   @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}
   def enqueue_pending_transfers(user_id) do
     Repo.transact(fn ->

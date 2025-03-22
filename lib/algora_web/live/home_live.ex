@@ -63,7 +63,6 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:stats, stats)
      |> assign(:faq_items, get_faq_items())
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-     # TODO: add url
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:pending_action, nil)}
@@ -76,7 +75,7 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-br from-black to-background">
+        <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-b from-background to-black">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
@@ -286,8 +285,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
               src="https://www.firecrawl.dev/images/yc.svg"
@@ -341,8 +339,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Build product faster
@@ -548,10 +545,9 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Hire by building product
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -723,8 +719,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-8xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?
@@ -804,7 +799,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-background border-t py-16 sm:py-40">
+        <section class="relative isolate bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>

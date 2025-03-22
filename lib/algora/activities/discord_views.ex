@@ -45,5 +45,42 @@ defmodule Algora.Activities.DiscordViews do
     }
   end
 
+  def render(%{type: :transaction_succeeded, assoc: tx}) do
+    tx = Repo.preload(tx, [:user, linked_transaction: [:user]])
+
+    %{
+      embeds: [
+        %{
+          color: 0x6366F1,
+          title: "#{tx.net_amount} paid!",
+          author: %{
+            name: tx.linked_transaction.user.name,
+            icon_url: tx.linked_transaction.user.avatar_url,
+            url: "#{AlgoraWeb.Endpoint.url()}/org/#{tx.linked_transaction.user.handle}"
+          },
+          footer: %{
+            text: tx.user.name,
+            icon_url: tx.user.avatar_url
+          },
+          thumbnail: %{url: tx.user.avatar_url},
+          fields: [
+            %{
+              name: "Sender",
+              value: tx.linked_transaction.user.name,
+              inline: false
+            },
+            %{
+              name: "Recipient",
+              value: tx.user.name,
+              inline: false
+            }
+          ],
+          url: "#{AlgoraWeb.Endpoint.url()}/org/#{tx.linked_transaction.user.handle}",
+          timestamp: tx.succeeded_at
+        }
+      ]
+    }
+  end
+
   def render(_activity), do: nil
 end

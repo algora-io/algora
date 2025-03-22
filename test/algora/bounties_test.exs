@@ -93,16 +93,11 @@ defmodule Algora.BountiesTest do
                  claims: claims
                )
 
-      assert_activity_names([:bounty_posted, :claim_submitted, :bounty_awarded, :tip_awarded])
-      assert_activity_names_for_user(creator.id, [:bounty_posted, :bounty_awarded, :tip_awarded])
-      assert_activity_names_for_user(recipient.id, [:claim_submitted, :tip_awarded])
+      assert_activity_names([:bounty_posted, :claim_submitted])
+      assert_activity_names_for_user(creator.id, [:bounty_posted])
+      assert_activity_names_for_user(recipient.id, [:claim_submitted])
 
-      assert [bounty, _claim, _awarded, tip] = Enum.reverse(Algora.Activities.all())
-      assert "tip_activities" == tip.assoc_name
-      # assert tip.notify_users == [recipient.id]
-      assert activity = Algora.Activities.get_with_preloaded_assoc(tip.assoc_name, tip.id)
-      assert activity.assoc.__meta__.schema == Tip
-      assert activity.assoc.creator.id == creator.id
+      assert [bounty, _claim] = Enum.reverse(Algora.Activities.all())
 
       assert_enqueued(worker: Notifier, args: %{"activity_id" => bounty.id})
       refute_enqueued(worker: SendEmail, args: %{"activity_id" => bounty.id})

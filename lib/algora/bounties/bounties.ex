@@ -678,10 +678,7 @@ defmodule Algora.Bounties do
         recipient_id: recipient.id,
         ticket_id: if(ticket, do: ticket.id)
       })
-      |> Repo.insert_with_activity(%{
-        type: :tip_awarded,
-        notify_users: []
-      })
+      |> Repo.insert()
     end
   end
 
@@ -696,18 +693,12 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
-    Repo.transact(fn ->
-      activity_attrs = %{type: :bounty_awarded}
-
-      with {:ok, _activity} <- Algora.Activities.insert(%Bounty{id: bounty_id}, activity_attrs) do
-        create_payment_session(
-          %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
-          ticket_ref: opts[:ticket_ref],
-          bounty_id: bounty_id,
-          claims: claims
-        )
-      end
-    end)
+    create_payment_session(
+      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
+      ticket_ref: opts[:ticket_ref],
+      bounty_id: bounty_id,
+      claims: claims
+    )
   end
 
   @spec generate_line_items(

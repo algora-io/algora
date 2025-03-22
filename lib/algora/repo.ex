@@ -3,6 +3,9 @@ defmodule Algora.Repo do
     otp_app: :algora,
     adapter: Ecto.Adapters.Postgres
 
+  alias Algora.Activities.Activity
+  alias Algora.Activities.Notifier
+
   require Ecto.Query
 
   @spec fetch_one(Ecto.Queryable.t(), Keyword.t()) ::
@@ -105,11 +108,20 @@ defmodule Algora.Repo do
   def with_activity(multi, activity) do
     multi
     |> Ecto.Multi.insert(:activity, fn %{target: target} ->
-      Algora.Activities.Activity.build_activity(target, Map.put(activity, :id, target.id))
+      Activity.build_activity(target, Map.put(activity, :id, target.id))
     end)
     |> Oban.insert(:notification, fn %{activity: activity, target: target} ->
-      Algora.Activities.Notifier.changeset(activity, target)
+      Notifier.changeset(activity, target)
     end)
+  end
+
+  def insert_activity(target, activity) do
+    activity = Map.put(activity, :id, target.id)
+
+    with {:ok, activity} <- Algora.Repo.insert(Activity.build_activity(target, activity)),
+         {:ok, notification} <- Oban.insert(Notifier.changeset(activity, target)) do
+      {:ok, %{activity: activity, notification: notification}}
+    end
   end
 
   defp extract_target(response) do

@@ -94,6 +94,7 @@ defmodule AlgoraWeb.User.ProfileLive do
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
         <!-- Completed Bounties Column -->
         <div class="space-y-4" id="transactions-container" phx-hook="InfiniteScroll">
+          <h2 class="text-lg font-semibold">Completed Bounties</h2>
           <%= if Enum.empty?(@transactions) do %>
             <.card class="text-center">
               <.card_header>
@@ -107,7 +108,6 @@ defmodule AlgoraWeb.User.ProfileLive do
               </.card_header>
             </.card>
           <% else %>
-            <h2 class="text-lg font-semibold">Completed Bounties</h2>
             <div class="relative -ml-4 w-full overflow-auto">
               <table class="w-full caption-bottom text-sm">
                 <tbody>
@@ -187,20 +187,20 @@ defmodule AlgoraWeb.User.ProfileLive do
         <!-- Reviews Column -->
         <div class="space-y-4">
           <div class="grid gap-4">
+            <h2 class="text-lg font-semibold">Completed Contracts</h2>
             <%= if Enum.empty?(@reviews) do %>
               <.card class="text-center">
                 <.card_header>
                   <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                    <.icon name="tabler-message-circle" class="h-8 w-8 text-muted-foreground" />
+                    <.icon name="tabler-contract" class="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <.card_title>No reviews yet</.card_title>
+                  <.card_title>No completed contracts yet</.card_title>
                   <.card_description>
-                    Reviews will appear here once this user receives feedback
+                    Contracts will appear here once completed
                   </.card_description>
                 </.card_header>
               </.card>
             <% else %>
-              <h2 class="text-lg font-semibold">Reviews</h2>
               <%= for review <- @reviews do %>
                 <div class="w-full rounded-lg border border-border bg-card p-4 text-sm">
                   <div class="mb-2 flex items-center gap-1">

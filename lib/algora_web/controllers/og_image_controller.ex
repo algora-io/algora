@@ -1,6 +1,8 @@
 defmodule AlgoraWeb.OGImageController do
   use AlgoraWeb, :controller
 
+  alias Algora.ScreenshotQueue
+
   require Logger
 
   def generate(conn, %{"path" => path}) do
@@ -26,11 +28,11 @@ defmodule AlgoraWeb.OGImageController do
       path: filepath,
       width: 1200,
       height: 630,
-      scale_factor: 2,
+      scale_factor: 1,
       timeout: 10_000
     ]
 
-    case generate_image(url, opts) do
+    case ScreenshotQueue.generate_image(url, opts) do
       {:ok, _path} ->
         object_path = Path.join(["og"] ++ path ++ ["og.png"])
 
@@ -46,47 +48,6 @@ defmodule AlgoraWeb.OGImageController do
 
       error ->
         error
-    end
-  end
-
-  @doc """
-    Wrapper for puppeteer-img.  Generates screenshots of a website from given URL.
-    Adapted from https://github.com/RobotsAndPencils/ex-puppeteer-img
-  """
-  def generate_image(url, options \\ []) do
-    opts =
-      options
-      |> Keyword.take([:type, :path, :width, :height, :scale_factor, :timeout])
-      |> Enum.reduce([url], fn {key, value}, result ->
-        result ++ [String.replace("--#{key}=#{value}", "_", "-")]
-      end)
-
-    try do
-      task =
-        Task.async(fn ->
-          try do
-            case System.cmd("puppeteer-img", opts) do
-              {_, 127} ->
-                {:error, :invalid_exec_path}
-
-              {cmd_response, _} ->
-                {:ok, cmd_response}
-            end
-          rescue
-            e in ErlangError ->
-              %ErlangError{original: error} = e
-
-              case error do
-                :enoent ->
-                  # This will happen when the file in exec_path doesn't exists
-                  {:error, :invalid_exec_path}
-              end
-          end
-        end)
-
-      Task.await(task, options[:timeout] || 2000)
-    catch
-      :exit, {:timeout, _} -> {:error, :timeout}
     end
   end
 end

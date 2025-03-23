@@ -5,7 +5,6 @@ defmodule AlgoraWeb.Pricing4Live do
   alias Algora.PSP.ConnectCountries
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Components.Wordmarks
 
   defmodule Plan do
@@ -397,18 +396,6 @@ defmodule AlgoraWeb.Pricing4Live do
         cta_url: "https://cal.com/ioannisflo",
         popular: false,
         features: []
-        # features: [
-        #   %Feature{name: "Featured on Algora"},
-        #   %Feature{name: "Access to verified OSS experts (12k+ users)"},
-        #   %Feature{name: "Instant top matches for your roles"},
-        #   %Feature{name: "Jobs published to platform & newsletter"},
-        #   # %Feature{name: "Whitelabel portal (cloud / self-hosted)"},
-        #   %Feature{name: "Priority placement"},
-        #   %Feature{name: "24x7x365 premium support"},
-        #   %Feature{name: "SOC2 compliance"},
-        #   %Feature{name: "HIPAA available as add-on"}
-        #   # %Feature{name: "Custom Security Questionnaires"}
-        # ]
       }
     ]
   end

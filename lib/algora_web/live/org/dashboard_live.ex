@@ -1246,7 +1246,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <% end %>
         </ol>
       </nav>
-      <div class="pt-6 flex items-center justify-between">
+      <div class="pt-12 flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Share your bounty board</h2>
       </div>
       <.badge
@@ -1279,7 +1279,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <img
         src={~p"/og/org/#{@current_org.handle}/home"}
         alt={@current_org.name}
-        class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input"
+        class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
       />
       <div class="fixed right-0 bottom-0 hidden w-96 p-4 pr-0 pt-6 sm:p-6 sm:pr-0 md:py-8 md:pr-0 lg:grid lg:grid-cols-2 gap-2 gap-x-4 text-sm">
         <div class="flex items-center gap-2">

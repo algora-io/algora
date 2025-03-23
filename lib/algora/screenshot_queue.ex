@@ -1,0 +1,56 @@
+defmodule Algora.ScreenshotQueue do
+  @moduledoc false
+  use GenServer
+
+  require Logger
+
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  end
+
+  def generate_image(url, opts) do
+    GenServer.call(__MODULE__, {:generate_image, url, opts}, opts[:timeout] || 30_000)
+  end
+
+  @impl true
+  def init(:ok) do
+    {:ok, :no_state_needed}
+  end
+
+  @impl true
+  def handle_call({:generate_image, url, opts}, _from, state) do
+    result =
+      try do
+        task =
+          Task.async(fn ->
+            try do
+              case System.cmd("puppeteer-img", build_opts(url, opts)) do
+                {_, 127} -> {:error, :invalid_exec_path}
+                {cmd_response, _} -> {:ok, cmd_response}
+              end
+            rescue
+              e in ErlangError ->
+                %ErlangError{original: error} = e
+
+                case error do
+                  :enoent -> {:error, :invalid_exec_path}
+                end
+            end
+          end)
+
+        Task.await(task, opts[:timeout] || 2000)
+      catch
+        :exit, {:timeout, _} -> {:error, :timeout}
+      end
+
+    {:reply, result, state}
+  end
+
+  defp build_opts(url, options) do
+    options
+    |> Keyword.take([:type, :path, :width, :height, :scale_factor, :timeout])
+    |> Enum.reduce([url], fn {key, value}, result ->
+      result ++ [String.replace("--#{key}=#{value}", "_", "-")]
+    end)
+  end
+end

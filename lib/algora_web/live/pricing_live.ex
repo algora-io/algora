@@ -5,11 +5,11 @@ defmodule AlgoraWeb.PricingLive do
   alias Algora.PSP.ConnectCountries
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Components.Wordmarks
 
   defmodule Plan do
     @moduledoc false
     defstruct [
+      :id,
       :name,
       :description,
       :price,
@@ -37,6 +37,7 @@ defmodule AlgoraWeb.PricingLive do
     ~H"""
     <div class="pt-24 xl:pt-20 2xl:pt-28">
       <%= if @screenshot? do %>
+        <div class="-mt-20" />
       <% else %>
         <Header.header />
       <% end %>
@@ -44,263 +45,64 @@ defmodule AlgoraWeb.PricingLive do
       <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12"></div>
 
       <section class="bg-background pb-16 sm:pb-24">
-        <div class="relative z-10 pb-4 xl:py-16">
-          <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
-            <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-              <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
-                Simple pricing,<br class="block lg:hidden" /> built for developers
-              </h1>
-              <p class="text-sm sm:text-lg text-muted-foreground">
-                Fund bounties, reward contributors, and accelerate your project
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class={
-          classes([
-            "px-6 lg:px-8",
-            "mx-auto grid gap-4",
-            "sm:grid-cols-2 lg:max-w-4xl"
-            # "lg:max-w-none xl:grid-cols-3 xl:gap-0"
-          ])
-        }>
-          <%= for plan <- @plans do %>
-            <.pricing_card plan={plan} />
-          <% end %>
-        </div>
-      </section>
-
-      <section class="bg-muted/20 border-t py-16 sm:py-24">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="mx-auto max-w-2xl text-center">
-            <h2 class="mb-4 text-3xl font-bold text-popover-foreground">
-              You're in good company
-            </h2>
-            <p class="text-base text-muted-foreground">
-              Join hundreds of open source companies that use Algora to accelerate their development
-            </p>
-          </div>
-          <div class="mx-auto mt-8 max-w-2xl gap-8 text-sm leading-6 sm:mt-10">
-            <.logo_cloud />
-          </div>
-        </div>
-      </section>
-
-      <section class="bg-background border-t py-16 sm:py-24">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="mx-auto max-w-2xl text-center">
-            <h2 class="mb-4 text-3xl font-bold text-popover-foreground">
-              See what our customers say
-            </h2>
-            <p class="text-base text-muted-foreground">
-              Discover how Algora helps founders accelerate development and find top talent
-            </p>
-          </div>
-
-          <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 lg:mx-0 lg:max-w-none">
-            <div class="grid gap-x-12 gap-y-8 lg:grid-cols-7">
-              <div class="lg:col-span-3">
-                <div class="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                  <iframe
-                    src="https://www.youtube.com/embed/xObOGcUdtY0?si=mrHBcTn-Nzj4_okq"
-                    title="YouTube video player"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allowfullscreen
-                    width="100%"
-                    height="100%"
-                  >
-                  </iframe>
-                </div>
-              </div>
-              <div class="lg:col-span-4">
-                <h3 class="text-3xl font-display font-bold text-success">
-                  $15,000 Bounty: Delighted by the Results
-                </h3>
-                <div class="relative text-base">
-                  <svg
-                    viewBox="0 0 162 128"
-                    fill="none"
-                    aria-hidden="true"
-                    class="absolute -top-12 left-0 -z-10 h-32 stroke-white/25"
-                  >
-                    <path
-                      id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-                      d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-                    >
-                    </path>
-                    <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
-                  </svg>
-                  <div class="font-medium text-white whitespace-pre-line">
-                    We've used Algora extensively at Golem Cloud for our hiring needs and what I have found actually over the course of a few decades of hiring people is that many times someone who is very active in open-source development, these types of engineers often make fantastic additions to a team.
-
-                    Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.
-
-                    The bounty system helps us assess real-world skills instead of just technical challenge problems. It's a great way to find talented developers who deeply understand how your system works.
-                  </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
-                  <div class="flex items-center gap-4">
-                    <span class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-full">
-                      <img
-                        alt="John A. De Goes"
-                        loading="lazy"
-                        decoding="async"
-                        data-nimg="fill"
-                        class="aspect-square h-full w-full"
-                        sizes="100vw"
-                        src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
-                        style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                      />
-                    </span>
-                    <div>
-                      <div class="text-base font-medium text-gray-100">John A. De Goes</div>
-                      <div class="text-sm text-gray-300">Founder & CEO</div>
-                    </div>
-                  </div>
-                </div>
-                <dl class="flex flex-wrap items-center gap-x-12 gap-y-4 pt-8 xl:flex-nowrap">
-                  <div class="flex flex-col-reverse">
-                    <dt class="text-base text-gray-300">Total awarded</dt>
-                    <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                      $103,950
-                    </dd>
-                  </div>
-                  <div class="flex flex-col-reverse">
-                    <dt class="text-base text-gray-300">Bounties completed</dt>
-                    <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                      359
-                    </dd>
-                  </div>
-                  <div class="flex flex-col-reverse">
-                    <dt class="text-base text-gray-300">Contributors rewarded</dt>
-                    <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                      82
-                    </dd>
-                  </div>
-                </dl>
+        <div class="mx-auto px-6 lg:px-8">
+          <div class="relative z-10 pb-4 xl:py-16">
+            <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
+              <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
+                <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
+                  Simple, transparent pricing
+                </h1>
+                <p class="text-sm sm:text-lg text-muted-foreground">
+                  For individuals, OSS communities, and open/closed source companies
+                </p>
               </div>
             </div>
           </div>
-          <div class="mx-auto mt-16 max-w-2xl gap-8 text-sm leading-6 text-gray-900 sm:mt-20 sm:grid-cols-2 lg:mx-0 lg:max-w-none">
-            <div class="grid gap-x-12 gap-y-8 lg:grid-cols-7">
-              <div class="lg:col-span-3 order-last lg:order-first">
-                <h3 class="text-3xl font-display font-bold text-success">
-                  From Bounty Contributor<br />To Full-Time Engineer
-                </h3>
-                <div class="relative text-base">
-                  <svg
-                    viewBox="0 0 162 128"
-                    fill="none"
-                    aria-hidden="true"
-                    class="absolute -top-12 left-0 -z-10 h-32 stroke-white/25"
-                  >
-                    <path
-                      id="b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb"
-                      d="M65.5697 118.507L65.8918 118.89C68.9503 116.314 71.367 113.253 73.1386 109.71C74.9162 106.155 75.8027 102.28 75.8027 98.0919C75.8027 94.237 75.16 90.6155 73.8708 87.2314C72.5851 83.8565 70.8137 80.9533 68.553 78.5292C66.4529 76.1079 63.9476 74.2482 61.0407 72.9536C58.2795 71.4949 55.276 70.767 52.0386 70.767C48.9935 70.767 46.4686 71.1668 44.4872 71.9924L44.4799 71.9955L44.4726 71.9988C42.7101 72.7999 41.1035 73.6831 39.6544 74.6492C38.2407 75.5916 36.8279 76.455 35.4159 77.2394L35.4047 77.2457L35.3938 77.2525C34.2318 77.9787 32.6713 78.3634 30.6736 78.3634C29.0405 78.3634 27.5131 77.2868 26.1274 74.8257C24.7483 72.2185 24.0519 69.2166 24.0519 65.8071C24.0519 60.0311 25.3782 54.4081 28.0373 48.9335C30.703 43.4454 34.3114 38.345 38.8667 33.6325C43.5812 28.761 49.0045 24.5159 55.1389 20.8979C60.1667 18.0071 65.4966 15.6179 71.1291 13.7305C73.8626 12.8145 75.8027 10.2968 75.8027 7.38572C75.8027 3.6497 72.6341 0.62247 68.8814 1.1527C61.1635 2.2432 53.7398 4.41426 46.6119 7.66522C37.5369 11.6459 29.5729 17.0612 22.7236 23.9105C16.0322 30.6019 10.618 38.4859 6.47981 47.558L6.47976 47.558L6.47682 47.5647C2.4901 56.6544 0.5 66.6148 0.5 77.4391C0.5 84.2996 1.61702 90.7679 3.85425 96.8404L3.8558 96.8445C6.08991 102.749 9.12394 108.02 12.959 112.654L12.959 112.654L12.9646 112.661C16.8027 117.138 21.2829 120.739 26.4034 123.459L26.4033 123.459L26.4144 123.465C31.5505 126.033 37.0873 127.316 43.0178 127.316C47.5035 127.316 51.6783 126.595 55.5376 125.148L55.5376 125.148L55.5477 125.144C59.5516 123.542 63.0052 121.456 65.9019 118.881L65.5697 118.507Z"
-                    >
-                    </path>
-                    <use href="#b56e9dab-6ccb-4d32-ad02-6b4bb5d9bbeb" x="86"></use>
-                  </svg>
-                  <div class="font-medium text-white whitespace-pre-line">
-                    We were doing bounties on Algora, and this one developer Nick kept solving them. His personality really came through in the GitHub issues and code. We ended up hiring him from that, and it was the easiest hire because we already knew he was great from his contributions.
 
-                    That's one massive advantage open source companies have versus closed source. When I talk to young people asking for advice, I specifically tell them to go on Algora and find issues there. You get to show people your work, plus you can point to your contributions as proof of your abilities, and you make money in the meantime.
+          <div class="mx-auto lg:max-w-[95rem] mb-8">
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <div class="flex items-center gap-2">
+                    <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
                   </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
-                  <div class="flex items-center gap-4">
-                    <span class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-full">
-                      <img
-                        alt="Eric Allam"
-                        loading="lazy"
-                        decoding="async"
-                        data-nimg="fill"
-                        class="aspect-square h-full w-full"
-                        sizes="100vw"
-                        src="https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
-                        style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                      />
-                    </span>
-                    <div>
-                      <div class="text-base font-medium text-gray-100">Eric Allam</div>
-                      <div class="text-sm text-gray-300">Founder & CTO</div>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <a
-                      class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
-                      href={~p"/org/triggerdotdev"}
-                    >
-                      <img
-                        alt="Trigger.dev"
-                        loading="lazy"
-                        decoding="async"
-                        data-nimg="fill"
-                        class="aspect-square h-full w-full"
-                        sizes="100vw"
-                        src="https://avatars.githubusercontent.com/u/95297378?s=200&v=4"
-                        style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
-                      />
-                    </a>
-                    <div>
-                      <a class="text-base font-medium text-gray-100" href={~p"/org/triggerdotdev"}>
-                        Trigger.dev (YC W23)
-                      </a>
-                      <a
-                        class="block text-sm text-gray-300 hover:text-white"
-                        target="_blank"
-                        rel="noopener"
-                        href="https://trigger.dev"
-                      >
-                        trigger.dev
-                      </a>
-                    </div>
-                  </div>
-                </div>
-                <dl class="flex flex-wrap items-center gap-x-6 gap-y-4 pt-8 xl:flex-nowrap">
-                  <div class="flex flex-col-reverse">
-                    <dt class="text-base text-gray-300">Total awarded</dt>
-                    <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                      $9,920
-                    </dd>
-                  </div>
-                  <div class="flex flex-col-reverse">
-                    <dt class="text-base text-gray-300">Bounties completed</dt>
-                    <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                      106
-                    </dd>
-                  </div>
-                  <div class="flex flex-col-reverse">
-                    <dt class="text-base text-gray-300">Contributors rewarded</dt>
-                    <dd class="font-display text-2xl font-semibold tracking-tight text-white">
-                      35
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-              <div class="lg:col-span-4 order-first lg:order-last">
-                <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                  <iframe
-                    src="https://www.youtube.com/embed/FXQVD02rfg8?si=rt3r_8-aFt2ZKla8"
-                    title="YouTube video player"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allowfullscreen
-                    width="100%"
-                    height="100%"
-                  >
-                  </iframe>
-                </div>
+                </h2>
+                <p class="text-base text-foreground-light">
+                  Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
+                </p>
               </div>
             </div>
+          </div>
+
+          <div class="mx-auto grid gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
+            <%= for plan <- @plans1 do %>
+              <.pricing_card1 plan={plan} plans={@plans1} />
+            <% end %>
+          </div>
+
+          <div class="mx-auto lg:max-w-[95rem] mt-16 mb-8">
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <div class="flex items-center gap-2">
+                    <.icon name="tabler-building-store" class="h-6 w-6 text-purple-400" /> Platform
+                  </div>
+                </h2>
+                <p class="text-base text-foreground-light">
+                  Connect with top open source talent, increase project visibility, and hire proven contributors
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mx-auto grid gap-4 lg:max-w-[95rem] xl:gap-0">
+            <%= for plan <- @plans2 do %>
+              <.pricing_card2 plan={plan} plans={@plans2} />
+            <% end %>
           </div>
         </div>
       </section>
 
-      <section class="bg-muted/20 border-t py-16 sm:py-24">
+      <section class="bg-black border-t py-16 sm:py-24">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
             Frequently asked questions
@@ -336,13 +138,13 @@ defmodule AlgoraWeb.PricingLive do
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
             <span class="text-muted-foreground">The open source</span>
-            <span class="block sm:inline">UpWork alternative.</span>
+            <span class="block sm:inline">Upwork alternative.</span>
           </h2>
           <div class="flex justify-center gap-4">
             <.button navigate="/onboarding/org">
               Start your project
             </.button>
-            <.button href="https://cal.com/ioannisflo" variant="secondary">
+            <.button href={AlgoraWeb.Constants.get(:calendar_url)} variant="secondary">
               Request a demo
             </.button>
           </div>
@@ -350,7 +152,7 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </section>
 
-      <div class="bg-muted/20">
+      <div class="bg-black">
         <Footer.footer />
       </div>
     </div>
@@ -360,154 +162,219 @@ defmodule AlgoraWeb.PricingLive do
   @impl true
   def mount(params, _session, socket) do
     socket =
-      socket
-      |> assign(
+      assign(socket,
+        screenshot?: not is_nil(params["screenshot"]),
         page_title: "Pricing",
-        plans: get_plans(),
+        plans1: get_plans1(),
+        plans2: get_plans2(),
         faq_items: get_faq_items(),
         active_faq: nil
       )
-      |> assign(:screenshot?, not is_nil(params["screenshot"]))
 
     {:ok, socket}
   end
 
-  defp pricing_card(assigns) do
+  defp pricing_card1(assigns) do
     ~H"""
-    <div class={
-      [
-        "bg-card/75 flex flex-col rounded-xl border",
-        # "first:rounded-l-xl last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
-        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8"
-      ]
-    }>
-      <div class="px-8 pt-6 xl:px-4 2xl:px-8">
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-2 pb-2">
-            <h3 class="font-display flex items-center gap-4 text-2xl font-normal uppercase text-foreground">
-              {@plan.name}
-            </h3>
-            <%= if @plan.popular do %>
-              <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
-                Most Popular
-              </span>
-            <% end %>
-          </div>
-        </div>
-        <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
-          {@plan.description}
-        </p>
-        <.button
-          navigate={@plan.cta_url}
-          class="font-regular h-[42px] relative w-full cursor-pointer space-x-2 rounded-md border px-4 py-2 text-center outline-none outline-0 transition-all duration-200 ease-out focus-visible:outline-4 focus-visible:outline-offset-1"
-        >
-          {@plan.cta_text}
-        </.button>
-        <div class="border-default flex items-baseline border-b py-8 text-5xl font-normal text-foreground lg:py-10 lg:text-4xl xl:text-4xl">
-          <div class="flex flex-col gap-1">
-            <%= if @plan.price do %>
-              <div>
-                <p class="text-foreground-lighter text-[13px] ml-1 font-normal leading-4">From</p>
-                <div class="flex items-end">
-                  <p class="font-display mt-2 pb-1 text-5xl">${@plan.price}</p>
-                  <p class="text-foreground-lighter text-[13px] mb-1.5 ml-1 leading-4">/ month</p>
-                </div>
-              </div>
-            <% else %>
-              <div>
-                <%= if @plan.name == "Individuals" do %>
-                  <p class="font-display mt-2 pb-1 text-4xl">
-                    100%
-                  </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-1 leading-4">
-                    payout received
-                  </p>
-                <% else %>
-                  <p class="font-display mt-2 pb-1 text-4xl">
-                    19%
-                  </p>
-                  <p class="text-foreground-lighter text-sm mb-1.5 ml-1 leading-4">
-                    pay as you go
-                  </p>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      <div class="border-default rounded-bl-[4px] rounded-br-[4px] flex flex-1 flex-col px-8 py-6 xl:px-4 2xl:px-8">
-        <p class="text-foreground-lighter text-[13px] mt-2 mb-4">
-          {if @plan.previous_tier,
-            do: "Everything in the #{@plan.previous_tier} Plan, plus:",
-            else: "Get started with:"}
-        </p>
-        <ul class="text-[13px] text-foreground-lighter flex-1">
-          <%= for feature <- @plan.features do %>
-            <li class="flex flex-col py-2 first:mt-0">
-              <div class="flex items-center">
-                <div class="flex w-6">
-                  <.icon name="tabler-check" class="h-4 w-4 text-success" />
-                </div>
-                <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
-              </div>
-              <%= if feature.detail do %>
-                <p class="text-foreground-lighter ml-6">{feature.detail}</p>
+    <.link
+      href={@plan.cta_url}
+      class="group border ring-1 ring-transparent hover:ring-emerald-400 rounded-xl overflow-hidden"
+    >
+      <div class={[
+        "bg-card/75 flex justify-between rounded-xl border-l-4 border-emerald-400 group-hover:border-emerald-300 group-hover:border-l-8 transition-all cursor-pointer",
+        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
+        "divide-x divide-default"
+      ]}>
+        <div class="flex-1 px-8 pt-6 xl:px-4 2xl:px-8 pr-0">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 pb-2">
+              <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                {@plan.name}
+              </h3>
+              <%= if @plan.popular do %>
+                <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
+                  Most Popular
+                </span>
               <% end %>
-            </li>
-          <% end %>
-        </ul>
-        <%= if @plan.footnote do %>
-          <div class="mt-auto flex flex-col gap-6 prose">
-            <div class="mt-12 space-y-2">
-              <p class="text-[13px] text-foreground-lighter mb-0 whitespace-pre-wrap leading-5">
-                {@plan.footnote}
-              </p>
             </div>
           </div>
-        <% end %>
+          <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
+            {@plan.description}
+          </p>
+          <div class="flex items-center justify-between pb-8 lg:pb-10">
+            <div class="border-default flex items-baseline text-5xl font-normal text-foreground lg:text-4xl xl:text-4xl">
+              <div class="flex flex-col gap-1 w-full">
+                <%= case @plan.id do %>
+                  <% "receive-payments" -> %>
+                    <div class="flex justify-between">
+                      <div class="flex items-end">
+                        <p class="font-display text-4xl">
+                          0%
+                        </p>
+                        <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                          service fee
+                        </p>
+                      </div>
+                    </div>
+                  <% "pay-developers" -> %>
+                    <div class="flex justify-between">
+                      <div class="flex items-end">
+                        <p class="font-display text-4xl">
+                          9%
+                        </p>
+                        <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
+                          service fee
+                        </p>
+                      </div>
+                    </div>
+                  <% "grow-your-team" -> %>
+                    <div class="flex justify-between">
+                      <div class="flex items-end">
+                        <p class="font-display text-4xl">
+                          Custom
+                        </p>
+                      </div>
+                    </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 border-l my-auto border-default px-4 2xl:px-8 pl-0">
+          <ul class="border-default text-sm text-foreground-lighter flex-1">
+            <%= for feature <- @plan.features do %>
+              <li class="flex flex-col py-2 first:mt-0">
+                <div class="flex items-center">
+                  <div class="flex w-7">
+                    <.icon name="tabler-check" class="size-5 text-emerald-400" />
+                  </div>
+                  <span class="text-sm xl:text-base mb-0 text-foreground">
+                    {Phoenix.HTML.raw(feature.name)}
+                  </span>
+                </div>
+                <%= if feature.detail do %>
+                  <p class="text-foreground-lighter ml-6">{feature.detail}</p>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </.link>
+    """
+  end
+
+  defp pricing_card2(assigns) do
+    ~H"""
+    <div class="group border ring-1 ring-transparent rounded-xl overflow-hidden">
+      <div class={[
+        "bg-card/75 flex justify-between rounded-xl border-l-4 border-purple-400 transition-all",
+        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
+        "divide-x divide-default"
+      ]}>
+        <div class="w-1/3 px-8 py-8 xl:px-4 2xl:px-8">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 pb-2">
+              <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                {@plan.name}
+              </h3>
+              <%= if @plan.popular do %>
+                <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
+                  Most Popular
+                </span>
+              <% end %>
+            </div>
+          </div>
+          <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
+            {@plan.description}
+          </p>
+          <div class="pt-4 flex gap-2">
+            <.button
+              navigate={@plan.cta_url}
+              variant="purple"
+              size="xl"
+              class="drop-shadow-[0_1px_5px_#c084fc80]"
+            >
+              {@plan.cta_text}
+            </.button>
+          </div>
+        </div>
+        <div class="w-2/3 my-auto">
+          <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
+            <li class="py-2 flex flex-col items-center justify-center">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                <.icon name="tabler-world" class="size-8 text-purple-400" />
+              </div>
+              <div class="pt-4 text-3xl font-semibold font-display">Publish</div>
+              <div class="pt-2 text-lg font-medium text-muted-foreground">
+                Bounties and contracts on Algora
+              </div>
+            </li>
+            <li class="py-2 flex flex-col items-center justify-center">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+              </div>
+              <div class="pt-4 text-3xl font-semibold font-display">Match</div>
+              <div class="pt-2 text-lg font-medium text-muted-foreground">Proven Algora experts</div>
+            </li>
+            <li class="py-2 flex flex-col items-center justify-center">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+              </div>
+              <div class="pt-4 text-3xl font-semibold font-display">Hire</div>
+              <div class="pt-2 text-lg font-medium text-muted-foreground">Top 1% OSS engineers</div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
     """
   end
 
-  defp get_plans do
+  defp get_plans1 do
     [
       %Plan{
-        name: "Individuals",
-        description: "For developers contributing to open source",
-        price: nil,
-        cta_text: "Start Contributing",
+        id: "receive-payments",
+        name: "Receive payments",
+        description: "Get paid for your open source work",
+        price: "100%",
+        cta_text: "Start earning",
         cta_url: "/onboarding/dev",
         popular: false,
         features: [
-          %Feature{name: "Payouts in 3-8 days on average"},
-          %Feature{
-            name:
-              ~s(Available in <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="font-semibold">#{ConnectCountries.count()} countries/regions</a>)
-          },
-          %Feature{name: "Algora profile with contribution history"},
-          %Feature{name: "Free livestreaming on Algora TV"}
+          %Feature{name: "Keep 100% of your earnings"},
+          %Feature{name: "Available in #{ConnectCountries.count()} countries"},
+          %Feature{name: "Fast payouts in 2-7 days"}
         ]
       },
       %Plan{
-        name: "Organizations",
-        description: "For companies and projects",
+        id: "pay-developers",
+        name: "Pay developers",
+        description: "Reward contributors with Algora",
         price: nil,
-        cta_text: "Get Started",
+        cta_text: "Create bounties",
         cta_url: "/onboarding/org",
         popular: false,
         features: [
-          %Feature{name: "Fees drop to 7.5% with volume"},
-          %Feature{name: "Public org page with complete history"},
-          %Feature{name: "Teammates with granular access rights"},
-          %Feature{name: "Slack / Discord notifications (Webhooks)"},
-          %Feature{name: "Display bounties on your site (SDK)"},
-          %Feature{name: "Auto-pay on merge"},
-          %Feature{name: "Embedded livestreaming"},
-          %Feature{name: "Experts Network"},
-          %Feature{name: "Hiring Portal"},
-          %Feature{name: "Live Challenges"}
+          %Feature{name: "GitHub bounties and tips"},
+          %Feature{name: "Contract work (fixed/hourly)"},
+          %Feature{name: "Invoices, payouts, compliance, 1099s"}
         ]
+      }
+    ]
+  end
+
+  defp get_plans2 do
+    [
+      %Plan{
+        id: "grow-your-team",
+        name: "Growing your team?",
+        description: "You're in the right place.",
+        price: "Custom",
+        cta_text: "Contact us",
+        cta_url: AlgoraWeb.Constants.get(:calendar_url),
+        popular: false,
+        features: []
       }
     ]
   end
@@ -524,7 +391,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "payment-methods",
         question: "What payment methods do you support?",
         answer:
-          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
+          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
       },
       %FaqItem{
         id: "payment-process",
@@ -566,86 +433,9 @@ defmodule AlgoraWeb.PricingLive do
         id: "supported-countries",
         question: "Which countries are supported for contributors?",
         answer:
-          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">full list of supported countries</a>.)
+          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">full list of supported countries</a>.)
       }
     ]
-  end
-
-  defp logo_cloud(assigns) do
-    ~H"""
-    <div>
-      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
-        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
-          <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
-          <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
-          <img
-            src="https://algora.io/banners/remotion.png"
-            alt="Remotion"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
-          <img
-            src="https://algora.io/banners/zio.png"
-            alt="ZIO"
-            class="w-[10rem] col-auto brightness-0 invert"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
-          <img
-            src="https://algora.io/banners/triggerdotdev.png"
-            alt="Trigger.dev"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
-          <img
-            src="https://algora.io/banners/tembo.png"
-            alt="Tembo"
-            class="w-[13rem] col-auto saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
-          <img
-            src="https://algora.io/banners/maybe.png"
-            alt="Maybe"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
-          <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
-          <img
-            src="https://algora.io/banners/million.png"
-            alt="Million"
-            class="col-auto w-44 saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
-          <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
-          <img
-            src="https://algora.io/banners/highlight.png"
-            alt="Highlight"
-            class="col-auto w-44 saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
-          <img
-            src="https://algora.io/banners/dittofeed.png"
-            alt="Dittofeed"
-            class="col-auto w-40 brightness-0 invert"
-          />
-        </a>
-      </div>
-    </div>
-    """
   end
 
   defp features_bento(assigns) do
@@ -811,7 +601,7 @@ defmodule AlgoraWeb.PricingLive do
             <p class="mt-2 text-sm/6 text-gray-400">
               Receive payments directly to your bank account from all around the world
               <.link
-                href={AlgoraWeb.Constants.get(:docs_supported_countries_url)}
+                href="https://docs.algora.io/bounties/payments#supported-countries-regions"
                 class="font-medium text-foreground"
               >
                 ({ConnectCountries.count()} countries/regions supported)

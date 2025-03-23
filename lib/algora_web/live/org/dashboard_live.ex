@@ -1290,7 +1290,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp sidebar(assigns) do
     ~H"""
-    <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
+    <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:flex lg:flex-col">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Getting started</h2>
       </div>
@@ -1345,7 +1345,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
         />
       <% end %>
-      <div class="fixed right-0 bottom-0 hidden w-96 p-4 pr-0 pt-6 sm:p-6 sm:pr-0 md:py-8 md:pr-0 lg:grid lg:grid-cols-2 gap-2 gap-x-4 text-sm">
+      <div class="pt-12 pb-16 mt-auto -mr-12 grid lg:grid-cols-2 gap-y-4 gap-x-6 text-sm">
         <div class="flex items-center gap-2">
           <div class="flex -space-x-2">
             <img

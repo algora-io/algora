@@ -16,7 +16,6 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Logos
-  alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
@@ -66,6 +65,39 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:pending_action, nil)}
+  end
+
+  attr :src, :string, required: true
+  attr :poster, :string, required: true
+  attr :title, :string, default: nil
+  attr :alt, :string, default: nil
+  attr :class, :string, default: nil
+  attr :autoplay, :boolean, default: true
+
+  defp modal_video(assigns) do
+    ~H"""
+    <div
+      class={
+        classes([
+          "group relative aspect-video w-full overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800 cursor-pointer",
+          @class
+        ])
+      }
+      phx-click={
+        %JS{}
+        |> JS.set_attribute({"src", @src <> "?autoplay=#{@autoplay}"}, to: "#video-modal-iframe")
+        |> JS.set_attribute({"title", @title}, to: "#video-modal-iframe")
+        |> show_modal("video-modal")
+      }
+    >
+      <img src={@poster} alt={@alt} class="object-cover w-full h-full" />
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+          <.icon name="tabler-player-play-filled" class="size-8 text-white" />
+        </div>
+      </div>
+    </div>
+    """
   end
 
   @impl true
@@ -132,33 +164,13 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-16 sm:py-40">
             <div class="pt-40 flex flex-row gap-x-16 gap-y-8">
               <div class="w-[40%]">
-                <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
-                  <div
-                    class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
-                    phx-click={JS.hide(to: "#poster-overlay")}
-                    id="poster-overlay"
-                  >
-                    <img
-                      src={~p"/images/people/john-de-goes.jpg"}
-                      alt="John A De Goes"
-                      class="object-cover aspect-[9/16] w-full h-full absolute inset-0"
-                    />
-                    <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                      <.icon name="tabler-player-play-filled" class="size-8 text-white" />
-                    </div>
-                  </div>
-                  <iframe
-                    src="https://www.youtube.com/embed/xObOGcUdtY0?autoplay=1"
-                    title="$15,000 Open source bounty to hire a Rust engineer"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allowfullscreen
-                    width="100%"
-                    height="100%"
-                  >
-                  </iframe>
-                </div>
+                <.modal_video
+                  class="aspect-[9/16] rounded-l-xl lg:rounded-l-2xl"
+                  src="https://www.youtube.com/embed/xObOGcUdtY0"
+                  title="$15,000 Open source bounty to hire a Rust engineer"
+                  poster={~p"/images/people/john-de-goes.jpg"}
+                  alt="John A De Goes"
+                />
               </div>
               <div class="w-[60%]">
                 <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
@@ -686,33 +698,13 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="w-[76%]">
-                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <div
-                      class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
-                      phx-click={JS.hide(to: "#poster-overlay-mogery")}
-                      id="poster-overlay-mogery"
-                    >
-                      <img
-                        src={~p"/images/people/mogery.png"}
-                        alt="Gergő Móricz"
-                        class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
-                      />
-                      <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                        <.icon name="tabler-player-play-filled" class="size-8 text-white" />
-                      </div>
-                    </div>
-                    <iframe
-                      src="https://www.youtube.com/embed/HhTT-GX5tjQ"
-                      title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
-                  </div>
+                  <.modal_video
+                    class="rounded-r-xl lg:rounded-r-2xl"
+                    src="https://www.youtube.com/embed/HhTT-GX5tjQ"
+                    title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
+                    poster={~p"/images/people/mogery.png"}
+                    alt="Gergő Móricz"
+                  />
                 </div>
               </div>
             </div>
@@ -824,6 +816,20 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </main>
     </div>
+
+    <.dialog id="video-modal" show={false} class="w-screen h-screen lg:max-w-none p-[5rem]">
+      <.dialog_content class="flex items-center justify-center">
+        <iframe
+          id="video-modal-iframe"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+          class="w-full h-full"
+        >
+        </iframe>
+      </.dialog_content>
+    </.dialog>
     """
   end
 

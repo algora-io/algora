@@ -141,7 +141,7 @@ defmodule AlgoraWeb.HomeLive do
                     <img
                       src={~p"/images/people/john-de-goes.jpg"}
                       alt="John A De Goes"
-                      class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
+                      class="object-cover aspect-[9/16] w-full h-full absolute inset-0"
                     />
                     <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
                       <.icon name="tabler-player-play-filled" class="size-8 text-white" />
@@ -165,7 +165,7 @@ defmodule AlgoraWeb.HomeLive do
                   <img
                     src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
                     alt="Golem bounty to hire"
-                    class="object-cover rounded-2xl"
+                    class="object-cover"
                   />
                 </div>
               </div>

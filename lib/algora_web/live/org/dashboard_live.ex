@@ -631,6 +631,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
              socket
              |> assign(:show_share_drawer, false)
              |> assign_contracts()
+             |> assign_achievements()
              |> put_flash(:info, "Contract offer sent to #{socket.assigns.selected_developer.name}")}
 
           {:error, changeset} ->
@@ -830,7 +831,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp assign_contracts(socket) do
-    contracts = Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: {:in, [:draft, :active]})
+    contracts =
+      Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: {:in, [:draft, :active, :paid]})
 
     assign(socket, :contracts, contracts)
   end
@@ -904,6 +906,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
       {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
+      {&create_contract_status/1, "Create a contract", nil},
+      {&reward_contract_status/1, "Reward a contract", nil},
       {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 
@@ -961,6 +965,20 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp reward_bounty_status(socket) do
     case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, status: :paid, limit: 1) do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp create_contract_status(socket) do
+    case socket.assigns.contracts do
+      [] -> :upcoming
+      _ -> :completed
+    end
+  end
+
+  defp reward_contract_status(socket) do
+    case Enum.filter(socket.assigns.contracts, &(&1.status == :paid)) do
       [] -> :upcoming
       _ -> :completed
     end
@@ -1062,7 +1080,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
             <.button
-              :if={@contract_for_user && @contract_for_user.status == :draft}
+              :if={@contract_for_user && @contract_for_user.status in [:draft, :paid]}
               navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
               class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#f8717180] focus:bg-gray-800/10 focus:text-gray-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-gray-400/50 focus:border-gray-400/50"

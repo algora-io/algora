@@ -16,6 +16,25 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def take_screenshot(url, filename) do
+    options = [
+      type: "jpeg",
+      path: "./" <> filename,
+      width: 1200,
+      height: 630,
+      scale_factor: 2
+    ]
+
+    dbg(options)
+
+    case PuppeteerImg.generate_image(url, options) do
+      # where "path" == final path where generated image is stored.
+      {:ok, path} -> IO.puts(path)
+      # where "error" == some error message.
+      {:error, error} -> IO.puts(error)
+    end
+  end
+
   def alert(message) do
     email_job =
       Algora.Activities.SendEmail.changeset(%{

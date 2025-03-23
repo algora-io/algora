@@ -142,7 +142,7 @@ defmodule AlgoraWeb.User.DashboardLive do
         </div>
       </div>
       <!-- Sidebar -->
-      <aside class="lg:fixed lg:top-16 lg:right-0 lg:bottom-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-border lg:bg-background p-4 pt-6 sm:p-6 md:p-8">
+      <aside class="lg:fixed lg:top-16 lg:right-0 lg:bottom-0 lg:w-96 lg:overflow-y-auto scrollbar-thin lg:border-l lg:border-border lg:bg-background p-4 pt-6 sm:p-6 md:p-8">
         <!-- Availability Section -->
         <%!-- <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">

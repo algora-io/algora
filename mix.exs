@@ -91,7 +91,6 @@ defmodule Algora.MixProject do
       {:dataloader, "~> 2.0.0"},
       {:mdex, "~> 0.2"},
       {:reverse_proxy_plug, "~> 3.0"},
-      {:puppeteer_img, "~> 0.1.3"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

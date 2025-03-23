@@ -96,7 +96,7 @@ defmodule AlgoraWeb.Pricing4Live do
               </div>
             </div>
           </div>
-          <div class="mx-auto grid gap-4 lg:max-w-[95rem] xl:gap-0 border-l-4 border-purple-400">
+          <div class="mx-auto grid gap-4 lg:max-w-[95rem] xl:gap-0">
             <%= for plan <- @plans2 do %>
               <.pricing_card2 plan={plan} plans={@plans2} />
             <% end %>
@@ -532,33 +532,33 @@ defmodule AlgoraWeb.Pricing4Live do
 
   defp pricing_card2(assigns) do
     ~H"""
-    <div class={[
-      "bg-card/75 flex justify-between rounded-xl border",
-      "last:rounded-r-xl last:border-r xl:rounded-none xl:border-r-0",
-      @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
-      "divide-x divide-default"
-    ]}>
-      <div class="w-1/3 px-8 py-8 xl:px-4 2xl:px-8">
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-2 pb-2">
-            <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
-              {@plan.name}
-            </h3>
-            <%= if @plan.popular do %>
-              <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
-                Most Popular
-              </span>
-            <% end %>
+    <div class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden">
+      <div class={[
+        "bg-card/75 flex justify-between rounded-xl border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:border-l-8 transition-all cursor-pointer",
+        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
+        "divide-x divide-default"
+      ]}>
+        <div class="w-1/3 px-8 py-8 xl:px-4 2xl:px-8">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 pb-2">
+              <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                {@plan.name}
+              </h3>
+              <%= if @plan.popular do %>
+                <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
+                  Most Popular
+                </span>
+              <% end %>
+            </div>
           </div>
-        </div>
-        <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
-          {@plan.description}
-        </p>
-        <div class="flex gap-2">
-          <.button navigate={@plan.cta_url} variant="purple" size="xl">
-            {@plan.cta_text}
-          </.button>
-          <%!-- <.button
+          <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
+            {@plan.description}
+          </p>
+          <div class="pt-4 flex gap-2">
+            <.button navigate={@plan.cta_url} variant="purple" size="xl">
+              {@plan.cta_text}
+            </.button>
+            <%!-- <.button
             href="https://github.com/algora-io/console"
             rel="noopener"
             target="_blank"
@@ -566,47 +566,48 @@ defmodule AlgoraWeb.Pricing4Live do
           >
             <.icon name="github" class="size-5 mr-2 -ml-1" /> View source code
           </.button> --%>
+          </div>
         </div>
-      </div>
-      <div class="w-2/3 my-auto">
-        <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
-          <li class="py-2 flex flex-col items-center justify-center">
-            <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
-              <.icon name="tabler-world" class="size-8 text-purple-400" />
-            </div>
-            <div class="pt-4 text-3xl font-semibold font-display">Publish</div>
-            <div class="pt-2 text-lg font-medium text-muted-foreground">
-              Bounties and contracts on Algora
-            </div>
-          </li>
-          <li class="py-2 flex flex-col items-center justify-center">
-            <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
-              <.icon name="tabler-bolt" class="size-8 text-purple-400" />
-            </div>
-            <div class="pt-4 text-3xl font-semibold font-display">Match</div>
-            <div class="pt-2 text-lg font-medium text-muted-foreground">Proven Algora experts</div>
-          </li>
-          <li class="py-2 flex flex-col items-center justify-center">
-            <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
-              <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
-            </div>
-            <div class="pt-4 text-3xl font-semibold font-display">Hire</div>
-            <div class="pt-2 text-lg font-medium text-muted-foreground">Top 1% OSS engineers</div>
-          </li>
-          <%= for feature <- @plan.features do %>
-            <li class="flex flex-col first:mt-0">
-              <div class="flex items-center">
-                <div class="flex w-7">
-                  <.icon name="tabler-check" class="size-5 text-purple-400" />
-                </div>
-                <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
+        <div class="w-2/3 my-auto">
+          <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
+            <li class="py-2 flex flex-col items-center justify-center">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
+                <.icon name="tabler-world" class="size-8 text-purple-400" />
               </div>
-              <%= if feature.detail do %>
-                <p class="text-foreground-lighter font-medium ml-6">{feature.detail}</p>
-              <% end %>
+              <div class="pt-4 text-3xl font-semibold font-display">Publish</div>
+              <div class="pt-2 text-lg font-medium text-muted-foreground">
+                Bounties and contracts on Algora
+              </div>
             </li>
-          <% end %>
-        </ul>
+            <li class="py-2 flex flex-col items-center justify-center">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
+                <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+              </div>
+              <div class="pt-4 text-3xl font-semibold font-display">Match</div>
+              <div class="pt-2 text-lg font-medium text-muted-foreground">Proven Algora experts</div>
+            </li>
+            <li class="py-2 flex flex-col items-center justify-center">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
+                <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+              </div>
+              <div class="pt-4 text-3xl font-semibold font-display">Hire</div>
+              <div class="pt-2 text-lg font-medium text-muted-foreground">Top 1% OSS engineers</div>
+            </li>
+            <%= for feature <- @plan.features do %>
+              <li class="flex flex-col first:mt-0">
+                <div class="flex items-center">
+                  <div class="flex w-7">
+                    <.icon name="tabler-check" class="size-5 text-purple-400" />
+                  </div>
+                  <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
+                </div>
+                <%= if feature.detail do %>
+                  <p class="text-foreground-lighter font-medium ml-6">{feature.detail}</p>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
       </div>
     </div>
     """

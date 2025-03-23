@@ -5,6 +5,8 @@ defmodule AlgoraWeb.OGImageController do
 
   require Logger
 
+  @opts [type: "png", width: 1200, height: 630, scale_factor: 1]
+
   def generate(conn, %{"path" => path}) do
     case take_and_upload_screenshot(path) do
       {:ok, s3_url} ->
@@ -23,16 +25,7 @@ defmodule AlgoraWeb.OGImageController do
     filepath = Path.join(dir, "og.png")
     url = url(~p"/#{path}?screenshot")
 
-    opts = [
-      type: "png",
-      path: filepath,
-      width: 1200,
-      height: 630,
-      scale_factor: 1,
-      timeout: 10_000
-    ]
-
-    case ScreenshotQueue.generate_image(url, opts) do
+    case ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath)) do
       {:ok, _path} ->
         object_path = Path.join(["og"] ++ path ++ ["og.png"])
 

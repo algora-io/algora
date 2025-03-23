@@ -4,12 +4,14 @@ defmodule Algora.ScreenshotQueue do
 
   require Logger
 
+  @timeout 10_000
+
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def generate_image(url, opts) do
-    GenServer.call(__MODULE__, {:generate_image, url, opts}, opts[:timeout] || 30_000)
+    GenServer.call(__MODULE__, {:generate_image, url, opts}, opts[:timeout] || @timeout)
   end
 
   @impl true
@@ -38,7 +40,7 @@ defmodule Algora.ScreenshotQueue do
             end
           end)
 
-        Task.await(task, opts[:timeout] || 2000)
+        Task.await(task, opts[:timeout] || @timeout)
       catch
         :exit, {:timeout, _} -> {:error, :timeout}
       end
@@ -48,7 +50,7 @@ defmodule Algora.ScreenshotQueue do
 
   defp build_opts(url, options) do
     options
-    |> Keyword.take([:type, :path, :width, :height, :scale_factor, :timeout])
+    |> Keyword.take([:type, :path, :width, :height, :scale_factor])
     |> Enum.reduce([url], fn {key, value}, result ->
       result ++ [String.replace("--#{key}=#{value}", "_", "-")]
     end)

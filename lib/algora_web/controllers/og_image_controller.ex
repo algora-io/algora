@@ -13,21 +13,33 @@ defmodule AlgoraWeb.OGImageController do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
 
-    case :head |> Finch.build(url) |> Finch.request(Algora.Finch) do
-      {:ok, %Finch.Response{status: status, headers: headers}} when status in 200..299 ->
+    case :get |> Finch.build(url) |> Finch.request(Algora.Finch) do
+      {:ok, %Finch.Response{status: status, body: body, headers: headers}} when status in 200..299 ->
         if should_regenerate?(headers) do
           case take_and_upload_screenshot(path) do
-            {:ok, s3_url} -> redirect(conn, external: s3_url)
-            {:error, reason} -> handle_error(conn, path, reason)
+            {:ok, body} ->
+              conn
+              |> put_resp_content_type("image/png")
+              |> send_resp(200, body)
+
+            {:error, reason} ->
+              handle_error(conn, path, reason)
           end
         else
-          redirect(conn, external: url)
+          conn
+          |> put_resp_content_type("image/png")
+          |> send_resp(200, body)
         end
 
       _error ->
         case take_and_upload_screenshot(path) do
-          {:ok, s3_url} -> redirect(conn, external: s3_url)
-          {:error, reason} -> handle_error(conn, path, reason)
+          {:ok, body} ->
+            conn
+            |> put_resp_content_type("image/png")
+            |> send_resp(200, body)
+
+          {:error, reason} ->
+            handle_error(conn, path, reason)
         end
     end
   end
@@ -70,15 +82,19 @@ defmodule AlgoraWeb.OGImageController do
       {:ok, _path} ->
         object_path = Path.join(["og"] ++ path ++ ["og.png"])
 
-        with {:ok, file_contents} <- File.read(filepath),
-             {:ok, _} <-
-               Algora.S3.upload(file_contents, object_path,
-                 content_type: "image/png",
-                 cache_control: "public, max-age=#{@max_age}"
-               ) do
-          File.rm(filepath)
-          {:ok, Path.join(Algora.S3.bucket_url(), object_path)}
-        else
+        case File.read(filepath) do
+          {:ok, body} ->
+            Task.start(fn ->
+              Algora.S3.upload(body, object_path,
+                content_type: "image/png",
+                cache_control: "public, max-age=#{@max_age}"
+              )
+
+              File.rm(filepath)
+            end)
+
+            {:ok, body}
+
           error ->
             File.rm(filepath)
             error

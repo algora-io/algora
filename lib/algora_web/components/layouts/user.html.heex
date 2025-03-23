@@ -275,9 +275,15 @@
   </div>
 </div>
 
-<div :if={!@current_user} class="relative pt-16">
+<div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-16">
   <.flash_group flash={@flash} />
   <AlgoraWeb.Components.Header.header />
+  {@inner_content}
+  <AlgoraWeb.Components.Footer.footer />
+</div>
+
+<div :if={assigns[:screenshot?]} class="relative">
+  <.flash_group flash={@flash} />
   {@inner_content}
   <AlgoraWeb.Components.Footer.footer />
 </div>

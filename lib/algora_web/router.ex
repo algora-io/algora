@@ -1,9 +1,9 @@
 defmodule AlgoraWeb.Router do
   use AlgoraWeb, :router
 
+  import AlgoraWeb.Analytics, only: [fetch_current_country: 2, fetch_current_page: 2]
   import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2, require_authenticated_admin: 2]
-  import AlgoraWeb.VisitorCountry, only: [fetch_current_country: 2]
   import Oban.Web.Router
 
   pipeline :browser do
@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Router do
     plug :fetch_session
     plug :fetch_live_flash
     plug :fetch_current_user
+    plug :fetch_current_page
     plug :fetch_current_country
     plug :put_root_layout, {AlgoraWeb.Layouts, :root}
     plug :protect_from_forgery
@@ -130,7 +131,7 @@ defmodule AlgoraWeb.Router do
     end
 
     live_session :onboarding,
-      on_mount: [{AlgoraWeb.VisitorCountry, :current_country}] do
+      on_mount: [{AlgoraWeb.Analytics, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
       live "/pricing", PricingLive

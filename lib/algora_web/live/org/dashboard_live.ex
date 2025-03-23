@@ -712,6 +712,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
      end}
   end
 
+  @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
   defp throttle, do: :timer.sleep(1000)
 
   defp assign_login_form(socket, %Ecto.Changeset{} = changeset) do
@@ -1241,12 +1246,37 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <% end %>
         </ol>
       </nav>
+      <div class="pt-6 flex items-center justify-between">
+        <h2 class="text-xl font-semibold leading-none tracking-tight">Share your bounty board</h2>
+      </div>
+      <.badge
+        id="og-url"
+        phx-hook="CopyToClipboard"
+        data-value={url(~p"/org/#{@current_org.handle}/home")}
+        data-notice="Copied to clipboard"
+        phx-click={
+          %JS{}
+          |> JS.hide(to: "#og-url-copy-icon")
+          |> JS.show(to: "#og-url-check-icon")
+        }
+        class="cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
+        variant="outline"
+      >
+        <.icon id="og-url-copy-icon" name="tabler-copy" class="size-4 mr-2" />
+        <.icon id="og-url-check-icon" name="tabler-check" class="hidden size-4 mr-2" />
+        {AlgoraWeb.Endpoint.host()}{~p"/org/#{@current_org.handle}/home"}
+      </.badge>
+      <img
+        src={~p"/og/org/#{@current_org.handle}/home"}
+        alt={@current_org.name}
+        class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input"
+      />
       <div class="fixed right-0 bottom-0 hidden w-96 p-4 pr-0 pt-6 sm:p-6 sm:pr-0 md:py-8 md:pr-0 lg:grid lg:grid-cols-2 gap-2 gap-x-4 text-sm">
         <div class="flex items-center gap-2">
           <div class="flex -space-x-2">
             <img
               src="https://github.com/ioannisflo.png"
-              alt="Ioannis Florakis"
+              alt="Ioannis Florokapis"
               class="relative z-10 inline-block size-6 rounded-full ring-2 ring-background"
             />
             <img

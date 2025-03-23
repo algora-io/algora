@@ -135,7 +135,6 @@ defmodule AlgoraWeb.Router do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
       live "/pricing", PricingLive
-      live "/pricing4", Pricing4Live
       live "/swift", SwiftBountiesLive
     end
 

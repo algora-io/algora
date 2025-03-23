@@ -213,7 +213,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.card_content>
           </.card>
         </.section>
-
         <.section
           :if={@contributors != []}
           title={"#{@current_org.name} Contributors"}
@@ -260,11 +259,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <div>
                 <h2 class="text-2xl font-bold dark:text-white">{@current_org.name} Bounties</h2>
                 <p class="text-sm dark:text-gray-300">
-                  Create new bounties using the
+                  Create new bounties by commenting
                   <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
                     /bounty $1000
                   </code>
-                  command on Github.
+                  on GitHub issues.
                 </p>
               </div>
               <div :if={length(@bounty_rows) + length(@transaction_rows) > 0} class="pb-4 md:pb-0">
@@ -325,11 +324,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <.card_title>No bounties yet</.card_title>
                   <.card_description class="pt-2">
                     <%= if @installations == [] do %>
-                      Install Algora in {@current_org.name} to create new bounties using the
+                      Install Algora in {@current_org.name} to create new bounties by commenting
                       <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
                         /bounty $1000
                       </code>
-                      command on Github
+                      on GitHub issues
                       <.button
                         :if={@installations == []}
                         phx-click="install_app"
@@ -338,11 +337,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install Algora
                       </.button>
                     <% else %>
-                      Create new bounties using the
+                      Create new bounties by commenting
                       <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
                         /bounty $1000
                       </code>
-                      command on Github
+                      on GitHub issues
                     <% end %>
                   </.card_description>
                 </.card_header>
@@ -1212,7 +1211,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp sidebar(assigns) do
     ~H"""
-    <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
+    <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Getting started</h2>
       </div>
@@ -1231,6 +1230,32 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <% end %>
         </ol>
       </nav>
+      <div class="fixed right-0 bottom-0 hidden w-96 p-4 pr-0 pt-6 sm:p-6 sm:pr-0 md:py-8 md:pr-0 lg:grid lg:grid-cols-2 gap-2 gap-x-4 text-sm">
+        <div class="flex items-center gap-2">
+          <div class="flex -space-x-2">
+            <img
+              src="https://github.com/ioannisflo.png"
+              alt="Ioannis Florakis"
+              class="relative z-10 inline-block size-6 rounded-full ring-2 ring-background"
+            />
+            <img
+              src="https://github.com/zcesur.png"
+              alt="Zafer Cesur"
+              class="relative z-0 inline-block size-6 rounded-full ring-2 ring-background"
+            />
+          </div>
+          Chat with founders
+        </div>
+        <div class="flex items-center gap-2">
+          <.icon name="tabler-brand-x" class="size-6 text-muted-foreground" /> @algoraio
+        </div>
+        <div class="flex items-center gap-2">
+          <.icon name="tabler-phone" class="size-6 text-muted-foreground" /> +1 (650) 420-2207
+        </div>
+        <div class="flex items-center gap-2">
+          <.icon name="tabler-mail" class="size-6 text-muted-foreground" /> support@algora.io
+        </div>
+      </div>
     </aside>
     """
   end

@@ -19,11 +19,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
           <div>
             <h2 class="text-2xl font-bold dark:text-white">Bounties</h2>
             <p class="text-sm dark:text-gray-300">
-              Create new bounties using the
+              Create new bounties by commenting
               <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
                 /bounty $1000
               </code>
-              command on Github.
+              on GitHub issues.
             </p>
           </div>
           <div class="pb-4 md:pb-0">

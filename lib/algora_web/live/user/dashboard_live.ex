@@ -235,8 +235,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       {&personalize_status/1, "Personalize Algora", nil},
       {&setup_stripe_status/1, "Create Stripe account", ~p"/user/transactions"},
       {&earn_first_bounty_status/1, "Earn first bounty", ~p"/bounties"},
-      {&share_with_friend_status/1, "Share Algora with a friend", nil},
-      {&earn_10k_status/1, "Earn $10K", ~p"/bounties"}
+      {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 
     {achievements, _} =
@@ -276,14 +275,6 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   defp share_with_friend_status(_socket), do: :upcoming
-
-  defp earn_10k_status(socket) do
-    if earned?(socket.assigns.current_user, Money.new!(10_000, :USD)) do
-      :completed
-    else
-      :upcoming
-    end
-  end
 
   defp earned?(user, amount) do
     cond do

@@ -79,6 +79,8 @@ RUN apt-get update -y && apt-get install -y postgresql-client
 
 COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
 
+RUN npm install -g @algora/puppeteer-img@1.0.4-algora.2
+
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 

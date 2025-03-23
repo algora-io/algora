@@ -6,7 +6,7 @@ defmodule AlgoraWeb.Org.Nav do
 
   alias Algora.Organizations
 
-  def on_mount(:default, %{"org_handle" => org_handle}, _session, socket) do
+  def on_mount(:default, %{"org_handle" => org_handle} = params, _session, socket) do
     current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
 
@@ -41,6 +41,7 @@ defmodule AlgoraWeb.Org.Nav do
 
     {:cont,
      socket
+     |> assign(:screenshot?, not is_nil(params["screenshot"]))
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)

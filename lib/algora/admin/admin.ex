@@ -25,8 +25,6 @@ defmodule Algora.Admin do
       scale_factor: 2
     ]
 
-    dbg(options)
-
     case PuppeteerImg.generate_image(url, options) do
       # where "path" == final path where generated image is stored.
       {:ok, path} -> IO.puts(path)

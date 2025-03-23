@@ -6,9 +6,10 @@ defmodule AlgoraWeb.User.Nav do
 
   alias AlgoraWeb.User
 
-  def on_mount(:default, _params, _session, socket) do
+  def on_mount(:default, params, _session, socket) do
     {:cont,
      socket
+     |> assign(:screenshot?, not is_nil(params["screenshot"]))
      |> assign(:contacts, [])
      |> assign_nav_items()
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}

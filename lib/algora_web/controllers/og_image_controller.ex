@@ -7,6 +7,8 @@ defmodule AlgoraWeb.OGImageController do
 
   @opts [type: "png", width: 1200, height: 630, scale_factor: 1]
 
+  # TODO: implement caching
+
   def generate(conn, %{"path" => path}) do
     case take_and_upload_screenshot(path) do
       {:ok, s3_url} ->

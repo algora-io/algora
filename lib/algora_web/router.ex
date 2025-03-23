@@ -58,7 +58,7 @@ defmodule AlgoraWeb.Router do
     pipe_through [:browser]
 
     get "/", RootController, :index
-
+    get "/og/*path", OGImageController, :generate
     get "/set_context/:context", ContextController, :set
     get "/a/:table_prefix/:activity_id", ActivityController, :get
     get "/auth/logout", OAuthCallbackController, :sign_out

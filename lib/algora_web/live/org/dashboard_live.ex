@@ -444,7 +444,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <div class="w-1/4 px-8 py-8 xl:px-4 2xl:px-8">
                 <div class="flex items-center gap-2">
                   <div class="flex items-center gap-2 pb-2">
-                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                    <h3 class="flex items-center gap-4 text-xl font-semibold text-foreground">
                       Growing your team?
                     </h3>
                   </div>
@@ -452,11 +452,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
                   You're in the right place.
                 </p>
-                <div class="pt-4 flex gap-2">
+                <div class="pt-2 flex gap-2">
                   <.button
                     navigate={AlgoraWeb.Constants.get(:calendar_url)}
                     variant="purple"
-                    size="xl"
+                    size="lg"
                     class="drop-shadow-[0_1px_5px_#c084fc80]"
                   >
                     Contact us
@@ -466,29 +466,29 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <div class="w-3/4 my-auto">
                 <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
                   <li class="py-2 flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                      <.icon name="tabler-world" class="size-8 text-purple-400" />
+                    <div class="flex items-center justify-center size-12 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                      <.icon name="tabler-world" class="size-6 text-purple-400" />
                     </div>
-                    <div class="pt-4 text-3xl font-semibold font-display">Publish</div>
-                    <div class="pt-2 text-base font-medium text-muted-foreground">
+                    <div class="pt-2 text-2xl font-semibold font-display">Publish</div>
+                    <div class="pt-1 text-sm font-medium text-muted-foreground">
                       Bounties and contracts on Algora
                     </div>
                   </li>
                   <li class="py-2 flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                      <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+                    <div class="flex items-center justify-center size-12 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                      <.icon name="tabler-bolt" class="size-6 text-purple-400" />
                     </div>
-                    <div class="pt-4 text-3xl font-semibold font-display">Match</div>
-                    <div class="pt-2 text-base font-medium text-muted-foreground">
+                    <div class="pt-2 text-2xl font-semibold font-display">Match</div>
+                    <div class="pt-1 text-sm font-medium text-muted-foreground">
                       Proven Algora experts
                     </div>
                   </li>
                   <li class="py-2 flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                      <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+                    <div class="flex items-center justify-center size-12 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                      <.icon name="tabler-briefcase" class="size68 text-purple-400" />
                     </div>
-                    <div class="pt-4 text-3xl font-semibold font-display">Hire</div>
-                    <div class="pt-2 text-base font-medium text-muted-foreground">
+                    <div class="pt-2 text-2xl font-semibold font-display">Hire</div>
+                    <div class="pt-1 text-sm font-medium text-muted-foreground">
                       Top 1% OSS engineers
                     </div>
                   </li>

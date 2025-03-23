@@ -1129,24 +1129,29 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <.card>
       <.card_header>
-        <div class="flex items-center gap-3">
-          <.icon name="tabler-diamond" class="h-8 w-8" />
-          <h2 class="text-2xl font-semibold">Post a bounty</h2>
+        <div class="text-3xl font-semibold text-foreground">
+          Fund any issue
+          <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+            in seconds
+          </span>
+        </div>
+        <div class="text-base font-medium text-muted-foreground">
+          Help improve the OSS you love and rely on
         </div>
       </.card_header>
       <.card_content>
         <.simple_form for={@bounty_form} phx-submit="create_bounty">
           <div class="flex flex-col gap-6">
             <.input
-              label="URL"
+              label="Issue URL"
               field={@bounty_form[:url]}
               placeholder="https://github.com/swift-lang/swift/issues/1337"
             />
             <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
             <p class="text-sm text-muted-foreground">
-              <span class="font-semibold">Tip:</span>
-              You can also comment <code class="px-1 py-0.5 text-success">/bounty $100</code>
-              to create a bounty on GitHub
+              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
+              <code class="px-1 py-0.5 text-success">/bounty $100</code>
+              on GitHub issues
               <button
                 :if={@installations == []}
                 type="button"
@@ -1170,26 +1175,32 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <.card>
       <.card_header>
-        <div class="flex items-center gap-3">
-          <.icon name="tabler-gift" class="h-8 w-8" />
-          <h2 class="text-2xl font-semibold">Tip a developer</h2>
+        <div class="text-3xl font-semibold text-foreground">
+          Tip any developer
+          <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+            instantly
+          </span>
+        </div>
+        <div class="text-base font-medium text-muted-foreground">
+          Thank OSS maintainers and contributors on GitHub
         </div>
       </.card_header>
       <.card_content>
         <.simple_form for={@tip_form} phx-submit="create_tip">
           <div class="flex flex-col gap-6">
-            <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
-            <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
             <.input
-              label="URL"
+              label="Contribution URL"
               field={@tip_form[:url]}
-              placeholder="https://github.com/owner/repo/issues/123"
-              helptext="We'll add a comment to the issue to notify the developer."
+              placeholder="https://github.com/owner/repo/pull/123"
             />
+            <div class="grid sm:grid-cols-2 gap-x-3 gap-y-6">
+              <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
+              <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+            </div>
             <p class="text-sm text-muted-foreground">
-              <span class="font-semibold">Tip:</span>
-              You can also comment <code class="px-1 py-0.5 text-success">/tip $100 @username</code>
-              to create a tip on GitHub
+              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
+              <code class="px-1 py-0.5 text-success">/tip $100 @handle</code>
+              on GitHub issues and PRs
               <button
                 :if={@installations == []}
                 type="button"

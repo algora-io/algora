@@ -50,7 +50,7 @@ defmodule AlgoraWeb.User.Nav do
           },
           %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
           %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
-          %{href: "/community", tab: :community, icon: "tabler-users", label: "Community"},
+          %{href: "/community", tab: :community, icon: "tabler-heart-code", label: "Community"},
           %{
             href: "/user/transactions",
             tab: :transactions,

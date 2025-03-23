@@ -47,12 +47,12 @@ defmodule AlgoraWeb.Org.HomeLive do
               <p class="mt-1 text-muted-foreground">{@org.bio}</p>
             </div>
 
-            <div class="flex gap-4">
+            <div class="flex gap-4 items-center">
               <%= for {platform, icon} <- social_links(),
                       url = social_link(@org, platform),
                       not is_nil(url) do %>
                 <.link href={url} target="_blank" class="text-muted-foreground hover:text-foreground">
-                  <.icon name={"tabler-#{icon}"} class="h-5 w-5" />
+                  <.icon name={icon} class="size-5" />
                 </.link>
               <% end %>
             </div>
@@ -225,14 +225,14 @@ defmodule AlgoraWeb.Org.HomeLive do
 
   defp social_links do
     [
-      {:website, "world"},
-      {:github, "brand-github"},
-      {:twitter, "brand-x"},
-      {:youtube, "brand-youtube"},
-      {:twitch, "brand-twitch"},
-      {:discord, "brand-discord"},
-      {:slack, "brand-slack"},
-      {:linkedin, "brand-linkedin"}
+      {:website, "tabler-world"},
+      {:github, "github"},
+      {:twitter, "tabler-brand-x"},
+      {:youtube, "tabler-brand-youtube"},
+      {:twitch, "tabler-brand-twitch"},
+      {:discord, "tabler-brand-discord"},
+      {:slack, "tabler-brand-slack"},
+      {:linkedin, "tabler-brand-linkedin"}
     ]
   end
 

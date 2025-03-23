@@ -58,13 +58,6 @@ defmodule AlgoraWeb.User.Nav do
             icon: "tabler-wallet",
             label: "Transactions"
           },
-          %{
-            href: AlgoraWeb.Constants.get(:algora_tv_url),
-            tab: :tv,
-            icon: "tabler-device-tv",
-            label: "Algora TV",
-            target: "_blank"
-          },
           %{href: "/user/settings", tab: :settings, icon: "tabler-settings", label: "Settings"}
         ]
       }

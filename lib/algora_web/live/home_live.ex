@@ -16,7 +16,6 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Logos
-  alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.TipForm
@@ -63,10 +62,42 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:stats, stats)
      |> assign(:faq_items, get_faq_items())
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-     # TODO: add url
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:pending_action, nil)}
+  end
+
+  attr :src, :string, required: true
+  attr :poster, :string, required: true
+  attr :title, :string, default: nil
+  attr :alt, :string, default: nil
+  attr :class, :string, default: nil
+  attr :autoplay, :boolean, default: true
+
+  defp modal_video(assigns) do
+    ~H"""
+    <div
+      class={
+        classes([
+          "group relative aspect-video w-full overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800 cursor-pointer",
+          @class
+        ])
+      }
+      phx-click={
+        %JS{}
+        |> JS.set_attribute({"src", @src <> "?autoplay=#{@autoplay}"}, to: "#video-modal-iframe")
+        |> JS.set_attribute({"title", @title}, to: "#video-modal-iframe")
+        |> show_modal("video-modal")
+      }
+    >
+      <img src={@poster} alt={@alt} class="object-cover w-full h-full" />
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+          <.icon name="tabler-player-play-filled" class="size-8 text-white" />
+        </div>
+      </div>
+    </div>
+    """
   end
 
   @impl true
@@ -76,7 +107,7 @@ defmodule AlgoraWeb.HomeLive do
       <Header.header />
 
       <main>
-        <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-br from-black to-background">
+        <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-b from-background to-black">
           <.pattern />
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
@@ -96,12 +127,12 @@ defmodule AlgoraWeb.HomeLive do
                     <.input
                       field={@repo_form[:url]}
                       placeholder="github.com/your/repo"
-                      class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 border-emerald-500 font-display"
+                      class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 ring-2 ring-emerald-500 font-display rounded-xl"
                     />
                     <Logos.github class="h-10 w-10 absolute left-3 top-3 text-muted-foreground/50" />
                     <.button
                       type="submit"
-                      class="absolute right-2 top-2 bottom-2 px-8 h-[3rem] text-xl font-semibold"
+                      class="absolute right-2 top-2 bottom-2 px-8 h-[3rem] text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980]"
                     >
                       Get Started
                     </.button>
@@ -130,10 +161,143 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
+          <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-16 sm:py-40">
+            <div class="pt-40 flex flex-row gap-x-16 gap-y-8">
+              <div class="w-[40%]">
+                <.modal_video
+                  class="aspect-[9/16] rounded-l-xl lg:rounded-l-2xl"
+                  src="https://www.youtube.com/embed/xObOGcUdtY0"
+                  title="$15,000 Open source bounty to hire a Rust engineer"
+                  poster={~p"/images/people/john-de-goes.jpg"}
+                  alt="John A De Goes"
+                />
+              </div>
+              <div class="w-[60%]">
+                <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
+                  <img
+                    src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                    alt="Golem bounty to hire"
+                    class="object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="mt-40 relative grid items-center grid-cols-5 w-full gap-x-12 rounded-xl bg-black/25 p-12 ring-2 ring-success/20 ransition-colors">
+              <div class="col-span-2 text-base leading-6 flex-1">
+                <div class="text-3xl font-semibold text-foreground">
+                  Fund any issue
+                  <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+                    in seconds
+                  </span>
+                </div>
+                <div class="pt-2 text-lg font-medium text-muted-foreground">
+                  Help improve the OSS you love and rely on
+                </div>
+                <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
+                  <div>
+                    <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                    Pay when PRs are merged
+                  </div>
+                  <div>
+                    <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                    Pool bounties with other sponsors
+                  </div>
+                  <div>
+                    <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                    Algora handles invoices, payouts, compliance & 1099s
+                  </div>
+                </div>
+              </div>
+              <.form
+                for={@bounty_form}
+                phx-submit="create_bounty"
+                class="col-span-3 grid gap-6 w-full"
+              >
+                <.input
+                  label="URL"
+                  field={@bounty_form[:url]}
+                  placeholder="https://github.com/owner/repo/issues/1337"
+                />
+                <.input
+                  label="Amount"
+                  icon="tabler-currency-dollar"
+                  field={@bounty_form[:amount]}
+                  class="placeholder:text-success"
+                />
+                <div class="flex flex-col items-center gap-2">
+                  <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                    Fund issue
+                  </.button>
+                  <div class="text-sm text-muted-foreground">No credit card required</div>
+                </div>
+              </.form>
+            </div>
+            <div class="pt-40 grid grid-cols-1 gap-16">
+              <.link
+                href="https://github.com/zed-industries/zed/issues/4440"
+                rel="noopener"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+              >
+                <div class="flex -space-x-4">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://github.com/zed-industries.png"
+                    alt="Zed"
+                  />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://github.com/schacon.png"
+                    alt="Scott Chacon"
+                  />
+                </div>
+                <div class="text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">
+                    GitHub cofounder funds new feature in Zed Editor
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Zed Editor, Scott Chacon
+                  </div>
+                </div>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
+
+              <.link
+                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                rel="noopener"
+                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+              >
+                <div class="flex items-center -space-x-6">
+                  <img
+                    class="h-20 w-20 rounded-full z-0"
+                    src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
+                    alt="Alex Klimaj"
+                  />
+                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                  <img
+                    class="h-20 w-20 rounded-full z-10"
+                    src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
+                    alt="Andrew Wilkins"
+                  />
+                </div>
+                <div class="text-base leading-6 flex-1">
+                  <div class="text-2xl font-semibold text-foreground">
+                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                  </div>
+                  <div class="text-lg font-medium text-muted-foreground">
+                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                  </div>
+                </div>
+                <.button size="lg" variant="secondary">
+                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                </.button>
+              </.link>
+            </div>
+          </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
               src="https://www.firecrawl.dev/images/yc.svg"
@@ -187,14 +351,13 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Build product faster
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Use bounties in your own repositories to manage contract work efficiently. Pay only for completed tasks, with full GitHub integration.
+              Use bounties for outcome-based contract work with full GitHub integration.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
@@ -394,10 +557,9 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Hire by building product
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -536,129 +698,20 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="w-[76%]">
-                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <div
-                      class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
-                      phx-click={JS.hide(to: "#poster-overlay-mogery")}
-                      id="poster-overlay-mogery"
-                    >
-                      <img
-                        src={~p"/images/people/mogery.png"}
-                        alt="Gergő Móricz"
-                        class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
-                      />
-                      <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                        <.icon name="tabler-player-play-filled" class="size-8 text-white" />
-                      </div>
-                    </div>
-                    <iframe
-                      src="https://www.youtube.com/embed/HhTT-GX5tjQ"
-                      title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <%!-- john --%>
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <.link
-                class="flex justify-center items-center"
-                aria-label="Logo"
-                navigate={~p"/org/golemcloud"}
-              >
-                <Wordmarks.golemcloud class="w-32" />
-              </.link>
-              <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
-                $15,000 Open source bounty to hire
-              </h2>
-              <div class="flex items-center justify-center gap-8">
-                <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
-                  <div class="flex items-center gap-4">
-                    <div class="text-right">
-                      <div class="text-base font-medium text-foreground">John A De Goes</div>
-                      <div class="pt-1 text-sm font-medium text-muted-foreground">
-                        Founder & CEO
-                      </div>
-                    </div>
-                    <img
-                      src={~p"/images/people/john-de-goes.jpg"}
-                      alt="John A De Goes"
-                      class="size-12 rounded-full object-cover"
-                    />
-                  </div>
-                </div>
-                <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
-                <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-                  <div class="flex items-center gap-4">
-                    <img
-                      src="https://github.com/mschuwalow.png"
-                      alt="Maxim Schuwalow"
-                      class="size-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <div class="text-base font-semibold text-foreground">Maxim Schuwalow</div>
-                      <div class="pt-2 text-sm font-medium text-muted-foreground">
-                        Software Engineer
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
-                <div class="w-[40%]">
-                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-r-none lg:rounded-r-none bg-gray-800">
-                    <div
-                      class="absolute inset-0 z-10 flex items-center justify-center cursor-pointer group"
-                      phx-click={JS.hide(to: "#poster-overlay")}
-                      id="poster-overlay"
-                    >
-                      <img
-                        src={~p"/images/people/john-de-goes.jpg"}
-                        alt="John A De Goes"
-                        class="object-cover aspect-[9/16] w-full h-full rounded-2xl absolute inset-0"
-                      />
-                      <div class="relative z-10 size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-                        <.icon name="tabler-player-play-filled" class="size-8 text-white" />
-                      </div>
-                    </div>
-                    <iframe
-                      src="https://www.youtube.com/embed/xObOGcUdtY0?autoplay=1"
-                      title="$15,000 Open source bounty to hire a Rust engineer"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
-                  </div>
-                </div>
-                <div class="w-[60%]">
-                  <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
-                    <img
-                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                      alt="Golem bounty to hire"
-                      class="object-cover rounded-2xl"
-                    />
-                  </div>
+                  <.modal_video
+                    class="rounded-r-xl lg:rounded-r-2xl"
+                    src="https://www.youtube.com/embed/HhTT-GX5tjQ"
+                    title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
+                    poster={~p"/images/people/mogery.png"}
+                    alt="Gergő Móricz"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background border-t py-16 sm:py-40">
-          <.pattern />
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-8xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?
@@ -668,12 +721,13 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="flex flex-row gap-8 lg:gap-8">
-              <div class="w-[52%] relative rounded-2xl bg-black/50 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
-                <h3 class="text-center col-span-3 text-3xl font-semibold text-foreground">
-                  Tip any contributor <span class="text-blue-500">in seconds</span>
-                </h3>
-                <div class="pt-4 grid lg:grid-cols-2 gap-8 lg:gap-12">
-                  <div class="text-base leading-6">
+              <div class="w-[65%] relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+                <div class="grid items-center lg:grid-cols-7 gap-8 h-full">
+                  <div class="col-span-3 text-base leading-6">
+                    <h3 class="col-span-3 text-3xl font-semibold text-foreground">
+                      Tip any contributor <br class="hidden lg:block" />
+                      <span class="text-blue-500 drop-shadow-[0_1px_5px_#60a5fa80]">instantly</span>
+                    </h3>
                     <p class="mt-4 text-lg font-medium text-muted-foreground">
                       Support the maintainers behind your favorite open source projects
                     </p>
@@ -693,7 +747,7 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </div>
 
-                  <.form for={@tip_form} phx-submit="create_tip" class="space-y-6">
+                  <.form for={@tip_form} phx-submit="create_tip" class="col-span-4 space-y-6">
                     <div class="grid lg:grid-cols-2 gap-y-6 gap-x-3">
                       <.input
                         label="GitHub Username"
@@ -714,24 +768,30 @@ defmodule AlgoraWeb.HomeLive do
                       helptext="We'll comment to notify the developer."
                     />
                     <div class="flex flex-col gap-2">
-                      <.button size="lg" class="w-full" variant="blue">Tip contributor</.button>
+                      <.button
+                        size="lg"
+                        class="w-full drop-shadow-[0_1px_5px_#60a5fa80]"
+                        variant="blue"
+                      >
+                        Tip contributor
+                      </.button>
                     </div>
                   </.form>
                 </div>
               </div>
 
-              <div class="w-[48%]">
+              <div class="w-[35%]">
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
-                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10"
+                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10 p-12 bg-[#0d1017]"
                 />
               </div>
             </div>
           </div>
         </section>
 
-        <section class="relative isolate bg-background border-t py-16 sm:py-40">
+        <section class="relative isolate bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
@@ -756,6 +816,20 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </main>
     </div>
+
+    <.dialog id="video-modal" show={false} class="w-screen h-screen lg:max-w-none p-[5rem]">
+      <.dialog_content class="flex items-center justify-center">
+        <iframe
+          id="video-modal-iframe"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+          class="w-full h-full"
+        >
+        </iframe>
+      </.dialog_content>
+    </.dialog>
     """
   end
 

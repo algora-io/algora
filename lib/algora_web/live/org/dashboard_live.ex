@@ -1317,7 +1317,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
           id="og-url"
           phx-hook="CopyToClipboard"
           data-value={url(~p"/org/#{@current_org.handle}/home")}
-          data-notice="Copied to clipboard!"
           phx-click={
             %JS{}
             |> JS.hide(

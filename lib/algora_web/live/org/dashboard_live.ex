@@ -1253,18 +1253,28 @@ defmodule AlgoraWeb.Org.DashboardLive do
         id="og-url"
         phx-hook="CopyToClipboard"
         data-value={url(~p"/org/#{@current_org.handle}/home")}
-        data-notice="Copied to clipboard"
+        data-notice="Copied to clipboard!"
         phx-click={
           %JS{}
-          |> JS.hide(to: "#og-url-copy-icon")
-          |> JS.show(to: "#og-url-check-icon")
+          |> JS.hide(
+            to: "#og-url-copy-icon",
+            transition: {"transition-opacity", "opacity-100", "opacity-0"}
+          )
+          |> JS.show(
+            to: "#og-url-check-icon",
+            transition: {"transition-opacity", "opacity-0", "opacity-100"}
+          )
         }
-        class="cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
+        class="relative cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
         variant="outline"
       >
-        <.icon id="og-url-copy-icon" name="tabler-copy" class="size-4 mr-2" />
-        <.icon id="og-url-check-icon" name="tabler-check" class="hidden size-4 mr-2" />
-        {AlgoraWeb.Endpoint.host()}{~p"/org/#{@current_org.handle}/home"}
+        <.icon id="og-url-copy-icon" name="tabler-copy" class="absolute left-1 my-auto size-4 mr-2" />
+        <.icon
+          id="og-url-check-icon"
+          name="tabler-check"
+          class="absolute left-1 my-auto hidden size-4 mr-2"
+        />
+        <span class="pl-4">{AlgoraWeb.Endpoint.host()}{~p"/org/#{@current_org.handle}/home"}</span>
       </.badge>
       <img
         src={~p"/og/org/#{@current_org.handle}/home"}

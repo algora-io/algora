@@ -1,4 +1,4 @@
-defmodule AlgoraWeb.VisitorCountry do
+defmodule AlgoraWeb.Analytics do
   @moduledoc false
   import Plug.Conn
 
@@ -8,6 +8,12 @@ defmodule AlgoraWeb.VisitorCountry do
 
   def on_mount(:current_country, _params, session, socket) do
     {:cont, Phoenix.Component.assign(socket, :current_country, session[@country_code_key])}
+  end
+
+  def fetch_current_page(conn, _opts) do
+    conn
+    |> assign(:page_url, Path.join([AlgoraWeb.Endpoint.url(), conn.request_path]))
+    |> assign(:page_image, Path.join([AlgoraWeb.Endpoint.url(), "og", conn.request_path]))
   end
 
   def fetch_current_country(conn, _opts) do

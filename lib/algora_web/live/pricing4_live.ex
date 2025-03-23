@@ -38,121 +38,70 @@ defmodule AlgoraWeb.Pricing4Live do
   def render(assigns) do
     ~H"""
     <div class="pt-24 xl:pt-20 2xl:pt-28">
-      <Header.header />
+      <%= if @screenshot? do %>
+        <div class="-mt-20" />
+      <% else %>
+        <Header.header />
+      <% end %>
 
       <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12"></div>
 
       <section class="bg-background pb-16 sm:pb-24">
-        <div class="relative z-10 pb-4 xl:py-16">
-          <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
-            <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-              <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
-                Simple, transparent pricing
-              </h1>
-              <p class="text-sm sm:text-lg text-muted-foreground">
-                For individuals, OSS communities, and open/closed source companies
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="mx-auto lg:max-w-[90rem] mb-8">
-          <div class="flex items-start gap-4">
-            <div class="flex-1">
-              <h2 class="text-2xl font-semibold text-foreground mb-2">
-                <div class="flex items-center gap-2">
-                  <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
-                </div>
-              </h2>
-              <p class="text-base text-foreground-light">
-                Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="mx-auto grid gap-4 lg:max-w-[90rem] xl:grid-cols-2 xl:gap-0 border-l-4 border-emerald-400">
-          <%= for plan <- @plans1 do %>
-            <.pricing_card1 plan={plan} plans={@plans1} />
-          <% end %>
-        </div>
-
-        <div class="mx-auto lg:max-w-[90rem] mt-16 mb-8">
-          <div class="flex items-start gap-4">
-            <div class="flex-1">
-              <h2 class="text-2xl font-semibold text-foreground mb-2">
-                <div class="flex items-center gap-2">
-                  <.icon name="tabler-building-store" class="h-6 w-6 text-blue-400" /> Platform
-                </div>
-              </h2>
-              <p class="text-base text-foreground-light">
-                Connect with top open source talent, increase project visibility, and hire proven contributors
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="mx-auto grid gap-4 lg:max-w-[90rem] lg:min-h-[23rem] xl:gap-0 border-l-4 border-blue-400">
-          <%= for plan <- @plans2 do %>
-            <.pricing_card2 plan={plan} plans={@plans2} />
-          <% end %>
-        </div>
-
-        <%!--
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="rounded-2xl rounded-t-none bg-card/75 border p-8">
-            <div class="flex flex-col lg:flex-row justify-between items-center gap-12">
-              <div>
-                <h3 class="font-display flex items-center gap-4 text-2xl font-normal uppercase text-foreground">
-                  Enterprise
-                </h3>
-                <p class="mt-2 text-sm text-foreground-light">
-                  A custom plan tailored to your requirements
+          <div class="relative z-10 pb-4 xl:py-16">
+            <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
+              <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
+                <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
+                  Simple, transparent pricing
+                </h1>
+                <p class="text-sm sm:text-lg text-muted-foreground">
+                  For individuals, OSS communities, and open/closed source companies
                 </p>
-                <div class="mt-4">
-                  <p class="text-4xl font-display text-foreground">Custom</p>
-                </div>
-              </div>
-              <div class="flex-1 space-y-4">
-                <ul class="text-xs grid grid-cols-2 gap-2">
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Whitelabel portal (cloud / self-hosted)</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>SOC2 compliance</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Priority placement (5+ full-time roles)</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>HIPAA available as add-on</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>24x7x365 premium support</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Custom Security Questionnaires</span>
-                  </li>
-                </ul>
-              </div>
-              <div class="flex-none">
-                <div class="flex gap-4">
-                  <.button href="https://github.com/algora-io/console" variant="secondary">
-                    <Logos.github class="h-4 w-4 mr-2 -ml-1" /> View source code
-                  </.button>
-                  <.button href="https://cal.com/ioannisflo" variant="subtle">
-                    Contact us
-                  </.button>
-                </div>
               </div>
             </div>
           </div>
-        </div> --%>
+
+          <div class="mx-auto lg:max-w-[90rem] mb-8">
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <div class="flex items-center gap-2">
+                    <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
+                  </div>
+                </h2>
+                <p class="text-base text-foreground-light">
+                  Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mx-auto grid gap-4 lg:max-w-[90rem] lg:grid-cols-2 xl:gap-0 border-l-4 border-emerald-400">
+            <%= for plan <- @plans1 do %>
+              <.pricing_card1 plan={plan} plans={@plans1} />
+            <% end %>
+          </div>
+
+          <div class="mx-auto lg:max-w-[90rem] mt-16 mb-8">
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <div class="flex items-center gap-2">
+                    <.icon name="tabler-building-store" class="h-6 w-6 text-blue-400" /> Platform
+                  </div>
+                </h2>
+                <p class="text-base text-foreground-light">
+                  Connect with top open source talent, increase project visibility, and hire proven contributors
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mx-auto grid gap-4 lg:max-w-[90rem] lg:min-h-[23rem] xl:gap-0 border-l-4 border-blue-400">
+            <%= for plan <- @plans2 do %>
+              <.pricing_card2 plan={plan} plans={@plans2} />
+            <% end %>
+          </div>
+        </div>
       </section>
 
       <section class="bg-muted/20 border-t py-16 sm:py-24">
@@ -446,9 +395,10 @@ defmodule AlgoraWeb.Pricing4Live do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     socket =
       assign(socket,
+        screenshot?: not is_nil(params["screenshot"]),
         page_title: "Pricing",
         plans1: get_plans1(),
         plans2: get_plans2(),
@@ -467,7 +417,7 @@ defmodule AlgoraWeb.Pricing4Live do
       @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
       "divide-x divide-default"
     ]}>
-      <div class="flex-1 px-8 pt-6 xl:px-4 2xl:px-8">
+      <div class="flex-1 px-8 pt-6 xl:px-4 2xl:px-8 pr-0">
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 pb-2">
             <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
@@ -545,7 +495,7 @@ defmodule AlgoraWeb.Pricing4Live do
           </div>
         </div>
       </div>
-      <div class="flex-1 border-l my-auto border-default px-8 xl:px-4 2xl:px-8">
+      <div class="flex-1 border-l my-auto border-default px-4 2xl:px-8 pl-0">
         <%!-- <div class="text-sm text-foreground">
           <%= case @plan.id do %>
             <% 0 -> %>
@@ -555,19 +505,16 @@ defmodule AlgoraWeb.Pricing4Live do
               <span>Everything in {Enum.at(@plans, 1).name}, plus:</span>
           <% end %>
         </div> --%>
-        <ul class={
-          classes([
-            "border-default text-sm text-foreground-lighter flex-1",
-            if(@plan.id == :b2, do: "grid grid-cols-2 gap-4")
-          ])
-        }>
+        <ul class="border-default text-sm text-foreground-lighter flex-1">
           <%= for feature <- @plan.features do %>
             <li class="flex flex-col py-2 first:mt-0">
               <div class="flex items-center">
                 <div class="flex w-7">
                   <.icon name="tabler-check" class="size-5 text-emerald-400" />
                 </div>
-                <span class="mb-0 text-foreground">{Phoenix.HTML.raw(feature.name)}</span>
+                <span class="text-sm xl:text-base mb-0 text-foreground">
+                  {Phoenix.HTML.raw(feature.name)}
+                </span>
               </div>
               <%= if feature.detail do %>
                 <p class="text-foreground-lighter ml-6">{feature.detail}</p>

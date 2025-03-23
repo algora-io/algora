@@ -5,7 +5,6 @@ defmodule AlgoraWeb.PricingLive do
   alias Algora.PSP.ConnectCountries
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
-  alias AlgoraWeb.Components.Wordmarks
 
   defmodule Plan do
     @moduledoc false
@@ -103,7 +102,7 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </section>
 
-      <section class="bg-muted/20 border-t py-16 sm:py-24">
+      <section class="bg-black border-t py-16 sm:py-24">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 class="mb-12 text-center text-3xl font-bold text-popover-foreground">
             Frequently asked questions
@@ -145,7 +144,7 @@ defmodule AlgoraWeb.PricingLive do
             <.button navigate="/onboarding/org">
               Start your project
             </.button>
-            <.button href="https://cal.com/ioannisflo" variant="secondary">
+            <.button href={AlgoraWeb.Constants.get(:calendar_url)} variant="secondary">
               Request a demo
             </.button>
           </div>
@@ -153,7 +152,7 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </section>
 
-      <div class="bg-muted/20">
+      <div class="bg-black">
         <Footer.footer />
       </div>
     </div>
@@ -206,7 +205,7 @@ defmodule AlgoraWeb.PricingLive do
             <div class="border-default flex items-baseline text-5xl font-normal text-foreground lg:text-4xl xl:text-4xl">
               <div class="flex flex-col gap-1 w-full">
                 <%= case @plan.id do %>
-                  <% :a0 -> %>
+                  <% "receive-payments" -> %>
                     <div class="flex justify-between">
                       <div class="flex items-end">
                         <p class="font-display text-4xl">
@@ -217,7 +216,7 @@ defmodule AlgoraWeb.PricingLive do
                         </p>
                       </div>
                     </div>
-                  <% :a1 -> %>
+                  <% "pay-developers" -> %>
                     <div class="flex justify-between">
                       <div class="flex items-end">
                         <p class="font-display text-4xl">
@@ -228,29 +227,7 @@ defmodule AlgoraWeb.PricingLive do
                         </p>
                       </div>
                     </div>
-                  <% :b0 -> %>
-                    <div class="flex justify-between">
-                      <div class="flex items-end">
-                        <p class="font-display text-4xl">
-                          $599
-                        </p>
-                        <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                          /mo
-                        </p>
-                      </div>
-                    </div>
-                  <% :b1 -> %>
-                    <div class="flex justify-between">
-                      <div class="flex items-end">
-                        <p class="font-display text-4xl">
-                          $1,599
-                        </p>
-                        <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                          /mo
-                        </p>
-                      </div>
-                    </div>
-                  <% :b2 -> %>
+                  <% "grow-your-team" -> %>
                     <div class="flex justify-between">
                       <div class="flex items-end">
                         <p class="font-display text-4xl">
@@ -261,9 +238,6 @@ defmodule AlgoraWeb.PricingLive do
                 <% end %>
               </div>
             </div>
-            <%!-- <.button navigate={@plan.cta_url}>
-            Get started
-          </.button> --%>
           </div>
         </div>
         <div class="flex-1 border-l my-auto border-default px-4 2xl:px-8 pl-0">
@@ -360,7 +334,7 @@ defmodule AlgoraWeb.PricingLive do
   defp get_plans1 do
     [
       %Plan{
-        id: :a0,
+        id: "receive-payments",
         name: "Receive payments",
         description: "Get paid for your open source work",
         price: "100%",
@@ -374,7 +348,7 @@ defmodule AlgoraWeb.PricingLive do
         ]
       },
       %Plan{
-        id: :a1,
+        id: "pay-developers",
         name: "Pay developers",
         description: "Reward contributors with Algora",
         price: nil,
@@ -393,12 +367,12 @@ defmodule AlgoraWeb.PricingLive do
   defp get_plans2 do
     [
       %Plan{
-        id: :b2,
+        id: "grow-your-team",
         name: "Growing your team?",
         description: "You're in the right place.",
         price: "Custom",
         cta_text: "Contact us",
-        cta_url: "https://cal.com/ioannisflo",
+        cta_url: AlgoraWeb.Constants.get(:calendar_url),
         popular: false,
         features: []
       }
@@ -462,113 +436,6 @@ defmodule AlgoraWeb.PricingLive do
           ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">full list of supported countries</a>.)
       }
     ]
-  end
-
-  defp logo_cloud(assigns) do
-    ~H"""
-    <div>
-      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
-          <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/qdrant"
-        >
-          <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/remotion"
-        >
-          <img
-            src="https://algora.io/banners/remotion.png"
-            alt="Remotion"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
-          <img
-            src="https://algora.io/banners/zio.png"
-            alt="ZIO"
-            class="w-[10rem] col-auto brightness-0 invert"
-          />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/triggerdotdev"
-        >
-          <img
-            src="https://algora.io/banners/triggerdotdev.png"
-            alt="Trigger.dev"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tembo"
-        >
-          <img
-            src="https://algora.io/banners/tembo.png"
-            alt="Tembo"
-            class="w-[13rem] col-auto saturate-0"
-          />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/maybe-finance"
-        >
-          <img
-            src="https://algora.io/banners/maybe.png"
-            alt="Maybe"
-            class="col-auto w-full saturate-0"
-          />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/golemcloud"
-        >
-          <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/aidenybai"
-        >
-          <img
-            src="https://algora.io/banners/million.png"
-            alt="Million"
-            class="col-auto w-44 saturate-0"
-          />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tailcallhq"
-        >
-          <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/highlight"
-        >
-          <img
-            src="https://algora.io/banners/highlight.png"
-            alt="Highlight"
-            class="col-auto w-44 saturate-0"
-          />
-        </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/dittofeed"
-        >
-          <img
-            src="https://algora.io/banners/dittofeed.png"
-            alt="Dittofeed"
-            class="col-auto w-40 brightness-0 invert"
-          />
-        </a>
-      </div>
-    </div>
-    """
   end
 
   defp features_bento(assigns) do

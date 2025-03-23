@@ -315,7 +315,12 @@ defmodule AlgoraWeb.Pricing4Live do
             {@plan.description}
           </p>
           <div class="pt-4 flex gap-2">
-            <.button navigate={@plan.cta_url} variant="purple" size="xl">
+            <.button
+              navigate={@plan.cta_url}
+              variant="purple"
+              size="xl"
+              class="drop-shadow-[0_1px_5px_#c084fc80]"
+            >
               {@plan.cta_text}
             </.button>
           </div>
@@ -323,7 +328,7 @@ defmodule AlgoraWeb.Pricing4Live do
         <div class="w-2/3 my-auto">
           <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
             <li class="py-2 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
                 <.icon name="tabler-world" class="size-8 text-purple-400" />
               </div>
               <div class="pt-4 text-3xl font-semibold font-display">Publish</div>
@@ -332,14 +337,14 @@ defmodule AlgoraWeb.Pricing4Live do
               </div>
             </li>
             <li class="py-2 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
                 <.icon name="tabler-bolt" class="size-8 text-purple-400" />
               </div>
               <div class="pt-4 text-3xl font-semibold font-display">Match</div>
               <div class="pt-2 text-lg font-medium text-muted-foreground">Proven Algora experts</div>
             </li>
             <li class="py-2 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center size-16 bg-purple-400/10 rounded-full">
+              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
                 <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
               </div>
               <div class="pt-4 text-3xl font-semibold font-display">Hire</div>

@@ -64,6 +64,8 @@ defmodule AlgoraWeb.Components.UI.Button do
         "bg-primary/50 hover:bg-primary/30 text-foreground border-primary/80 hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600 shadow border",
       "blue" =>
         "bg-blue-500/50 hover:bg-blue-500/30 text-foreground border-blue-500/80 hover:border-blue-500 focus-visible:outline-blue-600 data-[state=open]:bg-blue-500/80 data-[state=open]:outline-blue-600 shadow border",
+      "purple" =>
+        "bg-purple-500/50 hover:bg-purple-500/30 text-foreground border-purple-500/80 hover:border-purple-500 focus-visible:outline-purple-600 data-[state=open]:bg-purple-500/80 data-[state=open]:outline-purple-600 shadow border",
       "destructive" =>
         "bg-destructive/50 hover:bg-destructive/30 text-destructive-foreground border-destructive/80 hover:border-destructive focus-visible:outline-destructive-600 data-[state=open]:bg-destructive-500/80 data-[state=open]:outline-destructive-600 shadow border",
       "hover:destructive" =>

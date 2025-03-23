@@ -1105,7 +1105,7 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
-  def icon(%{name: "algora-logo"} = assigns) do
+  def icon(%{name: "algora"} = assigns) do
     ~H"""
     <AlgoraWeb.Components.Logos.algora class={@class} />
     """
@@ -1114,6 +1114,18 @@ defmodule AlgoraWeb.CoreComponents do
   def icon(%{name: "github"} = assigns) do
     ~H"""
     <AlgoraWeb.Components.Logos.github class={@class} />
+    """
+  end
+
+  def icon(%{name: "youtube"} = assigns) do
+    ~H"""
+    <AlgoraWeb.Components.Logos.youtube class={@class} />
+    """
+  end
+
+  def icon(%{name: "discord"} = assigns) do
+    ~H"""
+    <AlgoraWeb.Components.Logos.discord class={@class} />
     """
   end
 

@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Constants do
       youtube_url: "https://www.youtube.com/@algora-io",
       discord_url: ~p"/discord",
       github_url: "https://github.com/algora-io",
+      calendar_url: "https://cal.com/ioannisflo",
       # TODO: update this to the new repo
       github_repo_url: "https://github.com/algora-io/tv",
       github_repo_api_url: "https://api.github.com/repos/algora-io/tv",

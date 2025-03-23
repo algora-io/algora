@@ -1,15 +1,36 @@
-defmodule ProgressAnalyzer do
+defmodule Algora.Admin.Migration.Progress do
   @moduledoc false
   require Logger
 
-  def analyze_file(path, verbose \\ false) do
-    stats =
-      path
-      |> File.read!()
-      |> YamlElixir.read_from_string!()
-      |> count_statuses()
+  @doc """
+  Example usage:
 
-    display_stats(stats, verbose)
+      Migration.Progress.run!("v2-progress.yaml")
+  """
+  def run!(path, verbose \\ false) do
+    [Path.dirname(__ENV__.file), path]
+    |> Path.join()
+    |> File.read!()
+    |> YamlElixir.read_from_string!()
+    |> count_statuses()
+    |> display_stats(verbose)
+  end
+
+  def v1!(verbose \\ false), do: run!("v1-progress.yaml", verbose)
+  def v2!(verbose \\ false), do: run!("v2-progress.yaml", verbose)
+
+  @doc """
+  Example usage:
+
+      Migration.Progress.init!("priv/db/v2-structure.sql")
+  """
+  def init!(path) do
+    path
+    |> File.read!()
+    |> parse_tables()
+    |> filter_tables()
+    |> format_yaml()
+    |> IO.puts()
   end
 
   defp count_statuses(yaml) do
@@ -109,25 +130,45 @@ defmodule ProgressAnalyzer do
       String.duplicate("?", undecided_chars) <>
       String.duplicate(".", todo_chars)
   end
-end
 
-case System.argv() do
-  [filename, "-v"] ->
-    ProgressAnalyzer.analyze_file(filename, true)
+  defp parse_tables(content) do
+    # Match CREATE TABLE statements
+    regex = ~r/CREATE TABLE public\.([^(]+)\s*\((.*?)\);/s
 
-  ["-v", filename] ->
-    ProgressAnalyzer.analyze_file(filename, true)
+    regex
+    |> Regex.scan(content, capture: :all_but_first)
+    |> Enum.map(fn [table_name, columns] ->
+      {
+        String.trim(table_name),
+        parse_columns(columns)
+      }
+    end)
+  end
 
-  [filename] ->
-    ProgressAnalyzer.analyze_file(filename, false)
+  defp parse_columns(columns_str) do
+    # Match column definitions - captures quotes if present
+    regex = ~r/^\s*("?\w+"?)[^,]*/m
 
-  _ ->
-    IO.puts("""
-    Usage: elixir analyze_progress.exs [-v] <filename>
+    regex
+    |> Regex.scan(columns_str, capture: :all_but_first)
+    |> List.flatten()
+    |> Enum.map(&String.trim/1)
+  end
 
-    Options:
-      -v    Show detailed remaining columns list
-    """)
+  defp filter_tables(tables) do
+    Enum.reject(tables, fn {table_name, _columns} ->
+      String.ends_with?(table_name, "_activities")
+    end)
+  end
 
-    System.halt(1)
+  defp format_yaml(tables) do
+    Enum.map_join(tables, "\n", fn {table_name, columns} ->
+      columns_yaml =
+        Enum.map_join(columns, "\n", fn column ->
+          "    - #{column}: 0"
+        end)
+
+      "- #{table_name}:\n#{columns_yaml}"
+    end)
+  end
 end

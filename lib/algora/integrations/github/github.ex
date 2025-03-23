@@ -14,6 +14,7 @@ defmodule Algora.Github do
   def private_key, do: [:github, :private_key] |> Algora.config() |> String.replace("\\n", "\n")
   def pat, do: Algora.config([:github, :pat])
   def pat_enabled, do: Algora.config([:github, :pat_enabled])
+  def bot_handle, do: Algora.config([:github, :bot_handle])
 
   def install_url_base, do: "https://github.com/apps/#{app_handle()}/installations"
   def install_url_new, do: "#{install_url_base()}/new"
@@ -104,6 +105,8 @@ defmodule Algora.Github do
   def get_installation_token(installation_id), do: client().get_installation_token(installation_id)
 
   @impl true
+  def get_installation(installation_id), do: client().get_installation(installation_id)
+  @impl true
   def list_installation_repos(token), do: client().list_installation_repos(token)
 
   @impl true
@@ -121,6 +124,11 @@ defmodule Algora.Github do
   @impl true
   def list_repository_comments(token, owner, repo, opts \\ []),
     do: client().list_repository_comments(token, owner, repo, opts)
+
+  @impl true
+  def list_repository_languages(token, owner, repo), do: client().list_repository_languages(token, owner, repo)
+  @impl true
+  def list_repository_contributors(token, owner, repo), do: client().list_repository_contributors(token, owner, repo)
 
   @impl true
   def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)

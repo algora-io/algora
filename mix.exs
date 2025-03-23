@@ -59,6 +59,8 @@ defmodule Algora.MixProject do
       {:tabler_icons, github: "algora-io/icons", sparse: "icons", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
+      {:httpoison, "~> 2.2"},
+      {:redirect, "~> 0.4.0"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
@@ -79,7 +81,8 @@ defmodule Algora.MixProject do
       {:stripity_stripe, "~> 2.0"},
       {:live_svelte, "~> 0.14.1"},
       {:nimble_parsec, "~> 1.4"},
-      {:oban, "~> 2.17"},
+      {:oban, "~> 2.19"},
+      {:oban_web, "~> 2.11"},
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:chameleon, "~> 2.2.0"},
@@ -87,6 +90,8 @@ defmodule Algora.MixProject do
       {:excoveralls, "~> 0.18", only: :test},
       {:dataloader, "~> 2.0.0"},
       {:mdex, "~> 0.2"},
+      {:reverse_proxy_plug, "~> 3.0"},
+      {:puppeteer_img, "~> 0.1.3"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
@@ -94,7 +99,6 @@ defmodule Algora.MixProject do
       # monitoring, logging
       {:appsignal_phoenix, "~> 2.6"},
       {:logfmt_ex, "~> 0.4"},
-      {:oban_live_dashboard, "~> 0.1.0"},
       # TODO: delete after migration
       {:yaml_elixir, "~> 2.9"}
     ]

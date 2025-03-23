@@ -21,7 +21,7 @@ defmodule Algora.Activities.DiscordViews do
               "https://github.com/#{bounty.ticket.repository.user.provider_login}/#{bounty.ticket.repository.name}/issues/#{bounty.ticket.number}"
           },
           footer: %{
-            text: "Created by #{bounty.creator.name}",
+            text: bounty.creator.name,
             icon_url: bounty.creator.avatar_url
           },
           thumbnail: %{url: bounty.owner.avatar_url},
@@ -40,6 +40,43 @@ defmodule Algora.Activities.DiscordViews do
           url:
             "https://github.com/#{bounty.ticket.repository.user.provider_login}/#{bounty.ticket.repository.name}/issues/#{bounty.ticket.number}",
           timestamp: bounty.inserted_at
+        }
+      ]
+    }
+  end
+
+  def render(%{type: :transaction_succeeded, assoc: tx}) do
+    tx = Repo.preload(tx, [:user, linked_transaction: [:user]])
+
+    %{
+      embeds: [
+        %{
+          color: 0x6366F1,
+          title: "#{tx.net_amount} paid!",
+          author: %{
+            name: tx.linked_transaction.user.name,
+            icon_url: tx.linked_transaction.user.avatar_url,
+            url: "#{AlgoraWeb.Endpoint.url()}/org/#{tx.linked_transaction.user.handle}"
+          },
+          footer: %{
+            text: tx.user.name,
+            icon_url: tx.user.avatar_url
+          },
+          thumbnail: %{url: tx.user.avatar_url},
+          fields: [
+            %{
+              name: "Sender",
+              value: tx.linked_transaction.user.name,
+              inline: false
+            },
+            %{
+              name: "Recipient",
+              value: tx.user.name,
+              inline: false
+            }
+          ],
+          url: "#{AlgoraWeb.Endpoint.url()}/org/#{tx.linked_transaction.user.handle}",
+          timestamp: tx.succeeded_at
         }
       ]
     }

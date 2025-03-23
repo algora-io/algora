@@ -3,11 +3,13 @@ defmodule Algora.Workspace do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace.CommandResponse
+  alias Algora.Workspace.Contributor
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
@@ -18,6 +20,64 @@ defmodule Algora.Workspace do
   @type ticket_type :: :issue | :pull_request
   @type command_type :: :bounty | :attempt | :claim
   @type command_source :: :ticket | :comment
+
+  @doc """
+  Resolves a GitHub installation token for interacting with repositories.
+
+  This function attempts to obtain a valid GitHub access token through three methods in order:
+  1. If an installation_id is provided directly, it gets an installation token via the GitHub Apps API
+  2. If no installation_id is provided, it attempts to look up an installation_id by the repo owner
+  3. If no installation is found, it falls back to using the personal access token of the fallback user
+
+  ## Parameters
+    * `installation_id` - Optional GitHub App installation ID
+    * `repo_owner` - The GitHub username/org that owns the repository
+    * `fallback_user` - The user whose personal access token will be used if no installation token is available
+
+  ## Returns
+    * `{:ok, %{installation_id: integer() | nil, token: String.t()}}` - Successfully obtained token
+    * `{:error, atom()}` - Failed to obtain token
+
+  ## Examples
+      # Using provided installation ID
+      iex> resolve_installation_and_token(12345, "octocat", user)
+      {:ok, %{installation_id: 12345, token: "ghs_xxx..."}}
+
+      # Looking up installation ID by owner
+      iex> resolve_installation_and_token(nil, "octocat", user)
+      {:ok, %{installation_id: 67890, token: "ghs_xxx..."}}
+
+      # Falling back to user's personal access token
+      iex> resolve_installation_and_token(nil, "octocat", user)
+      {:ok, %{installation_id: nil, token: "ghp_xxx..."}}
+  """
+  @spec resolve_installation_and_token(integer() | nil, String.t(), User.t()) ::
+          {:ok, %{installation_id: integer() | nil, token: String.t()}} | {:error, atom()}
+  def resolve_installation_and_token(installation_id, repo_owner, fallback_user) do
+    with id when not is_nil(id) <- installation_id || get_installation_id_by_owner(repo_owner),
+         {:ok, token} <- Github.get_installation_token(id) do
+      {:ok, %{installation_id: id, token: token}}
+    else
+      _ ->
+        case Accounts.get_access_token(fallback_user) do
+          {:ok, token} -> {:ok, %{installation_id: nil, token: token}}
+          error -> error
+        end
+    end
+  end
+
+  @spec get_installation_id_by_owner(String.t()) :: integer() | nil
+  def get_installation_id_by_owner(repo_owner) do
+    installation =
+      Repo.one(
+        from i in Installation,
+          join: u in User,
+          on: u.id == i.provider_user_id and u.provider == i.provider,
+          where: u.provider == "github" and u.provider_login == ^repo_owner
+      )
+
+    if installation, do: installation.provider_id
+  end
 
   def ensure_ticket(token, owner, repo, number) do
     case get_ticket(owner, repo, number) do
@@ -55,7 +115,8 @@ defmodule Algora.Workspace do
         join: u in assoc(r, :user),
         where: r.provider == "github",
         where: r.name == ^repo,
-        where: u.provider_login == ^owner
+        where: u.provider_login == ^owner,
+        preload: [user: u]
       )
 
     res =
@@ -65,7 +126,7 @@ defmodule Algora.Workspace do
       end
 
     # TODO: remove after migration
-    if System.get_env("MIGRATION", "false") != "true" do
+    if not Algora.Settings.migration_in_progress?() do
       case res do
         {:ok, repository} -> maybe_schedule_og_image_update(repository)
         error -> error
@@ -80,7 +141,8 @@ defmodule Algora.Workspace do
 
     needs_update? =
       Repository.has_default_og_image?(repository) ||
-        (repository.og_image_updated_at && DateTime.before?(repository.og_image_updated_at, one_day_ago))
+        (repository.og_image_updated_at &&
+           DateTime.before?(repository.og_image_updated_at, one_day_ago))
 
     if needs_update? do
       %{repository_id: repository.id}
@@ -96,13 +158,21 @@ defmodule Algora.Workspace do
          {:ok, user} <- ensure_user_by_repo(token, repository, owner),
          {:ok, user} <- sync_user(user, repository, owner, repo),
          {:ok, repo} <- repository |> Repository.github_changeset(user) |> Repo.insert() do
-      {:ok, repo}
+      {:ok, %{repo | user: user}}
     else
       {:error,
        %Ecto.Changeset{
-         errors: [provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}]
+         errors: [
+           provider: {_, [constraint: :unique, constraint_name: "repositories_provider_provider_id_index"]}
+         ]
        } = changeset} ->
-        Repo.fetch_by(Repository, provider: "github", provider_id: changeset.changes.provider_id)
+        Repo.fetch_one(
+          from r in Repository,
+            where: r.provider == "github",
+            where: r.provider_id == ^changeset.changes.provider_id,
+            join: u in assoc(r, :user),
+            preload: [user: u]
+        )
 
       {:error, _reason} = error ->
         error
@@ -158,6 +228,7 @@ defmodule Algora.Workspace do
 
         error ->
           Logger.error("#{owner}/#{repo} | failed to remap #{user.provider_login} -> #{github_user["login"]}")
+
           error
       end
     end
@@ -224,11 +295,16 @@ defmodule Algora.Workspace do
   def get_installation(id), do: Repo.get(Installation, id)
   def get_installation!(id), do: Repo.get!(Installation, id)
 
-  def list_installations_by(fields), do: Repo.all(from(i in Installation, where: ^fields))
-
-  def list_user_installations(user_id) do
-    Repo.all(from(i in Installation, where: i.owner_id == ^user_id, preload: [:connected_user]))
-  end
+  def list_installations_by(fields),
+    do:
+      Repo.all(
+        from(i in Installation,
+          where: ^fields,
+          join: connected_user in assoc(i, :connected_user),
+          join: provider_user in assoc(i, :provider_user),
+          select_merge: %{connected_user: connected_user, provider_user: provider_user}
+        )
+      )
 
   def fetch_command_response(ticket_id, command_type) do
     Repo.fetch_one(
@@ -317,14 +393,21 @@ defmodule Algora.Workspace do
             {:error, reason}
         end
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Failed to refresh command response #{ticket.id}: #{inspect(reason)}")
         {:error, :command_response_not_found}
     end
   end
 
   defp post_response(token, ticket_ref, command_id, command_source, ticket, body) do
     with {:ok, comment} <-
-           Github.create_issue_comment(token, ticket_ref[:owner], ticket_ref[:repo], ticket_ref[:number], body) do
+           Github.create_issue_comment(
+             token,
+             ticket_ref[:owner],
+             ticket_ref[:repo],
+             ticket_ref[:number],
+             body
+           ) do
       create_command_response(%{
         comment: comment,
         command_source: command_source,
@@ -368,7 +451,101 @@ defmodule Algora.Workspace do
 
       {:error, reason} ->
         Logger.error("Failed to update command response #{command_response.id}: #{inspect(reason)}")
+
         {:ok, command_response}
     end
+  end
+
+  def ensure_repo_tech_stack(token, repository) do
+    with {:ok, languages} <- Github.list_repository_languages(token, repository.user.provider_login, repository.name) do
+      top_languages =
+        languages
+        |> Enum.sort_by(fn {_lang, count} -> count end, :desc)
+        |> Enum.take(3)
+        |> Enum.map(fn {lang, _count} -> lang end)
+
+      Repo.update_all(from(r in Repository, where: r.id == ^repository.id), set: [tech_stack: top_languages])
+
+      {:ok, top_languages}
+    end
+  rescue
+    error -> {:error, error}
+  end
+
+  def ensure_contributors(token, repository) do
+    case list_repository_contributors(repository.user.provider_login, repository.name) do
+      [] ->
+        with {:ok, contributors} <-
+               Github.list_repository_contributors(token, repository.user.provider_login, repository.name) do
+          Repo.transact(fn ->
+            Enum.reduce_while(contributors, {:ok, []}, fn contributor, {:ok, acc} ->
+              case create_contributor_from_github(repository, contributor) do
+                {:ok, created} -> {:cont, {:ok, [created | acc]}}
+                error -> {:halt, error}
+              end
+            end)
+          end)
+        end
+
+      contributors ->
+        {:ok, contributors}
+    end
+  end
+
+  defp ensure_user_by_contributor(contributor) do
+    case Repo.get_by(User, provider: "github", provider_id: to_string(contributor["id"])) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        contributor
+        |> Contributor.github_user_changeset()
+        |> Repo.insert()
+    end
+  end
+
+  def create_contributor_from_github(repository, contributor) do
+    with {:ok, user} <- ensure_user_by_contributor(contributor) do
+      %Contributor{}
+      |> Contributor.changeset(%{
+        contributions: contributor["contributions"],
+        repository_id: repository.id,
+        user_id: user.id
+      })
+      |> Repo.insert()
+    end
+  end
+
+  def list_repository_contributors(repo_owner, repo_name) do
+    Repo.all(
+      from(c in Contributor,
+        join: r in assoc(c, :repository),
+        where: r.provider == "github",
+        where: r.name == ^repo_name,
+        join: ro in assoc(r, :user),
+        where: ro.provider_login == ^repo_owner,
+        join: u in assoc(c, :user),
+        select_merge: %{user: u},
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+      )
+    )
+  end
+
+  def list_contributors(repo_owner) do
+    Repo.all(
+      from(c in Contributor,
+        join: r in assoc(c, :repository),
+        where: r.provider == "github",
+        join: ro in assoc(r, :user),
+        where: ro.provider_login == ^repo_owner,
+        join: u in assoc(c, :user),
+        select_merge: %{user: u},
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+      )
+    )
+  end
+
+  def fetch_contributor(repository_id, user_id) do
+    Repo.fetch_by(Contributor, repository_id: repository_id, user_id: user_id)
   end
 end

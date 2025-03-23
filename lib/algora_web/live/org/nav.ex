@@ -6,7 +6,7 @@ defmodule AlgoraWeb.Org.Nav do
 
   alias Algora.Organizations
 
-  def on_mount(:default, %{"org_handle" => org_handle}, _session, socket) do
+  def on_mount(:default, %{"org_handle" => org_handle} = params, _session, socket) do
     current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
 
@@ -41,6 +41,7 @@ defmodule AlgoraWeb.Org.Nav do
 
     {:cont,
      socket
+     |> assign(:screenshot?, not is_nil(params["screenshot"]))
      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)
@@ -52,8 +53,8 @@ defmodule AlgoraWeb.Org.Nav do
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
-        {AlgoraWeb.Org.DashboardLive, _} -> :quickstart
-        {AlgoraWeb.Org.DashboardPublicLive, _} -> :home
+        {AlgoraWeb.Org.DashboardLive, _} -> :dashboard
+        {AlgoraWeb.Org.HomeLive, _} -> :home
         {AlgoraWeb.Org.BountiesLive, _} -> :bounties
         {AlgoraWeb.Org.ProjectsLive, _} -> :projects
         {AlgoraWeb.Project.ViewLive, _} -> :projects
@@ -79,9 +80,9 @@ defmodule AlgoraWeb.Org.Nav do
       [
         %{
           href: "/org/#{org_handle}",
-          tab: :quickstart,
+          tab: :dashboard,
           icon: "tabler-sparkles",
-          label: "Quickstart",
+          label: "Dashboard",
           roles: [:admin, :mod]
         },
         %{

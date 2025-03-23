@@ -107,6 +107,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def get_installation(_installation_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
   def list_installation_repos(_access_token) do
     {:ok, []}
   end
@@ -128,6 +133,16 @@ defmodule Algora.Support.GithubMock do
 
   @impl true
   def list_repository_comments(_access_token, _owner, _repo, _opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
+  def list_repository_languages(_access_token, _owner, _repo) do
+    {:ok, []}
+  end
+
+  @impl true
+  def list_repository_contributors(_access_token, _owner, _repo) do
     {:ok, []}
   end
 

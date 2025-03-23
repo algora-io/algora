@@ -21,9 +21,9 @@ defmodule Algora.Application do
       {Finch, name: Algora.Finch},
       Algora.Github.TokenPool,
       Algora.Github.Poller.RootSupervisor,
-      Algora.Stargazer,
       # Start to serve requests, typically the last entry
       AlgoraWeb.Endpoint,
+      Algora.Stargazer,
       TwMerge.Cache
     ]
 

@@ -8,10 +8,10 @@ defmodule AlgoraWeb.Components.Bounties do
 
   def bounties(assigns) do
     ~H"""
-    <div class="relative -mx-2 -mt-2 overflow-auto">
+    <div class="relative -mx-2 -mt-2 overflow-auto scrollbar-thin">
       <ul class="divide-y divide-border">
         <%= for bounty <- @bounties do %>
-          <.link href={bounty.ticket.url} class="block hover:bg-muted/50">
+          <.link href={bounty.ticket.url} class="block whitespace-nowrap hover:bg-muted/50">
             <li class="flex items-center py-2 px-3">
               <div class="flex-shrink-0 mr-3">
                 <.avatar class="h-8 w-8">
@@ -24,12 +24,16 @@ defmodule AlgoraWeb.Components.Bounties do
 
               <div class="flex-grow min-w-0 mr-4">
                 <div class="flex items-center text-sm">
-                  <span class="font-semibold mr-1">{bounty.repository.name}</span>
+                  <span class="font-semibold mr-1">{bounty.repository.owner.name}</span>
+                  <.icon name="tabler-chevron-right" class="mr-1 size-3 text-muted-foreground" />
+                  <span class="font-semibold mr-1 text-muted-foreground">
+                    {bounty.repository.name}
+                  </span>
                   <span class="text-muted-foreground mr-2">#{bounty.ticket.number}</span>
                   <span class="font-display whitespace-nowrap text-sm font-semibold tabular-nums text-success mr-2">
                     {Money.to_string!(bounty.amount)}
                   </span>
-                  <span class="text-foreground truncate">{bounty.ticket.title}</span>
+                  <span class="text-foreground">{bounty.ticket.title}</span>
                 </div>
               </div>
             </li>

@@ -119,6 +119,10 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def put_current_user(conn, user) do
+    user
+    |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
+    |> Algora.Repo.update()
+
     conn =
       conn
       |> assign(:current_user, user)
@@ -220,6 +224,14 @@ defmodule AlgoraWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   def signed_in_path_from_context("personal"), do: ~p"/home"
+
+  def signed_in_path_from_context("preview/" <> ctx) do
+    case String.split(ctx, "/") do
+      [_id, repo_owner, repo_name] -> ~p"/go/#{repo_owner}/#{repo_name}"
+      _ -> ~p"/home"
+    end
+  end
+
   def signed_in_path_from_context(org_handle), do: ~p"/org/#{org_handle}"
 
   def signed_in_path(%User{} = user) do
@@ -288,6 +300,28 @@ defmodule AlgoraWeb.UserAuth do
         {:error, reason}
     end
   end
+
+  def sign_preview_code(payload) do
+    Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
+  end
+
+  def verify_preview_code(code, id) do
+    case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
+      {:ok, token_id} ->
+        if token_id == id do
+          {:ok, token_id}
+        else
+          {:error, :invalid_id}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def preview_path(id, token), do: ~p"/preview?id=#{id}&token=#{token}"
+
+  def preview_path(id, token, return_to), do: ~p"/preview?id=#{id}&token=#{token}&return_to=#{return_to}"
 
   def login_path(email, token), do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
 

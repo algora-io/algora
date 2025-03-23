@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Components.Footer do
   @moduledoc false
   use AlgoraWeb.Component
+  use AlgoraWeb, :verified_routes
 
   import AlgoraWeb.CoreComponents
 
@@ -16,48 +17,40 @@ defmodule AlgoraWeb.Components.Footer do
           <div class="grid grid-cols-2 gap-x-12 gap-y-20 md:grid-cols-4">
             <div>
               <h3 class="text-base font-semibold leading-6 text-white">
-                <a href="https://console.algora.io/bounties">Bounties</a>
+                <.link navigate={~p"/bounties"}>Bounties</.link>
               </h3>
               <ul role="list" class="mt-6 space-y-4">
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/rust"
+                    navigate={~p"/bounties?#{%{tech: "rust"}}"}
                   >
                     Rust
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/typescript"
+                    navigate={~p"/bounties?#{%{tech: "typescript"}}"}
                   >
                     TypeScript
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/scala"
+                    navigate={~p"/bounties?#{%{tech: "scala"}}"}
                   >
                     Scala
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/go"
+                    navigate={~p"/bounties?#{%{tech: "c,c++"}}"}
                   >
-                    Go
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/swift"
-                  >
-                    Swift
-                  </a>
+                    C / C++
+                  </.link>
                 </li>
               </ul>
             </div>
@@ -65,36 +58,28 @@ defmodule AlgoraWeb.Components.Footer do
               <h3 class="text-base font-semibold leading-6 text-white">Community</h3>
               <ul role="list" class="mt-6 space-y-4">
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/events"
-                  >
-                    Activity
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/home/projects#content"
+                    navigate={~p"/projects"}
                   >
                     Projects
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/community"
+                    navigate={~p"/community"}
                   >
                     Community
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/home/leaderboard#content"
+                    navigate={~p"/leaderboard"}
                   >
                     Leaderboard
-                  </a>
+                  </.link>
                 </li>
                 <li>
                   <a
@@ -134,12 +119,12 @@ defmodule AlgoraWeb.Components.Footer do
                   </a>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/pricing"
+                    navigate={~p"/pricing"}
                   >
                     Pricing
-                  </a>
+                  </.link>
                 </li>
               </ul>
             </div>

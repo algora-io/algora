@@ -31,7 +31,7 @@ defmodule Algora.Contracts do
           | {:open?, true}
           | {:active_or_paid?, true}
           | {:original?, true}
-          | {:status, :draft | :active | :paid}
+          | {:status, Contract.status() | {:in, [Contract.status()]}}
           | {:after, non_neg_integer()}
           | {:before, non_neg_integer()}
           | {:order, :asc | :desc}
@@ -539,12 +539,7 @@ defmodule Algora.Contracts do
   end
 
   defp mark_contract_as_paid(contract) do
-    contract
-    |> change(%{status: :paid})
-    |> Repo.update_with_activity(%{
-      type: :contract_paid,
-      notify_users: []
-    })
+    change(contract, %{status: :paid})
   end
 
   defp renew_contract(contract) do
@@ -683,6 +678,9 @@ defmodule Algora.Contracts do
 
       {:original?, true}, query ->
         from([c] in query, where: c.id == c.original_contract_id)
+
+      {:status, {:in, statuses}}, query ->
+        from([c] in query, where: c.status in ^statuses)
 
       {:status, status}, query ->
         from([c] in query, where: c.status == ^status)

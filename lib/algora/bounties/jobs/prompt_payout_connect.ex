@@ -82,7 +82,13 @@ defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
 
   defp do_perform(ticket_ref, body, installation) do
     with {:ok, token} <- Github.get_installation_token(installation.provider_id) do
-      Github.create_issue_comment(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, body)
+      Github.create_issue_comment(
+        token,
+        ticket_ref.owner,
+        ticket_ref.repo,
+        ticket_ref.number,
+        body
+      )
     end
   end
 end

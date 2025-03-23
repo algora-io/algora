@@ -57,13 +57,13 @@
     - github_res_comment_id: -1
     - type: -1
 - "BotMessage":
-    - id: -1
-    - created_at: -1
-    - updated_at: -1
-    - active: -1
-    - template: -1
-    - type: -1
-    - org_id: -1
+    - id: 1
+    - created_at: 1
+    - updated_at: 1
+    - active: 1
+    - template: 1
+    - type: 1
+    - org_id: 1
 - "Bounty":
     - id: 1
     - created_at: 1
@@ -74,16 +74,16 @@
     - status: 1
     - github_req_comment_id: 1
     - github_res_comment_id: 1
-    - type: 0
-    - kind: 0
+    - type: -1
+    - kind: -1
     - visibility: 1
     - number: 1
-    - deleted: 0
-    - reward_type: 0
+    - deleted: 1
+    - reward_type: -1
     - autopay_disabled: 1
-    - manual_assignments: 0
-    - timeouts_disabled: 0
-    - experts_only: 0
+    - manual_assignments: -1
+    - timeouts_disabled: -1
+    - experts_only: -1
 - "BountyCharge":
     - id: 1
     - created_at: 1
@@ -94,8 +94,8 @@
     - org_id: 1
     - amount: 1
     - currency: 1
-    - receipt_url: 0
-    - invoice_url: 0
+    - receipt_url: -1
+    - invoice_url: -1
 - "BountyProposal":
     - id: -1
     - created_at: -1
@@ -136,7 +136,7 @@
     - github_pull_request_id: 1
     - bounty_charge_id: -1
     - github_res_comment_id: 0
-    - info: 0
+    - info: -1
     - share: -1
 - "Company":
     - id: -1
@@ -284,10 +284,10 @@
     - repos_url: -1
     - events_url: -1
     - received_events_url: -1
-    - type: 0
+    - type: 1
     - site_admin: -1
     - name: 1
-    - email: 0
+    - email: -1
     - user_id: -1
     - retrieved_at: 1
     - api_version: -1
@@ -338,15 +338,15 @@
     - description: 1
     - stargazers_count: 1
     - priority: 1
-    - supervise_attempts: 0
+    - supervise_attempts: -1
     - manual_assignments: 1
-    - is_personal: 0
+    - is_personal: -1
     - max_open_attempts: 1
-    - enabled_expert_recs: 0
-    - enabled_private_bounties: 0
+    - enabled_expert_recs: -1
+    - enabled_private_bounties: -1
     - fee_pct_prev: -1
-    - days_until_timeout: 0
-    - days_until_timeout_reminder: 0
+    - days_until_timeout: -1
+    - days_until_timeout_reminder: -1
     - discord_url: 1
     - twitter_url: 1
     - website_url: 1
@@ -354,7 +354,7 @@
     - enabled_community_mode: 1
     - webhook_url_discord: -1
     - webhook_url_slack: -1
-    - accepts_community_bounties: 0
+    - accepts_community_bounties: -1
     - seeded: 1
     - slack_url: 1
     - github_handle: 1
@@ -516,14 +516,14 @@
     - number: 1
     - issue_id: 1
     - pull_request_id: 1
-    - source: 0
-    - image: 0
-    - status: 0
+    - source: -1
+    - image: -1
+    - status: -1
     - body: 1
-    - slug: 0
+    - slug: -1
     - title: 1
-    - og_image: 0
-    - tech: 0
+    - og_image: -1
+    - tech: -1
 - "User":
     - id: 1
     - created_at: 1
@@ -535,7 +535,7 @@
     - image: 1
     - is_admin: 1
     - loc: 1
-    - last_activity_at: 0
+    - last_activity_at: 1
     - country: 1
     - twitch_handle: 1
     - youtube_handle: 1

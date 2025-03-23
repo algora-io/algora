@@ -232,8 +232,16 @@ defmodule AlgoraWeb.CoreComponents do
           </.avatar>
           <div>
             <div class="font-semibold">{ctx.name}</div>
-            <div class="text-sm text-gray-500">@{ctx.handle}</div>
+            <div :if={ctx.handle} class="text-sm text-gray-500">@{ctx.handle}</div>
           </div>
+        </div>
+      </:link>
+      <:link :if={@current_user.is_admin} href={~p"/admin"}>
+        <div class="flex items-center whitespace-nowrap">
+          <div class="mr-3 flex h-8 w-8 items-center justify-center">
+            <.icon name="tabler-adjustments-alt" class="h-5 w-5" />
+          </div>
+          <div class="font-semibold">Admin</div>
         </div>
       </:link>
       <:link href={~p"/auth/logout"}>
@@ -756,7 +764,7 @@ defmodule AlgoraWeb.CoreComponents do
         id={@id || @name}
         name={@name}
         class={[
-          "min-h-[6rem] py-[7px] px-[11px] mt-2 block w-full rounded-lg border-input bg-background",
+          "min-h-[6rem] py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
           "text-foreground focus:border-ring focus:outline-none focus:ring-4 focus:ring-ring/5 sm:text-sm sm:leading-6",
           "border-input focus:border-ring focus:ring-ring/5",
           @errors != [] && "border-destructive focus:border-destructive focus:ring-destructive/10",
@@ -783,15 +791,17 @@ defmodule AlgoraWeb.CoreComponents do
           name={@name}
           id={@id || @name}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-          class={[
-            "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
-            "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
-            "border-input focus:border-ring focus:ring-ring",
-            @errors != [] &&
-              "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
-            @icon && "pl-10",
-            @class
-          ]}
+          class={
+            classes([
+              "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
+              "text-foreground focus:outline-none focus:ring-1 sm:text-sm sm:leading-6",
+              "border-input focus:border-ring focus:ring-ring",
+              @errors != [] &&
+                "border-destructive placeholder-destructive-foreground/50 focus:border-destructive focus:ring-destructive/10",
+              @icon && "pl-10",
+              @class
+            ])
+          }
           autocomplete="off"
           {@rest}
         />
@@ -1095,9 +1105,27 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
-  def icon(%{name: "algora-logo"} = assigns) do
+  def icon(%{name: "algora"} = assigns) do
     ~H"""
     <AlgoraWeb.Components.Logos.algora class={@class} />
+    """
+  end
+
+  def icon(%{name: "github"} = assigns) do
+    ~H"""
+    <AlgoraWeb.Components.Logos.github class={@class} />
+    """
+  end
+
+  def icon(%{name: "youtube"} = assigns) do
+    ~H"""
+    <AlgoraWeb.Components.Logos.youtube class={@class} />
+    """
+  end
+
+  def icon(%{name: "discord"} = assigns) do
+    ~H"""
+    <AlgoraWeb.Components.Logos.discord class={@class} />
     """
   end
 
@@ -1159,7 +1187,7 @@ defmodule AlgoraWeb.CoreComponents do
   def section(assigns) do
     ~H"""
     <div class="relative h-full">
-      <div :if={@title} class="flex items-end justify-between pb-6">
+      <div :if={@title} class="flex items-end justify-between pb-2">
         <div class="flex flex-col space-y-1.5">
           <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>
           <p :if={@subtitle} class="text-sm text-muted-foreground">{@subtitle}</p>

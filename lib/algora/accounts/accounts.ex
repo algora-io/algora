@@ -6,13 +6,19 @@ defmodule Algora.Accounts do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Bounties.Bounty
+  alias Algora.Contracts.Contract
   alias Algora.Github
   alias Algora.Organizations
   alias Algora.Organizations.Member
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Workspace.Contributor
+  alias Algora.Workspace.Installation
+  alias Algora.Workspace.Repository
+  alias Algora.Workspace.Ticket
 
   require Algora.SQL
+  require Logger
 
   def base_query, do: User
 
@@ -106,34 +112,38 @@ defmodule Algora.Accounts do
           total_earned: sum(tx.net_amount)
         }
 
-    bounties_query =
+    transactions_query =
       from t in Transaction,
-        where: t.type == :credit and t.status == :succeeded and not is_nil(t.bounty_id),
+        where: t.type == :credit and t.status == :succeeded,
         group_by: t.user_id,
         select: %{
           user_id: t.user_id,
-          bounties_count: count(fragment("DISTINCT ?", t.bounty_id))
+          transactions_count: count(t.id)
         }
 
     projects_query =
-      from t in Transaction,
-        join: lt in assoc(t, :linked_transaction),
-        where: t.type == :credit and t.status == :succeeded and lt.type == :debit,
-        group_by: t.user_id,
+      from tx in Transaction,
+        where: tx.type == :credit and tx.status == :succeeded,
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        group_by: tx.user_id,
         select: %{
-          user_id: t.user_id,
-          projects_count: count(fragment("DISTINCT ?", lt.user_id))
+          user_id: tx.user_id,
+          projects_count: count(fragment("DISTINCT ?", r.user_id))
         }
 
     User
     |> join(:inner, [u], b in subquery(base_users), as: :base, on: u.id == b.id)
     |> join(:left, [u], e in subquery(earnings_query), as: :earnings, on: e.user_id == u.id)
-    |> join(:left, [u], b in subquery(bounties_query), as: :bounties, on: b.user_id == u.id)
+    |> join(:left, [u], t in subquery(transactions_query), as: :transactions, on: t.user_id == u.id)
     |> join(:left, [u], p in subquery(projects_query), as: :projects, on: p.user_id == u.id)
     |> apply_criteria(criteria)
     |> order_by([earnings: e], desc_nulls_last: e.total_earned)
     |> order_by([u], desc: u.id)
-    |> select([u, earnings: e, bounties: b, projects: p], %{
+    |> select([u, earnings: e, transactions: t, projects: p], %{
       type: u.type,
       id: u.id,
       handle: u.handle,
@@ -145,7 +155,7 @@ defmodule Algora.Accounts do
       country: u.country,
       tech_stack: u.tech_stack,
       total_earned: Algora.SQL.money_or_zero(e.total_earned),
-      completed_bounties_count: coalesce(b.bounties_count, 0),
+      transactions_count: coalesce(t.transactions_count, 0),
       contributed_projects_count: coalesce(p.projects_count, 0),
       hourly_rate_min: u.hourly_rate_min,
       hourly_rate_max: u.hourly_rate_max,
@@ -246,26 +256,24 @@ defmodule Algora.Accounts do
   @doc """
   Registers a user from their GitHub information.
   """
-  def register_github_user(primary_email, info, emails, token) do
+  def register_github_user(current_user, primary_email, info, emails, token) do
     query =
       from(u in User,
-        left_join: i in Identity,
-        on: i.provider == "github" and i.provider_id == ^to_string(info["id"]),
-        where:
-          (u.provider == "github" and u.provider_id == ^to_string(info["id"])) or
-            u.email == ^primary_email,
-        select: {u, i}
+        where: u.email == ^primary_email or (u.provider == "github" and u.provider_id == ^to_string(info["id"]))
       )
 
-    case Repo.one(query) do
-      nil -> create_user(info, primary_email, emails, token)
-      {user, nil} -> update_user(user, info, primary_email, emails, token)
-      {user, _identity} -> update_github_token(user, token)
-    end
-  end
+    primary_user =
+      case {current_user, Repo.all(query)} do
+        {_, []} -> nil
+        {_, [user]} -> user
+        {nil, users} -> Enum.find(users, &(&1.email == primary_email))
+        {user, users} -> Enum.find(users, &(&1.id == user.id))
+      end
 
-  def register_org(params) do
-    params |> User.org_registration_changeset() |> Repo.insert()
+    case primary_user do
+      nil -> create_user(info, primary_email, emails, token)
+      user -> update_user(user, info, primary_email, emails, token)
+    end
   end
 
   def create_user(info, primary_email, emails, token) do
@@ -275,14 +283,73 @@ defmodule Algora.Accounts do
   end
 
   def update_user(user, info, primary_email, emails, token) do
-    with {:ok, _} <-
-           user
-           |> Identity.github_registration_changeset(info, primary_email, emails, token)
-           |> Repo.insert() do
-      user
-      |> User.github_registration_changeset(info, primary_email, emails, token)
-      |> Repo.update()
-    end
+    old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
+
+    Repo.transact(fn ->
+      Repo.delete_all(from(i in Identity, where: i.provider == "github" and i.provider_id == ^to_string(info["id"])))
+
+      with true <- old_user && old_user.id != user.id,
+           {:ok, old_user} <- old_user |> change(provider: nil, provider_id: nil, provider_login: nil) |> Repo.update() do
+        migrate_user(old_user, user)
+      else
+        {:error, reason} ->
+          Logger.error("Failed to migrate user: #{inspect(reason)}")
+
+        _ ->
+          :ok
+      end
+
+      identity_changeset = Identity.github_registration_changeset(user, info, primary_email, emails, token)
+      user_changeset = User.github_registration_changeset(user, info, primary_email, emails, token)
+
+      with {:ok, _} <- Repo.insert(identity_changeset),
+           {:ok, user} <- Repo.update(user_changeset) do
+        {:ok, user}
+      else
+        {:error, reason} ->
+          Logger.error("Failed to update user: #{inspect(reason)}")
+          {:error, reason}
+      end
+    end)
+  end
+
+  def migrate_user(old_user, new_user) do
+    # TODO: enqueue job
+    Repo.update_all(
+      from(r in Repository, where: r.user_id == ^old_user.id),
+      set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(c in Contributor, where: c.user_id == ^old_user.id),
+      set: [user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(c in Contract, where: c.contractor_id == ^old_user.id),
+      set: [contractor_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.owner_id == ^old_user.id),
+      set: [owner_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.provider_user_id == ^old_user.id),
+      set: [provider_user_id: new_user.id]
+    )
+
+    Repo.update_all(
+      from(i in Installation, where: i.connected_user_id == ^old_user.id),
+      set: [connected_user_id: new_user.id]
+    )
+
+    :ok
+  end
+
+  def register_org(params) do
+    params |> User.org_registration_changeset() |> Repo.insert()
   end
 
   # def get_user_by_provider_email(provider, email) when provider in [:github] do
@@ -352,19 +419,6 @@ defmodule Algora.Accounts do
     end
   end
 
-  defp update_github_token(%User{} = user, new_token) do
-    identity =
-      Repo.one!(from(i in Identity, where: i.user_id == ^user.id and i.provider == "github"))
-
-    {:ok, _} =
-      identity
-      |> change()
-      |> put_change(:provider_token, new_token)
-      |> Repo.update()
-
-    {:ok, Repo.preload(user, :identities, force: true)}
-  end
-
   def last_context(nil), do: "nil"
 
   def last_context(%User{last_context: nil} = user) do
@@ -413,8 +467,20 @@ defmodule Algora.Accounts do
 
   def get_last_context_user(%User{} = user) do
     case last_context(user) do
-      "personal" -> user
-      last_context -> get_user_by_handle(last_context)
+      "personal" ->
+        user
+
+      "preview/" <> ctx ->
+        case String.split(ctx, "/") do
+          [id, _repo_owner, _repo_name] -> get_user(id)
+          _ -> nil
+        end
+
+      "repo/" <> _repo_full_name ->
+        user
+
+      last_context ->
+        get_user_by_handle(last_context)
     end
   end
 

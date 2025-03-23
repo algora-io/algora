@@ -146,6 +146,41 @@ defmodule Algora.Factory do
     }
   end
 
+  def insert_transaction_pair(opts) do
+    credit_id = Nanoid.generate()
+    debit_id = Nanoid.generate()
+
+    debit_tx =
+      insert(
+        :transaction,
+        id: debit_id,
+        linked_transaction_id: credit_id,
+        status: :initialized,
+        type: :debit,
+        user_id: opts[:sender_id],
+        bounty_id: opts[:bounty_id],
+        tip_id: opts[:tip_id],
+        contract_id: opts[:contract_id],
+        group_id: opts[:group_id]
+      )
+
+    credit_tx =
+      insert(
+        :transaction,
+        id: credit_id,
+        linked_transaction_id: debit_id,
+        status: :initialized,
+        type: :credit,
+        user_id: opts[:recipient_id],
+        bounty_id: opts[:bounty_id],
+        tip_id: opts[:tip_id],
+        contract_id: opts[:contract_id],
+        group_id: opts[:group_id]
+      )
+
+    %{debit: debit_tx, credit: credit_tx}
+  end
+
   def timesheet_factory do
     %Algora.Contracts.Timesheet{
       id: Nanoid.generate(),
@@ -251,11 +286,16 @@ defmodule Algora.Factory do
       provider_id: sequence(:provider_id, &"#{&1 + offset(:installation)}"),
       provider_user_id: sequence(:provider_user_id, &"#{&1 + offset(:installation)}"),
       provider_meta: %{
-        "account" => %{"avatar_url" => "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png"},
         "repository_selection" => "selected"
       },
-      avatar_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-logo.png",
       repository_selection: "selected"
+    }
+  end
+
+  def bot_template_factory do
+    %Algora.BotTemplates.BotTemplate{
+      id: Nanoid.generate(),
+      type: :bounty_created
     }
   end
 

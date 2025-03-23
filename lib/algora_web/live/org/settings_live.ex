@@ -4,7 +4,10 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.BotTemplates
+  alias Algora.BotTemplates.BotTemplate
   alias Algora.Github
+  alias Algora.Markdown
   alias Algora.Payments
   alias AlgoraWeb.Components.Logos
 
@@ -67,9 +70,9 @@ defmodule AlgoraWeb.Org.SettingsLive do
             <%= if @installations != [] do %>
               <%= for installation <- @installations do %>
                 <div class="flex items-center gap-2">
-                  <img src={installation.avatar_url} class="w-9 h-9 rounded-lg" />
+                  <img src={installation.provider_user.avatar_url} class="w-9 h-9 rounded-lg" />
                   <div>
-                    <p class="font-medium">{installation.provider_meta["account"]["login"]}</p>
+                    <p class="font-medium">{installation.provider_user.provider_login}</p>
                     <p class="text-sm text-muted-foreground">
                       Algora app is installed in <strong>{installation.repository_selection}</strong>
                       repositories
@@ -103,7 +106,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
                 <.input field={@form[:handle]} label="Handle" />
                 <p class="text-sm text-muted-foreground flex items-center gap-1.5">
                   <.icon name="tabler-alert-triangle" class="w-4 h-4" />
-                  Changing your handle can have unintended side effects.
+                  Changing your handle will break existing URLs and references to your organization pages. This includes links shared on social media, documentation, and other websites.
                 </p>
               </div>
               <.button class="ml-auto">Save</.button>
@@ -134,6 +137,53 @@ defmodule AlgoraWeb.Org.SettingsLive do
           </.simple_form>
         </.card_content>
       </.card>
+
+      <.card>
+        <.card_header>
+          <.card_title>Bot Templates</.card_title>
+          <.card_description>
+            Customize the messages that Algora bot sends on your repositories
+          </.card_description>
+        </.card_header>
+        <.card_content>
+          <.simple_form for={@template_form} phx-change="validate_template" phx-submit="save_template">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-2">
+                <h3 class="font-medium text-sm">Template</h3>
+                <div class="flex-1 [&>div]:h-full">
+                  <.input
+                    field={@template_form[:template]}
+                    type="textarea"
+                    class="h-full"
+                    phx-debounce="300"
+                  />
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <h3 class="font-medium text-sm">Preview</h3>
+                <div class="flex-1 rounded-lg border bg-muted/40 p-4">
+                  <div class="prose prose-sm max-w-none dark:prose-invert">
+                    {raw(@template_preview)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex flex-col gap-2">
+                <h3 class="font-medium text-xs">Available variables</h3>
+                <div class="flex flex-wrap gap-2">
+                  <%= for variable <- @available_variables do %>
+                    <.badge variant="outline" class="font-mono">
+                      {"#{"${#{variable}}"}"}
+                    </.badge>
+                  <% end %>
+                </div>
+              </div>
+              <.button class="ml-auto">Save template</.button>
+            </div>
+          </.simple_form>
+        </.card_content>
+      </.card>
     </div>
     """
   end
@@ -150,12 +200,24 @@ defmodule AlgoraWeb.Org.SettingsLive do
     changeset = User.settings_changeset(current_org, %{})
     installations = Algora.Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
+    template =
+      case BotTemplates.get_template(current_org.id, :bounty_created) do
+        nil -> BotTemplates.get_default_template(:bounty_created)
+        bot_template -> bot_template.template
+      end
+
+    template_changeset = BotTemplate.changeset(%BotTemplate{}, %{template: template, type: :bounty_created})
+    available_variables = BotTemplates.available_variables(:bounty_created)
+
     {:ok,
      socket
      |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
      |> assign(:installations, installations)
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign_has_default_payment_method()
+     |> assign(:template_form, to_form(template_changeset))
+     |> assign(:template_preview, preview_template(socket, template))
+     |> assign(:available_variables, available_variables)
      |> assign_form(changeset)}
   end
 
@@ -234,6 +296,36 @@ defmodule AlgoraWeb.Org.SettingsLive do
   end
 
   @impl true
+  def handle_event("validate_template", %{"bot_template" => params}, socket) do
+    template = params["template"]
+
+    changeset =
+      %BotTemplate{}
+      |> BotTemplate.changeset(%{template: template, type: :bounty_created})
+      |> Map.put(:action, :validate)
+
+    {:noreply,
+     socket
+     |> assign(:template_form, to_form(changeset))
+     |> assign(:template_preview, preview_template(socket, template))}
+  end
+
+  @impl true
+  def handle_event("save_template", %{"bot_template" => params}, socket) do
+    case BotTemplates.save_template(
+           socket.assigns.current_org.id,
+           :bounty_created,
+           params["template"]
+         ) do
+      {:ok, _template} ->
+        {:noreply, put_flash(socket, :info, "Template updated!")}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to update template")}
+    end
+  end
+
+  @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -249,4 +341,17 @@ defmodule AlgoraWeb.Org.SettingsLive do
   defp assign_has_default_payment_method(socket) do
     assign(socket, :has_default_payment_method, Payments.has_default_payment_method?(socket.assigns.current_org.id))
   end
+
+  defp preview_template(socket, template) when is_binary(template) do
+    placeholders = BotTemplates.placeholders(:bounty_created, socket.assigns.current_org)
+
+    preview =
+      Enum.reduce(placeholders, template, fn {key, value}, acc ->
+        String.replace(acc, "${#{key}}", value)
+      end)
+
+    Markdown.render(preview)
+  end
+
+  defp preview_template(_socket, _template), do: ""
 end

@@ -12,7 +12,15 @@ config :algora,
   description:
     "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
   ecto_repos: [Algora.Repo],
-  generators: [timestamp_type: :utc_datetime_usec]
+  generators: [timestamp_type: :utc_datetime_usec],
+  redirects: [
+    {"/discord", "https://discord.gg/9RXD2nqbnG"},
+    {"/sdk", "https://github.com/algora-io/sdk"},
+    {"/healthcare", "https://blog.algora.io/post/healthcare"},
+    {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},
+    {"/create/org", "/onboarding/org"},
+    {"/onboarding/solver", "/onboarding/dev"}
+  ]
 
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,
@@ -26,10 +34,12 @@ config :algora, AlgoraWeb.Endpoint,
   live_view: [signing_salt: "lTPawhId"]
 
 config :algora, Oban,
+  notifier: Oban.Notifiers.PG,
   repo: Algora.Repo,
   queues: [
     event_consumers: 1,
     comment_consumers: 1,
+    search_consumers: 1,
     github_og_image: 5,
     notify_bounty: 1,
     notify_tip_intent: 1,
@@ -144,6 +154,11 @@ config :tails,
   ]
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
+config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.HTTPoison
+
+config :algora, :ingest_url, System.get_env("INGEST_URL")
+config :algora, :assets_url, System.get_env("ASSETS_URL")
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

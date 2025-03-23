@@ -5,17 +5,15 @@ defmodule Algora.Activities.Activity do
   require Protocol
 
   @activity_types ~w{
-    contract_paid
     contract_prepaid
     contract_created
     contract_renewed
     identity_created
-    bounty_awarded
     bounty_posted
     bounty_repriced
     claim_submitted
     claim_approved
-    tip_awarded
+    transaction_succeeded
   }a
 
   typed_schema "activities" do

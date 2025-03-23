@@ -62,6 +62,8 @@ defmodule AlgoraWeb.Components.UI.Button do
     variant: %{
       "default" =>
         "bg-primary/50 hover:bg-primary/30 text-foreground border-primary/80 hover:border-primary focus-visible:outline-primary-600 data-[state=open]:bg-primary-500/80 data-[state=open]:outline-primary-600 shadow border",
+      "blue" =>
+        "bg-blue-500/50 hover:bg-blue-500/30 text-foreground border-blue-500/80 hover:border-blue-500 focus-visible:outline-blue-600 data-[state=open]:bg-blue-500/80 data-[state=open]:outline-blue-600 shadow border",
       "destructive" =>
         "bg-destructive/50 hover:bg-destructive/30 text-destructive-foreground border-destructive/80 hover:border-destructive focus-visible:outline-destructive-600 data-[state=open]:bg-destructive-500/80 data-[state=open]:outline-destructive-600 shadow border",
       "hover:destructive" =>
@@ -72,7 +74,8 @@ defmodule AlgoraWeb.Components.UI.Button do
       "secondary" =>
         "bg-secondary hover:bg-secondary/80 text-foreground border-secondary-foreground/20 hover:border-secondary-foreground/40 focus-visible:outline-secondary-foreground shadow border",
       "ghost" => "hover:bg-accent hover:text-accent-foreground",
-      "link" => "text-primary underline-offset-4 hover:underline"
+      "link" => "text-primary underline-offset-4 hover:underline",
+      "none" => ""
     },
     size: %{
       "default" => "h-9 px-4 py-2 text-sm",

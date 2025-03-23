@@ -38,7 +38,10 @@ defmodule AlgoraWeb.PricingLive do
   def render(assigns) do
     ~H"""
     <div class="pt-24 xl:pt-20 2xl:pt-28">
-      <Header.header />
+      <%= if @screenshot? do %>
+      <% else %>
+        <Header.header />
+      <% end %>
 
       <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12"></div>
 
@@ -334,7 +337,7 @@ defmodule AlgoraWeb.PricingLive do
                   <div class="flex items-center gap-4">
                     <a
                       class="relative flex h-12 w-12 shrink-0 items-center overflow-hidden rounded-xl"
-                      href="https://console.algora.io/org/triggerdotdev"
+                      href={~p"/org/triggerdotdev"}
                     >
                       <img
                         alt="Trigger.dev"
@@ -348,10 +351,7 @@ defmodule AlgoraWeb.PricingLive do
                       />
                     </a>
                     <div>
-                      <a
-                        class="text-base font-medium text-gray-100"
-                        href="https://console.algora.io/org/triggerdotdev"
-                      >
+                      <a class="text-base font-medium text-gray-100" href={~p"/org/triggerdotdev"}>
                         Trigger.dev (YC W23)
                       </a>
                       <a
@@ -464,14 +464,16 @@ defmodule AlgoraWeb.PricingLive do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     socket =
-      assign(socket,
+      socket
+      |> assign(
         page_title: "Pricing",
         plans: get_plans(),
         faq_items: get_faq_items(),
         active_faq: nil
       )
+      |> assign(:screenshot?, not is_nil(params["screenshot"]))
 
     {:ok, socket}
   end
@@ -667,7 +669,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "payment-methods",
         question: "What payment methods do you support?",
         answer:
-          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
+          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
       },
       %FaqItem{
         id: "payment-process",
@@ -709,7 +711,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "supported-countries",
         question: "Which countries are supported for contributors?",
         answer:
-          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">full list of supported countries</a>.)
+          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">full list of supported countries</a>.)
       }
     ]
   end
@@ -718,98 +720,68 @@ defmodule AlgoraWeb.PricingLive do
     ~H"""
     <div>
       <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-10 sm:gap-y-8">
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
+        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
           <Wordmarks.calcom class="w-[6rem] sm:w-[7rem] col-auto mt-1" alt="Cal.com" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/qdrant"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
           <Wordmarks.qdrant class="w-[6rem] sm:w-[7rem] col-auto" alt="Qdrant" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/remotion"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
           <img
             src="https://algora.io/banners/remotion.png"
             alt="Remotion"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
+        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
           <img
             src="https://algora.io/banners/zio.png"
             alt="ZIO"
             class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/triggerdotdev"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tembo"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
           <img
             src="https://algora.io/banners/tembo.png"
             alt="Tembo"
             class="w-[13rem] col-auto saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/maybe-finance"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
           <img
             src="https://algora.io/banners/maybe.png"
             alt="Maybe"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/golemcloud"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/aidenybai"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tailcallhq"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/highlight"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/dittofeed"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"
@@ -984,7 +956,7 @@ defmodule AlgoraWeb.PricingLive do
             <p class="mt-2 text-sm/6 text-gray-400">
               Receive payments directly to your bank account from all around the world
               <.link
-                href="https://docs.algora.io/bounties/payments#supported-countries-regions"
+                href={AlgoraWeb.Constants.get(:docs_supported_countries_url)}
                 class="font-medium text-foreground"
               >
                 ({ConnectCountries.count()} countries/regions supported)

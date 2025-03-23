@@ -1,4 +1,4 @@
-defmodule DatabaseMigration do
+defmodule Algora.Admin.Migration do
   @moduledoc """
   Database Migration Script
 
@@ -22,6 +22,7 @@ defmodule DatabaseMigration do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Admin
+  alias Algora.BotTemplates.BotTemplate
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -54,6 +55,7 @@ defmodule DatabaseMigration do
     {"BountyCharge", Transaction},
     {"BountyTransfer", Tip},
     {"BountyTransfer", Transaction},
+    {"BotMessage", BotTemplate},
     {"OrgBalanceTransaction", Transaction},
     {"GithubInstallation", Installation},
     {"StripeAccount", Account},
@@ -108,6 +110,7 @@ defmodule DatabaseMigration do
             "provider_id" => github_issue["id"],
             "provider_meta" => deserialize_value(github_issue),
             "type" => "issue",
+            "state" => github_issue["state"],
             "title" => github_issue["title"],
             "description" => github_issue["body"],
             "number" => github_issue["number"],
@@ -123,6 +126,7 @@ defmodule DatabaseMigration do
             "provider_id" => github_pull_request["id"],
             "provider_meta" => deserialize_value(github_pull_request),
             "type" => "pull_request",
+            "state" => github_pull_request["state"],
             "title" => github_pull_request["title"],
             "description" => github_pull_request["body"],
             "number" => github_pull_request["number"],
@@ -138,6 +142,7 @@ defmodule DatabaseMigration do
             "provider_id" => nil,
             "provider_meta" => nil,
             "type" => "issue",
+            "state" => nil,
             "title" => row["title"],
             "description" => row["body"],
             "number" => row["number"],
@@ -163,12 +168,11 @@ defmodule DatabaseMigration do
       "provider" => github_user && "github",
       "provider_id" => github_user && github_user["id"],
       "provider_login" => github_user && github_user["login"],
-      "provider_meta" => github_user && deserialize_value(github_user),
+      "provider_meta" => deserialize_value(github_user),
       "email" => row["email"],
       "display_name" => row["name"],
       "handle" => row["handle"],
       "avatar_url" => update_url(row["image"]),
-      "external_homepage_url" => nil,
       "type" => "individual",
       "bio" => github_user && github_user["bio"],
       "location" => row["loc"],
@@ -191,8 +195,8 @@ defmodule DatabaseMigration do
       "website_url" => nil,
       "twitter_url" => nil,
       "github_url" => nil,
-      "youtube_url" => row["youtube_handle"] && "https://www.youtube.com/#{row["youtube_handle"]}",
-      "twitch_url" => row["twitch_handle"] && "https://www.twitch.tv/#{row["twitch_handle"]}",
+      "youtube_url" => if(not nullish?(row["youtube_handle"]), do: "https://www.youtube.com/#{row["youtube_handle"]}"),
+      "twitch_url" => if(not nullish?(row["twitch_handle"]), do: "https://www.twitch.tv/#{row["twitch_handle"]}"),
       "discord_url" => nil,
       "slack_url" => nil,
       "linkedin_url" => nil,
@@ -202,6 +206,7 @@ defmodule DatabaseMigration do
       "need_avatar" => nil,
       "inserted_at" => row["created_at"],
       "updated_at" => row["updated_at"],
+      "last_active_at" => row["last_activity_at"],
       "is_admin" => row["is_admin"]
     }
   end
@@ -212,15 +217,14 @@ defmodule DatabaseMigration do
     if not user?(merged_user) do
       %{
         "id" => row["id"],
-        "provider" => row["github_handle"] && "github",
+        "provider" => if(not nullish?(row["github_handle"]), do: "github"),
         "provider_id" => row["github_id"],
         "provider_login" => row["github_handle"],
-        "provider_meta" => row["github_data"] && deserialize_value(row["github_data"]),
+        "provider_meta" => deserialize_value(row["github_data"]),
         "email" => nil,
         "display_name" => row["name"],
         "handle" => row["handle"],
         "avatar_url" => update_url(row["avatar_url"]),
-        "external_homepage_url" => nil,
         "type" => "organization",
         "bio" => row["description"],
         "location" => nil,
@@ -229,7 +233,7 @@ defmodule DatabaseMigration do
         "stargazers_count" => row["stargazers_count"],
         "domain" => row["domain"],
         "tech_stack" => row["tech"],
-        "featured" => row["featured"],
+        "featured" => true?(row["featured"]) and not true?(row["is_personal"]) and not nullish?(row["avatar_url"]),
         "priority" => row["priority"],
         "fee_pct" => row["fee_pct"],
         "seeded" => row["seeded"],
@@ -247,7 +251,7 @@ defmodule DatabaseMigration do
         "hours_per_week" => nil,
         "website_url" => row["website_url"],
         "twitter_url" => row["twitter_url"],
-        "github_url" => nil,
+        "github_url" => if(not nullish?(row["github_handle"]), do: "https://github.com/#{row["github_handle"]}"),
         "youtube_url" => row["youtube_url"],
         "twitch_url" => nil,
         "discord_url" => row["discord_url"],
@@ -273,11 +277,16 @@ defmodule DatabaseMigration do
         "provider_login" => row["login"],
         "provider_meta" => deserialize_value(row),
         "email" => nil,
-        "display_name" => row["name"],
+        "display_name" => if(nullish?(row["name"]), do: row["login"], else: row["name"]),
         "handle" => nil,
         "avatar_url" => row["avatar_url"],
-        "external_homepage_url" => nil,
-        "type" => "individual",
+        "type" =>
+          case row["type"] do
+            "Bot" -> "bot"
+            "Organization" -> "organization"
+            "User" -> "individual"
+            _ -> raise "Unknown user type: #{inspect(row)}"
+          end,
         "bio" => row["bio"],
         "location" => row["location"],
         "country" => nil,
@@ -297,8 +306,9 @@ defmodule DatabaseMigration do
         "hourly_rate_max" => nil,
         "hours_per_week" => nil,
         "website_url" => nil,
-        "twitter_url" => row["twitter_username"] && "https://www.twitter.com/#{row["twitter_username"]}",
-        "github_url" => nil,
+        "twitter_url" =>
+          if(not nullish?(row["twitter_username"]), do: "https://www.twitter.com/#{row["twitter_username"]}"),
+        "github_url" => row["html_url"],
         "youtube_url" => nil,
         "twitch_url" => nil,
         "discord_url" => nil,
@@ -451,28 +461,30 @@ defmodule DatabaseMigration do
       raise "User not found: #{inspect(row)}"
     end
 
-    %{
-      "id" => row["id"],
-      "status" =>
-        case row["status"] do
-          "accepted" -> :approved
-          _ -> :pending
-        end,
-      "type" =>
-        cond do
-          !nullish?(row["github_pull_request_id"]) -> "pull_request"
-          String.match?(row["github_url"], ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
-          true -> "pull_request"
-        end,
-      "url" => or_else(row["github_url"], "https://algora.io"),
-      "group_id" => row["id"],
-      "group_share" => nil,
-      "source_id" => nil,
-      "target_id" => task["id"],
-      "user_id" => user_id,
-      "inserted_at" => row["created_at"],
-      "updated_at" => row["updated_at"]
-    }
+    if bounty["type"] != "tip" do
+      %{
+        "id" => row["id"],
+        "status" =>
+          case row["status"] do
+            "accepted" -> :approved
+            _ -> :pending
+          end,
+        "type" =>
+          cond do
+            !nullish?(row["github_pull_request_id"]) -> "pull_request"
+            String.match?(row["github_url"], ~r{^https?://(?:www\.)?figma\.com/}) -> "design"
+            true -> "pull_request"
+          end,
+        "url" => or_else(row["github_url"], "https://algora.io"),
+        "group_id" => row["id"],
+        "group_share" => nil,
+        "source_id" => nil,
+        "target_id" => task["id"],
+        "user_id" => user_id,
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"]
+      }
+    end
   end
 
   defp transform({"BountyCharge", Transaction}, row, db) do
@@ -550,7 +562,7 @@ defmodule DatabaseMigration do
       %{
         "id" => bounty["id"] <> user_id,
         "amount" => amount,
-        "status" => nil,
+        "status" => :paid,
         "ticket_id" => bounty["task_id"],
         "owner_id" => owner["id"],
         "creator_id" => bounty["poster_id"],
@@ -619,6 +631,33 @@ defmodule DatabaseMigration do
     end
   end
 
+  defp transform({"BotMessage", BotTemplate}, row, db) do
+    user = find_by_index(db, "_MergedUser", "id", row["org_id"])
+
+    if !user do
+      raise "User not found: #{inspect(row)}"
+    end
+
+    type =
+      case row["type"] do
+        "dev_bounty_created" -> "bounty_created"
+        "design_bounty_created" -> nil
+        type -> type
+      end
+
+    if type do
+      %{
+        "id" => row["id"],
+        "inserted_at" => row["created_at"],
+        "updated_at" => row["updated_at"],
+        "active" => row["active"],
+        "template" => row["template"],
+        "type" => type,
+        "user_id" => user["id"]
+      }
+    end
+  end
+
   defp transform({"OrgBalanceTransaction", Transaction}, row, db) do
     user = find_by_index(db, "_MergedUser", "id", row["org_id"])
 
@@ -682,7 +721,6 @@ defmodule DatabaseMigration do
       "provider" => "github",
       "provider_id" => row["github_id"],
       "provider_meta" => nil,
-      "avatar_url" => nil,
       "repository_selection" => nil,
       "owner_id" => nil,
       "connected_user_id" => connected_user["id"],
@@ -871,7 +909,7 @@ defmodule DatabaseMigration do
     end
   end
 
-  def process_dump(input_file, output_file) do
+  def remap_dump(input_file, output_file) do
     db = collect_data(input_file)
 
     input_file
@@ -1131,7 +1169,6 @@ defmodule DatabaseMigration do
       |> Map.take(Enum.map(Map.keys(default_fields), &Atom.to_string/1))
       |> Map.new(fn {k, v} -> {String.to_existing_atom(k), v} end)
 
-    # TODO: do we need this?
     fields = ensure_unique_handle(fields)
 
     Map.merge(default_fields, fields)
@@ -1179,65 +1216,26 @@ defmodule DatabaseMigration do
   defp serialize_value(%Decimal{} = value), do: Decimal.to_string(value)
 
   defp serialize_value(value) when is_map(value) or is_list(value) do
-    json = Jason.encode!(value, escape: :json)
-    # Handle empty arrays specifically
-    if json == "[]" do
-      "{}"
-    else
-      # Escape backslashes and double quotes for PostgreSQL COPY
-      String.replace(json, ["\\", "\""], fn
-        "\\" -> "\\\\"
-        "\"" -> "\\\""
-      end)
+    case Jason.encode(value) do
+      {:ok, json} ->
+        if json == "[]" do
+          "{}"
+        else
+          # Escape backslashes and double quotes for PostgreSQL COPY
+          String.replace(json, ["\\", "\""], fn
+            "\\" -> "\\\\"
+            "\"" -> "\\\""
+          end)
+        end
+
+      {:error, _} ->
+        inspect(value)
     end
-  rescue
-    _ ->
-      # Fallback to a safe string representation
-      value
-      |> inspect(limit: :infinity, printable_limit: :infinity)
-      |> String.replace(["\\", "\n", "\r", "\t"], fn
-        "\\" -> "\\\\"
-        "\n" -> "\\n"
-        "\r" -> "\\r"
-        "\t" -> "\\t"
-      end)
-      |> String.replace("\"", "\\\"")
   end
 
-  defp serialize_value(value) when is_nil(value), do: "\\N"
-
-  defp serialize_value(value) when is_binary(value) do
-    # Remove any surrounding quotes for numeric values
-    value =
-      if String.starts_with?(value, "\"") and String.ends_with?(value, "\"") do
-        String.slice(value, 1..-2//1)
-      else
-        value
-      end
-
-    String.replace(value, ["\\", "\n", "\r", "\t"], fn
-      "\\" -> "\\\\"
-      "\n" -> "\\n"
-      "\r" -> "\\r"
-      "\t" -> "\\t"
-    end)
-  end
+  defp serialize_value(nil), do: "\\N"
 
   defp serialize_value(value), do: to_string(value)
-
-  # defp extract_default_fields(schema) do
-  #   schema.__schema__(:fields)
-  #   |> Enum.filter(fn field ->
-  #     case schema.__schema__(:field, field) do
-  #       {:default, _} -> true
-  #       _ -> false
-  #     end
-  #   end)
-  #   |> Enum.map(fn field ->
-  #     {field, schema.__schema__(:field, field) |> elem(1)}
-  #   end)
-  #   |> Enum.into(%{})
-  # end
 
   defp update_url(url) do
     case url do
@@ -1390,35 +1388,62 @@ defmodule DatabaseMigration do
     :ok
   end
 
-  def run! do
-    System.put_env("MIGRATION", "true")
+  def run!(timestamp \\ nil, opts \\ [])
 
-    pwd = ".local/db"
+  def run!(nil, opts) do
+    run!(Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S"), opts)
+  end
+
+  def run!(:last, opts) do
+    timestamp =
+      [:code.priv_dir(:algora), "db"]
+      |> Path.join()
+      |> File.ls!()
+      |> Enum.filter(&String.starts_with?(&1, dump_prefix()))
+      |> List.last()
+      |> String.replace_prefix(dump_prefix(), "")
+      |> String.replace_suffix(".sql", "")
+
+    run!(timestamp, Keyword.put(opts, :skip_dump, true))
+  end
+
+  def run!(timestamp, opts) do
+    Process.delete(:handles)
+    Algora.Settings.set_migration_in_progress!(true)
+
+    pwd = Path.join([:code.priv_dir(:algora), "db"])
     File.mkdir_p!(pwd)
 
-    timestamp =
-      case System.argv() do
-        [timestamp | _] -> timestamp
-        [] -> Calendar.strftime(DateTime.utc_now(), "%Y-%m-%d-%H-%M-%S")
+    input_path = Path.join(pwd, "#{dump_prefix()}#{timestamp}.sql")
+    output_path = Path.join(pwd, "#{load_prefix()}#{timestamp}.sql")
+
+    time_step("Migrating database", fn ->
+      if !opts[:skip_dump] do
+        :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
       end
 
-    input_path = Path.join(pwd, "v1-data-#{timestamp}.sql")
-    output_path = Path.join(pwd, "v2-data-#{timestamp}.sql")
+      if !opts[:skip_remap] do
+        :ok = time_step("Remapping dump", fn -> remap_dump(input_path, output_path) end)
+      end
 
-    IO.puts("⏳ Starting migration...")
+      :ok = time_step("Clearing tables", fn -> clear_tables!() end)
+      {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
+      :ok = time_step("Backfilling users", fn -> Admin.backfill_users!() end)
+      :ok = time_step("Backfilling installations", fn -> Admin.backfill_installations!() end)
+      :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
+      :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
+      :ok = time_step("Backfilling tickets", fn -> Admin.backfill_tickets!() end)
+      :ok = time_step("Backfilling repo tech stack", fn -> Admin.backfill_repo_tech_stack!() end)
+      :ok = time_step("Backfilling repo contributors", fn -> Admin.backfill_repo_contributors!() end)
+    end)
 
-    {total_time, _} =
-      :timer.tc(fn ->
-        :ok = time_step("Dumping database", fn -> dump_database!(input_path) end)
-        :ok = time_step("Processing dump", fn -> process_dump(input_path, output_path) end)
-        :ok = time_step("Clearing tables", fn -> clear_tables!() end)
-        {:ok, _} = time_step("Importing new data", fn -> psql(["-f", output_path]) end)
-        :ok = time_step("Backfilling repositories", fn -> Admin.backfill_repos!() end)
-        :ok = time_step("Backfilling claims", fn -> Admin.backfill_claims!() end)
-      end)
-
-    IO.puts("✅ Migration completed successfully in #{total_time / 1_000_000} seconds")
+    Algora.Settings.set_migration_in_progress!(false)
   end
-end
 
-DatabaseMigration.run!()
+  def reset! do
+    clear_tables!()
+  end
+
+  defp dump_prefix, do: "v1-data-"
+  defp load_prefix, do: "v2-data-"
+end

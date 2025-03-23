@@ -1,16 +1,35 @@
 defmodule AlgoraWeb.User.DashboardLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
   import AlgoraWeb.Components.Achievement
   import AlgoraWeb.Components.Bounties
+  import Ecto.Changeset
 
   alias Algora.Accounts.User
   alias Algora.Bounties
-  alias Algora.Bounties.Bounty
   alias Algora.Payments
   alias Algora.Payments.Account
+  alias Algora.Repo
 
+  defmodule SettingsForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :tech_stack, {:array, :string}
+    end
+
+    def changeset(form, attrs) do
+      cast(form, attrs, [:tech_stack])
+    end
+  end
+
+  @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
@@ -24,6 +43,11 @@ defmodule AlgoraWeb.User.DashboardLive do
         _ -> false
       end
 
+    settings_form =
+      %SettingsForm{}
+      |> SettingsForm.changeset(%{tech_stack: socket.assigns.current_user.tech_stack})
+      |> to_form()
+
     socket =
       socket
       |> assign(:view_mode, "compact")
@@ -31,176 +55,178 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:hourly_rate, Money.new!(50, :USD))
       |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
-      |> assign(:has_more_bounties, false)
       |> assign(:has_active_account, has_active_account)
+      |> assign(:settings_form, settings_form)
       |> assign_bounties()
       |> assign_achievements()
 
     {:ok, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex-1 bg-background text-foreground lg:pr-96">
-      <div :if={not @has_active_account} class="relative h-full p-6">
-        <.section>
-          <.card>
-            <.card_header>
-              <.card_title>Connect with Stripe</.card_title>
-              <.card_description>
-                Connect your Stripe account to receive payments for bounties and contracts
-              </.card_description>
-            </.card_header>
-            <.card_content>
-              <div class="flex flex-col gap-3">
-                <.button navigate={~p"/user/transactions"} class="ml-auto">
-                  Connect with Stripe <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2 -mr-1" />
-                </.button>
-              </div>
-            </.card_content>
-          </.card>
-        </.section>
-      </div>
-      <!-- Contracts section -->
-      <div :if={length(@contracts) > 0} class="relative h-full p-6">
-        <div class="flex justify-between">
-          <div class="flex flex-col space-y-1.5">
-            <h2 class="text-2xl font-semibold leading-none tracking-tight">
-              Hourly contracts
-            </h2>
-            <p class="text-sm text-muted-foreground">Paid out weekly</p>
-          </div>
+    <div class="flex lg:flex-row flex-col-reverse">
+      <div class="flex-1 bg-background text-foreground lg:pr-96">
+        <div :if={not @has_active_account} class="p-4 sm:p-6 md:p-8">
+          <.section>
+            <.card>
+              <.card_header>
+                <.card_title>Connect with Stripe</.card_title>
+                <.card_description>
+                  Connect your Stripe account to receive payments for bounties and contracts
+                </.card_description>
+              </.card_header>
+              <.card_content>
+                <div class="flex flex-col gap-3">
+                  <.button navigate={~p"/user/transactions"} class="ml-auto">
+                    Connect with Stripe <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2 -mr-1" />
+                  </.button>
+                </div>
+              </.card_content>
+            </.card>
+          </.section>
         </div>
-        <div class="-ml-4">
-          <div class="relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <tbody>
-                <%= for contract <- @contracts do %>
-                  <.contract_card contract={contract} />
-                <% end %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <!-- Bounties section -->
-      <div :if={length(@bounties) > 0} class="relative h-full p-6">
-        <.section title="Open bounties" subtitle="Bounties for you">
-          <div id="bounties-container" phx-hook="InfiniteScroll">
-            <.bounties bounties={@bounties} />
-            <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
-              <div class="animate-pulse text-muted-foreground">
-                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
-              </div>
+        <!-- Contracts section -->
+        <div :if={length(@contracts) > 0} class="p-4 sm:p-6 md:p-8">
+          <div class="flex justify-between">
+            <div class="flex flex-col space-y-1.5">
+              <h2 class="text-2xl font-semibold leading-none tracking-tight">
+                Hourly contracts
+              </h2>
+              <p class="text-sm text-muted-foreground">Paid out weekly</p>
             </div>
           </div>
-        </.section>
-      </div>
-    </div>
-    <!-- Sidebar -->
-    <aside class="fixed top-16 right-0 bottom-0 hidden w-96 overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:block">
-      <!-- Availability Section -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <label for="available" class="text-sm font-medium">Available to work</label>
-          <.tooltip>
-            <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
-            <.tooltip_content side="bottom" class="max-w-xs text-sm">
-              When enabled, you will receive hourly contract offers
-            </.tooltip_content>
-          </.tooltip>
+          <div class="-ml-4">
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for contract <- @contracts do %>
+                    <.contract_card contract={contract} />
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <.switch
-          id="available"
-          name="available"
-          value={@available_to_work}
-          phx-click="toggle_availability"
-        />
+        <!-- Bounties section -->
+        <div class="p-4 sm:p-6 md:p-8">
+          <div class="flex items-end justify-between pb-2">
+            <div class="flex flex-col space-y-1.5">
+              <h2 class="text-2xl font-semibold leading-none tracking-tight">Open bounties</h2>
+              <p class="text-sm text-muted-foreground">Bounties for you</p>
+            </div>
+          </div>
+          <%= if length(@bounties) > 0 do %>
+            <div id="bounties-container" phx-hook="InfiniteScroll">
+              <.bounties bounties={@bounties} />
+              <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+                <div class="animate-pulse text-muted-foreground">
+                  <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <.card class="text-center">
+              <.card_header>
+                <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                  <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
+                </div>
+                <.card_title>No bounties for your tech stack</.card_title>
+                <.card_description>
+                  Update your tech stack to see bounties for other tech stacks
+                </.card_description>
+              </.card_header>
+            </.card>
+          <% end %>
+        </div>
       </div>
-      <div class="mt-4 grid grid-cols-2 gap-4">
-        <div>
-          <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
-          <div class="relative mt-2">
-            <span class="font-display absolute top-1/2 left-3 -translate-y-1/2">
-              $
-            </span>
+      <!-- Sidebar -->
+      <aside class="lg:fixed lg:top-16 lg:right-0 lg:bottom-0 lg:w-96 lg:overflow-y-auto lg:border-l lg:border-border lg:bg-background p-4 pt-6 sm:p-6 md:p-8">
+        <!-- Availability Section -->
+        <%!-- <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <label for="available" class="text-sm font-medium">Available to work</label>
+            <.tooltip>
+              <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
+              <.tooltip_content side="bottom" class="max-w-xs text-sm">
+                When enabled, you will receive hourly contract offers
+              </.tooltip_content>
+            </.tooltip>
+          </div>
+          <.switch
+            id="available"
+            name="available"
+            value={@available_to_work}
+            phx-click="toggle_availability"
+          />
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-4">
+          <div>
+            <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
+            <div class="relative mt-2">
+              <span class="font-display absolute top-1/2 left-3 -translate-y-1/2">
+                $
+              </span>
+              <.input
+                type="number"
+                min="0"
+                id="hourly-rate"
+                name="hourly-rate"
+                value={@hourly_rate}
+                phx-keydown="handle_hourly_rate"
+                phx-debounce="200"
+                phx-hook="ClearInput"
+                class="font-display w-full border-input bg-background ps-6"
+              />
+            </div>
+          </div>
+          <div>
+            <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
             <.input
               type="number"
               min="0"
-              id="hourly-rate"
-              name="hourly-rate"
-              value={@hourly_rate}
-              phx-keydown="handle_hourly_rate"
+              max="168"
+              id="hours-per-week"
+              name="hours-per-week"
+              value={@hours_per_week}
+              phx-keydown="handle_hours_per_week"
               phx-debounce="200"
-              phx-hook="ClearInput"
-              class="font-display w-full border-input bg-background ps-6"
+              class="font-display mt-2 w-full border-input bg-background"
             />
           </div>
-        </div>
-        <div>
-          <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
-          <.input
-            type="number"
-            min="0"
-            max="168"
-            id="hours-per-week"
-            name="hours-per-week"
-            value={@hours_per_week}
-            phx-keydown="handle_hours_per_week"
-            phx-debounce="200"
-            class="font-display mt-2 w-full border-input bg-background"
+        </div> --%>
+        <!-- Tech Stack Section -->
+        <.form for={@settings_form}>
+          <h2 class="mb-2 text-xl font-semibold">
+            Tech stack
+          </h2>
+          <.TechStack
+            class="mt-4"
+            tech={get_field(@settings_form.source, :tech_stack)}
+            socket={@socket}
+            form="settings_form"
           />
+
+          <.error :for={msg <- @settings_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
+            {msg}
+          </.error>
+        </.form>
+        <!-- Achievements Section -->
+        <div class="hidden lg:block mt-8">
+          <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
+          <nav class="pt-4">
+            <ol role="list" class="space-y-6">
+              <%= for achievement <- @achievements do %>
+                <li>
+                  <.achievement achievement={achievement} />
+                </li>
+              <% end %>
+            </ol>
+          </nav>
         </div>
-      </div>
-      <!-- Tech Stack Section -->
-      <div class="mt-4">
-        <label for="tech-input" class="text-sm font-medium">Tech stack</label>
-        <.input
-          id="tech-input"
-          name="tech-input"
-          value=""
-          type="text"
-          placeholder="Elixir, Phoenix, PostgreSQL, etc."
-          phx-keydown="handle_tech_input"
-          phx-debounce="200"
-          phx-hook="ClearInput"
-          class="mt-2 w-full border-input bg-background"
-        />
-        <div class="mt-4 flex flex-wrap gap-3">
-          <%= for tech <- @current_user.tech_stack do %>
-            <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
-              {tech}
-              <button
-                phx-click="remove_tech"
-                phx-value-tech={tech}
-                class="ml-1 text-foreground hover:text-foreground/80"
-              >
-                ×
-              </button>
-            </div>
-          <% end %>
-        </div>
-      </div>
-      <!-- Achievements Section -->
-      <div class="mt-8 flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
-        <.link
-          class="whitespace-pre text-sm text-muted-foreground hover:underline hover:brightness-125"
-          href="#"
-        >
-          View all
-        </.link>
-      </div>
-      <nav class="pt-4">
-        <ol role="list" class="space-y-6">
-          <%= for achievement <- @achievements do %>
-            <li>
-              <.achievement achievement={achievement} />
-            </li>
-          <% end %>
-        </ol>
-      </nav>
-    </aside>
+      </aside>
+    </div>
     """
   end
 
@@ -209,8 +235,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       {&personalize_status/1, "Personalize Algora", nil},
       {&setup_stripe_status/1, "Create Stripe account", ~p"/user/transactions"},
       {&earn_first_bounty_status/1, "Earn first bounty", ~p"/bounties"},
-      {&earn_through_referral_status/1, "Earn through referral", nil},
-      {&earn_10k_status/1, "Earn $10K", ~p"/bounties"}
+      {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 
     {achievements, _} =
@@ -249,16 +274,7 @@ defmodule AlgoraWeb.User.DashboardLive do
     end
   end
 
-  # TODO: implement referral earnings check
-  defp earn_through_referral_status(_socket), do: :upcoming
-
-  defp earn_10k_status(socket) do
-    if earned?(socket.assigns.current_user, Money.new!(10_000, :USD)) do
-      :completed
-    else
-      :upcoming
-    end
-  end
+  defp share_with_friend_status(_socket), do: :upcoming
 
   defp earned?(user, amount) do
     cond do
@@ -268,160 +284,76 @@ defmodule AlgoraWeb.User.DashboardLive do
     end
   end
 
-  def handle_event("handle_tech_input", %{"key" => "Enter", "value" => tech}, socket) when byte_size(tech) > 0 do
-    tech_stack = Enum.uniq([String.trim(tech) | socket.assigns.tech_stack])
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))
-     |> push_event("clear-input", %{selector: "[phx-keydown='handle_tech_input']"})}
-  end
-
-  def handle_event("handle_tech_input", _params, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_event("remove_tech", %{"tech" => tech}, socket) do
-    tech_stack = List.delete(socket.assigns.tech_stack, tech)
-
-    {:noreply,
-     socket
-     |> assign(:tech_stack, tech_stack)
-     |> assign(:bounties, Bounties.list_bounties(tech_stack: tech_stack, limit: 10))}
-  end
-
+  @impl true
   def handle_event("view_mode", %{"value" => mode}, socket) do
     {:noreply, assign(socket, :view_mode, mode)}
   end
 
+  @impl true
   def handle_event("view_contract", %{"org" => _org_handle}, socket) do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("load_more", _params, socket) do
-    %{bounties: bounties, current_user: current_user} = socket.assigns
-
-    last_bounty = List.last(bounties)
-
-    cursor = %{
-      inserted_at: last_bounty.inserted_at,
-      id: last_bounty.id
-    }
-
-    more_bounties =
-      Bounties.list_bounties(
-        status: :open,
-        tech_stack: current_user.tech_stack,
-        limit: page_size(),
-        before: cursor
-      )
-
-    {:noreply,
-     socket
-     |> assign(:bounties, bounties ++ more_bounties)
-     |> assign(:has_more_bounties, length(more_bounties) >= page_size())}
+    {:noreply, assign_more_bounties(socket)}
   end
 
+  @impl true
+  def handle_event("tech_stack_changed", params, socket) do
+    case socket.assigns.current_user
+         |> User.settings_changeset(%{tech_stack: params["tech_stack"]})
+         |> Repo.update() do
+      {:ok, user} ->
+        {:noreply, socket |> assign(:current_user, user) |> assign_bounties()}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :settings_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
   def handle_info(:bounties_updated, socket) do
-    {:noreply, assign_bounties(socket)}
+    {:noreply, socket}
   end
 
   defp assign_bounties(socket) do
-    bounties =
-      Bounties.list_bounties(
-        status: :open,
-        tech_stack: socket.assigns.current_user.tech_stack,
-        limit: page_size()
-      )
+    query_opts = [
+      status: :open,
+      limit: page_size(),
+      current_user: socket.assigns.current_user,
+      tech_stack: socket.assigns.current_user.tech_stack,
+      amount_gt: Money.new(:USD, 200)
+    ]
+
+    bounties = Bounties.list_bounties(query_opts)
 
     socket
     |> assign(:bounties, bounties)
+    |> assign(:query_opts, query_opts)
     |> assign(:has_more_bounties, length(bounties) >= page_size())
+  end
+
+  defp assign_more_bounties(socket) do
+    %{bounties: bounties} = socket.assigns
+
+    query_opts =
+      Keyword.put(socket.assigns.query_opts, :before, %{
+        inserted_at: List.last(bounties).inserted_at,
+        id: List.last(bounties).id
+      })
+
+    more_bounties = Bounties.list_bounties(query_opts)
+
+    socket
+    |> assign(:bounties, bounties ++ more_bounties)
+    |> assign(:query_opts, query_opts)
+    |> assign(:has_more_bounties, length(more_bounties) >= page_size())
   end
 
   defp page_size, do: 10
 
-  def compact_view(assigns) do
-    ~H"""
-    <tr class="h-10 border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 py-0 align-middle">
-        <div class="flex items-center gap-4">
-          <div class="font-display shrink-0 whitespace-nowrap text-base font-semibold text-success">
-            {Money.to_string!(@bounty.amount)}
-          </div>
-
-          <.link
-            href={@bounty.ticket.url}
-            class="max-w-[400px] truncate text-sm text-foreground hover:underline"
-          >
-            {@bounty.ticket.title}
-          </.link>
-
-          <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
-            <.link navigate={User.url(@bounty.owner)} class="font-semibold hover:underline">
-              {@bounty.owner.name}
-            </.link>
-            <.icon name="tabler-chevron-right" class="h-4 w-4" />
-            <.link href={@bounty.ticket.url} class="hover:underline">
-              {Bounty.path(@bounty)}
-            </.link>
-          </div>
-        </div>
-      </td>
-    </tr>
-    """
-  end
-
-  def default_view(assigns) do
-    ~H"""
-    <tr class="border-b transition-colors hover:bg-muted/10">
-      <td class="p-4 align-middle">
-        <div class="flex items-center gap-4">
-          <.link navigate={User.url(@bounty.owner)}>
-            <.avatar class="h-14 w-14 rounded-xl">
-              <.avatar_image src={@bounty.owner.avatar_url} alt={@bounty.owner.name} />
-              <.avatar_fallback>
-                {Algora.Util.initials(@bounty.owner.name)}
-              </.avatar_fallback>
-            </.avatar>
-          </.link>
-
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-1 text-sm text-muted-foreground">
-              <.link navigate={User.url(@bounty.owner)} class="font-semibold hover:underline">
-                {@bounty.owner.name}
-              </.link>
-              <.icon name="tabler-chevron-right" class="h-4 w-4" />
-              <.link href={@bounty.ticket.url} class="hover:underline">
-                {Bounty.path(@bounty)}
-              </.link>
-            </div>
-
-            <.link href={@bounty.ticket.url} class="group flex items-center gap-2">
-              <div class="font-display text-xl font-semibold text-success">
-                {Money.to_string!(@bounty.amount)}
-              </div>
-              <div class="line-clamp-1 text-foreground group-hover:underline">
-                {@bounty.ticket.title}
-              </div>
-            </.link>
-
-            <div class="flex flex-wrap gap-2">
-              <%= for tag <- @bounty.owner.tech_stack do %>
-                <span class="text-sm text-muted-foreground">
-                  {tag}
-                </span>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>
-    """
-  end
-
-  def contract_card(assigns) do
+  defp contract_card(assigns) do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
       <td class="p-4 align-middle">

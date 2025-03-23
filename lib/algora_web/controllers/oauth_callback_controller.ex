@@ -6,14 +6,6 @@ defmodule AlgoraWeb.OAuthCallbackController do
 
   require Logger
 
-  defp welcome_message(user) do
-    if user.name do
-      "Welcome, #{user.name |> String.split() |> List.first() |> String.capitalize()}!"
-    else
-      "Welcome, #{user.handle}!"
-    end
-  end
-
   def translate_error(:invalid), do: "Unable to verify your login request. Please try signing in again"
   def translate_error(:expired), do: "Your login link has expired. Please request a new one to continue"
   def translate_error(%Ecto.Changeset{}), do: "We were unable to fetch the necessary information from your GitHub account"
@@ -33,7 +25,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
     with {:ok, data} <- res,
          {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
-         {:ok, user} <- Accounts.register_github_user(primary, info, emails, token) do
+         {:ok, user} <- Accounts.register_github_user(conn.assigns[:current_user], primary, info, emails, token) do
       if socket_id do
         Phoenix.PubSub.broadcast(Algora.PubSub, "auth:#{socket_id}", {:authenticated, user})
       end
@@ -45,10 +37,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
           |> render(:success)
 
         :redirect ->
-          conn =
-            conn
-            |> put_flash(:info, welcome_message(user))
-            |> AlgoraWeb.UserAuth.put_current_user(user)
+          conn = AlgoraWeb.UserAuth.put_current_user(conn, user)
 
           redirect(conn, to: data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
       end
@@ -100,9 +89,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
           conn
         end
 
-      conn
-      |> put_flash(:info, welcome_message(user))
-      |> AlgoraWeb.UserAuth.log_in_user(user)
+      AlgoraWeb.UserAuth.log_in_user(conn, user)
     else
       {:error, %Ecto.Changeset{} = changeset} ->
         Logger.debug("failed GitHub insert #{inspect(changeset.errors)}")

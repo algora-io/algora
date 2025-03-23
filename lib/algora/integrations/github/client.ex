@@ -8,11 +8,9 @@ defmodule Algora.Github.Client do
 
   @type token :: String.t()
 
-  defp migration?, do: System.get_env("MIGRATION", "false") == "true"
-
   def http(host, method, path, headers, body) do
     # TODO: remove after migration
-    if migration?() do
+    if Algora.Settings.migration_in_progress?() do
       run_cached(path, fn -> do_http_request(host, method, path, headers, body) end)
     else
       do_http_request(host, method, path, headers, body)
@@ -67,7 +65,7 @@ defmodule Algora.Github.Client do
     end
   end
 
-  defp get_cache_path(path), do: ".local/github/#{path}.bin"
+  defp get_cache_path(path), do: Path.join([:code.priv_dir(:algora), "github", path <> ".bin"])
 
   defp maybe_retry({:ok, %{"message" => "Moved Permanently"}}), do: :not_found
   defp maybe_retry({:ok, data}), do: {:ok, data}
@@ -196,8 +194,19 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def get_installation(installation_id) do
+    path = "/app/installations/#{installation_id}"
+
+    with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
+         {:ok, %{"token" => token}} <- fetch(jwt, path, "GET") do
+      {:ok, token}
+    end
+  end
+
+  @impl true
   def list_installation_repos(access_token) do
-    with {:ok, %{"repositories" => repos}} <- fetch(access_token, "/installation/repositories", "GET") do
+    with {:ok, %{"repositories" => repos}} <-
+           fetch(access_token, "/installation/repositories", "GET") do
       {:ok, repos}
     end
   end
@@ -233,7 +242,19 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def list_repository_languages(access_token, owner, repo) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/languages")
+  end
+
+  @impl true
+  def list_repository_contributors(access_token, owner, repo) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/contributors")
+  end
+
+  @impl true
   def add_labels(access_token, owner, repo, number, labels) do
-    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{labels: labels})
+    fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}/labels", "POST", %{
+      labels: labels
+    })
   end
 end

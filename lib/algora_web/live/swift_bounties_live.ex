@@ -11,59 +11,13 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Repo
-  alias Algora.Types.USD
-  alias Algora.Validations
   alias Algora.Workspace
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.TipForm
   alias AlgoraWeb.UserAuth
 
   require Logger
-
-  defmodule BountyForm do
-    @moduledoc false
-    use Ecto.Schema
-
-    import Ecto.Changeset
-
-    embedded_schema do
-      field :url, :string
-      field :amount, USD
-
-      embeds_one :ticket_ref, TicketRef, primary_key: false do
-        field :owner, :string
-        field :repo, :string
-        field :number, :integer
-        field :type, :string
-      end
-    end
-
-    def changeset(form, attrs \\ %{}) do
-      form
-      |> cast(attrs, [:url, :amount])
-      |> validate_required([:url, :amount])
-      |> Validations.validate_money_positive(:amount)
-      |> Validations.validate_ticket_ref(:url, :ticket_ref)
-    end
-  end
-
-  defmodule TipForm do
-    @moduledoc false
-    use Ecto.Schema
-
-    import Ecto.Changeset
-
-    embedded_schema do
-      field :github_handle, :string
-      field :amount, USD
-    end
-
-    def changeset(form, attrs \\ %{}) do
-      form
-      |> cast(attrs, [:github_handle, :amount])
-      |> validate_required([:github_handle, :amount])
-      |> Validations.validate_money_positive(:amount)
-    end
-  end
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -636,6 +590,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
+    # TODO: add url
     changeset =
       %TipForm{}
       |> TipForm.changeset(params)
@@ -698,22 +653,23 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   defp assign_active_repos(socket) do
-    active_pollers =
-      Enum.reduce(Algora.Github.Poller.Supervisor.which_children(), [], fn {_, pid, _, _}, acc ->
-        {owner, name} = GenServer.call(pid, :get_repo_info)
+    active_pollers = []
+    # active_pollers =
+    #   Enum.reduce(Algora.Github.Poller.Supervisor.which_children(), [], fn {_, pid, _, _}, acc ->
+    #     {owner, name} = GenServer.call(pid, :get_repo_info)
 
-        case Algora.Github.Poller.Supervisor.find_child(owner, name) do
-          {_, pid, _, _} ->
-            if GenServer.call(pid, :is_paused) do
-              acc
-            else
-              [{owner, name} | acc]
-            end
+    #     case Algora.Github.Poller.Supervisor.find_child(owner, name) do
+    #       {_, pid, _, _} ->
+    #         if GenServer.call(pid, :is_paused) do
+    #           acc
+    #         else
+    #           [{owner, name} | acc]
+    #         end
 
-          _ ->
-            acc
-        end
-      end)
+    #       _ ->
+    #         acc
+    #     end
+    #   end)
 
     # Build dynamic OR conditions for each owner/name pair
     conditions =

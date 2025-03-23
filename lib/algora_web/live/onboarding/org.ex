@@ -7,6 +7,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Organizations
   alias AlgoraWeb.Components.Wordmarks
   alias Phoenix.LiveView.AsyncResult
   alias Swoosh.Email
@@ -152,7 +153,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       |> validate_required([:hiring], message: "Please select a hiring status")
       |> validate_required([:categories], message: "Please select at least one category")
       |> validate_length(:categories, min: 1, message: "Please select at least one category")
-      |> validate_subset(:categories, Enum.map(PreferencesForm.categories_options(), &elem(&1, 1)))
+      |> validate_subset(
+        :categories,
+        Enum.map(PreferencesForm.categories_options(), &elem(&1, 1))
+      )
     end
   end
 
@@ -171,10 +175,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     if Accounts.get_user_by_email(email) do
       # user already exists, so onboarding is complete
       # allow user to login with token until expiry
-      {:ok,
-       socket
-       |> put_flash(:info, "Welcome back to Algora!")
-       |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code))}
+      {:ok, redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code))}
     else
       tech_stack_form =
         %TechStackForm{}
@@ -349,17 +350,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               handle
           end
 
-        user_handle =
-          email
-          |> String.split("@")
-          |> List.first()
-          |> String.split("+")
-          |> List.first()
-          |> String.replace(~r/[^a-zA-Z0-9]/, "")
-          |> String.downcase()
-
-        org_unique_handle = org_handle
-        user_unique_handle = user_handle
+        user_handle = Organizations.generate_handle_from_email(email)
 
         org_params =
           %{
@@ -369,7 +360,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
                 get_in(metadata, [:org, :og_description]) ||
                 get_in(metadata, [:org, :og_title]),
             avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
-            handle: org_unique_handle,
+            handle: org_handle,
             domain: domain,
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
@@ -390,9 +381,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             email: email,
             display_name: user_handle,
             avatar_url: get_in(metadata, [:avatar_url]),
-            handle: user_unique_handle,
+            handle: user_handle,
             tech_stack: tech_stack,
-            last_context: org_unique_handle,
+            last_context: org_handle,
             timezone: socket.assigns.timezone
           }
 
@@ -411,9 +402,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         socket =
           case Algora.Organizations.onboard_organization(params) do
             {:ok, %{org: org}} ->
-              socket
-              |> put_flash(:info, "Welcome to Algora!")
-              |> redirect(to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
+              redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
 
             {:error, name, changeset, _created} ->
               Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
@@ -561,13 +550,10 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         />
         <p class="mt-4 text-sm text-muted-foreground/75">
           By continuing, you agree to Algora's
-          <.link href="https://console.algora.io/legal/terms" class="text-primary hover:underline">
+          <.link href={AlgoraWeb.Constants.get(:terms_url)} class="text-primary hover:underline">
             Terms of Service
           </.link>
-          and <.link
-            href="https://console.algora.io/legal/privacy"
-            class="text-primary hover:underline"
-          >Privacy Policy</.link>.
+          and <.link href={AlgoraWeb.Constants.get(:privacy_url)} class="text-primary hover:underline">Privacy Policy</.link>.
         </p>
 
         <div class="flex justify-between">
@@ -767,98 +753,68 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         You're in good company
       </h2>
       <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/cal">
+        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
           <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/qdrant"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
           <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/remotion"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
           <img
             src="https://algora.io/banners/remotion.png"
             alt="Remotion"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href="https://console.algora.io/org/zio">
+        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
           <img
             src="https://algora.io/banners/zio.png"
             alt="ZIO"
             class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/triggerdotdev"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tembo"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
           <img
             src="https://algora.io/banners/tembo.png"
             alt="Tembo"
             class="w-[13rem] col-auto saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/maybe-finance"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
           <img
             src="https://algora.io/banners/maybe.png"
             alt="Maybe"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/golemcloud"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/aidenybai"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
           <img
             src="https://algora.io/banners/million.png"
             alt="Million"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/tailcallhq"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/highlight"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a
-          class="relative flex items-center justify-center"
-          href="https://console.algora.io/org/dittofeed"
-        >
+        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
           <img
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"

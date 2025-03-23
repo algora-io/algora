@@ -28,8 +28,9 @@ if config_env() == :prod do
     app_id: System.fetch_env!("GITHUB_APP_ID"),
     webhook_secret: System.fetch_env!("GITHUB_WEBHOOK_SECRET"),
     private_key: System.fetch_env!("GITHUB_PRIVATE_KEY"),
-    pat: System.fetch_env!("GITHUB_PAT"),
-    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "true") == "true",
+    pat: System.get_env("GITHUB_PAT"),
+    pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true",
+    bot_handle: System.get_env("GITHUB_BOT_HANDLE"),
     oauth_state_ttl: String.to_integer(System.get_env("GITHUB_OAUTH_STATE_TTL", "600")),
     oauth_state_salt: System.fetch_env!("GITHUB_OAUTH_STATE_SALT")
 
@@ -129,9 +130,12 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  config :algora, Algora.Mailer,
-    adapter: Swoosh.Adapters.Sendgrid,
-    api_key: System.fetch_env!("SENDGRID_API_KEY")
+  # TODO: remove after migration
+  if false do
+    config :algora, Algora.Mailer,
+      adapter: Swoosh.Adapters.Sendgrid,
+      api_key: System.get_env("SENDGRID_API_KEY")
+  end
 
   config :swoosh, :api_client, Swoosh.ApiClient.Finch
 
@@ -144,4 +148,10 @@ if config_env() == :prod do
   config :algora, :login_code,
     ttl: String.to_integer(System.get_env("LOGIN_CODE_TTL", "3600")),
     salt: System.fetch_env!("LOGIN_CODE_SALT")
+
+  config :algora, :plausible_url, System.get_env("PLAUSIBLE_URL")
+
+  config :algora, :assets_url, System.get_env("ASSETS_URL")
+
+  config :algora, :ingest_url, System.get_env("INGEST_URL")
 end

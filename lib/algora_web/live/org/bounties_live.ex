@@ -19,11 +19,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
           <div>
             <h2 class="text-2xl font-bold dark:text-white">Bounties</h2>
             <p class="text-sm dark:text-gray-300">
-              Create new bounties using the
+              Create new bounties by commenting
               <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
                 /bounty $1000
               </code>
-              command on Github.
+              on GitHub issues.
             </p>
           </div>
           <div class="pb-4 md:pb-0">
@@ -295,7 +295,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
     stats = Bounties.fetch_stats(current_org.id)
 
     bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
-    transactions = Payments.list_sent_transactions(current_org.id, limit: page_size())
+    transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
 
     {:noreply,
      socket
@@ -324,7 +324,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
   defp to_transaction_rows(transactions), do: transactions
 
-  def assign_more_bounties(socket) do
+  defp assign_more_bounties(socket) do
     %{rows: rows, current_org: current_org} = socket.assigns
 
     last_bounty = List.last(rows).bounty
@@ -353,7 +353,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
     last_transaction = List.last(rows).transaction
 
     more_transactions =
-      Payments.list_sent_transactions(
+      Payments.list_hosted_transactions(
         current_org.id,
         limit: page_size(),
         before: %{

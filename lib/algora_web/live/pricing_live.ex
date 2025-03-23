@@ -36,7 +36,10 @@ defmodule AlgoraWeb.PricingLive do
   def render(assigns) do
     ~H"""
     <div class="pt-24 xl:pt-20 2xl:pt-28">
-      <Header.header />
+      <%= if @screenshot? do %>
+      <% else %>
+        <Header.header />
+      <% end %>
 
       <div class="mx-auto flex flex-col lg:container lg:px-16 xl:px-12"></div>
 
@@ -355,14 +358,16 @@ defmodule AlgoraWeb.PricingLive do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     socket =
-      assign(socket,
+      socket
+      |> assign(
         page_title: "Pricing",
         plans: get_plans(),
         faq_items: get_faq_items(),
         active_faq: nil
       )
+      |> assign(:screenshot?, not is_nil(params["screenshot"]))
 
     {:ok, socket}
   end

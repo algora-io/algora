@@ -41,7 +41,7 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   @impl true
-  def mount(%{"country_code" => country_code}, _session, socket) do
+  def mount(%{"country_code" => country_code} = params, _session, socket) do
     Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
 
     stats = [
@@ -57,6 +57,7 @@ defmodule AlgoraWeb.HomeLive do
 
     {:ok,
      socket
+     |> assign(:screenshot?, not is_nil(params["screenshot"]))
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign(:featured_devs, Accounts.list_featured_developers(country_code))
      |> assign(:stats, stats)
@@ -104,7 +105,11 @@ defmodule AlgoraWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <div>
-      <Header.header />
+      <%= if @screenshot? do %>
+        <div class="-mt-24" />
+      <% else %>
+        <Header.header />
+      <% end %>
 
       <main>
         <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-b from-background to-black">
@@ -112,7 +117,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
-                <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
+                <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground sm:text-5xl xl:text-7xl">
                   The open source Upwork for engineers
                 </h1>
                 <p class="mt-8 text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
@@ -122,7 +127,11 @@ defmodule AlgoraWeb.HomeLive do
                   Hire the top 1% open source developers
                 </p>
                 <!-- CTA buttons -->
-                <.form for={@repo_form} phx-submit="submit_repo" class="mt-10 w-full max-w-2xl">
+                <.form
+                  for={@repo_form}
+                  phx-submit="submit_repo"
+                  class="mt-10 w-full max-w-lg xl:max-w-2xl"
+                >
                   <div class="relative">
                     <.input
                       field={@repo_form[:url]}

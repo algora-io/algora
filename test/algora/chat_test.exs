@@ -13,7 +13,7 @@ defmodule Algora.ChatTest do
       {:ok, message_2} = Chat.send_message(thread.id, user_2.id, "there")
       assert thread.id |> Chat.list_messages() |> Enum.map(& &1.id) == [message_1.id, message_2.id]
       assert Chat.mark_as_read(thread.id, user_1.id) == {1, nil}
-      assert Chat.get_thread_for_users(user_1.id, user_2.id).id == thread.id
+      assert Chat.get_thread_for_users([user_1, user_2]).id == thread.id
       assert user_1.id |> Chat.list_threads() |> Enum.map(& &1.id) == [thread.id]
       assert user_2.id |> Chat.list_threads() |> Enum.map(& &1.id) == [thread.id]
     end

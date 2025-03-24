@@ -50,6 +50,7 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
       live "/", Admin.AdminLive
       live "/leaderboard", Admin.LeaderboardLive
+      live "/chat/:id", Chat.ThreadLive
     end
 
     oban_dashboard("/oban", resolver: AlgoraWeb.ObanDashboardResolver)

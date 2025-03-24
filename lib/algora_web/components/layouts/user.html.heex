@@ -106,14 +106,14 @@
         <.separator :if={index != length(@nav) - 1} class="mx-auto my-4 w-2/3" />
       <% end %>
 
-      <%= if @contacts != [] do %>
+      <%= if assigns[:threads] && assigns[:threads] != [] do %>
         <.separator class="mx-auto my-4 w-2/3" />
         <ul role="list" class="space-y-1">
-          <%= for contact <- @contacts do %>
+          <%= for %{thread: thread, contact: contact, path: path} <- @threads do %>
             <li>
               <.link
                 class="flex justify-center p-2"
-                navigate={Algora.Accounts.User.url(contact)}
+                navigate={path}
                 title={Algora.Accounts.User.handle(contact)}
               >
                 <div class="relative inline-block">

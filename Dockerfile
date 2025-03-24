@@ -23,7 +23,9 @@ ARG NODE_IMAGE="node:${NODE_VERSION}"
 
 FROM ${NODE_IMAGE} as node
 
-RUN PUPPETEER_CACHE_DIR=/app/puppeteer npx --yes puppeteer browsers install
+ENV PUPPETEER_CACHE_DIR="/app/puppeteer"
+
+RUN npx --yes puppeteer browsers install
 
 FROM ${BUILDER_IMAGE} as builder
 

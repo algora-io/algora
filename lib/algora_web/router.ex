@@ -138,6 +138,8 @@ defmodule AlgoraWeb.Router do
       live "/onboarding/dev", Onboarding.DevLive
       live "/pricing", PricingLive
       live "/swift", SwiftBountiesLive
+      live "/blog/:slug", BlogLive, :show
+      live "/blog", BlogLive, :index
     end
 
     live_session :root,

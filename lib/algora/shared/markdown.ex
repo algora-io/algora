@@ -40,4 +40,17 @@ defmodule Algora.Markdown do
         md_or_doc
     end
   end
+
+  def render_unsafe(md_or_doc, opts \\ []) do
+    default_opts = update_in(@default_opts, [:features, :sanitize], fn _ -> false end)
+
+    case MDEx.to_html(md_or_doc, Keyword.merge(default_opts, opts)) do
+      {:ok, html} ->
+        html
+
+      {:error, error} ->
+        Logger.error("Error converting markdown to html: #{inspect(error)}")
+        md_or_doc
+    end
+  end
 end

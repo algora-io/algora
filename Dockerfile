@@ -15,9 +15,11 @@ ARG ALGORA_VERSION=0.1.0
 ARG ELIXIR_VERSION=1.18.1
 ARG OTP_VERSION=27.2
 ARG DEBIAN_VERSION=bookworm-20241223-slim
+ARG NODE_VERSION=23-bookworm-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG NODE_IMAGE="node:${NODE_VERSION}"
 
 
 FROM ${BUILDER_IMAGE} as builder
@@ -35,7 +37,6 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
-ENV PUPPETEER_CACHE_DIR=/app/puppeteer
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
@@ -59,10 +60,6 @@ COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
 # compile assets
 RUN mix assets.deploy
 
-# RUN ln -s /usr/local/bin/puppeteer-img /app/lib/algora-${ALGORA_VERSION}/priv/puppeteer-img.js
-# RUN chmod u+x /app/lib/algora-${ALGORA_VERSION}/priv/puppeteer-img.js
-# TODO: make this runnable via /env/bin/node?
-
 # Compile the release
 RUN mix compile
 
@@ -71,6 +68,10 @@ COPY config/runtime.exs config/
 
 COPY rel rel
 RUN mix release
+
+FROM ${NODE_IMAGE} as node
+
+RUN PUPPETEER_CACHE_DIR=/app/puppeteer npx --yes puppeteer browsers install
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
@@ -83,21 +84,7 @@ RUN apt-get update -y && \
 # TODO: remove after migration
 RUN apt-get update -y && apt-get install -y postgresql-client
 
-# Install Node.js and npm
-RUN apt-get update && apt-get install -y ca-certificates curl gnupg
-RUN mkdir -p /etc/apt/keyrings
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update && apt-get install -y nodejs
-RUN npm install -n -g npm@latest
-
 COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
-
-RUN npx puppeteer browsers install
-
-# RUN npm install -g @algora/puppeteer-img@1.0.4-algora.2
-# RUN npm install -g puppeteer
-# RUN npx @puppeteer/browsers install chrome@134.0.6998.35
 
 RUN apt-get update -y && apt-get install -y ca-certificates fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
 
@@ -118,7 +105,7 @@ ENV MIX_ENV="prod"
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/algora ./
 
 # Copy the puppeteer cache from the build stage
-COPY --from=builder --chown=nobody:root /app/puppeteer /app/puppeteer
+COPY --from=node --chown=nobody:root /app/puppeteer ./puppeteer
 
 USER nobody
 

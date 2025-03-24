@@ -24,7 +24,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:funnel_data, funnel_data)
      |> assign(:selected_period, "30d")
      |> assign(:notes_form, to_form(notes_changeset))
-     |> assign(:notes_preview, (mainthing && Markdown.render(mainthing.content)) || "")
+     |> assign(:notes_preview, (mainthing && Markdown.render_unsafe(mainthing.content)) || "")
      |> assign(:mainthing, mainthing)
      |> assign(:notes_edit_mode, false)
      |> assign(:notes_full_screen, false)
@@ -244,7 +244,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
     {:noreply,
      socket
      |> assign(:notes_form, to_form(changeset))
-     |> assign(:notes_preview, Markdown.render(content))}
+     |> assign(:notes_preview, Markdown.render_unsafe(content))}
   end
 
   def handle_event("save_notes", %{"mainthing" => params}, socket) do
@@ -259,7 +259,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
         {:noreply,
          socket
          |> assign(:mainthing, mainthing)
-         |> assign(:notes_preview, Markdown.render(mainthing.content))
+         |> assign(:notes_preview, Markdown.render_unsafe(mainthing.content))
          |> assign(:notes_edit_mode, false)
          |> put_flash(:info, "Notes saved successfully")}
 

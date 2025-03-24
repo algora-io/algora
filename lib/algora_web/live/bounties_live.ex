@@ -112,8 +112,12 @@ defmodule AlgoraWeb.BountiesLive do
           <%= for {tech, count} <- @techs do %>
             <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
               <.badge
-                variant={if String.downcase(tech) in @selected_techs, do: "success", else: "outline"}
-                class="hover:bg-white/[4%] transition-colors"
+                variant={if String.downcase(tech) in @selected_techs, do: "success", else: "default"}
+                class={
+                  if String.downcase(tech) in @selected_techs,
+                    do: "hover:bg-success/5 transition-colors",
+                    else: "hover:bg-accent/80 transition-colors"
+                }
               >
                 {tech} ({count})
               </.badge>

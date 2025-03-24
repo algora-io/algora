@@ -330,6 +330,16 @@ defmodule Algora.Admin do
     |> Algora.Repo.update()
   end
 
+  def admins_last_active do
+    Algora.Repo.one(
+      from u in User,
+        where: u.is_admin == true,
+        order_by: [desc: u.last_active_at],
+        select: u.last_active_at,
+        limit: 1
+    )
+  end
+
   def setup_test_account(user_handle) do
     with account_id when is_binary(account_id) <- Algora.config([:stripe, :test_account_id]),
          {:ok, user} <- Repo.fetch_by(User, handle: user_handle),

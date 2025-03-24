@@ -491,18 +491,22 @@ defmodule Algora.Accounts do
   end
 
   def set_context(%User{} = user, context) do
-    membership =
-      Repo.one(
-        from(m in Member,
-          join: o in assoc(m, :org),
-          where: m.user_id == ^user.id and o.handle == ^context
-        )
-      )
-
-    if membership do
+    if context == user.handle do
       update_settings(user, %{last_context: context})
     else
-      {:error, :unauthorized}
+      membership =
+        Repo.one(
+          from(m in Member,
+            join: o in assoc(m, :org),
+            where: m.user_id == ^user.id and o.handle == ^context
+          )
+        )
+
+      if membership do
+        update_settings(user, %{last_context: context})
+      else
+        {:error, :unauthorized}
+      end
     end
   end
 

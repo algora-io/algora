@@ -14,9 +14,13 @@ defmodule AlgoraWeb.Org.Nav do
       if is_nil(current_user) do
         :none
       else
-        case Organizations.fetch_member(current_org.id, current_user.id) do
-          {:ok, member} -> member.role
-          _ -> :none
+        if current_org.id == current_user.id do
+          :admin
+        else
+          case Organizations.fetch_member(current_org.id, current_user.id) do
+            {:ok, member} -> member.role
+            _ -> :none
+          end
         end
       end
 

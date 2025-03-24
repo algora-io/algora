@@ -617,7 +617,11 @@ topbar.config({
   barColors: { 0: "rgba(5, 150, 105, 1)" },
   shadowColor: "rgba(0, 0, 0, .3)",
 });
-window.addEventListener("phx:page-loading-start", (info) => topbar.show(300));
+window.addEventListener("phx:page-loading-start", (info) => {
+  if (!window.location.search.includes("screenshot")) {
+    topbar.show(300);
+  }
+});
 window.addEventListener("phx:page-loading-stop", (info) => topbar.hide());
 
 // Accessible routing

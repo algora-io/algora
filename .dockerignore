@@ -34,3 +34,4 @@ node_modules
 /priv/domain_blacklist.txt
 /priv/plts
 /priv/db
+/priv/puppeteer

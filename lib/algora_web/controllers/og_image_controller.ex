@@ -74,7 +74,6 @@ defmodule AlgoraWeb.OGImageController do
   defp take_and_upload_screenshot(path) do
     dir = Path.join([System.tmp_dir!(), "og"] ++ path)
     File.mkdir_p!(dir)
-
     filepath = Path.join(dir, "og.png")
     url = url(~p"/#{path}?screenshot")
 

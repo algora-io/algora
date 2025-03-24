@@ -973,8 +973,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
-      {&create_contract_status/1, "Create a contract", nil},
-      {&reward_contract_status/1, "Reward a contract", nil},
+      {&create_contract_status/1, "Contract a developer", nil},
       {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 
@@ -1039,13 +1038,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp create_contract_status(socket) do
     case socket.assigns.contracts do
-      [] -> :upcoming
-      _ -> :completed
-    end
-  end
-
-  defp reward_contract_status(socket) do
-    case Enum.filter(socket.assigns.contracts, &(&1.status == :paid)) do
       [] -> :upcoming
       _ -> :completed
     end

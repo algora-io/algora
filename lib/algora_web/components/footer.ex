@@ -23,7 +23,7 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties?#{%{tech: "rust"}}"}
+                    navigate={~p"/bounties/rust"}
                   >
                     Rust
                   </.link>
@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties?#{%{tech: "typescript"}}"}
+                    navigate={~p"/bounties/typescript"}
                   >
                     TypeScript
                   </.link>
@@ -39,7 +39,7 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties?#{%{tech: "scala"}}"}
+                    navigate={~p"/bounties/scala"}
                   >
                     Scala
                   </.link>
@@ -47,7 +47,7 @@ defmodule AlgoraWeb.Components.Footer do
                 <li>
                   <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    navigate={~p"/bounties?#{%{tech: "c,c++"}}"}
+                    navigate={~p"/bounties/c,c++"}
                   >
                     C / C++
                   </.link>

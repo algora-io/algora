@@ -256,68 +256,68 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </.form>
               </div>
-            </div>
-            <div class="pt-40 grid grid-cols-1 gap-16">
-              <.link
-                href="https://github.com/zed-industries/zed/issues/4440"
-                rel="noopener"
-                class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
-              >
-                <div class="flex -space-x-4 shrink-0">
-                  <img
-                    class="size-20 rounded-full z-0"
-                    src="https://github.com/zed-industries.png"
-                    alt="Zed"
-                  />
-                  <img
-                    class="size-20 rounded-full z-10"
-                    src="https://github.com/schacon.png"
-                    alt="Scott Chacon"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                    GitHub cofounder funds new feature in Zed Editor
+              <div class="pt-20 sm:pt-40 grid grid-cols-1 gap-16">
+                <.link
+                  href="https://github.com/zed-industries/zed/issues/4440"
+                  rel="noopener"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                >
+                  <div class="flex -space-x-4 shrink-0">
+                    <img
+                      class="size-20 rounded-full z-0"
+                      src="https://github.com/zed-industries.png"
+                      alt="Zed"
+                    />
+                    <img
+                      class="size-20 rounded-full z-10"
+                      src="https://github.com/schacon.png"
+                      alt="Scott Chacon"
+                    />
                   </div>
-                  <div class="text-base sm:text-lg font-medium text-muted-foreground">
-                    Zed Editor, Scott Chacon
+                  <div class="text-base leading-6 flex-1">
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      GitHub cofounder funds new feature in Zed Editor
+                    </div>
+                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                      Zed Editor, Scott Chacon
+                    </div>
                   </div>
-                </div>
-                <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
-                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
-                </.button>
-              </.link>
+                  <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                    <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                  </.button>
+                </.link>
 
-              <.link
-                href="https://github.com/PX4/PX4-Autopilot/issues/22464"
-                rel="noopener"
-                class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
-              >
-                <div class="flex items-center -space-x-6 shrink-0">
-                  <img
-                    class="size-20 rounded-full z-0"
-                    src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
-                    alt="Alex Klimaj"
-                  />
-                  <img class="size-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
-                  <img
-                    class="size-20 rounded-full z-10"
-                    src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
-                    alt="Andrew Wilkins"
-                  />
-                </div>
-                <div class="text-base leading-6 flex-1">
-                  <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                    DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                <.link
+                  href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                  rel="noopener"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                >
+                  <div class="flex items-center -space-x-6 shrink-0">
+                    <img
+                      class="size-20 rounded-full z-0"
+                      src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
+                      alt="Alex Klimaj"
+                    />
+                    <img class="size-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                    <img
+                      class="size-20 rounded-full z-10"
+                      src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
+                      alt="Andrew Wilkins"
+                    />
                   </div>
-                  <div class="text-base sm:text-lg font-medium text-muted-foreground">
-                    Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                  <div class="text-base leading-6 flex-1">
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                    </div>
+                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                      Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                    </div>
                   </div>
-                </div>
-                <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
-                  <Logos.github class="size-4 mr-4 -ml-2" /> View issue
-                </.button>
-              </.link>
+                  <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                    <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                  </.button>
+                </.link>
+              </div>
             </div>
           </div>
         </section>
@@ -865,7 +865,7 @@ defmodule AlgoraWeb.HomeLive do
     <.dialog
       id="video-modal"
       show={false}
-      class="w-screen h-screen lg:max-w-none p-2 sm:p-4 lg:p-[5rem]"
+      class="aspect-video h-full sm:h-auto w-full lg:max-w-none p-2 sm:p-4 lg:p-[5rem]"
       on_cancel={
         %JS{}
         |> JS.set_attribute({"src", ""}, to: "#video-modal-iframe")
@@ -879,7 +879,7 @@ defmodule AlgoraWeb.HomeLive do
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen
-          class="w-full h-full"
+          class="aspect-[9/16] sm:aspect-video w-full bg-black"
         >
         </iframe>
       </.dialog_content>

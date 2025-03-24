@@ -74,6 +74,7 @@ defmodule AlgoraWeb.HomeLive do
   attr :alt, :string, default: nil
   attr :class, :string, default: nil
   attr :autoplay, :boolean, default: true
+  attr :start, :integer, default: 0
 
   defp modal_video(assigns) do
     ~H"""
@@ -86,7 +87,9 @@ defmodule AlgoraWeb.HomeLive do
       }
       phx-click={
         %JS{}
-        |> JS.set_attribute({"src", @src <> "?autoplay=#{@autoplay}"}, to: "#video-modal-iframe")
+        |> JS.set_attribute({"src", @src <> "?autoplay=#{@autoplay}&start=#{@start}"},
+          to: "#video-modal-iframe"
+        )
         |> JS.set_attribute({"title", @title}, to: "#video-modal-iframe")
         |> show_modal("video-modal")
       }
@@ -176,6 +179,7 @@ defmodule AlgoraWeb.HomeLive do
                 <.modal_video
                   class="aspect-[9/16] rounded-l-xl lg:rounded-l-2xl"
                   src="https://www.youtube.com/embed/xObOGcUdtY0"
+                  start={122}
                   title="$15,000 Open source bounty to hire a Rust engineer"
                   poster={~p"/images/people/john-de-goes.jpg"}
                   alt="John A De Goes"
@@ -575,25 +579,23 @@ defmodule AlgoraWeb.HomeLive do
               Find your next team member through real-world collaboration. Use bounties to evaluate developers based on actual contributions to your codebase.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
                 <div class="lg:col-span-6 order-first lg:order-last">
                   <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <iframe
-                      src="https://www.youtube.com/embed/FXQVD02rfg8?si=rt3r_8-aFt2ZKla8"
-                      title="YouTube video player"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
+                    <.modal_video
+                      class="rounded-r-xl lg:rounded-r-2xl"
+                      src="https://www.youtube.com/embed/FXQVD02rfg8"
+                      start={8}
+                      title="How Nick got a job with Open Source Software"
+                      poster="https://img.youtube.com/vi/FXQVD02rfg8/maxresdefault.jpg"
+                      alt="Eric Allam"
+                    />
                   </div>
                 </div>
-                <div class="lg:col-span-5 order-last lg:order-first">
+                <div class="lg:col-span-6 order-last lg:order-first">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
-                    It was the easiest hire because we already knew how great he was
+                    It was the <span class="text-success">easiest hire</span>
+                    because we already knew how great he was
                   </h3>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
@@ -611,24 +613,23 @@ defmodule AlgoraWeb.HomeLive do
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-6">
+                <div class="lg:col-span-5">
                   <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <iframe
+                    <.modal_video
+                      class="rounded-r-xl lg:rounded-r-2xl"
                       src="https://www.youtube.com/embed/3wZGDuoPajk"
-                      title="YouTube video player"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
+                      start={13}
+                      title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
+                      poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
+                      alt="Tushar Mathur"
+                    />
                   </div>
                 </div>
-                <div class="lg:col-span-5">
+                <div class="lg:col-span-6">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
-                    Bounties help us control our burn rate, get work done & meet new hires. I've made 3 full-time hires from Algora
+                    Bounties help us control our burn rate, get work done & meet new hires. I've made
+                    <span class="text-success">3 full-time hires</span>
+                    using Algora
                   </h3>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
@@ -693,23 +694,20 @@ defmodule AlgoraWeb.HomeLive do
               <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
                 <div class="w-[24%]">
                   <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <iframe
+                    <.modal_video
+                      class="aspect-[9/16] rounded-r-xl lg:rounded-r-2xl"
                       src="https://www.youtube.com/embed/j4fLNIJCywk"
                       title="High school student solves #opensource bounties"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerpolicy="strict-origin-when-cross-origin"
-                      allowfullscreen
-                      width="100%"
-                      height="100%"
-                    >
-                    </iframe>
+                      poster="https://img.youtube.com/vi/j4fLNIJCywk/maxresdefault.jpg"
+                      alt="Gergő Móricz"
+                    />
                   </div>
                 </div>
                 <div class="w-[76%]">
                   <.modal_video
                     class="rounded-r-xl lg:rounded-r-2xl"
                     src="https://www.youtube.com/embed/HhTT-GX5tjQ"
+                    start={293}
                     title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
                     poster={~p"/images/people/mogery.png"}
                     alt="Gergő Móricz"

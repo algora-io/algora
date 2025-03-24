@@ -86,11 +86,15 @@ defmodule Algora.Chat do
     |> Repo.all()
   end
 
-  def list_threads(user_id) do
+  def get_thread(thread_id) do
+    Repo.get(Thread, thread_id)
+  end
+
+  def list_threads(_user_id) do
     Thread
-    |> join(:inner, [t], p in Participant, on: p.thread_id == t.id)
-    |> where([_t, p], p.user_id == ^user_id)
-    |> preload(:participants)
+    # |> join(:inner, [t], p in Participant, on: p.thread_id == t.id)
+    # |> where([_t, p], p.user_id == ^user_id)
+    |> preload(participants: :user)
     |> Repo.all()
   end
 

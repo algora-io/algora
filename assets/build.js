@@ -50,7 +50,7 @@ let optsPuppeteer = {
   entryPoints: ["js/puppeteer-img.js"],
   platform: "node",
   bundle: true,
-  minify: false,
+  minify: true,
   target: "node19.6.1",
   conditions: [],
   outdir: "../priv/puppeteer",

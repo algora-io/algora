@@ -106,6 +106,8 @@ function _validateInteger(value) {
     }
   }
 
+  console.error(puppeteer);
+
   puppeteer
     .launch({
       devtools: false,

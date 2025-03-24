@@ -35,6 +35,7 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
+ENV PUPPETEER_CACHE_DIR=/tmp/algora/puppeteer
 
 # install mix dependencies
 COPY mix.exs mix.lock ./

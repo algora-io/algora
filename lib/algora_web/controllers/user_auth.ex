@@ -160,9 +160,13 @@ defmodule AlgoraWeb.UserAuth do
     user_id = get_session(conn, :user_id)
     user = user_id && Accounts.get_user(user_id)
 
-    user
-    |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
-    |> Algora.Repo.update()
+    if user do
+      Task.start(fn ->
+        user
+        |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
+        |> Algora.Repo.update()
+      end)
+    end
 
     conn
     |> assign(:current_user, user)

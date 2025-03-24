@@ -112,8 +112,11 @@ RUN chown nobody /app
 # set runner ENV
 ENV MIX_ENV="prod"
 
-# Only copy the final release from the build stage
+# Copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/algora ./
+
+# Copy the puppeteer cache from the build stage
+COPY --from=builder --chown=nobody:root /tmp/algora/puppeteer /tmp/algora/puppeteer
 
 USER nobody
 

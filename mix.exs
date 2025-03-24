@@ -128,7 +128,7 @@ defmodule Algora.MixProject do
       "assets.build": ["tailwind algora", "cmd --cd assets pnpm install"],
       "assets.deploy": [
         "tailwind algora --minify",
-        "cmd --cd assets pnpm dlx puppeteer browsers install",
+        # "cmd --cd assets npx puppeteer browsers install",
         "cmd --cd assets node build.js --deploy",
         "phx.digest"
       ]

@@ -35,7 +35,7 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
-ENV PUPPETEER_CACHE_DIR=/tmp/algora/puppeteer
+ENV PUPPETEER_CACHE_DIR=/app/puppeteer
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
@@ -93,6 +93,8 @@ RUN npm install -n -g npm@latest
 
 COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
 
+RUN npx puppeteer browsers install
+
 # RUN npm install -g @algora/puppeteer-img@1.0.4-algora.2
 # RUN npm install -g puppeteer
 # RUN npx @puppeteer/browsers install chrome@134.0.6998.35
@@ -116,7 +118,7 @@ ENV MIX_ENV="prod"
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/algora ./
 
 # Copy the puppeteer cache from the build stage
-COPY --from=builder --chown=nobody:root /tmp/algora/puppeteer /tmp/algora/puppeteer
+COPY --from=builder --chown=nobody:root /app/puppeteer /app/puppeteer
 
 USER nobody
 

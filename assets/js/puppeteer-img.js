@@ -118,6 +118,7 @@ function _validateInteger(value) {
       const page = await browser.newPage();
       await page.setViewport(viewportOptions);
       await page.goto(options.url, { waitUntil: ["networkidle2"] });
+      await page.focus("body");
       await page.screenshot(screenshotOptions);
 
       await page.close();

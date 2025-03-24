@@ -27,7 +27,7 @@ defmodule AlgoraWeb.Components.UI.Badge do
     <div
       class={
         classes([
-          "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-input",
+          "inline-flex items-center rounded-md px-2 py-1 text-xs font-medium border border-input relative",
           @variant_class,
           @class
         ])
@@ -41,12 +41,12 @@ defmodule AlgoraWeb.Components.UI.Badge do
 
   @variants %{
     variant: %{
-      "default" => "bg-accent/60 text-accent-foreground ring-accent-foreground/20",
-      "secondary" => "bg-secondary/10 text-secondary ring-secondary/20",
-      "destructive" => "bg-destructive/10 text-destructive ring-destructive/20",
-      "success" => "bg-success/10 text-success ring-success/20",
-      "warning" => "bg-warning/10 text-warning ring-warning/20",
-      "outline" => "bg-transparent text-foreground ring-foreground/30"
+      "default" => "bg-accent/10 text-accent-foreground border-accent-foreground/20",
+      "secondary" => "bg-secondary/10 text-secondary border-secondary/20",
+      "destructive" => "bg-destructive/10 text-destructive border-destructive/20",
+      "success" => "bg-success/10 text-success border-success/20",
+      "warning" => "bg-warning/10 text-warning border-warning/20",
+      "outline" => "bg-transparent text-foreground border-foreground/30"
     }
   }
 

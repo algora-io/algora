@@ -9,10 +9,8 @@ defmodule AlgoraWeb.BountiesLive do
   require Logger
 
   @impl true
-  def handle_params(params, _uri, socket) do
-    selected_techs =
-      (params["tech"] || "") |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
-
+  def handle_params(%{"tech" => tech}, _uri, socket) when is_binary(tech) do
+    selected_techs = tech |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
     valid_techs = Enum.map(socket.assigns.techs, fn {tech, _} -> String.downcase(tech) end)
     # Only keep valid techs that exist in the available tech list
     selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
@@ -31,15 +29,23 @@ defmodule AlgoraWeb.BountiesLive do
      |> assign_bounties()}
   end
 
+  def handle_params(_params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign(:selected_techs, [])
+     |> assign(:query_opts, Keyword.delete(socket.assigns.query_opts, :tech_stack))
+     |> assign_bounties()}
+  end
+
   @impl true
-  def mount(params, _session, socket) do
+  def mount(%{"tech" => tech}, _session, socket) when is_binary(tech) do
     if connected?(socket) do
       Bounties.subscribe()
     end
 
     # Parse selected techs from URL params and ensure lowercase
     selected_techs =
-      (params["tech"] || "")
+      tech
       |> String.split(",")
       |> Enum.reject(&(&1 == ""))
       |> Enum.map(&String.downcase/1)
@@ -67,6 +73,32 @@ defmodule AlgoraWeb.BountiesLive do
      socket
      |> assign(:techs, techs)
      |> assign(:selected_techs, selected_techs)
+     |> assign(:query_opts, query_opts)
+     |> assign_bounties()}
+  end
+
+  def mount(_params, _session, socket) do
+    if connected?(socket) do
+      Bounties.subscribe()
+    end
+
+    query_opts =
+      [
+        status: :open,
+        limit: page_size()
+      ] ++
+        if socket.assigns.current_user do
+          [amount_gt: Money.new(:USD, 200)]
+        else
+          [amount_gt: Money.new(:USD, 500)]
+        end
+
+    techs = Bounties.list_tech(query_opts)
+
+    {:ok,
+     socket
+     |> assign(:techs, techs)
+     |> assign(:selected_techs, [])
      |> assign(:query_opts, query_opts)
      |> assign_bounties()}
   end
@@ -157,11 +189,11 @@ defmodule AlgoraWeb.BountiesLive do
       end
 
     # Update the URL with selected techs
-    tech_param = if selected_techs == [], do: nil, else: Enum.join(selected_techs, ",")
+    path = if selected_techs == [], do: ~p"/bounties", else: ~p"/bounties/#{Enum.join(selected_techs, ",")}"
 
     {:noreply,
      socket
-     |> push_patch(to: ~p"/bounties?#{%{tech: tech_param}}")
+     |> push_patch(to: path)
      |> assign(:selected_techs, selected_techs)
      |> assign(:query_opts, query_opts)
      |> assign_bounties()}

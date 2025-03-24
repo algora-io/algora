@@ -71,7 +71,7 @@ defmodule AlgoraWeb.OGImageController do
     conn |> put_status(:not_found) |> text("Not found")
   end
 
-  def take_and_upload_screenshot(path) do
+  defp take_and_upload_screenshot(path) do
     dir = Path.join([System.tmp_dir!(), "og"] ++ path)
     File.mkdir_p!(dir)
     filepath = Path.join(dir, "og.png")

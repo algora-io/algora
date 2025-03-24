@@ -16,16 +16,6 @@ defmodule Algora.Admin do
 
   require Logger
 
-  @opts [type: "png", width: 1200, height: 630, scale_factor: 1]
-
-  def test(path) do
-    dir = Path.join([System.tmp_dir!(), "og"] ++ path)
-    File.mkdir_p!(dir)
-    filepath = Path.join(dir, "og.png")
-    url = "#{AlgoraWeb.Endpoint.url()}/#{path}?screenshot"
-    Algora.ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath))
-  end
-
   def alert(message) do
     email_job =
       Algora.Activities.SendEmail.changeset(%{

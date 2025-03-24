@@ -90,6 +90,7 @@ defmodule Algora.Chat do
     Repo.get(Thread, thread_id)
   end
 
+  # TODO: filter by user_id
   def list_threads(_user_id) do
     last_message_query =
       from m in Message,

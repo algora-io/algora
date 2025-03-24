@@ -31,7 +31,10 @@ defmodule AlgoraWeb.Chat.ThreadLive do
         content
       )
 
-    {:noreply, push_event(socket, "clear-input", %{selector: "#message-input"})}
+    {:noreply,
+     socket
+     |> Phoenix.Component.update(:messages, &(&1 ++ [message]))
+     |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
   @impl true
@@ -39,7 +42,7 @@ defmodule AlgoraWeb.Chat.ThreadLive do
     if message.id in Enum.map(socket.assigns.messages, & &1.id) do
       {:noreply, socket}
     else
-      {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
+      {:noreply, Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))}
     end
   end
 

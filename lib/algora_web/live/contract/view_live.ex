@@ -484,6 +484,10 @@ defmodule AlgoraWeb.Contract.ViewLive do
              not (socket.assigns.all_contexts |> Enum.map(& &1.id) |> Enum.member?(contract.client_id)) do
           {:ok, raise(AlgoraWeb.NotFoundError)}
         else
+          if connected?(socket) do
+            Chat.subscribe(thread.id)
+          end
+
           {:ok,
            socket
            |> assign(:contract, contract)
@@ -498,6 +502,14 @@ defmodule AlgoraWeb.Contract.ViewLive do
            |> assign(:fee_data, Contracts.calculate_fee_data(contract))
            |> assign(:org_members, Organizations.list_org_members(contract.client))}
         end
+    end
+  end
+
+  def handle_info(%Chat.Message{} = message, socket) do
+    if message.id in Enum.map(socket.assigns.messages, & &1.id) do
+      {:noreply, socket}
+    else
+      {:noreply, Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))}
     end
   end
 

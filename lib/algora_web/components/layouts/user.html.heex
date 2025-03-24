@@ -109,7 +109,7 @@
       <%= if assigns[:threads] && assigns[:threads] != [] do %>
         <.separator class="mx-auto my-4 w-2/3" />
         <ul role="list" class="space-y-1">
-          <%= for %{thread: thread, contact: contact, path: path} <- @threads do %>
+          <%= for %{contact: contact, path: path} <- @threads do %>
             <li>
               <.link
                 class="flex justify-center p-2"

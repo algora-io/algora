@@ -534,7 +534,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     if message.id in Enum.map(socket.assigns.messages, & &1.id) do
       {:noreply, socket}
     else
-      {:noreply, assign(socket, :messages, socket.assigns.messages ++ [message])}
+      {:noreply, Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))}
     end
   end
 

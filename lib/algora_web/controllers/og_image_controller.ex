@@ -73,46 +73,33 @@ defmodule AlgoraWeb.OGImageController do
 
   def take_and_upload_screenshot(path) do
     dir = Path.join([System.tmp_dir!(), "og"] ++ path)
-    dbg("1")
     File.mkdir_p!(dir)
-    dbg("2")
     filepath = Path.join(dir, "og.png")
-    dbg("3")
     url = url(~p"/#{path}?screenshot")
-    dbg("4")
 
     case ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath)) do
       {:ok, _path} ->
-        dbg("5")
         object_path = Path.join(["og"] ++ path ++ ["og.png"])
-
-        dbg("6")
 
         case File.read(filepath) do
           {:ok, body} ->
-            dbg("7")
-
             Task.start(fn ->
               Algora.S3.upload(body, object_path,
                 content_type: "image/png",
                 cache_control: "public, max-age=#{@max_age}"
               )
 
-              dbg("8")
               File.rm(filepath)
             end)
 
-            dbg("9")
             {:ok, body}
 
           error ->
-            dbg("10")
             File.rm(filepath)
             error
         end
 
       error ->
-        dbg("11")
         error
     end
   end

@@ -26,14 +26,11 @@ defmodule Algora.ScreenshotQueue do
         task =
           Task.async(fn ->
             try do
-              case System.cmd("puppeteer-img", build_opts(url, opts)) do
-                {_, 127} ->
-                  dbg("127")
-                  {:error, :invalid_exec_path}
+              puppeteer_path = Path.join([:code.priv_dir(:algora), "puppeteer", "puppeteer-img.js"])
 
-                {cmd_response, _} ->
-                  dbg("cmd_response")
-                  {:ok, cmd_response}
+              case System.cmd("node", [puppeteer_path] ++ build_opts(url, opts)) do
+                {_, 127} -> {:error, :invalid_exec_path}
+                {cmd_response, _} -> {:ok, cmd_response}
               end
             rescue
               e in ErlangError ->

@@ -230,7 +230,7 @@ defmodule AlgoraWeb.CoreComponents do
           </div>
         </div>
       </:link>
-      <:link href={~p"/set_context/#{@current_user.handle}"}>
+      <:link :if={@current_user.handle} href={~p"/set_context/#{@current_user.handle}"}>
         <div class="flex items-center whitespace-nowrap">
           <.avatar class="mr-3 h-8 w-8">
             <.avatar_image src={@current_user.avatar_url} />

@@ -15,7 +15,6 @@ kill_signal = 'SIGTERM'
 [env]
   PHX_HOST = 'staging.algora.io'
   PORT = '4000'
-  PUPPETEER_CACHE_DIR = '/app/puppeteer'
 
 [http_service]
   internal_port = 4000

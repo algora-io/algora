@@ -581,16 +581,14 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
                 <div class="lg:col-span-6 order-first lg:order-last">
-                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <.modal_video
-                      class="rounded-r-xl lg:rounded-r-2xl"
-                      src="https://www.youtube.com/embed/FXQVD02rfg8"
-                      start={8}
-                      title="How Nick got a job with Open Source Software"
-                      poster="https://img.youtube.com/vi/FXQVD02rfg8/maxresdefault.jpg"
-                      alt="Eric Allam"
-                    />
-                  </div>
+                  <.modal_video
+                    class="rounded-xl lg:rounded-2xl"
+                    src="https://www.youtube.com/embed/FXQVD02rfg8"
+                    start={8}
+                    title="How Nick got a job with Open Source Software"
+                    poster="https://img.youtube.com/vi/FXQVD02rfg8/maxresdefault.jpg"
+                    alt="Eric Allam"
+                  />
                 </div>
                 <div class="lg:col-span-6 order-last lg:order-first">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
@@ -614,16 +612,14 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-5">
-                  <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <.modal_video
-                      class="rounded-r-xl lg:rounded-r-2xl"
-                      src="https://www.youtube.com/embed/3wZGDuoPajk"
-                      start={13}
-                      title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
-                      poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
-                      alt="Tushar Mathur"
-                    />
-                  </div>
+                  <.modal_video
+                    class="rounded-xl lg:rounded-2xl"
+                    src="https://www.youtube.com/embed/3wZGDuoPajk"
+                    start={13}
+                    title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
+                    poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
+                    alt="Tushar Mathur"
+                  />
                 </div>
                 <div class="lg:col-span-6">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
@@ -693,19 +689,17 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
                 <div class="w-[24%]">
-                  <div class="relative flex aspect-[9/16] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800">
-                    <.modal_video
-                      class="aspect-[9/16] rounded-r-xl lg:rounded-r-2xl"
-                      src="https://www.youtube.com/embed/j4fLNIJCywk"
-                      title="High school student solves #opensource bounties"
-                      poster="https://img.youtube.com/vi/j4fLNIJCywk/maxresdefault.jpg"
-                      alt="Gergő Móricz"
-                    />
-                  </div>
+                  <.modal_video
+                    class="aspect-[9/16] rounded-xl lg:rounded-2xl"
+                    src="https://www.youtube.com/embed/j4fLNIJCywk"
+                    title="High school student solves #opensource bounties"
+                    poster="https://img.youtube.com/vi/j4fLNIJCywk/maxresdefault.jpg"
+                    alt="Gergő Móricz"
+                  />
                 </div>
                 <div class="w-[76%]">
                   <.modal_video
-                    class="rounded-r-xl lg:rounded-r-2xl"
+                    class="rounded-xl lg:rounded-2xl"
                     src="https://www.youtube.com/embed/HhTT-GX5tjQ"
                     start={293}
                     title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"

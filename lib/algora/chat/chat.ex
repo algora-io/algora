@@ -91,9 +91,17 @@ defmodule Algora.Chat do
   end
 
   def list_threads(_user_id) do
+    last_message_query =
+      from m in Message,
+        select: %{
+          thread_id: m.thread_id,
+          last_message_at: max(m.inserted_at)
+        },
+        group_by: m.thread_id
+
     Thread
-    # |> join(:inner, [t], p in Participant, on: p.thread_id == t.id)
-    # |> where([_t, p], p.user_id == ^user_id)
+    |> join(:left, [t], lm in subquery(last_message_query), on: t.id == lm.thread_id)
+    |> order_by([t, lm], desc: lm.last_message_at)
     |> preload(participants: :user)
     |> Repo.all()
   end

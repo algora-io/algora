@@ -96,8 +96,8 @@ defmodule AlgoraWeb.HomeLive do
     >
       <img src={@poster} alt={@alt} class="object-cover w-full h-full" />
       <div class="absolute inset-0 flex items-center justify-center">
-        <div class="size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-          <.icon name="tabler-player-play-filled" class="size-8 text-white" />
+        <div class="size-10 sm:size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
+          <.icon name="tabler-player-play-filled" class="size-5 sm:size-8 text-white" />
         </div>
       </div>
     </div>
@@ -120,31 +120,31 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
-                <h1 class="font-display text-5xl font-semibold tracking-tight text-foreground sm:text-5xl xl:text-7xl">
+                <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
                   The open source Upwork for engineers
                 </h1>
-                <p class="mt-8 text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
+                <p class="mt-4 sm:mt-8 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
                   Discover GitHub bounties, contract work and jobs
                 </p>
-                <p class="mt-4 text-lg font-medium text-muted-foreground sm:max-w-md sm:text-2xl/8 lg:max-w-none">
+                <p class="mt-2 sm:mt-4 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
                   Hire the top 1% open source developers
                 </p>
                 <!-- CTA buttons -->
                 <.form
                   for={@repo_form}
                   phx-submit="submit_repo"
-                  class="mt-10 w-full max-w-lg xl:max-w-2xl"
+                  class="mt-6 sm:mt-10 w-full max-w-lg xl:max-w-2xl"
                 >
                   <div class="relative">
                     <.input
                       field={@repo_form[:url]}
                       placeholder="github.com/your/repo"
-                      class="w-full h-16 text-xl sm:text-2xl pl-[3.75rem] pr-48 ring-2 ring-emerald-500 font-display rounded-xl"
+                      class="w-full h-10 sm:h-12 lg:h-16 text-base sm:text-lg xl:text-2xl pl-12 sm:pl-[3.75rem] pr-24 sm:pr-48 ring-2 ring-emerald-500 font-display rounded-lg sm:rounded-xl"
                     />
-                    <Logos.github class="h-10 w-10 absolute left-3 top-3 text-muted-foreground/50" />
+                    <Logos.github class="h-6 w-6 sm:h-10 sm:w-10 absolute left-3 top-2 sm:top-3 text-muted-foreground/50" />
                     <.button
                       type="submit"
-                      class="absolute right-2 top-2 bottom-2 px-8 h-[3rem] text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980]"
+                      class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-4 sm:px-8 h-7 sm:h-[3rem] text-base sm:text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
                     >
                       Get Started
                     </.button>
@@ -152,19 +152,24 @@ defmodule AlgoraWeb.HomeLive do
                 </.form>
               </div>
               <!-- Featured devs -->
-              <div class="mt-14 flex justify-start md:justify-center gap-8 lg:justify-start lg:mt-0 lg:pl-0 overflow-x-auto scrollbar-thin lg:overflow-x-visible">
+              <div class={
+                [
+                  "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0"
+                  # "overflow-x-auto scrollbar-thin lg:overflow-x-visible"
+                ]
+              }>
                 <%= if length(@featured_devs) > 0 do %>
-                  <div class="ml-auto w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                  <div class="ml-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                     <.dev_card dev={List.first(@featured_devs)} />
                   </div>
-                  <div class="mr-auto w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 sm:mr-0 lg:pt-36">
+                  <div class="mr-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 sm:mr-0 lg:pt-36">
                     <%= if length(@featured_devs) >= 3 do %>
                       <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
                         <.dev_card dev={dev} />
                       <% end %>
                     <% end %>
                   </div>
-                  <div class="w-32 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-8 pt-32 lg:pt-0">
+                  <div class="w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 lg:pt-0">
                     <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
                       <.dev_card dev={dev} />
                     <% end %>
@@ -173,105 +178,112 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-          <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-16 sm:py-40">
-            <div class="pt-40 flex flex-row gap-x-16 gap-y-8">
-              <div class="w-[40%]">
-                <.modal_video
-                  class="aspect-[9/16] rounded-l-xl lg:rounded-l-2xl"
-                  src="https://www.youtube.com/embed/xObOGcUdtY0"
-                  start={122}
-                  title="$15,000 Open source bounty to hire a Rust engineer"
-                  poster={~p"/images/people/john-de-goes.jpg"}
-                  alt="John A De Goes"
-                />
-              </div>
-              <div class="w-[60%]">
-                <div class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl rounded-l-none lg:rounded-l-none bg-gray-800">
-                  <img
-                    src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                    alt="Golem bounty to hire"
-                    class="object-cover"
+          <div class="p-4 sm:p-6 md:p-8">
+            <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-8 sm:py-16 md:py-24 lg:py-40">
+              <div class="pt-20 sm:pt-40 flex gap-8 lg:gap-x-16">
+                <div class="w-[40%]">
+                  <.modal_video
+                    class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
+                    src="https://www.youtube.com/embed/xObOGcUdtY0"
+                    start={122}
+                    title="$15,000 Open source bounty to hire a Rust engineer"
+                    poster={~p"/images/people/john-de-goes.jpg"}
+                    alt="John A De Goes"
                   />
                 </div>
-              </div>
-            </div>
-            <div class="mt-40 relative grid items-center grid-cols-5 w-full gap-x-12 rounded-xl bg-black/25 p-12 ring-2 ring-success/20 ransition-colors">
-              <div class="col-span-2 text-base leading-6 flex-1">
-                <div class="text-3xl font-semibold text-foreground">
-                  Fund any issue
-                  <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-                    in seconds
-                  </span>
-                </div>
-                <div class="pt-2 text-lg font-medium text-muted-foreground">
-                  Help improve the OSS you love and rely on
-                </div>
-                <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
-                  <div>
-                    <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                    Pay when PRs are merged
-                  </div>
-                  <div>
-                    <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                    Pool bounties with other sponsors
-                  </div>
-                  <div>
-                    <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                    Algora handles invoices, payouts, compliance & 1099s
-                  </div>
+                <div class="w-[60%]">
+                  <.link
+                    href="https://github.com/golemcloud/golem/issues/1004"
+                    rel="noopener"
+                    target="_blank"
+                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none bg-gray-800"
+                  >
+                    <img
+                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                      alt="Golem bounty to hire"
+                      class="object-cover"
+                    />
+                  </.link>
                 </div>
               </div>
-              <.form
-                for={@bounty_form}
-                phx-submit="create_bounty"
-                class="col-span-3 grid gap-6 w-full"
-              >
-                <.input
-                  label="URL"
-                  field={@bounty_form[:url]}
-                  placeholder="https://github.com/owner/repo/issues/1337"
-                />
-                <.input
-                  label="Amount"
-                  icon="tabler-currency-dollar"
-                  field={@bounty_form[:amount]}
-                  class="placeholder:text-success"
-                />
-                <div class="flex flex-col items-center gap-2">
-                  <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
-                    Fund issue
-                  </.button>
-                  <div class="text-sm text-muted-foreground">No credit card required</div>
+              <div class="mt-20 sm:mt-40 relative grid items-center grid-cols-1 lg:grid-cols-5 w-full gap-8 lg:gap-x-12 rounded-xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-2 ring-success/20 transition-colors">
+                <div class="lg:col-span-2 text-base leading-6 flex-1">
+                  <div class="text-2xl sm:text-3xl font-semibold text-foreground">
+                    Fund any issue
+                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+                      in seconds
+                    </span>
+                  </div>
+                  <div class="pt-2 text-base sm:text-lg xl:text-lg font-medium text-muted-foreground">
+                    Help improve the OSS you love and rely on
+                  </div>
+                  <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pay when PRs are merged
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pool bounties with other sponsors
+                    </div>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Algora handles invoices, payouts, compliance<span class="hidden sm:inline"> & 1099s</span>
+                    </div>
+                  </div>
                 </div>
-              </.form>
+                <.form
+                  for={@bounty_form}
+                  phx-submit="create_bounty"
+                  class="lg:col-span-3 grid gap-4 sm:gap-6 w-full"
+                >
+                  <.input
+                    label="URL"
+                    field={@bounty_form[:url]}
+                    placeholder="https://github.com/owner/repo/issues/1337"
+                  />
+                  <.input
+                    label="Amount"
+                    icon="tabler-currency-dollar"
+                    field={@bounty_form[:amount]}
+                    class="placeholder:text-success"
+                  />
+                  <div class="flex flex-col items-center gap-2">
+                    <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                      Fund issue
+                    </.button>
+                    <div class="text-sm text-muted-foreground">No credit card required</div>
+                  </div>
+                </.form>
+              </div>
             </div>
             <div class="pt-40 grid grid-cols-1 gap-16">
               <.link
                 href="https://github.com/zed-industries/zed/issues/4440"
                 rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+                class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
               >
-                <div class="flex -space-x-4">
+                <div class="flex -space-x-4 shrink-0">
                   <img
-                    class="h-20 w-20 rounded-full z-0"
+                    class="size-20 rounded-full z-0"
                     src="https://github.com/zed-industries.png"
                     alt="Zed"
                   />
                   <img
-                    class="h-20 w-20 rounded-full z-10"
+                    class="size-20 rounded-full z-10"
                     src="https://github.com/schacon.png"
                     alt="Scott Chacon"
                   />
                 </div>
                 <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
+                  <div class="text-xl sm:text-2xl font-semibold text-foreground">
                     GitHub cofounder funds new feature in Zed Editor
                   </div>
-                  <div class="text-lg font-medium text-muted-foreground">
+                  <div class="text-base sm:text-lg font-medium text-muted-foreground">
                     Zed Editor, Scott Chacon
                   </div>
                 </div>
-                <.button size="lg" variant="secondary">
+                <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
                   <Logos.github class="size-4 mr-4 -ml-2" /> View issue
                 </.button>
               </.link>
@@ -279,30 +291,30 @@ defmodule AlgoraWeb.HomeLive do
               <.link
                 href="https://github.com/PX4/PX4-Autopilot/issues/22464"
                 rel="noopener"
-                class="relative flex items-center gap-x-4 rounded-xl bg-black p-6 ring-1 ring-border transition-colors"
+                class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
               >
-                <div class="flex items-center -space-x-6">
+                <div class="flex items-center -space-x-6 shrink-0">
                   <img
-                    class="h-20 w-20 rounded-full z-0"
+                    class="size-20 rounded-full z-0"
                     src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
                     alt="Alex Klimaj"
                   />
-                  <img class="h-16 w-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                  <img class="size-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
                   <img
-                    class="h-20 w-20 rounded-full z-10"
+                    class="size-20 rounded-full z-10"
                     src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
                     alt="Andrew Wilkins"
                   />
                 </div>
                 <div class="text-base leading-6 flex-1">
-                  <div class="text-2xl font-semibold text-foreground">
+                  <div class="text-xl sm:text-2xl font-semibold text-foreground">
                     DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
                   </div>
-                  <div class="text-lg font-medium text-muted-foreground">
+                  <div class="text-base sm:text-lg font-medium text-muted-foreground">
                     Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
                   </div>
                 </div>
-                <.button size="lg" variant="secondary">
+                <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
                   <Logos.github class="size-4 mr-4 -ml-2" /> View issue
                 </.button>
               </.link>
@@ -314,10 +326,10 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
               src="https://www.firecrawl.dev/images/yc.svg"
-              class="h-24 mx-auto"
+              class="h-20 sm:h-24 mx-auto"
               alt="Y Combinator Logo"
             />
-            <h2 class="mt-8 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4 !leading-[1.25]">
+            <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               YCombinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">
@@ -336,7 +348,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-6">
-                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     Keep has 90+ integrations to alert our customers about critical events. Of these,
                     <.link
                       href="https://github.com/keephq/keep/issues?q=state%3Aclosed%20label%3A%22%F0%9F%92%8E%20Bounty%22%20%20label%3A%22%F0%9F%92%B0%20Rewarded%22%20label%3AProvider%20"
@@ -351,8 +363,10 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">Tal Borenstein</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Tal Borenstein
+                        </div>
+                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Keep (YC W23)
                         </div>
                       </div>
@@ -373,9 +387,9 @@ defmodule AlgoraWeb.HomeLive do
               Use bounties for outcome-based contract work with full GitHub integration.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-5 order-first lg:order-last">
-                  <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                  <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-gray-800">
                     <img
                       src={~p"/images/people/louis-beaumont.png"}
                       alt="Louis Beaumont"
@@ -384,16 +398,18 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-6 order-last lg:order-first">
-                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                  <h3 class="text-2xl sm:text-3xl font-display font-bold leading-[1.5] sm:leading-[3rem]">
                     I posted our bounty on <span class="text-success">Upwork</span>
                     to try it, overall it's <span class="text-success">1000x more friction</span>
                     than OSS bounties with Algora.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">Louis Beaumont</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                        <div class="text-2xl sm:text-3xl font-semibold text-foreground">
+                          Louis Beaumont
+                        </div>
+                        <div class="pt-2 text-xl sm:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Screenpipe
                         </div>
                       </div>
@@ -404,27 +420,27 @@ defmodule AlgoraWeb.HomeLive do
             </div>
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-6">
                   <div class="relative flex -space-x-4">
                     <img
                       src="https://github.com/calcom.png"
                       alt="Cal.com"
-                      class="size-40 rounded-2xl"
+                      class="size-24 sm:size-40 rounded-2xl"
                     />
                     <img
                       src="https://media.licdn.com/dms/image/v2/C4D03AQFy5iED85Z9mQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1650904368312?e=1747872000&v=beta&t=3gbV5Eru74Gxt8zvLZ0cKRD2YkQYHQ3qjBPvqJH31AQ"
                       alt="PeerRich"
-                      class="size-40 rounded-full"
+                      class="size-24 sm:size-40 rounded-full"
                     />
                     <img
                       src="https://media.licdn.com/dms/image/v2/D4E03AQEHMtneifrVfQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1708121831533?e=1747872000&v=beta&t=heIzHASUcd-OhZ4ZeEm-6smGjX66YcEAOqKQoCeXbgo"
                       alt="Bailey Pumfleet"
-                      class="size-40 rounded-full"
+                      class="size-24 sm:size-40 rounded-full"
                     />
                   </div>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8">
-                    <div class="flex flex-col gap-4 text-5xl font-semibold font-display">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-8">
+                    <div class="flex flex-col gap-4 text-3xl sm:text-5xl font-semibold font-display">
                       <div>
                         Used bounties
                       </div>
@@ -438,38 +454,38 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-5">
-                  <div class="text-3xl font-display font-semibold leading-[3rem]">
+                  <div class="text-2xl sm:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
                     Shipped by <span class="text-success">86 contributors</span>
                   </div>
-                  <ul class="text-3xl font-display font-semibold leading-[3rem]">
+                  <ul class="text-2xl sm:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">14</span>
                       High Priority tickets
                     </li>
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">24</span> Improvements
                     </li>
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">21</span> Bugs
                     </li>
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">36</span>
                       Medium priority tickets
                     </li>
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">13</span> UI updates
                     </li>
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">68</span> New Features
                     </li>
                     <li class="flex items-center gap-x-4">
-                      <.icon name="tabler-check" class="size-8 text-success" />
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">18</span> Integrations
                     </li>
                   </ul>
@@ -658,8 +674,10 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
                   <div class="flex items-center gap-4">
                     <div class="text-right">
-                      <div class="text-base font-medium text-foreground">Nicolas Camara</div>
-                      <div class="pt-1 text-sm font-medium text-muted-foreground">
+                      <div class="text-base font-medium text-foreground whitespace-nowrap">
+                        Nicolas Camara
+                      </div>
+                      <div class="pt-1 text-sm font-medium text-muted-foreground whitespace-nowrap">
                         Founder & CTO
                       </div>
                     </div>
@@ -670,7 +688,10 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                 </div>
-                <.icon name="tabler-git-merge" class="size-8 text-purple-400" />
+                <.icon
+                  name="tabler-git-merge"
+                  class="size-6 sm:size-8 text-purple-400 hidden sm:block"
+                />
                 <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
                   <div class="flex items-center gap-4">
                     <img
@@ -679,15 +700,17 @@ defmodule AlgoraWeb.HomeLive do
                       class="size-12 rounded-full object-cover"
                     />
                     <div>
-                      <div class="text-base font-semibold text-foreground">Gergő Móricz</div>
-                      <div class="pt-2 text-sm font-medium text-muted-foreground">
-                        Software Engineer
+                      <div class="text-base font-semibold text-foreground whitespace-nowrap">
+                        Gergő Móricz
+                      </div>
+                      <div class="pt-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                        Contributor
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="pt-12 flex flex-row gap-x-16 gap-y-8">
+              <div class="pt-8 sm:pt-12 flex gap-8 lg:gap-x-16">
                 <div class="w-[24%]">
                   <.modal_video
                     class="aspect-[9/16] rounded-xl lg:rounded-2xl"
@@ -712,27 +735,44 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
+        <section class="relative isolate overflow-hidden bg-black py-8 sm:py-16 lg:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="mb-4 sm:mb-8 text-2xl sm:text-3xl font-bold text-card-foreground text-center">
+              <span class="text-muted-foreground block sm:inline">The open source </span>
+              <span>Upwork for engineers</span>
+            </h2>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <.button navigate="/onboarding/org" class="w-full sm:w-auto">
+                Start your project
+              </.button>
+              <.button href="https://cal.com/ioannisflo" variant="secondary" class="w-full sm:w-auto">
+                Request a demo
+              </.button>
+            </div>
+          </div>
+        </section>
+
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-8xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?
             </h2>
-            <p class="text-center font-medium text-base text-muted-foreground mb-16">
+            <p class="text-center font-medium text-base text-muted-foreground mb-8 sm:mb-16">
               You can tip your favorite open source contributors with Algora.
             </p>
 
-            <div class="flex flex-row gap-8 lg:gap-8">
-              <div class="w-[65%] relative rounded-2xl bg-black/25 p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+            <div class="flex flex-col lg:flex-row gap-8">
+              <div class="w-full lg:w-[65%] relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
                 <div class="grid items-center lg:grid-cols-7 gap-8 h-full">
-                  <div class="col-span-3 text-base leading-6">
-                    <h3 class="col-span-3 text-3xl font-semibold text-foreground">
+                  <div class="lg:col-span-3 text-base leading-6">
+                    <h3 class="text-2xl sm:text-3xl font-semibold text-foreground">
                       Tip any contributor <br class="hidden lg:block" />
                       <span class="text-blue-500 drop-shadow-[0_1px_5px_#60a5fa80]">instantly</span>
                     </h3>
-                    <p class="mt-4 text-lg font-medium text-muted-foreground">
+                    <p class="mt-4 text-base sm:text-lg font-medium text-muted-foreground">
                       Support the maintainers behind your favorite open source projects
                     </p>
-                    <div class="mt-6 space-y-3">
+                    <div class="mt-4 sm:mt-6 space-y-3">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
                         <span>Send tips directly to GitHub usernames</span>
@@ -748,8 +788,12 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </div>
 
-                  <.form for={@tip_form} phx-submit="create_tip" class="col-span-4 space-y-6">
-                    <div class="grid lg:grid-cols-2 gap-y-6 gap-x-3">
+                  <.form
+                    for={@tip_form}
+                    phx-submit="create_tip"
+                    class="lg:col-span-4 space-y-4 sm:space-y-6"
+                  >
+                    <div class="grid sm:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
                       <.input
                         label="GitHub Username"
                         field={@tip_form[:github_handle]}
@@ -781,11 +825,11 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
 
-              <div class="w-[35%]">
+              <div class="hidden sm:block w-full lg:w-[35%]">
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
-                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10 p-12 bg-[#0d1017]"
+                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10 p-8 sm:p-12 bg-[#0d1017]"
                 />
               </div>
             </div>
@@ -821,7 +865,7 @@ defmodule AlgoraWeb.HomeLive do
     <.dialog
       id="video-modal"
       show={false}
-      class="w-screen h-screen lg:max-w-none p-[5rem]"
+      class="w-screen h-screen lg:max-w-none p-2 sm:p-4 lg:p-[5rem]"
       on_cancel={
         %JS{}
         |> JS.set_attribute({"src", ""}, to: "#video-modal-iframe")
@@ -1139,13 +1183,11 @@ defmodule AlgoraWeb.HomeLive do
     <div>
       <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
         <.link
-          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/browser-use"}
         >
-          <img class="size-7 mr-4" src="https://browser-use.com/logo.svg" />
-          <span class="sm:inline hidden">
-            Browser Use
-          </span>
+          <img class="size-4 sm:size-7 mr-2 sm:mr-4" src="https://browser-use.com/logo.svg" />
+          Browser Use
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/outerbase"}>
           <svg viewBox="0 0 123 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[80%]">
@@ -1210,35 +1252,35 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
-            class="col-auto w-[90%] saturate-0"
+            class="col-auto sm:w-[90%] saturate-0"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/traceloop"}>
           <img
             src="https://cdn.prod.website-files.com/664553b7af7a800a7911b9f0/664553f95f4ec29495eb8eb9_traceloop%20logo%20dark%20bg.png"
             alt="Traceloop"
-            class="w-[90%] col-auto saturate-0"
+            class="sm:w-[90%] col-auto saturate-0"
           />
         </.link>
         <.link
-          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/trieve"}
         >
           <img
             src="https://cdn.trieve.ai/trieve-logo.png"
             alt="Trieve logo"
-            class="size-12 mr-2 brightness-0 invert"
+            class="size-8 sm:size-12 mr-2 brightness-0 invert"
           /> Trieve
         </.link>
         <.link
-          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/twentyhq"}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 40 40"
-            class="size-7 mr-4"
+            class="shrink-0 size-4 sm:size-7 mr-2 sm:mr-4"
           >
             <path
               fill="currentColor"
@@ -1261,7 +1303,7 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
-            class="col-auto w-[90%] saturate-0"
+            class="col-auto sm:w-[90%] saturate-0"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
@@ -1280,7 +1322,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
 
         <.link
-          class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
           aria-label="Logo"
           navigate={~p"/org/mendableai"}
         >

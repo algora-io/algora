@@ -119,10 +119,6 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def put_current_user(conn, user) do
-    user
-    |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
-    |> Algora.Repo.update()
-
     conn =
       conn
       |> assign(:current_user, user)
@@ -163,6 +159,10 @@ defmodule AlgoraWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     user_id = get_session(conn, :user_id)
     user = user_id && Accounts.get_user(user_id)
+
+    user
+    |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
+    |> Algora.Repo.update()
 
     conn
     |> assign(:current_user, user)

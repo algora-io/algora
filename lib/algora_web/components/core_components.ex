@@ -214,8 +214,40 @@ defmodule AlgoraWeb.CoreComponents do
       <:img src={@current_context.avatar_url} alt={@current_context.handle} />
       <:title>{@current_context.name}</:title>
 
+      <:link href={~p"/set_context/personal"}>
+        <div class="flex items-center whitespace-nowrap">
+          <.avatar class="mr-3 h-8 w-8">
+            <.avatar_image src={@current_user.avatar_url} />
+            <.avatar_fallback>
+              {Algora.Util.initials(@current_user.name)}
+            </.avatar_fallback>
+          </.avatar>
+          <div>
+            <div class="font-semibold">{@current_user.name}</div>
+            <div class="text-sm text-gray-500">
+              Solver dashboard
+            </div>
+          </div>
+        </div>
+      </:link>
+      <:link href={~p"/set_context/#{@current_user.handle}"}>
+        <div class="flex items-center whitespace-nowrap">
+          <.avatar class="mr-3 h-8 w-8">
+            <.avatar_image src={@current_user.avatar_url} />
+            <.avatar_fallback>
+              {Algora.Util.initials(@current_user.name)}
+            </.avatar_fallback>
+          </.avatar>
+          <div>
+            <div class="font-semibold">{@current_user.name}</div>
+            <div class="text-sm text-gray-500">
+              Bounty board
+            </div>
+          </div>
+        </div>
+      </:link>
       <:link
-        :for={ctx <- @all_contexts}
+        :for={ctx <- @all_contexts |> Enum.filter(&(&1.id != @current_user.id))}
         :if={@current_context.id != ctx.id}
         href={
           if ctx.id == @current_user.id,

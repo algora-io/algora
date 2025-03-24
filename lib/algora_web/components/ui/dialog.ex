@@ -50,7 +50,7 @@ defmodule AlgoraWeb.Components.UI.Dialog do
       phx-mounted={@show && JS.exec("phx-show-modal", to: "##{@id}")}
       phx-remove={JS.exec("phx-hide-modal", to: "##{@id}")}
       phx-show-modal={show_modal(@id)}
-      phx-hide-modal={hide_modal(@id)}
+      phx-hide-modal={@on_cancel |> hide_modal(@id)}
       class="group/dialog relative z-50 hidden"
     >
       <div

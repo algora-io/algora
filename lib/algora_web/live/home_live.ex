@@ -824,7 +824,16 @@ defmodule AlgoraWeb.HomeLive do
       </main>
     </div>
 
-    <.dialog id="video-modal" show={false} class="w-screen h-screen lg:max-w-none p-[5rem]">
+    <.dialog
+      id="video-modal"
+      show={false}
+      class="w-screen h-screen lg:max-w-none p-[5rem]"
+      on_cancel={
+        %JS{}
+        |> JS.set_attribute({"src", ""}, to: "#video-modal-iframe")
+        |> JS.set_attribute({"title", ""}, to: "#video-modal-iframe")
+      }
+    >
       <.dialog_content class="flex items-center justify-center">
         <iframe
           id="video-modal-iframe"

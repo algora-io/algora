@@ -139,6 +139,17 @@ defmodule Algora.AccountsTest do
       assert_activity_names_for_user(user.id, [:identity_created])
       assert_activity_names_for_user(user_again.id, [:identity_created])
     end
+
+    test "user.name is never nil", %{
+      github_info: github_info,
+      emails: emails,
+      token: token,
+      primary_email: primary_email
+    } do
+      {:ok, user} = Accounts.register_github_user(nil, primary_email, github_info, emails, token)
+
+      assert not is_nil(user.name)
+    end
   end
 
   describe "accounts" do

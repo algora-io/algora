@@ -178,6 +178,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
+
           <div class="p-4 sm:p-6 md:p-8">
             <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-8 sm:py-16 md:py-24 lg:py-40">
               <div class="pt-20 sm:pt-40 flex gap-8 lg:gap-x-16">
@@ -755,23 +756,6 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-8 sm:py-16 lg:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="mb-4 sm:mb-8 text-2xl sm:text-3xl font-bold text-card-foreground text-center">
-              <span class="text-muted-foreground block sm:inline">The open source </span>
-              <span>Upwork for engineers</span>
-            </h2>
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <.button navigate="/onboarding/org" class="w-full sm:w-auto">
-                Start your project
-              </.button>
-              <.button href="https://cal.com/ioannisflo" variant="secondary" class="w-full sm:w-auto">
-                Request a demo
-              </.button>
-            </div>
-          </div>
-        </section>
-
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-8xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
@@ -857,8 +841,24 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-black py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <section class="z-20 relative isolate bg-black py-[35vw] sm:py-[25vw]">
+          <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+            <div class="scale-[300%] sm:scale-[150%] opacity-50">
+              <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
+                <img
+                  alt="Algora dashboard"
+                  width="1200"
+                  height="630"
+                  decoding="async"
+                  data-nimg="1"
+                  class="hidden dark:block border border-border bg-white mix-blend-overlay dark:[box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)] [box-shadow:0px_82px_105px_0px_#E3E2DF7A,0px_29.93px_38.33px_0px_#E3E2DF54,0px_14.53px_18.61px_0px_#E3E2DF44,0px_7.12px_9.12px_0px_#E3E2DF36,0px_2.82px_3.61px_0px_#E3E2DF26]"
+                  style="color:transparent"
+                  src={~p"/images/screenshots/org-home.png"}
+                />
+              </div>
+            </div>
+          </div>
+          <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
               <span class="block sm:inline">Upwork for engineers</span>
@@ -874,7 +874,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
+        <div class="z-10 relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
           <Footer.footer />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?

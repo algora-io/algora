@@ -587,7 +587,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
               field={@verification_form[:code]}
               type="text"
               placeholder="Enter verification code"
-              class="w-full border-input bg-background text-center text-2xl tracking-widest"
+              class="w-full border-input bg-background text-center text-xl sm:text-2xl tracking-widest"
             />
 
             <%= if @code_valid? == false do %>

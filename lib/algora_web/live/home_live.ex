@@ -120,14 +120,12 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
-                <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
-                  The open source Upwork for engineers
+                <h1 class="font-display text-2xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
+                  The open source Upwork<br class="sm:hidden" /> for engineers
                 </h1>
                 <p class="mt-4 sm:mt-8 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
-                  Discover GitHub bounties, contract work and jobs
-                </p>
-                <p class="mt-2 sm:mt-4 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
-                  Hire the top 1% open source developers
+                  Discover GitHub bounties, contract work and jobs.<br class="hidden sm:block" />
+                  Hire the top 1% open source developers.
                 </p>
                 <!-- CTA buttons -->
                 <.form
@@ -141,16 +139,15 @@ defmodule AlgoraWeb.HomeLive do
                       placeholder="github.com/your/repo"
                       class={
                         classes([
-                          "w-full h-10 sm:h-16 text-base sm:text-lg xl:text-2xl pl-12 sm:pl-[3.75rem] pr-24 sm:pr-48 ring-2 ring-emerald-500 font-display rounded-lg sm:rounded-xl",
-                          @repo_form[:url].errors != [] &&
-                            "ring-destructive"
+                          "w-full h-10 sm:h-16 text-sm sm:text-lg xl:text-2xl pl-8 sm:pl-[3.75rem] pr-24 sm:pr-48 ring-2 ring-emerald-500 font-display rounded-lg sm:rounded-xl",
+                          @repo_form[:url].errors != [] && "ring-destructive"
                         ])
                       }
                     />
-                    <Logos.github class="h-6 w-6 sm:h-10 sm:w-10 absolute left-3 top-2 sm:top-3 text-muted-foreground/50" />
+                    <Logos.github class="size-5 sm:size-10 absolute left-2 sm:left-3 top-2 sm:top-3 text-muted-foreground/50" />
                     <.button
                       type="submit"
-                      class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-4 sm:px-8 h-7 sm:h-[3rem] text-base sm:text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
+                      class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-2 sm:px-8 h-7 sm:h-[3rem] text-sm sm:text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
                     >
                       Get Started
                     </.button>
@@ -187,7 +184,7 @@ defmodule AlgoraWeb.HomeLive do
 
           <div class="p-4 sm:p-6 md:p-8">
             <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-8 sm:py-16 md:py-24 lg:py-40">
-              <div class="pt-20 sm:pt-40 flex gap-8 lg:gap-x-16">
+              <div class="pt-20 sm:pt-40 flex gap-4 sm:gap-8 lg:gap-x-16">
                 <div class="w-[40%]">
                   <.modal_video
                     class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
@@ -222,7 +219,7 @@ defmodule AlgoraWeb.HomeLive do
                       in seconds
                     </span>
                   </div>
-                  <div class="pt-2 text-base sm:text-lg xl:text-lg font-medium text-muted-foreground">
+                  <div class="pt-2 text-sm sm:text-lg xl:text-lg font-medium text-muted-foreground">
                     Help improve the OSS you love and rely on
                   </div>
                   <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
@@ -1208,7 +1205,7 @@ defmodule AlgoraWeb.HomeLive do
     <div>
       <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
         <.link
-          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/browser-use"}
         >
           <img
@@ -1293,7 +1290,7 @@ defmodule AlgoraWeb.HomeLive do
           />
         </.link>
         <.link
-          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/trieve"}
         >
           <img
@@ -1304,7 +1301,7 @@ defmodule AlgoraWeb.HomeLive do
           /> Trieve
         </.link>
         <.link
-          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/twentyhq"}
         >
           <svg
@@ -1361,7 +1358,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
 
         <.link
-          class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
           aria-label="Logo"
           navigate={~p"/org/mendableai"}
         >

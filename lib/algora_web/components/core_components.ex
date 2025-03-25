@@ -150,7 +150,7 @@ defmodule AlgoraWeb.CoreComponents do
           type="button"
           class={
             classes([
-              "group w-full rounded-md p-3 text-left text-sm font-medium text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring",
+              "group w-full rounded-md px-3 py-2 text-left text-sm font-medium text-foreground hover:bg-accent/75 focus:outline-none focus:ring-2 focus:ring-ring",
               @border && "border border-input"
             ])
           }

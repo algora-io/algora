@@ -210,14 +210,29 @@ defmodule AlgoraWeb.CoreComponents do
 
   def context_selector(assigns) do
     ~H"""
-    <.dropdown id="dashboard-dropdown" class={@class}>
+    <.dropdown id="dashboard-dropdown" class="w-[14rem]">
       <:img src={@current_context.avatar_url} alt={@current_context.handle} />
       <:title>{@current_context.name}</:title>
+      <:subtitle :if={@current_context.handle && @current_context.id != @current_user.id}>
+        @{@current_context.handle}
+      </:subtitle>
+      <:subtitle :if={
+        @current_context.handle && @current_context.id == @current_user.id &&
+          @current_user.last_context == "personal"
+      }>
+        Solver dashboard
+      </:subtitle>
+      <:subtitle :if={
+        @current_context.handle && @current_context.id == @current_user.id &&
+          @current_user.last_context != "personal"
+      }>
+        Bounty board
+      </:subtitle>
 
       <:link href={~p"/set_context/personal"}>
         <div class="flex items-center whitespace-nowrap">
-          <div class="mr-3 relative h-8 w-8 shrink-0">
-            <.avatar class="mr-3 h-8 w-8">
+          <div class="mr-3 relative size-10 shrink-0">
+            <.avatar class="mr-3 size-10">
               <.avatar_image src={@current_user.avatar_url} />
               <.avatar_fallback>
                 {Algora.Util.initials(@current_user.name)}
@@ -237,8 +252,8 @@ defmodule AlgoraWeb.CoreComponents do
       </:link>
       <:link :if={@current_user.handle} href={~p"/set_context/#{@current_user.handle}"}>
         <div class="flex items-center whitespace-nowrap">
-          <div class="mr-3 relative h-8 w-8 shrink-0">
-            <.avatar class="mr-3 h-8 w-8">
+          <div class="mr-3 relative size-10 shrink-0">
+            <.avatar class="mr-3 size-10">
               <.avatar_image src={@current_user.avatar_url} />
               <.avatar_fallback>
                 {Algora.Util.initials(@current_user.name)}
@@ -266,7 +281,7 @@ defmodule AlgoraWeb.CoreComponents do
         }
       >
         <div class="flex items-center whitespace-nowrap">
-          <.avatar class="mr-3 h-8 w-8">
+          <.avatar class="mr-3 size-10">
             <.avatar_image src={ctx.avatar_url} />
             <.avatar_fallback>
               {Algora.Util.initials(ctx.name)}
@@ -280,16 +295,16 @@ defmodule AlgoraWeb.CoreComponents do
       </:link>
       <:link :if={@current_user.is_admin} href={~p"/admin"}>
         <div class="flex items-center whitespace-nowrap">
-          <div class="mr-3 flex h-8 w-8 items-center justify-center">
-            <.icon name="tabler-adjustments-alt" class="h-5 w-5" />
+          <div class="mr-3 flex size-10 items-center justify-center bg-accent rounded-full">
+            <.icon name="tabler-adjustments-alt" class="size-6" />
           </div>
           <div class="font-semibold">Admin</div>
         </div>
       </:link>
       <:link href={~p"/auth/logout"}>
         <div class="flex items-center whitespace-nowrap">
-          <div class="mr-3 flex h-8 w-8 items-center justify-center">
-            <.icon name="tabler-logout" class="h-5 w-5" />
+          <div class="mr-3 flex size-10 items-center justify-center bg-accent rounded-full">
+            <.icon name="tabler-logout" class="size-6" />
           </div>
           <div class="font-semibold">Logout</div>
         </div>

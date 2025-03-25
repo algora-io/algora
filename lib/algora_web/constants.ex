@@ -14,8 +14,8 @@ defmodule AlgoraWeb.Constants do
       github_url: "https://github.com/algora-io",
       calendar_url: "https://cal.com/ioannisflo",
       # TODO: update this to the new repo
-      github_repo_url: "https://github.com/algora-io/tv",
-      github_repo_api_url: "https://api.github.com/repos/algora-io/tv",
+      github_repo_url: "https://github.com/algora-io/console",
+      github_repo_api_url: "https://api.github.com/repos/algora-io/console",
       docs_url: "https://docs.algora.io",
       docs_supported_countries_url: "https://docs.algora.io/bounties/payments#supported-countries-regions",
       demo_url: "https://www.youtube.com/watch?v=Ts5GhlEROrs",

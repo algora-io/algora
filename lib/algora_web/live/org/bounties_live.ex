@@ -32,7 +32,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
               <div
                 role="tablist"
                 aria-orientation="horizontal"
-                class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-md bg-white/5 p-1 text-white/50 dark:bg-gray-800 dark:text-gray-400"
+                class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-md p-1 bg-muted text-card-foreground"
                 tabindex="0"
                 data-orientation="horizontal"
                 style="outline: none;"

@@ -210,7 +210,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def context_selector(assigns) do
     ~H"""
-    <.dropdown id="dashboard-dropdown">
+    <.dropdown id="dashboard-dropdown" class={@class}>
       <:img src={@current_context.avatar_url} alt={@current_context.handle} />
       <:title>{@current_context.name}</:title>
 
@@ -222,9 +222,9 @@ defmodule AlgoraWeb.CoreComponents do
               {Algora.Util.initials(@current_user.name)}
             </.avatar_fallback>
           </.avatar>
-          <div>
-            <div class="font-semibold">{@current_user.name}</div>
-            <div class="text-sm text-gray-500">
+          <div class="truncate">
+            <div class="font-semibold truncate">{@current_user.name}</div>
+            <div class="text-sm text-gray-500 truncate">
               Solver dashboard
             </div>
           </div>
@@ -238,9 +238,9 @@ defmodule AlgoraWeb.CoreComponents do
               {Algora.Util.initials(@current_user.name)}
             </.avatar_fallback>
           </.avatar>
-          <div>
-            <div class="font-semibold">{@current_user.name}</div>
-            <div class="text-sm text-gray-500">
+          <div class="truncate">
+            <div class="font-semibold truncate">{@current_user.name}</div>
+            <div class="text-sm text-gray-500 truncate">
               Bounty board
             </div>
           </div>
@@ -262,9 +262,9 @@ defmodule AlgoraWeb.CoreComponents do
               {Algora.Util.initials(ctx.name)}
             </.avatar_fallback>
           </.avatar>
-          <div>
-            <div class="font-semibold">{ctx.name}</div>
-            <div :if={ctx.handle} class="text-sm text-gray-500">@{ctx.handle}</div>
+          <div class="truncate">
+            <div class="font-semibold truncate">{ctx.name}</div>
+            <div :if={ctx.handle} class="text-sm text-gray-500 truncate">@{ctx.handle}</div>
           </div>
         </div>
       </:link>

@@ -445,60 +445,69 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
 
         <.section>
-          <div class="group border ring-1 ring-transparent rounded-xl overflow-hidden">
-            <div class={[
-              "bg-card/75 flex justify-between rounded-xl border-l-4 border-purple-400 transition-all",
-              "divide-x divide-default"
-            ]}>
-              <div class="w-1/4 px-8 py-8 xl:px-4 2xl:px-8">
+          <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
+            <div class="bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 transition-all divide-y sm:divide-y-0 sm:divide-x sm:divide-default">
+              <div class="sm:w-1/2 xl:w-1/3 p-4 pb-8 sm:pb-4 sm:px-6 flex flex-col justify-center">
                 <div class="flex items-center gap-2">
                   <div class="flex items-center gap-2 pb-2">
-                    <h3 class="flex items-center gap-4 text-xl font-semibold text-foreground">
+                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
                       Growing your team?
                     </h3>
                   </div>
                 </div>
-                <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
+                <p class="text-foreground-light text-sm pt-2 2xl:pr-4">
                   You're in the right place.
                 </p>
-                <div class="pt-2 flex gap-2">
-                  <.button
-                    navigate={Constants.get(:calendar_url)}
-                    variant="purple"
-                    size="lg"
-                    class="drop-shadow-[0_1px_5px_#c084fc80]"
+                <div class="flex gap-2 pt-4">
+                  <.link
+                    href={Constants.get(:calendar_url)}
+                    rel="noopener"
+                    target="_blank"
+                    class="inline-flex px-10 rounded-md border-purple-500/80 bg-purple-500/50 text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium drop-shadow-[0_1px_5px_#c084fc80] shadow text-lg h-12 focus-visible:outline-purple-600 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:border-purple-500 hover:bg-purple-500/30 border data-[state=open]:bg-purple-500/80 data-[state=open]:outline-purple-600 phx-submit-loading:opacity-75"
                   >
                     Contact us
-                  </.button>
+                  </.link>
                 </div>
               </div>
-              <div class="w-3/4 my-auto">
-                <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
-                  <li class="py-2 flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center size-12 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                      <.icon name="tabler-world" class="size-6 text-purple-400" />
-                    </div>
-                    <div class="pt-2 text-2xl font-semibold font-display">Publish</div>
-                    <div class="pt-1 text-sm font-medium text-muted-foreground">
-                      Bounties and contracts on Algora
-                    </div>
-                  </li>
-                  <li class="py-2 flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center size-12 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                      <.icon name="tabler-bolt" class="size-6 text-purple-400" />
-                    </div>
-                    <div class="pt-2 text-2xl font-semibold font-display">Match</div>
-                    <div class="pt-1 text-sm font-medium text-muted-foreground">
-                      Proven Algora experts
+              <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
+                <ul class="border-default text-base text-foreground-lighter flex-1 grid xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
+                  <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+                    <div class="flex items-center xl:flex-col gap-4">
+                      <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                        <.icon name="tabler-world" class="size-8 text-purple-400" />
+                      </div>
+                      <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                        <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
+                        <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                          Bounties and contracts
+                        </div>
+                      </div>
                     </div>
                   </li>
-                  <li class="py-2 flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center size-12 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                      <.icon name="tabler-briefcase" class="size68 text-purple-400" />
+                  <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+                    <div class="flex items-center xl:flex-col gap-4">
+                      <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                        <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+                      </div>
+                      <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                        <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
+                        <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                          Proven Algora experts
+                        </div>
+                      </div>
                     </div>
-                    <div class="pt-2 text-2xl font-semibold font-display">Hire</div>
-                    <div class="pt-1 text-sm font-medium text-muted-foreground">
-                      Top 1% OSS engineers
+                  </li>
+                  <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+                    <div class="flex items-center xl:flex-col gap-4">
+                      <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                        <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+                      </div>
+                      <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                        <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
+                        <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                          Top 1% OSS engineers
+                        </div>
+                      </div>
                     </div>
                   </li>
                 </ul>
@@ -1245,96 +1254,96 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp create_bounty(assigns) do
     ~H"""
-    <.card>
-      <.card_header>
-        <div class="text-3xl font-semibold text-foreground">
-          Fund any issue
-          <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-            in seconds
-          </span>
-        </div>
-        <div class="text-base font-medium text-muted-foreground">
-          Help improve the OSS you love and rely on
-        </div>
-      </.card_header>
-      <.card_content>
-        <.simple_form for={@bounty_form} phx-submit="create_bounty">
-          <div class="flex flex-col gap-6">
-            <.input
-              label="Issue URL"
-              field={@bounty_form[:url]}
-              placeholder="https://github.com/swift-lang/swift/issues/1337"
-            />
-            <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
-            <p class="text-sm text-muted-foreground">
-              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
-              <code class="px-1 py-0.5 text-success">/bounty $100</code>
-              on GitHub issues
-              <button
-                :if={@installations == []}
-                type="button"
-                phx-click="install_app"
-                class="hover:underline"
-              >
-                (requires the Algora app)
-              </button>
-            </p>
-            <div class="flex justify-end gap-4">
-              <.button>Submit</.button>
-            </div>
+    <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
+      <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+        <div class="p-4 sm:p-6">
+          <div class="text-2xl font-semibold text-foreground">
+            Fund any issue<br />
+            <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+              in seconds
+            </span>
           </div>
-        </.simple_form>
-      </.card_content>
-    </.card>
+          <div class="pt-1 text-base font-medium text-muted-foreground">
+            Help improve the OSS you love and rely on
+          </div>
+          <.simple_form for={@bounty_form} phx-submit="create_bounty">
+            <div class="flex flex-col gap-6 pt-6">
+              <.input
+                label="Issue URL"
+                field={@bounty_form[:url]}
+                placeholder="https://github.com/swift-lang/swift/issues/1337"
+              />
+              <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+              <p class="text-sm text-muted-foreground">
+                <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
+                <code class="px-1 py-0.5 text-success">/bounty $100</code>
+                on GitHub issues
+                <button
+                  :if={@installations == []}
+                  type="button"
+                  phx-click="install_app"
+                  class="hover:underline"
+                >
+                  (requires the Algora app)
+                </button>
+              </p>
+              <div class="flex justify-end gap-4">
+                <.button>Submit</.button>
+              </div>
+            </div>
+          </.simple_form>
+        </div>
+      </div>
+    </div>
     """
   end
 
   defp create_tip(assigns) do
     ~H"""
-    <.card>
-      <.card_header>
-        <div class="text-3xl font-semibold text-foreground">
-          Tip any developer
-          <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-            instantly
-          </span>
-        </div>
-        <div class="text-base font-medium text-muted-foreground">
-          Thank OSS maintainers and contributors on GitHub
-        </div>
-      </.card_header>
-      <.card_content>
-        <.simple_form for={@tip_form} phx-submit="create_tip">
-          <div class="flex flex-col gap-6">
-            <.input
-              label="Contribution URL"
-              field={@tip_form[:url]}
-              placeholder="https://github.com/owner/repo/pull/123"
-            />
-            <div class="grid sm:grid-cols-2 gap-x-3 gap-y-6">
-              <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
-              <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
-            </div>
-            <p class="text-sm text-muted-foreground">
-              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
-              <code class="px-1 py-0.5 text-success">/tip $100 @handle</code>
-              on GitHub issues and PRs
-              <button
-                :if={@installations == []}
-                type="button"
-                phx-click="install_app"
-                class="hover:underline"
-              >
-                (requires the Algora app)
-              </button>
-            </p>
-            <div class="flex justify-end gap-4">
-              <.button>Submit</.button>
-            </div>
+    <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
+      <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+        <div class="p-4 sm:p-6">
+          <div class="text-2xl font-semibold text-foreground">
+            Tip any developer<br />
+            <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+              instantly
+            </span>
           </div>
-        </.simple_form>
-      </.card_content>
-    </.card>
+          <div class="pt-1 text-base font-medium text-muted-foreground">
+            Thank OSS maintainers and contributors on GitHub
+          </div>
+          <.simple_form for={@tip_form} phx-submit="create_tip">
+            <div class="flex flex-col gap-6 pt-6">
+              <.input
+                label="Contribution URL"
+                field={@tip_form[:url]}
+                placeholder="https://github.com/owner/repo/pull/123"
+              />
+              <div class="grid sm:grid-cols-2 gap-x-3 gap-y-6">
+                <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
+                <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+              </div>
+              <p class="text-sm text-muted-foreground">
+                <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
+                <code class="px-1 py-0.5 text-success">/tip $100 @handle</code>
+                on GitHub issues and PRs
+                <button
+                  :if={@installations == []}
+                  type="button"
+                  phx-click="install_app"
+                  class="hover:underline"
+                >
+                  (requires the Algora app)
+                </button>
+              </p>
+              <div class="flex justify-end gap-4">
+                <.button>Submit</.button>
+              </div>
+            </div>
+          </.simple_form>
+        </div>
+      </div>
+    </div>
     """
   end
 

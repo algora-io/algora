@@ -241,7 +241,7 @@ defmodule Algora.Organizations do
   end
 
   def init_preview(repo_owner, repo_name) do
-    token = Algora.Admin.token!()
+    token = Algora.Admin.token()
 
     {:ok, repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
     {:ok, owner} = Workspace.ensure_user(token, repo_owner)

@@ -2,6 +2,9 @@ defmodule Algora.Stargazer do
   @moduledoc false
   use GenServer
 
+  alias Algora.Github
+  alias AlgoraWeb.Constants
+
   require Logger
 
   @poll_interval :timer.minutes(10)

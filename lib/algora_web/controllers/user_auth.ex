@@ -328,6 +328,7 @@ defmodule AlgoraWeb.UserAuth do
   def preview_path(id, token, return_to), do: ~p"/preview?id=#{id}&token=#{token}&return_to=#{return_to}"
 
   def login_path(email, token), do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
+  def login_path(email, token, nil), do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}"
 
   def login_path(email, token, return_to),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"
@@ -355,4 +356,6 @@ defmodule AlgoraWeb.UserAuth do
     © 2025 Algora PBC.
     """
   end
+
+  def generate_login_path(email, return_to \\ nil), do: login_path(email, generate_login_code(email), return_to)
 end

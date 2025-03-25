@@ -772,9 +772,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
            |> assign_achievements()}
 
         user ->
-          token = AlgoraWeb.UserAuth.generate_login_code(user.email)
-
-          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.login_path(user.email, token))}
+          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
       end
     else
       throttle()

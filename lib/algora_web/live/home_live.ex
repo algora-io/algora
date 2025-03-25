@@ -139,7 +139,13 @@ defmodule AlgoraWeb.HomeLive do
                     <.input
                       field={@repo_form[:url]}
                       placeholder="github.com/your/repo"
-                      class="w-full h-10 sm:h-16 text-base sm:text-lg xl:text-2xl pl-12 sm:pl-[3.75rem] pr-24 sm:pr-48 ring-2 ring-emerald-500 font-display rounded-lg sm:rounded-xl"
+                      class={
+                        classes([
+                          "w-full h-10 sm:h-16 text-base sm:text-lg xl:text-2xl pl-12 sm:pl-[3.75rem] pr-24 sm:pr-48 ring-2 ring-emerald-500 font-display rounded-lg sm:rounded-xl",
+                          @repo_form[:url].errors != [] &&
+                            "ring-destructive"
+                        ])
+                      }
                     />
                     <Logos.github class="h-6 w-6 sm:h-10 sm:w-10 absolute left-3 top-2 sm:top-3 text-muted-foreground/50" />
                     <.button

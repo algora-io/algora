@@ -37,12 +37,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
                 data-orientation="horizontal"
                 style="outline: none;"
               >
-                <button
+                <.button
                   type="button"
                   role="tab"
                   aria-selected={@current_status == :open}
-                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :open, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
-                  data-state={if @current_status == :open, do: "active", else: "inactive"}
+                  variant={if @current_status == :open, do: "default", else: "ghost"}
                   phx-click="change-tab"
                   phx-value-tab="open"
                 >
@@ -52,13 +51,13 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       {@stats.open_bounties_count}
                     </span>
                   </div>
-                </button>
-                <button
+                </.button>
+
+                <.button
                   type="button"
                   role="tab"
                   aria-selected={@current_status == :paid}
-                  class={"inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium #{if @current_status == :paid, do: "bg-emerald-700 text-white", else: "hover:bg-emerald-700/50"}"}
-                  data-state={if @current_status == :paid, do: "active", else: "inactive"}
+                  variant={if @current_status == :paid, do: "default", else: "ghost"}
                   phx-click="change-tab"
                   phx-value-tab="completed"
                 >
@@ -68,7 +67,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
                       {@stats.rewarded_bounties_count}
                     </span>
                   </div>
-                </button>
+                </.button>
               </div>
             </div>
           </div>

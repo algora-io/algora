@@ -279,7 +279,7 @@ defmodule Algora.Accounts do
   def create_user(info, primary_email, emails, token) do
     nil
     |> User.github_registration_changeset(info, primary_email, emails, token)
-    |> Repo.insert()
+    |> Repo.insert(returning: true)
   end
 
   def update_user(user, info, primary_email, emails, token) do

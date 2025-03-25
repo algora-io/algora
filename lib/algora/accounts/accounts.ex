@@ -422,13 +422,13 @@ defmodule Algora.Accounts do
   def last_context(nil), do: "nil"
 
   def last_context(%User{last_context: nil} = user) do
-    orgs = Organizations.get_user_orgs(user)
+    contexts = get_contexts(user)
 
     last_debit_query =
       from(t in Transaction,
         join: u in assoc(t, :user),
         where: t.type == :debit,
-        where: u.id in ^Enum.map(orgs, & &1.id),
+        where: u.id in ^Enum.map(contexts, & &1.id),
         order_by: [desc: t.succeeded_at],
         limit: 1,
         select_merge: %{user: u}
@@ -437,28 +437,22 @@ defmodule Algora.Accounts do
     last_bounty_query =
       from(b in Bounty,
         join: c in assoc(b, :creator),
-        where: c.id in ^Enum.map(orgs, & &1.id),
+        where: c.id in ^Enum.map(contexts, & &1.id),
         order_by: [desc: b.inserted_at],
         limit: 1,
         select_merge: %{creator: c}
       )
 
-    last_sponsored_on_behalf_of =
+    new_context =
       cond do
-        last_debit = Repo.one(last_debit_query) -> last_debit.user
-        last_bounty = Repo.one(last_bounty_query) -> last_bounty.owner
-        true -> nil
+        last_debit = Repo.one(last_debit_query) -> last_debit.user.handle
+        last_bounty = Repo.one(last_bounty_query) -> last_bounty.owner.handle
+        true -> default_context()
       end
 
-    last_context =
-      case last_sponsored_on_behalf_of do
-        %{type: :organization} -> last_sponsored_on_behalf_of.handle
-        _ -> default_context()
-      end
+    update_settings(user, %{last_context: new_context})
 
-    update_settings(user, %{last_context: last_context})
-
-    last_context
+    new_context
   end
 
   def last_context(%User{last_context: last_context}), do: last_context

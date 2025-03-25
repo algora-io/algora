@@ -12,23 +12,26 @@ defmodule AlgoraWeb.OrgAuth do
     ensure_role([:mod, :admin], params, session, socket)
   end
 
+  def get_user_role(nil, _org), do: :none
+
+  def get_user_role(user, _org) when user.is_admin, do: :admin
+
+  def get_user_role(user, org) when org.id == user.id, do: :admin
+
+  def get_user_role(user, org) do
+    case Organizations.fetch_member(org.id, user.id) do
+      {:ok, member} -> member.role
+      _ -> :none
+    end
+  end
+
   defp ensure_role(allowed_roles, _params, _session, socket) do
     %{current_org: current_org, current_user: current_user} = socket.assigns
 
-    user_role =
-      if current_org.id == current_user.id do
-        {:ok, :admin}
-      else
-        with {:ok, member} <- Organizations.fetch_member(current_org.id, current_user.id) do
-          {:ok, member.role}
-        end
-      end
-
-    with {:ok, role} <- user_role,
-         true <- role in allowed_roles do
+    if get_user_role(current_user, current_org) in allowed_roles do
       {:cont, socket}
     else
-      _ -> {:halt, redirect(socket, to: "/org/#{current_org.handle}")}
+      {:halt, redirect(socket, to: "/org/#{current_org.handle}")}
     end
   end
 end

@@ -22,8 +22,8 @@ defmodule AlgoraWeb.User.SettingsLive do
             <div class="flex flex-col gap-6">
               <div class="flex flex-col gap-2">
                 <.input field={@form[:handle]} label="Handle" />
-                <p class="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <.icon name="tabler-alert-triangle" class="w-4 h-4" />
+                <p class="text-sm text-muted-foreground">
+                  <.icon name="tabler-alert-triangle" class="size-4 mr-1" />
                   Changing your handle will break existing URLs and references to your profile and other pages. This includes links shared on social media, documentation, and other websites.
                 </p>
               </div>

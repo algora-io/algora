@@ -225,7 +225,10 @@ defmodule AlgoraWeb.User.DashboardLive do
             </ol>
           </nav>
         </div>
-        <div class="hidden lg:block pt-12">
+        <div
+          :if={not incomplete?(@achievements, :earn_first_bounty_status)}
+          class="hidden lg:block pt-12"
+        >
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold leading-none tracking-tight">Share your profile</h2>
           </div>
@@ -281,19 +284,24 @@ defmodule AlgoraWeb.User.DashboardLive do
     {achievements, _} =
       Enum.reduce_while(achievements, {[], false}, fn
         {status_fn, name, path}, {acc, found_current} ->
+          id = Function.info(status_fn)[:name]
           status = status_fn.(socket)
 
           result =
             cond do
-              found_current -> {acc ++ [%{status: :upcoming, name: name, path: path}], found_current}
-              status == :completed -> {acc ++ [%{status: status, name: name, path: path}], false}
-              true -> {acc ++ [%{status: :current, name: name, path: path}], true}
+              found_current -> {acc ++ [%{id: id, status: :upcoming, name: name, path: path}], found_current}
+              status == :completed -> {acc ++ [%{id: id, status: status, name: name, path: path}], false}
+              true -> {acc ++ [%{id: id, status: :current, name: name, path: path}], true}
             end
 
           {:cont, result}
       end)
 
     assign(socket, :achievements, achievements)
+  end
+
+  defp incomplete?(achievements, id) do
+    Enum.any?(achievements, &(&1.id == id and &1.status != :completed))
   end
 
   defp personalize_status(_socket), do: :completed

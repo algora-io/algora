@@ -459,7 +459,12 @@ defmodule AlgoraWeb.PricingLive do
     <div class="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-[repeat(14,_minmax(0,_1fr))]">
       <div class="flex p-px lg:col-span-8">
         <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tl-[2rem]">
-          <img class="object-cover object-left" src={~p"/images/screenshots/bounty.png"} alt="" />
+          <img
+            class="object-cover object-left"
+            loading="lazy"
+            src={~p"/images/screenshots/bounty.png"}
+            alt=""
+          />
           <div class="p-4 sm:p-6">
             <h3 class="text-sm/4 font-semibold text-gray-400">Bounties</h3>
             <p class="mt-2 text-lg font-medium tracking-tight text-white">
@@ -473,7 +478,7 @@ defmodule AlgoraWeb.PricingLive do
       </div>
       <div class="flex p-px lg:col-span-6">
         <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-tr-[2rem]">
-          <img class="object-cover" src={~p"/images/screenshots/tip.png"} alt="" />
+          <img class="object-cover" loading="lazy" src={~p"/images/screenshots/tip.png"} alt="" />
           <div class="p-4 sm:p-6">
             <h3 class="text-sm/4 font-semibold text-gray-400">Tips</h3>
             <p class="mt-2 text-lg font-medium tracking-tight text-white">
@@ -590,7 +595,12 @@ defmodule AlgoraWeb.PricingLive do
       </div>
       <div class="flex p-px lg:col-span-8">
         <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15">
-          <img class="object-cover object-left" src={~p"/images/screenshots/bounties.png"} alt="" />
+          <img
+            class="object-cover object-left"
+            loading="lazy"
+            src={~p"/images/screenshots/bounties.png"}
+            alt=""
+          />
           <div class="p-4 sm:p-6">
             <h3 class="text-sm/4 font-semibold text-gray-400">Pooling</h3>
             <p class="mt-2 text-lg font-medium tracking-tight text-white">
@@ -606,6 +616,7 @@ defmodule AlgoraWeb.PricingLive do
         <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-bl-[2rem]">
           <img
             class="object-cover object-left"
+            loading="lazy"
             src={~p"/images/screenshots/payout-account.png"}
             alt=""
           />
@@ -628,7 +639,7 @@ defmodule AlgoraWeb.PricingLive do
       </div>
       <div class="flex p-px lg:col-span-9">
         <div class="w-full overflow-hidden rounded sm:rounded-lg bg-card ring-1 ring-white/15 lg:rounded-br-[2rem]">
-          <img class="object-cover" src={~p"/images/screenshots/contract.png"} alt="" />
+          <img class="object-cover" loading="lazy" src={~p"/images/screenshots/contract.png"} alt="" />
           <div class="p-4 sm:p-6">
             <h3 class="text-sm/4 font-semibold text-gray-400">Contracts</h3>
             <p class="mt-2 text-lg font-medium tracking-tight text-white">

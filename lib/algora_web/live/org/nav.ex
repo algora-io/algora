@@ -5,24 +5,12 @@ defmodule AlgoraWeb.Org.Nav do
   import Phoenix.LiveView
 
   alias Algora.Organizations
+  alias AlgoraWeb.OrgAuth
 
   def on_mount(:default, %{"org_handle" => org_handle} = params, _session, socket) do
     current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
-
-    current_user_role =
-      if is_nil(current_user) do
-        :none
-      else
-        if current_org.id == current_user.id do
-          :admin
-        else
-          case Organizations.fetch_member(current_org.id, current_user.id) do
-            {:ok, member} -> member.role
-            _ -> :none
-          end
-        end
-      end
+    current_user_role = OrgAuth.get_user_role(current_user, current_org)
 
     # TODO: restore once chat is implemented
     contacts = []

@@ -119,9 +119,9 @@ defmodule AlgoraWeb.HomeLive do
           <.pattern />
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="px-6 lg:px-8 xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
-                <h1 class="font-display text-2xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
-                  The open source Upwork<br class="sm:hidden" /> for engineers
+              <div class="px-6 lg:px-8 lg:pr-0 xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
+                <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
+                  The open source Upwork for engineers
                 </h1>
                 <p class="mt-4 sm:mt-8 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
                   Discover GitHub bounties, contract work and jobs.<br class="hidden sm:block" />
@@ -147,7 +147,7 @@ defmodule AlgoraWeb.HomeLive do
                     <Logos.github class="size-5 sm:size-10 absolute left-2 sm:left-3 top-2 sm:top-3 text-muted-foreground/50" />
                     <.button
                       type="submit"
-                      class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-2 sm:px-8 h-7 sm:h-[3rem] text-sm sm:text-xl font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
+                      class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-2 sm:px-8 h-7 sm:h-[3rem] text-sm sm:text-xl sm:font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
                     >
                       Get Started
                     </.button>
@@ -158,7 +158,7 @@ defmodule AlgoraWeb.HomeLive do
               <div class={
                 classes([
                   "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0",
-                  "overflow-x-auto scrollbar-thin lg:overflow-x-visible"
+                  "overflow-x-auto scrollbar-thin lg:overflow-x-visible px-6 lg:px-8"
                 ])
               }>
                 <%= if length(@featured_devs) > 0 do %>

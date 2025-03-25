@@ -47,9 +47,9 @@ defmodule AlgoraWeb.PricingLive do
       <section class="bg-background pb-16 sm:pb-24">
         <div class="mx-auto px-6 lg:px-8">
           <div class="relative z-10 pb-4 xl:py-16">
-            <div class="mx-auto max-w-7xl text-center px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl sm:text-center">
               <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-                <h1 class="text-3xl sm:text-4xl font-bold text-popover-foreground">
+                <h1 class="text-2xl sm:text-4xl font-bold text-popover-foreground">
                   Simple, transparent pricing
                 </h1>
                 <p class="text-sm sm:text-lg text-muted-foreground">
@@ -59,7 +59,7 @@ defmodule AlgoraWeb.PricingLive do
             </div>
           </div>
 
-          <div class="mx-auto lg:max-w-[95rem] mb-8">
+          <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
             <div class="flex items-start gap-4">
               <div class="flex-1">
                 <h2 class="text-2xl font-semibold text-foreground mb-2">
@@ -181,11 +181,11 @@ defmodule AlgoraWeb.PricingLive do
       class="group border ring-1 ring-transparent hover:ring-emerald-400 rounded-xl overflow-hidden"
     >
       <div class={[
-        "bg-card/75 flex justify-between rounded-xl border-l-4 border-emerald-400 group-hover:border-emerald-300 group-hover:border-l-8 transition-all cursor-pointer",
+        "bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400 group-hover:border-emerald-300 group-hover:sm:border-l-8 transition-all cursor-pointer",
         @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
-        "divide-x divide-default"
+        "divide-y sm:divide-y-0 sm:divide-x sm:divide-default"
       ]}>
-        <div class="flex-1 px-8 pt-6 xl:px-4 2xl:px-8 pr-0">
+        <div class="flex-1 p-4 sm:px-6">
           <div class="flex items-center gap-2">
             <div class="flex items-center gap-2 pb-2">
               <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
@@ -201,7 +201,7 @@ defmodule AlgoraWeb.PricingLive do
           <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
             {@plan.description}
           </p>
-          <div class="flex items-center justify-between pb-8 lg:pb-10">
+          <div class="flex items-center justify-between">
             <div class="border-default flex items-baseline text-5xl font-normal text-foreground lg:text-4xl xl:text-4xl">
               <div class="flex flex-col gap-1 w-full">
                 <%= case @plan.id do %>
@@ -240,15 +240,15 @@ defmodule AlgoraWeb.PricingLive do
             </div>
           </div>
         </div>
-        <div class="flex-1 border-l my-auto border-default px-4 2xl:px-8 pl-0">
+        <div class="flex-1 p-4 sm:px-6">
           <ul class="border-default text-sm text-foreground-lighter flex-1">
             <%= for feature <- @plan.features do %>
               <li class="flex flex-col py-2 first:mt-0">
-                <div class="flex items-center">
+                <div class="flex items-start">
                   <div class="flex w-7">
                     <.icon name="tabler-check" class="size-5 text-emerald-400" />
                   </div>
-                  <span class="text-sm xl:text-base mb-0 text-foreground">
+                  <span class="text-sm xl:text-base mb-0 text-foreground truncate">
                     {Phoenix.HTML.raw(feature.name)}
                   </span>
                 </div>
@@ -266,13 +266,13 @@ defmodule AlgoraWeb.PricingLive do
 
   defp pricing_card2(assigns) do
     ~H"""
-    <div class="group border ring-1 ring-transparent rounded-xl overflow-hidden">
+    <div class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden">
       <div class={[
-        "bg-card/75 flex justify-between rounded-xl border-l-4 border-purple-400 transition-all",
+        "bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer",
         @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
-        "divide-x divide-default"
+        "divide-y sm:divide-y-0 sm:divide-x sm:divide-default"
       ]}>
-        <div class="w-1/3 px-8 py-8 xl:px-4 2xl:px-8">
+        <div class="sm:w-1/2 xl:w-1/3 p-4 pb-8 sm:pb-4 sm:px-6 flex flex-col justify-center">
           <div class="flex items-center gap-2">
             <div class="flex items-center gap-2 pb-2">
               <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
@@ -285,10 +285,10 @@ defmodule AlgoraWeb.PricingLive do
               <% end %>
             </div>
           </div>
-          <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
+          <p class="text-foreground-light text-sm pt-2 2xl:pr-4">
             {@plan.description}
           </p>
-          <div class="pt-4 flex gap-2">
+          <div class="flex gap-2 pt-4">
             <.button
               navigate={@plan.cta_url}
               variant="purple"
@@ -299,30 +299,46 @@ defmodule AlgoraWeb.PricingLive do
             </.button>
           </div>
         </div>
-        <div class="w-2/3 my-auto">
-          <ul class="py-8 border-default text-base text-foreground-lighter flex-1 grid grid-cols-3 gap-4 divide-x divide-default">
-            <li class="py-2 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                <.icon name="tabler-world" class="size-8 text-purple-400" />
-              </div>
-              <div class="pt-4 text-3xl font-semibold font-display">Publish</div>
-              <div class="pt-2 text-lg font-medium text-muted-foreground">
-                Bounties and contracts on Algora
+        <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
+          <ul class="border-default text-base text-foreground-lighter flex-1 grid xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
+            <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+              <div class="flex items-center xl:flex-col gap-4">
+                <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                  <.icon name="tabler-world" class="size-8 text-purple-400" />
+                </div>
+                <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                  <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
+                  <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                    Bounties and contracts <span class="hidden 2xl:inline">on Algora</span>
+                  </div>
+                </div>
               </div>
             </li>
-            <li class="py-2 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+            <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+              <div class="flex items-center xl:flex-col gap-4">
+                <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                  <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+                </div>
+                <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                  <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
+                  <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                    Proven Algora experts
+                  </div>
+                </div>
               </div>
-              <div class="pt-4 text-3xl font-semibold font-display">Match</div>
-              <div class="pt-2 text-lg font-medium text-muted-foreground">Proven Algora experts</div>
             </li>
-            <li class="py-2 flex flex-col items-center justify-center">
-              <div class="flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+            <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+              <div class="flex items-center xl:flex-col gap-4">
+                <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                  <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+                </div>
+                <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                  <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
+                  <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                    Top 1% OSS engineers
+                  </div>
+                </div>
               </div>
-              <div class="pt-4 text-3xl font-semibold font-display">Hire</div>
-              <div class="pt-2 text-lg font-medium text-muted-foreground">Top 1% OSS engineers</div>
             </li>
           </ul>
         </div>

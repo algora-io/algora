@@ -5,7 +5,10 @@ defmodule AlgoraWeb.Constants do
   def constants do
     %{
       email: "info@algora.io",
+      # TODO: use support@algora.io
+      support_email: "info@algora.io",
       twitter_url: "https://x.com/algoraio",
+      twitter_handle: "algoraio",
       youtube_url: "https://www.youtube.com/@algora-io",
       discord_url: ~p"/discord",
       github_url: "https://github.com/algora-io",
@@ -21,7 +24,9 @@ defmodule AlgoraWeb.Constants do
       terms_url: ~p"/legal/terms",
       blog_url: "https://blog.algora.io",
       contact_url: "https://docs.algora.io/contact",
-      algora_tv_url: "https://algora.tv"
+      algora_tv_url: "https://algora.tv",
+      tel_formatted: "+1 (650) 420-2207",
+      tel: "+16504202207"
     }
   end
 

@@ -391,11 +391,15 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <tr class="border-b transition-colors hover:bg-muted/10">
       <td class="p-4 align-middle">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4">
             <.link navigate={User.url(@contract.client)}>
               <.avatar class="aspect-[1200/630] h-32 w-auto rounded-lg">
-                <.avatar_image src={@contract.client.og_image_url} alt={@contract.client.name} />
+                <.avatar_image
+                  src={@contract.client.og_image_url || @contract.client.avatar_url}
+                  alt={@contract.client.name}
+                  class="object-cover"
+                />
                 <.avatar_fallback class="rounded-lg"></.avatar_fallback>
               </.avatar>
             </.link>
@@ -428,8 +432,8 @@ defmodule AlgoraWeb.User.DashboardLive do
             </div>
           </div>
 
-          <div class="flex flex-col items-end gap-3">
-            <div class="text-right">
+          <div class="flex flex-col items-start sm:items-end gap-3">
+            <div class="hidden sm:block sm:text-right">
               <div class="whitespace-nowrap text-sm text-muted-foreground">Total contract value</div>
               <div class="font-display text-lg font-semibold text-foreground">
                 {Money.to_string!(Money.mult!(@contract.hourly_rate, @contract.hours_per_week))} / wk

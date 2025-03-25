@@ -16,6 +16,8 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def screenshot(path), do: AlgoraWeb.OGImageController.take_and_upload_screenshot([path])
+
   def alert(message) do
     email_job =
       Algora.Activities.SendEmail.changeset(%{

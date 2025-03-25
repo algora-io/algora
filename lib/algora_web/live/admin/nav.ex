@@ -18,8 +18,6 @@ defmodule AlgoraWeb.Admin.Nav do
         end
       end)
 
-    dbg(threads)
-
     {:cont,
      socket
      |> assign(:threads, threads)

@@ -103,7 +103,7 @@ defmodule AlgoraWeb.Org.HomeLive do
               View all
             </.link>
           </div>
-          <div class="relative -ml-4 w-full overflow-auto">
+          <div class="relative -ml-4 w-full overflow-auto scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for bounty <- @open_bounties do %>
@@ -146,7 +146,7 @@ defmodule AlgoraWeb.Org.HomeLive do
               View all
             </.link>
           </div>
-          <div class="relative -ml-4 w-full overflow-auto">
+          <div class="relative -ml-4 w-full overflow-auto scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %{transaction: transaction, ticket: ticket} <- @transactions do %>

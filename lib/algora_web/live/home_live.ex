@@ -94,7 +94,7 @@ defmodule AlgoraWeb.HomeLive do
         |> show_modal("video-modal")
       }
     >
-      <img src={@poster} alt={@alt} class="object-cover w-full h-full" />
+      <img src={@poster} alt={@alt} class="object-cover w-full h-full" loading="lazy" />
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="size-10 sm:size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
           <.icon name="tabler-player-play-filled" class="size-5 sm:size-8 text-white" />
@@ -202,6 +202,7 @@ defmodule AlgoraWeb.HomeLive do
                       src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
                       alt="Golem bounty to hire"
                       class="object-cover"
+                      loading="lazy"
                     />
                   </.link>
                 </div>
@@ -267,11 +268,13 @@ defmodule AlgoraWeb.HomeLive do
                       class="size-20 rounded-full z-0"
                       src="https://github.com/zed-industries.png"
                       alt="Zed"
+                      loading="lazy"
                     />
                     <img
                       class="size-20 rounded-full z-10"
                       src="https://github.com/schacon.png"
                       alt="Scott Chacon"
+                      loading="lazy"
                     />
                   </div>
                   <div class="text-base leading-6 flex-1">
@@ -297,12 +300,19 @@ defmodule AlgoraWeb.HomeLive do
                       class="size-20 rounded-full z-0"
                       src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
                       alt="Alex Klimaj"
+                      loading="lazy"
                     />
-                    <img class="size-16 z-20" src="https://github.com/PX4.png" alt="PX4" />
+                    <img
+                      class="size-16 z-20"
+                      src="https://github.com/PX4.png"
+                      alt="PX4"
+                      loading="lazy"
+                    />
                     <img
                       class="size-20 rounded-full z-10"
                       src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
                       alt="Andrew Wilkins"
+                      loading="lazy"
                     />
                   </div>
                   <div class="text-base leading-6 flex-1">
@@ -328,6 +338,7 @@ defmodule AlgoraWeb.HomeLive do
               src="https://www.firecrawl.dev/images/yc.svg"
               class="h-20 sm:h-24 mx-auto"
               alt="Y Combinator Logo"
+              loading="lazy"
             />
             <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               YCombinator companies use Algora<br />to build product and hire engineers
@@ -344,6 +355,7 @@ defmodule AlgoraWeb.HomeLive do
                       src="https://media.licdn.com/dms/image/v2/D4D03AQEgJ8LaoTna5A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1705829974466?e=1747872000&v=beta&t=95CP-kabFE8TKb73sSuCMYK6brUajTFFxaUNQstV54g"
                       alt="Tal Borenstein"
                       class="object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -394,6 +406,7 @@ defmodule AlgoraWeb.HomeLive do
                       src={~p"/images/people/louis-beaumont.png"}
                       alt="Louis Beaumont"
                       class="object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -427,16 +440,19 @@ defmodule AlgoraWeb.HomeLive do
                       src="https://github.com/calcom.png"
                       alt="Cal.com"
                       class="size-24 sm:size-40 rounded-2xl"
+                      loading="lazy"
                     />
                     <img
                       src="https://media.licdn.com/dms/image/v2/C4D03AQFy5iED85Z9mQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1650904368312?e=1747872000&v=beta&t=3gbV5Eru74Gxt8zvLZ0cKRD2YkQYHQ3qjBPvqJH31AQ"
                       alt="PeerRich"
                       class="size-24 sm:size-40 rounded-full"
+                      loading="lazy"
                     />
                     <img
                       src="https://media.licdn.com/dms/image/v2/D4E03AQEHMtneifrVfQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1708121831533?e=1747872000&v=beta&t=heIzHASUcd-OhZ4ZeEm-6smGjX66YcEAOqKQoCeXbgo"
                       alt="Bailey Pumfleet"
                       class="size-24 sm:size-40 rounded-full"
+                      loading="lazy"
                     />
                   </div>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-8">
@@ -501,6 +517,7 @@ defmodule AlgoraWeb.HomeLive do
                       src={~p"/images/people/josh-pigford.png"}
                       alt="Josh Pigford"
                       class="object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -533,6 +550,7 @@ defmodule AlgoraWeb.HomeLive do
                       src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
                       alt="John A De Goes"
                       class="object-cover size-84 rounded-2xl"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -685,6 +703,7 @@ defmodule AlgoraWeb.HomeLive do
                       src="https://pbs.twimg.com/profile_images/1599993355089465344/R6Al_s_H_400x400.jpg"
                       alt="Nicolas Camara"
                       class="size-12 rounded-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -698,6 +717,7 @@ defmodule AlgoraWeb.HomeLive do
                       src="https://github.com/mogery.png"
                       alt="Gergő Móricz"
                       class="size-12 rounded-full object-cover"
+                      loading="lazy"
                     />
                     <div>
                       <div class="text-base font-semibold text-foreground whitespace-nowrap">
@@ -830,6 +850,7 @@ defmodule AlgoraWeb.HomeLive do
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
                   class="w-full rounded-2xl shadow-xl ring-1 ring-white/10 p-8 sm:p-12 bg-[#0d1017]"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -1186,8 +1207,11 @@ defmodule AlgoraWeb.HomeLive do
           class="font-bold font-display text-lg sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/browser-use"}
         >
-          <img class="size-4 sm:size-7 mr-2 sm:mr-4" src="https://browser-use.com/logo.svg" />
-          Browser Use
+          <img
+            class="size-4 sm:size-7 mr-2 sm:mr-4"
+            src="https://browser-use.com/logo.svg"
+            loading="lazy"
+          /> Browser Use
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/outerbase"}>
           <svg viewBox="0 0 123 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[80%]">
@@ -1253,6 +1277,7 @@ defmodule AlgoraWeb.HomeLive do
             src="https://algora.io/banners/triggerdotdev.png"
             alt="Trigger.dev"
             class="col-auto sm:w-[90%] saturate-0"
+            loading="lazy"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/traceloop"}>
@@ -1260,6 +1285,7 @@ defmodule AlgoraWeb.HomeLive do
             src="https://cdn.prod.website-files.com/664553b7af7a800a7911b9f0/664553f95f4ec29495eb8eb9_traceloop%20logo%20dark%20bg.png"
             alt="Traceloop"
             class="sm:w-[90%] col-auto saturate-0"
+            loading="lazy"
           />
         </.link>
         <.link
@@ -1270,6 +1296,7 @@ defmodule AlgoraWeb.HomeLive do
             src="https://cdn.trieve.ai/trieve-logo.png"
             alt="Trieve logo"
             class="size-8 sm:size-12 mr-2 brightness-0 invert"
+            loading="lazy"
           /> Trieve
         </.link>
         <.link
@@ -1294,16 +1321,18 @@ defmodule AlgoraWeb.HomeLive do
             src="https://algora.io/banners/million.png"
             alt="Million"
             class="col-auto w-[80%] saturate-0"
+            loading="lazy"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/moonrepo"}>
-          <img src="https://moonrepo.dev/img/logo.svg" alt="moon" class="w-[80%]" />
+          <img src="https://moonrepo.dev/img/logo.svg" alt="moon" class="w-[80%]" loading="lazy" />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
           <img
             src="https://algora.io/banners/highlight.png"
             alt="Highlight"
             class="col-auto sm:w-[90%] saturate-0"
+            loading="lazy"
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
@@ -1311,6 +1340,7 @@ defmodule AlgoraWeb.HomeLive do
             src="https://algora.io/banners/dittofeed.png"
             alt="Dittofeed"
             class="col-auto w-[80%] brightness-0 invert"
+            loading="lazy"
           />
         </.link>
 
@@ -1318,7 +1348,12 @@ defmodule AlgoraWeb.HomeLive do
           class="relative flex items-center justify-center brightness-0 invert"
           navigate={~p"/org/onyx-dot-app"}
         >
-          <img src="https://onyx.app/Onyx.png" alt="Onyx Logo" class="object-contain w-[60%]" />
+          <img
+            src="https://onyx.app/Onyx.png"
+            alt="Onyx Logo"
+            class="object-contain w-[60%]"
+            loading="lazy"
+          />
         </.link>
 
         <.link

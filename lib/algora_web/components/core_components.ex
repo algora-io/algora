@@ -178,7 +178,7 @@ defmodule AlgoraWeb.CoreComponents do
             </span>
             <.icon
               name="tabler-selector"
-              class="ml-2 h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-400"
+              class="ml-2 h-6 w-6 flex-shrink-0 text-muted-foreground group-hover:text-gray-400"
             />
           </span>
         </button>
@@ -216,15 +216,20 @@ defmodule AlgoraWeb.CoreComponents do
 
       <:link href={~p"/set_context/personal"}>
         <div class="flex items-center whitespace-nowrap">
-          <.avatar class="mr-3 h-8 w-8">
-            <.avatar_image src={@current_user.avatar_url} />
-            <.avatar_fallback>
-              {Algora.Util.initials(@current_user.name)}
-            </.avatar_fallback>
-          </.avatar>
+          <div class="mr-3 relative h-8 w-8 shrink-0">
+            <.avatar class="mr-3 h-8 w-8">
+              <.avatar_image src={@current_user.avatar_url} />
+              <.avatar_fallback>
+                {Algora.Util.initials(@current_user.name)}
+              </.avatar_fallback>
+            </.avatar>
+            <div class="absolute -right-2 -bottom-1 bg-popover rounded-full size-5 flex items-center justify-center">
+              <.icon name="tabler-code" class="size-5 text-foreground" />
+            </div>
+          </div>
           <div class="truncate">
             <div class="font-semibold truncate">{@current_user.name}</div>
-            <div class="text-sm text-gray-500 truncate">
+            <div class="text-sm text-muted-foreground truncate">
               Solver dashboard
             </div>
           </div>
@@ -232,15 +237,20 @@ defmodule AlgoraWeb.CoreComponents do
       </:link>
       <:link :if={@current_user.handle} href={~p"/set_context/#{@current_user.handle}"}>
         <div class="flex items-center whitespace-nowrap">
-          <.avatar class="mr-3 h-8 w-8">
-            <.avatar_image src={@current_user.avatar_url} />
-            <.avatar_fallback>
-              {Algora.Util.initials(@current_user.name)}
-            </.avatar_fallback>
-          </.avatar>
+          <div class="mr-3 relative h-8 w-8 shrink-0">
+            <.avatar class="mr-3 h-8 w-8">
+              <.avatar_image src={@current_user.avatar_url} />
+              <.avatar_fallback>
+                {Algora.Util.initials(@current_user.name)}
+              </.avatar_fallback>
+            </.avatar>
+            <div class="absolute -right-2 -bottom-1 bg-popover rounded-full size-5 flex items-center justify-center">
+              <.icon name="tabler-currency-dollar" class="size-5 text-foreground" />
+            </div>
+          </div>
           <div class="truncate">
             <div class="font-semibold truncate">{@current_user.name}</div>
-            <div class="text-sm text-gray-500 truncate">
+            <div class="text-sm text-muted-foreground truncate">
               Bounty board
             </div>
           </div>
@@ -264,7 +274,7 @@ defmodule AlgoraWeb.CoreComponents do
           </.avatar>
           <div class="truncate">
             <div class="font-semibold truncate">{ctx.name}</div>
-            <div :if={ctx.handle} class="text-sm text-gray-500 truncate">@{ctx.handle}</div>
+            <div :if={ctx.handle} class="text-sm text-muted-foreground truncate">@{ctx.handle}</div>
           </div>
         </div>
       </:link>

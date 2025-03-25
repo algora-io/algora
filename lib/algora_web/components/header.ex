@@ -122,6 +122,12 @@ defmodule AlgoraWeb.Components.Header do
               </div>
               <div class="py-6">
                 <.link
+                  navigate={~p"/auth/signup"}
+                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
+                >
+                  Sign up
+                </.link>
+                <.link
                   navigate={~p"/auth/login"}
                   class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
                 >

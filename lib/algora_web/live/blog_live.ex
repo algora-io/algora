@@ -6,8 +6,6 @@ defmodule AlgoraWeb.BlogLive do
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
 
-  @blog_path "priv/blog"
-
   @impl true
   def mount(%{"slug" => slug}, _session, socket) do
     case load_blog_post(slug) do
@@ -108,7 +106,7 @@ defmodule AlgoraWeb.BlogLive do
   end
 
   defp load_blog_post(slug) do
-    with {:ok, content} <- File.read(Path.join(@blog_path, "#{slug}.md")),
+    with {:ok, content} <- File.read(Path.join(blog_path(), "#{slug}.md")),
          [frontmatter, markdown] <- content |> String.split("---\n", parts: 3) |> Enum.drop(1),
          {:ok, parsed_frontmatter} <- YamlElixir.read_from_string(frontmatter) do
       {:ok, {parsed_frontmatter, markdown}}
@@ -116,7 +114,7 @@ defmodule AlgoraWeb.BlogLive do
   end
 
   defp list_blog_posts do
-    @blog_path
+    blog_path()
     |> File.ls!()
     |> Enum.filter(&String.ends_with?(&1, ".md"))
     |> Enum.map(fn filename ->
@@ -142,4 +140,6 @@ defmodule AlgoraWeb.BlogLive do
   end
 
   def format_date(_), do: ""
+
+  defp blog_path, do: Path.join([:code.priv_dir(:algora), "blog"])
 end

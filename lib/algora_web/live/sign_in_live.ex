@@ -285,19 +285,8 @@ defmodule AlgoraWeb.SignInLive do
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
-      user = socket.assigns.user
-      token = AlgoraWeb.UserAuth.generate_login_code(user.email)
-
-      path =
-        case socket.assigns.return_to do
-          return_to when is_binary(return_to) ->
-            AlgoraWeb.UserAuth.login_path(user.email, token, return_to)
-
-          _ ->
-            AlgoraWeb.UserAuth.login_path(user.email, token)
-        end
-
-      {:noreply, redirect(socket, to: path)}
+      {:noreply,
+       redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(socket.assigns.user.email, socket.assigns[:return_to]))}
     else
       throttle()
       {:noreply, put_flash(socket, :error, "Invalid login code")}

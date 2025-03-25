@@ -7,8 +7,10 @@ defmodule Algora.Content do
 
   defstruct [:slug, :title, :date, :tags, :authors, :content]
 
+  defp base_path, do: Path.join([:code.priv_dir(:algora), "content"])
+
   def load_content(directory, slug) do
-    with {:ok, content} <- File.read(Path.join(directory, "#{slug}.md")),
+    with {:ok, content} <- [base_path(), directory, "#{slug}.md"] |> Path.join() |> File.read(),
          [frontmatter, markdown] <- content |> String.split("---\n", parts: 3) |> Enum.drop(1),
          {:ok, parsed_frontmatter} <- YamlElixir.read_from_string(frontmatter) do
       {:ok,
@@ -24,7 +26,8 @@ defmodule Algora.Content do
   end
 
   def list_content(directory) do
-    directory
+    [base_path(), directory]
+    |> Path.join()
     |> File.ls!()
     |> Enum.filter(&String.ends_with?(&1, ".md"))
     |> Enum.map(fn filename ->

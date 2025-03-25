@@ -140,6 +140,10 @@ defmodule AlgoraWeb.Router do
       live "/swift", SwiftBountiesLive
       live "/blog/:slug", BlogLive, :show
       live "/blog", BlogLive, :index
+      live "/changelog/:slug", ChangelogLive, :show
+      live "/changelog", ChangelogLive, :index
+      live "/case-studies/:slug", CaseStudyLive, :show
+      live "/case-studies", CaseStudyLive, :index
     end
 
     live_session :root,

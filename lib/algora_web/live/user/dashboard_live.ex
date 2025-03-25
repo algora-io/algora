@@ -225,40 +225,46 @@ defmodule AlgoraWeb.User.DashboardLive do
             </ol>
           </nav>
         </div>
-        <div class="pt-12 flex items-center justify-between">
-          <h2 class="text-xl font-semibold leading-none tracking-tight">Share your profile</h2>
-        </div>
-        <.badge
-          id="og-url"
-          phx-hook="CopyToClipboard"
-          data-value={url(~p"/@/#{@current_user.handle}")}
-          phx-click={
-            %JS{}
-            |> JS.hide(
-              to: "#og-url-copy-icon",
-              transition: {"transition-opacity", "opacity-100", "opacity-0"}
-            )
-            |> JS.show(
-              to: "#og-url-check-icon",
-              transition: {"transition-opacity", "opacity-0", "opacity-100"}
-            )
-          }
-          class="relative cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
-          variant="outline"
-        >
-          <.icon id="og-url-copy-icon" name="tabler-copy" class="absolute left-1 my-auto size-4 mr-2" />
-          <.icon
-            id="og-url-check-icon"
-            name="tabler-check"
-            class="absolute left-1 my-auto hidden size-4 mr-2"
+        <div class="hidden lg:block pt-12">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-none tracking-tight">Share your profile</h2>
+          </div>
+          <.badge
+            id="og-url"
+            phx-hook="CopyToClipboard"
+            data-value={url(~p"/@/#{@current_user.handle}")}
+            phx-click={
+              %JS{}
+              |> JS.hide(
+                to: "#og-url-copy-icon",
+                transition: {"transition-opacity", "opacity-100", "opacity-0"}
+              )
+              |> JS.show(
+                to: "#og-url-check-icon",
+                transition: {"transition-opacity", "opacity-0", "opacity-100"}
+              )
+            }
+            class="relative cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
+            variant="outline"
+          >
+            <.icon
+              id="og-url-copy-icon"
+              name="tabler-copy"
+              class="absolute left-1 my-auto size-4 mr-2"
+            />
+            <.icon
+              id="og-url-check-icon"
+              name="tabler-check"
+              class="absolute left-1 my-auto hidden size-4 mr-2"
+            />
+            <span class="pl-4">{AlgoraWeb.Endpoint.host()}{~p"/@/#{@current_user.handle}"}</span>
+          </.badge>
+          <img
+            src={~p"/og/@/#{@current_user.handle}"}
+            alt={@current_user.name}
+            class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
           />
-          <span class="pl-4">{AlgoraWeb.Endpoint.host()}{~p"/@/#{@current_user.handle}"}</span>
-        </.badge>
-        <img
-          src={~p"/og/@/#{@current_user.handle}"}
-          alt={@current_user.name}
-          class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
-        />
+        </div>
       </aside>
     </div>
     """

@@ -10,7 +10,7 @@ defmodule Algora.ScreenshotQueue do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  def generate_image(url, opts) do
+  def generate_image(url, opts \\ []) do
     GenServer.call(__MODULE__, {:generate_image, url, opts}, opts[:timeout] || @timeout)
   end
 

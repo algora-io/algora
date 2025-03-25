@@ -71,11 +71,11 @@ defmodule AlgoraWeb.OGImageController do
     conn |> put_status(:not_found) |> text("Not found")
   end
 
-  defp take_and_upload_screenshot(path) do
+  def take_and_upload_screenshot(path) do
     dir = Path.join([System.tmp_dir!(), "og"] ++ path)
     File.mkdir_p!(dir)
     filepath = Path.join(dir, "og.png")
-    url = url(~p"/#{path}?screenshot")
+    url = Path.join([AlgoraWeb.Endpoint.url() | path]) <> "?screenshot"
 
     case ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath)) do
       {:ok, _path} ->

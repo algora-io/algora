@@ -1209,7 +1209,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               :if={@contract_for_user && @contract_for_user.status in [:draft, :paid]}
               navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
-              class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#f8717180] focus:bg-gray-800/10 focus:text-gray-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-gray-400/50 focus:border-gray-400/50"
+              class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#94a3b880] focus:bg-gray-800/10 focus:text-gray-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#94a3b880] border border-gray-400/50 focus:border-gray-400/50"
             >
               <.icon name="tabler-clock" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>

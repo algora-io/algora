@@ -138,17 +138,13 @@ defmodule AlgoraWeb.Onboarding.DevLive do
            seeking_jobs: "jobs" in intentions
          )
          |> Repo.update() do
-      {:ok, _user} ->
-        :ok
+      {:ok, user} ->
+        {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
 
       {:error, changeset} ->
         Logger.error("Failed to update user #{user.id} on onboarding: #{inspect(changeset)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
     end
-
-    {:noreply,
-     socket
-     |> assign(:current_user, user)
-     |> redirect(to: ~p"/")}
   end
 
   @impl true

@@ -1116,7 +1116,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <tr class="border-b transition-colors">
       <td class="py-4 align-middle">
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
             <.link navigate={User.url(@user)}>
               <.avatar class="h-12 w-12 rounded-full">
@@ -1136,7 +1136,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
               <div
                 :if={@user.provider_meta}
-                class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
               >
                 <.link
                   :if={@user.provider_login}

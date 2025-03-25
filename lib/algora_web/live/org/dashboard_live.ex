@@ -437,79 +437,76 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title={"#{@current_org.name} Ecosystem"}
           subtitle="Help maintain and grow your ecosystem by creating bounties and tips in your dependencies"
         >
-          <div class="pt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div class="pt-8 flex flex-col gap-8">
             {create_bounty(assigns)}
             {create_tip(assigns)}
-          </div>
-        </.section>
-
-        <.section>
-          <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-            <div class="bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 transition-all divide-y sm:divide-y-0 sm:divide-x sm:divide-default">
-              <div class="sm:w-1/2 xl:w-1/3 p-4 pb-8 sm:pb-4 sm:px-6 flex flex-col justify-center">
-                <div class="flex items-center gap-2">
-                  <div class="flex items-center gap-2 pb-2">
-                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
-                      Growing your team?
-                    </h3>
+            <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
+              <div class="bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 transition-all divide-y sm:divide-y-0 sm:divide-x sm:divide-default">
+                <div class="sm:w-1/2 xl:w-1/3 p-4 pb-8 sm:pb-4 sm:px-6 flex flex-col justify-center">
+                  <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 pb-2">
+                      <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                        Growing your team?
+                      </h3>
+                    </div>
+                  </div>
+                  <p class="text-foreground-light text-sm pt-2 2xl:pr-4">
+                    You're in the right place.
+                  </p>
+                  <div class="flex gap-2 pt-4">
+                    <.link
+                      href={Constants.get(:calendar_url)}
+                      rel="noopener"
+                      target="_blank"
+                      class="inline-flex px-10 rounded-md border-purple-500/80 bg-purple-500/50 text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium drop-shadow-[0_1px_5px_#c084fc80] shadow text-lg h-12 focus-visible:outline-purple-600 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:border-purple-500 hover:bg-purple-500/30 border data-[state=open]:bg-purple-500/80 data-[state=open]:outline-purple-600 phx-submit-loading:opacity-75"
+                    >
+                      Contact us
+                    </.link>
                   </div>
                 </div>
-                <p class="text-foreground-light text-sm pt-2 2xl:pr-4">
-                  You're in the right place.
-                </p>
-                <div class="flex gap-2 pt-4">
-                  <.link
-                    href={Constants.get(:calendar_url)}
-                    rel="noopener"
-                    target="_blank"
-                    class="inline-flex px-10 rounded-md border-purple-500/80 bg-purple-500/50 text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium drop-shadow-[0_1px_5px_#c084fc80] shadow text-lg h-12 focus-visible:outline-purple-600 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:border-purple-500 hover:bg-purple-500/30 border data-[state=open]:bg-purple-500/80 data-[state=open]:outline-purple-600 phx-submit-loading:opacity-75"
-                  >
-                    Contact us
-                  </.link>
+                <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
+                  <ul class="border-default text-base text-foreground-lighter flex-1 grid xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
+                    <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+                      <div class="flex items-center xl:flex-col gap-4">
+                        <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                          <.icon name="tabler-world" class="size-8 text-purple-400" />
+                        </div>
+                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                          <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
+                          <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                            Bounties and contracts
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+                      <div class="flex items-center xl:flex-col gap-4">
+                        <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                          <.icon name="tabler-bolt" class="size-8 text-purple-400" />
+                        </div>
+                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                          <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
+                          <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                            Proven Algora experts
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="py-2 flex flex-col xl:items-center xl:justify-center">
+                      <div class="flex items-center xl:flex-col gap-4">
+                        <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
+                          <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
+                        </div>
+                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                          <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
+                          <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                            Top 1% OSS engineers
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
-              </div>
-              <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
-                <ul class="border-default text-base text-foreground-lighter flex-1 grid xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
-                  <li class="py-2 flex flex-col xl:items-center xl:justify-center">
-                    <div class="flex items-center xl:flex-col gap-4">
-                      <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                        <.icon name="tabler-world" class="size-8 text-purple-400" />
-                      </div>
-                      <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
-                        <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
-                        <div class="text-base xl:text-lg font-medium text-muted-foreground">
-                          Bounties and contracts
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="py-2 flex flex-col xl:items-center xl:justify-center">
-                    <div class="flex items-center xl:flex-col gap-4">
-                      <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                        <.icon name="tabler-bolt" class="size-8 text-purple-400" />
-                      </div>
-                      <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
-                        <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
-                        <div class="text-base xl:text-lg font-medium text-muted-foreground">
-                          Proven Algora experts
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="py-2 flex flex-col xl:items-center xl:justify-center">
-                    <div class="flex items-center xl:flex-col gap-4">
-                      <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                        <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
-                      </div>
-                      <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
-                        <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
-                        <div class="text-base xl:text-lg font-medium text-muted-foreground">
-                          Top 1% OSS engineers
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
@@ -1255,7 +1252,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
         <div class="p-4 sm:p-6">
           <div class="text-2xl font-semibold text-foreground">
-            Fund any issue<br />
+            Fund any issue<br class="block sm:hidden" />
             <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
               in seconds
             </span>
@@ -1265,12 +1262,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
           <.simple_form for={@bounty_form} phx-submit="create_bounty">
             <div class="flex flex-col gap-6 pt-6">
-              <.input
-                label="Issue URL"
-                field={@bounty_form[:url]}
-                placeholder="https://github.com/swift-lang/swift/issues/1337"
-              />
-              <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+              <div class="grid sm:grid-cols-2 gap-6">
+                <.input
+                  label="Issue URL"
+                  field={@bounty_form[:url]}
+                  placeholder="https://github.com/swift-lang/swift/issues/1337"
+                />
+                <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+              </div>
               <p class="text-sm text-muted-foreground">
                 <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
                 <code class="px-1 py-0.5 text-success">/bounty $100</code>
@@ -1301,7 +1300,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
         <div class="p-4 sm:p-6">
           <div class="text-2xl font-semibold text-foreground">
-            Tip any developer<br />
+            Tip any developer<br class="block sm:hidden" />
             <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
               instantly
             </span>
@@ -1311,12 +1310,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
           <.simple_form for={@tip_form} phx-submit="create_tip">
             <div class="flex flex-col gap-6 pt-6">
-              <.input
-                label="Contribution URL"
-                field={@tip_form[:url]}
-                placeholder="https://github.com/owner/repo/pull/123"
-              />
-              <div class="grid sm:grid-cols-2 gap-x-3 gap-y-6">
+              <div class="grid sm:grid-cols-3 gap-x-3 gap-y-6">
+                <.input
+                  label="Contribution URL"
+                  field={@tip_form[:url]}
+                  placeholder="https://github.com/owner/repo/pull/123"
+                />
                 <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
                 <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
               </div>

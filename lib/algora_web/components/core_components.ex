@@ -210,7 +210,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def context_selector(assigns) do
     ~H"""
-    <.dropdown id="dashboard-dropdown" class="w-[12rem] sm:w-[14rem]">
+    <.dropdown id="dashboard-dropdown" class="min-w-[12rem]">
       <:img src={@current_context.avatar_url} alt={@current_context.handle} />
       <:title>{@current_context.name}</:title>
       <:subtitle :if={@current_context.handle && @current_context.id != @current_user.id}>

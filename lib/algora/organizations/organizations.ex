@@ -3,7 +3,6 @@ defmodule Algora.Organizations do
   import Ecto.Query
 
   alias Algora.Accounts.User
-  alias Algora.Github.TokenPool
   alias Algora.Organizations.Member
   alias Algora.Organizations.Org
   alias Algora.Repo
@@ -242,7 +241,7 @@ defmodule Algora.Organizations do
   end
 
   def init_preview(repo_owner, repo_name) do
-    token = TokenPool.get_token()
+    token = Algora.Admin.token!()
 
     {:ok, repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
     {:ok, owner} = Workspace.ensure_user(token, repo_owner)

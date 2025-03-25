@@ -559,7 +559,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
     ticket_ref = get_field(changeset, :ticket_ref)
 
     if changeset.valid? do
-      if socket.assigns[:current_user] do
+      if user = socket.assigns[:current_user] do
         case Bounties.create_bounty(%{
                creator: socket.assigns.current_user,
                owner: socket.assigns.current_user,
@@ -567,10 +567,12 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                ticket_ref: ticket_ref
              }) do
           {:ok, _bounty} ->
+            user |> change(last_context: user.handle) |> Repo.update()
+
             {:noreply,
              socket
              |> put_flash(:info, "Bounty created")
-             |> redirect(to: ~p"/")}
+             |> redirect(to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
 
           {:error, :already_exists} ->
             {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
@@ -597,7 +599,7 @@ defmodule AlgoraWeb.SwiftBountiesLive do
       |> Map.put(:action, :validate)
 
     if changeset.valid? do
-      if socket.assigns[:current_user] do
+      if user = socket.assigns[:current_user] do
         with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
              {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
              {:ok, checkout_url} <-
@@ -607,7 +609,8 @@ defmodule AlgoraWeb.SwiftBountiesLive do
                  recipient: recipient,
                  amount: get_field(changeset, :amount)
                }) do
-          {:noreply, redirect(socket, external: checkout_url)}
+          user |> change(last_context: user.handle) |> Repo.update()
+          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email, checkout_url))}
         else
           {:error, reason} ->
             Logger.error("Failed to create tip: #{inspect(reason)}")

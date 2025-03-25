@@ -961,8 +961,6 @@ defmodule AlgoraWeb.HomeLive do
 
     if changeset.valid? do
       if user = socket.assigns[:current_user] do
-        dbg(user)
-
         with {:ok, token} <- Accounts.get_access_token(user),
              {:ok, recipient} <-
                Workspace.ensure_user(token, get_field(changeset, :github_handle)),

@@ -96,7 +96,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-card">
-      <div class="flex flex-1">
+      <div class="flex flex-col lg:flex-row flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">
             <div class="mb-4 flex items-center gap-4 text-lg">
@@ -117,7 +117,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
             </div>
           </div>
         </div>
-        <div class="h-screen w-1/3 overflow-y-auto border-l border-border bg-background px-6 py-4">
+        <div class="w-full px-6 py-4 lg:w-1/3 lg:h-screen lg:overflow-y-auto lg:border-l lg:border-border lg:bg-background">
           {sidebar_content(assigns)}
         </div>
       </div>

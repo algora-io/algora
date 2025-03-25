@@ -69,7 +69,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
           <div class="flex flex-col gap-3">
             <%= if @installations != [] do %>
               <%= for installation <- @installations do %>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                   <img src={installation.provider_user.avatar_url} class="w-9 h-9 rounded-lg" />
                   <div>
                     <p class="font-medium">{installation.provider_user.provider_login}</p>
@@ -104,8 +104,8 @@ defmodule AlgoraWeb.Org.SettingsLive do
             <div class="flex flex-col gap-6">
               <div class="flex flex-col gap-2">
                 <.input field={@form[:handle]} label="Handle" />
-                <p class="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <.icon name="tabler-alert-triangle" class="w-4 h-4" />
+                <p class="text-sm text-muted-foreground">
+                  <.icon name="tabler-alert-triangle" class="size-4 mr-1" />
                   Changing your handle will break existing URLs and references to your organization pages. This includes links shared on social media, documentation, and other websites.
                 </p>
               </div>
@@ -147,14 +147,14 @@ defmodule AlgoraWeb.Org.SettingsLive do
         </.card_header>
         <.card_content>
           <.simple_form for={@template_form} phx-change="validate_template" phx-submit="save_template">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid sm:grid-cols-2 gap-4">
               <div class="flex flex-col gap-2">
                 <h3 class="font-medium text-sm">Template</h3>
                 <div class="flex-1 [&>div]:h-full">
                   <.input
                     field={@template_form[:template]}
                     type="textarea"
-                    class="h-full"
+                    class="h-full min-h-[200px]"
                     phx-debounce="300"
                   />
                 </div>
@@ -168,7 +168,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
                 </div>
               </div>
             </div>
-            <div class="flex items-center justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div class="flex flex-col gap-2">
                 <h3 class="font-medium text-xs">Available variables</h3>
                 <div class="flex flex-wrap gap-2">

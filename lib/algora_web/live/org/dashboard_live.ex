@@ -23,6 +23,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Workspace.Contributor
   alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.Constants
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
@@ -462,7 +463,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </p>
                 <div class="pt-2 flex gap-2">
                   <.button
-                    navigate={AlgoraWeb.Constants.get(:calendar_url)}
+                    navigate={Constants.get(:calendar_url)}
                     variant="purple"
                     size="lg"
                     class="drop-shadow-[0_1px_5px_#c084fc80]"
@@ -1412,15 +1413,23 @@ defmodule AlgoraWeb.Org.DashboardLive do
             Chat with founders
           </button>
         </div>
-        <div class="flex items-center gap-2">
-          <.icon name="tabler-brand-x" class="size-6 text-muted-foreground" /> @algoraio
-        </div>
-        <div class="flex items-center gap-2">
-          <.icon name="tabler-phone" class="size-6 text-muted-foreground" /> +1 (650) 420-2207
-        </div>
-        <div class="flex items-center gap-2">
-          <.icon name="tabler-mail" class="size-6 text-muted-foreground" /> support@algora.io
-        </div>
+        <.link
+          href={Constants.get(:twitter_url)}
+          rel="noopener"
+          target="_blank"
+          class="flex items-center gap-2"
+        >
+          <.icon name="tabler-brand-x" class="size-6 text-muted-foreground" />
+          @{Constants.get(:twitter_handle)}
+        </.link>
+        <.link href={"tel:" <> Constants.get(:tel)} class="flex items-center gap-2">
+          <.icon name="tabler-phone" class="size-6 text-muted-foreground" />
+          {Constants.get(:tel_formatted)}
+        </.link>
+        <.link href={"mailto:" <> Constants.get(:support_email)} class="flex items-center gap-2">
+          <.icon name="tabler-mail" class="size-6 text-muted-foreground" />
+          {Constants.get(:support_email)}
+        </.link>
       </div>
 
       <%= if @show_chat do %>

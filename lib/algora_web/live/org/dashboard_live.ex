@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Org.DashboardLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
   import AlgoraWeb.Components.Achievement
   import AlgoraWeb.Components.Bounties
@@ -1214,7 +1215,22 @@ defmodule AlgoraWeb.Org.DashboardLive do
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
-            <.dropdown_menu>
+
+            <.DropdownMenu align="start" side="right">
+              <:trigger>
+                <.button variant="ghost" size="icon">
+                  <.icon name="tabler-dots" class="h-4 w-4" />
+                </.button>
+              </:trigger>
+
+              <:item>
+                <.link href={User.url(@user)}>
+                  View Profile
+                </.link>
+              </:item>
+            </.DropdownMenu>
+
+            <%!-- <.dropdown_menu>
               <.dropdown_menu_trigger>
                 <.button variant="ghost" size="icon">
                   <.icon name="tabler-dots" class="h-4 w-4" />
@@ -1231,7 +1247,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   Remove
                 </.dropdown_menu_item>
               </.dropdown_menu_content>
-            </.dropdown_menu>
+            </.dropdown_menu> --%>
           </div>
         </div>
       </td>

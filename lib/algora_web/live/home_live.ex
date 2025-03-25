@@ -117,9 +117,9 @@ defmodule AlgoraWeb.HomeLive do
       <main>
         <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-b from-background to-black">
           <.pattern />
-          <div class="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 xl:pt-20">
+          <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
+              <div class="px-6 lg:px-8 xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
                 <h1 class="font-display text-2xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
                   The open source Upwork<br class="sm:hidden" /> for engineers
                 </h1>
@@ -156,10 +156,10 @@ defmodule AlgoraWeb.HomeLive do
               </div>
               <!-- Featured devs -->
               <div class={
-                [
-                  "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0"
-                  # "overflow-x-auto scrollbar-thin lg:overflow-x-visible"
-                ]
+                classes([
+                  "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0",
+                  "overflow-x-auto scrollbar-thin lg:overflow-x-visible"
+                ])
               }>
                 <%= if length(@featured_devs) > 0 do %>
                   <div class="ml-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
@@ -844,7 +844,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="z-20 relative isolate bg-black py-[35vw] sm:py-[25vw]">
+        <section class="relative isolate overflow-hidden bg-black py-[35vw] sm:py-[25vw]">
           <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
             <div class="scale-[300%] sm:scale-[150%] opacity-50">
               <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
@@ -877,7 +877,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <div class="z-10 relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
+        <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
           <Footer.footer />
           <div class="mx-auto max-w-7xl px-6 pb-4 text-center text-xs text-muted-foreground">
             Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?

@@ -568,7 +568,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
       class={[
-        "fixed right-4 bottom-4 z-[1000] hidden w-80 rounded-lg p-3 pr-8 shadow-md ring-1 sm:w-96",
+        "fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] hidden w-80 rounded-lg p-3 shadow-md ring-1 sm:w-96",
         @kind == :info &&
           "bg-emerald-950 fill-success-foreground text-success-foreground ring ring-success/70",
         @kind == :warning &&
@@ -648,7 +648,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-disconnected={show("#disconnected")}
       phx-connected={hide("#disconnected")}
     >
-      Attempting to reconnect <.icon name="tabler-refresh" class="ml-1 h-4 w-4 animate-spin" />
+      Attempting to reconnect <.icon name="tabler-refresh" class="ml-auto h-4 w-4 animate-spin" />
     </.flash>
     """
   end

@@ -514,12 +514,6 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_content>
                   <div class="space-y-4">
                     <%= if Enum.empty?(@available_bounties) do %>
-                      <.alert variant="destructive">
-                        <.alert_title>No bounties available</.alert_title>
-                        <.alert_description>
-                          You didn't post a bounty for this issue. Would you like to create one now?
-                        </.alert_description>
-                      </.alert>
                     <% end %>
                     <.input
                       label="Amount"

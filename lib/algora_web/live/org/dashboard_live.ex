@@ -580,7 +580,51 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
-  def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+  def handle_event("create_public_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+    if socket.assigns.has_fresh_token? do
+      changeset =
+        %BountyForm{}
+        |> BountyForm.changeset(params)
+        |> Map.put(:action, :validate)
+
+      amount = get_field(changeset, :amount)
+      ticket_ref = get_field(changeset, :ticket_ref)
+
+      with %{valid?: true} <- changeset,
+           {:ok, _bounty} <-
+             Bounties.create_bounty(%{
+               creator: socket.assigns.current_user,
+               owner: socket.assigns.current_org,
+               amount: amount,
+               ticket_ref: %{
+                 owner: ticket_ref.owner,
+                 repo: ticket_ref.repo,
+                 number: ticket_ref.number
+               }
+             }) do
+        {:noreply,
+         socket
+         |> assign_achievements()
+         |> put_flash(:info, "Bounty created")}
+      else
+        %{valid?: false} ->
+          {:noreply, assign(socket, :bounty_form, to_form(changeset))}
+
+        {:error, :already_exists} ->
+          {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+
+        {:error, _reason} ->
+          {:noreply, put_flash(socket, :error, "Something went wrong")}
+      end
+    else
+      {:noreply,
+       socket
+       |> assign(:pending_action, {event, unsigned_params})
+       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+    end
+  end
+
+  def handle_event("create_exclusive_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
     if socket.assigns.has_fresh_token? do
       changeset =
         %BountyForm{}
@@ -1264,7 +1308,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div class="pt-1 text-base font-medium text-muted-foreground">
             Help improve the OSS you love and rely on
           </div>
-          <.simple_form for={@bounty_form} phx-submit="create_bounty">
+          <.simple_form for={@bounty_form} phx-submit="create_public_bounty">
             <div class="flex flex-col gap-6 pt-6">
               <div class="grid sm:grid-cols-2 gap-6">
                 <.input
@@ -1625,7 +1669,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp share_drawer_content(%{share_drawer_type: "bounty"} = assigns) do
     ~H"""
-    <.form for={@bounty_form} phx-submit="create_bounty">
+    <.form for={@bounty_form} phx-submit="create_exclusive_bounty">
       <.card>
         <.card_header>
           <.card_title>Bounty Details</.card_title>

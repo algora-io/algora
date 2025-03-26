@@ -11,7 +11,15 @@ defmodule AlgoraWeb.Org.HomeLive do
   @impl true
   def mount(_params, _session, socket) do
     org = socket.assigns.current_org
-    open_bounties = Bounties.list_bounties(owner_id: org.id, status: :open, limit: page_size())
+
+    open_bounties =
+      Bounties.list_bounties(
+        owner_id: org.id,
+        status: :open,
+        limit: page_size(),
+        current_user: socket.assigns[:current_user]
+      )
+
     top_earners = Accounts.list_developers(org_id: org.id, limit: 10, earnings_gt: Money.zero(:USD))
     stats = Bounties.fetch_stats(org.id)
     transactions = Payments.list_hosted_transactions(org.id, limit: page_size())

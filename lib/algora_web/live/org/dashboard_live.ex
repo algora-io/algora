@@ -101,7 +101,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     stats = Bounties.fetch_stats(current_org.id)
 
-    bounties = Bounties.list_bounties(owner_id: current_org.id, limit: page_size(), status: :open)
+    bounties =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: :open,
+        current_user: socket.assigns[:current_user]
+      )
+
     transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
 
     {:noreply,
@@ -862,7 +869,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         owner_id: current_org.id,
         limit: page_size(),
         status: socket.assigns.current_status,
-        before: cursor
+        before: cursor,
+        current_user: socket.assigns[:current_user]
       )
 
     socket

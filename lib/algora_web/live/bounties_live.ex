@@ -53,9 +53,10 @@ defmodule AlgoraWeb.BountiesLive do
     query_opts =
       [
         status: :open,
-        limit: page_size()
+        limit: page_size(),
+        current_user: socket.assigns[:current_user]
       ] ++
-        if socket.assigns.current_user do
+        if socket.assigns[:current_user] do
           [amount_gt: Money.new(:USD, 200)]
         else
           [amount_gt: Money.new(:USD, 500)]
@@ -85,9 +86,10 @@ defmodule AlgoraWeb.BountiesLive do
     query_opts =
       [
         status: :open,
-        limit: page_size()
+        limit: page_size(),
+        current_user: socket.assigns[:current_user]
       ] ++
-        if socket.assigns.current_user do
+        if socket.assigns[:current_user] do
           [amount_gt: Money.new(:USD, 200)]
         else
           [amount_gt: Money.new(:USD, 500)]

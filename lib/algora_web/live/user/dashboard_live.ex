@@ -197,7 +197,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </div>
         </div> --%>
         <!-- Tech Stack Section -->
-        <.form for={@settings_form}>
+        <div>
           <h2 class="mb-2 text-xl font-semibold">
             Tech stack
           </h2>
@@ -211,7 +211,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           <.error :for={msg <- @settings_form[:tech_stack].errors |> Enum.map(&translate_error(&1))}>
             {msg}
           </.error>
-        </.form>
+        </div>
         <!-- Achievements Section -->
         <div class="hidden lg:block mt-8">
           <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>

@@ -681,20 +681,19 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def handle_event("create_tip" = event, %{"tip_form" => params} = unsigned_params, socket) do
     if socket.assigns.has_fresh_token? do
-      changeset =
-        %TipForm{}
-        |> TipForm.changeset(Map.put(params, "github_handle", socket.assigns.current_user.provider_login))
-        |> Map.put(:action, :validate)
+      changeset = %TipForm{} |> TipForm.changeset(params) |> Map.put(:action, :validate)
 
       ticket_ref = get_field(changeset, :ticket_ref)
 
       with %{valid?: true} <- changeset,
+           {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+           {:ok, recipient} <- Workspace.ensure_user(token, get_field(changeset, :github_handle)),
            {:ok, checkout_url} <-
              Bounties.create_tip(
                %{
                  creator: socket.assigns.current_user,
                  owner: socket.assigns.current_org,
-                 recipient: socket.assigns.selected_developer,
+                 recipient: recipient,
                  amount: get_field(changeset, :amount)
                },
                ticket_ref: %{
@@ -1708,6 +1707,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.card_header>
         <.card_content>
           <div class="space-y-4">
+            <input
+              type="hidden"
+              name="tip_form[github_handle]"
+              value={@selected_developer.provider_login}
+            />
             <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
             <.input
               label="URL"
@@ -1820,6 +1824,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <div class="pointer-events-none">
                 <.share_drawer_content
                   :if={@selected_developer}
+                  selected_developer={@selected_developer}
                   share_drawer_type={@share_drawer_type}
                   bounty_form={@bounty_form}
                   tip_form={@tip_form}
@@ -1842,6 +1847,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <% else %>
             <.share_drawer_content
               :if={@selected_developer}
+              selected_developer={@selected_developer}
               share_drawer_type={@share_drawer_type}
               bounty_form={@bounty_form}
               tip_form={@tip_form}

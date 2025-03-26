@@ -1019,20 +1019,19 @@ defmodule Algora.Bounties do
                     query,
                     [b],
                     b.visibility != :exclusive or
-                      (b.visibility == :exclusive and
-                         (fragment(
-                            "? && ARRAY[?, ?, ?]::citext[]",
-                            b.shared_with,
-                            ^user.id,
-                            ^user.email,
-                            ^to_string(user.provider_id)
-                          ) or
-                            fragment(
-                              "EXISTS (SELECT 1 FROM members m WHERE m.user_id = ? AND m.org_id = ? AND m.role = ANY(?))",
-                              ^user.id,
-                              b.owner_id,
-                              ^["admin", "mod"]
-                            )))
+                      fragment(
+                        "? && ARRAY[?, ?, ?]::citext[]",
+                        b.shared_with,
+                        ^user.id,
+                        ^user.email,
+                        ^to_string(user.provider_id)
+                      ) or
+                      fragment(
+                        "EXISTS (SELECT 1 FROM members m WHERE m.user_id = ? AND m.org_id = ? AND m.role = ANY(?))",
+                        ^user.id,
+                        b.owner_id,
+                        ^["admin", "mod"]
+                      )
                   )
               end
 

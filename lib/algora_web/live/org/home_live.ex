@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Org.HomeLive do
       )
 
     top_earners = Accounts.list_developers(org_id: org.id, limit: 10, earnings_gt: Money.zero(:USD))
-    stats = Bounties.fetch_stats(org.id)
+    stats = Bounties.fetch_stats(org_id: org.id, current_user: socket.assigns[:current_user])
     transactions = Payments.list_hosted_transactions(org.id, limit: page_size())
 
     socket =

@@ -1162,19 +1162,44 @@ defmodule Algora.Bounties do
     list_bounties_with(base_query(), criteria)
   end
 
-  def fetch_stats(org_id \\ nil) do
+  def fetch_stats(opts) do
     zero_money = Money.zero(:USD, no_fraction_if_integer: true)
 
     open_bounties_query =
       from b in Bounty,
         join: t in assoc(b, :ticket),
         left_join: r in assoc(t, :repository),
-        where: b.owner_id == ^org_id or r.user_id == ^org_id,
+        where: b.owner_id == ^opts[:org_id] or r.user_id == ^opts[:org_id],
         where: b.status == :open,
         where: b.status != :cancelled,
         where: not is_nil(b.amount),
-        where: t.state == :open,
-        where: b.visibility in [:public, :community]
+        where: t.state == :open
+
+    open_bounties_query =
+      case(opts[:current_user]) do
+        nil ->
+          where(open_bounties_query, [b], b.visibility != :exclusive)
+
+        user ->
+          where(
+            open_bounties_query,
+            [b],
+            b.visibility != :exclusive or
+              fragment(
+                "? && ARRAY[?, ?, ?]::citext[]",
+                b.shared_with,
+                ^user.id,
+                ^user.email,
+                ^to_string(user.provider_id)
+              ) or
+              fragment(
+                "EXISTS (SELECT 1 FROM members m WHERE m.user_id = ? AND m.org_id = ? AND m.role = ANY(?))",
+                ^user.id,
+                b.owner_id,
+                ^["admin", "mod"]
+              )
+          )
+      end
 
     rewards_query =
       from tx in Transaction,
@@ -1187,7 +1212,7 @@ defmodule Algora.Bounties do
         left_join: r in assoc(t, :repository),
         where: ltx.type == :debit,
         where: ltx.status == :succeeded,
-        where: ltx.user_id == ^org_id or r.user_id == ^org_id
+        where: ltx.user_id == ^opts[:org_id] or r.user_id == ^opts[:org_id]
 
     rewarded_bounties_query =
       rewards_query
@@ -1219,7 +1244,7 @@ defmodule Algora.Bounties do
         where: t.succeeded_at >= fragment("NOW() - INTERVAL '1 month'"),
         except_all: ^from(t in rewarded_users_query, where: t.succeeded_at < fragment("NOW() - INTERVAL '1 month'"))
 
-    members_query = Member.filter_by_org_id(Member, org_id)
+    members_query = Member.filter_by_org_id(Member, opts[:org_id])
     open_bounties = Repo.aggregate(open_bounties_query, :count, :id)
     open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || zero_money
     total_awarded_amount = Repo.aggregate(rewards_query, :sum, :net_amount) || zero_money

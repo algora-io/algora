@@ -99,7 +99,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     current_org = socket.assigns.current_org
     current_status = get_current_status(params)
 
-    stats = Bounties.fetch_stats(current_org.id)
+    stats = Bounties.fetch_stats(org_id: current_org.id, current_user: socket.assigns[:current_user])
 
     bounties =
       Bounties.list_bounties(

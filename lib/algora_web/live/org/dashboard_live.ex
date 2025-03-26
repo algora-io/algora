@@ -325,7 +325,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                       <div class="relative flex items-center gap-2.5 text-sm md:text-base">
                         <div class="truncate">Completed</div>
                         <span class={"min-w-[1ch] font-mono #{if @current_status == :paid, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
-                          {@stats.rewarded_bounties_count}
+                          {@stats.rewarded_bounties_count + @stats.rewarded_tips_count}
                         </span>
                       </div>
                     </.button>

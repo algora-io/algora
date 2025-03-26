@@ -471,7 +471,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
                           <.icon name="tabler-world" class="size-8 text-purple-400" />
                         </div>
-                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2 xl:text-center">
                           <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
                           <div class="text-base xl:text-lg font-medium text-muted-foreground">
                             Bounties and contracts
@@ -484,7 +484,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
                           <.icon name="tabler-bolt" class="size-8 text-purple-400" />
                         </div>
-                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2 xl:text-center">
                           <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
                           <div class="text-base xl:text-lg font-medium text-muted-foreground">
                             Proven Algora experts
@@ -497,7 +497,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                         <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
                           <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
                         </div>
-                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
+                        <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2 xl:text-center">
                           <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
                           <div class="text-base xl:text-lg font-medium text-muted-foreground">
                             Top 1% OSS engineers

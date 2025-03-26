@@ -70,8 +70,11 @@ defmodule Algora.Util do
 
   def to_date!(date) do
     case DateTime.from_iso8601(date) do
-      {:ok, datetime, _offset} -> datetime
-      {:error, _reason} = error -> error
+      {:ok, datetime, _offset} ->
+        %{datetime | microsecond: {elem(datetime.microsecond, 0), 6}}
+
+      {:error, _reason} = error ->
+        error
     end
   end
 

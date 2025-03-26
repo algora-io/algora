@@ -118,6 +118,9 @@ defmodule Algora.Github do
     do: client().update_issue_comment(token, owner, repo, comment_id, body)
 
   @impl true
+  def list_user_repositories(token, username, opts \\ []), do: client().list_user_repositories(token, username, opts)
+
+  @impl true
   def list_repository_events(token, owner, repo, opts \\ []),
     do: client().list_repository_events(token, owner, repo, opts)
 

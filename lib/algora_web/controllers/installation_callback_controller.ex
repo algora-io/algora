@@ -91,6 +91,25 @@ defmodule AlgoraWeb.InstallationCallbackController do
 
   defp featured_follower_threshold, do: 50
 
+  defp get_top_repo(token, installation) do
+    username = installation["account"]["login"]
+
+    with {:ok, repos} <- Github.list_user_repositories(token, username, sort: "pushed", direction: "desc") do
+      {:ok,
+       repos
+       |> Enum.reject(&(&1["fork"] == true))
+       |> Enum.sort_by(& &1["stargazers_count"], :desc)
+       |> List.first()}
+    end
+  end
+
+  defp init_contributors(token, installation) do
+    with {:ok, repo} when not is_nil(repo) <- get_top_repo(token, installation),
+         {:ok, repo} <- Workspace.ensure_repository(token, repo["owner"]["login"], repo["name"]) do
+      Workspace.ensure_contributors(token, repo)
+    end
+  end
+
   defp do_handle_installation(conn, user, installation_id) do
     # TODO: replace :last_context with a new :last_installation_target field
     # TODO: handle nil user
@@ -98,6 +117,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
     with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
          {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]) do
+      _contributors_res = init_contributors(access_token, installation)
       total_followers_count = get_total_followers_count(access_token, [user, provider_user])
 
       case user.last_context do

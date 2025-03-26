@@ -21,6 +21,7 @@ defmodule Algora.Github.Behaviour do
               {:ok, map()} | {:error, String.t()}
   @callback update_issue_comment(token(), String.t(), String.t(), integer(), String.t()) ::
               {:ok, map()} | {:error, String.t()}
+  @callback list_user_repositories(token(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_events(token(), String.t(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_comments(token(), String.t(), String.t(), keyword()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_languages(token(), String.t(), String.t()) :: {:ok, [map()]} | {:error, String.t()}

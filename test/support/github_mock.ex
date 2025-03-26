@@ -127,6 +127,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def list_user_repositories(_access_token, _username, _opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
   def list_repository_events(_access_token, _owner, _repo, _opts \\ []) do
     {:ok, []}
   end

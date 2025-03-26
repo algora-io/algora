@@ -232,6 +232,11 @@ defmodule Algora.Github.Client do
   end
 
   @impl true
+  def list_user_repositories(access_token, username, opts \\ []) do
+    fetch(access_token, "/users/#{username}/repos#{build_query(opts)}")
+  end
+
+  @impl true
   def list_repository_events(access_token, owner, repo, opts \\ []) do
     fetch(access_token, "/repos/#{owner}/#{repo}/events#{build_query(opts)}")
   end

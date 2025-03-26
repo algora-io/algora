@@ -36,6 +36,13 @@ defmodule AlgoraWeb.InstallationCallbackController do
       {:error, _reason} ->
         redirect(conn, to: UserAuth.signed_in_path(conn))
     end
+  rescue
+    error ->
+      Logger.error("❌ Installation callback failed: #{inspect(error)}")
+
+      conn
+      |> put_flash(:error, "Something went wrong")
+      |> redirect(to: UserAuth.signed_in_path(conn))
   end
 
   defp validate_query_params(params) do
@@ -72,22 +79,18 @@ defmodule AlgoraWeb.InstallationCallbackController do
     end
   end
 
-  defp get_followers_count(token, user) do
-    if followers_count = user.provider_meta["followers_count"] do
-      followers_count
-    else
-      case Github.get_user(token, user.provider_id) do
-        {:ok, user} -> user["followers"]
-        _ -> 0
-      end
+  defp get_followers_count(_token, %{"followers" => followers}), do: followers
+
+  defp get_followers_count(_token, %{provider_meta: %{"followers" => followers}}), do: followers
+
+  defp get_followers_count(token, %{provider_id: provider_id}) do
+    case Github.get_user(token, provider_id) do
+      {:ok, user} -> user["followers"]
+      _ -> 0
     end
   end
 
-  defp get_total_followers_count(token, users) do
-    users
-    |> Enum.map(&get_followers_count(token, &1))
-    |> Enum.sum()
-  end
+  defp get_followers_count(_token, _user), do: 0
 
   defp featured_follower_threshold, do: 50
 
@@ -116,69 +119,72 @@ defmodule AlgoraWeb.InstallationCallbackController do
     # TODO: handle nil last_context
     with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
-         {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]) do
+         {:ok, provider_user} <- Github.get_user_by_username(access_token, installation["account"]["login"]),
+         total_followers_count = Enum.sum_by([user, provider_user], &get_followers_count(access_token, &1)),
+         featured? = total_followers_count > featured_follower_threshold(),
+         {:ok, conn, org} <- update_user_and_org(conn, user, installation, featured?),
+         {:ok, provider_user} <- Workspace.ensure_user(access_token, installation["account"]["login"]),
+         {:ok, _} <- Workspace.upsert_installation(installation, user, org, provider_user) do
       _contributors_res = init_contributors(access_token, installation)
-      total_followers_count = get_total_followers_count(access_token, [user, provider_user])
+      {:ok, conn}
+    end
+  end
 
-      case user.last_context do
-        "preview/" <> ctx ->
-          case String.split(ctx, "/") do
-            [id, _repo_owner, _repo_name] ->
-              existing_org =
-                Repo.one(
-                  from(u in User,
-                    where: u.provider == "github",
-                    where: u.provider_id == ^to_string(installation["account"]["id"])
-                  )
-                )
+  defp fetch_or_create_member(user, org) do
+    case Repo.get_by(Member, user_id: user.id, org_id: org.id) do
+      %Member{} = member -> {:ok, member}
+      nil -> Repo.insert(%Member{id: Nanoid.generate(), user: user, org: org, role: :admin})
+    end
+  end
 
-              {:ok, org} =
-                case existing_org do
-                  %User{} = org -> {:ok, org}
-                  nil -> Repo.fetch(User, id)
-                end
+  defp update_user_and_org(conn, %{last_context: "preview/" <> ctx} = user, installation, featured) do
+    with [id, _repo_owner, _repo_name] <- String.split(ctx, "/"),
+         existing_org =
+           Repo.one(
+             from(u in User,
+               where: u.provider == "github",
+               where: u.provider_id == ^to_string(installation["account"]["id"])
+             )
+           ),
+         {:ok, org} <- if(existing_org, do: {:ok, existing_org}, else: Repo.fetch(User, id)),
+         {:ok, _member} <- fetch_or_create_member(user, org),
+         {:ok, org} <-
+           org
+           |> change(
+             handle: Organizations.ensure_unique_org_handle(installation["account"]["login"]),
+             featured: org.featured || featured,
+             provider: "github",
+             provider_id: to_string(installation["account"]["id"]),
+             provider_login: installation["account"]["login"],
+             provider_meta: Util.normalize_struct(installation["account"])
+           )
+           |> Repo.update(),
+         {:ok, user} <- user |> change(last_context: org.handle) |> Repo.update() do
+      {:ok, UserAuth.put_current_user(conn, user), org}
+    end
+  end
 
-              {:ok, _member} =
-                case Repo.get_by(Member, user_id: user.id, org_id: org.id) do
-                  %Member{} = member -> {:ok, member}
-                  nil -> Repo.insert(%Member{id: Nanoid.generate(), user: user, org: org, role: :admin})
-                end
-
-              {:ok, org} =
-                org
-                |> change(
-                  handle: Organizations.ensure_unique_org_handle(installation["account"]["login"]),
-                  featured: if(org.featured, do: true, else: total_followers_count > featured_follower_threshold()),
-                  provider: "github",
-                  provider_id: to_string(installation["account"]["id"]),
-                  provider_meta: Util.normalize_struct(installation["account"])
-                )
-                |> Repo.update()
-
-              {:ok, user} =
-                user
-                |> change(last_context: org.handle)
-                |> Repo.update()
-
-              {:ok, _} = Workspace.upsert_installation(installation, user, org, provider_user)
-
-              {:ok, UserAuth.put_current_user(conn, user)}
-
-            _ ->
-              {:error, :invalid_last_context}
-          end
-
-        last_context ->
-          {:ok, org} = Organizations.fetch_org_by(handle: last_context)
-
-          {:ok, org} =
-            org
-            |> change(featured: if(org.featured, do: true, else: total_followers_count > featured_follower_threshold()))
-            |> Repo.update()
-
-          {:ok, _} = Workspace.upsert_installation(installation, user, org, provider_user)
-          {:ok, conn}
-      end
+  defp update_user_and_org(conn, %{last_context: last_context} = _user, installation, featured) do
+    with {:ok, org} <- Organizations.fetch_org_by(handle: last_context),
+         {:ok, org} <-
+           org
+           |> change(
+             Map.merge(
+               %{featured: org.featured || featured},
+               if is_nil(org.provider_id) do
+                 %{
+                   provider: "github",
+                   provider_id: to_string(installation["account"]["id"]),
+                   provider_login: installation["account"]["login"],
+                   provider_meta: Util.normalize_struct(installation["account"])
+                 }
+               else
+                 %{}
+               end
+             )
+           )
+           |> Repo.update() do
+      {:ok, conn, org}
     end
   end
 end

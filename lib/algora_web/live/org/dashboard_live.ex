@@ -31,6 +31,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   require Logger
 
+  defp list_contributors(%{last_context: "repo/" <> repo} = current_org) do
+    case String.split(repo, "/") do
+      [repo_owner, repo_name] ->
+        Workspace.list_repository_contributors(repo_owner, repo_name)
+
+      _ ->
+        if current_org.provider_login, do: Workspace.list_contributors(current_org.provider_login), else: []
+    end
+  end
+
+  defp list_contributors(%{provider_login: provider_login}) when is_binary(provider_login),
+    do: Workspace.list_contributors(provider_login)
+
+  defp list_contributors(_current_org), do: []
+
   @impl true
   def mount(_params, _session, socket) do
     %{current_org: current_org} = socket.assigns
@@ -45,21 +60,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
-      contributors =
-        if is_nil(current_org.provider_login) do
-          []
-        else
-          case current_org.last_context do
-            "repo/" <> repo ->
-              case String.split(repo, "/") do
-                [repo_owner, repo_name] -> Workspace.list_repository_contributors(repo_owner, repo_name)
-                _ -> Workspace.list_contributors(current_org.provider_login)
-              end
-
-            _ ->
-              Workspace.list_contributors(current_org.provider_login)
-          end
-        end
+      contributors = list_contributors(current_org)
 
       admins_last_active = Algora.Admin.admins_last_active()
 

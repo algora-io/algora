@@ -581,56 +581,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
-  def handle_event("create_public_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+  def handle_event("create_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
     if socket.assigns.has_fresh_token? do
-      changeset =
-        %BountyForm{}
-        |> BountyForm.changeset(params)
-        |> Map.put(:action, :validate)
-
-      amount = get_field(changeset, :amount)
-      ticket_ref = get_field(changeset, :ticket_ref)
-
-      with %{valid?: true} <- changeset,
-           {:ok, _bounty} <-
-             Bounties.create_bounty(%{
-               creator: socket.assigns.current_user,
-               owner: socket.assigns.current_org,
-               amount: amount,
-               ticket_ref: %{
-                 owner: ticket_ref.owner,
-                 repo: ticket_ref.repo,
-                 number: ticket_ref.number
-               }
-             }) do
-        {:noreply,
-         socket
-         |> assign_achievements()
-         |> put_flash(:info, "Bounty created")}
-      else
-        %{valid?: false} ->
-          {:noreply, assign(socket, :bounty_form, to_form(changeset))}
-
-        {:error, :already_exists} ->
-          {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
-
-        {:error, _reason} ->
-          {:noreply, put_flash(socket, :error, "Something went wrong")}
-      end
-    else
-      {:noreply,
-       socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
-    end
-  end
-
-  def handle_event("create_exclusive_bounty" = event, %{"bounty_form" => params} = unsigned_params, socket) do
-    if socket.assigns.has_fresh_token? do
-      changeset =
-        %BountyForm{}
-        |> BountyForm.changeset(params)
-        |> Map.put(:action, :validate)
+      changeset = %BountyForm{} |> BountyForm.changeset(params) |> Map.put(:action, :validate)
 
       amount = get_field(changeset, :amount)
       ticket_ref = get_field(changeset, :ticket_ref)
@@ -648,13 +601,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
                    number: ticket_ref.number
                  }
                },
-               visibility: :exclusive,
-               shared_with:
-                 case socket.assigns.selected_developer do
-                   %User{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
-                   %User{id: id} -> [id]
-                   _ -> raise "Developer not selected"
-                 end
+               visibility: get_field(changeset, :visibility),
+               shared_with: get_field(changeset, :shared_with)
              ) do
         {:noreply,
          socket
@@ -1308,7 +1256,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div class="pt-1 text-base font-medium text-muted-foreground">
             Help improve the OSS you love and rely on
           </div>
-          <.simple_form for={@bounty_form} phx-submit="create_public_bounty">
+          <.simple_form for={@bounty_form} phx-submit="create_bounty">
             <div class="flex flex-col gap-6 pt-6">
               <div class="grid sm:grid-cols-2 gap-6">
                 <.input
@@ -1669,13 +1617,24 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp share_drawer_content(%{share_drawer_type: "bounty"} = assigns) do
     ~H"""
-    <.form for={@bounty_form} phx-submit="create_exclusive_bounty">
+    <.form for={@bounty_form} phx-submit="create_bounty">
       <.card>
         <.card_header>
           <.card_title>Bounty Details</.card_title>
         </.card_header>
         <.card_content>
           <div class="space-y-4">
+            <.input type="hidden" name="bounty_form[visibility]" value="exclusive" />
+            <.input
+              type="hidden"
+              name="bounty_form[shared_with][]"
+              value={
+                case @selected_developer do
+                  %User{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
+                  %User{id: id} -> [id]
+                end
+              }
+            />
             <.input
               label="URL"
               field={@bounty_form[:url]}

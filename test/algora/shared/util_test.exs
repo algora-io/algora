@@ -54,4 +54,38 @@ defmodule Algora.UtilTest do
       assert Util.parse_github_url("  github.com/owner/repo  ") == {:ok, {"owner", "repo"}}
     end
   end
+
+  describe "to_date!/1" do
+    test "handles nil" do
+      assert Util.to_date!(nil) == nil
+    end
+
+    test "converts ISO8601 with no microseconds" do
+      datetime = Util.to_date!("2024-03-14T12:00:00Z")
+      assert datetime.microsecond == {0, 6}
+      assert datetime.year == 2024
+      assert datetime.month == 3
+      assert datetime.day == 14
+      assert datetime.hour == 12
+    end
+
+    test "converts ISO8601 with partial microseconds" do
+      datetime = Util.to_date!("2024-03-14T12:00:00.123Z")
+      assert datetime.microsecond == {123_000, 6}
+    end
+
+    test "converts ISO8601 with full microseconds" do
+      datetime = Util.to_date!("2024-03-14T12:00:00.123456Z")
+      assert datetime.microsecond == {123_456, 6}
+    end
+
+    test "converts ISO8601 with excess precision" do
+      datetime = Util.to_date!("2024-03-14T12:00:00.123456789Z")
+      assert datetime.microsecond == {123_456, 6}
+    end
+
+    test "handles invalid format" do
+      assert {:error, _reason} = Util.to_date!("invalid")
+    end
+  end
 end

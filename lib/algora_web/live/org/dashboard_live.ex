@@ -46,15 +46,19 @@ defmodule AlgoraWeb.Org.DashboardLive do
       installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
 
       contributors =
-        case current_org.last_context do
-          "repo/" <> repo ->
-            case String.split(repo, "/") do
-              [repo_owner, repo_name] -> Workspace.list_repository_contributors(repo_owner, repo_name)
-              _ -> Workspace.list_contributors(current_org.provider_login)
-            end
+        if is_nil(current_org.provider_login) do
+          []
+        else
+          case current_org.last_context do
+            "repo/" <> repo ->
+              case String.split(repo, "/") do
+                [repo_owner, repo_name] -> Workspace.list_repository_contributors(repo_owner, repo_name)
+                _ -> Workspace.list_contributors(current_org.provider_login)
+              end
 
-          _ ->
-            Workspace.list_contributors(current_org.provider_login)
+            _ ->
+              Workspace.list_contributors(current_org.provider_login)
+          end
         end
 
       admins_last_active = Algora.Admin.admins_last_active()

@@ -1065,18 +1065,20 @@ defmodule Algora.Bounties do
 
       {:tech_stack, tech_stack}, query ->
         from([b, r: r] in query,
-          where: fragment("? && ?::citext[]", r.tech_stack, ^tech_stack) or r.tech_stack == ^[]
+          where:
+            b.visibility == :exclusive or fragment("? && ?::citext[]", r.tech_stack, ^tech_stack) or r.tech_stack == ^[]
         )
 
       {:amount_gt, min_amount}, query ->
         from([b] in query,
           where:
-            fragment(
-              "?::money_with_currency >= (?, ?)::money_with_currency",
-              b.amount,
-              ^to_string(min_amount.currency),
-              ^min_amount.amount
-            )
+            b.visibility == :exclusive or
+              fragment(
+                "?::money_with_currency >= (?, ?)::money_with_currency",
+                b.amount,
+                ^to_string(min_amount.currency),
+                ^min_amount.amount
+              )
         )
 
       _, query ->

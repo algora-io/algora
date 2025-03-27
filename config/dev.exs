@@ -99,10 +99,11 @@ config :algora, AlgoraWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :algora, dev_routes: true
 
-# Do not include metadata nor timestamps in development logs
+# Configures Elixir's Logger
 config :logger, :console,
-  format: "[$level] $message\n",
-  level: String.to_atom(System.get_env("LOG_LEVEL") || "debug")
+  format: "[$level] $message $metadata\n",
+  level: String.to_atom(System.get_env("LOG_LEVEL") || "debug"),
+  metadata: [:mfa, :file, :line, :request_id, :user_id]
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.

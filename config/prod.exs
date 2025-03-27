@@ -13,10 +13,10 @@ config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Algora.Finch
 # TODO: Disable Swoosh Local Memory Storage
 config :swoosh, local: true
 
-config :logger,
+config :logger, :console,
   format: {LogfmtEx, :format},
   level: String.to_atom(System.get_env("LOG_LEVEL") || "info"),
-  metadata: :all
+  metadata: [:mfa, :file, :line, :request_id, :user_id]
 
 config :algora,
   swift_mode: true,

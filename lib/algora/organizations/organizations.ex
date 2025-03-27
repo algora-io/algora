@@ -243,32 +243,40 @@ defmodule Algora.Organizations do
   def init_preview(repo_owner, repo_name) do
     token = Algora.Admin.token()
 
-    {:ok, repo} = Workspace.ensure_repository(token, repo_owner, repo_name)
-    {:ok, owner} = Workspace.ensure_user(token, repo_owner)
-    {:ok, _contributors} = Workspace.ensure_contributors(token, repo)
-    {:ok, _languages} = Workspace.ensure_repo_tech_stack(token, repo)
-
-    Repo.transact(fn _ ->
-      {:ok, org} =
-        Repo.insert(%User{
-          type: :organization,
-          id: Nanoid.generate(),
-          display_name: owner.name,
-          avatar_url: owner.avatar_url,
-          last_context: "repo/#{repo_owner}/#{repo_name}",
-          tech_stack: repo.tech_stack
-        })
-
-      {:ok, user} =
-        Repo.insert(%User{
-          type: :individual,
-          id: Nanoid.generate(),
-          display_name: "You",
-          last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}",
-          tech_stack: repo.tech_stack
-        })
-
-      {:ok, %{org: org, user: user}}
-    end)
+    with {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
+         {:ok, owner} <- Workspace.ensure_user(token, repo_owner),
+         {:ok, _contributors} <- Workspace.ensure_contributors(token, repo),
+         {:ok, _languages} <- Workspace.ensure_repo_tech_stack(token, repo) do
+      Repo.transact(fn _ ->
+        with {:ok, org} <-
+               Repo.insert(%User{
+                 type: :organization,
+                 id: Nanoid.generate(),
+                 display_name: owner.name,
+                 avatar_url: owner.avatar_url,
+                 last_context: "repo/#{repo_owner}/#{repo_name}",
+                 tech_stack: repo.tech_stack
+               }),
+             {:ok, user} <-
+               Repo.insert(%User{
+                 type: :individual,
+                 id: Nanoid.generate(),
+                 display_name: "You",
+                 last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}",
+                 tech_stack: repo.tech_stack
+               }) do
+          Algora.Admin.alert("New preview for #{repo_owner}/#{repo_name}", :info)
+          {:ok, %{org: org, user: user}}
+        end
+      end)
+    else
+      {:error, error} ->
+        Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
+        {:error, error}
+    end
+  rescue
+    error ->
+      Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
+      {:error, error}
   end
 end

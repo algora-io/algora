@@ -344,7 +344,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
       </.drawer_header>
       <.drawer_content class="mt-4">
         <div class="space-y-6">
-          <div class="grid gap-6">
+          <div class="grid grid-cols-1 gap-6">
             <.card>
               <.card_header>
                 <.card_title>Account Status</.card_title>

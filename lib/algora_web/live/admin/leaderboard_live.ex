@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Admin.LeaderboardLive do
         <:subtitle>Top earners by country</:subtitle>
       </.header>
 
-      <div class="grid gap-8">
+      <div class="grid grid-cols-1 gap-8">
         <%= for {country, users} <- @top_earners do %>
           <.card>
             <.card_header>

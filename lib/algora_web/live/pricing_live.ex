@@ -74,7 +74,7 @@ defmodule AlgoraWeb.PricingLive do
             </div>
           </div>
 
-          <div class="mx-auto grid gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
+          <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
             <%= for plan <- @plans1 do %>
               <.pricing_card1 plan={plan} plans={@plans1} />
             <% end %>
@@ -94,7 +94,7 @@ defmodule AlgoraWeb.PricingLive do
               </div>
             </div>
           </div>
-          <div class="mx-auto grid gap-4 lg:max-w-[95rem] xl:gap-0">
+          <div class="mx-auto grid grid-cols-1 gap-4 lg:max-w-[95rem] xl:gap-0">
             <%= for plan <- @plans2 do %>
               <.pricing_card2 plan={plan} plans={@plans2} />
             <% end %>
@@ -300,7 +300,7 @@ defmodule AlgoraWeb.PricingLive do
           </div>
         </div>
         <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
-          <ul class="border-default text-base text-foreground-lighter flex-1 grid xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
+          <ul class="border-default text-base text-foreground-lighter flex-1 grid grid-cols-1 xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
             <li class="py-2 flex flex-col xl:items-center xl:justify-center">
               <div class="flex items-center xl:flex-col gap-4">
                 <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">

@@ -80,6 +80,16 @@ defmodule AlgoraWeb.UserAuthTest do
     test "handles empty string input" do
       assert {:error, :invalid} = UserAuth.verify_login_code("", "test@example.com")
     end
+
+    test "trims whitespace from code" do
+      email = "test@example.com"
+      code = UserAuth.generate_login_code(email)
+      padded_code = "  #{code}  \n"
+
+      assert {:ok, result} = UserAuth.verify_login_code(padded_code, email)
+      assert result.email == email
+      assert result.token == code
+    end
   end
 
   describe "verify_preview_code/2" do
@@ -122,6 +132,15 @@ defmodule AlgoraWeb.UserAuthTest do
 
     test "handles empty string input" do
       assert {:error, :invalid} = UserAuth.verify_preview_code("", "123")
+    end
+
+    test "trims whitespace from code" do
+      id = "123"
+      code = UserAuth.sign_preview_code(id)
+      padded_code = "  #{code}  \n"
+
+      assert {:ok, result} = UserAuth.verify_preview_code(padded_code, id)
+      assert result == id
     end
   end
 end

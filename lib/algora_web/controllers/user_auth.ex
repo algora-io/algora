@@ -267,7 +267,11 @@ defmodule AlgoraWeb.UserAuth do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
   end
 
+  def verify_login_code(nil, _email), do: {:error, :missing}
+
   def verify_login_code(code, email) do
+    code = String.trim(code || "")
+
     case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
       {:ok, payload} ->
         result =
@@ -309,7 +313,11 @@ defmodule AlgoraWeb.UserAuth do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, login_code_salt(), payload, max_age: login_code_ttl())
   end
 
+  def verify_preview_code(nil, _id), do: {:error, :missing}
+
   def verify_preview_code(code, id) do
+    code = String.trim(code || "")
+
     case Phoenix.Token.verify(AlgoraWeb.Endpoint, login_code_salt(), code, max_age: login_code_ttl()) do
       {:ok, token_id} ->
         if token_id == id do

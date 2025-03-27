@@ -548,7 +548,7 @@ defmodule Algora.Bounties do
   def cancel_all_claims(claims) do
     Enum.reduce_while(claims, :ok, fn claim, :ok ->
       case claim
-           |> Claim.changeset(%{status: :cancelled})
+           |> Claim.changeset(%{status: :cancelled, group_share: Decimal.new(0)})
            |> Repo.update() do
         {:ok, _} -> {:cont, :ok}
         error -> error

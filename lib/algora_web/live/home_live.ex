@@ -289,8 +289,8 @@ defmodule AlgoraWeb.HomeLive do
                       Zed Editor, Scott Chacon
                     </div>
                   </div>
-                  <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
-                    <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                  <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                    <Logos.github class="size-5 mr-3" /> View issue
                   </.button>
                 </.link>
 
@@ -327,8 +327,37 @@ defmodule AlgoraWeb.HomeLive do
                       Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
                     </div>
                   </div>
-                  <.button size="sm" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
-                    <Logos.github class="size-4 mr-4 -ml-2" /> View issue
+                  <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                    <Logos.github class="size-5 mr-3" /> View issue
+                  </.button>
+                </.link>
+
+                <.link
+                  href={~p"/org/coollabsio"}
+                  rel="noopener"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                >
+                  <div class="flex -space-x-4 shrink-0">
+                    <img
+                      class="size-20 rounded-full z-0"
+                      src="https://pbs.twimg.com/profile_images/1885366118367256580/ZmNo5ur__400x400.jpg"
+                      alt="Coolify"
+                      loading="lazy"
+                    />
+                    <img
+                      class="size-20 rounded-full z-10"
+                      src="https://github.com/andrasbacsai.png"
+                      alt="Andras Bacsai"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="text-base leading-6 flex-1">
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      Coolify pools bounties from the community to fund and prioritize new features
+                    </div>
+                  </div>
+                  <.button size="lg" variant="subtle" class="hidden sm:flex mt-2 sm:mt-0">
+                    View bounty board
                   </.button>
                 </.link>
               </div>

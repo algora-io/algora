@@ -165,14 +165,14 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="ml-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                     <.dev_card dev={List.first(@featured_devs)} />
                   </div>
-                  <div class="mr-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 sm:mr-0 lg:pt-36">
+                  <div class="flex flex-col mr-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 sm:mr-0 lg:pt-36">
                     <%= if length(@featured_devs) >= 3 do %>
                       <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
                         <.dev_card dev={dev} />
                       <% end %>
                     <% end %>
                   </div>
-                  <div class="w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 lg:pt-0">
+                  <div class="flex flex-col w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 lg:pt-0">
                     <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
                       <.dev_card dev={dev} />
                     <% end %>

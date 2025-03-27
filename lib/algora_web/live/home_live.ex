@@ -528,7 +528,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="lg:col-span-6 order-last lg:order-first">
                   <h3 class="text-3xl font-display font-bold leading-[3rem]">
                     <span class="text-success">Let's offer a bounty</span>
-                    to say "Hey, someone please prioritize this, who has the skillset for it? I think long term I'd like to make it a
+                    to say "Hey, someone please prioritize this, who has the skillset for it?" I think long term I'd like to make it a
                     <span class="text-success">very consistent</span>
                     part of our development process.
                   </h3>
@@ -786,10 +786,6 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
                         <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
-                        <span>No GitHub account required for the recipient</span>
-                      </div>
-                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
                         <span>Algora handles payouts, compliance & 1099s</span>
                       </div>
                     </div>
@@ -867,11 +863,11 @@ defmodule AlgoraWeb.HomeLive do
               <span class="block sm:inline">Upwork for engineers</span>
             </h2>
             <div class="flex justify-center gap-4">
-              <.button navigate="/onboarding/org">
-                Start your project
+              <.button navigate={~p"/auth/signup"}>
+                Get started
               </.button>
-              <.button href="https://cal.com/ioannisflo" variant="secondary">
-                Request a demo
+              <.button href={AlgoraWeb.Constants.get(:github_repo_url)} variant="secondary">
+                <.icon name="github" class="size-4 mr-2 -ml-1" /> View source code
               </.button>
             </div>
           </div>
@@ -1033,7 +1029,7 @@ defmodule AlgoraWeb.HomeLive do
 
   defp dev_card(assigns) do
     ~H"""
-    <div class="relative">
+    <.link navigate={User.url(@dev)} target="_blank" class="relative">
       <img
         src={@dev.avatar_url}
         alt={@dev.name}
@@ -1060,7 +1056,7 @@ defmodule AlgoraWeb.HomeLive do
           </span>
         </div>
       </div>
-    </div>
+    </.link>
     """
   end
 

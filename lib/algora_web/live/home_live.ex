@@ -354,7 +354,7 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid grid-cols-1 items-center gap-x-12 gap-y-8 lg:grid-cols-10">
                 <div class="lg:col-span-4">
-                  <div class="relative flex aspect-square size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                  <div class="relative flex aspect-square size-[18rem] sm:size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
                       src="https://media.licdn.com/dms/image/v2/D4D03AQEgJ8LaoTna5A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1705829974466?e=1747872000&v=beta&t=95CP-kabFE8TKb73sSuCMYK6brUajTFFxaUNQstV54g"
                       alt="Tal Borenstein"
@@ -415,7 +415,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-6 order-last lg:order-first">
-                  <h3 class="text-2xl sm:text-3xl font-display font-bold leading-[1.5] sm:leading-[3rem]">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     I posted our bounty on <span class="text-success">Upwork</span>
                     to try it, overall it's <span class="text-success">1000x more friction</span>
                     than OSS bounties with Algora.
@@ -423,10 +423,10 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-2xl sm:text-3xl font-semibold text-foreground">
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           Louis Beaumont
                         </div>
-                        <div class="pt-2 text-xl sm:text-2xl font-medium text-muted-foreground">
+                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Screenpipe
                         </div>
                       </div>
@@ -460,7 +460,7 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-8">
-                    <div class="flex flex-col gap-4 text-3xl sm:text-5xl font-semibold font-display">
+                    <div class="flex flex-col gap-4 text-xl sm:text-2xl xl:text-5xl font-semibold font-display">
                       <div>
                         Used bounties
                       </div>
@@ -474,10 +474,10 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-5">
-                  <div class="text-2xl sm:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
+                  <div class="text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
                     Shipped by <span class="text-success">86 contributors</span>
                   </div>
-                  <ul class="text-2xl sm:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
+                  <ul class="text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">14</span>
@@ -526,7 +526,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-6 order-last lg:order-first">
-                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     <span class="text-success">Let's offer a bounty</span>
                     to say "Hey, someone please prioritize this, who has the skillset for it?" I think long term I'd like to make it a
                     <span class="text-success">very consistent</span>
@@ -535,8 +535,10 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">Josh Pigford</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Josh Pigford
+                        </div>
+                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Maybe
                         </div>
                       </div>
@@ -559,7 +561,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
                 <div class="lg:col-span-5">
-                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     We used Algora extensively at Ziverge to reward over
                     <span class="text-success">$70,000</span>
                     in bounties and introduce a whole
@@ -569,8 +571,10 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">John A De Goes</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          John A De Goes
+                        </div>
+                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Founder & CEO at Ziverge
                         </div>
                       </div>
@@ -629,15 +633,17 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
                 <div class="lg:col-span-6 order-last lg:order-first">
-                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     It was the <span class="text-success">easiest hire</span>
                     because we already knew how great he was
                   </h3>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">Eric Allam</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Eric Allam
+                        </div>
+                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CTO at Trigger.dev (YC W23)
                         </div>
                       </div>
@@ -660,7 +666,7 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
                 <div class="lg:col-span-6">
-                  <h3 class="text-3xl font-display font-bold leading-[3rem]">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                     Bounties help us control our burn rate, get work done & meet new hires. I've made
                     <span class="text-success">3 full-time hires</span>
                     using Algora
@@ -668,8 +674,10 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
                     <div class="flex items-center gap-4">
                       <div>
-                        <div class="text-3xl font-semibold text-foreground">Tushar Mathur</div>
-                        <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Tushar Mathur
+                        </div>
+                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Founder & CEO at Tailcall
                         </div>
                       </div>

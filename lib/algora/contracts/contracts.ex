@@ -400,6 +400,7 @@ defmodule Algora.Contracts do
   defp maybe_generate_invoice(_contract, nil), do: {:ok, nil}
 
   defp maybe_generate_invoice(contract, charge) do
+    # TODO: add metadata to invoice %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
     with {:ok, invoice} <- Invoice.create(invoice_params, %{idempotency_key: "contract-#{contract.id}"}),

@@ -208,14 +208,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
         autopay_result =
           if autopayable_bounty do
-            idempotency_key = "bounty-#{autopayable_bounty.id}"
-
             with {:ok, invoice} <-
                    Bounties.create_invoice(
                      %{
                        owner: autopayable_bounty.owner,
                        amount: autopayable_bounty.amount,
-                       idempotency_key: idempotency_key
+                       idempotency_key: "bounty-#{autopayable_bounty.id}"
                      },
                      ticket_ref: %{
                        owner: payload["repository"]["owner"]["login"],
@@ -231,8 +229,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      %{
                        payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
                        off_session: true
-                     },
-                     %{idempotency_key: idempotency_key}
+                     }
                    ) do
               Algora.Admin.alert(
                 "Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).",
@@ -439,8 +436,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             not is_nil(amount) and
             autopay_cooldown_expired?.()
 
-        idempotency_key = "tip-#{recipient}-#{webhook.delivery}"
-
         autopay_result =
           if autopayable? do
             with {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
@@ -458,21 +453,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      %{
                        owner: owner,
                        amount: amount,
-                       idempotency_key: idempotency_key
+                       idempotency_key: "invoice-#{recipient.provider_login}-#{webhook.delivery}"
                      },
                      ticket_ref: ticket_ref,
                      tip_id: tip.id,
                      recipient: recipient
                    ),
                  {:ok, _invoice} <-
-                   Invoice.pay(
-                     invoice,
-                     %{
-                       payment_method: customer.default_payment_method.provider_id,
-                       off_session: true
-                     },
-                     %{idempotency_key: idempotency_key}
-                   ) do
+                   Invoice.pay(invoice, %{payment_method: customer.default_payment_method.provider_id, off_session: true}) do
               Algora.Admin.alert(
                 "Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).",
                 :info

@@ -25,27 +25,9 @@ defmodule Algora.Bounties.Jobs.NotifyClaim do
            )
            |> Repo.all()
            |> Repo.preload([:user, source: [repository: [:user]], target: [repository: [:user]]]),
-         {:ok, _} <- maybe_add_labels(token, claims),
-         {:ok, _} <- add_comment(token, claims) do
+         {:ok, _} <- maybe_add_labels(token, claims) do
       :ok
     end
-  end
-
-  defp add_comment(token, claims) do
-    primary_claim = List.first(claims)
-
-    names =
-      claims
-      |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
-      |> Algora.Util.format_name_list()
-
-    Github.create_issue_comment(
-      token,
-      primary_claim.target.repository.user.provider_login,
-      primary_claim.target.repository.name,
-      primary_claim.target.number,
-      "💡 #{names} submitted [#{Claim.type_label(primary_claim.type)}](#{primary_claim.url}) that claims the bounty. You can visit [Algora](#{Claim.reward_url(primary_claim)}) to reward."
-    )
   end
 
   defp maybe_add_labels(token, claims) do

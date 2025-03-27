@@ -12,7 +12,7 @@ defmodule Algora.Support.StripeMock do
        }}
     end
 
-    def pay(_invoice_id, %{payment_method: "pm_card_declined"}, _opts) do
+    def pay(_invoice_id, %{payment_method: "pm_card_declined"}) do
       {:error,
        %Stripe.Error{
          source: :stripe,
@@ -21,7 +21,7 @@ defmodule Algora.Support.StripeMock do
        }}
     end
 
-    def pay(invoice_id, _params, _opts) do
+    def pay(invoice_id, _params) do
       {:ok, %Stripe.Invoice{id: invoice_id, paid: true, status: "paid"}}
     end
   end

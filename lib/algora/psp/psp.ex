@@ -47,17 +47,14 @@ defmodule Algora.PSP do
                }
     def create(params, opts), do: Algora.PSP.client(__MODULE__).create(params, Keyword.new(opts))
 
-    @spec pay(Stripe.id() | t, params, options) :: {:ok, t} | {:error, Algora.PSP.error()}
+    @spec pay(Stripe.id() | t, params) :: {:ok, t} | {:error, Algora.PSP.error()}
           when params:
                  %{
                    optional(:off_session) => boolean,
                    optional(:payment_method) => String.t()
                  }
-                 | %{},
-               options: %{
-                 :idempotency_key => String.t()
-               }
-    def pay(invoice_id, params, opts), do: Algora.PSP.client(__MODULE__).pay(invoice_id, params, Keyword.new(opts))
+                 | %{}
+    def pay(invoice_id, params), do: Algora.PSP.client(__MODULE__).pay(invoice_id, params)
 
     def retrieve(id), do: Algora.PSP.client(__MODULE__).retrieve(id)
     def retrieve(id, opts), do: Algora.PSP.client(__MODULE__).retrieve(id, Keyword.new(opts))

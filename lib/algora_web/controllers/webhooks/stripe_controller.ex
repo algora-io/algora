@@ -96,8 +96,13 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  defp process_event(%Stripe.Event{type: type} = event) when type in ["checkout.session.completed"] do
-    Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :info)
+  defp process_event(
+         %Stripe.Event{
+           type: "checkout.session.completed",
+           data: %{object: %Stripe.Session{customer_details: %{name: name, email: email}}}
+         } = event
+       ) do
+    Algora.Admin.alert("#{event.type} #{event.id} by #{name} (#{email})", :info)
     :ok
   end
 

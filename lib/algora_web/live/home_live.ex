@@ -321,7 +321,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                   <div class="text-base leading-6 flex-1">
                     <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                      DefenceTech CEOs fund obstacle avoidance in PX4 Drone Autopilot
+                      DefenceTech CEOs fund obstacle avoidance in PX4 Autopilot
                     </div>
                     <div class="text-base sm:text-lg font-medium text-muted-foreground">
                       Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
@@ -353,10 +353,17 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                   <div class="text-base leading-6 flex-1">
                     <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                      Coolify pools bounties from the community to fund and prioritize new features
+                      Coolify community crowdfunds new feature development
+                    </div>
+                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                      Andras Bacsai, Founder of Coolify
                     </div>
                   </div>
-                  <.button size="lg" variant="subtle" class="hidden sm:flex mt-2 sm:mt-0">
+                  <.button
+                    size="lg"
+                    variant="secondary"
+                    class="hidden sm:flex mt-2 sm:mt-0 ring-2 ring-emerald-500"
+                  >
                     View bounty board
                   </.button>
                 </.link>

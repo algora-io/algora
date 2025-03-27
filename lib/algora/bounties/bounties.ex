@@ -169,7 +169,7 @@ defmodule Algora.Bounties do
         {:ok, bounty}
       else
         {:error, _reason} = error ->
-          Logger.error("Failed to create bounty: #{inspect(error)}")
+          Algora.Admin.alert("Error creating bounty: #{inspect(error)}", :error)
           error
       end
     end)
@@ -642,13 +642,18 @@ defmodule Algora.Bounties do
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
     Repo.transact(fn ->
-      with {:ok, tip} <- do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts) do
-        create_payment_session(
-          %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
-          ticket_ref: opts[:ticket_ref],
-          tip_id: tip.id,
-          recipient: recipient
-        )
+      case do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts) do
+        {:ok, tip} ->
+          create_payment_session(
+            %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
+            ticket_ref: opts[:ticket_ref],
+            tip_id: tip.id,
+            recipient: recipient
+          )
+
+        {:error, reason} ->
+          Algora.Admin.alert("Error creating tip: #{inspect(reason)}", :error)
+          {:error, reason}
       end
     end)
   end

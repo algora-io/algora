@@ -39,9 +39,15 @@ defmodule Algora.Contracts do
           | {:tech_stack, [String.t()]}
 
   def create_contract(attrs) do
-    %Contract{}
-    |> Contract.changeset(attrs)
-    |> Repo.insert()
+    case %Contract{} |> Contract.changeset(attrs) |> Repo.insert() do
+      {:ok, contract} ->
+        Algora.Admin.alert("Contract created: #{contract.id}", :info)
+        {:ok, contract}
+
+      {:error, error} ->
+        Algora.Admin.alert("Error creating contract: #{inspect(error)}", :error)
+        {:error, error}
+    end
   end
 
   @spec get_payment_status(Contract.t()) :: payment_status()

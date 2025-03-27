@@ -39,6 +39,7 @@ defmodule Algora.PSP do
           when params:
                  %{
                    optional(:auto_advance) => boolean,
+                   :metadata => Algora.PSP.metadata(),
                    :customer => Stripe.id() | Stripe.Customer.t()
                  }
                  | %{},

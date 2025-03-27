@@ -871,7 +871,8 @@ defmodule Algora.Bounties do
              PSP.Invoice.create(
                %{
                  auto_advance: false,
-                 customer: customer.provider_id
+                 customer: customer.provider_id,
+                 metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
                },
                %{idempotency_key: idempotency_key}
              ),

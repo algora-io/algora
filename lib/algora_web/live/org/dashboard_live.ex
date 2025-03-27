@@ -765,7 +765,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    if Plug.Crypto.secure_compare(code, socket.assigns.secret_code) do
+    if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
       handle =
         socket.assigns.email
         |> Organizations.generate_handle_from_email()

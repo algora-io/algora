@@ -344,7 +344,7 @@ defmodule AlgoraWeb.HomeLive do
               alt="Y Combinator Logo"
               loading="lazy"
             />
-            <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+            <h2 class="mt-4 sm:mt-8 font-display text-lg sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               YCombinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">
@@ -1365,7 +1365,7 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src={~p"/images/wordmarks/keep.png"}
             alt="Keep"
-            class="col-auto w-[50%]"
+            class="col-auto w-[70%] sm:w-[50%]"
             loading="lazy"
           />
         </.link>
@@ -1386,7 +1386,7 @@ defmodule AlgoraWeb.HomeLive do
           <img
             src="https://getpanora.com/wp-content/uploads/2023/09/logo-panora.png"
             alt="Panora"
-            class="col-auto w-[50%] saturate-0 brightness-0 invert"
+            class="col-auto w-[60%] sm:w-[50%] saturate-0 brightness-0 invert"
             loading="lazy"
           />
         </.link>

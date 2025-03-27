@@ -47,6 +47,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       {:error, error}
   end
 
+  @tracked_events ["charge.succeeded", "transfer.created", "checkout.session.completed"]
+
   defp process_event(%Stripe.Event{
          type: "charge.succeeded",
          data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
@@ -146,8 +148,9 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  defp process_event(%Stripe.Event{type: "checkout.session.completed"} = event) do
-    Logger.info("Stripe #{event.type} event: #{event.id}")
+  defp process_event(%Stripe.Event{type: type} = event) when type in @tracked_events do
+    Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
+    :ok
   end
 
   defp process_event(_event), do: :ok

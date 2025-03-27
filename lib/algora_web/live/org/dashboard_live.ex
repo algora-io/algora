@@ -489,7 +489,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   </div>
                 </div>
                 <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
-                  <ul class="border-default text-base text-foreground-lighter flex-1 grid xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
+                  <ul class="border-default text-base text-foreground-lighter flex-1 grid grid-cols-1 xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
                     <li class="py-2 flex flex-col xl:items-center xl:justify-center">
                       <div class="flex items-center xl:flex-col gap-4">
                         <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
@@ -1278,7 +1278,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
           <.simple_form for={@bounty_form} phx-submit="create_bounty">
             <div class="flex flex-col gap-6 pt-6">
-              <div class="grid sm:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <.input
                   label="Issue URL"
                   field={@bounty_form[:url]}
@@ -1326,7 +1326,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
           <.simple_form for={@tip_form} phx-submit="create_tip">
             <div class="flex flex-col gap-6 pt-6">
-              <div class="grid sm:grid-cols-3 gap-x-3 gap-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-6">
                 <.input
                   label="Contribution URL"
                   field={@tip_form[:url]}
@@ -1424,7 +1424,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           />
         </div>
       <% end %>
-      <div class="pt-12 pb-16 mt-auto -mr-12 grid lg:grid-cols-2 gap-y-4 gap-x-6 text-sm">
+      <div class="pt-12 pb-16 mt-auto -mr-12 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-6 text-sm">
         <div class="flex items-center gap-2">
           <div class="flex -space-x-2">
             <img

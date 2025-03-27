@@ -240,7 +240,7 @@ defmodule AlgoraWeb.HomeLive do
                 <.form
                   for={@bounty_form}
                   phx-submit="create_bounty"
-                  class="lg:col-span-3 grid gap-4 sm:gap-6 w-full"
+                  class="lg:col-span-3 grid grid-cols-1 gap-4 sm:gap-6 w-full"
                 >
                   <.input
                     label="URL"
@@ -352,7 +352,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-12 gap-y-8 lg:grid-cols-10">
+              <div class="grid grid-cols-1 items-center gap-x-12 gap-y-8 lg:grid-cols-10">
                 <div class="lg:col-span-4">
                   <div class="relative flex aspect-square size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
@@ -403,7 +403,7 @@ defmodule AlgoraWeb.HomeLive do
               Use bounties for outcome-based contract work with full GitHub integration.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid grid-cols-1 items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-5 order-first lg:order-last">
                   <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-gray-800">
                     <img
@@ -437,7 +437,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid grid-cols-1 items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-6">
                   <div class="relative flex -space-x-4">
                     <img
@@ -514,7 +514,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-5 order-first lg:order-last">
                   <div class="relative flex aspect-[1091/1007] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
@@ -547,7 +547,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-6">
                   <div class="relative flex items-center justify-center">
                     <img
@@ -617,7 +617,7 @@ defmodule AlgoraWeb.HomeLive do
               Find your next team member through real-world collaboration. Use bounties to evaluate developers based on actual contributions to your codebase.
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
                 <div class="lg:col-span-6 order-first lg:order-last">
                   <.modal_video
                     class="rounded-xl lg:rounded-2xl"
@@ -648,7 +648,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
                 <div class="lg:col-span-5">
                   <.modal_video
                     class="rounded-xl lg:rounded-2xl"
@@ -770,7 +770,7 @@ defmodule AlgoraWeb.HomeLive do
 
             <div class="flex flex-col lg:flex-row gap-8">
               <div class="w-full lg:w-[65%] relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
-                <div class="grid items-center lg:grid-cols-7 gap-8 h-full">
+                <div class="grid grid-cols-1 items-center lg:grid-cols-7 gap-8 h-full">
                   <div class="lg:col-span-3 text-base leading-6">
                     <h3 class="text-2xl sm:text-3xl font-semibold text-foreground">
                       Tip any contributor <br class="hidden lg:block" />
@@ -800,7 +800,7 @@ defmodule AlgoraWeb.HomeLive do
                     phx-submit="create_tip"
                     class="lg:col-span-4 space-y-4 sm:space-y-6"
                   >
-                    <div class="grid sm:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
                       <.input
                         label="GitHub Username"
                         field={@tip_form[:github_handle]}

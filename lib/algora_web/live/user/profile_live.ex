@@ -177,7 +177,7 @@ defmodule AlgoraWeb.User.ProfileLive do
         </div>
         <!-- Reviews Column -->
         <div class="space-y-4">
-          <div class="grid gap-4">
+          <div class="grid grid-cols-1 gap-4">
             <h2 class="text-lg font-semibold">Completed Contracts</h2>
             <%= if Enum.empty?(@reviews) do %>
               <.card class="text-center">

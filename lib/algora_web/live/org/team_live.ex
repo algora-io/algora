@@ -80,7 +80,7 @@ defmodule AlgoraWeb.Org.TeamLive do
           <.card_description>External contractors working with your organization</.card_description>
         </.card_header>
         <.card_content>
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <.card :for={contractor <- @contractors}>
               <.card_header class="space-y-0 pb-2">
                 <div class="flex items-center gap-3">

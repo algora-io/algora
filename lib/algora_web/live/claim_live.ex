@@ -292,7 +292,7 @@ defmodule AlgoraWeb.ClaimLive do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto py-8 px-4">
-      <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-[2fr_1fr]">
         <div class="space-y-8">
           <.card>
             <.card_header>

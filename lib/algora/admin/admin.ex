@@ -17,6 +17,9 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def magic(email, return_to \\ nil),
+    do: AlgoraWeb.Endpoint.url() <> AlgoraWeb.UserAuth.generate_login_path(email, return_to)
+
   def screenshot(path), do: AlgoraWeb.OGImageController.take_and_upload_screenshot([path])
 
   def alert(message, severity \\ :error)

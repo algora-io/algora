@@ -135,7 +135,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </.card_description>
             </.card_header>
             <.card_content class="p-0">
-              <table class="w-full caption-bottom text-sm">
+              <table class="w-full caption-bottom text-sm overflow-x-auto">
                 <tbody class="[&_tr:last-child]:border-0">
                   <%= for {_group_id, [%{target: %{bounties: [bounty | _]}} | _] = claims} <- @payable_bounties do %>
                     <tr
@@ -143,7 +143,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                       data-state="false"
                     >
                       <td colspan={2} class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                        <div class="min-w-[250px]">
+                        <div class="md:min-w-[250px]">
                           <div class="group relative flex h-full flex-col">
                             <div class="relative h-full pl-2">
                               <div class="flex items-start justify-between">
@@ -182,7 +182,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                       data-state="false"
                     >
                       <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle w-full">
-                        <div class="min-w-[250px]">
+                        <div class="md:min-w-[250px]">
                           <div class="flex items-center gap-3">
                             <div class="flex -space-x-3">
                               <%= for claim <- claims do %>
@@ -199,7 +199,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                               <% end %>
                             </div>
                             <div>
-                              <div class="text-sm font-medium text-gray-200">
+                              <div class="text-sm font-medium text-gray-200 line-clamp-1">
                                 {claims
                                 |> Enum.map(fn c -> User.handle(c.user) end)
                                 |> Algora.Util.format_name_list()}
@@ -209,10 +209,22 @@ defmodule AlgoraWeb.Org.DashboardLive do
                               </div>
                             </div>
                           </div>
+                          <div class="pt-4 flex items-center md:hidden gap-4">
+                            <.button
+                              :if={hd(claims).source}
+                              href={hd(claims).source.url}
+                              variant="secondary"
+                            >
+                              View
+                            </.button>
+                            <.button href={~p"/claims/#{hd(claims).group_id}"}>
+                              Reward
+                            </.button>
+                          </div>
                         </div>
                       </td>
-                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle">
-                        <div class="min-w-[180px]">
+                      <td class="[&:has([role=checkbox])]:pr-0 p-4 align-middle hidden md:table-cell">
+                        <div class="md:min-w-[180px]">
                           <div class="flex items-center justify-end gap-4">
                             <.button
                               :if={hd(claims).source}

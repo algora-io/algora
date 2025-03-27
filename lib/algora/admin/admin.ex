@@ -26,7 +26,7 @@ defmodule Algora.Admin do
 
     email_job =
       Algora.Activities.SendEmail.changeset(%{
-        title: "Alert: #{message}",
+        title: "Error: #{message}",
         body: message,
         name: "Algora Alert",
         email: "info@algora.io"
@@ -34,7 +34,7 @@ defmodule Algora.Admin do
 
     discord_job =
       SendDiscord.changeset(%{
-        payload: %{embeds: [%{color: 0xEF4444, title: "Alert", description: message, timestamp: DateTime.utc_now()}]}
+        payload: %{embeds: [%{color: 0xEF4444, title: "Error", description: message, timestamp: DateTime.utc_now()}]}
       })
 
     Oban.insert_all([email_job, discord_job])

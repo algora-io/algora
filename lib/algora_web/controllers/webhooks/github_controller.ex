@@ -453,7 +453,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      %{
                        owner: owner,
                        amount: amount,
-                       idempotency_key: "invoice-#{recipient.provider_login}-#{webhook.delivery}"
+                       idempotency_key: "tip-#{recipient.provider_login}-#{webhook.delivery}"
                      },
                      ticket_ref: ticket_ref,
                      tip_id: tip.id,

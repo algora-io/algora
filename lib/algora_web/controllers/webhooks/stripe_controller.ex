@@ -49,11 +49,77 @@ defmodule AlgoraWeb.Webhooks.StripeController do
 
   @tracked_events ["charge.succeeded", "transfer.created", "checkout.session.completed"]
 
-  defp process_event(%Stripe.Event{
-         type: "charge.succeeded",
-         data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
-       })
+  defp process_event(
+         %Stripe.Event{
+           type: "charge.succeeded",
+           data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
+         } = event
+       )
        when is_binary(group_id) do
+    process_charge_succeeded(event, group_id)
+  end
+
+  defp process_event(
+         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{invoice: invoice_id}}} = event
+       ) do
+    with {:ok, invoice} <- Algora.PSP.Invoice.retrieve(invoice_id),
+         %{"version" => @metadata_version, "group_id" => group_id} <- invoice.metadata do
+      process_charge_succeeded(event, group_id)
+    end
+  end
+
+  defp process_event(%Stripe.Event{
+         type: "transfer.created",
+         data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
+       }) do
+    with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
+         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer),
+         {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transfer_id: transaction.id})) do
+      Payments.broadcast()
+      {:ok, nil}
+    else
+      error ->
+        Logger.error("Failed to update transaction: #{inspect(error)}")
+        {:error, :failed_to_update_transaction}
+    end
+  end
+
+  defp process_event(%Stripe.Event{
+         type: "checkout.session.completed",
+         data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
+       }) do
+    with {:ok, setup_intent} <- Algora.PSP.SetupIntent.retrieve(setup_intent_id, %{}),
+         pm_id = setup_intent.payment_method,
+         {:ok, payment_method} <- Algora.PSP.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
+         {:ok, customer} <- Repo.fetch_by(Customer, provider: "stripe", provider_id: customer_id),
+         {:ok, _} <- Payments.create_payment_method(customer, payment_method) do
+      Payments.broadcast()
+      :ok
+    end
+  end
+
+  defp process_event(%Stripe.Event{type: type} = event) when type in @tracked_events do
+    Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
+    :ok
+  end
+
+  defp process_event(_event), do: :ok
+
+  defp maybe_update_transaction(transaction, transfer) do
+    if transaction.status == :succeeded do
+      {:ok, transaction}
+    else
+      transaction
+      |> change(%{
+        status: :succeeded,
+        succeeded_at: DateTime.utc_now(),
+        provider_meta: Util.normalize_struct(transfer)
+      })
+      |> Repo.update()
+    end
+  end
+
+  defp process_charge_succeeded(%Stripe.Event{type: "charge.succeeded"}, group_id) when is_binary(group_id) do
     Repo.transact(fn ->
       {_, txs} =
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
@@ -116,57 +182,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
           {:error, :failed_to_update_transactions}
       end
     end)
-  end
-
-  defp process_event(%Stripe.Event{
-         type: "transfer.created",
-         data: %{object: %Stripe.Transfer{metadata: %{"version" => @metadata_version}} = transfer}
-       }) do
-    with {:ok, transaction} <- Repo.fetch_by(Transaction, provider: "stripe", provider_id: transfer.id),
-         {:ok, _transaction} <- maybe_update_transaction(transaction, transfer),
-         {:ok, _job} <- Oban.insert(Bounties.Jobs.NotifyTransfer.new(%{transfer_id: transaction.id})) do
-      Payments.broadcast()
-      {:ok, nil}
-    else
-      error ->
-        Logger.error("Failed to update transaction: #{inspect(error)}")
-        {:error, :failed_to_update_transaction}
-    end
-  end
-
-  defp process_event(%Stripe.Event{
-         type: "checkout.session.completed",
-         data: %{object: %Stripe.Session{customer: customer_id, mode: "setup", setup_intent: setup_intent_id}}
-       }) do
-    with {:ok, setup_intent} <- Algora.PSP.SetupIntent.retrieve(setup_intent_id, %{}),
-         pm_id = setup_intent.payment_method,
-         {:ok, payment_method} <- Algora.PSP.PaymentMethod.attach(%{payment_method: pm_id, customer: customer_id}),
-         {:ok, customer} <- Repo.fetch_by(Customer, provider: "stripe", provider_id: customer_id),
-         {:ok, _} <- Payments.create_payment_method(customer, payment_method) do
-      Payments.broadcast()
-      :ok
-    end
-  end
-
-  defp process_event(%Stripe.Event{type: type} = event) when type in @tracked_events do
-    Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
-    :ok
-  end
-
-  defp process_event(_event), do: :ok
-
-  defp maybe_update_transaction(transaction, transfer) do
-    if transaction.status == :succeeded do
-      {:ok, transaction}
-    else
-      transaction
-      |> change(%{
-        status: :succeeded,
-        succeeded_at: DateTime.utc_now(),
-        provider_meta: Util.normalize_struct(transfer)
-      })
-      |> Repo.update()
-    end
   end
 
   defp notify_event(%Stripe.Event{} = event, :ok) do

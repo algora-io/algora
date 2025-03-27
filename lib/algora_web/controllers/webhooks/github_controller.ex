@@ -234,13 +234,17 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      },
                      %{idempotency_key: idempotency_key}
                    ) do
-              Logger.info("Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).")
+              Algora.Admin.alert(
+                "Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).",
+                :info
+              )
 
               :ok
             else
               {:error, reason} ->
-                Logger.error(
-                  "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}"
+                Algora.Admin.alert(
+                  "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}",
+                  :error
                 )
 
                 :error
@@ -469,13 +473,17 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                      },
                      %{idempotency_key: idempotency_key}
                    ) do
-              Logger.info("Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).")
+              Algora.Admin.alert(
+                "Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).",
+                :info
+              )
 
               {:ok, tip}
             else
               {:error, reason} ->
-                Logger.error(
-                  "Autopay failed (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}): #{inspect(reason)}"
+                Algora.Admin.alert(
+                  "Autopay failed (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}): #{inspect(reason)}",
+                  :error
                 )
 
                 {:error, reason}

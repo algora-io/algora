@@ -45,7 +45,7 @@ defmodule Algora.Admin do
       payload: %{
         embeds: [
           %{
-            color: 0xEF4444,
+            color: 0xF59E0B,
             title: severity |> to_string() |> String.capitalize(),
             description: message,
             timestamp: DateTime.utc_now()

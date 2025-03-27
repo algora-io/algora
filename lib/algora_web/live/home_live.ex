@@ -340,7 +340,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
               src="https://www.firecrawl.dev/images/yc.svg"
-              class="h-20 sm:h-24 mx-auto"
+              class="h-16 sm:h-24 mx-auto"
               alt="Y Combinator Logo"
               loading="lazy"
             />
@@ -460,7 +460,7 @@ defmodule AlgoraWeb.HomeLive do
                     />
                   </div>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-8">
-                    <div class="flex flex-col gap-4 text-xl sm:text-2xl xl:text-5xl font-semibold font-display">
+                    <div class="flex flex-col sm:gap-4 text-xl sm:text-2xl xl:text-5xl font-semibold font-display">
                       <div>
                         Used bounties
                       </div>
@@ -857,7 +857,7 @@ defmodule AlgoraWeb.HomeLive do
                   width="1200"
                   height="630"
                   loading="lazy"
-                  class="border border-border bg-muted mix-blend-overlay dark:[box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)] [box-shadow:0px_82px_105px_0px_#E3E2DF7A,0px_29.93px_38.33px_0px_#E3E2DF54,0px_14.53px_18.61px_0px_#E3E2DF44,0px_7.12px_9.12px_0px_#E3E2DF36,0px_2.82px_3.61px_0px_#E3E2DF26]"
+                  class="border border-border bg-muted mix-blend-overlay [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
                   style="color:transparent"
                   src={~p"/images/screenshots/org-home.png"}
                 />

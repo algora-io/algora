@@ -20,8 +20,6 @@ defmodule AlgoraWeb.Org.PreviewNav do
        |> assign(:contacts, [])
        |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
     else
-      Algora.Admin.alert("New preview for #{repo_owner}/#{repo_name}", :info)
-
       case Organizations.init_preview(repo_owner, repo_name) do
         {:ok, %{user: user, org: _org}} ->
           token = AlgoraWeb.UserAuth.sign_preview_code(user.id)
@@ -30,7 +28,6 @@ defmodule AlgoraWeb.Org.PreviewNav do
           {:halt, redirect(socket, to: path)}
 
         {:error, reason} ->
-          Algora.Admin.alert("Failed to initialize preview: #{inspect(reason)}", :error)
           {:cont, put_flash(socket, :error, "Failed to initialize preview: #{inspect(reason)}")}
       end
     end

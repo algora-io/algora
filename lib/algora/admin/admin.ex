@@ -3,6 +3,7 @@ defmodule Algora.Admin do
   import Ecto.Query
 
   alias Algora.Accounts.User
+  alias Algora.Activities.SendDiscord
   alias Algora.Bounties.Claim
   alias Algora.Github
   alias Algora.Parser
@@ -18,7 +19,11 @@ defmodule Algora.Admin do
 
   def screenshot(path), do: AlgoraWeb.OGImageController.take_and_upload_screenshot([path])
 
-  def alert(message) do
+  def alert(message, severity \\ :error)
+
+  def alert(message, :error) do
+    Logger.error(message)
+
     email_job =
       Algora.Activities.SendEmail.changeset(%{
         title: "Alert: #{message}",
@@ -28,11 +33,28 @@ defmodule Algora.Admin do
       })
 
     discord_job =
-      Algora.Activities.SendDiscord.changeset(%{
+      SendDiscord.changeset(%{
         payload: %{embeds: [%{color: 0xEF4444, title: "Alert", description: message, timestamp: DateTime.utc_now()}]}
       })
 
     Oban.insert_all([email_job, discord_job])
+  end
+
+  def alert(message, severity) do
+    %{
+      payload: %{
+        embeds: [
+          %{
+            color: 0xEF4444,
+            title: severity |> to_string() |> String.capitalize(),
+            description: message,
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+    |> SendDiscord.changeset()
+    |> Oban.insert()
   end
 
   def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")

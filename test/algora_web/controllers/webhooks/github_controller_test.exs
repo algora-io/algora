@@ -504,6 +504,79 @@ defmodule AlgoraWeb.Webhooks.GithubControllerTest do
       assert Enum.all?(claims, &(&1.target_id == hd(claims).target_id))
     end
 
+    test "", ctx do
+      issue_number = :rand.uniform(1000)
+      pr_number = :rand.uniform(1000)
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "issue_comment.created",
+          user_type: :repo_admin,
+          body: "/bounty $100",
+          params: %{"issue" => %{"number" => issue_number}}
+        }
+      ])
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        }
+      ])
+
+      claims = Repo.all(Claim)
+      assert length(claims) == 1
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 1)))
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @jsmith",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        }
+      ])
+
+      claims = Repo.all(Claim)
+      assert length(claims) == 2
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 2)))
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number}",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        }
+      ])
+
+      claims = Repo.all(from c in Claim, where: c.status == :pending)
+      assert length(claims) == 1
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 1)))
+
+      claims = Repo.all(from c in Claim, where: c.status == :cancelled)
+      assert length(claims) == 1
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(0, 1)))
+
+      process_scenario!(ctx, [
+        %{
+          event_action: "pull_request.opened",
+          user_type: :unauthorized,
+          body: "/claim #{issue_number} /split @jdoe",
+          params: %{"pull_request" => %{"number" => pr_number}}
+        }
+      ])
+
+      claims = Repo.all(from c in Claim, where: c.status == :pending)
+      assert length(claims) == 2
+      assert Enum.all?(claims, &(&1.group_share == Decimal.div(1, 2)))
+
+      claims = Repo.all(from c in Claim, where: c.status == :cancelled)
+      assert length(claims) == 1
+    end
+
     test "claim command is idempotent when editing pull request", ctx do
       issue_number = :rand.uniform(1000)
       pr_number = :rand.uniform(1000)

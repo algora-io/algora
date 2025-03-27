@@ -47,8 +47,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       {:error, error}
   end
 
-  @tracked_events ["charge.succeeded", "transfer.created", "checkout.session.completed"]
-
   defp process_event(
          %Stripe.Event{
            type: "charge.succeeded",
@@ -98,7 +96,13 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  defp process_event(%Stripe.Event{type: type} = event) when type in @tracked_events do
+  defp process_event(%Stripe.Event{type: type} = event) when type in ["checkout.session.completed"] do
+    Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :info)
+    :ok
+  end
+
+  defp process_event(%Stripe.Event{type: type} = event)
+       when type in ["charge.succeeded", "transfer.created", "checkout.session.completed"] do
     Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
     :ok
   end
@@ -199,12 +203,12 @@ defmodule AlgoraWeb.Webhooks.StripeController do
               %{
                 name: "Event",
                 value: event.id,
-                inline: true
+                inline: false
               },
               %{
                 name: event.data.object.object,
                 value: event.data.object.id,
-                inline: true
+                inline: false
               }
             ],
             url: "https://dashboard.stripe.com/payments?status[0]=successful",
@@ -240,12 +244,12 @@ defmodule AlgoraWeb.Webhooks.StripeController do
               %{
                 name: "Event",
                 value: event.id,
-                inline: true
+                inline: false
               },
               %{
                 name: event.data.object.object,
                 value: event.data.object.id,
-                inline: true
+                inline: false
               }
             ],
             url: "https://dashboard.stripe.com/payments?status[0]=failed",

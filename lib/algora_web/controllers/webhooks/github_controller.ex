@@ -573,20 +573,19 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
+  defp execute_command(_webhook, {cmd, _args}) when cmd in [:bounty, :tip, :claim, :attempt] do
+    {:ok, nil}
+  end
+
   defp execute_command(webhook, command) do
     github_ticket = get_github_ticket(webhook)
 
-    message =
-      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}"
+    Algora.Admin.alert(
+      "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}",
+      :error
+    )
 
-    case Algora.Admin.alert(message) do
-      [] ->
-        Logger.error(message)
-        {:error, :unknown_command}
-
-      _jobs ->
-        :ok
-    end
+    {:error, :unknown_command}
   end
 
   def build_command({:claim, args}, commands) do

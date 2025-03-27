@@ -1198,7 +1198,7 @@ defmodule AlgoraWeb.HomeLive do
   defp yc_logo_cloud(assigns) do
     ~H"""
     <div>
-      <div class="grid grid-cols-3 lg:grid-cols-4 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
+      <div class="grid grid-cols-3 lg:grid-cols-3 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
         <.link
           class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/browser-use"}
@@ -1359,6 +1359,36 @@ defmodule AlgoraWeb.HomeLive do
         >
           🔥
           Firecrawl
+        </.link>
+
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/keephq"}>
+          <img
+            src={~p"/images/wordmarks/keep.png"}
+            alt="Keep"
+            class="col-auto w-[50%]"
+            loading="lazy"
+          />
+        </.link>
+
+        <.link
+          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          navigate={~p"/org/windmill-labs"}
+        >
+          <img
+            src="https://windmill.dev/img/windmill.svg"
+            alt="Windmill"
+            class="size-4 sm:size-10 mr-2 saturate-0"
+            loading="lazy"
+          /> Windmill
+        </.link>
+
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/panoratech"}>
+          <img
+            src="https://getpanora.com/wp-content/uploads/2023/09/logo-panora.png"
+            alt="Panora"
+            class="col-auto w-[50%] saturate-0 brightness-0 invert"
+            loading="lazy"
+          />
         </.link>
       </div>
     </div>

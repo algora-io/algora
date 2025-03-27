@@ -48,7 +48,7 @@ defmodule AlgoraWeb.ClaimLive do
   @impl true
   def mount(%{"group_id" => group_id}, _session, socket) do
     claims =
-      from(c in Claim, where: c.group_id == ^group_id)
+      from(c in Claim, where: c.group_id == ^group_id and c.status != :cancelled)
       |> order_by(desc: :group_share)
       |> Repo.all()
       |> Repo.preload([

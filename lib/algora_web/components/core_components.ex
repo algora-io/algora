@@ -74,11 +74,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def logo(assigns) do
     ~H"""
-    <.link
-      navigate="/"
-      aria-label="Algora"
-      class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-    >
+    <.link navigate="/" aria-label="Algora">
       <AlgoraWeb.Components.Logos.algora class={["fill-current", @class || "h-auto w-20"]} />
     </.link>
     """
@@ -88,11 +84,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def wordmark(assigns) do
     ~H"""
-    <.link
-      navigate="/"
-      aria-label="Algora"
-      class="focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-    >
+    <.link navigate="/" aria-label="Algora">
       <AlgoraWeb.Components.Wordmarks.algora class={
         classes(["fill-current", @class || "h-auto w-20"])
       } />
@@ -351,7 +343,7 @@ defmodule AlgoraWeb.CoreComponents do
         <button
           id={@id}
           type="button"
-          class="group w-full rounded-full bg-gray-800 text-left text-sm font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-800"
+          class="group w-full rounded-full bg-gray-800 text-left text-sm font-medium text-gray-200 hover:bg-gray-700"
           phx-click={show_dropdown("##{@id}-dropdown")}
           phx-hook="Menu"
           data-active-class="bg-gray-800"
@@ -374,7 +366,7 @@ defmodule AlgoraWeb.CoreComponents do
             <.link
               tabindex="-1"
               role="menuitem"
-              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-gray-700"
+              class="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
               {link}
             >
               {render_slot(link)}

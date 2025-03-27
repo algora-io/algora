@@ -472,9 +472,7 @@ defmodule Algora.Contracts do
   defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
-    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}, %{
-           idempotency_key: "contract-#{contract.id}"
-         }) do
+    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}) do
       {:ok, stripe_invoice} ->
         if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}

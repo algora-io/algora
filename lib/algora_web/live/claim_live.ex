@@ -100,7 +100,8 @@ defmodule AlgoraWeb.ClaimLive do
           pledges
           |> Enum.map(fn {sponsor_id, {sponsor, pledged}} ->
             paid = Map.get(payments, sponsor_id, Money.zero(:USD, no_fraction_if_integer: true))
-            tipped = Money.sub!(paid, pledged)
+            tipped = Money.max!(Money.sub!(paid, pledged), Money.zero(:USD, no_fraction_if_integer: true))
+            remaining = Money.max!(Money.sub!(pledged, paid), Money.zero(:USD, no_fraction_if_integer: true))
 
             status =
               cond do
@@ -116,7 +117,8 @@ defmodule AlgoraWeb.ClaimLive do
               status: status,
               pledged: pledged,
               paid: paid,
-              tipped: tipped
+              tipped: tipped,
+              remaining: remaining
             }
           end)
           |> Enum.sort_by(&{&1.pledged, &1.paid, &1.sponsor.name}, :desc)
@@ -133,13 +135,7 @@ defmodule AlgoraWeb.ClaimLive do
         context_ids = MapSet.new(contexts, & &1.id)
         available_bounties = Enum.filter(primary_claim.target.bounties, &MapSet.member?(context_ids, &1.owner_id))
 
-        amount =
-          case available_bounties do
-            [] -> nil
-            [bounty | _] -> Money.to_decimal(bounty.amount)
-          end
-
-        changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0, amount: amount})
+        changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0})
 
         {:ok,
          socket
@@ -163,7 +159,7 @@ defmodule AlgoraWeb.ClaimLive do
 
   @impl true
   def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, :current_context_pending_payment, nil)}
   end
 
   def handle_params(%{"context" => context_id}, _url, socket) do
@@ -171,7 +167,7 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   def handle_params(_params, _url, socket) do
-    {:noreply, socket |> assign_selected_context(default_context_id(socket)) |> assign_line_items()}
+    {:noreply, socket |> assign_selected_context() |> assign_line_items()}
   end
 
   @impl true
@@ -221,13 +217,39 @@ defmodule AlgoraWeb.ClaimLive do
     end
   end
 
+  defp assign_reward_bounty_form(socket) do
+    remaining = socket.assigns.current_context_pending_payment
+
+    amount =
+      if(remaining && Money.positive?(remaining)) do
+        Money.to_decimal(remaining)
+      end
+
+    form =
+      socket.assigns.reward_bounty_form.source
+      |> change(amount: amount)
+      |> to_form()
+
+    assign(socket, :reward_bounty_form, form)
+  end
+
+  defp assign_selected_context(socket), do: assign_selected_context(socket, default_context_id(socket))
+
   defp assign_selected_context(socket, context_id) do
+    current_context_pending_payment =
+      if sponsor = Enum.find(socket.assigns.sponsors, &(&1.sponsor.id == context_id)) do
+        sponsor.remaining
+      end
+
     case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
       nil ->
         push_patch(socket, to: "/claims/#{socket.assigns.primary_claim.group_id}?context=#{default_context_id(socket)}")
 
       context ->
-        assign(socket, :selected_context, context)
+        socket
+        |> assign(:selected_context, context)
+        |> assign(:current_context_pending_payment, current_context_pending_payment)
+        |> assign_reward_bounty_form()
     end
   end
 
@@ -340,9 +362,15 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_title>
                   Claim
                 </.card_title>
-                <.button phx-click="reward_bounty">
-                  Reward bounty
-                </.button>
+                <%= if is_nil(@current_context_pending_payment) or Money.positive?(@current_context_pending_payment) do %>
+                  <.button phx-click="reward_bounty">
+                    Reward bounty
+                  </.button>
+                <% else %>
+                  <.badge variant="success">
+                    <.icon name="tabler-check" class="size-4 mr-2 -ml-1" /> Rewarded
+                  </.badge>
+                <% end %>
               </div>
             </.card_header>
             <.card_content>

@@ -804,7 +804,7 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
-          <div class="mx-auto max-w-8xl px-6 lg:px-8">
+          <div class="mx-auto 2xl:max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?
             </h2>
@@ -813,7 +813,7 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="flex flex-col lg:flex-row gap-8">
-              <div class="w-full lg:w-[65%] relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+              <div class="w-full lg:max-w-6xl relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
                 <div class="grid grid-cols-1 items-center lg:grid-cols-7 gap-8 h-full">
                   <div class="lg:col-span-3 text-base leading-6">
                     <h3 class="text-2xl sm:text-3xl font-semibold text-foreground">
@@ -840,7 +840,7 @@ defmodule AlgoraWeb.HomeLive do
                     phx-submit="create_tip"
                     class="lg:col-span-4 space-y-4 sm:space-y-6"
                   >
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
                       <.input
                         label="GitHub Username"
                         field={@tip_form[:github_handle]}
@@ -872,11 +872,11 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
 
-              <div class="hidden sm:block w-full lg:w-[35%]">
+              <div>
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
-                  class="w-full rounded-2xl shadow-xl ring-1 ring-white/10 p-8 sm:p-12 bg-[#0d1017]"
+                  class="w-full h-full object-contain rounded-2xl shadow-xl ring-1 ring-white/10 p-8 sm:p-12 bg-[#0d1017]"
                   loading="lazy"
                 />
               </div>

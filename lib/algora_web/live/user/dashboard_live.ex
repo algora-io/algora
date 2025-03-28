@@ -7,6 +7,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   import AlgoraWeb.Components.Bounties
   import Ecto.Changeset
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Payments
@@ -48,6 +49,12 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> SettingsForm.changeset(%{tech_stack: socket.assigns.current_user.tech_stack})
       |> to_form()
 
+    total_earned =
+      case Accounts.fetch_developer_by(handle: socket.assigns.current_user.handle) do
+        {:ok, user} -> user.total_earned
+        _ -> Money.zero(:USD)
+      end
+
     socket =
       socket
       |> assign(:view_mode, "compact")
@@ -57,6 +64,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:contracts, contracts)
       |> assign(:has_active_account, has_active_account)
       |> assign(:settings_form, settings_form)
+      |> assign(:total_earned, total_earned)
       |> assign_bounties()
       |> assign_achievements()
 
@@ -315,7 +323,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   defp earn_first_bounty_status(socket) do
-    if earned?(socket.assigns.current_user, Money.new!(0, :USD)) do
+    if Money.compare(socket.assigns.total_earned, Money.new!(0, :USD)) == :gt do
       :completed
     else
       :upcoming
@@ -323,14 +331,6 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   defp share_with_friend_status(_socket), do: :upcoming
-
-  defp earned?(user, amount) do
-    cond do
-      is_nil(user.total_earned) -> false
-      Money.compare(user.total_earned, amount) == :lt -> false
-      true -> true
-    end
-  end
 
   @impl true
   def handle_event("view_mode", %{"value" => mode}, socket) do

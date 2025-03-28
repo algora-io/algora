@@ -308,7 +308,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
                 <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
                   <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
-                  <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                  <div class="text-sm sm:text-base xl:text-lg font-medium text-muted-foreground">
                     Bounties and contracts <span class="hidden 2xl:inline">on Algora</span>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
                 <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
                   <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
-                  <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                  <div class="text-sm sm:text-base xl:text-lg font-medium text-muted-foreground">
                     Proven Algora experts
                   </div>
                 </div>
@@ -334,7 +334,7 @@ defmodule AlgoraWeb.PricingLive do
                 </div>
                 <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
                   <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
-                  <div class="text-base xl:text-lg font-medium text-muted-foreground">
+                  <div class="text-sm sm:text-base xl:text-lg font-medium text-muted-foreground">
                     Top 1% OSS engineers
                   </div>
                 </div>

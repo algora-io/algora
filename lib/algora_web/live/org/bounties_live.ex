@@ -217,7 +217,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
             </tbody>
           </table>
         </div>
-        <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+        <div :if={@has_more_bounties} class="flex justify-center mt-4" data-load-more-indicator>
           <div class="animate-pulse text-gray-400">
             <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
           </div>
@@ -261,7 +261,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
             </div>
           </div>
         <% end %>
-        <div :if={@has_more_transactions} class="flex justify-center mt-4" id="load-more-indicator">
+        <div :if={@has_more_transactions} class="flex justify-center mt-4" data-load-more-indicator>
           <div class="animate-pulse text-gray-400">
             <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
           </div>

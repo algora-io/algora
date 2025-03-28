@@ -1117,8 +1117,10 @@ defmodule Algora.Bounties do
       status: b.status,
       owner: %{
         id: o.id,
+        inserted_at: o.inserted_at,
         name: o.name,
         handle: o.handle,
+        provider_login: o.provider_login,
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack
       },

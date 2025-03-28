@@ -11,6 +11,8 @@ defmodule AlgoraWeb.API.BountyController do
 
   Query Parameters:
   - status: string (optional) - Filter by status (open, paid)
+  - org: string (optional) - Filter by organization handle
+  - limit: integer (optional) - Limit the number of bounties returned
   """
   def index(conn, %{"batch" => _batch, "input" => input} = _params) do
     with {:ok, decoded} <- Jason.decode(input),
@@ -30,17 +32,26 @@ defmodule AlgoraWeb.API.BountyController do
   # Convert JSON/map parameters to keyword list criteria
   defp to_criteria(params) when is_map(params) do
     params
-    |> Keyword.new(fn
-      {"status", status} -> {:status, parse_status(status)}
-      {"org", org_handle} -> {:owner_handle, org_handle}
-      {_k, _v} -> nil
-    end)
+    |> Enum.map(&parse_params/1)
     |> Enum.reject(&is_nil/1)
-  rescue
-    _ -> []
+    |> Keyword.new()
   end
 
   defp to_criteria(_), do: []
+
+  defp parse_params({"status", status}) do
+    {:status, parse_status(status)}
+  end
+
+  defp parse_params({"org", org_handle}) do
+    {:owner_handle, org_handle}
+  end
+
+  defp parse_params({"limit", limit}) do
+    {:limit, limit}
+  end
+
+  defp parse_params(_), do: nil
 
   # Parse status string to corresponding enum atom
   defp parse_status(status) when is_binary(status) do

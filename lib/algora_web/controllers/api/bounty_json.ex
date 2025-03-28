@@ -1,77 +1,19 @@
 defmodule AlgoraWeb.API.BountyJSON do
   alias Algora.Bounties.Bounty
 
-  @doc """
-  Renders a list of bounties.
-  """
   def index(%{bounties: bounties}) do
-    %{
-      data: [
-        %{
-          result: %{
-            data: %{
-              json: %{
-                # TODO: Implement pagination
-                next_cursor: nil,
-                items: for(bounty <- bounties, do: data(bounty))
-              }
+    [
+      %{
+        result: %{
+          data: %{
+            json: %{
+              next_cursor: nil,
+              items: for(bounty <- bounties, do: data(bounty))
             }
           }
         }
-      ]
-    }
-  end
-
-  @doc """
-  Renders a single bounty.
-  """
-  def show(%{bounty: bounty}) do
-    %{
-      data: [
-        %{
-          result: %{
-            data: %{
-              json: %{
-                next_cursor: nil,
-                items: [data(bounty)]
-              }
-            }
-          }
-        }
-      ]
-    }
-  end
-
-  defp data(%Bounty{} = bounty) do
-    %{
-      id: bounty.id,
-      # TODO: Implement point rewards
-      point_reward: nil,
-      reward: %{
-        amount: bounty.amount.amount,
-        currency: bounty.amount.currency
-      },
-      reward_formatted: "#{bounty.amount.amount} #{bounty.amount.currency}",
-      # TODO: Implement reward tiers
-      reward_tiers: [],
-      tech: bounty.ticket.tech || [],
-      status: bounty.status,
-      # TODO: Determine if bounty is external
-      is_external: false,
-      org: org_data(bounty.owner),
-      task: task_data(bounty.ticket),
-      type: "standard",
-      kind: "dev",
-      reward_type: "cash",
-      visibility: bounty.visibility,
-      # TODO: Implement bids
-      bids: [],
-      autopay_disabled: bounty.autopay_disabled,
-      timeouts_disabled: true,
-      manual_assignments: false,
-      created_at: bounty.inserted_at,
-      updated_at: bounty.updated_at
-    }
+      }
+    ]
   end
 
   defp data(%{} = bounty) do
@@ -79,75 +21,62 @@ defmodule AlgoraWeb.API.BountyJSON do
       id: bounty.id,
       point_reward: nil,
       reward: %{
-        amount: bounty.amount.amount,
+        amount: Algora.MoneyUtils.to_minor_units(bounty.amount),
         currency: bounty.amount.currency
       },
-      reward_formatted: "#{bounty.amount.amount} #{bounty.amount.currency}",
+      reward_formatted: Money.to_string!(bounty.amount, no_fraction_if_integer: true),
       reward_tiers: [],
-      tech: bounty.ticket.tech || [],
+      tech: bounty.owner.tech_stack,
       status: bounty.status,
       is_external: false,
       org: org_data(bounty.owner),
-      task: task_data(bounty.ticket),
+      task: task_data(bounty),
       type: "standard",
       kind: "dev",
       reward_type: "cash",
-      visibility: Map.get(bounty, :visibility, :public),
+      visibility: "public",
       bids: [],
-      autopay_disabled: Map.get(bounty, :autopay_disabled, false),
-      timeouts_disabled: true,
+      autopay_disabled: false,
+      timeouts_disabled: false,
       manual_assignments: false,
       created_at: bounty.inserted_at,
-      updated_at: Map.get(bounty, :updated_at, bounty.inserted_at)
+      updated_at: bounty.inserted_at
     }
   end
 
-  defp task_data(nil), do: nil
-
-  defp task_data(ticket) do
+  defp task_data(bounty) do
     %{
-      id: ticket.id,
-      # TODO: Make this dynamic based on ticket provider
+      id: bounty.ticket.id,
       forge: "github",
-      # TODO: Extract from ticket URL
-      repo_owner: "TODO",
-      # TODO: Extract from ticket URL
-      repo_name: "TODO",
-      number: ticket.number,
+      repo_owner: bounty.repository.owner.provider_login,
+      repo_name: bounty.repository.name,
+      number: bounty.ticket.number,
       source: %{
-        # TODO: Make this dynamic based on ticket provider
         type: "github",
         data: %{
-          id: ticket.id,
-          html_url: ticket.url,
-          # TODO: Add title to ticket schema
-          title: "TODO",
-          # TODO: Add body to ticket schema
-          body: "TODO",
+          id: bounty.ticket.id,
+          html_url: bounty.ticket.url,
+          title: bounty.ticket.title,
+          body: "",
           user: %{
-            # TODO: Add creator info to ticket schema
             id: 0,
-            login: "TODO",
-            avatar_url: "TODO",
-            html_url: "TODO",
-            name: "TODO",
-            company: "TODO",
-            location: "TODO",
-            twitter_username: "TODO"
+            login: "",
+            avatar_url: "",
+            html_url: "",
+            name: "",
+            company: "",
+            location: "",
+            twitter_username: ""
           }
         }
       },
-      # TODO: Map ticket status
       status: "open",
-      # TODO: Add title to ticket schema
-      title: "TODO",
-      url: ticket.url,
-      # TODO: Add body to ticket schema
-      body: "TODO",
-      # TODO: Make this dynamic
+      title: bounty.ticket.title,
+      url: bounty.ticket.url,
+      body: "",
       type: "issue",
-      hash: ticket.hash || "",
-      tech: ticket.tech || []
+      hash: Bounty.path(bounty),
+      tech: []
     }
   end
 
@@ -159,22 +88,19 @@ defmodule AlgoraWeb.API.BountyJSON do
       created_at: org.inserted_at,
       handle: org.handle,
       name: org.name,
-      display_name: org.display_name || org.name,
-      description: org.bio || "",
+      display_name: org.name,
+      description: "",
       avatar_url: org.avatar_url,
-      website_url: org.website_url || "",
-      twitter_url: org.twitter_url || "",
-      youtube_url: org.youtube_url || "",
-      discord_url: org.discord_url || "",
-      slack_url: org.slack_url,
-      stargazers_count: org.stargazers_count || 0,
-      tech: org.tech_stack || [],
-      # TODO: Add to org schema
+      website_url: "",
+      twitter_url: "",
+      youtube_url: "",
+      discord_url: "",
+      slack_url: "",
+      stargazers_count: 0,
+      tech: org.tech_stack,
       accepts_sponsorships: false,
       members: members_data(org),
-      # TODO: Add to org schema
       enabled_expert_recs: false,
-      # TODO: Add to org schema
       enabled_private_bounties: false,
       days_until_timeout: nil,
       github_handle: org.provider_login
@@ -182,23 +108,6 @@ defmodule AlgoraWeb.API.BountyJSON do
   end
 
   defp members_data(_org) do
-    # TODO: Implement actual member fetching
     []
   end
-
-  # defp user_data(nil), do: nil
-
-  # defp user_data(user) do
-  #   %{
-  #     id: user.id,
-  #     handle: user.handle,
-  #     image: user.avatar_url,
-  #     name: user.name,
-  #     github_handle: user.provider_login,
-  #     youtube_handle: nil,
-  #     twitch_handle: nil,
-  #     # TODO: Implement org fetching for user
-  #     orgs: []
-  #   }
-  # end
 end

@@ -158,6 +158,17 @@ defmodule AlgoraWeb.Router do
     end
   end
 
+  scope "/api", AlgoraWeb.API do
+    pipe_through :api
+
+    # Legacy tRPC endpoints
+    get "/trpc/bounty.list", BountyController, :index
+    post "/trpc/bounty.list", BountyController, :index
+
+    # REST endpoints
+    resources "/bounties", BountyController, except: [:new, :edit]
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", AlgoraWeb do
   #   pipe_through :api

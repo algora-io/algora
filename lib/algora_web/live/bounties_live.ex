@@ -162,7 +162,7 @@ defmodule AlgoraWeb.BountiesLive do
   def handle_event("load_more", _params, socket) do
     %{bounties: bounties} = socket.assigns
 
-    more_bounties =
+    {:ok, more_bounties} =
       Bounties.list_bounties(
         Keyword.put(socket.assigns.query_opts, :before, %{
           inserted_at: List.last(bounties).inserted_at,
@@ -206,7 +206,7 @@ defmodule AlgoraWeb.BountiesLive do
   end
 
   defp assign_bounties(socket) do
-    bounties = Bounties.list_bounties(socket.assigns.query_opts)
+    {:ok, bounties} = Bounties.list_bounties(socket.assigns.query_opts)
 
     socket
     |> assign(:bounties, bounties)

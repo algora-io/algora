@@ -645,15 +645,14 @@ defmodule AlgoraWeb.SwiftBountiesLive do
   end
 
   defp assign_bounties(socket) do
-    bounties =
-      Bounties.list_bounties(
-        status: :open,
-        tech_stack: ["Swift"],
-        limit: 100
-      )
+    {:ok, bounties} = Bounties.list_bounties(socket.assigns.query_opts)
 
-    assign(socket, :bounties, bounties)
+    socket
+    |> assign(:bounties, bounties)
+    |> assign(:has_more_bounties, length(bounties) >= page_size())
   end
+
+  defp page_size, do: 10
 
   defp assign_active_repos(socket) do
     active_pollers = []

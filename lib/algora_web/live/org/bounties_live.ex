@@ -280,11 +280,27 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("load_more", _params, socket) do
-    {:noreply,
-     case socket.assigns.current_status do
-       :open -> assign_more_bounties(socket)
-       :paid -> assign_more_transactions(socket)
-     end}
+    %{bounty_rows: rows, current_org: current_org} = socket.assigns
+
+    last_bounty = List.last(rows).bounty
+
+    cursor = %{
+      inserted_at: last_bounty.inserted_at,
+      id: last_bounty.id
+    }
+
+    {:ok, more_bounties} =
+      Bounties.list_bounties(
+        owner_id: current_org.id,
+        limit: page_size(),
+        status: socket.assigns.current_status,
+        before: cursor,
+        current_user: socket.assigns[:current_user]
+      )
+
+    socket
+    |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
+    |> assign(:has_more, length(more_bounties) >= page_size())
   end
 
   def handle_params(params, _uri, socket) do
@@ -329,50 +345,6 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   defp to_transaction_rows(transactions), do: transactions
-
-  defp assign_more_bounties(socket) do
-    %{rows: rows, current_org: current_org} = socket.assigns
-
-    last_bounty = List.last(rows).bounty
-
-    cursor = %{
-      inserted_at: last_bounty.inserted_at,
-      id: last_bounty.id
-    }
-
-    more_bounties =
-      Bounties.list_bounties(
-        owner_id: current_org.id,
-        limit: page_size(),
-        status: socket.assigns.current_status,
-        before: cursor,
-        current_user: socket.assigns[:current_user]
-      )
-
-    socket
-    |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
-    |> assign(:has_more, length(more_bounties) >= page_size())
-  end
-
-  defp assign_more_transactions(socket) do
-    %{transaction_rows: rows, current_org: current_org} = socket.assigns
-
-    last_transaction = List.last(rows).transaction
-
-    more_transactions =
-      Payments.list_hosted_transactions(
-        current_org.id,
-        limit: page_size(),
-        before: %{
-          succeeded_at: last_transaction.succeeded_at,
-          id: last_transaction.id
-        }
-      )
-
-    socket
-    |> assign(:transaction_rows, rows ++ to_transaction_rows(more_transactions))
-    |> assign(:has_more_transactions, length(more_transactions) >= page_size())
-  end
 
   defp get_current_status(params) do
     case params["status"] do

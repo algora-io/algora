@@ -101,7 +101,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     stats = Bounties.fetch_stats(org_id: current_org.id, current_user: socket.assigns[:current_user])
 
-    bounties =
+    {:ok, bounties} =
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),
@@ -876,7 +876,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       id: last_bounty.id
     }
 
-    more_bounties =
+    {:ok, more_bounties} =
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),
@@ -1101,15 +1101,15 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp create_bounty_status(socket) do
     case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 1) do
-      [] -> :upcoming
-      _ -> :completed
+      {:ok, []} -> :upcoming
+      {:ok, _} -> :completed
     end
   end
 
   defp reward_bounty_status(socket) do
     case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, status: :paid, limit: 1) do
-      [] -> :upcoming
-      _ -> :completed
+      {:ok, []} -> :upcoming
+      {:ok, _} -> :completed
     end
   end
 

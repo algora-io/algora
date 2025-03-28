@@ -84,7 +84,8 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
     with {:ok, token} <- Github.get_installation_token(installation_id),
          {:ok, ticket} <-
            Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number),
-         bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
+         {:ok, bounties} <- Bounties.list_bounties(ticket_id: ticket.id),
+         true <- bounties != [],
          {:ok, _} <-
            Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, [
              "💎 Bounty"

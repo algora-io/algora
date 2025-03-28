@@ -498,7 +498,7 @@ defmodule Algora.BountiesTest do
       insert!(:bounty, status: :paid, ticket: ticket, owner: insert!(:user))
       insert!(:bounty, status: :cancelled, ticket: ticket, owner: insert!(:user))
 
-      bounties = Bounties.list_bounties()
+      {:ok, bounties} = Bounties.list_bounties()
       assert Enum.any?(bounties, &(&1.status == :open))
       assert Enum.any?(bounties, &(&1.status == :paid))
       refute Enum.any?(bounties, &(&1.status == :cancelled))

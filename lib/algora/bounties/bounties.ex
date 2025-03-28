@@ -707,7 +707,7 @@ defmodule Algora.Bounties do
   end
 
   @spec generate_line_items(
-          %{amount: Money.t()},
+          %{owner: User.t(), amount: Money.t()},
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             claims: [Claim.t()],
@@ -715,14 +715,14 @@ defmodule Algora.Bounties do
           ]
         ) ::
           [LineItem.t()]
-  def generate_line_items(%{amount: amount}, opts \\ []) do
+  def generate_line_items(%{owner: owner, amount: amount}, opts \\ []) do
     ticket_ref = opts[:ticket_ref]
     recipient = opts[:recipient]
     claims = opts[:claims] || []
 
     description = if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
-    platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
+    platform_fee_pct = Decimal.div(owner.fee_pct, 100)
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
     payouts =
@@ -779,7 +779,7 @@ defmodule Algora.Bounties do
     tx_group_id = Nanoid.generate()
 
     line_items =
-      generate_line_items(%{amount: amount},
+      generate_line_items(%{owner: owner, amount: amount},
         ticket_ref: opts[:ticket_ref],
         recipient: opts[:recipient],
         claims: opts[:claims]
@@ -835,7 +835,7 @@ defmodule Algora.Bounties do
     tx_group_id = Nanoid.generate()
 
     line_items =
-      generate_line_items(%{amount: amount},
+      generate_line_items(%{owner: owner, amount: amount},
         ticket_ref: opts[:ticket_ref],
         recipient: opts[:recipient],
         claims: opts[:claims]

@@ -53,7 +53,7 @@ defmodule Algora.BountiesTest do
 
       assert {:ok, bounty} = Bounties.create_bounty(bounty_params, [])
 
-      assert bounty.visibility == :public
+      assert bounty.visibility == :community
 
       assert {:ok, claims} =
                Bounties.claim_bounty(
@@ -515,6 +515,72 @@ defmodule Algora.BountiesTest do
       assert Enum.any?(claims, &(&1.status == :pending))
       assert Enum.any?(claims, &(&1.status == :approved))
       refute Enum.any?(claims, &(&1.status == :cancelled))
+    end
+  end
+
+  describe "generate_line_items/2" do
+    test "uses owner's fee percentage for platform fee" do
+      owner = insert!(:user, fee_pct: 5)
+      recipient = insert!(:user, provider_login: "recipient")
+      amount = Money.new(10_000, :USD)
+
+      line_items =
+        Bounties.generate_line_items(
+          %{owner: owner, amount: amount},
+          recipient: recipient
+        )
+
+      platform_fee = Enum.find(line_items, &(&1.type == :fee and String.contains?(&1.title, "platform fee")))
+      assert Money.equal?(platform_fee.amount, Money.new(500, :USD))
+      assert platform_fee.title == "Algora platform fee (5%)"
+
+      payout = Enum.find(line_items, &(&1.type == :payout))
+      assert Money.equal?(payout.amount, amount)
+      assert payout.title == "Payment to @recipient"
+    end
+
+    test "calculates line items correctly with claims" do
+      owner = insert!(:user, fee_pct: 5)
+      solver1 = insert!(:user, provider_login: "solver1")
+      solver2 = insert!(:user, provider_login: "solver2")
+      amount = Money.new(10_000, :USD)
+
+      claims = [
+        build(:claim, user: solver1, group_share: Decimal.new("0.60")),
+        build(:claim, user: solver2, group_share: Decimal.new("0.40"))
+      ]
+
+      line_items =
+        Bounties.generate_line_items(
+          %{owner: owner, amount: amount},
+          claims: claims
+        )
+
+      platform_fee = Enum.find(line_items, &(&1.type == :fee and String.contains?(&1.title, "platform fee")))
+      assert Money.equal?(platform_fee.amount, Money.new(500, :USD))
+
+      [payout1, payout2] = Enum.filter(line_items, &(&1.type == :payout))
+      assert Money.equal?(payout1.amount, Money.new(6000, :USD))
+      assert payout1.title == "Payment to @solver1"
+      assert Money.equal?(payout2.amount, Money.new(4000, :USD))
+      assert payout2.title == "Payment to @solver2"
+    end
+
+    test "includes ticket reference in description when provided" do
+      owner = insert!(:user, fee_pct: 5)
+      recipient = insert!(:user, provider_login: "recipient")
+      amount = Money.new(10_000, :USD)
+      ticket_ref = %{owner: "owner", repo: "repo", number: 123}
+
+      line_items =
+        Bounties.generate_line_items(
+          %{owner: owner, amount: amount},
+          recipient: recipient,
+          ticket_ref: ticket_ref
+        )
+
+      payout = Enum.find(line_items, &(&1.type == :payout))
+      assert payout.description == "repo#123"
     end
   end
 end

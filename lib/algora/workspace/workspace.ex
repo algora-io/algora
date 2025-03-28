@@ -394,7 +394,7 @@ defmodule Algora.Workspace do
         end
 
       {:error, reason} ->
-        Logger.error("Failed to refresh command response #{ticket.id}: #{inspect(reason)}")
+        Logger.warning("Failed to refresh command response #{ticket.id}: #{inspect(reason)}")
         {:error, :command_response_not_found}
     end
   end

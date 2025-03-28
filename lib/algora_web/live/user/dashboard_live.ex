@@ -290,22 +290,21 @@ defmodule AlgoraWeb.User.DashboardLive do
     ]
 
     {achievements, _} =
-      Enum.reduce_while(achievements, {[], false}, fn
-        {status_fn, name, path}, {acc, found_current} ->
-          id = Function.info(status_fn)[:name]
-          status = status_fn.(socket)
+      Enum.reduce_while(achievements, {[], false}, fn {status_fn, name, path}, {acc, found_current} ->
+        id = Function.info(status_fn)[:name]
+        status = status_fn.(socket)
 
-          result =
-            cond do
-              found_current -> {acc ++ [%{id: id, status: :upcoming, name: name, path: path}], found_current}
-              status == :completed -> {acc ++ [%{id: id, status: status, name: name, path: path}], false}
-              true -> {acc ++ [%{id: id, status: :current, name: name, path: path}], true}
-            end
+        result =
+          cond do
+            found_current -> {acc ++ [%{id: id, status: :upcoming, name: name, path: path}], found_current}
+            status == :completed -> {acc ++ [%{id: id, status: status, name: name, path: path}], false}
+            true -> {acc ++ [%{id: id, status: :current, name: name, path: path}], true}
+          end
 
-          {:cont, result}
+        {:cont, result}
       end)
 
-    assign(socket, :achievements, achievements)
+    assign(socket, :achievements, Enum.reject(achievements, &(&1.status == :completed)))
   end
 
   defp incomplete?(achievements, id) do

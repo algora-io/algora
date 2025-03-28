@@ -174,7 +174,7 @@ defmodule AlgoraWeb.PricingLive do
     {:ok, socket}
   end
 
-  defp pricing_card1(assigns) do
+  def pricing_card1(assigns) do
     ~H"""
     <.link
       href={@plan.cta_url}
@@ -264,7 +264,7 @@ defmodule AlgoraWeb.PricingLive do
     """
   end
 
-  defp pricing_card2(assigns) do
+  def pricing_card2(assigns) do
     ~H"""
     <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
       <div class={[
@@ -347,7 +347,7 @@ defmodule AlgoraWeb.PricingLive do
     """
   end
 
-  defp get_plans1 do
+  def get_plans1 do
     [
       %Plan{
         id: "receive-payments",
@@ -380,7 +380,7 @@ defmodule AlgoraWeb.PricingLive do
     ]
   end
 
-  defp get_plans2 do
+  def get_plans2 do
     [
       %Plan{
         id: "grow-your-team",

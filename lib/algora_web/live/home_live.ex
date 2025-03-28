@@ -63,7 +63,9 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
-     |> assign(:pending_action, nil)}
+     |> assign(:pending_action, nil)
+     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
+     |> assign(:plans2, AlgoraWeb.PricingLive.get_plans2())}
   end
 
   attr :src, :string, required: true
@@ -838,6 +840,64 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
+        <section class="relative isolate overflow-hidden bg-black pb-16 sm:pb-24">
+          <div class="mx-auto px-6 lg:px-8">
+            <div class="relative z-10 pb-4 xl:py-16">
+              <div class="mx-auto max-w-7xl sm:text-center">
+                <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
+                  <h1 class="text-2xl sm:text-4xl font-bold text-popover-foreground">
+                    Simple, transparent pricing
+                  </h1>
+                  <p class="text-sm sm:text-lg text-muted-foreground">
+                    For individuals, OSS communities, and open/closed source companies
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
+              <div class="flex items-start gap-4">
+                <div class="flex-1">
+                  <h2 class="text-2xl font-semibold text-foreground mb-2">
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
+                    </div>
+                  </h2>
+                  <p class="text-base text-foreground-light">
+                    Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
+              <%= for plan <- @plans1 do %>
+                <AlgoraWeb.PricingLive.pricing_card1 plan={plan} plans={@plans1} />
+              <% end %>
+            </div>
+
+            <div class="mx-auto lg:max-w-[95rem] mt-16 mb-8">
+              <div class="flex items-start gap-4">
+                <div class="flex-1">
+                  <h2 class="text-2xl font-semibold text-foreground mb-2">
+                    <div class="flex items-center gap-2">
+                      <.icon name="tabler-building-store" class="h-6 w-6 text-purple-400" /> Platform
+                    </div>
+                  </h2>
+                  <p class="text-base text-foreground-light">
+                    Connect with top open source talent, increase project visibility, and hire proven contributors
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="mx-auto grid grid-cols-1 gap-4 lg:max-w-[95rem] xl:gap-0">
+              <%= for plan <- @plans2 do %>
+                <AlgoraWeb.PricingLive.pricing_card2 plan={plan} plans={@plans2} />
+              <% end %>
+            </div>
+          </div>
+        </section>
+
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
@@ -919,7 +979,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-background py-16 sm:py-40">
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>

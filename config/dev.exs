@@ -92,7 +92,12 @@ config :algora, AlgoraWeb.Endpoint,
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/algora_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/algora_web/(controllers|components)/.*(ex|heex)$"
+    ],
+    notify: [
+      live_view: [
+        ~r"lib/algora_web/live/.*(ex|heex)$"
+      ]
     ]
   ]
 

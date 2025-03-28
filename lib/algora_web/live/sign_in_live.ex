@@ -30,7 +30,7 @@ defmodule AlgoraWeb.SignInLive do
             </p>
 
             <div :if={@mode == :signup} class="mt-6">
-              <label class="mb-2 block text-sm/6 font-semibold">I am a...</label>
+              <label class="mb-2 block text-sm/6 font-semibold">Sign up as...</label>
               <div class="grid grid-cols-2 gap-4">
                 <.button navigate={~p"/onboarding/org"}>
                   Company
@@ -41,7 +41,7 @@ defmodule AlgoraWeb.SignInLive do
               </div>
             </div>
             <div :if={@mode == :login} class="mt-6">
-              <label class="mb-2 block text-sm/6 font-semibold">I am a...</label>
+              <label class="mb-2 block text-sm/6 font-semibold">Sign in as...</label>
               <div class="grid grid-cols-2 gap-4">
                 <label class={[
                   "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",

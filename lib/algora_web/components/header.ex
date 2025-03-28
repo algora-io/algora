@@ -26,16 +26,22 @@ defmodule AlgoraWeb.Components.Header do
         <!-- Desktop nav -->
         <div class="hidden lg:flex lg:gap-x-12">
           <.link
-            href={AlgoraWeb.Constants.get(:docs_url)}
+            navigate={~p"/bounties"}
             class="text-sm/6 font-medium text-foreground/80 hover:text-foreground"
           >
-            Docs
+            Bounties
           </.link>
           <.link
-            href={AlgoraWeb.Constants.get(:blog_url)}
+            navigate={~p"/projects"}
             class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
           >
-            Blog
+            Projects
+          </.link>
+          <.link
+            navigate={~p"/community"}
+            class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
+          >
+            Community
           </.link>
           <.link
             navigate={~p"/pricing"}

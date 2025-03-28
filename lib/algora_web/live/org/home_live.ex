@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Org.HomeLive do
   def mount(_params, _session, socket) do
     org = socket.assigns.current_org
 
-    {:ok, open_bounties} =
+    open_bounties =
       Bounties.list_bounties(
         owner_id: org.id,
         status: :open,

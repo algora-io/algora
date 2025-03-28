@@ -19,19 +19,17 @@ defmodule AlgoraWeb.API.BountyController do
   """
   def index(conn, %{"batch" => _batch, "input" => input} = _params) do
     with {:ok, decoded} <- Jason.decode(input),
-         %{"0" => %{"json" => json}} <- decoded,
-         criteria = to_criteria(json),
-         {:ok, bounties} <- Bounties.list_bounties(criteria) do
+         %{"0" => %{"json" => json}} <- decoded do
+      criteria = to_criteria(json)
+      bounties = Bounties.list_bounties(criteria)
       render(conn, :index, bounties: bounties)
     end
   end
 
   def index(conn, params) do
     criteria = to_criteria(params)
-
-    with {:ok, bounties} <- Bounties.list_bounties(criteria) do
-      render(conn, :index, bounties: bounties)
-    end
+    bounties = Bounties.list_bounties(criteria)
+    render(conn, :index, bounties: bounties)
   end
 
   # Convert JSON/map parameters to keyword list criteria

@@ -289,7 +289,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
       id: last_bounty.id
     }
 
-    {:ok, more_bounties} =
+    more_bounties =
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),

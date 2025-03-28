@@ -360,7 +360,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           :paid -> [status: :paid]
         end
 
-    {:ok, more_bounties} = Bounties.list_bounties(query_opts)
+    more_bounties = Bounties.list_bounties(query_opts)
 
     {:noreply,
      socket
@@ -395,7 +395,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       amount_gt: Money.new(:USD, 200)
     ]
 
-    {:ok, bounties} = Bounties.list_bounties(query_opts)
+    bounties = Bounties.list_bounties(query_opts)
 
     socket
     |> assign(:bounties, bounties)

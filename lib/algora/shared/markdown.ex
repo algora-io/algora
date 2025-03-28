@@ -30,7 +30,11 @@ defmodule Algora.Markdown do
     ]
   ]
 
-  def render(md_or_doc, opts \\ []) do
+  def render(_md_or_doc, _opts \\ [])
+
+  def render(nil, _opts), do: nil
+
+  def render(md_or_doc, opts) do
     case MDEx.to_html(md_or_doc, Keyword.merge(@default_opts, opts)) do
       {:ok, html} ->
         html

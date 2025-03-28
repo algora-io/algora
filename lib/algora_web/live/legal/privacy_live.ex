@@ -35,7 +35,7 @@ defmodule AlgoraWeb.Legal.PrivacyLive do
           <div>
             <span>
               Algora, PBC.&nbsp;(“us”, “we”, or “our”)
-              operates&nbsp;https://console.algora.io&nbsp;(hereinafter referred
+              operates&nbsp;{AlgoraWeb.Endpoint.url()}&nbsp;(hereinafter referred
               to as “
             </span>
             <span>Service</span>
@@ -45,7 +45,7 @@ defmodule AlgoraWeb.Legal.PrivacyLive do
           <div>
             <span>
               Our Privacy Policy governs your visit
-              to&nbsp;https://console.algora.io, and explains how we collect,
+              to&nbsp;{AlgoraWeb.Endpoint.url()}, and explains how we collect,
               safeguard and disclose information that results from your use of
               our Service.{" "}
             </span>
@@ -81,7 +81,7 @@ defmodule AlgoraWeb.Legal.PrivacyLive do
           <div>
             <span>SERVICE&nbsp;</span>
             <span>
-              means the&nbsp;https://console.algora.io website&nbsp;operated
+              means the&nbsp;{AlgoraWeb.Endpoint.url()} website&nbsp;operated
               by&nbsp;Algora, PBC.
             </span>
           </div>

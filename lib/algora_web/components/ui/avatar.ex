@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Components.UI.Avatar do
   @moduledoc false
   use AlgoraWeb.Component
+  use AlgoraWeb, :verified_routes
 
   attr :class, :string, default: nil
   attr :rest, :global
@@ -23,7 +24,7 @@ defmodule AlgoraWeb.Components.UI.Avatar do
     ~H"""
     <img
       id={@id}
-      src={@src || "http://console.algora.io/placeholder-avatar.png"}
+      src={@src || ~p"/images/placeholder-avatar.png"}
       class={classes(["aspect-square h-full w-full bg-muted", @class])}
       phx-hook="AvatarImage"
       {@rest}

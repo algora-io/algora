@@ -9,7 +9,7 @@
   <p align="center">
     Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.
     <br/>
-    <a href="https://console.algora.io">Website</a>
+    <a href="https://algora.io">Website</a>
     ·
     <a href="https://algora.io/discord">Discord</a>
     ·

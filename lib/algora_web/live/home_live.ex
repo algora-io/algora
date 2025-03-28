@@ -128,10 +128,10 @@ defmodule AlgoraWeb.HomeLive do
                   Hire the top 1% open source developers.
                 </p>
                 <div class="mt-6 sm:mt-10 flex gap-4">
-                  <.button navigate={~p"/onboarding/org"} size="xl">
+                  <.button navigate={~p"/onboarding/org"} size="2xl">
                     Companies
                   </.button>
-                  <.button navigate={~p"/onboarding/dev"} variant="secondary" size="xl">
+                  <.button navigate={~p"/onboarding/dev"} variant="secondary" size="2xl">
                     Developers
                   </.button>
                 </div>

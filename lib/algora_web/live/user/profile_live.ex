@@ -46,9 +46,9 @@ defmodule AlgoraWeb.User.ProfileLive do
 
             <div class="flex flex-wrap gap-4">
               <%= for tech <- @user.tech_stack do %>
-                <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
+                <.badge>
                   {tech}
-                </span>
+                </.badge>
               <% end %>
             </div>
           </div>

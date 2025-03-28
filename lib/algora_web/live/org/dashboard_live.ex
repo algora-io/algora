@@ -1208,7 +1208,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.button>
 
             <.button
-              :if={@contract_for_user && @contract_for_user.status == :active}
+              :if={@contract_for_user && @contract_for_user.status in [:active, :paid]}
               navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
               class="bg-emerald-800/10 text-emerald-300 drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/50 focus:border-emerald-400/50"
@@ -1216,7 +1216,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
             <.button
-              :if={@contract_for_user && @contract_for_user.status in [:draft, :paid]}
+              :if={@contract_for_user && @contract_for_user.status in [:draft]}
               navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
               class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#94a3b880] focus:bg-gray-800/10 focus:text-gray-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#94a3b880] border border-gray-400/50 focus:border-gray-400/50"
@@ -1362,26 +1362,26 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp sidebar(assigns) do
     ~H"""
     <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:flex lg:flex-col">
-      <div class="flex items-center justify-between">
+      <div :if={length(@achievements) > 1} class="pb-12">
         <h2 class="text-xl font-semibold leading-none tracking-tight">Getting started</h2>
+        <nav class="pt-6">
+          <ol role="list" class="space-y-6">
+            <%= for achievement <- @achievements do %>
+              <li class="space-y-6">
+                <.achievement achievement={achievement} />
+                <.achievement_todo
+                  achievement={achievement}
+                  current_user={@current_user}
+                  secret_code={@secret_code}
+                  login_form={@login_form}
+                />
+              </li>
+            <% end %>
+          </ol>
+        </nav>
       </div>
-      <nav class="pt-6">
-        <ol role="list" class="space-y-6">
-          <%= for achievement <- @achievements do %>
-            <li class="space-y-6">
-              <.achievement achievement={achievement} />
-              <.achievement_todo
-                achievement={achievement}
-                current_user={@current_user}
-                secret_code={@secret_code}
-                login_form={@login_form}
-              />
-            </li>
-          <% end %>
-        </ol>
-      </nav>
       <%= if @current_org.handle do %>
-        <div :if={not incomplete?(@achievements, :create_bounty_status)} class="pt-12">
+        <div :if={not incomplete?(@achievements, :create_bounty_status)}>
           <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold leading-none tracking-tight">Share your bounty board</h2>
           </div>

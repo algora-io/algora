@@ -960,7 +960,7 @@ defmodule AlgoraWeb.HomeLive do
                     <div class="flex flex-col gap-2">
                       <.button
                         size="lg"
-                        class="w-full drop-shadow-[0_1px_5px_#60a5fa80]"
+                        class="w-full drop-shadow-[0_1px_5px_#818cf880]"
                         variant="indigo"
                       >
                         Tip contributor

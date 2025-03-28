@@ -1239,7 +1239,7 @@ defmodule Algora.Admin.Migration do
 
   defp update_url(url) do
     case url do
-      "/" <> rest -> "https://console.algora.io/" <> rest
+      "/" <> rest -> "#{AlgoraWeb.Endpoint.url()}/" <> rest
       _ -> url
     end
   end

@@ -51,8 +51,7 @@ defmodule AlgoraWeb.Legal.TermsLive do
             <span>”, “</span>
             <span>Terms of Service</span>
             <span>
-              ”) govern your use of&nbsp;our web pages located at
-              https://console.algora.io
+              ”) govern your use of&nbsp;our web pages located at {AlgoraWeb.Endpoint.url()}
             </span>
             <span>&nbsp;operated by&nbsp;Algora, PBC.</span>
           </div>
@@ -61,8 +60,7 @@ defmodule AlgoraWeb.Legal.TermsLive do
             <span>
               Our Privacy Policy also governs your use of our Service and
               explains how we collect, safeguard and disclose information that
-              results from your use of our web pages. Please read it here
-              https://console.algora.io/legal/privacy .
+              results from your use of our web pages. Please read it here {AlgoraWeb.Endpoint.url()}/legal/privacy .
             </span>
           </div>
 

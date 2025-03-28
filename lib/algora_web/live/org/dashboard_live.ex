@@ -950,20 +950,28 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp assign_payable_bounties(socket) do
     org = socket.assigns.current_org
 
+    paid_bounties_query =
+      from b in Bounty,
+        join: t in Transaction,
+        on: t.bounty_id == b.id,
+        where: t.type == :debit,
+        where: t.status == :succeeded,
+        where: t.user_id == ^org.id,
+        select: b.id
+
     payable_claims =
       Repo.all(
         from c in Claim,
           where: c.status == :approved,
+          join: b in Bounty,
+          on: b.ticket_id == c.target_id and b.owner_id == ^org.id,
+          where: b.id not in subquery(paid_bounties_query),
           join: t in assoc(c, :target),
-          join: b in assoc(t, :bounties),
-          where: b.owner_id == ^org.id,
-          left_join: tx in Transaction,
-          on: tx.claim_id == c.id and tx.type == :debit,
-          where: is_nil(tx.status) or tx.status not in [:initialized, :succeeded],
           join: r in assoc(t, :repository),
           join: ru in assoc(r, :user),
           join: cu in assoc(c, :user),
           left_join: s in assoc(c, :source),
+          distinct: b.id,
           select_merge: %{
             user: cu,
             source: s,

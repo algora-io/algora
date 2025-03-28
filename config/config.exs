@@ -19,6 +19,7 @@ config :algora,
     {"/healthcare", "https://blog.algora.io/post/healthcare"},
     {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},
     {"/create/org", "/onboarding/org"},
+    {"/solve", "/onboarding/dev"},
     {"/onboarding/solver", "/onboarding/dev"}
   ]
 

@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
   alias Algora.Contracts.Contract
   alias Algora.Organizations
   alias Algora.Repo
+  alias Algora.Util
 
   defp page_size, do: 10
 
@@ -24,13 +25,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.client.avatar_url} />
                   <.avatar_fallback>
-                    {Algora.Util.initials(@contract.client.name)}
+                    {Util.initials(@contract.client.name)}
                   </.avatar_fallback>
                 </.avatar>
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.contractor.avatar_url} />
                   <.avatar_fallback>
-                    {Algora.Util.initials(@contract.contractor.name)}
+                    {Util.initials(@contract.contractor.name)}
                   </.avatar_fallback>
                 </.avatar>
               </div>
@@ -54,6 +55,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <.badge variant="warning">Draft</.badge>
               <% :active -> %>
                 <.badge variant="success">Active</.badge>
+              <% :paid -> %>
+                <.badge variant="success">Paid</.badge>
               <% _ -> %>
                 <.badge variant="destructive">Inactive</.badge>
             <% end %>
@@ -260,9 +263,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     </div>
                     <div class="flex flex-wrap gap-2 pt-6">
                       <%= for tech <- @contract.client.tech_stack do %>
-                        <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
-                          {tech}
-                        </span>
+                        <.badge>{tech}</.badge>
                       <% end %>
                     </div>
                     <div class="flex -space-x-1 pt-6">
@@ -270,7 +271,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar class="h-9 w-9 ring-2 ring-background">
                           <.avatar_image src={member.user.avatar_url} />
                           <.avatar_fallback>
-                            {Algora.Util.initials(member.user.name)}
+                            {Util.initials(member.user.name)}
                           </.avatar_fallback>
                         </.avatar>
                       <% end %>
@@ -280,7 +281,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
                 <.card>
                   <.card_header>
-                    <.card_title>Provider</.card_title>
+                    <.card_title>Contractor</.card_title>
                   </.card_header>
                   <.card_content>
                     <div class="flex items-center gap-4">
@@ -296,9 +297,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     </div>
                     <div class="flex flex-wrap gap-2 pt-6">
                       <%= for tech <- @contract.contractor.tech_stack do %>
-                        <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
-                          {tech}
-                        </span>
+                        <.badge>{tech}</.badge>
                       <% end %>
                     </div>
                     <div class="space-y-2 pt-6">
@@ -343,7 +342,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.avatar>
                 <.avatar_image src={@contract.contractor.avatar_url} alt="Developer avatar" />
                 <.avatar_fallback>
-                  {Algora.Util.initials(@contract.contractor.name)}
+                  {Util.initials(@contract.contractor.name)}
                 </.avatar_fallback>
               </.avatar>
               <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
@@ -351,7 +350,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </div>
             <div>
               <h2 class="text-lg font-semibold">{@contract.contractor.name}</h2>
-              <p class="text-xs text-muted-foreground">Active now</p>
+              <p class="text-xs text-muted-foreground">
+                Active {Util.time_ago(@contract.contractor.last_active_at)}
+              </p>
             </div>
           </div>
         </div>
@@ -384,7 +385,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={message.sender.avatar_url} />
                       <.avatar_fallback>
-                        {Algora.Util.initials(message.sender.name)}
+                        {Util.initials(message.sender.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">

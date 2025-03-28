@@ -84,7 +84,7 @@ defmodule AlgoraWeb.Contract.Modals.ReleaseRenewDrawer do
                 </.card_content>
               </.card>
             </div>
-            <div class="flex flex-col gap-8">
+            <div :if={length(@fee_data.fee_tiers) > 1} class="flex flex-col gap-8">
               <div>
                 <h3 class="mb-6 text-lg font-semibold">Algora Fee Tier</h3>
                 <div class="space-y-2">

@@ -1331,7 +1331,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/triggerdotdev"}>
           <img
-            src="https://algora.io/banners/triggerdotdev.png"
+            src={~p"/images/wordmarks/triggerdotdev.png"}
             alt="Trigger.dev"
             class="col-auto sm:w-[90%] saturate-0"
             loading="lazy"
@@ -1375,7 +1375,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/aidenybai"}>
           <img
-            src="https://algora.io/banners/million.png"
+            src={~p"/images/wordmarks/million.png"}
             alt="Million"
             class="col-auto w-[80%] saturate-0"
             loading="lazy"
@@ -1386,7 +1386,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
           <img
-            src="https://algora.io/banners/highlight.png"
+            src={~p"/images/wordmarks/highlight.png"}
             alt="Highlight"
             class="col-auto sm:w-[90%] saturate-0"
             loading="lazy"
@@ -1394,7 +1394,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
           <img
-            src="https://algora.io/banners/dittofeed.png"
+            src={~p"/images/wordmarks/dittofeed.png"}
             alt="Dittofeed"
             class="col-auto w-[80%] brightness-0 invert"
             loading="lazy"

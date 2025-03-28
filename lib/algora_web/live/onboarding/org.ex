@@ -761,62 +761,54 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
           <img
-            src="https://algora.io/banners/remotion.png"
+            src={~p"/images/wordmarks/remotion.png"}
             alt="Remotion"
             class="col-auto w-full saturate-0"
           />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
           <img
-            src="https://algora.io/banners/zio.png"
+            src={~p"/images/wordmarks/zio.png"}
             alt="ZIO"
             class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
           <img
-            src="https://algora.io/banners/triggerdotdev.png"
+            src={~p"/images/wordmarks/triggerdotdev.png"}
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
           <img
-            src="https://algora.io/banners/tembo.png"
+            src={~p"/images/wordmarks/tembo.png"}
             alt="Tembo"
             class="w-[13rem] col-auto saturate-0"
           />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
-          <img
-            src="https://algora.io/banners/maybe.png"
-            alt="Maybe"
-            class="col-auto w-full saturate-0"
-          />
+          <img src={~p"/images/wordmarks/maybe.png"} alt="Maybe" class="col-auto w-full saturate-0" />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
-          <img
-            src="https://algora.io/banners/million.png"
-            alt="Million"
-            class="col-auto w-44 saturate-0"
-          />
+          <img src={~p"/images/wordmarks/million.png"} alt="Million" class="col-auto w-44 saturate-0" />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
           <img
-            src="https://algora.io/banners/highlight.png"
+            src={~p"/images/wordmarks/highlight.png"}
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
         </a>
         <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
           <img
-            src="https://algora.io/banners/dittofeed.png"
+            src={~p"/images/wordmarks/dittofeed.png"}
             alt="Dittofeed"
             class="col-auto w-40 brightness-0 invert"
           />

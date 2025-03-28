@@ -10,7 +10,6 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Bounties
   alias Algora.Github
   alias Algora.Payments.Transaction
-  alias Algora.PSP.ConnectCountries
   alias Algora.Repo
   alias Algora.Workspace
   alias AlgoraWeb.Components.Footer
@@ -61,7 +60,6 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign(:featured_devs, Accounts.list_featured_developers(country_code))
      |> assign(:stats, stats)
-     |> assign(:faq_items, get_faq_items())
      |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
@@ -1196,70 +1194,6 @@ defmodule AlgoraWeb.HomeLive do
   defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
-
-  defmodule FaqItem do
-    @moduledoc false
-    defstruct [:id, :question, :answer]
-  end
-
-  defp get_faq_items do
-    [
-      %FaqItem{
-        id: "platform-fee",
-        question: "How do the platform fees work?",
-        answer:
-          "For organizations, we charge a 19% fee on bounties, which can drop to 7.5% with volume. For individual contributors, you receive 100% of the bounty amount with no fees deducted."
-      },
-      %FaqItem{
-        id: "payment-methods",
-        question: "What payment methods do you support?",
-        answer:
-          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
-      },
-      %FaqItem{
-        id: "payment-process",
-        question: "How does the payment process work?",
-        answer:
-          "There's no upfront payment required for bounties. Organizations can either pay manually after merging pull requests, or save their card with Stripe to enable auto-pay on merge. Manual payments are processed through a secure Stripe hosted checkout page."
-      },
-      %FaqItem{
-        id: "invoices-receipts",
-        question: "Do you provide invoices and receipts?",
-        answer:
-          "Yes, users receive an invoice and receipt after each bounty payment. These documents are automatically generated and delivered to your email."
-      },
-      %FaqItem{
-        id: "tax-forms",
-        question: "How are tax forms handled?",
-        answer:
-          "We partner with Stripe to file and deliver 1099 forms for your US-based freelancers, simplifying tax compliance for organizations working with US contributors."
-      },
-      %FaqItem{
-        id: "payout-time",
-        question: "How long do payouts take?",
-        answer:
-          "Payout timing varies by country, typically ranging from 2-7 business days after a bounty is awarded. Initial payouts for new accounts may take 7-14 days. The exact timing depends on your location, banking system, and account history with Stripe, our payment processor."
-      },
-      %FaqItem{
-        id: "minimum-bounty",
-        question: "Is there a minimum bounty amount?",
-        answer:
-          "There's no strict minimum bounty amount. However, bounties with higher values tend to attract more attention and faster solutions from contributors."
-      },
-      %FaqItem{
-        id: "enterprise-options",
-        question: "Do you offer custom enterprise plans?",
-        answer:
-          ~s(Yes, for larger organizations with specific needs, we offer custom enterprise plans with additional features, dedicated support, and volume-based pricing. Please <a href="https://cal.com/ioannisflo" class="text-success hover:underline">schedule a call with a founder</a> to discuss your requirements.)
-      },
-      %FaqItem{
-        id: "supported-countries",
-        question: "Which countries are supported for contributors?",
-        answer:
-          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="#{AlgoraWeb.Constants.get(:docs_supported_countries_url)}" class="text-success hover:underline">full list of supported countries</a>.)
-      }
-    ]
-  end
 
   defp yc_logo_cloud(assigns) do
     ~H"""

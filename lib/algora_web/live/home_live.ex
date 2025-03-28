@@ -449,13 +449,13 @@ defmodule AlgoraWeb.HomeLive do
                     were built by <span class="text-success">22 developers</span>
                     using <span class="text-success">bounties on Algora</span>.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           Tal Borenstein
                         </div>
-                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Keep (YC W23)
                         </div>
                       </div>
@@ -493,13 +493,13 @@ defmodule AlgoraWeb.HomeLive do
                     to try it, overall it's <span class="text-success">1000x more friction</span>
                     than OSS bounties with Algora.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-4 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           Louis Beaumont
                         </div>
-                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Screenpipe
                         </div>
                       </div>
@@ -550,7 +550,7 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
                     Shipped by <span class="text-success">86 contributors</span>
                   </div>
-                  <ul class="text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
+                  <ul class="pt-2 text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
                     <li class="flex items-center gap-x-4">
                       <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
                       <span class="text-success tabular-nums font-bold">14</span>
@@ -605,13 +605,13 @@ defmodule AlgoraWeb.HomeLive do
                     <span class="text-success">very consistent</span>
                     part of our development process.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           Josh Pigford
                         </div>
-                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CEO at Maybe
                         </div>
                       </div>
@@ -641,13 +641,13 @@ defmodule AlgoraWeb.HomeLive do
                     <span class="text-success">new generation of contributors</span>
                     to the ZIO ecosystem.
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           John A De Goes
                         </div>
-                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Founder & CEO at Ziverge
                         </div>
                       </div>
@@ -710,13 +710,13 @@ defmodule AlgoraWeb.HomeLive do
                     It was the <span class="text-success">easiest hire</span>
                     because we already knew how great he was
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           Eric Allam
                         </div>
-                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Co-founder & CTO at Trigger.dev (YC W23)
                         </div>
                       </div>
@@ -744,13 +744,13 @@ defmodule AlgoraWeb.HomeLive do
                     <span class="text-success">3 full-time hires</span>
                     using Algora
                   </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-12">
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
                     <div class="flex items-center gap-4">
                       <div>
                         <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
                           Tushar Mathur
                         </div>
-                        <div class="pt-2 text-base sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
                           Founder & CEO at Tailcall
                         </div>
                       </div>

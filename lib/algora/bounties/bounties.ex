@@ -1007,6 +1007,9 @@ defmodule Algora.Bounties do
       {:owner_id, owner_id}, query ->
         from([b, r: r] in query, where: b.owner_id == ^owner_id or r.user_id == ^owner_id)
 
+      {:owner_handle, owner_handle}, query ->
+        from([b, o: o] in query, where: o.handle == ^owner_handle)
+
       {:status, status}, query ->
         query = where(query, [b], b.status == ^status)
 
@@ -1114,8 +1117,10 @@ defmodule Algora.Bounties do
       status: b.status,
       owner: %{
         id: o.id,
+        inserted_at: o.inserted_at,
         name: o.name,
         handle: o.handle,
+        provider_login: o.provider_login,
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack
       },

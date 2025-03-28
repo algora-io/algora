@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2, require_authenticated_admin: 2]
   import Oban.Web.Router
+  import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -52,6 +53,12 @@ defmodule AlgoraWeb.Router do
       live "/leaderboard", Admin.LeaderboardLive
       live "/chat/:id", Chat.ThreadLive
     end
+
+    live_dashboard "/dashboard",
+      metrics: AlgoraWeb.Telemetry,
+      additional_pages: [],
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}]
 
     oban_dashboard("/oban", resolver: AlgoraWeb.ObanDashboardResolver)
   end

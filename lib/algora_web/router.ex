@@ -164,9 +164,6 @@ defmodule AlgoraWeb.Router do
     # Legacy tRPC endpoints
     get "/trpc/bounty.list", BountyController, :index
     post "/trpc/bounty.list", BountyController, :index
-
-    # REST endpoints
-    resources "/bounties", BountyController, except: [:new, :edit]
   end
 
   # Other scopes may use custom stacks.

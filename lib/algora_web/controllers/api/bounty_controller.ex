@@ -2,7 +2,6 @@ defmodule AlgoraWeb.API.BountyController do
   use AlgoraWeb, :controller
 
   alias Algora.Bounties
-  alias Algora.Bounties.Bounty
   alias AlgoraWeb.API.FallbackController
 
   action_fallback FallbackController
@@ -71,52 +70,4 @@ defmodule AlgoraWeb.API.BountyController do
   end
 
   defp parse_visibility(_), do: :public
-
-  @doc """
-  Get a specific bounty by ID.
-  """
-  def show(conn, %{"id" => id}) do
-    with {:ok, bounty} <- Bounties.get_bounty(id) do
-      render(conn, :show, bounty: bounty)
-    end
-  end
-
-  @doc """
-  Create a new bounty.
-
-  Required Parameters:
-  - amount: integer - Bounty amount in cents
-  - ticket_id: string - Associated ticket ID
-  - type: string - Bounty type (e.g., "standard")
-  - kind: string - Bounty kind (e.g., "dev")
-  - reward_type: string - Type of reward (e.g., "cash")
-  - visibility: string - Visibility setting (e.g., "public")
-  """
-  def create(conn, params) do
-    with {:ok, %Bounty{} = bounty} <- Bounties.create_bounty(params) do
-      conn
-      |> put_status(:created)
-      |> render(:show, bounty: bounty)
-    end
-  end
-
-  @doc """
-  Update an existing bounty.
-  """
-  def update(conn, %{"id" => id} = params) do
-    with {:ok, bounty} <- Bounties.get_bounty(id),
-         {:ok, updated_bounty} <- Bounties.update_bounty(bounty, params) do
-      render(conn, :show, bounty: updated_bounty)
-    end
-  end
-
-  @doc """
-  Delete a bounty.
-  """
-  def delete(conn, %{"id" => id}) do
-    with {:ok, bounty} <- Bounties.get_bounty(id),
-         {:ok, _deleted} <- Bounties.delete_bounty(bounty) do
-      send_resp(conn, :no_content, "")
-    end
-  end
 end

@@ -1,16 +1,10 @@
 defmodule AlgoraWeb.API.ErrorJSON do
-  @doc """
-  Renders changeset errors.
-  """
   def error(%{changeset: changeset}) do
     %{
       errors: Ecto.Changeset.traverse_errors(changeset, &translate_error/1)
     }
   end
 
-  @doc """
-  Renders error message.
-  """
   def error(%{message: message}) do
     %{error: message}
   end

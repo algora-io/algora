@@ -181,24 +181,24 @@ defmodule AlgoraWeb.API.BountyJSON do
     }
   end
 
-  defp members_data(org) do
+  defp members_data(_org) do
     # TODO: Implement actual member fetching
     []
   end
 
-  defp user_data(nil), do: nil
+  # defp user_data(nil), do: nil
 
-  defp user_data(user) do
-    %{
-      id: user.id,
-      handle: user.handle,
-      image: user.avatar_url,
-      name: user.name,
-      github_handle: user.provider_login,
-      youtube_handle: nil,
-      twitch_handle: nil,
-      # TODO: Implement org fetching for user
-      orgs: []
-    }
-  end
+  # defp user_data(user) do
+  #   %{
+  #     id: user.id,
+  #     handle: user.handle,
+  #     image: user.avatar_url,
+  #     name: user.name,
+  #     github_handle: user.provider_login,
+  #     youtube_handle: nil,
+  #     twitch_handle: nil,
+  #     # TODO: Implement org fetching for user
+  #     orgs: []
+  #   }
+  # end
 end

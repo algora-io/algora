@@ -60,9 +60,18 @@ defmodule Algora.Contracts do
   end
 
   def calculate_fee_data(contract) do
-    total_paid = Payments.get_total_paid(contract.client_id, contract.contractor_id)
-    fee_tiers = FeeTier.all()
-    current_fee = FeeTier.calculate_fee_percentage(total_paid)
+    contract = Repo.preload(contract, :client)
+
+    # TODO: implement sliding scale for expert contracts
+    # fee_tiers = FeeTier.all(:expert)
+    # total_paid = Payments.get_total_paid(contract.client_id, contract.contractor_id)
+    # progress: FeeTier.calculate_progress(total_paid)
+    # current_fee = FeeTier.calculate_fee_percentage(total_paid)
+
+    fee_tiers = FeeTier.all(:community)
+    total_paid = Money.zero(:USD)
+    progress = Decimal.new(0)
+    current_fee = Decimal.div(contract.client.fee_pct, 100)
 
     %{
       total_paid: total_paid,
@@ -70,7 +79,7 @@ defmodule Algora.Contracts do
       current_fee: current_fee,
       transaction_fee: Payments.get_transaction_fee_pct(),
       total_fee: Decimal.add(current_fee, Payments.get_transaction_fee_pct()),
-      progress: FeeTier.calculate_progress(total_paid)
+      progress: progress
     }
   end
 

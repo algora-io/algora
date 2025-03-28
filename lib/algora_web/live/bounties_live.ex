@@ -141,7 +141,7 @@ defmodule AlgoraWeb.BountiesLive do
         <% else %>
           <div id="bounties-container" phx-hook="InfiniteScroll">
             <.bounties bounties={@bounties} />
-            <div :if={@has_more_bounties} class="flex justify-center mt-4" id="load-more-indicator">
+            <div :if={@has_more_bounties} class="flex justify-center mt-4" data-load-more-indicator>
               <div class="animate-pulse text-muted-foreground">
                 <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
               </div>

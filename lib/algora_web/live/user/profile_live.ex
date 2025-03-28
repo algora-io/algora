@@ -167,7 +167,7 @@ defmodule AlgoraWeb.User.ProfileLive do
             <div
               :if={@has_more_transactions}
               class="flex justify-center mt-4"
-              id="load-more-indicator"
+              data-load-more-indicator
             >
               <div class="animate-pulse text-muted-foreground">
                 <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />

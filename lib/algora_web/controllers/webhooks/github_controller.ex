@@ -5,7 +5,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   import Ecto.Query
 
   alias Algora.Accounts
-  alias Algora.Activities.SendDiscord
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
@@ -30,7 +29,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
          {:ok, commands} <- process_commands(webhook),
          :ok <- process_event(webhook, commands) do
       Logger.debug("✅ #{inspect(webhook.event_action)}")
-      notify_event(webhook, :ok)
       :ok
     else
       {:error, :bot_event} ->
@@ -38,13 +36,13 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
       {:error, reason} ->
         Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(reason)}")
-        notify_event(webhook, {:error, reason})
+        alert(webhook, {:error, reason})
         {:error, reason}
     end
   rescue
     error ->
       Logger.error("❌ #{inspect(webhook.event_action)}: #{inspect(error)}")
-      notify_event(webhook, {:error, error})
+      alert(webhook, {:error, error})
       {:error, error}
   end
 
@@ -700,101 +698,17 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end
   end
 
-  defp notify_event(%Webhook{event_action: event_action, author: author, payload: payload} = webhook, :ok) do
-    with github_ticket when not is_nil(github_ticket) <- get_github_ticket(webhook),
-         ticket when not is_nil(ticket) <-
-           Workspace.get_ticket(
-             payload["repository"]["owner"]["login"],
-             payload["repository"]["name"],
-             github_ticket["number"]
-           ) do
-      discord_payload = %{
-        payload: %{
-          embeds: [
-            %{
-              color: 0x64748B,
-              title: event_action,
-              author: %{
-                name: payload["repository"]["owner"]["login"],
-                icon_url: payload["repository"]["owner"]["avatar_url"],
-                url: github_ticket["html_url"]
-              },
-              footer: %{
-                text: author["login"],
-                icon_url: author["avatar_url"]
-              },
-              fields: [
-                %{
-                  name: "Ticket",
-                  value: "#{payload["repository"]["name"]}##{github_ticket["number"]}: #{github_ticket["title"]}",
-                  inline: false
-                }
-              ],
-              url: github_ticket["html_url"],
-              timestamp: DateTime.utc_now()
-            }
-          ]
-        }
-      }
+  defp alert(%Webhook{event_action: event_action} = webhook, {:error, error}) do
+    message =
+      case get_github_ticket(webhook) do
+        github_ticket when not is_nil(github_ticket) ->
+          "Error processing event: #{event_action}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
 
-      case discord_payload |> SendDiscord.changeset() |> Oban.insert() do
-        {:ok, _} ->
-          :ok
-
-        {:error, reason} ->
-          Logger.error("Error sending discord notification: #{inspect(reason)}")
-          {:error, reason}
+        _ ->
+          "Error processing event: #{event_action}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
       end
-    else
-      _ -> :ok
-    end
-  end
 
-  defp notify_event(%Webhook{event_action: event_action, author: author, payload: payload} = webhook, {:error, error}) do
-    case get_github_ticket(webhook) do
-      github_ticket when not is_nil(github_ticket) ->
-        discord_payload = %{
-          payload: %{
-            embeds: [
-              %{
-                color: 0xEF4444,
-                title: event_action,
-                description: inspect(error),
-                author: %{
-                  name: payload["repository"]["owner"]["login"],
-                  icon_url: payload["repository"]["owner"]["avatar_url"],
-                  url: github_ticket["html_url"]
-                },
-                footer: %{
-                  text: author["login"],
-                  icon_url: author["avatar_url"]
-                },
-                fields: [
-                  %{
-                    name: "Ticket",
-                    value: "#{payload["repository"]["name"]}##{github_ticket["number"]}: #{github_ticket["title"]}",
-                    inline: false
-                  }
-                ],
-                url: github_ticket["html_url"],
-                timestamp: DateTime.utc_now()
-              }
-            ]
-          }
-        }
-
-        case discord_payload |> SendDiscord.changeset() |> Oban.insert() do
-          {:ok, _} ->
-            :ok
-
-          {:error, reason} ->
-            Logger.error("Error sending discord notification: #{inspect(reason)}")
-            {:error, reason}
-        end
-
-      _ ->
-        :ok
-    end
+    Algora.Admin.alert(message, :error)
   end
 
   defp get_github_ticket(%Webhook{event: event, payload: payload}) do

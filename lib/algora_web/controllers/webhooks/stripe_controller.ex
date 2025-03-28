@@ -4,7 +4,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Algora.Activities.SendDiscord
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Tip
@@ -32,18 +31,18 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     case result do
       :ok ->
         Logger.debug("✅ #{inspect(event.type)}")
-        notify_event(event, :ok)
+        alert(event, :ok)
         :ok
 
       {:error, reason} ->
         Logger.error("❌ #{inspect(event.type)}: #{inspect(reason)}")
-        notify_event(event, {:error, reason})
+        alert(event, {:error, reason})
         {:error, reason}
     end
   rescue
     error ->
       Logger.error("❌ #{inspect(event.type)}: #{inspect(error)}")
-      notify_event(event, {:error, error})
+      alert(event, {:error, error})
       {:error, error}
   end
 
@@ -193,84 +192,14 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end)
   end
 
-  defp notify_event(%Stripe.Event{} = event, :ok) do
-    discord_payload = %{
-      payload: %{
-        embeds: [
-          %{
-            color: 0x64748B,
-            title: event.type,
-            footer: %{
-              text: "Stripe",
-              icon_url: "https://github.com/stripe.png"
-            },
-            fields: [
-              %{
-                name: "Event",
-                value: event.id,
-                inline: false
-              },
-              %{
-                name: event.data.object.object,
-                value: event.data.object.id,
-                inline: false
-              }
-            ],
-            url: "https://dashboard.stripe.com/payments?status[0]=successful",
-            timestamp: DateTime.utc_now()
-          }
-        ]
-      }
-    }
-
-    case discord_payload |> SendDiscord.changeset() |> Oban.insert() do
-      {:ok, _} ->
-        :ok
-
-      {:error, reason} ->
-        Logger.error("Error sending discord notification: #{inspect(reason)}")
-        {:error, reason}
-    end
+  defp alert(%Stripe.Event{} = event, :ok) do
+    Algora.Admin.alert("Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=true", :info)
   end
 
-  defp notify_event(%Stripe.Event{} = event, {:error, error}) do
-    discord_payload = %{
-      payload: %{
-        embeds: [
-          %{
-            color: 0xEF4444,
-            title: event.type,
-            description: inspect(error),
-            footer: %{
-              text: "Stripe",
-              icon_url: "https://github.com/stripe.png"
-            },
-            fields: [
-              %{
-                name: "Event",
-                value: event.id,
-                inline: false
-              },
-              %{
-                name: event.data.object.object,
-                value: event.data.object.id,
-                inline: false
-              }
-            ],
-            url: "https://dashboard.stripe.com/payments?status[0]=failed",
-            timestamp: DateTime.utc_now()
-          }
-        ]
-      }
-    }
-
-    case discord_payload |> SendDiscord.changeset() |> Oban.insert() do
-      {:ok, _} ->
-        :ok
-
-      {:error, reason} ->
-        Logger.error("Error sending discord notification: #{inspect(reason)}")
-        {:error, reason}
-    end
+  defp alert(%Stripe.Event{} = event, {:error, error}) do
+    Algora.Admin.alert(
+      "Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=false Error: #{inspect(error)}",
+      :error
+    )
   end
 end

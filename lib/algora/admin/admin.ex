@@ -17,8 +17,23 @@ defmodule Algora.Admin do
 
   require Logger
 
-  def magic(email, return_to \\ nil),
+  def magic(:email, email, return_to),
     do: AlgoraWeb.Endpoint.url() <> AlgoraWeb.UserAuth.generate_login_path(email, return_to)
+
+  def magic(:handle, handle, return_to) do
+    case Algora.Accounts.fetch_user_by(handle: handle) do
+      {:ok, user} -> magic(:email, user.email, return_to)
+      error -> {:error, error}
+    end
+  end
+
+  def magic(identifier, return_to \\ nil) do
+    if String.match?(identifier, ~r/@/) do
+      magic(:email, identifier, return_to)
+    else
+      magic(:handle, identifier, return_to)
+    end
+  end
 
   def screenshot(path), do: AlgoraWeb.OGImageController.take_and_upload_screenshot([path])
 

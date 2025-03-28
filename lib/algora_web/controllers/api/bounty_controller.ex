@@ -10,11 +10,7 @@ defmodule AlgoraWeb.API.BountyController do
   Get a list of bounties with optional filtering parameters.
 
   Query Parameters:
-  - type: string (optional) - Filter by bounty type (e.g., "standard")
-  - kind: string (optional) - Filter by bounty kind (e.g., "dev")
-  - reward_type: string (optional) - Filter by reward type (e.g., "cash")
-  - visibility: string (optional) - Filter by visibility (e.g., "public")
-  - status: string (optional) - Filter by status (open, cancelled, paid)
+  - status: string (optional) - Filter by status (open, paid)
   """
   def index(conn, %{"batch" => _batch, "input" => input} = _params) do
     with {:ok, decoded} <- Jason.decode(input),
@@ -33,12 +29,13 @@ defmodule AlgoraWeb.API.BountyController do
 
   # Convert JSON/map parameters to keyword list criteria
   defp to_criteria(params) when is_map(params) do
-    Keyword.new(params, fn
+    params
+    |> Keyword.new(fn
       {"status", status} -> {:status, parse_status(status)}
-      {"visibility", visibility} -> {:visibility, parse_visibility(visibility)}
       {"org", org_handle} -> {:owner_handle, org_handle}
-      {k, v} -> {String.to_existing_atom(k), v}
+      {_k, _v} -> nil
     end)
+    |> Enum.reject(&is_nil/1)
   rescue
     _ -> []
   end
@@ -48,26 +45,10 @@ defmodule AlgoraWeb.API.BountyController do
   # Parse status string to corresponding enum atom
   defp parse_status(status) when is_binary(status) do
     case String.downcase(status) do
-      "active" -> :open
-      "open" -> :open
-      "cancelled" -> :cancelled
-      "canceled" -> :cancelled
       "paid" -> :paid
       _ -> :open
     end
   end
 
   defp parse_status(_), do: :open
-
-  # Parse visibility string to corresponding enum atom
-  defp parse_visibility(visibility) when is_binary(visibility) do
-    case String.downcase(visibility) do
-      "public" -> :public
-      "community" -> :community
-      "exclusive" -> :exclusive
-      _ -> :public
-    end
-  end
-
-  defp parse_visibility(_), do: :public
 end

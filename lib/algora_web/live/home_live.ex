@@ -411,7 +411,7 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
-              src="https://www.firecrawl.dev/images/yc.svg"
+              src={~p"/images/logos/yc.svg"}
               class="h-16 sm:h-24 mx-auto"
               alt="Y Combinator Logo"
               loading="lazy"
@@ -1266,7 +1266,7 @@ defmodule AlgoraWeb.HomeLive do
         >
           <img
             class="size-4 sm:size-7 mr-2 sm:mr-4"
-            src="https://browser-use.com/logo.svg"
+            src={~p"/images/wordmarks/browser-use.svg"}
             loading="lazy"
           /> Browser Use
         </.link>
@@ -1339,7 +1339,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/traceloop"}>
           <img
-            src="https://cdn.prod.website-files.com/664553b7af7a800a7911b9f0/664553f95f4ec29495eb8eb9_traceloop%20logo%20dark%20bg.png"
+            src={~p"/images/wordmarks/traceloop.png"}
             alt="Traceloop"
             class="sm:w-[90%] col-auto saturate-0"
             loading="lazy"
@@ -1350,7 +1350,7 @@ defmodule AlgoraWeb.HomeLive do
           navigate={~p"/org/trieve"}
         >
           <img
-            src="https://cdn.trieve.ai/trieve-logo.png"
+            src={~p"/images/wordmarks/trieve.png"}
             alt="Trieve logo"
             class="size-8 sm:size-12 mr-2 brightness-0 invert"
             loading="lazy"
@@ -1382,7 +1382,7 @@ defmodule AlgoraWeb.HomeLive do
           />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/moonrepo"}>
-          <img src="https://moonrepo.dev/img/logo.svg" alt="moon" class="w-[80%]" loading="lazy" />
+          <img src={~p"/images/wordmarks/moonrepo.svg"} alt="moon" class="w-[80%]" loading="lazy" />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
           <img
@@ -1406,7 +1406,7 @@ defmodule AlgoraWeb.HomeLive do
           navigate={~p"/org/onyx-dot-app"}
         >
           <img
-            src="https://onyx.app/Onyx.png"
+            src={~p"/images/wordmarks/onyx.png"}
             alt="Onyx Logo"
             class="object-contain w-[60%]"
             loading="lazy"
@@ -1436,7 +1436,7 @@ defmodule AlgoraWeb.HomeLive do
           navigate={~p"/org/windmill-labs"}
         >
           <img
-            src="https://windmill.dev/img/windmill.svg"
+            src={~p"/images/wordmarks/windmill.svg"}
             alt="Windmill"
             class="size-4 sm:size-10 mr-2 saturate-0"
             loading="lazy"
@@ -1445,7 +1445,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <.link class="relative flex items-center justify-center" navigate={~p"/org/panoratech"}>
           <img
-            src="https://getpanora.com/wp-content/uploads/2023/09/logo-panora.png"
+            src={~p"/images/wordmarks/panora.png"}
             alt="Panora"
             class="col-auto w-[60%] sm:w-[50%] saturate-0 brightness-0 invert"
             loading="lazy"

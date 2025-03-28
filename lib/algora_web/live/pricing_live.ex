@@ -266,9 +266,9 @@ defmodule AlgoraWeb.PricingLive do
 
   defp pricing_card2(assigns) do
     ~H"""
-    <div class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden">
+    <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
       <div class={[
-        "bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer",
+        "bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400",
         @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
         "divide-y sm:divide-y-0 sm:divide-x sm:divide-default"
       ]}>

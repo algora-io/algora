@@ -208,7 +208,7 @@ defmodule AlgoraWeb.PricingLive do
                   <% "receive-payments" -> %>
                     <div class="flex justify-between">
                       <div class="flex items-end">
-                        <p class="font-display text-4xl">
+                        <p class="font-display text-4xl text-emerald-400">
                           0%
                         </p>
                         <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -219,7 +219,7 @@ defmodule AlgoraWeb.PricingLive do
                   <% "pay-developers" -> %>
                     <div class="flex justify-between">
                       <div class="flex items-end">
-                        <p class="font-display text-4xl">
+                        <p class="font-display text-4xl text-emerald-400">
                           9%
                         </p>
                         <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
@@ -401,7 +401,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "platform-fee",
         question: "How do the platform fees work?",
         answer:
-          "For organizations, we charge a 19% fee on bounties, which can drop to 7.5% with volume. For individual contributors, you receive 100% of the bounty amount with no fees deducted."
+          "For organizations, we charge a 9% fee on bounties when they are rewarded. For individual contributors, you receive 100% of the bounty amount with no fees deducted."
       },
       %FaqItem{
         id: "payment-methods",

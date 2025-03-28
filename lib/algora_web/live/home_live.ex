@@ -338,7 +338,7 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex items-center -space-x-6 shrink-0">
                     <img
                       class="size-20 rounded-full z-0"
-                      src="https://pbs.twimg.com/profile_images/1277333515412045824/Xys6F_6E_400x400.jpg"
+                      src={~p"/images/people/alex-klimaj.jpg"}
                       alt="Alex Klimaj"
                       loading="lazy"
                     />
@@ -350,7 +350,7 @@ defmodule AlgoraWeb.HomeLive do
                     />
                     <img
                       class="size-20 rounded-full z-10"
-                      src="https://pbs.twimg.com/profile_images/1768744461243387905/AHYQnqY9_400x400.jpg"
+                      src={~p"/images/people/andrew-wilkins.jpg"}
                       alt="Andrew Wilkins"
                       loading="lazy"
                     />
@@ -376,7 +376,7 @@ defmodule AlgoraWeb.HomeLive do
                   <div class="flex -space-x-4 shrink-0">
                     <img
                       class="size-20 rounded-full z-0"
-                      src="https://pbs.twimg.com/profile_images/1885366118367256580/ZmNo5ur__400x400.jpg"
+                      src={~p"/images/logos/coolify.jpg"}
                       alt="Coolify"
                       loading="lazy"
                     />
@@ -626,7 +626,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="lg:col-span-6">
                   <div class="relative flex items-center justify-center">
                     <img
-                      src="https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+                      src={~p"/images/people/john-de-goes-2.jpg"}
                       alt="John A De Goes"
                       class="object-cover size-84 rounded-2xl"
                       loading="lazy"

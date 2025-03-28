@@ -910,7 +910,7 @@ defmodule AlgoraWeb.HomeLive do
                 <img
                   src={~p"/images/screenshots/tip-remotion.png"}
                   alt="Tip contributor"
-                  class="w-full h-full object-contain rounded-2xl shadow-xl ring-1 ring-white/10 p-8 sm:p-12 bg-[#0d1017]"
+                  class="w-full h-full object-contain"
                   loading="lazy"
                 />
               </div>

@@ -221,7 +221,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </.error>
         </div>
         <!-- Achievements Section -->
-        <div class="hidden lg:block mt-8">
+        <div :if={length(@achievements) > 1} class="hidden lg:block mt-8">
           <h2 class="text-xl font-semibold leading-none tracking-tight">Achievements</h2>
           <nav class="pt-4">
             <ol role="list" class="space-y-6">

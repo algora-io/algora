@@ -469,7 +469,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Build product faster
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -687,7 +687,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Hire by building product
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -759,28 +759,31 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            <%!-- mogery --%>
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <.link
-                class="font-bold font-display text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+                class="font-bold font-display text-2xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
                 aria-label="Logo"
                 navigate={~p"/org/mendableai"}
               >
                 🔥
                 Firecrawl
               </.link>
-              <h2 class="mt-2 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4 !leading-[1.25]">
+              <h2 class="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4 !leading-[1.25]">
                 Open source contributor to full-time engineer
               </h2>
               <div class="flex items-center justify-center gap-8">
                 <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2 sm:gap-4">
                     <div class="text-right">
-                      <div class="text-base font-medium text-foreground whitespace-nowrap">
+                      <div class="text-sm sm:text-base font-medium text-foreground whitespace-nowrap">
                         Nicolas Camara
                       </div>
-                      <div class="pt-1 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <div class="pt-1 text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
                         Founder & CTO
                       </div>
                     </div>
@@ -797,7 +800,7 @@ defmodule AlgoraWeb.HomeLive do
                   class="size-6 sm:size-8 text-purple-400 hidden sm:block"
                 />
                 <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2 sm:gap-4">
                     <img
                       src="https://github.com/mogery.png"
                       alt="Gergő Móricz"
@@ -805,17 +808,17 @@ defmodule AlgoraWeb.HomeLive do
                       loading="lazy"
                     />
                     <div>
-                      <div class="text-base font-semibold text-foreground whitespace-nowrap">
+                      <div class="text-sm sm:text-base font-semibold text-foreground whitespace-nowrap">
                         Gergő Móricz
                       </div>
-                      <div class="pt-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      <div class="pt-2 text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
                         Contributor
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="pt-8 sm:pt-12 flex gap-8 lg:gap-x-16">
+              <div class="pt-8 sm:pt-12 flex gap-4 sm:gap-8 lg:gap-x-16">
                 <div class="w-[24%]">
                   <.modal_video
                     class="aspect-[9/16] rounded-xl lg:rounded-2xl"
@@ -840,15 +843,15 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black pb-16 sm:pb-24">
+        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto px-6 lg:px-8">
             <div class="relative z-10 pb-4 xl:py-16">
               <div class="mx-auto max-w-7xl sm:text-center">
                 <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-                  <h1 class="text-2xl sm:text-4xl font-bold text-popover-foreground">
+                  <h2 class="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
                     Simple, transparent pricing
-                  </h1>
-                  <p class="text-sm sm:text-lg text-muted-foreground">
+                  </h2>
+                  <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
                     For individuals, OSS communities, and open/closed source companies
                   </p>
                 </div>
@@ -858,11 +861,11 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
               <div class="flex items-start gap-4">
                 <div class="flex-1">
-                  <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <h3 class="text-2xl font-semibold text-foreground mb-2">
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
                     </div>
-                  </h2>
+                  </h3>
                   <p class="text-base text-foreground-light">
                     Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
                   </p>
@@ -879,11 +882,11 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto lg:max-w-[95rem] mt-16 mb-8">
               <div class="flex items-start gap-4">
                 <div class="flex-1">
-                  <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <h3 class="text-2xl font-semibold text-foreground mb-2">
                     <div class="flex items-center gap-2">
                       <.icon name="tabler-building-store" class="h-6 w-6 text-purple-400" /> Platform
                     </div>
-                  </h2>
+                  </h3>
                   <p class="text-base text-foreground-light">
                     Connect with top open source talent, increase project visibility, and hire proven contributors
                   </p>
@@ -900,7 +903,7 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Did you know?
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-8 sm:mb-16">
@@ -967,21 +970,19 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
 
-              <div>
-                <img
-                  src={~p"/images/screenshots/tip-remotion.png"}
-                  alt="Tip contributor"
-                  class="w-full h-full object-contain"
-                  loading="lazy"
-                />
-              </div>
+              <img
+                src={~p"/images/screenshots/tip-remotion.png"}
+                alt="Tip contributor"
+                class="w-full h-full object-contain order-first lg:order-last"
+                loading="lazy"
+              />
             </div>
           </div>
         </section>
 
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
           <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               <span class="text-muted-foreground">The open source</span>
               <span class="block sm:inline">Upwork for engineers</span>
             </h2>

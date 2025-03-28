@@ -838,7 +838,7 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
-          <div class="mx-auto 2xl:max-w-7xl px-6 lg:px-8">
+          <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-4">
               Did you know?
             </h2>

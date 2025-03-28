@@ -255,7 +255,11 @@ defmodule AlgoraWeb.ClaimLive do
 
   defp assign_line_items(socket) do
     line_items =
-      Bounties.generate_line_items(%{amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)},
+      Bounties.generate_line_items(
+        %{
+          owner: socket.assigns.selected_context,
+          amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)
+        },
         ticket_ref: ticket_ref(socket),
         claims: socket.assigns.claims
       )

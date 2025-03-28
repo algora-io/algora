@@ -73,6 +73,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:contributors, contributors)
        |> assign(:developers, contributors |> Enum.map(& &1.user) |> Enum.concat(experts))
        |> assign(:has_more_bounties, false)
+       |> assign(:has_more_transactions, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
@@ -867,9 +868,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp to_transaction_rows(transactions), do: transactions
 
   defp assign_more_bounties(socket) do
-    %{rows: rows, current_org: current_org} = socket.assigns
+    %{bounty_rows: rows, current_org: current_org} = socket.assigns
 
-    last_bounty = List.last(rows).bounty
+    last_bounty = List.last(rows)
 
     cursor = %{
       inserted_at: last_bounty.inserted_at,
@@ -887,7 +888,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     socket
     |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
-    |> assign(:has_more, length(more_bounties) >= page_size())
+    |> assign(:has_more_bounties, length(more_bounties) >= page_size())
   end
 
   defp assign_more_transactions(socket) do

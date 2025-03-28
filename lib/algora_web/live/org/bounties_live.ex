@@ -351,7 +351,7 @@ defmodule AlgoraWeb.Org.BountiesLive do
 
     socket
     |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
-    |> assign(:has_more, length(more_bounties) >= page_size())
+    |> assign(:has_more_bounties, length(more_bounties) >= page_size())
   end
 
   defp assign_more_transactions(socket) do

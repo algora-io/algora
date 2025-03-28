@@ -65,7 +65,7 @@ defmodule Algora.Factory do
       hourly_rate_max: Money.new!(150, :USD),
       hours_per_week: 40,
       featured: true,
-      fee_pct: 19,
+      fee_pct: 9,
       activated: true,
       website_url: "https://piedpiper.com",
       twitter_url: "https://twitter.com/piedpiper",

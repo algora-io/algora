@@ -12,7 +12,7 @@ defmodule Algora.Bounties.Bounty do
     field :status, Ecto.Enum, values: [:open, :cancelled, :paid]
     field :number, :integer, default: 0
     field :autopay_disabled, :boolean, default: false
-    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :public
+    field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :community
     field :shared_with, {:array, :string}, null: false, default: []
 
     belongs_to :ticket, Algora.Workspace.Ticket

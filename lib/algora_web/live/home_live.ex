@@ -296,6 +296,7 @@ defmodule AlgoraWeb.HomeLive do
                 <.link
                   href="https://github.com/zed-industries/zed/issues/4440"
                   rel="noopener"
+                  target="_blank"
                   class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
                 >
                   <div class="flex -space-x-4 shrink-0">
@@ -328,6 +329,7 @@ defmodule AlgoraWeb.HomeLive do
                 <.link
                   href="https://github.com/PX4/PX4-Autopilot/issues/22464"
                   rel="noopener"
+                  target="_blank"
                   class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
                 >
                   <div class="flex items-center -space-x-6 shrink-0">
@@ -423,7 +425,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="lg:col-span-4">
                   <div class="relative flex aspect-square size-[18rem] sm:size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
-                      src="https://media.licdn.com/dms/image/v2/D4D03AQEgJ8LaoTna5A/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1705829974466?e=1747872000&v=beta&t=95CP-kabFE8TKb73sSuCMYK6brUajTFFxaUNQstV54g"
+                      src={~p"/images/people/tal-borenstein.jpeg"}
                       alt="Tal Borenstein"
                       class="object-cover"
                       loading="lazy"
@@ -436,6 +438,7 @@ defmodule AlgoraWeb.HomeLive do
                     <.link
                       href="https://github.com/keephq/keep/issues?q=state%3Aclosed%20label%3A%22%F0%9F%92%8E%20Bounty%22%20%20label%3A%22%F0%9F%92%B0%20Rewarded%22%20label%3AProvider%20"
                       rel="noopener"
+                      target="_blank"
                       class="text-success inline-flex items-center hover:text-success-300"
                     >
                       42 integrations <.icon name="tabler-external-link" class="size-5 ml-1 mb-4" />
@@ -514,13 +517,13 @@ defmodule AlgoraWeb.HomeLive do
                       loading="lazy"
                     />
                     <img
-                      src="https://media.licdn.com/dms/image/v2/C4D03AQFy5iED85Z9mQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1650904368312?e=1747872000&v=beta&t=3gbV5Eru74Gxt8zvLZ0cKRD2YkQYHQ3qjBPvqJH31AQ"
+                      src={~p"/images/people/peer-rich.jpeg"}
                       alt="PeerRich"
                       class="size-24 sm:size-40 rounded-full"
                       loading="lazy"
                     />
                     <img
-                      src="https://media.licdn.com/dms/image/v2/D4E03AQEHMtneifrVfQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1708121831533?e=1747872000&v=beta&t=heIzHASUcd-OhZ4ZeEm-6smGjX66YcEAOqKQoCeXbgo"
+                      src={~p"/images/people/bailey-pumfleet.jpeg"}
                       alt="Bailey Pumfleet"
                       class="size-24 sm:size-40 rounded-full"
                       loading="lazy"

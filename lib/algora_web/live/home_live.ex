@@ -911,23 +911,23 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="flex flex-col lg:flex-row gap-8">
-              <div class="w-full lg:max-w-6xl relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-blue-500/20 transition-colors backdrop-blur-sm">
+              <div class="w-full lg:max-w-6xl relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-indigo-500/20 transition-colors backdrop-blur-sm">
                 <div class="grid grid-cols-1 items-center lg:grid-cols-7 gap-8 h-full">
                   <div class="lg:col-span-3 text-base leading-6">
                     <h3 class="text-2xl sm:text-3xl font-semibold text-foreground">
                       Tip any contributor <br class="hidden lg:block" />
-                      <span class="text-blue-500 drop-shadow-[0_1px_5px_#60a5fa80]">instantly</span>
+                      <span class="text-indigo-500 drop-shadow-[0_1px_5px_#60a5fa80]">instantly</span>
                     </h3>
                     <p class="mt-4 text-base sm:text-lg font-medium text-muted-foreground">
                       Support the maintainers behind your favorite open source projects
                     </p>
                     <div class="mt-4 sm:mt-6 space-y-3">
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
+                        <.icon name="tabler-check" class="h-5 w-5 text-indigo-400 flex-none" />
                         <span>Send tips directly to GitHub usernames</span>
                       </div>
                       <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-check" class="h-5 w-5 text-blue-400 flex-none" />
+                        <.icon name="tabler-check" class="h-5 w-5 text-indigo-400 flex-none" />
                         <span>Algora handles payouts, compliance & 1099s</span>
                       </div>
                     </div>
@@ -948,7 +948,7 @@ defmodule AlgoraWeb.HomeLive do
                         label="Amount"
                         icon="tabler-currency-dollar"
                         field={@tip_form[:amount]}
-                        class="placeholder:text-blue-500"
+                        class="placeholder:text-indigo-500"
                       />
                     </div>
                     <.input
@@ -961,7 +961,7 @@ defmodule AlgoraWeb.HomeLive do
                       <.button
                         size="lg"
                         class="w-full drop-shadow-[0_1px_5px_#60a5fa80]"
-                        variant="blue"
+                        variant="indigo"
                       >
                         Tip contributor
                       </.button>
@@ -970,12 +970,14 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
 
-              <img
-                src={~p"/images/screenshots/tip-remotion.png"}
-                alt="Tip contributor"
-                class="w-full h-full object-contain order-first lg:order-last"
-                loading="lazy"
-              />
+              <div class="order-first lg:order-last">
+                <img
+                  src={~p"/images/screenshots/tip-remotion.png"}
+                  alt="Tip contributor"
+                  class="w-full h-full object-contain"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -1261,11 +1263,11 @@ defmodule AlgoraWeb.HomeLive do
     <div>
       <div class="grid grid-cols-3 lg:grid-cols-3 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
         <.link
-          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-4xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/browser-use"}
         >
           <img
-            class="size-4 sm:size-7 mr-2 sm:mr-4"
+            class="size-4 sm:size-10 mr-2 sm:mr-4"
             src={~p"/images/wordmarks/browser-use.svg"}
             loading="lazy"
           /> Browser Use
@@ -1346,25 +1348,25 @@ defmodule AlgoraWeb.HomeLive do
           />
         </.link>
         <.link
-          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/trieve"}
         >
           <img
             src={~p"/images/wordmarks/trieve.png"}
             alt="Trieve logo"
-            class="size-8 sm:size-12 mr-2 brightness-0 invert"
+            class="size-8 sm:size-16 mr-2 brightness-0 invert"
             loading="lazy"
           /> Trieve
         </.link>
         <.link
-          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/twentyhq"}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 40 40"
-            class="shrink-0 size-4 sm:size-7 mr-2 sm:mr-4"
+            class="shrink-0 size-4 sm:size-10 mr-2 sm:mr-4"
           >
             <path
               fill="currentColor"
@@ -1383,14 +1385,6 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/moonrepo"}>
           <img src={~p"/images/wordmarks/moonrepo.svg"} alt="moon" class="w-[80%]" loading="lazy" />
-        </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
-          <img
-            src={~p"/images/wordmarks/highlight.png"}
-            alt="Highlight"
-            class="col-auto sm:w-[90%] saturate-0"
-            loading="lazy"
-          />
         </.link>
         <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
           <img
@@ -1414,7 +1408,7 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
 
         <.link
-          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+          class="font-bold font-display text-base sm:text-4xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
           aria-label="Logo"
           navigate={~p"/org/mendableai"}
         >
@@ -1432,13 +1426,13 @@ defmodule AlgoraWeb.HomeLive do
         </.link>
 
         <.link
-          class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+          class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
           navigate={~p"/org/windmill-labs"}
         >
           <img
             src={~p"/images/wordmarks/windmill.svg"}
             alt="Windmill"
-            class="size-4 sm:size-10 mr-2 saturate-0"
+            class="size-4 sm:size-14 mr-2 saturate-0"
             loading="lazy"
           /> Windmill
         </.link>
@@ -1448,6 +1442,15 @@ defmodule AlgoraWeb.HomeLive do
             src={~p"/images/wordmarks/panora.png"}
             alt="Panora"
             class="col-auto w-[60%] sm:w-[50%] saturate-0 brightness-0 invert"
+            loading="lazy"
+          />
+        </.link>
+
+        <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
+          <img
+            src={~p"/images/wordmarks/highlight.png"}
+            alt="Highlight"
+            class="col-auto sm:w-[90%] saturate-0"
             loading="lazy"
           />
         </.link>

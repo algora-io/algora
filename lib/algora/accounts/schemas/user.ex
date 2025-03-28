@@ -38,7 +38,7 @@ defmodule Algora.Accounts.User do
     field :categories, {:array, :string}, default: []
     field :featured, :boolean, default: false
     field :priority, :integer, default: 0
-    field :fee_pct, :integer, default: 19
+    field :fee_pct, :integer, default: 9
     field :seeded, :boolean, default: false
     field :activated, :boolean, default: false
     field :max_open_attempts, :integer, default: 3
@@ -63,7 +63,7 @@ defmodule Algora.Accounts.User do
 
     field :bounty_mode, Ecto.Enum,
       values: [:community, :exclusive, :public],
-      default: :public
+      default: :community
 
     field :website_url, :string
     field :twitter_url, :string

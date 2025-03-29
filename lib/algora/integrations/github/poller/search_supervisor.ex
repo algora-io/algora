@@ -1,4 +1,4 @@
-defmodule Algora.Github.Poller.Supervisor do
+defmodule Algora.Github.Poller.SearchSupervisor do
   @moduledoc false
   use DynamicSupervisor
 

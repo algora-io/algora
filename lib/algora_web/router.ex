@@ -172,6 +172,9 @@ defmodule AlgoraWeb.Router do
     get "/trpc/bounty.list", BountyController, :index
     post "/trpc/bounty.list", BountyController, :index
 
+    # Legacy OG Image redirects
+    get "/og/:org_handle/:asset", OGRedirectController, :redirect_to_org_path
+
     # Shields.io badges
     get "/shields/:org_handle/bounties", ShieldsController, :bounties
   end

@@ -7,11 +7,8 @@ defmodule AlgoraWeb.API.OGRedirectController do
         {"leaderboard.png", _} ->
           "/og/org/#{org_handle}/leaderboard"
 
-        {"bounties.png", status} when not is_nil(status) ->
-          "/og/org/#{org_handle}/bounties?status=#{status}"
-
         {"bounties.png", _} ->
-          "/og/org/#{org_handle}/bounties"
+          "/og/org/#{org_handle}"
 
         _ ->
           nil

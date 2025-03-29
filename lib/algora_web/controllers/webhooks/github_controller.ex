@@ -22,8 +22,6 @@ defmodule AlgoraWeb.Webhooks.GithubController do
 
   require Logger
 
-  # TODO: auto-retry failed deliveries with backoff
-
   def process_delivery(webhook) do
     with :ok <- ensure_human_author(webhook),
          {:ok, commands} <- process_commands(webhook),

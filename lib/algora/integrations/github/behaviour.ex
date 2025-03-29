@@ -3,6 +3,9 @@ defmodule Algora.Github.Behaviour do
 
   @type token :: String.t()
 
+  @callback get_delivery(String.t()) :: {:ok, map()} | {:error, String.t()}
+  @callback list_deliveries(keyword()) :: {:ok, [map()]} | {:error, String.t()}
+  @callback redeliver(String.t()) :: {:ok, map()} | {:error, String.t()}
   @callback get_issue(token(), String.t(), String.t(), integer()) :: {:ok, map()} | {:error, String.t()}
   @callback get_repository(token(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
   @callback get_repository(token(), integer()) :: {:ok, map()} | {:error, String.t()}

@@ -112,6 +112,12 @@ defmodule Algora.Github.Client do
     )
   end
 
+  def fetch_with_jwt(path, method \\ "GET", body \\ nil) do
+    with {:ok, jwt, _claims} <- Crypto.generate_jwt() do
+      fetch(jwt, path, method, body)
+    end
+  end
+
   defp build_query(opts), do: if(opts == [], do: "", else: "?" <> URI.encode_query(opts))
 
   @impl true
@@ -185,20 +191,14 @@ defmodule Algora.Github.Client do
 
   @impl true
   def get_installation_token(installation_id) do
-    path = "/app/installations/#{installation_id}/access_tokens"
-
-    with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
-         {:ok, %{"token" => token}} <- fetch(jwt, path, "POST") do
+    with {:ok, %{"token" => token}} <- fetch_with_jwt("/app/installations/#{installation_id}/access_tokens", "POST") do
       {:ok, token}
     end
   end
 
   @impl true
   def get_installation(installation_id) do
-    path = "/app/installations/#{installation_id}"
-
-    with {:ok, jwt, _claims} <- Crypto.generate_jwt(),
-         {:ok, %{"token" => token}} <- fetch(jwt, path, "GET") do
+    with {:ok, %{"token" => token}} <- fetch_with_jwt("/app/installations/#{installation_id}") do
       {:ok, token}
     end
   end

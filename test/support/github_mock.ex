@@ -5,6 +5,21 @@ defmodule Algora.Support.GithubMock do
   defp random_id(n \\ 1000), do: :rand.uniform(n)
 
   @impl true
+  def get_delivery(id) do
+    {:ok, %{"id" => id}}
+  end
+
+  @impl true
+  def list_deliveries(_opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
+  def redeliver(_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
   def get_issue(_access_token, owner, repo, number) do
     {:ok,
      %{

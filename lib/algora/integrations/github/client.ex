@@ -121,6 +121,21 @@ defmodule Algora.Github.Client do
   defp build_query(opts), do: if(opts == [], do: "", else: "?" <> URI.encode_query(opts))
 
   @impl true
+  def get_delivery(delivery_id) do
+    fetch_with_jwt("/app/hook/deliveries/#{delivery_id}")
+  end
+
+  @impl true
+  def list_deliveries(opts \\ []) do
+    fetch_with_jwt("/app/hook/deliveries#{build_query(opts)}")
+  end
+
+  @impl true
+  def redeliver(delivery_id) do
+    fetch_with_jwt("/app/hook/deliveries/#{delivery_id}/attempts", "POST")
+  end
+
+  @impl true
   def get_issue(access_token, owner, repo, number) do
     fetch(access_token, "/repos/#{owner}/#{repo}/issues/#{number}")
   end

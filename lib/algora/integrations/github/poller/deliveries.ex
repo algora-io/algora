@@ -91,7 +91,6 @@ defmodule Algora.Github.Poller.Deliveries do
 
   def poll(state) do
     with {:ok, deliveries} <- fetch_deliveries(state),
-         if(length(deliveries) > 0, do: Logger.info("Processing #{length(deliveries)} deliveries")),
          {:ok, updated_cursor} <- process_batch(deliveries, state) do
       {:ok, %{state | cursor: updated_cursor}}
     else
@@ -161,8 +160,6 @@ defmodule Algora.Github.Poller.Deliveries do
         if skip_reason do
           {:ok, nil}
         else
-          dbg("Enqueuing redelivery #{delivery["id"]}")
-
           %{delivery: delivery}
           |> Github.Poller.DeliveryConsumer.new()
           |> Oban.insert()

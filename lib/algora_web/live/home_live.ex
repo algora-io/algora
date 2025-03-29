@@ -982,9 +982,9 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
-          <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+        <section class="relative isolate bg-black py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>
               <span class="block sm:inline">Upwork for engineers</span>
             </h2>

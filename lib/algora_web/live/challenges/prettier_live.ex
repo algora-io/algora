@@ -77,7 +77,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           </div>
                           <div
                             class="absolute inset-0 opacity-20 mix-blend-overlay"
-                            style="background: url(&quot;/grid.png&quot;);"
+                            style="background: url(&quot;/images/grid.png&quot;);"
                           >
                           </div>
                         </div>
@@ -326,25 +326,43 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           data-state="closed"
                           class="group relative flex flex-1 flex-col overflow-hidden rounded-2xl border-2 border-solid border-white p-4 text-left md:p-6"
                           style="background: radial-gradient(circle at right bottom, rgb(203, 206, 225) 0%, rgb(101, 104, 139) 28%, rgb(5, 2, 23) 63.02%, rgb(5, 2, 23) 100%); box-shadow: rgba(30, 27, 75, 0.08) 0px 3.26536px 2.21381px 0px, rgba(30, 27, 75, 0.11) 0px 7.84712px 5.32008px 0px, rgba(30, 27, 75, 0.14) 0px 14.7754px 10.0172px 0px, rgba(30, 27, 75, 0.16) 0px 26.3568px 17.8691px 0px, rgba(30, 27, 75, 0.19) 0px 49.2976px 33.4221px 0px, rgba(30, 27, 75, 0.27) 0px 118px 80px 0px;"
-                        ><h3 class="!mt-0 mb-12 text-3xl font-black leading-none tracking-tighter md:text-6xl">Submit a solution</h3><div class="flex items-center pt-12 md:pt-16"><div class="mr-1 font-bold uppercase tracking-wider transition-all group-hover:mr-3">Get started</div><svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-5 w-5 text-purple-100"
-                            aria-hidden="true"
-                          ><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></div><div
-                          class="absolute inset-0 bg-cover bg-center opacity-100 mix-blend-overlay"
-                          style="background-image: url(&quot;/images/prettier/solve.png&quot;);"
-                        ></div><div
-                          class="absolute inset-0 opacity-50 mix-blend-overlay"
-                          style="background: url(&quot;/images/grid.png&quot;);"
-                        ></div></button>
+                        >
+                          <h3 class="!mt-0 mb-12 text-3xl font-black leading-none tracking-tighter md:text-6xl">
+                            Submit a solution
+                          </h3>
+                          <div class="flex items-center pt-12 md:pt-16">
+                            <div class="mr-1 font-bold uppercase tracking-wider transition-all group-hover:mr-3">
+                              Get started
+                            </div>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="h-5 w-5 text-purple-100"
+                              aria-hidden="true"
+                            >
+                              <path d="M5 12l14 0"></path>
+                              <path d="M13 18l6 -6"></path>
+                              <path d="M13 6l6 6"></path>
+                            </svg>
+                          </div>
+                          <div
+                            class="absolute inset-0 bg-cover bg-center opacity-100 mix-blend-overlay"
+                            style="background-image: url(&quot;/images/prettier/solve.png&quot;);"
+                          >
+                          </div>
+                          <div
+                            class="absolute inset-0 opacity-50 mix-blend-overlay"
+                            style="background: url(&quot;/images/grid.png&quot;);"
+                          >
+                          </div>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -504,21 +522,26 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                               <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path>
                             </svg>
                           </a>
-                          <a rel="noopener" href="https://discord.gg/BypW39g6Yc"><svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-7 w-7 text-yellow-600 transition-colors duration-150 hover:text-yellow-500 hover:opacity-100"
-                          ><path d="M8 12a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"></path><path d="M14 12a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"></path><path d="M15.5 17c0 1 1.5 3 2 3c1.5 0 2.833 -1.667 3.5 -3c.667 -1.667 .5 -5.833 -1.5 -11.5c-1.457 -1.015 -3 -1.34 -4.5 -1.5l-.972 1.923a11.913 11.913 0 0 0 -4.053 0l-.975 -1.923c-1.5 .16 -3.043 .485 -4.5 1.5c-2 5.667 -2.167 9.833 -1.5 11.5c.667 1.333 2 3 3.5 3c.5 0 2 -2 2 -3"></path><path d="M7 16.5c3.5 1 6.5 1 10 0"></path></svg></a><a
-                            rel="noopener noreferrer"
-                            href="https://github.com/biomejs"
-                          ><svg
+                          <a rel="noopener" href="https://discord.gg/BypW39g6Yc">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="h-7 w-7 text-yellow-600 transition-colors duration-150 hover:text-yellow-500 hover:opacity-100"
+                            >
+                              <path d="M8 12a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"></path>
+                              <path d="M14 12a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"></path>
+                              <path d="M15.5 17c0 1 1.5 3 2 3c1.5 0 2.833 -1.667 3.5 -3c.667 -1.667 .5 -5.833 -1.5 -11.5c-1.457 -1.015 -3 -1.34 -4.5 -1.5l-.972 1.923a11.913 11.913 0 0 0 -4.053 0l-.975 -1.923c-1.5 .16 -3.043 .485 -4.5 1.5c-2 5.667 -2.167 9.833 -1.5 11.5c.667 1.333 2 3 3.5 3c.5 0 2 -2 2 -3">
+                              </path>
+                              <path d="M7 16.5c3.5 1 6.5 1 10 0"></path>
+                            </svg>
+                          </a><a rel="noopener noreferrer" href="https://github.com/biomejs"><svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"
@@ -586,7 +609,20 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                         rel="noopener noreferrer"
                         class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"
                         href="https://github.com/biomejs/biome/blob/main/crates/biome_js_formatter/report.md"
-                      ><div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950"></div><div class="absolute left-0 top-0 z-0 h-full w-full bg-purple-900/10 transition-colors duration-150 group-hover:bg-purple-900/20"></div><div class="relative"><dt class="text-sm font-semibold leading-6 text-gray-300">Compatible lines</dt><dd class="order-first text-3xl font-semibold tracking-tight text-white">96.62%</dd></div></a><a
+                      >
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950">
+                        </div>
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-purple-900/10 transition-colors duration-150 group-hover:bg-purple-900/20">
+                        </div>
+                        <div class="relative">
+                          <dt class="text-sm font-semibold leading-6 text-gray-300">
+                            Compatible lines
+                          </dt>
+                          <dd class="order-first text-3xl font-semibold tracking-tight text-white">
+                            96.62%
+                          </dd>
+                        </div>
+                      </a><a
                         target="_blank"
                         rel="noopener noreferrer"
                         class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"

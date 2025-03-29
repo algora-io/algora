@@ -68,6 +68,15 @@ defmodule Algora.Github do
   end
 
   @impl true
+  def get_delivery(delivery_id), do: client().get_delivery(delivery_id)
+
+  @impl true
+  def list_deliveries(opts \\ []), do: client().list_deliveries(opts)
+
+  @impl true
+  def redeliver(delivery_id), do: client().redeliver(delivery_id)
+
+  @impl true
   def get_repository(token, owner, repo), do: client().get_repository(token, owner, repo)
 
   @impl true

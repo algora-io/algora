@@ -66,7 +66,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                                 stroke-width="2"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
-                                class="h-5 w-5 text-purple-300"
+                                class="h-5 w-5 text-indigo-300"
                                 aria-hidden="true"
                               >
                                 <path d="M5 12l14 0"></path>
@@ -117,7 +117,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                             stroke-width="2"
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            class="h-5 w-5 text-purple-300"
+                            class="h-5 w-5 text-indigo-300"
                             aria-hidden="true"
                           >
                             <path d="M5 12l14 0"></path>
@@ -168,7 +168,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           Christopher Chedeau
                         </h2>
                         <h3
-                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
+                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-indigo-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
                           style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;"
                         >
                           $10,000
@@ -193,7 +193,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           Guillermo Rauch
                         </h2>
                         <h3
-                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
+                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-indigo-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
                           style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;"
                         >
                           $10,000
@@ -218,7 +218,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           Wasmer
                         </h2>
                         <h3
-                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
+                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-indigo-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
                           style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;"
                         >
                           $2,500
@@ -243,7 +243,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           NAPI-RS
                         </h2>
                         <h3
-                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
+                          class="mt-1 font-mono text-2xl font-extrabold leading-none tracking-tighter text-indigo-100 mix-blend-exclusion md:text-4xl xl:text-3xl"
                           style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;"
                         >
                           $2,500
@@ -262,7 +262,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                     <p class="mb-8 mt-2 text-lg font-medium leading-7 text-gray-300">
                       Have a question? Send us an email at
                       <a
-                        class="font-semibold text-purple-300 hover:text-purple-200"
+                        class="font-semibold text-indigo-300 hover:text-indigo-200"
                         href="mailto:info@algora.io"
                       >
                         info@algora.io
@@ -298,7 +298,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                                 stroke-width="2"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
-                                class="h-5 w-5 text-purple-100"
+                                class="h-5 w-5 text-indigo-100"
                                 aria-hidden="true"
                               >
                                 <path d="M5 12l14 0"></path>
@@ -344,7 +344,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                               stroke-width="2"
                               stroke-linecap="round"
                               stroke-linejoin="round"
-                              class="h-5 w-5 text-purple-100"
+                              class="h-5 w-5 text-indigo-100"
                               aria-hidden="true"
                             >
                               <path d="M5 12l14 0"></path>
@@ -542,35 +542,42 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                               <path d="M7 16.5c3.5 1 6.5 1 10 0"></path>
                             </svg>
                           </a>
-                          <a rel="noopener noreferrer" href="https://github.com/biomejs"><svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-7 w-7 text-yellow-600 transition-colors duration-150 hover:text-yellow-500 hover:opacity-100"
-                          ><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"></path></svg></a><a
-                            rel="noopener"
-                            href="https://fosstodon.org/@biomejs"
-                          ><svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-7 w-7 text-yellow-600 transition-colors duration-150 hover:text-yellow-500 hover:opacity-100"
-                          ><path d="M18.648 15.254c-1.816 1.763 -6.648 1.626 -6.648 1.626a18.262 18.262 0 0 1 -3.288 -.256c1.127 1.985 4.12 2.81 8.982 2.475c-1.945 2.013 -13.598 5.257 -13.668 -7.636l-.026 -1.154c0 -3.036 .023 -4.115 1.352 -5.633c1.671 -1.91 6.648 -1.666 6.648 -1.666s4.977 -.243 6.648 1.667c1.329 1.518 1.352 2.597 1.352 5.633s-.456 4.074 -1.352 4.944z"></path><path d="M12 11.204v-2.926c0 -1.258 -.895 -2.278 -2 -2.278s-2 1.02 -2 2.278v4.722m4 -4.722c0 -1.258 .895 -2.278 2 -2.278s2 1.02 2 2.278v4.722"></path></svg></a><a
-                            rel="noopener"
-                            href="https://biomejs.dev"
-                          ><svg
+                          <a rel="noopener noreferrer" href="https://github.com/biomejs">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="h-7 w-7 text-yellow-600 transition-colors duration-150 hover:text-yellow-500 hover:opacity-100"
+                            >
+                              <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5">
+                              </path>
+                            </svg>
+                          </a>
+                          <a rel="noopener" href="https://fosstodon.org/@biomejs">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="h-7 w-7 text-yellow-600 transition-colors duration-150 hover:text-yellow-500 hover:opacity-100"
+                            >
+                              <path d="M18.648 15.254c-1.816 1.763 -6.648 1.626 -6.648 1.626a18.262 18.262 0 0 1 -3.288 -.256c1.127 1.985 4.12 2.81 8.982 2.475c-1.945 2.013 -13.598 5.257 -13.668 -7.636l-.026 -1.154c0 -3.036 .023 -4.115 1.352 -5.633c1.671 -1.91 6.648 -1.666 6.648 -1.666s4.977 -.243 6.648 1.667c1.329 1.518 1.352 2.597 1.352 5.633s-.456 4.074 -1.352 4.944z">
+                              </path>
+                              <path d="M12 11.204v-2.926c0 -1.258 -.895 -2.278 -2 -2.278s-2 1.02 -2 2.278v4.722m4 -4.722c0 -1.258 .895 -2.278 2 -2.278s2 1.02 2 2.278v4.722">
+                              </path>
+                            </svg>
+                          </a><a rel="noopener" href="https://biomejs.dev"><svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"
@@ -589,12 +596,12 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"
+                        class="group relative flex flex-col bg-indigo-950 p-8 transition-colors duration-150 hover:bg-gray-800"
                         href="https://github.com/biomejs/biome/blob/main/crates/biome_js_formatter/report.md"
                       >
                         <div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950">
                         </div>
-                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-purple-900/10 transition-colors duration-150 group-hover:bg-purple-900/20">
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-indigo-900/10 transition-colors duration-150 group-hover:bg-indigo-900/20">
                         </div>
                         <div class="relative">
                           <dt class="text-sm font-semibold leading-6 text-gray-300">
@@ -608,12 +615,12 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"
+                        class="group relative flex flex-col bg-indigo-950 p-8 transition-colors duration-150 hover:bg-gray-800"
                         href="https://github.com/biomejs/biome/blob/main/crates/biome_js_formatter/report.md"
                       >
                         <div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950">
                         </div>
-                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-purple-900/10 transition-colors duration-150 group-hover:bg-purple-900/20">
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-indigo-900/10 transition-colors duration-150 group-hover:bg-indigo-900/20">
                         </div>
                         <div class="relative">
                           <dt class="text-sm font-semibold leading-6 text-gray-300">
@@ -627,14 +634,37 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"
+                        class="group relative flex flex-col bg-indigo-950 p-8 transition-colors duration-150 hover:bg-gray-800"
                         href="https://github.com/biomejs/biome/pulls?q=challenge%28formatter%29"
-                      ><div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950"></div><div class="absolute left-0 top-0 z-0 h-full w-full bg-purple-900/10 transition-colors duration-150 group-hover:bg-purple-900/20"></div><div class="relative"><dt class="text-sm font-semibold leading-6 text-gray-300">Pull requests</dt><dd class="order-first text-3xl font-semibold tracking-tight text-white">42</dd></div></a><a
+                      >
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950">
+                        </div>
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-indigo-900/10 transition-colors duration-150 group-hover:bg-indigo-900/20">
+                        </div>
+                        <div class="relative">
+                          <dt class="text-sm font-semibold leading-6 text-gray-300">Pull requests</dt>
+                          <dd class="order-first text-3xl font-semibold tracking-tight text-white">
+                            42
+                          </dd>
+                        </div>
+                      </a>
+                      <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"
+                        class="group relative flex flex-col bg-indigo-950 p-8 transition-colors duration-150 hover:bg-gray-800"
                         href="https://github.com/biomejs/biome/pulls?q=challenge%28formatter%29"
-                      ><div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950"></div><div class="absolute left-0 top-0 z-0 h-full w-full bg-purple-900/10 transition-colors duration-150 group-hover:bg-purple-900/20"></div><div class="relative"><dt class="text-sm font-semibold leading-6 text-gray-300">Contributors</dt><dd class="order-first text-3xl font-semibold tracking-tight text-white">9</dd></div></a>
+                      >
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-gray-950">
+                        </div>
+                        <div class="absolute left-0 top-0 z-0 h-full w-full bg-indigo-900/10 transition-colors duration-150 group-hover:bg-indigo-900/20">
+                        </div>
+                        <div class="relative">
+                          <dt class="text-sm font-semibold leading-6 text-gray-300">Contributors</dt>
+                          <dd class="order-first text-3xl font-semibold tracking-tight text-white">
+                            9
+                          </dd>
+                        </div>
+                      </a>
                     </dl>
                     <div class="scrollbar-thin -mb-4 mt-8 overflow-x-auto pb-4">
                       <table class="w-full whitespace-nowrap text-left">

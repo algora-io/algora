@@ -70,9 +70,14 @@ defmodule Algora.Github.Poller.Comments do
   end
 
   @impl true
-  def handle_cast(:resume, state) do
+  def handle_cast(:resume, %{paused: true} = state) do
     schedule_poll()
     {:noreply, %{state | paused: false}}
+  end
+
+  @impl true
+  def handle_cast(:resume, state) do
+    {:noreply, state}
   end
 
   @impl true

@@ -136,7 +136,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                 </div>
                 <div class="absolute inset-0 z-0 h-[810px]">
                   <img
-                    src={~p"/images/prettier/bg.png"}
+                    src={~p"/images/challenges/prettier/bg.png"}
                     alt="Background"
                     class="h-full w-full object-cover object-[50%]"
                   />
@@ -160,7 +160,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                             alt="Christopher Chedeau"
                             loading="lazy"
                             class="rounded-full saturate-0"
-                            src={~p"/images/prettier/vjeux.jpg"}
+                            src={~p"/images/challenges/prettier/vjeux.jpg"}
                             style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                           />
                         </div>
@@ -185,7 +185,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                             alt="Guillermo Rauch"
                             loading="lazy"
                             class="rounded-full saturate-0"
-                            src={~p"/images/prettier/rauchg.jpg"}
+                            src={~p"/images/challenges/prettier/rauchg.jpg"}
                             style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                           />
                         </div>
@@ -210,7 +210,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                             alt="Wasmer"
                             loading="lazy"
                             class="rounded-full saturate-0"
-                            src={~p"/images/prettier/wasmer.png"}
+                            src={~p"/images/challenges/prettier/wasmer.png"}
                             style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                           />
                         </div>
@@ -235,7 +235,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                             alt="NAPI-RS"
                             loading="lazy"
                             class="rounded-full saturate-0"
-                            src={~p"/images/prettier/napi-rs.png"}
+                            src={~p"/images/challenges/prettier/napi-rs.png"}
                             style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;"
                           />
                         </div>
@@ -309,7 +309,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           </div>
                           <div
                             class="absolute inset-0 bg-cover bg-center opacity-100 mix-blend-overlay"
-                            style="background-image: url(&quot;/images/prettier/sponsor.png&quot;);"
+                            style="background-image: url(&quot;/images/challenges/prettier/sponsor.png&quot;);"
                           >
                           </div>
                           <div
@@ -354,7 +354,7 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                           </div>
                           <div
                             class="absolute inset-0 bg-cover bg-center opacity-100 mix-blend-overlay"
-                            style="background-image: url(&quot;/images/prettier/solve.png&quot;);"
+                            style="background-image: url(&quot;/images/challenges/prettier/solve.png&quot;);"
                           >
                           </div>
                           <div

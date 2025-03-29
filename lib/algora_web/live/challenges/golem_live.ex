@@ -68,7 +68,8 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                                 </g>
                               </g>
                             </g>
-                          </svg><span class="font-display text-[1.75rem] tracking-tight md:text-[4rem]">CHALLENGE</span>
+                          </svg>
+                          <span class="font-display text-[1.75rem] tracking-tight md:text-[4rem]">CHALLENGE</span>
                         </div>
                         <div class="hidden pt-2 text-[3rem] font-black tracking-tighter md:block">
                           Win<!-- -->
@@ -117,7 +118,8 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                           </path>
                           <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
                           <path d="M15 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-                        </svg><span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Tackle a challenging Rust-based task in Golem's open-source codebase</span>
+                        </svg>
+                        <span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Tackle a challenging Rust-based task in Golem's open-source codebase</span>
                       </div>
                       <div class="flex items-center gap-2">
                         <svg
@@ -134,7 +136,8 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                         >
                           <path d="M6 5h12l3 5l-8.5 9.5a.7 .7 0 0 1 -1 0l-8.5 -9.5l3 -5"></path>
                           <path d="M10 12l-2 -2.2l.6 -1"></path>
-                        </svg><span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Best implementation wins a<!-- --><span class="font-semibold">$15,000</span> bounty</span>
+                        </svg>
+                        <span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Best implementation wins a<!-- --><span class="font-semibold">$15,000</span> bounty</span>
                       </div>
                       <div class="flex items-center gap-2">
                         <svg
@@ -155,7 +158,8 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                           <path d="M17 10h2a2 2 0 0 1 2 2v1"></path>
                           <path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
                           <path d="M3 13v-1a2 2 0 0 1 2 -2h2"></path>
-                        </svg><span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Collaborate with and learn from top-tier Rust developers</span>
+                        </svg>
+                        <span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Collaborate with and learn from top-tier Rust developers</span>
                       </div>
                       <div class="flex items-center gap-2">
                         <svg
@@ -172,7 +176,8 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                         >
                           <path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6z">
                           </path>
-                        </svg><span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Showcase your skills to a wider open-source community</span>
+                        </svg>
+                        <span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Showcase your skills to a wider open-source community</span>
                       </div>
                       <div class="flex items-center gap-2">
                         <svg
@@ -192,7 +197,8 @@ defmodule AlgoraWeb.Challenges.GolemLive do
                           <path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
                           <path d="M12 12l0 .01"></path>
                           <path d="M3 13a20 20 0 0 0 18 0"></path>
-                        </svg><span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Potential opportunity to<!-- --><span class="font-semibold">join Golem's elite engineering team</span></span>
+                        </svg>
+                        <span class="shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)]">Potential opportunity to<!-- --><span class="font-semibold">join Golem's elite engineering team</span></span>
                       </div>
                     </div>
                   </div>

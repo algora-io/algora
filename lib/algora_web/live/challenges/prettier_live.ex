@@ -541,7 +541,8 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                               </path>
                               <path d="M7 16.5c3.5 1 6.5 1 10 0"></path>
                             </svg>
-                          </a><a rel="noopener noreferrer" href="https://github.com/biomejs"><svg
+                          </a>
+                          <a rel="noopener noreferrer" href="https://github.com/biomejs"><svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"
@@ -622,7 +623,8 @@ defmodule AlgoraWeb.Challenges.PrettierLive do
                             96.62%
                           </dd>
                         </div>
-                      </a><a
+                      </a>
+                      <a
                         target="_blank"
                         rel="noopener noreferrer"
                         class="group relative flex flex-col bg-purple-950 p-8 transition-colors duration-150 hover:bg-gray-800"

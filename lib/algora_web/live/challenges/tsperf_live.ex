@@ -110,12 +110,17 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                         <h3 class="mt-auto text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-xl">
                           Open Source<br /> API Key Management
                         </h3>
-                      </a><a
+                      </a>
+                      <a
                         target="_blank"
                         rel="noopener"
                         class="flex h-full flex-1 flex-col items-center text-white no-underline hover:no-underline"
                         href="https://scalar.com"
-                      ><img src="/images/wordmarks/scalar.png" alt="Scalar" class="h-20 w-auto saturate-0" /><h3 class="mt-auto text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-xl">Open Source<br /> API Documentation</h3></a><a
+                      ><img
+                        src="/images/wordmarks/scalar.png"
+                        alt="Scalar"
+                        class="h-20 w-auto saturate-0"
+                      /><h3 class="mt-auto text-2xl font-extrabold leading-none tracking-tighter text-purple-100 mix-blend-exclusion md:text-4xl xl:text-xl">Open Source<br /> API Documentation</h3></a><a
                         target="_blank"
                         rel="noopener"
                         class="flex h-full flex-1 flex-col items-center text-white no-underline hover:no-underline"
@@ -205,7 +210,8 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                       style="position:absolute;height:100%;width:100%;left:0;top:0;right:0;bottom:0;color:transparent"
                       src="/images/challenges/tsperf/tracer-repo.png"
                     />
-                  </a><a
+                  </a>
+                  <a
                     rel="noopener noreferrer"
                     class="relative aspect-[1200/600] w-full max-w-xl overflow-hidden rounded-xl rounded-l-none shadow-[0px_3.26536px_2.21381px_0px_rgba(30,_27,_75,_0.08),_0px_7.84712px_5.32008px_0px_rgba(30,_27,_75,_0.11),_0px_14.77543px_10.01724px_0px_rgba(30,_27,_75,_0.14),_0px_26.35684px_17.86905px_0px_rgba(30,_27,_75,_0.16),_0px_49.29758px_33.42209px_0px_rgba(30,_27,_75,_0.19),_0px_118px_80px_0px_rgba(30,_27,_75,_0.27)] ring-1 ring-white/15"
                     href="https://marketplace.visualstudio.com/items?itemName=tsperf.tracer"
@@ -300,7 +306,8 @@ defmodule AlgoraWeb.Challenges.TsperfLive do
                         </div>
                       </div>
                     </div>
-                  </a><a class="block pt-6 md:pt-12" href="https://tv.algora.io/danielroe/9476"><div class="relative z-30 mx-auto max-w-7xl"><div class="relative mx-auto"><div class="group/card h-full border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline"><div class="grid h-6 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 "><div class="ml-2 flex items-center gap-1"><div class="h-2 w-2 rounded-full bg-red-400"></div><div class="h-2 w-2 rounded-full bg-yellow-400"></div><div class="h-2 w-2 rounded-full bg-green-400"></div></div><div class="flex items-center justify-center"><div class="text-xs text-gray-500">tv.algora.io</div></div><div></div></div><div class="relative flex aspect-[16/9] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl"><div class="absolute right-2 top-2 hidden rounded-lg bg-red-500 px-2 py-1 text-2xl font-bold text-white [text-shadow:#450a0a_1px_0_2px] sm:right-5 sm:top-5 sm:text-4xl">LIVE</div><img
+                  </a>
+                  <a class="block pt-6 md:pt-12" href="https://tv.algora.io/danielroe/9476"><div class="relative z-30 mx-auto max-w-7xl"><div class="relative mx-auto"><div class="group/card h-full border border-white/10 bg-white/[2%] bg-gradient-to-br from-white/[2%] via-white/[2%] to-white/[2%] md:gap-8 group relative flex-1 overflow-hidden rounded-xl bg-cover shadow-[0px_3.26536px_2.21381px_0px_rgba(69,_10,_10,_0.08),_0px_7.84712px_5.32008px_0px_rgba(69,_10,_10,_0.11),_0px_14.77543px_10.01724px_0px_rgba(69,_10,_10,_0.14),_0px_26.35684px_17.86905px_0px_rgba(69,_10,_10,_0.16),_0px_49.29758px_33.42209px_0px_rgba(69,_10,_10,_0.19),_0px_118px_80px_0px_rgba(69,_10,_10,_0.27)] ring-2 ring-red-500 hover:no-underline"><div class="grid h-6 grid-cols-[1fr_auto_1fr] overflow-hidden border-b border-gray-800 "><div class="ml-2 flex items-center gap-1"><div class="h-2 w-2 rounded-full bg-red-400"></div><div class="h-2 w-2 rounded-full bg-yellow-400"></div><div class="h-2 w-2 rounded-full bg-green-400"></div></div><div class="flex items-center justify-center"><div class="text-xs text-gray-500">tv.algora.io</div></div><div></div></div><div class="relative flex aspect-[16/9] h-full w-full items-center justify-center text-balance bg-gray-950 text-center text-xl font-medium text-red-100 sm:text-2xl"><div class="absolute right-2 top-2 hidden rounded-lg bg-red-500 px-2 py-1 text-2xl font-bold text-white [text-shadow:#450a0a_1px_0_2px] sm:right-5 sm:top-5 sm:text-4xl">LIVE</div><img
                             src="/asset/storage/v1/object/public/images/challenges/tsperf-daniel-rhys.png"
                             alt="TSPerf Live Review with Daniel &amp; Rhys"
                           /></div></div></div></div></a>

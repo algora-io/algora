@@ -13,6 +13,7 @@ defmodule Algora.Github.Poller.RootSupervisor do
   def init(_init_arg) do
     children = [
       SearchSupervisor,
+      DeliverySupervisor,
       Supervisor.child_spec(
         {Task, &SearchSupervisor.start_children/0},
         id: :search_supervisor,

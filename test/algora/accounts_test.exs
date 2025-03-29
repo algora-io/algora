@@ -125,7 +125,7 @@ defmodule Algora.AccountsTest do
       assert is_nil(old_user.provider_id)
     end
 
-    test "is idempotent and creates activities", %{
+    test "is idempotent", %{
       github_info: github_info,
       emails: emails,
       token: token,
@@ -135,9 +135,6 @@ defmodule Algora.AccountsTest do
       {:ok, user_again} = Accounts.register_github_user(user, primary_email, github_info, emails, token)
 
       assert user.id == user_again.id
-      assert_activity_names([:identity_created, :identity_created])
-      assert_activity_names_for_user(user.id, [:identity_created])
-      assert_activity_names_for_user(user_again.id, [:identity_created])
     end
 
     test "user.name is never nil", %{

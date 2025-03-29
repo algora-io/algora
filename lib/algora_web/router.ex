@@ -171,6 +171,9 @@ defmodule AlgoraWeb.Router do
     # Legacy tRPC endpoints
     get "/trpc/bounty.list", BountyController, :index
     post "/trpc/bounty.list", BountyController, :index
+
+    # Shields.io badges
+    get "/shields/:org_handle/bounties", ShieldsController, :bounties
   end
 
   # Other scopes may use custom stacks.

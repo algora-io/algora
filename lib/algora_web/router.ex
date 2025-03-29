@@ -145,6 +145,8 @@ defmodule AlgoraWeb.Router do
       live "/onboarding/dev", Onboarding.DevLive
       live "/pricing", PricingLive
       live "/challenges/prettier", Challenges.PrettierLive
+      live "/challenges/golem", Challenges.GolemLive
+      live "/challenges/tsperf", Challenges.TsperfLive
       live "/swift", SwiftBountiesLive
       live "/blog/:slug", BlogLive, :show
       live "/blog", BlogLive, :index

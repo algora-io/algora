@@ -147,6 +147,7 @@ defmodule Algora.Bounties do
                     visibility: opts[:visibility],
                     shared_with: shared_with
                   })
+                  # |> Activity.put_activity(%Bounty{}, %{type: :bounty_updated, notify_users: []})
                   |> Repo.update()
 
                 :increase ->
@@ -156,6 +157,7 @@ defmodule Algora.Bounties do
                     visibility: opts[:visibility],
                     shared_with: shared_with
                   })
+                  # |> Activity.put_activity(%Bounty{}, %{type: :bounty_updated, notify_users: []})
                   |> Repo.update()
               end),
            {:ok, _job} <-

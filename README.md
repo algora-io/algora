@@ -150,16 +150,14 @@ STRIPE_SECRET_KEY=""
 STRIPE_WEBHOOK_SECRET=""
 ```
 
-#### Tigris
+#### Object Storage
 
-Tigris is used for hosting static assets.
-
-[Create a public Tigris bucket](https://console.tigris.dev/) to obtain your secrets and add them to your `.env` file.
+To host static assets, set up a public bucket on your preferred S3-compatible storage service and add the following credentials to your `.env` file:
 
 ```env
-AWS_ENDPOINT_URL_S3="https://fly.storage.tigris.dev"
-AWS_REGION="auto"
-AWS_ACCESS_KEY_ID="tid_..."
-AWS_SECRET_ACCESS_KEY="tsec_..."
-BUCKET_NAME="..."
+AWS_ENDPOINT_URL_S3=""
+AWS_REGION=""
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+BUCKET_NAME=""
 ```

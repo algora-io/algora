@@ -30,6 +30,27 @@ defmodule AlgoraWeb.User.DashboardLive do
     end
   end
 
+  defmodule AvailabilityForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :hourly_rate_min, :integer
+      field :hours_per_week, :integer
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:hourly_rate_min, :hours_per_week])
+      |> validate_required([:hourly_rate_min, :hours_per_week])
+      |> validate_number(:hourly_rate_min, greater_than: 0)
+      |> validate_number(:hours_per_week, greater_than: 0, less_than_or_equal_to: 40)
+    end
+  end
+
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -49,6 +70,14 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> SettingsForm.changeset(%{tech_stack: socket.assigns.current_user.tech_stack})
       |> to_form()
 
+    availability_form =
+      %AvailabilityForm{}
+      |> AvailabilityForm.changeset(%{
+        hourly_rate_min: socket.assigns.current_user.hourly_rate_min,
+        hours_per_week: socket.assigns.current_user.hours_per_week
+      })
+      |> to_form()
+
     total_earned =
       case Accounts.fetch_developer_by(handle: socket.assigns.current_user.handle) do
         {:ok, user} -> user.total_earned
@@ -58,12 +87,10 @@ defmodule AlgoraWeb.User.DashboardLive do
     socket =
       socket
       |> assign(:view_mode, "compact")
-      |> assign(:available_to_work, true)
-      |> assign(:hourly_rate, Money.new!(50, :USD))
-      |> assign(:hours_per_week, 40)
       |> assign(:contracts, contracts)
       |> assign(:has_active_account, has_active_account)
       |> assign(:settings_form, settings_form)
+      |> assign(:availability_form, availability_form)
       |> assign(:total_earned, total_earned)
       |> assign_bounties()
       |> assign_achievements()
@@ -152,7 +179,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       <!-- Sidebar -->
       <aside class="lg:fixed lg:top-16 lg:right-0 lg:bottom-0 lg:w-96 lg:overflow-y-auto scrollbar-thin lg:border-l lg:border-border lg:bg-background p-4 pt-6 sm:p-6 md:p-8">
         <!-- Availability Section -->
-        <%!-- <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <label for="available" class="text-sm font-medium">Available to work</label>
             <.tooltip>
@@ -165,47 +192,46 @@ defmodule AlgoraWeb.User.DashboardLive do
           <.switch
             id="available"
             name="available"
-            value={@available_to_work}
-            phx-click="toggle_availability"
+            value={@current_user.seeking_contracts}
+            on_click={
+              %JS{}
+              |> JS.push("toggle_availability")
+              |> JS.toggle(to: "#availability-details")
+            }
           />
         </div>
-        <div class="mt-4 grid grid-cols-2 gap-4">
-          <div>
-            <label for="hourly-rate" class="text-sm font-medium">Hourly rate (USD)</label>
-            <div class="relative mt-2">
-              <span class="font-display absolute top-1/2 left-3 -translate-y-1/2">
-                $
-              </span>
-              <.input
-                type="number"
-                min="0"
-                id="hourly-rate"
-                name="hourly-rate"
-                value={@hourly_rate}
-                phx-keydown="handle_hourly_rate"
-                phx-debounce="200"
-                phx-hook="ClearInput"
-                class="font-display w-full border-input bg-background ps-6"
-              />
-            </div>
-          </div>
-          <div>
-            <label for="hours-per-week" class="text-sm font-medium">Hours per week</label>
-            <.input
-              type="number"
-              min="0"
-              max="168"
-              id="hours-per-week"
-              name="hours-per-week"
-              value={@hours_per_week}
-              phx-keydown="handle_hours_per_week"
-              phx-debounce="200"
-              class="font-display mt-2 w-full border-input bg-background"
-            />
-          </div>
-        </div> --%>
+        <.form
+          for={@availability_form}
+          id="availability-form"
+          phx-change="validate_availability"
+          phx-submit="save_availability"
+          class={
+            classes([
+              "mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4",
+              @current_user.seeking_contracts || "hidden"
+            ])
+          }
+        >
+          <.input
+            field={@availability_form[:hourly_rate_min]}
+            label="Hourly Rate (USD)"
+            icon="tabler-currency-dollar"
+          />
+          <.input
+            field={@availability_form[:hours_per_week]}
+            label="Hours per Week"
+            icon="tabler-clock"
+          />
+          <.button
+            :if={@availability_form.source.action == :validate}
+            type="submit"
+            class="lg:col-span-2"
+          >
+            Save
+          </.button>
+        </.form>
         <!-- Tech Stack Section -->
-        <div>
+        <div class="mt-4">
           <h2 class="mb-2 text-xl font-semibold">
             Tech stack
           </h2>
@@ -356,6 +382,54 @@ defmodule AlgoraWeb.User.DashboardLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, :settings_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("toggle_availability", _params, socket) do
+    current_user = socket.assigns.current_user
+
+    {:ok, user} = Accounts.update_settings(current_user, %{seeking_contracts: !current_user.seeking_contracts})
+
+    {:noreply, assign(socket, :current_user, user)}
+  end
+
+  @impl true
+  def handle_event("validate_availability", %{"availability_form" => params}, socket) do
+    form =
+      %AvailabilityForm{}
+      |> AvailabilityForm.changeset(params)
+      |> Map.put(:action, :validate)
+      |> to_form()
+
+    {:noreply, assign(socket, availability_form: form)}
+  end
+
+  @impl true
+  def handle_event("save_availability", %{"availability_form" => params}, socket) do
+    changeset =
+      %AvailabilityForm{}
+      |> AvailabilityForm.changeset(params)
+      |> Map.put(:action, :validate)
+
+    case changeset do
+      %{valid?: true} ->
+        case socket.assigns.current_user
+             |> User.settings_changeset(params)
+             |> Repo.update() do
+          {:ok, user} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Availability updated!")
+             |> assign(:current_user, user)
+             |> assign(:availability_form, changeset |> Map.put(:action, nil) |> to_form())}
+
+          {:error, _changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to update availability")}
+        end
+
+      %{valid?: false} ->
+        {:noreply, assign(socket, availability_form: to_form(changeset))}
     end
   end
 

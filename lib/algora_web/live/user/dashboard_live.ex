@@ -184,7 +184,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             <label for="available" class="text-sm font-medium">Available to work</label>
             <.tooltip>
               <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
-              <.tooltip_content side="bottom" class="max-w-xs text-sm">
+              <.tooltip_content side="bottom" class="text-xs">
                 When enabled, you will receive hourly contract offers
               </.tooltip_content>
             </.tooltip>

@@ -332,28 +332,28 @@ defmodule AlgoraWeb.SignInLive do
           "Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.",
         author: "John A. De Goes",
         role: "Founder & CEO, Golem Cloud",
-        avatar: "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+        avatar: ~p"/images/people/john-de-goes-2.jpg"
       },
       %{
         text:
           "That's one massive advantage open source companies have versus closed source. You get to show people your work, plus you can point to your contributions as proof of your abilities.",
         author: "Eric Allam",
         role: "Founder & CTO, Trigger.dev (YC W23)",
-        avatar: "https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
+        avatar: ~p"/images/people/eric-allam.jpg"
       },
       %{
         text:
           "We've used Algora extensively at Golem Cloud for our hiring needs. Many times someone who is very active in open-source development, these types of engineers often make fantastic additions to a team.",
         author: "John A. De Goes",
         role: "Founder & CEO, Golem Cloud",
-        avatar: "https://pbs.twimg.com/profile_images/1771489509798236160/jGsCqm25_400x400.jpg"
+        avatar: ~p"/images/people/john-de-goes-2.jpg"
       },
       %{
         text:
           "We were doing bounties on Algora, and this one developer Nick kept solving them. His personality really came through in the GitHub issues and code. We ended up hiring him from that.",
         author: "Eric Allam",
         role: "Founder & CTO, Trigger.dev (YC W23)",
-        avatar: "https://pbs.twimg.com/profile_images/1584912680007204865/a_GK3tMi_400x400.jpg"
+        avatar: ~p"/images/people/eric-allam.jpg"
       },
       %{
         text:

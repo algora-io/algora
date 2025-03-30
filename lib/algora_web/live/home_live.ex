@@ -788,7 +788,7 @@ defmodule AlgoraWeb.HomeLive do
                       </div>
                     </div>
                     <img
-                      src="https://pbs.twimg.com/profile_images/1599993355089465344/R6Al_s_H_400x400.jpg"
+                      src={~p"/images/people/nicolas-camara.jpg"}
                       alt="Nicolas Camara"
                       class="size-12 rounded-full object-cover"
                       loading="lazy"

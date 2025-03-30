@@ -264,7 +264,12 @@ defmodule Algora.Accounts.User do
       :country,
       :location,
       :timezone,
-      :tech_stack
+      :tech_stack,
+      :seeking_contracts,
+      :seeking_bounties,
+      :seeking_jobs,
+      :hourly_rate_min,
+      :hours_per_week
     ])
     |> validate_required([:handle, :display_name])
     |> validate_handle()

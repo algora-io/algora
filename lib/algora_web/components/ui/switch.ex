@@ -11,7 +11,7 @@ defmodule AlgoraWeb.Components.UI.Switch do
   attr :id, :string, required: true
   attr :name, :string, default: nil
   attr :value, :boolean, default: nil
-
+  attr :on_click, JS, default: %JS{}
   attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :"default-value", :any, values: [true, false, "true", "false"], default: false
@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Components.UI.Switch do
       type="button"
       role="switch"
       data-state={(@checked && "checked") || "unchecked"}
-      phx-click={toggle(@id)}
+      phx-click={@on_click |> toggle(@id)}
       class={
         classes([
           "group/switch inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors data-[state=checked]:bg-success data-[state=unchecked]:bg-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
@@ -48,8 +48,8 @@ defmodule AlgoraWeb.Components.UI.Switch do
     """
   end
 
-  defp toggle(id) do
-    %JS{}
+  defp toggle(js, id) do
+    js
     |> JS.toggle_attribute({"data-state", "checked", "unchecked"})
     |> JS.toggle_attribute({"checked", true}, to: "##{id} input[type=checkbox]")
   end

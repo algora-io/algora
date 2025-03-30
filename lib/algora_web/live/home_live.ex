@@ -114,8 +114,8 @@ defmodule AlgoraWeb.HomeLive do
         <Header.header />
       <% end %>
 
-      <main>
-        <section class="relative isolate overflow-hidden min-h-[100svh] bg-gradient-to-b from-background to-black">
+      <main class="bg-black relative overflow-hidden">
+        <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
           <.pattern />
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
@@ -171,7 +171,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
 
-          <div class="relative isolate overflow-hidden py-[35vw] sm:py-[25vw]">
+          <div class="relative isolate py-[35vw] sm:py-[25vw]">
             <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               <div class="scale-[300%] sm:scale-[150%] opacity-50">
                 <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
@@ -408,7 +408,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img
               src={~p"/images/logos/yc.svg"}
@@ -467,7 +467,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Build product faster
@@ -685,7 +685,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Hire by building product
@@ -762,7 +762,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <.link
@@ -843,7 +843,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto px-6 lg:px-8">
             <div class="relative z-10 pb-4 xl:py-16">
               <div class="mx-auto max-w-7xl sm:text-center">
@@ -901,7 +901,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate overflow-hidden bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Did you know?
@@ -982,7 +982,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate bg-black py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               <span class="text-muted-foreground">The open source</span>

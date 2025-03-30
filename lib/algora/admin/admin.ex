@@ -6,16 +6,35 @@ defmodule Algora.Admin do
   alias Algora.Activities.SendDiscord
   alias Algora.Bounties.Claim
   alias Algora.Github
+  alias Algora.LLM
   alias Algora.Parser
   alias Algora.Payments
+  alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
+  alias Algora.Workspace.Comment
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
   require Logger
+
+  @llm_batch_size 2500
+
+  def rewarded_pulls do
+    Repo.all(
+      from t in Ticket,
+        join: c in Claim,
+        on: c.source_id == t.id,
+        join: tx in Transaction,
+        on: tx.claim_id == c.id,
+        where: tx.status == :succeeded,
+        where: fragment("NOT EXISTS (SELECT 1 FROM comments WHERE comments.ticket_id = ?)", t.id),
+        select: t.provider_meta["url"],
+        order_by: [desc: :inserted_at]
+    )
+  end
 
   def magic(:email, email, return_to),
     do: AlgoraWeb.Endpoint.url() <> AlgoraWeb.UserAuth.generate_login_path(email, return_to)
@@ -443,5 +462,193 @@ defmodule Algora.Admin do
     :ok
   rescue
     error -> {:error, error}
+  end
+
+  def backfill_comments! do
+    {success, failure} =
+      rewarded_pulls()
+      |> Task.async_stream(&backfill_comments/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Comments backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
+  def backfill_comments(url) do
+    with {:ok, ticket} <- get_ticket_by_url(url),
+         {:ok, comments} <- Github.Client.fetch(token!(), ticket.provider_meta["comments_url"]),
+         {:ok, _} <- insert_comments(comments, ticket) do
+      {:ok, comments}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill comments for #{url}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  defp get_ticket_by_url(url) do
+    case Repo.one(from t in Ticket, where: fragment("?->>'url' = ?", t.provider_meta, ^url)) do
+      nil -> {:error, :not_found}
+      ticket -> {:ok, ticket}
+    end
+  end
+
+  defp insert_comments(comments, ticket) do
+    comments
+    |> Enum.reject(&is_bot_comment?/1)
+    |> Enum.map(fn comment ->
+      user = get_user(comment["user"])
+      Comment.github_changeset(comment, ticket, user)
+    end)
+    |> Enum.reduce(Ecto.Multi.new(), fn changeset, multi ->
+      Ecto.Multi.insert(multi, {:comment, changeset.changes.provider_id}, changeset,
+        on_conflict: :nothing,
+        conflict_target: [:provider, :provider_id]
+      )
+    end)
+    |> Repo.transaction()
+  end
+
+  defp is_bot_comment?(comment) do
+    user = comment["user"]
+    user["type"] == "Bot" || String.ends_with?(user["login"], "[bot]")
+  end
+
+  defp get_user(user_data) do
+    Repo.get_by(User, provider: "github", provider_id: to_string(user_data["id"]))
+  end
+
+  def analyze_comments do
+    with {:ok, comments} <- get_unanalyzed_comments(limit: @llm_batch_size),
+         comments = prepare_comments(comments),
+         {:ok, results} <- analyze_comment_batches(comments) do
+      # Mark all comments as analyzed, updating those with positive feedback
+      Enum.each(comments, fn comment ->
+        result = Enum.find(results, fn r -> r["comment_id"] == comment.id end)
+
+        comment.comment
+        |> Comment.mark_analyzed(result && result["analysis"])
+        |> Repo.update!()
+      end)
+
+      {:ok, results}
+    else
+      {:error, :not_found} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to analyze comments: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def get_unanalyzed_comments(opts \\ []) do
+    comments =
+      Repo.all(
+        from c in Comment,
+          where: is_nil(c.llm_analyzed_at),
+          order_by: [asc: c.inserted_at],
+          limit: ^opts[:limit]
+      )
+
+    {:ok, comments}
+  end
+
+  defp prepare_comments(comments) do
+    comments
+    |> Enum.reject(&is_long_code_comment?/1)
+    |> Enum.map(fn comment ->
+      %{
+        id: comment.provider_id,
+        body: clean_comment_body(comment.body),
+        author: get_in(comment.provider_meta, ["user", "login"]),
+        # Keep reference to original comment
+        comment: comment
+      }
+    end)
+  end
+
+  defp is_long_code_comment?(comment) do
+    body = comment.body || ""
+    # Skip if more than 50% is code blocks or comment is too long
+    code_blocks = Regex.scan(~r/```[\s\S]*?```/, body)
+    total_length = String.length(body)
+    code_length = code_blocks |> Enum.join() |> String.length()
+
+    total_length > 2000 || (code_length > 0 && code_length / total_length > 0.5)
+  end
+
+  defp clean_comment_body(body) when is_binary(body) do
+    body
+    |> String.replace(~r/```[\s\S]*?```/, "[code block removed]")
+    |> String.replace(~r/`[^`]*`/, "[inline code removed]")
+    |> String.trim()
+  end
+
+  defp clean_comment_body(_), do: ""
+
+  defp analyze_comment_batches(comments) do
+    comments
+    |> Enum.chunk_every(@llm_batch_size)
+    |> Task.async_stream(&analyze_comment_batch/1, max_concurrency: 1, timeout: :infinity)
+    |> Enum.reduce(
+      {:ok, []},
+      fn
+        {:ok, {:ok, results}}, {:ok, acc} -> {:ok, acc ++ results}
+        _, _error -> {:error, "Analysis failed"}
+      end
+    )
+  end
+
+  defp analyze_comment_batch(comments) do
+    prompt = """
+    Analyze these GitHub comments and identify ONLY the ones containing HIGHLY enthusiastic feedback or substantial appreciation for the PR author.
+    We're looking for comments that go beyond simple approval - find comments that show genuine excitement, detailed appreciation, or meaningful recognition.
+
+    Include ONLY comments that have elements like:
+    - Strong enthusiasm ("This is amazing!", "Incredible work!", etc.)
+    - Detailed appreciation of specific aspects of the work
+    - Personal impact statements ("This will help so many people", "Can't wait to use this")
+    - Recognition of exceptional effort or quality
+    - Meaningful encouragement with specific details
+
+    EXCLUDE simple approvals like:
+    - "LGTM"
+    - Basic thumbs up 👍
+    - "Looks good"
+    - "Approved"
+    - Simple "Thanks"
+    - Basic merge approvals
+
+    Comments to analyze:
+    #{Enum.map_join(comments, "\n\n", fn c -> "Comment #{c.id}:\n#{c.body}" end)}
+
+    Return a JSON object with a single key "positive_comments" containing an array of objects.
+    Each object should have:
+    - comment_id: The comment ID
+    - analysis: Brief explanation of why this comment shows exceptional enthusiasm or appreciation
+
+    Only include comments showing genuine excitement or substantial appreciation.
+    If no comments meet this high bar, return {"positive_comments": []}.
+    """
+
+    case LLM.chat(prompt) do
+      {:ok, response} ->
+        case Jason.decode(response) do
+          {:ok, %{"positive_comments" => results}} -> {:ok, results}
+          {:ok, _} -> {:ok, []}
+          error -> error
+        end
+
+      error ->
+        error
+    end
   end
 end

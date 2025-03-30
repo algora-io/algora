@@ -301,16 +301,20 @@ defmodule AlgoraWeb.Contract.ViewLive do
                       <% end %>
                     </div>
                     <div class="space-y-2 pt-6">
-                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div
+                        :if={@contract.contractor.location}
+                        class="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
                         <.icon name="tabler-map-pin" class="h-4 w-4" />
                         {@contract.contractor.location}
                       </div>
-                      <%= if @contract.contractor.timezone do %>
-                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-clock" class="h-4 w-4" />
-                          {Algora.Time.friendly_timezone(@contract.contractor.timezone)}
-                        </div>
-                      <% end %>
+                      <div
+                        :if={@contract.contractor.timezone}
+                        class="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
+                        <.icon name="tabler-clock" class="h-4 w-4" />
+                        {Algora.Time.friendly_timezone(@contract.contractor.timezone)}
+                      </div>
                     </div>
                   </.card_content>
                 </.card>

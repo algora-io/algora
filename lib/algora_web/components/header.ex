@@ -57,7 +57,7 @@ defmodule AlgoraWeb.Components.Header do
             class="group w-fit outline-none flex items-center"
             target="_blank"
             rel="noopener"
-            href={AlgoraWeb.Constants.get(:github_url)}
+            href={AlgoraWeb.Constants.get(:github_repo_url)}
           >
             <div class="rounded-[3px] hidden shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
               <div class="flex w-full items-center justify-center gap-x-1">

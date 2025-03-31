@@ -69,6 +69,7 @@ defmodule AlgoraWeb.BountyLive do
       |> Repo.get!(bounty_id)
       |> Repo.preload([
         :owner,
+        :creator,
         :transactions,
         ticket: [repository: [:user]]
       ])
@@ -108,6 +109,7 @@ defmodule AlgoraWeb.BountyLive do
      |> assign(:show_exclusive_modal, false)
      |> assign(:selected_context, nil)
      |> assign(:line_items, [])
+     |> assign(:messages, [])
      |> assign(:reward_form, to_form(reward_changeset))
      |> assign(:exclusive_form, to_form(exclusive_changeset))
      |> assign_exclusives(bounty.shared_with)}
@@ -259,9 +261,9 @@ defmodule AlgoraWeb.BountyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto py-8 px-4">
-      <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
-        <div class="space-y-8">
+    <div class="flex">
+      <.scroll_area class="h-[calc(100vh-64px)] flex-1 p-4">
+        <div class="space-y-4">
           <.card>
             <.card_content>
               <div class="flex justify-between">
@@ -374,6 +376,108 @@ defmodule AlgoraWeb.BountyLive do
               </div>
             </.card_content>
           </.card>
+        </div>
+      </.scroll_area>
+
+      <div class="h-[calc(100vh-64px)] w-[400px] flex flex-none flex-col border-l border-border">
+        <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <.avatar>
+                <.avatar_image src={@bounty.owner.avatar_url} alt="Developer avatar" />
+                <.avatar_fallback>
+                  {Algora.Util.initials(@bounty.owner.name)}
+                </.avatar_fallback>
+              </.avatar>
+              <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
+              </div>
+            </div>
+            <div>
+              <h2 class="text-lg font-semibold">{@bounty.owner.name}</h2>
+            </div>
+          </div>
+        </div>
+
+        <.scroll_area
+          class="flex h-full flex-1 flex-col-reverse gap-6 p-4"
+          id="messages-container"
+          phx-hook="ScrollToBottom"
+        >
+          <div class="space-y-6">
+            <%= for {date, messages} <- @messages
+                |> Enum.group_by(fn msg ->
+                  case Date.diff(Date.utc_today(), DateTime.to_date(msg.inserted_at)) do
+                    0 -> "Today"
+                    1 -> "Yesterday"
+                    n when n <= 7 -> Calendar.strftime(msg.inserted_at, "%A")
+                    _ -> Calendar.strftime(msg.inserted_at, "%b %d")
+                  end
+                end)
+                |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, Date) do %>
+              <div class="flex items-center justify-center">
+                <div class="rounded-full bg-background px-2 py-1 text-xs text-muted-foreground">
+                  {date}
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-6">
+                <%= for message <- Enum.sort_by(messages, & &1.inserted_at, Date) do %>
+                  <div class="group flex gap-3">
+                    <.avatar class="h-8 w-8">
+                      <.avatar_image src={message.sender.avatar_url} />
+                      <.avatar_fallback>
+                        {Util.initials(message.sender.name)}
+                      </.avatar_fallback>
+                    </.avatar>
+                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
+                      {message.content}
+                      <div class="text-[10px] mt-1 text-muted-foreground">
+                        {message.inserted_at
+                        |> DateTime.to_time()
+                        |> Time.to_string()
+                        |> String.slice(0..4)}
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </.scroll_area>
+
+        <div class="mt-auto flex-none border-t border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <form phx-submit="send_message" class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <.input
+                id="message-input"
+                type="text"
+                name="message"
+                value=""
+                placeholder="Type a message..."
+                autocomplete="off"
+                class="flex-1 pr-24"
+                phx-hook="ClearInput"
+              />
+              <div class="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1">
+                <.button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  phx-hook="EmojiPicker"
+                  id="emoji-trigger"
+                >
+                  <.icon name="tabler-mood-smile" class="h-4 w-4" />
+                </.button>
+              </div>
+            </div>
+            <.button type="submit" size="icon">
+              <.icon name="tabler-send" class="h-4 w-4" />
+            </.button>
+          </form>
+          <!-- Add the emoji picker element (hidden by default) -->
+          <div id="emoji-picker-container" class="bottom-[80px] absolute right-4 hidden">
+            <emoji-picker></emoji-picker>
+          </div>
         </div>
       </div>
     </div>

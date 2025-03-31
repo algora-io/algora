@@ -306,7 +306,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <div
                     role="tablist"
                     aria-orientation="horizontal"
-                    class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-md p-1 bg-muted text-card-foreground"
+                    class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-lg p-1 bg-muted/40 text-card-foreground"
                     tabindex="0"
                     data-orientation="horizontal"
                     style="outline: none;"
@@ -731,9 +731,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {:noreply,
              socket
              |> assign(:show_share_drawer, false)
-             |> assign_contracts()
-             |> assign_achievements()
-             |> put_flash(:info, "Contract offer sent to #{socket.assigns.selected_developer.name}")}
+             |> redirect(to: ~p"/org/#{socket.assigns.current_org.handle}/contracts/#{contract.id}")}
 
           {:error, changeset} ->
             {:noreply, put_flash(socket, :error, "Failed to create contract: #{inspect(changeset.errors)}")}
@@ -1585,7 +1583,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     <.drawer_header>
       <.drawer_title>Offer Contract</.drawer_title>
       <.drawer_description>
-        Once you send an offer, {@selected_developer.name} will be notified and can accept or decline.
+        {@selected_developer.name} will be notified and can accept or decline. You can auto-renew or cancel the contract at the end of each period.
       </.drawer_description>
     </.drawer_header>
     """

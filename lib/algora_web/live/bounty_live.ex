@@ -381,19 +381,19 @@ defmodule AlgoraWeb.BountyLive do
 
       <div class="h-[calc(100vh-64px)] w-[400px] flex flex-none flex-col border-l border-border">
         <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div class="flex items-center gap-3">
-            <div class="relative">
-              <.avatar>
-                <.avatar_image src={@bounty.owner.avatar_url} alt="Developer avatar" />
-                <.avatar_fallback>
-                  {Algora.Util.initials(@bounty.owner.name)}
-                </.avatar_fallback>
-              </.avatar>
-              <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
-              </div>
-            </div>
-            <div>
-              <h2 class="text-lg font-semibold">{@bounty.owner.name}</h2>
+          <div class="flex justify-between items-center w-full">
+            <h2 class="text-lg font-semibold">
+              Chat
+            </h2>
+            <div class="relative flex -space-x-2">
+              <%= for user <- @exclusives do %>
+                <.avatar>
+                  <.avatar_image src={user.avatar_url} alt="Developer avatar" />
+                  <.avatar_fallback>
+                    {Algora.Util.initials(@bounty.owner.name)}
+                  </.avatar_fallback>
+                </.avatar>
+              <% end %>
             </div>
           </div>
         </div>
@@ -659,11 +659,6 @@ defmodule AlgoraWeb.BountyLive do
 
   defp contexts(_bounty) do
     Accounts.list_featured_developers()
-  end
-
-  # TODO: implement this
-  defp bounty_frequency(_bounty) do
-    "Monthly"
   end
 
   defp close_drawers(socket) do

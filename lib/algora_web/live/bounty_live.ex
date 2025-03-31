@@ -113,20 +113,6 @@ defmodule AlgoraWeb.BountyLive do
      |> assign_exclusives(bounty.shared_with)}
   end
 
-  defp assign_exclusives(socket, shared_with) do
-    exclusives =
-      Enum.flat_map(shared_with, fn github_handle ->
-        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
-             {:ok, user} <- Workspace.ensure_user(token, github_handle) do
-          [user]
-        else
-          _ -> []
-        end
-      end)
-
-    assign(socket, :exclusives, exclusives)
-  end
-
   @impl true
   def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket}
@@ -373,6 +359,45 @@ defmodule AlgoraWeb.BountyLive do
               <% end %>
             </.card_content>
           </.card>
+
+          <.card>
+            <.card_header>
+              <div class="flex items-center justify-between">
+                <.card_title>
+                  Share on socials
+                </.card_title>
+                <div class="flex gap-2">
+                  <.social_share_button
+                    id="twitter-share-url"
+                    icon="tabler-brand-x"
+                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                  />
+                  <.social_share_button
+                    id="reddit-share-url"
+                    icon="tabler-brand-reddit"
+                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                  />
+                  <.social_share_button
+                    id="linkedin-share-url"
+                    icon="tabler-brand-linkedin"
+                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                  />
+                  <.social_share_button
+                    id="hackernews-share-url"
+                    icon="tabler-brand-ycombinator"
+                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                  />
+                </div>
+              </div>
+            </.card_header>
+            <.card_content>
+              <img
+                src={~p"/og/0/bounties/#{@bounty.id}"}
+                alt={@bounty.ticket.title}
+                class="mt-3 w-full aspect-[1200/630] max-w-xs rounded-lg ring-1 ring-input bg-black"
+              />
+            </.card_content>
+          </.card>
         </div>
       </div>
     </div>
@@ -522,6 +547,36 @@ defmodule AlgoraWeb.BountyLive do
     """
   end
 
+  defp social_share_button(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      phx-hook="CopyToClipboard"
+      data-value={@value}
+      phx-click={
+        %JS{}
+        |> JS.hide(
+          to: "##{@id}-copy-icon",
+          transition: {"transition-opacity", "opacity-100", "opacity-0"}
+        )
+        |> JS.show(
+          to: "##{@id}-check-icon",
+          transition: {"transition-opacity", "opacity-0", "opacity-100"}
+        )
+      }
+      class="size-6 relative cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
+      variant="outline"
+    >
+      <.icon id={@id <> "-copy-icon"} name={@icon} class="absolute my-auto size-6 mr-2" />
+      <.icon
+        id={@id <> "-check-icon"}
+        name="tabler-check"
+        class="absolute my-auto hidden size-6 mr-2"
+      />
+    </div>
+    """
+  end
+
   defp contexts(_bounty) do
     Accounts.list_featured_developers()
   end
@@ -535,5 +590,19 @@ defmodule AlgoraWeb.BountyLive do
     socket
     |> assign(:show_reward_modal, false)
     |> assign(:show_exclusive_modal, false)
+  end
+
+  defp assign_exclusives(socket, shared_with) do
+    exclusives =
+      Enum.flat_map(shared_with, fn github_handle ->
+        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+             {:ok, user} <- Workspace.ensure_user(token, github_handle) do
+          [user]
+        else
+          _ -> []
+        end
+      end)
+
+    assign(socket, :exclusives, exclusives)
   end
 end

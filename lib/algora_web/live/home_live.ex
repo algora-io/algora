@@ -943,7 +943,7 @@ defmodule AlgoraWeb.HomeLive do
                   >
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
                       <.input
-                        label="GitHub Username"
+                        label="GitHub handle"
                         field={@tip_form[:github_handle]}
                         placeholder="jsmith"
                       />

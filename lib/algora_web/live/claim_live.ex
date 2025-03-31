@@ -411,7 +411,7 @@ defmodule AlgoraWeb.ClaimLive do
             <.card_header>
               <div class="flex items-center justify-between">
                 <.card_title>
-                  Authors
+                  Contributors
                 </.card_title>
               </div>
             </.card_header>

@@ -299,73 +299,90 @@ defmodule AlgoraWeb.BountyLive do
             </.card_content>
           </.card>
           <div class="grid grid-cols-2 gap-4">
-            <.card>
-              <.card_header>
-                <div class="flex items-center justify-between">
-                  <.card_title>
-                    Exclusives
-                  </.card_title>
-                  <.button variant="secondary" phx-click="exclusive">
-                    <.icon name="tabler-user-plus" class="h-4 w-4 mr-2 -ml-1" /> Add
-                  </.button>
-                </div>
-              </.card_header>
+            <.card class="col">
               <.card_content>
-                <%= for user <- @exclusives do %>
-                  <div class="flex justify-between text-sm">
-                    <span>
-                      <div class="flex items-center gap-4">
-                        <.avatar>
-                          <.avatar_image src={user.avatar_url} />
-                          <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
-                        </.avatar>
-                        <div>
-                          <p class="font-medium">{user.name}</p>
-                          <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
-                        </div>
-                      </div>
-                    </span>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <.card_title>
+                      Exclusives
+                    </.card_title>
+                    <div class="flex items-center">
+                      <span class="text-sm text-muted-foreground">
+                        Expires on {Calendar.strftime(@bounty.inserted_at, "%b %d, %Y")}
+                      </span>
+                      <.button
+                        variant="ghost"
+                        size="icon-sm"
+                        phx-click="exclusive"
+                        class="group h-6 w-6"
+                      >
+                        <.icon
+                          name="tabler-pencil"
+                          class="h-4 w-4 text-muted-foreground group-hover:text-foreground"
+                        />
+                      </.button>
+                    </div>
+                    <.button variant="secondary" phx-click="exclusive" class="mt-3">
+                      <.icon name="tabler-user-plus" class="h-4 w-4 mr-2 -ml-1" /> Add
+                    </.button>
                   </div>
-                <% end %>
+                  <div class="flex flex-col gap-4">
+                    <%= for user <- @exclusives do %>
+                      <div class="flex justify-between text-sm">
+                        <span>
+                          <div class="flex items-center gap-4">
+                            <.avatar>
+                              <.avatar_image src={user.avatar_url} />
+                              <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
+                            </.avatar>
+                            <div>
+                              <p class="font-medium">{user.name}</p>
+                              <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
+                            </div>
+                          </div>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
               </.card_content>
             </.card>
-
             <.card>
-              <.card_header>
-                <div class="flex items-center justify-between">
-                  <.card_title>
-                    Share on socials
-                  </.card_title>
-                  <div class="flex gap-3 items-center">
-                    <.social_share_button
-                      id="twitter-share-url"
-                      icon="tabler-brand-x"
-                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                    />
-                    <.social_share_button
-                      id="reddit-share-url"
-                      icon="tabler-brand-reddit"
-                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                    />
-                    <.social_share_button
-                      id="linkedin-share-url"
-                      icon="tabler-brand-linkedin"
-                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                    />
-                    <.social_share_button
-                      id="hackernews-share-url"
-                      icon="tabler-brand-ycombinator"
-                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                    />
-                  </div>
-                </div>
-              </.card_header>
               <.card_content>
-                <img
-                  src={~p"/og/0/bounties/#{@bounty.id}"}
-                  alt={@bounty.ticket.title}
-                  class="mt-3 w-full aspect-[1200/630] max-w-[10rem] rounded-lg ring-1 ring-input bg-black"
-                />
+                <div class="flex items-center justify-between">
+                  <div>
+                    <.card_title>
+                      Share on socials
+                    </.card_title>
+                    <div class="pt-3 flex gap-3 items-center">
+                      <.social_share_button
+                        id="twitter-share-url"
+                        icon="tabler-brand-x"
+                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                      />
+                      <.social_share_button
+                        id="reddit-share-url"
+                        icon="tabler-brand-reddit"
+                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                      />
+                      <.social_share_button
+                        id="linkedin-share-url"
+                        icon="tabler-brand-linkedin"
+                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                      />
+                      <.social_share_button
+                        id="hackernews-share-url"
+                        icon="tabler-brand-ycombinator"
+                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                      />
+                    </div>
+                  </div>
+                  <img
+                    src={~p"/og/0/bounties/#{@bounty.id}"}
+                    alt={@bounty.ticket.title}
+                    class="mt-3 w-full aspect-[1200/630] max-w-[11rem] rounded-lg ring-1 ring-input bg-black"
+                  />
+                </div>
               </.card_content>
             </.card>
           </div>
@@ -383,7 +400,7 @@ defmodule AlgoraWeb.BountyLive do
         <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div class="flex justify-between items-center w-full">
             <h2 class="text-lg font-semibold">
-              Chat
+              Contributor chat
             </h2>
             <div class="relative flex -space-x-2">
               <%= for user <- @exclusives do %>

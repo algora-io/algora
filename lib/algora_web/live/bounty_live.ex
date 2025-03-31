@@ -263,139 +263,115 @@ defmodule AlgoraWeb.BountyLive do
       <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
         <div class="space-y-8">
           <.card>
-            <.card_header>
-              <div class="flex items-center gap-4">
-                <.avatar class="h-12 w-12 rounded-full">
-                  <.avatar_image src={@ticket.repository.user.avatar_url} />
-                  <.avatar_fallback>
-                    {String.first(@ticket.repository.user.provider_login)}
-                  </.avatar_fallback>
-                </.avatar>
-                <div>
-                  <.link
-                    href={@ticket.url}
-                    class="text-xl font-semibold hover:underline"
-                    target="_blank"
-                  >
-                    {@ticket.title}
-                  </.link>
-                  <div class="text-sm text-muted-foreground">
-                    {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
+            <.card_content>
+              <div class="flex justify-between">
+                <div class="flex items-center gap-4">
+                  <.avatar class="h-12 w-12 rounded-full">
+                    <.avatar_image src={@ticket.repository.user.avatar_url} />
+                    <.avatar_fallback>
+                      {String.first(@ticket.repository.user.provider_login)}
+                    </.avatar_fallback>
+                  </.avatar>
+                  <div>
+                    <.link
+                      href={@ticket.url}
+                      class="text-xl font-semibold hover:underline"
+                      target="_blank"
+                    >
+                      {@ticket.title}
+                    </.link>
+                    <div class="text-sm text-muted-foreground">
+                      {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
+                    </div>
                   </div>
                 </div>
+                <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
+                  {Money.to_string!(@bounty.amount)}
+                </div>
               </div>
-            </.card_header>
+              <div class="pt-4 flex gap-2">
+                <.button phx-click="reward">
+                  Reward
+                </.button>
+                <.button variant="secondary" phx-click="exclusive">
+                  <.icon name="tabler-lock" class="h-4 w-4 mr-2 -ml-1" /> Exclusive
+                </.button>
+              </div>
+            </.card_content>
+          </.card>
+          <div class="grid grid-cols-2 gap-4">
+            <.card>
+              <.card_header>
+                <div class="flex items-center justify-between">
+                  <.card_title>
+                    Exclusives
+                  </.card_title>
+                </div>
+              </.card_header>
+              <.card_content>
+                <%= for user <- @exclusives do %>
+                  <div class="flex justify-between text-sm">
+                    <span>
+                      <div class="flex items-center gap-4">
+                        <.avatar>
+                          <.avatar_image src={user.avatar_url} />
+                          <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
+                        </.avatar>
+                        <div>
+                          <p class="font-medium">{user.name}</p>
+                          <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                <% end %>
+              </.card_content>
+            </.card>
+
+            <.card>
+              <.card_header>
+                <div class="flex items-center justify-between">
+                  <.card_title>
+                    Share on socials
+                  </.card_title>
+                  <div class="flex gap-2">
+                    <.social_share_button
+                      id="twitter-share-url"
+                      icon="tabler-brand-x"
+                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                    />
+                    <.social_share_button
+                      id="reddit-share-url"
+                      icon="tabler-brand-reddit"
+                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                    />
+                    <.social_share_button
+                      id="linkedin-share-url"
+                      icon="tabler-brand-linkedin"
+                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                    />
+                    <.social_share_button
+                      id="hackernews-share-url"
+                      icon="tabler-brand-ycombinator"
+                      value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                    />
+                  </div>
+                </div>
+              </.card_header>
+              <.card_content>
+                <img
+                  src={~p"/og/0/bounties/#{@bounty.id}"}
+                  alt={@bounty.ticket.title}
+                  class="mt-3 w-full aspect-[1200/630] max-w-[10rem] rounded-lg ring-1 ring-input bg-black"
+                />
+              </.card_content>
+            </.card>
+          </div>
+          <.card>
             <.card_content>
               <div class="prose dark:prose-invert">
                 {Phoenix.HTML.raw(@ticket_body_html)}
               </div>
-            </.card_content>
-          </.card>
-        </div>
-
-        <div class="space-y-8">
-          <.card>
-            <.card_header>
-              <div class="flex items-center justify-between">
-                <.card_title>
-                  Bounty
-                </.card_title>
-                <.button phx-click="reward">
-                  Reward
-                </.button>
-              </div>
-            </.card_header>
-            <.card_content>
-              <div class="space-y-2">
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Frequency</span>
-                  <span class="font-medium font-display tabular-nums">
-                    {bounty_frequency(@bounty)}
-                  </span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Amount</span>
-                  <span class="font-medium font-display tabular-nums">
-                    {Money.to_string!(@bounty.amount)}
-                  </span>
-                </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Total paid</span>
-                  <span class="font-medium font-display tabular-nums">
-                    {Money.to_string!(@total_paid)}
-                  </span>
-                </div>
-              </div>
-            </.card_content>
-          </.card>
-
-          <.card>
-            <.card_header>
-              <div class="flex items-center justify-between">
-                <.card_title>
-                  Shared with
-                </.card_title>
-                <.button phx-click="exclusive">
-                  Share
-                </.button>
-              </div>
-            </.card_header>
-            <.card_content>
-              <%= for user <- @exclusives do %>
-                <div class="flex justify-between text-sm">
-                  <span>
-                    <div class="flex items-center gap-4">
-                      <.avatar>
-                        <.avatar_image src={user.avatar_url} />
-                        <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
-                      </.avatar>
-                      <div>
-                        <p class="font-medium">{user.name}</p>
-                        <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
-                      </div>
-                    </div>
-                  </span>
-                </div>
-              <% end %>
-            </.card_content>
-          </.card>
-
-          <.card>
-            <.card_header>
-              <div class="flex items-center justify-between">
-                <.card_title>
-                  Share on socials
-                </.card_title>
-                <div class="flex gap-2">
-                  <.social_share_button
-                    id="twitter-share-url"
-                    icon="tabler-brand-x"
-                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                  />
-                  <.social_share_button
-                    id="reddit-share-url"
-                    icon="tabler-brand-reddit"
-                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                  />
-                  <.social_share_button
-                    id="linkedin-share-url"
-                    icon="tabler-brand-linkedin"
-                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                  />
-                  <.social_share_button
-                    id="hackernews-share-url"
-                    icon="tabler-brand-ycombinator"
-                    value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
-                  />
-                </div>
-              </div>
-            </.card_header>
-            <.card_content>
-              <img
-                src={~p"/og/0/bounties/#{@bounty.id}"}
-                alt={@bounty.ticket.title}
-                class="mt-3 w-full aspect-[1200/630] max-w-xs rounded-lg ring-1 ring-input bg-black"
-              />
             </.card_content>
           </.card>
         </div>

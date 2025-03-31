@@ -27,8 +27,10 @@ config :algora,
   dev_routes: true,
   require_admin_for_mailbox: true
 
-config :algora, :assets_url, System.get_env("ASSETS_URL")
-config :algora, :ingest_url, System.get_env("INGEST_URL")
+config :algora,
+  plausible_url: System.get_env("PLAUSIBLE_URL"),
+  assets_url: System.get_env("ASSETS_URL"),
+  ingest_url: System.get_env("INGEST_URL")
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

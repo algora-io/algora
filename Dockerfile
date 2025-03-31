@@ -14,23 +14,30 @@
 ARG ELIXIR_VERSION=1.18.1
 ARG OTP_VERSION=27.2
 ARG DEBIAN_VERSION=bookworm-20241223-slim
+ARG NODE_VERSION=23-bookworm-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+ARG NODE_IMAGE="node:${NODE_VERSION}"
 
+FROM ${NODE_IMAGE} as node_stage
+
+ENV PUPPETEER_CACHE_DIR="/app/puppeteer"
+
+RUN npx --yes puppeteer browsers install
 
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
 RUN apt-get update -y && apt-get install -y build-essential git \
-    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+  && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
 WORKDIR /app
 
 # install hex + rebar
 RUN mix local.hex --force && \
-    mix local.rebar --force
+  mix local.rebar --force
 
 # set build ENV
 ENV MIX_ENV="prod"
@@ -52,7 +59,7 @@ COPY lib lib
 
 COPY assets assets
 
-COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
+COPY --from=node_stage /usr/local/bin /usr/local/bin
 
 # compile assets
 RUN mix assets.deploy
@@ -74,7 +81,12 @@ RUN apt-get update -y && \
   apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-COPY --from=node:23-bookworm-slim /usr/local/bin /usr/local/bin
+# TODO: remove after migration
+RUN apt-get update -y && apt-get install -y postgresql-client
+
+COPY --from=node_stage /usr/local/bin /usr/local/bin
+
+RUN apt-get update -y && apt-get install -y ca-certificates fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
@@ -89,8 +101,11 @@ RUN chown nobody /app
 # set runner ENV
 ENV MIX_ENV="prod"
 
-# Only copy the final release from the build stage
+# Copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/algora ./
+
+# Copy the puppeteer cache from the node stage
+COPY --from=node_stage --chown=nobody:root /app/puppeteer ./puppeteer
 
 USER nobody
 

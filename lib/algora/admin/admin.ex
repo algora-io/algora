@@ -4,11 +4,16 @@ defmodule Algora.Admin do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Activities.SendDiscord
   alias Algora.Bounties.Claim
+  alias Algora.Github
   alias Algora.Parser
   alias Algora.Payments
   alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace
+  alias Algora.Workspace.Installation
+  alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
   require Logger
@@ -64,7 +69,66 @@ defmodule Algora.Admin do
     IO.puts("#{AlgoraWeb.Endpoint.url()}/org/#{org.handle}/bounties/#{bounty.id}")
   end
 
+  def magic(:email, email, return_to),
+    do: AlgoraWeb.Endpoint.url() <> AlgoraWeb.UserAuth.generate_login_path(email, return_to)
+
+  def magic(:handle, handle, return_to) do
+    case Algora.Accounts.fetch_user_by(handle: handle) do
+      {:ok, user} -> magic(:email, user.email, return_to)
+      error -> {:error, error}
+    end
+  end
+
+  def magic(identifier, return_to \\ nil) do
+    if String.match?(identifier, ~r/@/) do
+      magic(:email, identifier, return_to)
+    else
+      magic(:handle, identifier, return_to)
+    end
+  end
+
+  def screenshot(path), do: AlgoraWeb.OGImageController.take_and_upload_screenshot([path])
+
+  def alert(message, severity \\ :error)
+
+  def alert(message, :error) do
+    Logger.error(message)
+
+    email_job =
+      Algora.Activities.SendEmail.changeset(%{
+        title: "Error: #{message}",
+        body: message,
+        name: "Algora Alert",
+        email: "info@algora.io"
+      })
+
+    discord_job =
+      SendDiscord.changeset(%{
+        payload: %{embeds: [%{color: 0xEF4444, title: "Error", description: message, timestamp: DateTime.utc_now()}]}
+      })
+
+    Oban.insert_all([email_job, discord_job])
+  end
+
+  def alert(message, severity) do
+    %{
+      payload: %{
+        embeds: [
+          %{
+            color: 0xF59E0B,
+            title: severity |> to_string() |> String.capitalize(),
+            description: message,
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+    |> SendDiscord.changeset()
+    |> Oban.insert()
+  end
+
   def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
+  def token, do: System.get_env("ADMIN_GITHUB_TOKEN")
 
   def run(worker) do
     worker.perform(%Oban.Job{args: read!("dev/job.json")})
@@ -108,6 +172,48 @@ defmodule Algora.Admin do
     :ok
   end
 
+  def backfill_repo_tech_stack! do
+    query = from(r in Repository, join: u in assoc(r, :user), select: %{r | user: u})
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_repo_tech_stack/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository tech stack backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
+  def backfill_repo_contributors! do
+    query =
+      from(r in Repository,
+        where: fragment("?->>'contributors_url' IS NOT NULL", r.provider_meta),
+        join: u in assoc(r, :user),
+        join: t in assoc(r, :tickets),
+        join: b in assoc(t, :bounties),
+        distinct: fragment("?->>'contributors_url'", r.provider_meta),
+        select: %{r | user: u}
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_repo_contributors/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository contributors backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
   def backfill_claims! do
     query =
       from(t in Claim,
@@ -130,6 +236,73 @@ defmodule Algora.Admin do
     :ok
   end
 
+  def backfill_tickets! do
+    query =
+      from(t in Ticket,
+        join: b in assoc(t, :bounties),
+        where: b.status == :open,
+        where: fragment("?->>'url' IS NOT NULL", t.provider_meta),
+        select: t
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_ticket/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Ticket backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
+  def backfill_users! do
+    query =
+      from(u in User,
+        where: is_nil(u.provider_id) and not is_nil(u.provider_login),
+        distinct: u.provider_login,
+        select: u.provider_login
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_user/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
+  def backfill_installations! do
+    query =
+      from(i in Installation,
+        where: is_nil(i.provider_user_id),
+        distinct: i.provider_id,
+        select: i.provider_id
+      )
+
+    {success, failure} =
+      query
+      |> Repo.all()
+      |> Task.async_stream(&backfill_installation/1, max_concurrency: 1, timeout: :infinity)
+      |> Enum.reduce({0, 0}, fn
+        {:ok, {:ok, _}}, {s, f} -> {s + 1, f}
+        {:ok, {:error, _}}, {s, f} -> {s, f + 1}
+        {:exit, _}, {s, f} -> {s, f + 1}
+      end)
+
+    IO.puts("Repository backfill complete: #{success} succeeded, #{failure} failed")
+    :ok
+  end
+
   def backfill_repo(url) do
     with %URI{host: "api.github.com", path: "/repos/" <> path} <- URI.parse(url),
          [owner, repo] <- String.split(path, "/", trim: true),
@@ -142,6 +315,34 @@ defmodule Algora.Admin do
 
       error ->
         Logger.error("Failed to backfill repo #{url}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_repo_tech_stack(repo) do
+    case Workspace.ensure_repo_tech_stack(token!(), repo) do
+      {:ok, languages} ->
+        {:ok, languages}
+
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill repo tech stack #{repo.provider_meta["languages_url"]}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_repo_contributors(repo) do
+    case Workspace.ensure_contributors(token!(), repo) do
+      {:ok, contributors} ->
+        {:ok, contributors}
+
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill repo contributors #{repo.provider_meta["contributors_url"]}: #{inspect(error)}")
         {:error, error}
     end
   end
@@ -165,11 +366,73 @@ defmodule Algora.Admin do
     end
   end
 
+  def backfill_ticket(ticket) do
+    case Github.Client.fetch(token!(), ticket.provider_meta["url"]) do
+      {:ok, issue} ->
+        ticket
+        |> Ecto.Changeset.change(
+          provider_meta: Util.normalize_struct(issue),
+          state: String.to_existing_atom(issue["state"])
+        )
+        |> Repo.update()
+
+      {:error, "410 This issue was deleted"} ->
+        ticket
+        |> Ecto.Changeset.change(state: :closed)
+        |> Repo.update()
+
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill ticket #{ticket.id}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_user(provider_login) do
+    with {:ok, user} <- Github.get_user_by_username(token!(), provider_login),
+         :ok <- update_user(user) do
+      {:ok, user}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill user #{provider_login}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
+  def backfill_installation(installation_id) do
+    with {:ok, installation} <- Github.get_installation(installation_id),
+         :ok <- update_installation(installation) do
+      {:ok, installation}
+    else
+      {:error, "404 Not Found"} = error ->
+        error
+
+      error ->
+        Logger.error("Failed to backfill installation #{installation_id}: #{inspect(error)}")
+        {:error, error}
+    end
+  end
+
   def make_admin!(user_handle, is_admin) when is_boolean(is_admin) do
     user_handle
     |> Algora.Accounts.get_user_by_handle()
     |> Algora.Accounts.User.is_admin_changeset(is_admin)
     |> Algora.Repo.update()
+  end
+
+  def admins_last_active do
+    Algora.Repo.one(
+      from u in User,
+        where: u.is_admin == true,
+        order_by: [desc: u.last_active_at],
+        select: u.last_active_at,
+        limit: 1
+    )
   end
 
   def setup_test_account(user_handle) do
@@ -193,6 +456,41 @@ defmodule Algora.Admin do
 
   defp update_claims(url, source_id) do
     Repo.update_all(from(t in Claim, where: t.url == ^url), set: [source_id: source_id])
+
+    :ok
+  rescue
+    error -> {:error, error}
+  end
+
+  defp update_user(user) do
+    Repo.update_all(from(u in User, where: u.provider == "github", where: u.provider_login == ^user["login"]),
+      set: [provider_meta: Util.normalize_struct(user), provider_id: to_string(user["id"])]
+    )
+
+    :ok
+  rescue
+    error -> {:error, error}
+  end
+
+  defp update_installation(installation) do
+    target_user =
+      Repo.get_by(User,
+        provider: "github",
+        provider_id: to_string(installation["target_id"])
+      )
+
+    Repo.update_all(
+      from(t in Installation,
+        where: t.provider == "github",
+        where: t.provider_id == ^to_string(installation["id"])
+      ),
+      set:
+        [
+          provider_meta: Util.normalize_struct(installation),
+          repository_selection: installation["repository_selection"]
+        ] ++
+          if(target_user, do: [provider_user_id: target_user.id], else: [])
+    )
 
     :ok
   rescue

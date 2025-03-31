@@ -13,9 +13,6 @@ defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
 
   require Logger
 
-  # TODO: confirm url
-  @onboarding_url "https://console.algora.io/solve"
-
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"credit_id" => credit_id}}) do
     with {:ok, ticket} <-
@@ -65,7 +62,7 @@ defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
         end
 
       body =
-        "@#{credit_tx.user.provider_login}: You've been awarded a **#{credit_tx.net_amount}** by **#{debit_tx.user.name}**! 👉 [Complete your Algora onboarding](#{@onboarding_url}) to collect the #{reward_type}."
+        "@#{credit_tx.user.provider_login}: You've been awarded a **#{credit_tx.net_amount}** by **#{debit_tx.user.name}**! 👉 [Complete your Algora onboarding](#{AlgoraWeb.Endpoint.url()}/onboarding/dev) to collect the #{reward_type}."
 
       do_perform(ticket_ref, body, installation)
     end
@@ -82,7 +79,13 @@ defmodule Algora.Bounties.Jobs.PromptPayoutConnect do
 
   defp do_perform(ticket_ref, body, installation) do
     with {:ok, token} <- Github.get_installation_token(installation.provider_id) do
-      Github.create_issue_comment(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, body)
+      Github.create_issue_comment(
+        token,
+        ticket_ref.owner,
+        ticket_ref.repo,
+        ticket_ref.number,
+        body
+      )
     end
   end
 end

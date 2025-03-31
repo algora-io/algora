@@ -3,7 +3,15 @@ defmodule Algora.FeeTier do
   Defines the fee tiers and helper functions for calculating fees based on payment volume.
   """
 
-  @tiers [
+  @community_tiers [
+    %{
+      threshold: Money.new!(0, :USD, no_fraction_if_integer: true),
+      fee: Decimal.new("0.09"),
+      progress: Decimal.new("0.00")
+    }
+  ]
+
+  @expert_tiers [
     %{
       threshold: Money.new!(0, :USD, no_fraction_if_integer: true),
       fee: Decimal.new("0.19"),
@@ -26,14 +34,15 @@ defmodule Algora.FeeTier do
     }
   ]
 
-  def all, do: @tiers
+  def all(:community), do: @community_tiers
+  def all(:expert), do: @expert_tiers
 
   def calculate_fee_percentage(total_paid) do
     # Find the highest tier where total_paid is greater than or equal to the threshold
     tier =
-      @tiers
+      @expert_tiers
       |> Enum.reverse()
-      |> Enum.find(List.first(@tiers), &threshold_met?(total_paid, &1))
+      |> Enum.find(List.first(@expert_tiers), &threshold_met?(total_paid, &1))
 
     tier.fee
   end
@@ -41,7 +50,7 @@ defmodule Algora.FeeTier do
   def calculate_progress(total_paid) do
     tier = find_current_tier(total_paid)
     prev_tier = find_previous_tier(tier)
-    next_threshold = if tier, do: tier.threshold, else: List.last(@tiers).threshold
+    next_threshold = if tier, do: tier.threshold, else: List.last(@expert_tiers).threshold
 
     case {prev_tier, tier} do
       {nil, _tier} ->
@@ -67,14 +76,14 @@ defmodule Algora.FeeTier do
   end
 
   defp find_current_tier(total_paid) do
-    Enum.find(@tiers, &(Money.compare!(total_paid, &1.threshold) == :lt))
+    Enum.find(@expert_tiers, &(Money.compare!(total_paid, &1.threshold) == :lt))
   end
 
-  defp find_previous_tier(nil), do: List.last(@tiers)
+  defp find_previous_tier(nil), do: List.last(@expert_tiers)
 
   defp find_previous_tier(current_tier) do
-    index = Enum.find_index(@tiers, &(&1 == current_tier))
-    if index > 0, do: Enum.at(@tiers, index - 1)
+    index = Enum.find_index(@expert_tiers, &(&1 == current_tier))
+    if index > 0, do: Enum.at(@expert_tiers, index - 1)
   end
 
   defp percentage_of(amount, total) do
@@ -92,6 +101,6 @@ defmodule Algora.FeeTier do
   end
 
   def first_threshold_met?(total_paid) do
-    threshold_met?(total_paid, Enum.at(@tiers, 1))
+    threshold_met?(total_paid, Enum.at(@expert_tiers, 1))
   end
 end

@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Components.UI.Avatar do
   @moduledoc false
   use AlgoraWeb.Component
+  use AlgoraWeb, :verified_routes
 
   attr :class, :string, default: nil
   attr :rest, :global
@@ -14,16 +15,19 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   end
 
   attr :class, :string, default: nil
+  attr :src, :string, default: nil
   attr :rest, :global
 
   def avatar_image(assigns) do
+    assigns = assign(assigns, id: "avatar-image-#{Algora.Util.random_string()}")
+
     ~H"""
     <img
-      class={classes(["aspect-square h-full w-full", @class])}
+      id={@id}
+      src={@src || ~p"/images/placeholder-avatar.png"}
+      class={classes(["aspect-square h-full w-full bg-muted", @class])}
+      phx-hook="AvatarImage"
       {@rest}
-      phx-update="ignore"
-      style="display:none"
-      onload="this.style.display=''"
     />
     """
   end

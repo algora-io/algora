@@ -19,7 +19,7 @@ defmodule AlgoraWeb.Payment.SuccessLive do
 
           socket
           |> put_flash(:info, "Your payment has been completed successfully!")
-          |> push_navigate(to: to)
+          |> redirect(to: to)
       end
 
     {:ok, socket}

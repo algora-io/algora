@@ -48,7 +48,7 @@ defmodule AlgoraWeb.ClaimLive do
   @impl true
   def mount(%{"group_id" => group_id}, _session, socket) do
     claims =
-      from(c in Claim, where: c.group_id == ^group_id)
+      from(c in Claim, where: c.group_id == ^group_id and c.status != :cancelled)
       |> order_by(desc: :group_share)
       |> Repo.all()
       |> Repo.preload([
@@ -78,7 +78,7 @@ defmodule AlgoraWeb.ClaimLive do
           |> Enum.map(& &1.net_amount)
           |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
-        source_body_html = Algora.Markdown.render(primary_claim.source.description)
+        source_body_html = Algora.Markdown.render(if primary_claim.source, do: primary_claim.source.description)
 
         pledges =
           primary_claim.target.bounties
@@ -100,7 +100,8 @@ defmodule AlgoraWeb.ClaimLive do
           pledges
           |> Enum.map(fn {sponsor_id, {sponsor, pledged}} ->
             paid = Map.get(payments, sponsor_id, Money.zero(:USD, no_fraction_if_integer: true))
-            tipped = Money.sub!(paid, pledged)
+            tipped = Money.max!(Money.sub!(paid, pledged), Money.zero(:USD, no_fraction_if_integer: true))
+            remaining = Money.max!(Money.sub!(pledged, paid), Money.zero(:USD, no_fraction_if_integer: true))
 
             status =
               cond do
@@ -116,7 +117,8 @@ defmodule AlgoraWeb.ClaimLive do
               status: status,
               pledged: pledged,
               paid: paid,
-              tipped: tipped
+              tipped: tipped,
+              remaining: remaining
             }
           end)
           |> Enum.sort_by(&{&1.pledged, &1.paid, &1.sponsor.name}, :desc)
@@ -133,13 +135,7 @@ defmodule AlgoraWeb.ClaimLive do
         context_ids = MapSet.new(contexts, & &1.id)
         available_bounties = Enum.filter(primary_claim.target.bounties, &MapSet.member?(context_ids, &1.owner_id))
 
-        amount =
-          case available_bounties do
-            [] -> nil
-            [bounty | _] -> Money.to_decimal(bounty.amount)
-          end
-
-        changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0, amount: amount})
+        changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0})
 
         {:ok,
          socket
@@ -163,7 +159,7 @@ defmodule AlgoraWeb.ClaimLive do
 
   @impl true
   def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, :current_context_pending_payment, nil)}
   end
 
   def handle_params(%{"context" => context_id}, _url, socket) do
@@ -171,7 +167,7 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   def handle_params(_params, _url, socket) do
-    {:noreply, socket |> assign_selected_context(default_context_id(socket)) |> assign_line_items()}
+    {:noreply, socket |> assign_selected_context() |> assign_line_items()}
   end
 
   @impl true
@@ -193,15 +189,6 @@ defmodule AlgoraWeb.ClaimLive do
      socket
      |> assign(:reward_bounty_form, to_form(RewardBountyForm.changeset(%RewardBountyForm{}, params)))
      |> assign_line_items()}
-  end
-
-  def handle_event("split_bounty", _params, socket) do
-    # TODO: Implement split bounty
-    Logger.error(
-      "Attempt to split bounty #{socket.assigns.target.repository.user.provider_login}/#{socket.assigns.target.repository.name}#{socket.assigns.target.number}"
-    )
-
-    {:noreply, socket}
   end
 
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
@@ -230,24 +217,50 @@ defmodule AlgoraWeb.ClaimLive do
     end
   end
 
+  defp assign_reward_bounty_form(socket) do
+    remaining = socket.assigns.current_context_pending_payment
+
+    amount =
+      if(remaining && Money.positive?(remaining)) do
+        Money.to_decimal(remaining)
+      end
+
+    form =
+      socket.assigns.reward_bounty_form.source
+      |> change(amount: amount)
+      |> to_form()
+
+    assign(socket, :reward_bounty_form, form)
+  end
+
+  defp assign_selected_context(socket), do: assign_selected_context(socket, default_context_id(socket))
+
   defp assign_selected_context(socket, context_id) do
+    current_context_pending_payment =
+      if sponsor = Enum.find(socket.assigns.sponsors, &(&1.sponsor.id == context_id)) do
+        sponsor.remaining
+      end
+
     case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
       nil ->
         push_patch(socket, to: "/claims/#{socket.assigns.primary_claim.group_id}?context=#{default_context_id(socket)}")
 
       context ->
-        assign(socket, :selected_context, context)
+        socket
+        |> assign(:selected_context, context)
+        |> assign(:current_context_pending_payment, current_context_pending_payment)
+        |> assign_reward_bounty_form()
     end
   end
 
   defp assign_line_items(socket) do
     line_items =
-      Bounties.generate_line_items(%{amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)},
-        ticket_ref: %{
-          owner: socket.assigns.target.repository.user.provider_login,
-          repo: socket.assigns.target.repository.name,
-          number: socket.assigns.target.number
+      Bounties.generate_line_items(
+        %{
+          owner: socket.assigns.selected_context,
+          amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)
         },
+        ticket_ref: ticket_ref(socket),
         claims: socket.assigns.claims
       )
 
@@ -255,11 +268,13 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   defp ticket_ref(socket) do
-    %{
-      owner: socket.assigns.target.repository.user.provider_login,
-      repo: socket.assigns.target.repository.name,
-      number: socket.assigns.target.number
-    }
+    if socket.assigns.target.repository do
+      %{
+        owner: socket.assigns.target.repository.user.provider_login,
+        repo: socket.assigns.target.repository.name,
+        number: socket.assigns.target.number
+      }
+    end
   end
 
   defp get_or_create_bounty(socket, data) do
@@ -303,15 +318,15 @@ defmodule AlgoraWeb.ClaimLive do
   def render(assigns) do
     ~H"""
     <div class="container mx-auto py-8 px-4">
-      <div class="grid gap-8 md:grid-cols-[2fr_1fr]">
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-[2fr_1fr]">
         <div class="space-y-8">
           <.card>
             <.card_header>
               <div class="flex items-center gap-4">
-                <.avatar class="h-12 w-12 rounded-full">
+                <.avatar :if={@source_or_target.repository} class="h-12 w-12 rounded-full">
                   <.avatar_image src={@source_or_target.repository.user.avatar_url} />
                   <.avatar_fallback>
-                    {String.first(@source_or_target.repository.user.provider_login)}
+                    {Algora.Util.initials(@source_or_target.repository.user.provider_login)}
                   </.avatar_fallback>
                 </.avatar>
                 <div>
@@ -322,9 +337,17 @@ defmodule AlgoraWeb.ClaimLive do
                   >
                     {@source_or_target.title}
                   </.link>
-                  <div class="text-sm text-muted-foreground">
+                  <div :if={@source_or_target.repository} class="text-sm text-muted-foreground">
                     {@source_or_target.repository.user.provider_login}/{@source_or_target.repository.name}#{@source_or_target.number}
                   </div>
+                  <.link
+                    :if={!@source_or_target.repository}
+                    href={@primary_claim.url}
+                    rel="noopener"
+                    class="block text-sm text-muted-foreground"
+                  >
+                    {@primary_claim.url}
+                  </.link>
                 </div>
               </div>
             </.card_header>
@@ -343,9 +366,15 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_title>
                   Claim
                 </.card_title>
-                <.button phx-click="reward_bounty">
-                  Reward bounty
-                </.button>
+                <%= if is_nil(@current_context_pending_payment) or Money.positive?(@current_context_pending_payment) do %>
+                  <.button phx-click="reward_bounty">
+                    Reward bounty
+                  </.button>
+                <% else %>
+                  <.badge variant="success">
+                    <.icon name="tabler-check" class="size-4 mr-2 -ml-1" /> Rewarded
+                  </.badge>
+                <% end %>
               </div>
             </.card_header>
             <.card_content>
@@ -382,7 +411,7 @@ defmodule AlgoraWeb.ClaimLive do
             <.card_header>
               <div class="flex items-center justify-between">
                 <.card_title>
-                  Authors
+                  Contributors
                 </.card_title>
               </div>
             </.card_header>
@@ -394,7 +423,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <div class="flex items-center gap-4">
                         <.avatar>
                           <.avatar_image src={claim.user.avatar_url} />
-                          <.avatar_fallback>{String.first(claim.user.name)}</.avatar_fallback>
+                          <.avatar_fallback>{Algora.Util.initials(claim.user.name)}</.avatar_fallback>
                         </.avatar>
                         <div>
                           <p class="font-medium">{claim.user.name}</p>
@@ -427,7 +456,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <.avatar>
                         <.avatar_image src={sponsor.sponsor.avatar_url} />
                         <.avatar_fallback>
-                          {String.first(sponsor.sponsor.name)}
+                          {Algora.Util.initials(sponsor.sponsor.name)}
                         </.avatar_fallback>
                       </.avatar>
                       <div>
@@ -517,12 +546,6 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_content>
                   <div class="space-y-4">
                     <%= if Enum.empty?(@available_bounties) do %>
-                      <.alert variant="destructive">
-                        <.alert_title>No bounties available</.alert_title>
-                        <.alert_description>
-                          You didn't post a bounty for this issue. Would you like to create one now?
-                        </.alert_description>
-                      </.alert>
                     <% end %>
                     <.input
                       label="Amount"
@@ -532,7 +555,7 @@ defmodule AlgoraWeb.ClaimLive do
 
                     <div>
                       <.label>On behalf of</.label>
-                      <.dropdown2 id="context-dropdown" class="mt-2">
+                      <.dropdown id="context-dropdown" class="mt-2" border>
                         <:img src={@selected_context.avatar_url} />
                         <:title>{@selected_context.name}</:title>
                         <:subtitle>@{@selected_context.handle}</:subtitle>
@@ -553,7 +576,7 @@ defmodule AlgoraWeb.ClaimLive do
                             </div>
                           </div>
                         </:link>
-                      </.dropdown2>
+                      </.dropdown>
                     </div>
 
                     <div>

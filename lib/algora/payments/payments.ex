@@ -14,6 +14,7 @@ defmodule Algora.Payments do
   alias Algora.PSP
   alias Algora.Repo
   alias Algora.Util
+  alias Algora.Workspace.Ticket
 
   require Logger
 
@@ -223,6 +224,11 @@ defmodule Algora.Payments do
     Repo.fetch_by(Account, user_id: user.id)
   end
 
+  @spec get_account(user :: User.t()) :: Account.t() | nil
+  def get_account(user) do
+    Repo.get_by(Account, user_id: user.id)
+  end
+
   @spec create_account(user :: User.t(), country :: String.t()) ::
           {:ok, Account.t()} | {:error, Ecto.Changeset.t()}
   def create_account(user, country) do
@@ -360,6 +366,66 @@ defmodule Algora.Payments do
         where: is_nil(tr.id)
       )
     )
+  end
+
+  def list_hosted_transactions(user_id, opts \\ []) do
+    query =
+      from tx in Transaction,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        join: ltx in assoc(tx, :linked_transaction),
+        join: recipient in assoc(tx, :user),
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        where: ltx.user_id == ^user_id or r.user_id == ^user_id,
+        left_join: o in assoc(r, :user),
+        select: %{transaction: tx, recipient: recipient, ticket: %{t | repository: %{r | user: o}}},
+        order_by: [desc: tx.succeeded_at]
+
+    query =
+      if cursor = opts[:before] do
+        from [tx] in query,
+          where: {tx.succeeded_at, tx.id} < {^cursor.succeeded_at, ^cursor.id}
+      else
+        query
+      end
+
+    query = from q in query, limit: ^opts[:limit]
+
+    Repo.all(query)
+  end
+
+  def list_received_transactions(user_id, opts \\ []) do
+    query =
+      from tx in Transaction,
+        where: tx.user_id == ^user_id,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        join: ltx in assoc(tx, :linked_transaction),
+        join: sender in assoc(ltx, :user),
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        left_join: o in assoc(r, :user),
+        select: %{transaction: tx, sender: sender, ticket: %{t | repository: %{r | user: o}}},
+        order_by: [desc: tx.succeeded_at]
+
+    query =
+      if cursor = opts[:before] do
+        from [tx] in query,
+          where: {tx.succeeded_at, tx.id} < {^cursor.succeeded_at, ^cursor.id}
+      else
+        query
+      end
+
+    query = from q in query, limit: ^opts[:limit]
+
+    Repo.all(query)
   end
 
   @spec enqueue_pending_transfers(user_id :: String.t()) :: {:ok, nil} | {:error, term()}

@@ -3,16 +3,15 @@ defmodule Algora.Bounties do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.BotTemplates
+  alias Algora.BotTemplates.BotTemplate
   alias Algora.Bounties.Attempt
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs
   alias Algora.Bounties.LineItem
   alias Algora.Bounties.Tip
-  alias Algora.FeeTier
-  alias Algora.Github
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -28,11 +27,14 @@ defmodule Algora.Bounties do
   def base_query, do: Bounty
 
   @type criterion ::
-          {:limit, non_neg_integer()}
+          {:limit, non_neg_integer() | :infinity}
           | {:ticket_id, String.t()}
           | {:owner_id, String.t()}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
+          | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
+          | {:amount_gt, Money.t()}
+          | {:current_user, User.t()}
 
   def broadcast do
     Phoenix.PubSub.broadcast(Algora.PubSub, "bounties:all", :bounties_updated)
@@ -42,21 +44,30 @@ defmodule Algora.Bounties do
     Phoenix.PubSub.subscribe(Algora.PubSub, "bounties:all")
   end
 
-  @spec do_create_bounty(%{creator: User.t(), owner: User.t(), amount: Money.t(), ticket: Ticket.t()}) ::
+  @spec do_create_bounty(%{
+          creator: User.t(),
+          owner: User.t(),
+          amount: Money.t(),
+          ticket: Ticket.t(),
+          visibility: Bounty.visibility(),
+          shared_with: [String.t()]
+        }) ::
           {:ok, Bounty.t()} | {:error, atom()}
-  defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket}) do
+  defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket} = params) do
     changeset =
       Bounty.changeset(%Bounty{}, %{
         amount: amount,
         ticket_id: ticket.id,
         owner_id: owner.id,
-        creator_id: creator.id
+        creator_id: creator.id,
+        visibility: params[:visibility] || owner.bounty_mode,
+        shared_with: params[:shared_with] || []
       })
 
     changeset
     |> Repo.insert_with_activity(%{
       type: :bounty_posted,
-      notify_users: [creator.id]
+      notify_users: []
     })
     |> case do
       {:ok, bounty} ->
@@ -93,7 +104,9 @@ defmodule Algora.Bounties do
             strategy: strategy(),
             installation_id: integer(),
             command_id: integer(),
-            command_source: :ticket | :comment
+            command_source: :ticket | :comment,
+            visibility: Bounty.visibility() | nil,
+            shared_with: [String.t()] | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -106,24 +119,46 @@ defmodule Algora.Bounties do
         },
         opts \\ []
       ) do
-    installation_id = opts[:installation_id]
     command_id = opts[:command_id]
-
-    token_res =
-      if installation_id,
-        do: Github.get_installation_token(installation_id),
-        else: Accounts.get_access_token(creator)
+    shared_with = opts[:shared_with] || []
 
     Repo.transact(fn ->
-      with {:ok, token} <- token_res,
+      with {:ok, %{installation_id: installation_id, token: token}} <-
+             Workspace.resolve_installation_and_token(opts[:installation_id], repo_owner, creator),
            {:ok, ticket} <- Workspace.ensure_ticket(token, repo_owner, repo_name, number),
            existing = Repo.get_by(Bounty, owner_id: owner.id, ticket_id: ticket.id),
            {:ok, strategy} <- strategy_to_action(existing, opts[:strategy]),
            {:ok, bounty} <-
              (case strategy do
-                :create -> do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket})
-                :set -> existing |> Bounty.changeset(%{amount: amount}) |> Repo.update()
-                :increase -> existing |> Bounty.changeset(%{amount: Money.add!(existing.amount, amount)}) |> Repo.update()
+                :create ->
+                  do_create_bounty(%{
+                    creator: creator,
+                    owner: owner,
+                    amount: amount,
+                    ticket: ticket,
+                    visibility: opts[:visibility],
+                    shared_with: shared_with
+                  })
+
+                :set ->
+                  existing
+                  |> Bounty.changeset(%{
+                    amount: amount,
+                    visibility: opts[:visibility],
+                    shared_with: shared_with
+                  })
+                  # |> Activity.put_activity(%Bounty{}, %{type: :bounty_updated, notify_users: []})
+                  |> Repo.update()
+
+                :increase ->
+                  existing
+                  |> Bounty.changeset(%{
+                    amount: Money.add!(existing.amount, amount),
+                    visibility: opts[:visibility],
+                    shared_with: shared_with
+                  })
+                  # |> Activity.put_activity(%Bounty{}, %{type: :bounty_updated, notify_users: []})
+                  |> Repo.update()
               end),
            {:ok, _job} <-
              notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref},
@@ -134,7 +169,9 @@ defmodule Algora.Bounties do
         broadcast()
         {:ok, bounty}
       else
-        {:error, _reason} = error -> error
+        {:error, _reason} = error ->
+          Algora.Admin.alert("Error creating bounty: #{inspect(error)}", :error)
+          error
       end
     end)
   end
@@ -144,7 +181,8 @@ defmodule Algora.Bounties do
       type: :claim,
       started_at: claim.inserted_at,
       user: claim.user,
-      group_id: "claim-#{claim.group_id}",
+      group_id: claim.group_id,
+      solution_id: "claim-#{claim.group_id}",
       indicator: "🟢",
       solution: "##{claim.source.number}"
     }
@@ -155,7 +193,8 @@ defmodule Algora.Bounties do
       type: :attempt,
       started_at: attempt.inserted_at,
       user: attempt.user,
-      group_id: "attempt-#{attempt.id}",
+      group_id: attempt.id,
+      solution_id: "attempt-#{attempt.id}",
       indicator: get_attempt_emoji(attempt),
       solution: "WIP"
     }
@@ -168,11 +207,62 @@ defmodule Algora.Bounties do
           claims :: list(Claim.t())
         ) :: String.t()
   def get_response_body(bounties, ticket_ref, attempts, claims) do
-    header =
-      Enum.map_join(bounties, "\n", fn bounty ->
-        "## 💎 #{bounty.amount} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
-      end)
+    custom_template =
+      Repo.one(
+        from bt in BotTemplate,
+          where: bt.type == :bounty_created,
+          where: bt.active == true,
+          join: u in assoc(bt, :user),
+          join: r in assoc(u, :repositories),
+          join: t in assoc(r, :tickets),
+          where: t.id == ^List.first(bounties).ticket_id
+      )
 
+    prize_pool = format_prize_pool(bounties)
+    attempts_table = format_attempts_table(attempts, claims)
+
+    template =
+      if custom_template do
+        custom_template.template
+      else
+        BotTemplates.get_default_template(:bounty_created)
+      end
+
+    template
+    |> String.replace("${PRIZE_POOL}", prize_pool)
+    |> String.replace("${ISSUE_NUMBER}", to_string(ticket_ref[:number]))
+    |> String.replace("${REPO_FULL_NAME}", "#{ticket_ref[:owner]}/#{ticket_ref[:repo]}")
+    |> String.replace("${ATTEMPTS}", attempts_table)
+    |> String.replace("${FUND_URL}", AlgoraWeb.Endpoint.url())
+    |> String.replace("${TWEET_URL}", generate_tweet_url(bounties, ticket_ref))
+    |> String.replace("${ADDITIONAL_OPPORTUNITIES}", "")
+    |> String.trim()
+  end
+
+  defp generate_tweet_url(bounties, ticket_ref) do
+    total_amount = Enum.reduce(bounties, Money.new(0, :USD), &Money.add!(&2, &1.amount))
+
+    text =
+      "#{Money.to_string!(total_amount, no_fraction_if_integer: true)} bounty! 💎 https://github.com/#{ticket_ref[:owner]}/#{ticket_ref[:repo]}/issues/#{ticket_ref[:number]}"
+
+    uri = URI.parse("https://twitter.com/intent/tweet")
+
+    query =
+      URI.encode_query(%{
+        "text" => text,
+        "related" => "algoraio"
+      })
+
+    URI.to_string(%{uri | query: query})
+  end
+
+  defp format_prize_pool(bounties) do
+    Enum.map_join(bounties, "\n", fn bounty ->
+      "## 💎 #{Money.to_string!(bounty.amount, no_fraction_if_integer: true)} bounty [• #{bounty.owner.name}](#{User.url(bounty.owner)})"
+    end)
+  end
+
+  defp format_attempts_table(attempts, claims) do
     solutions =
       []
       |> Enum.concat(Enum.map(claims, &claim_to_solution/1))
@@ -183,9 +273,9 @@ defmodule Algora.Bounties do
         solution = Enum.find(solutions, &(&1.type == :claim)) || List.first(solutions)
         %{solution | started_at: started_at}
       end)
-      |> Enum.group_by(& &1.group_id)
-      |> Enum.sort_by(fn {_group_id, solutions} -> Enum.min_by(solutions, & &1.started_at).started_at end)
-      |> Enum.map(fn {_group_id, solutions} ->
+      |> Enum.group_by(& &1.solution_id)
+      |> Enum.sort_by(fn {_solution_id, solutions} -> Enum.min_by(solutions, & &1.started_at).started_at end)
+      |> Enum.map(fn {_solution_id, solutions} ->
         primary_solution = Enum.min_by(solutions, & &1.started_at)
         timestamp = Calendar.strftime(primary_solution.started_at, "%b %d, %Y, %I:%M:%S %p")
 
@@ -195,31 +285,26 @@ defmodule Algora.Bounties do
           |> Enum.map(&"@#{&1.user.provider_login}")
           |> Util.format_name_list()
 
-        "| #{primary_solution.indicator} #{users} | #{timestamp} | #{primary_solution.solution} |"
+        actions =
+          if primary_solution.type == :claim do
+            "[Reward](#{AlgoraWeb.Endpoint.url()}/claims/#{primary_solution.group_id})"
+          else
+            ""
+          end
+
+        "| #{primary_solution.indicator} #{users} | #{timestamp} | #{primary_solution.solution} | #{actions} |"
       end)
 
-    solutions_table =
-      if solutions == [] do
-        ""
-      else
-        """
+    if solutions == [] do
+      ""
+    else
+      """
 
-        | Attempt | Started (UTC) | Solution |
-        | --- | --- | --- |
-        #{Enum.join(solutions, "\n")}
-        """
-      end
-
-    String.trim("""
-    #{header}
-    ### Steps to solve:
-    1. **Start working**: Comment `/attempt ##{ticket_ref[:number]}` with your implementation plan
-    2. **Submit work**: Create a pull request including `/claim ##{ticket_ref[:number]}` in the PR body to claim the bounty
-    3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://docs.algora.io/bounties/payments#supported-countries-regions)
-
-    Thank you for contributing to #{ticket_ref[:owner]}/#{ticket_ref[:repo]}!
-    #{solutions_table}
-    """)
+      | Attempt | Started (UTC) | Solution | Actions |
+      | --- | --- | --- | --- |
+      #{Enum.join(solutions, "\n")}
+      """
+    end
   end
 
   def refresh_bounty_response(token, ticket_ref, ticket) do
@@ -243,7 +328,7 @@ defmodule Algora.Bounties do
         {:ok, response}
 
       {:error, _} ->
-        Logger.error(
+        Logger.warning(
           "Failed to refresh bounty response for #{ticket_ref[:owner]}/#{ticket_ref[:repo]}##{ticket_ref[:number]}"
         )
 
@@ -267,7 +352,10 @@ defmodule Algora.Bounties do
       ticket_ref: %{owner: ticket_ref.owner, repo: ticket_ref.repo, number: ticket_ref.number},
       installation_id: opts[:installation_id],
       command_id: opts[:command_id],
-      command_source: opts[:command_source]
+      command_source: opts[:command_source],
+      bounty_id: bounty.id,
+      visibility: bounty.visibility,
+      shared_with: bounty.shared_with
     }
     |> Jobs.NotifyBounty.new()
     |> Oban.insert()
@@ -296,7 +384,7 @@ defmodule Algora.Bounties do
        }) do
     case Workspace.ensure_user(token, provider_login) do
       {:ok, user} ->
-        activity_attrs = %{type: :claim_submitted, notify_users: [user.id]}
+        activity_attrs = %{type: :claim_submitted, notify_users: []}
 
         claim_attrs = %{
           target_id: target.id,
@@ -398,15 +486,9 @@ defmodule Algora.Bounties do
         },
         opts \\ []
       ) do
-    installation_id = opts[:installation_id]
-
-    token_res =
-      if installation_id,
-        do: Github.get_installation_token(installation_id),
-        else: Accounts.get_access_token(user)
-
     Repo.transact(fn ->
-      with {:ok, token} <- token_res,
+      with {:ok, %{installation_id: installation_id, token: token}} <-
+             Workspace.resolve_installation_and_token(opts[:installation_id], source_repo_owner, user),
            {:ok, target} <- Workspace.ensure_ticket(token, target_repo_owner, target_repo_name, target_number),
            {:ok, source} <- Workspace.ensure_ticket(token, source_repo_owner, source_repo_name, source_number) do
         # Get all active claims for this PR
@@ -467,7 +549,7 @@ defmodule Algora.Bounties do
   def cancel_all_claims(claims) do
     Enum.reduce_while(claims, :ok, fn claim, :ok ->
       case claim
-           |> Claim.changeset(%{status: :cancelled})
+           |> Claim.changeset(%{status: :cancelled, group_share: Decimal.new(0)})
            |> Repo.update() do
         {:ok, _} -> {:cont, :ok}
         error -> error
@@ -561,22 +643,18 @@ defmodule Algora.Bounties do
           {:ok, String.t()} | {:error, atom()}
   def create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
     Repo.transact(fn ->
-      with {:ok, tip} <-
-             do_create_tip(
-               %{
-                 creator: creator,
-                 owner: owner,
-                 recipient: recipient,
-                 amount: amount
-               },
-               opts
-             ) do
-        create_payment_session(
-          %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
-          ticket_ref: opts[:ticket_ref],
-          tip_id: tip.id,
-          recipient: recipient
-        )
+      case do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts) do
+        {:ok, tip} ->
+          create_payment_session(
+            %{owner: owner, amount: amount, description: "Tip payment for OSS contributions"},
+            ticket_ref: opts[:ticket_ref],
+            tip_id: tip.id,
+            recipient: recipient
+          )
+
+        {:error, reason} ->
+          Algora.Admin.alert("Error creating tip: #{inspect(reason)}", :error)
+          {:error, reason}
       end
     end)
   end
@@ -587,18 +665,10 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, Tip.t()} | {:error, atom()}
   def do_create_tip(%{creator: creator, owner: owner, recipient: recipient, amount: amount}, opts \\ []) do
-    installation_id = opts[:installation_id]
-
-    token_res =
-      if installation_id,
-        do: Github.get_installation_token(installation_id),
-        else: Accounts.get_access_token(creator)
-
-    ticket_ref = opts[:ticket_ref]
-
     ticket_res =
-      if ticket_ref do
-        with {:ok, token} <- token_res do
+      if ticket_ref = opts[:ticket_ref] do
+        with {:ok, %{token: token}} <-
+               Workspace.resolve_installation_and_token(opts[:installation_id], ticket_ref[:owner], creator) do
           Workspace.ensure_ticket(token, ticket_ref[:owner], ticket_ref[:repo], ticket_ref[:number])
         end
       else
@@ -614,10 +684,7 @@ defmodule Algora.Bounties do
         recipient_id: recipient.id,
         ticket_id: if(ticket, do: ticket.id)
       })
-      |> Repo.insert_with_activity(%{
-        type: :tip_awarded,
-        notify_users: [recipient.id]
-      })
+      |> Repo.insert()
     end
   end
 
@@ -632,23 +699,16 @@ defmodule Algora.Bounties do
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
-    Repo.transact(fn ->
-      activity_attrs = %{type: :bounty_awarded}
-
-      with {:ok, _activity} <- Algora.Activities.insert(%Bounty{id: bounty_id}, activity_attrs) do
-        create_payment_session(
-          %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
-          ticket_ref: opts[:ticket_ref],
-          bounty_id: bounty_id,
-          claims: claims,
-          recipient: opts[:recipient]
-        )
-      end
-    end)
+    create_payment_session(
+      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
+      ticket_ref: opts[:ticket_ref],
+      bounty_id: bounty_id,
+      claims: claims
+    )
   end
 
   @spec generate_line_items(
-          %{amount: Money.t()},
+          %{owner: User.t(), amount: Money.t()},
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             claims: [Claim.t()],
@@ -656,14 +716,14 @@ defmodule Algora.Bounties do
           ]
         ) ::
           [LineItem.t()]
-  def generate_line_items(%{amount: amount}, opts \\ []) do
+  def generate_line_items(%{owner: owner, amount: amount}, opts \\ []) do
     ticket_ref = opts[:ticket_ref]
     recipient = opts[:recipient]
     claims = opts[:claims] || []
 
     description = if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
-    platform_fee_pct = FeeTier.calculate_fee_percentage(Money.zero(:USD))
+    platform_fee_pct = Decimal.div(owner.fee_pct, 100)
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
     payouts =
@@ -720,7 +780,7 @@ defmodule Algora.Bounties do
     tx_group_id = Nanoid.generate()
 
     line_items =
-      generate_line_items(%{amount: amount},
+      generate_line_items(%{owner: owner, amount: amount},
         ticket_ref: opts[:ticket_ref],
         recipient: opts[:recipient],
         claims: opts[:claims]
@@ -776,7 +836,7 @@ defmodule Algora.Bounties do
     tx_group_id = Nanoid.generate()
 
     line_items =
-      generate_line_items(%{amount: amount},
+      generate_line_items(%{owner: owner, amount: amount},
         ticket_ref: opts[:ticket_ref],
         recipient: opts[:recipient],
         claims: opts[:claims]
@@ -812,7 +872,8 @@ defmodule Algora.Bounties do
              PSP.Invoice.create(
                %{
                  auto_advance: false,
-                 customer: customer.provider_id
+                 customer: customer.provider_id,
+                 metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
                },
                %{idempotency_key: idempotency_key}
              ),
@@ -936,6 +997,9 @@ defmodule Algora.Bounties do
   @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
+      {:limit, :infinity}, query ->
+        query
+
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
 
@@ -943,19 +1007,83 @@ defmodule Algora.Bounties do
         from([b] in query, where: b.ticket_id == ^ticket_id)
 
       {:owner_id, owner_id}, query ->
-        from([b] in query, where: b.owner_id == ^owner_id)
+        from([b, r: r] in query, where: b.owner_id == ^owner_id or r.user_id == ^owner_id)
+
+      {:owner_handle, owner_handle}, query ->
+        from([b, o: o] in query, where: o.handle == ^owner_handle)
 
       {:status, status}, query ->
-        from([b] in query, where: b.status == ^status)
+        query = where(query, [b], b.status == ^status)
+
+        case status do
+          :open ->
+            query = where(query, [t: t], t.state == :open)
+
+            query =
+              case criteria[:current_user] do
+                nil ->
+                  where(query, [b], b.visibility != :exclusive)
+
+                user ->
+                  where(
+                    query,
+                    [b],
+                    b.visibility != :exclusive or
+                      fragment(
+                        "? && ARRAY[?, ?, ?]::citext[]",
+                        b.shared_with,
+                        ^user.id,
+                        ^user.email,
+                        ^to_string(user.provider_id)
+                      ) or
+                      fragment(
+                        "EXISTS (SELECT 1 FROM members m WHERE m.user_id = ? AND m.org_id = ? AND m.role = ANY(?))",
+                        ^user.id,
+                        b.owner_id,
+                        ^["admin", "mod"]
+                      )
+                  )
+              end
+
+            query =
+              case criteria[:owner_id] do
+                nil ->
+                  where(query, [b, o: o], (b.visibility == :public and o.featured == true) or b.visibility == :exclusive)
+
+                _org_id ->
+                  query
+              end
+
+            query
+
+          _ ->
+            query
+        end
+
+      {:before, %{inserted_at: inserted_at, id: id}}, query ->
+        from([b] in query,
+          where: {b.inserted_at, b.id} < {^inserted_at, ^id}
+        )
+
+      {:tech_stack, []}, query ->
+        query
 
       {:tech_stack, tech_stack}, query ->
-        from([b, o: o] in query,
+        from([b, r: r] in query,
           where:
-            fragment(
-              "EXISTS (SELECT 1 FROM UNNEST(?::citext[]) t1 WHERE t1 = ANY(?::citext[]))",
-              o.tech_stack,
-              ^tech_stack
-            )
+            b.visibility == :exclusive or fragment("? && ?::citext[]", r.tech_stack, ^tech_stack) or r.tech_stack == ^[]
+        )
+
+      {:amount_gt, min_amount}, query ->
+        from([b] in query,
+          where:
+            b.visibility == :exclusive or
+              fragment(
+                "?::money_with_currency >= (?, ?)::money_with_currency",
+                b.amount,
+                ^to_string(min_amount.currency),
+                ^min_amount.amount
+              )
         )
 
       _, query ->
@@ -963,7 +1091,7 @@ defmodule Algora.Bounties do
     end)
   end
 
-  def list_bounties_with(base_query, criteria \\ []) do
+  def list_bounties_query(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 
     base_bounties = select(base_query, [b], b.id)
@@ -972,12 +1100,18 @@ defmodule Algora.Bounties do
     |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
     |> join(:inner, [b], t in assoc(b, :ticket), as: :t)
     |> join(:inner, [b], o in assoc(b, :owner), as: :o)
-    |> join(:left, [t: t], r in assoc(t, :repository), as: :r)
+    |> join(:inner, [t: t], r in assoc(t, :repository), as: :r)
     |> join(:left, [r: r], ro in assoc(r, :user), as: :ro)
     |> where([b], not is_nil(b.amount))
     |> where([b], b.status != :cancelled)
     |> apply_criteria(criteria)
-    |> order_by([b], desc: b.amount, desc: b.inserted_at, desc: b.id)
+  end
+
+  def list_bounties_with(base_query, criteria \\ []) do
+    base_query
+    |> list_bounties_query(criteria)
+    # TODO: sort by b.paid_at if criteria[:status] == :paid
+    |> order_by([b], desc: b.inserted_at, desc: b.id)
     |> select([b, o: o, t: t, ro: ro, r: r], %{
       id: b.id,
       inserted_at: b.inserted_at,
@@ -985,11 +1119,14 @@ defmodule Algora.Bounties do
       status: b.status,
       owner: %{
         id: o.id,
+        inserted_at: o.inserted_at,
         name: o.name,
         handle: o.handle,
+        provider_login: o.provider_login,
         avatar_url: o.avatar_url,
         tech_stack: o.tech_stack
       },
+      ticket_id: t.id,
       ticket: %{
         id: t.id,
         title: t.title,
@@ -1001,10 +1138,24 @@ defmodule Algora.Bounties do
         name: r.name,
         owner: %{
           id: ro.id,
-          login: ro.provider_login
+          name: ro.name,
+          handle: ro.handle,
+          provider_login: ro.provider_login,
+          avatar_url: ro.avatar_url
         }
       }
     })
+    |> Repo.all()
+  end
+
+  def list_tech(criteria \\ []) do
+    base_query()
+    |> list_bounties_query(Keyword.put(criteria, :limit, :infinity))
+    |> where([b, r: r], not is_nil(r.tech_stack))
+    |> join(:cross_lateral, [b, r: r], tech in fragment("SELECT UNNEST(?) as tech", r.tech_stack), as: :tech)
+    |> group_by([b, r: r, tech: tech], fragment("tech"))
+    |> select([b, r: r, tech: tech], {fragment("tech"), count(fragment("tech"))})
+    |> order_by([b, r: r, tech: tech], desc: count(fragment("tech")))
     |> Repo.all()
   end
 
@@ -1021,59 +1172,101 @@ defmodule Algora.Bounties do
     )
   end
 
-  def awarded_to_user(user_id) do
-    from b in Bounty,
-      join: t in Transaction,
-      on: t.bounty_id == b.id,
-      where: t.user_id == ^user_id and t.type == :credit and t.status == :succeeded
-  end
-
-  def list_bounties_awarded_to_user(user_id, criteria \\ []) do
-    user_id
-    |> awarded_to_user()
-    |> list_bounties_with(criteria)
-  end
-
   def list_bounties(criteria \\ []) do
     list_bounties_with(base_query(), criteria)
   end
 
-  def fetch_stats(org_id \\ nil) do
+  def fetch_stats(opts) do
     zero_money = Money.zero(:USD, no_fraction_if_integer: true)
 
     open_bounties_query =
       from b in Bounty,
-        join: u in assoc(b, :owner),
-        where: u.id == ^org_id,
-        where: b.status == :open
+        join: t in assoc(b, :ticket),
+        left_join: r in assoc(t, :repository),
+        where: b.owner_id == ^opts[:org_id] or r.user_id == ^opts[:org_id],
+        where: b.status == :open,
+        where: b.status != :cancelled,
+        where: not is_nil(b.amount),
+        where: t.state == :open
+
+    open_bounties_query =
+      case(opts[:current_user]) do
+        nil ->
+          where(open_bounties_query, [b], b.visibility != :exclusive)
+
+        user ->
+          where(
+            open_bounties_query,
+            [b],
+            b.visibility != :exclusive or
+              fragment(
+                "? && ARRAY[?, ?, ?]::citext[]",
+                b.shared_with,
+                ^user.id,
+                ^user.email,
+                ^to_string(user.provider_id)
+              ) or
+              fragment(
+                "EXISTS (SELECT 1 FROM members m WHERE m.user_id = ? AND m.org_id = ? AND m.role = ANY(?))",
+                ^user.id,
+                b.owner_id,
+                ^["admin", "mod"]
+              )
+          )
+      end
 
     rewards_query =
-      from t in Transaction,
-        where: t.type == :credit,
-        where: t.status == :succeeded,
-        join: lt in assoc(t, :linked_transaction),
-        where: lt.type == :debit,
-        where: lt.status == :succeeded,
-        where: lt.user_id == ^org_id
+      from tx in Transaction,
+        where: tx.type == :credit,
+        where: tx.status == :succeeded,
+        join: ltx in assoc(tx, :linked_transaction),
+        left_join: b in assoc(tx, :bounty),
+        as: :b,
+        left_join: t in assoc(b, :ticket),
+        left_join: r in assoc(t, :repository),
+        where: ltx.type == :debit,
+        where: ltx.status == :succeeded,
+        where: ltx.user_id == ^opts[:org_id] or r.user_id == ^opts[:org_id]
 
-    rewarded_bounties_query = distinct(rewards_query, :bounty_id)
-    rewarded_tips_query = distinct(rewards_query, :tip_id)
-    rewarded_contracts_query = distinct(rewards_query, :contract_id)
-    rewarded_users_query = rewards_query |> distinct(true) |> select([:user_id])
+    rewarded_bounties_query =
+      rewards_query
+      |> where([t], not is_nil(t.bounty_id))
+      |> distinct([:user_id, :bounty_id])
 
-    rewarded_users_last_month_query =
+    rewarded_tips_query =
+      rewards_query
+      |> where([t], not is_nil(t.tip_id))
+      |> distinct([:user_id, :tip_id])
+
+    rewarded_bonuses_query =
+      rewards_query
+      |> where([t, b: b], t.net_amount > b.amount)
+      |> distinct([:user_id, :bounty_id])
+
+    rewarded_contracts_query =
+      rewards_query
+      |> where([t], not is_nil(t.contract_id))
+      |> distinct([:user_id, :contract_id])
+
+    rewarded_users_query =
+      rewards_query
+      |> distinct(true)
+      |> select([:user_id])
+
+    rewarded_users_diff_query =
       from t in rewarded_users_query,
         where: t.succeeded_at >= fragment("NOW() - INTERVAL '1 month'"),
         except_all: ^from(t in rewarded_users_query, where: t.succeeded_at < fragment("NOW() - INTERVAL '1 month'"))
 
-    members_query = Member.filter_by_org_id(Member, org_id)
+    members_query = Member.filter_by_org_id(Member, opts[:org_id])
     open_bounties = Repo.aggregate(open_bounties_query, :count, :id)
     open_bounties_amount = Repo.aggregate(open_bounties_query, :sum, :amount) || zero_money
     total_awarded_amount = Repo.aggregate(rewards_query, :sum, :net_amount) || zero_money
     rewarded_bounties_count = Repo.aggregate(rewarded_bounties_query, :count, :id)
     rewarded_tips_count = Repo.aggregate(rewarded_tips_query, :count, :id)
+    rewarded_bonuses_count = Repo.aggregate(rewarded_bonuses_query, :count, :id)
     rewarded_contracts_count = Repo.aggregate(rewarded_contracts_query, :count, :id)
-    solvers_count_last_month = Repo.aggregate(rewarded_users_last_month_query, :count, :user_id)
+    solvers_diff = Repo.aggregate(rewarded_users_diff_query, :count, :user_id)
     solvers_count = Repo.aggregate(rewarded_users_query, :count, :user_id)
     members_count = Repo.aggregate(members_query, :count, :id)
 
@@ -1082,10 +1275,10 @@ defmodule Algora.Bounties do
       open_bounties_count: open_bounties,
       total_awarded_amount: total_awarded_amount,
       rewarded_bounties_count: rewarded_bounties_count,
-      rewarded_tips_count: rewarded_tips_count,
+      rewarded_tips_count: rewarded_tips_count + rewarded_bonuses_count,
       rewarded_contracts_count: rewarded_contracts_count,
       solvers_count: solvers_count,
-      solvers_diff: solvers_count - solvers_count_last_month,
+      solvers_diff: solvers_diff,
       members_count: members_count
     }
   end

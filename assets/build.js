@@ -46,6 +46,20 @@ let optsServer = {
   ],
 };
 
+let optsPuppeteer = {
+  entryPoints: ["js/puppeteer-img.js"],
+  platform: "node",
+  bundle: true,
+  minify: true,
+  target: "node19.6.1",
+  conditions: [],
+  outdir: "../priv/puppeteer",
+  logLevel: "info",
+  sourcemap: watch ? "inline" : false,
+  tsconfig: "./tsconfig.json",
+  plugins: [],
+};
+
 if (watch) {
   esbuild
     .context(optsClient)
@@ -56,7 +70,13 @@ if (watch) {
     .context(optsServer)
     .then((ctx) => ctx.watch())
     .catch((_error) => process.exit(1));
+
+  esbuild
+    .context(optsPuppeteer)
+    .then((ctx) => ctx.watch())
+    .catch((_error) => process.exit(1));
 } else {
   esbuild.build(optsClient);
   esbuild.build(optsServer);
+  esbuild.build(optsPuppeteer);
 }

@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
   alias Algora.Contracts.Contract
   alias Algora.Organizations
   alias Algora.Repo
+  alias Algora.Util
 
   defp page_size, do: 10
 
@@ -24,13 +25,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.client.avatar_url} />
                   <.avatar_fallback>
-                    {String.slice(@contract.client.name, 0, 2)}
+                    {Util.initials(@contract.client.name)}
                   </.avatar_fallback>
                 </.avatar>
                 <.avatar class="h-12 w-12 ring-2 ring-background">
                   <.avatar_image src={@contract.contractor.avatar_url} />
                   <.avatar_fallback>
-                    {String.slice(@contract.contractor.name, 0, 2)}
+                    {Util.initials(@contract.contractor.name)}
                   </.avatar_fallback>
                 </.avatar>
               </div>
@@ -38,14 +39,27 @@ defmodule AlgoraWeb.Contract.ViewLive do
                 <h1 class="text-2xl font-semibold">
                   Contract with {@contract.contractor.name}
                 </h1>
-                <p class="text-sm text-muted-foreground">
-                  Started {Calendar.strftime(@contract.start_date, "%b %d, %Y")}
-                </p>
+                <%= if @contract.start_date do %>
+                  <p class="text-sm text-muted-foreground">
+                    Started {Calendar.strftime(@contract.start_date, "%b %d, %Y")}
+                  </p>
+                <% else %>
+                  <p class="text-sm text-muted-foreground">
+                    Drafted on {Calendar.strftime(@contract.inserted_at, "%b %d, %Y")}
+                  </p>
+                <% end %>
               </div>
             </div>
-            <div>
-              <.badge variant="success">Active</.badge>
-            </div>
+            <%= case @contract.status do %>
+              <% :draft -> %>
+                <.badge variant="warning">Draft</.badge>
+              <% :active -> %>
+                <.badge variant="success">Active</.badge>
+              <% :paid -> %>
+                <.badge variant="success">Paid</.badge>
+              <% _ -> %>
+                <.badge variant="destructive">Inactive</.badge>
+            <% end %>
           </div>
           <!-- Stats Grid -->
           <div class="mt-8 grid grid-cols-4 gap-4">
@@ -84,13 +98,13 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </.card>
           </div>
           <!-- Tabs -->
-          <.tabs :let={builder} id="contract-tabs" default="payments" class="mt-8">
+          <.tabs :let={builder} id="contract-tabs" default="details" class="mt-8">
             <.tabs_list class="flex w-full space-x-1 rounded-lg bg-muted p-1">
-              <.tabs_trigger builder={builder} value="payments" class="flex-1">
-                <.icon name="tabler-credit-card" class="mr-2 h-4 w-4" /> Payments
-              </.tabs_trigger>
               <.tabs_trigger builder={builder} value="details" class="flex-1">
                 <.icon name="tabler-file-text" class="mr-2 h-4 w-4" /> Contract Details
+              </.tabs_trigger>
+              <.tabs_trigger builder={builder} value="payments" class="flex-1">
+                <.icon name="tabler-credit-card" class="mr-2 h-4 w-4" /> Payments
               </.tabs_trigger>
               <.tabs_trigger builder={builder} value="activity" class="flex-1">
                 <.icon name="tabler-history" class="mr-2 h-4 w-4" /> Activity
@@ -106,7 +120,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                   </.card_description>
                 </.card_header>
                 <.card_content>
-                  <div class="space-y-8">
+                  <div :if={@contract.timesheet} class="space-y-8">
                     <%= for contract <- @contract_chain do %>
                       <%= case Contracts.get_payment_status(contract) do %>
                         <% {:pending_timesheet, contract} -> %>
@@ -119,7 +133,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                 <div class="font-medium">
                                   Waiting for timesheet submission
                                 </div>
-                                <div class="text-sm text-muted-foreground">
+                                <div :if={contract.start_date} class="text-sm text-muted-foreground">
                                   {Calendar.strftime(contract.start_date, "%b %d")} - {Calendar.strftime(
                                     contract.end_date,
                                     "%b %d, %Y"
@@ -142,7 +156,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                                 <div class="font-medium">
                                   Ready to release payment for {contract.timesheet.hours_worked} hours
                                 </div>
-                                <div class="text-sm text-muted-foreground">
+                                <div :if={contract.start_date} class="text-sm text-muted-foreground">
                                   {Calendar.strftime(contract.start_date, "%b %d")} - {Calendar.strftime(
                                     contract.end_date,
                                     "%b %d, %Y"
@@ -249,9 +263,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     </div>
                     <div class="flex flex-wrap gap-2 pt-6">
                       <%= for tech <- @contract.client.tech_stack do %>
-                        <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
-                          {tech}
-                        </span>
+                        <.badge>{tech}</.badge>
                       <% end %>
                     </div>
                     <div class="flex -space-x-1 pt-6">
@@ -259,7 +271,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         <.avatar class="h-9 w-9 ring-2 ring-background">
                           <.avatar_image src={member.user.avatar_url} />
                           <.avatar_fallback>
-                            {String.slice(member.user.name, 0, 2)}
+                            {Util.initials(member.user.name)}
                           </.avatar_fallback>
                         </.avatar>
                       <% end %>
@@ -269,7 +281,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
                 <.card>
                   <.card_header>
-                    <.card_title>Provider</.card_title>
+                    <.card_title>Contractor</.card_title>
                   </.card_header>
                   <.card_content>
                     <div class="flex items-center gap-4">
@@ -285,22 +297,24 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     </div>
                     <div class="flex flex-wrap gap-2 pt-6">
                       <%= for tech <- @contract.contractor.tech_stack do %>
-                        <span class="rounded-lg bg-secondary px-2 py-0.5 text-xs ring-1 ring-border">
-                          {tech}
-                        </span>
+                        <.badge>{tech}</.badge>
                       <% end %>
                     </div>
                     <div class="space-y-2 pt-6">
-                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div
+                        :if={@contract.contractor.location}
+                        class="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
                         <.icon name="tabler-map-pin" class="h-4 w-4" />
                         {@contract.contractor.location}
                       </div>
-                      <%= if @contract.contractor.timezone do %>
-                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-clock" class="h-4 w-4" />
-                          {Algora.Time.friendly_timezone(@contract.contractor.timezone)}
-                        </div>
-                      <% end %>
+                      <div
+                        :if={@contract.contractor.timezone}
+                        class="flex items-center gap-2 text-sm text-muted-foreground"
+                      >
+                        <.icon name="tabler-clock" class="h-4 w-4" />
+                        {Algora.Time.friendly_timezone(@contract.contractor.timezone)}
+                      </div>
                     </div>
                   </.card_content>
                 </.card>
@@ -332,7 +346,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
               <.avatar>
                 <.avatar_image src={@contract.contractor.avatar_url} alt="Developer avatar" />
                 <.avatar_fallback>
-                  {String.slice(@contract.contractor.name, 0, 2)}
+                  {Util.initials(@contract.contractor.name)}
                 </.avatar_fallback>
               </.avatar>
               <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
@@ -340,7 +354,9 @@ defmodule AlgoraWeb.Contract.ViewLive do
             </div>
             <div>
               <h2 class="text-lg font-semibold">{@contract.contractor.name}</h2>
-              <p class="text-xs text-muted-foreground">Active now</p>
+              <p class="text-xs text-muted-foreground">
+                Active {Util.time_ago(@contract.contractor.last_active_at)}
+              </p>
             </div>
           </div>
         </div>
@@ -373,7 +389,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                     <.avatar class="h-8 w-8">
                       <.avatar_image src={message.sender.avatar_url} />
                       <.avatar_fallback>
-                        {String.slice(message.sender.name, 0, 2)}
+                        {Util.initials(message.sender.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
@@ -464,19 +480,42 @@ defmodule AlgoraWeb.Contract.ViewLive do
     thread = Chat.get_or_create_thread!(contract)
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
 
-    {:ok,
-     socket
-     |> assign(:contract, contract)
-     |> assign(:contract_chain, contract_chain)
-     |> assign(:has_more, length(contract_chain) >= page_size())
-     |> assign(:page_title, "Contract with #{contract.contractor.name}")
-     |> assign(:messages, messages)
-     |> assign(:thread, thread)
-     |> assign(:show_release_renew_modal, false)
-     |> assign(:show_release_modal, false)
-     |> assign(:show_dispute_modal, false)
-     |> assign(:fee_data, Contracts.calculate_fee_data(contract))
-     |> assign(:org_members, Organizations.list_org_members(contract.client))}
+    case socket.assigns[:current_user] do
+      nil ->
+        {:ok, redirect(socket, to: ~p"/auth/login?return_to=#{~p"/org/#{contract.client.handle}/contracts/#{id}"}")}
+
+      current_user ->
+        if current_user.id != contract.contractor_id and
+             not (socket.assigns.all_contexts |> Enum.map(& &1.id) |> Enum.member?(contract.client_id)) do
+          {:ok, raise(AlgoraWeb.NotFoundError)}
+        else
+          if connected?(socket) do
+            Chat.subscribe(thread.id)
+          end
+
+          {:ok,
+           socket
+           |> assign(:contract, contract)
+           |> assign(:contract_chain, contract_chain)
+           |> assign(:has_more, length(contract_chain) >= page_size())
+           |> assign(:page_title, "Contract with #{contract.contractor.name}")
+           |> assign(:messages, messages)
+           |> assign(:thread, thread)
+           |> assign(:show_release_renew_modal, false)
+           |> assign(:show_release_modal, false)
+           |> assign(:show_dispute_modal, false)
+           |> assign(:fee_data, Contracts.calculate_fee_data(contract))
+           |> assign(:org_members, Organizations.list_org_members(contract.client))}
+        end
+    end
+  end
+
+  def handle_info(%Chat.Message{} = message, socket) do
+    if message.id in Enum.map(socket.assigns.messages, & &1.id) do
+      {:noreply, socket}
+    else
+      {:noreply, Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))}
+    end
   end
 
   def handle_event("send_message", %{"message" => content}, socket) do

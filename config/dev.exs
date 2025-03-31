@@ -8,7 +8,10 @@ config :algora, :github,
   webhook_secret: System.get_env("GITHUB_WEBHOOK_SECRET"),
   private_key: System.get_env("GITHUB_PRIVATE_KEY"),
   pat: System.get_env("GITHUB_PAT"),
-  pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true"
+  pat_enabled: System.get_env("GITHUB_PAT_ENABLED", "false") == "true",
+  bot_handle: System.get_env("GITHUB_BOT_HANDLE"),
+  oauth_state_ttl: String.to_integer(System.get_env("GITHUB_OAUTH_STATE_TTL", "600")),
+  oauth_state_salt: System.get_env("GITHUB_OAUTH_STATE_SALT", "github-oauth-state")
 
 config :stripity_stripe,
   api_key: System.get_env("STRIPE_SECRET_KEY"),
@@ -89,17 +92,23 @@ config :algora, AlgoraWeb.Endpoint,
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/algora_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/algora_web/(controllers|components)/.*(ex|heex)$"
+    ],
+    notify: [
+      live_view: [
+        ~r"lib/algora_web/live/.*(ex|heex)$"
+      ]
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
 config :algora, dev_routes: true
 
-# Do not include metadata nor timestamps in development logs
+# Configures Elixir's Logger
 config :logger, :console,
-  format: "[$level] $message\n",
-  level: String.to_atom(System.get_env("LOG_LEVEL") || "debug")
+  format: "[$level] $message $metadata\n",
+  level: String.to_atom(System.get_env("LOG_LEVEL") || "debug"),
+  metadata: [:mfa, :file, :line, :request_id, :user_id]
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
@@ -122,3 +131,14 @@ config :algora,
   cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
   swift_mode: System.get_env("SWIFT_MODE") == "true",
   auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
+
+config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")
+
+config :algora, :login_code,
+  ttl: String.to_integer(System.get_env("LOGIN_CODE_TTL", "3600")),
+  salt: System.get_env("LOGIN_CODE_SALT", "algora-login-code")
+
+config :algora,
+  plausible_url: System.get_env("PLAUSIBLE_URL"),
+  assets_url: System.get_env("ASSETS_URL"),
+  ingest_url: System.get_env("INGEST_URL")

@@ -14,13 +14,14 @@ defmodule Algora.Github do
   def private_key, do: [:github, :private_key] |> Algora.config() |> String.replace("\\n", "\n")
   def pat, do: Algora.config([:github, :pat])
   def pat_enabled, do: Algora.config([:github, :pat_enabled])
+  def bot_handle, do: Algora.config([:github, :bot_handle])
 
   def install_url_base, do: "https://github.com/apps/#{app_handle()}/installations"
   def install_url_new, do: "#{install_url_base()}/new"
   def install_url_select_target, do: "#{install_url_base()}/select_target"
 
-  defp oauth_state_ttl, do: 600
-  defp oauth_state_salt, do: "github-oauth-state"
+  defp oauth_state_ttl, do: Algora.config([:github, :oauth_state_ttl])
+  defp oauth_state_salt, do: Algora.config([:github, :oauth_state_salt])
 
   def generate_oauth_state(data) do
     Phoenix.Token.sign(AlgoraWeb.Endpoint, oauth_state_salt(), data, max_age: oauth_state_ttl())
@@ -67,6 +68,15 @@ defmodule Algora.Github do
   end
 
   @impl true
+  def get_delivery(delivery_id), do: client().get_delivery(delivery_id)
+
+  @impl true
+  def list_deliveries(opts \\ []), do: client().list_deliveries(opts)
+
+  @impl true
+  def redeliver(delivery_id), do: client().redeliver(delivery_id)
+
+  @impl true
   def get_repository(token, owner, repo), do: client().get_repository(token, owner, repo)
 
   @impl true
@@ -104,6 +114,8 @@ defmodule Algora.Github do
   def get_installation_token(installation_id), do: client().get_installation_token(installation_id)
 
   @impl true
+  def get_installation(installation_id), do: client().get_installation(installation_id)
+  @impl true
   def list_installation_repos(token), do: client().list_installation_repos(token)
 
   @impl true
@@ -115,12 +127,20 @@ defmodule Algora.Github do
     do: client().update_issue_comment(token, owner, repo, comment_id, body)
 
   @impl true
+  def list_user_repositories(token, username, opts \\ []), do: client().list_user_repositories(token, username, opts)
+
+  @impl true
   def list_repository_events(token, owner, repo, opts \\ []),
     do: client().list_repository_events(token, owner, repo, opts)
 
   @impl true
   def list_repository_comments(token, owner, repo, opts \\ []),
     do: client().list_repository_comments(token, owner, repo, opts)
+
+  @impl true
+  def list_repository_languages(token, owner, repo), do: client().list_repository_languages(token, owner, repo)
+  @impl true
+  def list_repository_contributors(token, owner, repo), do: client().list_repository_contributors(token, owner, repo)
 
   @impl true
   def add_labels(token, owner, repo, number, labels), do: client().add_labels(token, owner, repo, number, labels)

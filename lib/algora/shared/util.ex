@@ -66,12 +66,15 @@ defmodule Algora.Util do
     date |> DateTime.shift_zone!(timezone) |> Calendar.strftime("%Y-%m-%d %I:%M %p")
   end
 
-  def to_date(nil), do: nil
+  def to_date!(nil), do: nil
 
-  def to_date(date) do
+  def to_date!(date) do
     case DateTime.from_iso8601(date) do
-      {:ok, datetime, _offset} -> datetime
-      {:error, _reason} = error -> error
+      {:ok, datetime, _offset} ->
+        %{datetime | microsecond: {elem(datetime.microsecond, 0), 6}}
+
+      {:error, _reason} = error ->
+        error
     end
   end
 
@@ -115,7 +118,26 @@ defmodule Algora.Util do
   def format_name_list([x1, x2, x3]), do: "#{x1}, #{x2} and #{x3}"
   def format_name_list([x1, x2 | xs]), do: "#{x1}, #{x2} and #{length(xs)} others"
 
+  def initials(str, length \\ 2)
+  def initials(nil, _length), do: ""
+  def initials(str, length), do: str |> String.slice(0, length) |> String.upcase()
+
   # TODO: Implement this for all countries
   def locale_from_country_code("gr"), do: "el"
   def locale_from_country_code(country_code), do: country_code
+
+  def parse_github_url(url) do
+    case Regex.run(~r{(?:github\.com/)?([^/\s]+)/([^/\s]+)}, url) do
+      [_, owner, repo] -> {:ok, {owner, repo}}
+      _ -> {:error, "Must be a valid GitHub repository URL (e.g. github.com/owner/repo) or owner/repo format"}
+    end
+  end
+
+  def path_from_url(url) do
+    url
+    |> URI.parse()
+    |> then(& &1.path)
+    |> String.replace(~r/^\/[^\/]+\//, "")
+    |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
+  end
 end

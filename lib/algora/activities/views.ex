@@ -2,6 +2,8 @@ defmodule Algora.Activities.Views do
   @moduledoc false
   alias Algora.Repo
 
+  require Logger
+
   def render(%{type: type} = activity, template) when is_binary(type) do
     render(%{activity | type: String.to_existing_atom(type)}, template)
   end
@@ -18,31 +20,16 @@ defmodule Algora.Activities.Views do
     """
   end
 
-  def render(%{type: :bounty_awarded, assoc: bounty}, :title) do
-    bounty = Repo.preload(bounty, :creator)
-    "🎉 #{bounty.amount} bounty awarded by #{bounty.creator.display_name}"
-  end
-
-  def render(%{type: :bounty_awarded, assoc: bounty} = activity, :txt) do
-    bounty = Repo.preload(bounty, :creator)
-
-    """
-    Congratulations, you've been awarded a bounty by #{bounty.creator.display_name}!
-
-    #{Algora.Activities.external_url(activity)}
-    """
-  end
-
   def render(%{type: :bounty_posted, assoc: bounty}, :title) do
     bounty = Repo.preload(bounty, :creator)
-    "#{bounty.amount} bounty posted by #{bounty.creator.display_name}"
+    "#{bounty.amount} bounty posted by #{bounty.creator.name}"
   end
 
   def render(%{type: :bounty_posted, assoc: bounty} = activity, :txt) do
     bounty = Repo.preload(bounty, :creator)
 
     """
-    A new bounty has been posted by #{bounty.creator.display_name}
+    A new bounty has been posted by #{bounty.creator.name}
 
     #{Algora.Activities.external_url(activity)}
     """
@@ -102,21 +89,7 @@ defmodule Algora.Activities.Views do
     contract = Repo.preload(contract, [:client, :contractor])
 
     """
-    A contract between #{contract.client.display_name} and #{contract.contractor.display_name} has been created.
-
-    #{Algora.Activities.external_url(activity)}
-    """
-  end
-
-  def render(%{type: :contract_paid, assoc: _contract}, :title) do
-    "A contract has been paid on Algora"
-  end
-
-  def render(%{type: :contract_paid, assoc: contract} = activity, :txt) do
-    contract = Repo.preload(contract, [:client, :contractor])
-
-    """
-    A contract between "#{contract.client.display_name}" and "#{contract.contractor.display_name}" has been paid.
+    A contract between #{contract.client.name} and #{contract.contractor.name} has been created.
 
     #{Algora.Activities.external_url(activity)}
     """
@@ -130,7 +103,7 @@ defmodule Algora.Activities.Views do
     contract = Repo.preload(contract, :client)
 
     """
-    A contract for "#{contract.client.display_name}" has been prepaid.
+    A contract for "#{contract.client.name}" has been prepaid.
 
     #{Algora.Activities.external_url(activity)}
     """
@@ -144,23 +117,63 @@ defmodule Algora.Activities.Views do
     contract = Repo.preload(contract, [:client, :contractor])
 
     """
-    A contract between "#{contract.client.display_name}" and "#{contract.contractor.display_name}" has been renewed.
+    A contract between "#{contract.client.name}" and "#{contract.contractor.name}" has been renewed.
 
     #{Algora.Activities.external_url(activity)}
     """
   end
 
-  def render(%{type: :tip_awarded, assoc: _tip}, :title) do
-    "You were awarded a tip on Algora"
+  def render(%{type: :transaction_succeeded, assoc: tx} = activity, template) do
+    tx = Repo.preload(tx, [:user, linked_transaction: [:user]])
+    activity = %{activity | assoc: tx}
+
+    case tx do
+      %{linked_transaction: nil} ->
+        Logger.error("Unknown transaction type: #{inspect(tx)}")
+        raise "Unknown transaction type: #{inspect(tx)}"
+
+      %{bounty_id: bounty_id} when not is_nil(bounty_id) ->
+        render_transaction_succeeded(activity, template, :bounty)
+
+      %{tip_id: tip_id} when not is_nil(tip_id) ->
+        render_transaction_succeeded(activity, template, :tip)
+
+      %{contract_id: contract_id} when not is_nil(contract_id) ->
+        render_transaction_succeeded(activity, template, :contract)
+
+      _ ->
+        Logger.error("Unknown transaction type: #{inspect(tx)}")
+        raise "Unknown transaction type: #{inspect(tx)}"
+    end
   end
 
-  def render(%{type: :tip_awarded, assoc: tip} = activity, :txt) do
-    tip = Repo.preload(tip, :creator)
+  defp render_transaction_succeeded(%{assoc: tx}, :title, :bounty) do
+    "🎉 #{tx.net_amount} bounty awarded by #{tx.linked_transaction.user.name}"
+  end
 
+  defp render_transaction_succeeded(%{assoc: tx}, :title, :tip) do
+    "💸 #{tx.net_amount} tip received from #{tx.linked_transaction.user.name}"
+  end
+
+  defp render_transaction_succeeded(%{assoc: tx}, :title, :contract) do
+    "💰 #{tx.net_amount} contract paid by #{tx.linked_transaction.user.name}"
+  end
+
+  defp render_transaction_succeeded(%{assoc: tx}, :txt, :bounty) do
     """
-    #{tip.creator.display_name} sent you a #{tip.amount} tip on Algora!
+    Congratulations, you've been awarded a #{tx.net_amount} bounty by #{tx.linked_transaction.user.name}!
+    """
+  end
 
-    #{Algora.Activities.external_url(activity)}
+  defp render_transaction_succeeded(%{assoc: tx}, :txt, :tip) do
+    """
+    Congratulations, you've been awarded a #{tx.net_amount} tip by #{tx.linked_transaction.user.name}!
+    """
+  end
+
+  defp render_transaction_succeeded(%{assoc: tx}, :txt, :contract) do
+    """
+    Congratulations, you've been awarded a #{tx.net_amount} contract by #{tx.linked_transaction.user.name}!
     """
   end
 end

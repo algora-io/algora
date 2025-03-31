@@ -193,7 +193,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
         </div>
         <%= if @account do %>
           <div class="flex items-center gap-2">
-            <%= if @account.charges_enabled do %>
+            <%= if @account.payouts_enabled do %>
               <.badge variant="success" phx-click="show_manage_payout_drawer" class="cursor-pointer">
                 Payout account active
               </.badge>
@@ -265,7 +265,9 @@ defmodule AlgoraWeb.Org.TransactionsLive do
                           <div class="flex items-center gap-3">
                             <.avatar class="h-8 w-8">
                               <.avatar_image src={linked_user.avatar_url} alt={linked_user.name} />
-                              <.avatar_fallback>{String.first(linked_user.name)}</.avatar_fallback>
+                              <.avatar_fallback>
+                                {Algora.Util.initials(linked_user.name)}
+                              </.avatar_fallback>
                             </.avatar>
                             <div class="font-medium">
                               <div>{linked_user.name}</div>
@@ -313,7 +315,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
               options={
                 PayoutAccountForm.countries()
                 |> Enum.map(fn {name, code} ->
-                  {Algora.Misc.CountryEmojis.get(code, "🌎") <> " " <> name, code}
+                  {Algora.Misc.CountryEmojis.get(code) <> " " <> name, code}
                 end)
               }
               helptext="Select the country where you or your business will legally operate."
@@ -342,7 +344,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
       </.drawer_header>
       <.drawer_content class="mt-4">
         <div class="space-y-6">
-          <div class="grid gap-6">
+          <div class="grid grid-cols-1 gap-6">
             <.card>
               <.card_header>
                 <.card_title>Account Status</.card_title>
@@ -385,7 +387,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
               </.card_content>
             </.card>
 
-            <.card :if={@account.details_submitted}>
+            <.card :if={@account.details_submitted and @account.provider_meta}>
               <.card_header>
                 <.card_title>Payout Settings</.card_title>
               </.card_header>

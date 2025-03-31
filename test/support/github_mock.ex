@@ -5,6 +5,21 @@ defmodule Algora.Support.GithubMock do
   defp random_id(n \\ 1000), do: :rand.uniform(n)
 
   @impl true
+  def get_delivery(id) do
+    {:ok, %{"id" => id}}
+  end
+
+  @impl true
+  def list_deliveries(_opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
+  def redeliver(_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
   def get_issue(_access_token, owner, repo, number) do
     {:ok,
      %{
@@ -12,7 +27,8 @@ defmodule Algora.Support.GithubMock do
        "title" => "title #{number}",
        "body" => "body #{number}",
        "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}"
+       "html_url" => "https://github.com/#{owner}/#{repo}/issues/#{number}",
+       "state" => "open"
      }}
   end
 
@@ -53,7 +69,8 @@ defmodule Algora.Support.GithubMock do
        "title" => "title #{number}",
        "body" => "body #{number}",
        "number" => number,
-       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}"
+       "html_url" => "https://github.com/#{owner}/#{repo}/pull/#{number}",
+       "state" => "open"
      }}
   end
 
@@ -105,6 +122,11 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def get_installation(_installation_id) do
+    {:ok, %{"id" => random_id()}}
+  end
+
+  @impl true
   def list_installation_repos(_access_token) do
     {:ok, []}
   end
@@ -120,12 +142,27 @@ defmodule Algora.Support.GithubMock do
   end
 
   @impl true
+  def list_user_repositories(_access_token, _username, _opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
   def list_repository_events(_access_token, _owner, _repo, _opts \\ []) do
     {:ok, []}
   end
 
   @impl true
   def list_repository_comments(_access_token, _owner, _repo, _opts \\ []) do
+    {:ok, []}
+  end
+
+  @impl true
+  def list_repository_languages(_access_token, _owner, _repo) do
+    {:ok, []}
+  end
+
+  @impl true
+  def list_repository_contributors(_access_token, _owner, _repo) do
     {:ok, []}
   end
 

@@ -2,6 +2,9 @@ defmodule Algora.Stargazer do
   @moduledoc false
   use GenServer
 
+  alias Algora.Github
+  alias AlgoraWeb.Constants
+
   require Logger
 
   @poll_interval :timer.minutes(10)
@@ -26,14 +29,9 @@ defmodule Algora.Stargazer do
     state
   end
 
-  defp fetch_count do
-    with {:ok, %Finch.Response{status: 200, body: body}} <-
-           :get
-           |> Finch.build(AlgoraWeb.Constants.get(:github_repo_url))
-           |> Finch.request(Algora.Finch),
-         {:ok, %{"stargazers_count" => count}} <- Jason.decode(body) do
-      count
-    else
+  def fetch_count do
+    case Github.Client.fetch(nil, Constants.get(:github_repo_api_url)) do
+      {:ok, %{"stargazers_count" => count}} -> count
       _ -> nil
     end
   end

@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Components.Footer do
   @moduledoc false
   use AlgoraWeb.Component
+  use AlgoraWeb, :verified_routes
 
   import AlgoraWeb.CoreComponents
 
@@ -16,48 +17,40 @@ defmodule AlgoraWeb.Components.Footer do
           <div class="grid grid-cols-2 gap-x-12 gap-y-20 md:grid-cols-4">
             <div>
               <h3 class="text-base font-semibold leading-6 text-white">
-                <a href="https://console.algora.io/bounties">Bounties</a>
+                <.link navigate={~p"/bounties"}>Bounties</.link>
               </h3>
               <ul role="list" class="mt-6 space-y-4">
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/rust"
+                    navigate={~p"/bounties/rust"}
                   >
                     Rust
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/typescript"
+                    navigate={~p"/bounties/typescript"}
                   >
                     TypeScript
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/scala"
+                    navigate={~p"/bounties/scala"}
                   >
                     Scala
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/go"
+                    navigate={~p"/bounties/c,c++"}
                   >
-                    Go
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/bounties/t/swift"
-                  >
-                    Swift
-                  </a>
+                    C / C++
+                  </.link>
                 </li>
               </ul>
             </div>
@@ -65,36 +58,28 @@ defmodule AlgoraWeb.Components.Footer do
               <h3 class="text-base font-semibold leading-6 text-white">Community</h3>
               <ul role="list" class="mt-6 space-y-4">
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/events"
-                  >
-                    Activity
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/home/projects#content"
+                    navigate={~p"/projects"}
                   >
                     Projects
-                  </a>
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/experts"
+                    navigate={~p"/community"}
                   >
-                    Experts
-                  </a>
+                    Community
+                  </.link>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/home/leaderboard#content"
+                    navigate={~p"/leaderboard"}
                   >
                     Leaderboard
-                  </a>
+                  </.link>
                 </li>
                 <li>
                   <a
@@ -134,12 +119,12 @@ defmodule AlgoraWeb.Components.Footer do
                   </a>
                 </li>
                 <li>
-                  <a
+                  <.link
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
-                    href="https://console.algora.io/pricing"
+                    navigate={~p"/pricing"}
                   >
                     Pricing
-                  </a>
+                  </.link>
                 </li>
               </ul>
             </div>
@@ -182,47 +167,68 @@ defmodule AlgoraWeb.Components.Footer do
             </div>
           </div>
         </div>
-        <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 md:flex md:justify-between lg:mt-24">
+        <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 flex flex-col md:flex-row md:justify-between md:items-start lg:mt-24 gap-8">
           <div class="flex gap-4 sm:gap-6 md:order-2">
-            <a
+            <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:discord_url)}
+              rel="noopener"
+              target="_blank"
             >
               <span class="sr-only">Discord</span>
               <.icon name="tabler-brand-discord-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </a>
-            <a
+            </.link>
+            <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:twitter_url)}
+              rel="noopener"
+              target="_blank"
             >
               <span class="sr-only">X (formerly Twitter)</span>
               <.icon name="tabler-brand-x" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </a>
-            <a
+            </.link>
+            <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:github_url)}
+              rel="noopener"
+              target="_blank"
             >
               <span class="sr-only">GitHub</span>
               <Logos.github class="h-6 w-6 sm:h-8 sm:w-8" />
-            </a>
-            <a
+            </.link>
+            <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={Constants.get(:youtube_url)}
+              rel="noopener"
+              target="_blank"
             >
               <span class="sr-only">YouTube</span>
               <.icon name="tabler-brand-youtube-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </a>
-            <a
+            </.link>
+            <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"
               href={"mailto:" <> Constants.get(:email)}
             >
               <span class="sr-only">Email</span>
               <.icon name="tabler-mail-filled" class="h-6 w-6 sm:h-8 sm:w-8" />
-            </a>
+            </.link>
           </div>
-          <p class="mt-8 text-sm font-medium leading-5 text-gray-400 md:order-1 md:mt-0 md:text-base">
-            © {Date.utc_today().year} Algora, Public Benefit Corporation
-          </p>
+
+          <div class="flex flex-col gap-4 md:gap-2">
+            <div class="text-sm font-medium leading-5 text-gray-400 md:text-base">
+              © {Date.utc_today().year} Algora, Public Benefit Corporation
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <.link
+                class="flex w-max items-center gap-2 rounded-full border border-gray-700 py-2 pl-2 pr-3.5 text-xs text-muted-foreground hover:text-foreground transition-colors hover:border-gray-600"
+                href={"tel:" <> Constants.get(:tel)}
+              >
+                <.icon name="tabler-phone-filled" class="size-4" /> Call us
+                <span>{Constants.get(:tel_formatted)}</span>
+              </.link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

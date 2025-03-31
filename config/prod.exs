@@ -10,8 +10,8 @@ config :algora, AlgoraWeb.Endpoint, cache_static_manifest: "priv/static/cache_ma
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Algora.Finch
 
-# Disable Swoosh Local Memory Storage
-config :swoosh, local: false
+# TODO: Disable Swoosh Local Memory Storage
+config :swoosh, local: true
 
 config :logger,
   format: {LogfmtEx, :format},
@@ -21,6 +21,16 @@ config :logger,
 config :algora,
   swift_mode: true,
   auto_start_pollers: true
+
+# TODO: remove after migration
+config :algora,
+  dev_routes: true,
+  require_admin_for_mailbox: true
+
+config :algora,
+  plausible_url: System.get_env("PLAUSIBLE_URL"),
+  assets_url: System.get_env("ASSETS_URL"),
+  ingest_url: System.get_env("INGEST_URL")
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

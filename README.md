@@ -9,7 +9,7 @@
   <p align="center">
     Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.
     <br/>
-    <a href="https://console.algora.io">Website</a>
+    <a href="https://algora.io">Website</a>
     ·
     <a href="https://algora.io/discord">Discord</a>
     ·
@@ -21,11 +21,11 @@
   </p>
 
   <p align="center">
-    <a href="https://console.algora.io/org/algora/bounties?status=open">
-      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Falgora%2Fbounties%3Fstatus%3Dopen" alt="Open Bounties">
+    <a href="https://algora.io/org/algora/bounties?status=open">
+      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Falgora.io%2Fapi%2Fshields%2Falgora%2Fbounties%3Fstatus%3Dopen" alt="Open Bounties">
     </a>
-    <a href="https://console.algora.io/org/algora/bounties?status=completed">
-      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Falgora%2Fbounties%3Fstatus%3Dcompleted" alt="Rewarded Bounties">
+    <a href="https://algora.io/org/algora/bounties?status=completed">
+      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Falgora.io%2Fapi%2Fshields%2Falgora%2Fbounties%3Fstatus%3Dcompleted" alt="Rewarded Bounties">
     </a>
   </p>
 </p>
@@ -61,8 +61,6 @@ To get a local copy up and running, follow these steps.
    ```sh
    mix deps.get
    ```
-
-   **Note:** If you're using an Apple machine with an ARM-based chip, you need to install the Rust compiler and run `mix compile.rambo`
 
 4. Initialize your `.env` file
 
@@ -105,7 +103,7 @@ To get a local copy up and running, follow these steps.
    iex -S mix phx.server
    ```
 
-10. (Optional) Watch for file changes and auto-recompile in a separate terminal
+10. (Optional) Watch for file changes and auto reload IEx shell in a separate terminal
 
     ```sh
     find lib/ | entr mix compile
@@ -113,20 +111,53 @@ To get a local copy up and running, follow these steps.
 
 ### Setting up external services
 
-Some features of Algora Console rely on external services. If you're not planning on using these features, feel free to skip setting them up.
+Some features of Algora rely on external services. If you're not planning on using these features, feel free to skip setting them up.
 
 #### GitHub
 
-GitHub is used for authenticating users.
-
-[Create a GitHub OAuth app](https://github.com/settings/applications/new) and set
+[Register new GitHub app](https://github.com/settings/apps/new) and set
 
 - Homepage URL: http://localhost:4000
-- Authorization callback URL: http://localhost:4000/callbacks/github/oauth
+- Callback URL: http://localhost:4000/callbacks/github/oauth
+- Setup URL: http://localhost:4000/callbacks/github/installation
+- Redirect on update: Yes
+- Webhook URL: https://[your-public-proxy]/webhooks/github (e.g. ngrok, Cloudflare Tunnel)
+- Secret: [generate new random string]
+- Permissions:
+  - Read & write issues
+  - Read & write pull requests
+  - Read account email address
+- Events: issues, pull requests, issue comment, pull request review, pull request review comment
 
 Once you have obtained your client ID and secret, add them to your `.env` file and run `direnv allow .env`
 
 ```env
 GITHUB_CLIENT_ID=""
-GITHUB_CLIENT_SECRET="..."
+GITHUB_CLIENT_SECRET=""
+GITHUB_APP_HANDLE=""
+GITHUB_APP_ID=""
+GITHUB_WEBHOOK_SECRET=""
+GITHUB_PRIVATE_KEY=""
+```
+
+#### Stripe
+
+[Create new Stripe account](https://dashboard.stripe.com/register) to obtain your secrets and add them to your `.env` file.
+
+```env
+STRIPE_PUBLISHABLE_KEY=""
+STRIPE_SECRET_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+```
+
+#### Object Storage
+
+To host static assets, set up a public bucket on your preferred S3-compatible storage service and add the following credentials to your `.env` file:
+
+```env
+AWS_ENDPOINT_URL_S3=""
+AWS_REGION=""
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+BUCKET_NAME=""
 ```

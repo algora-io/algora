@@ -26,11 +26,12 @@ defmodule Algora.Contracts do
   @type criterion ::
           {:id, binary()}
           | {:client_id, binary()}
+          | {:contractor_id, binary()}
           | {:original_contract_id, binary()}
           | {:open?, true}
           | {:active_or_paid?, true}
           | {:original?, true}
-          | {:status, :open | :paid}
+          | {:status, Contract.status() | {:in, [Contract.status()]}}
           | {:after, non_neg_integer()}
           | {:before, non_neg_integer()}
           | {:order, :asc | :desc}
@@ -38,9 +39,15 @@ defmodule Algora.Contracts do
           | {:tech_stack, [String.t()]}
 
   def create_contract(attrs) do
-    %Contract{}
-    |> Contract.changeset(attrs)
-    |> Repo.insert()
+    case %Contract{} |> Contract.changeset(attrs) |> Repo.insert() do
+      {:ok, contract} ->
+        Algora.Admin.alert("Contract created: #{contract.id}", :info)
+        {:ok, contract}
+
+      {:error, error} ->
+        Algora.Admin.alert("Error creating contract: #{inspect(error)}", :error)
+        {:error, error}
+    end
   end
 
   @spec get_payment_status(Contract.t()) :: payment_status()
@@ -53,9 +60,18 @@ defmodule Algora.Contracts do
   end
 
   def calculate_fee_data(contract) do
-    total_paid = Payments.get_total_paid(contract.client_id, contract.contractor_id)
-    fee_tiers = FeeTier.all()
-    current_fee = FeeTier.calculate_fee_percentage(total_paid)
+    contract = Repo.preload(contract, :client)
+
+    # TODO: implement sliding scale for expert contracts
+    # fee_tiers = FeeTier.all(:expert)
+    # total_paid = Payments.get_total_paid(contract.client_id, contract.contractor_id)
+    # progress: FeeTier.calculate_progress(total_paid)
+    # current_fee = FeeTier.calculate_fee_percentage(total_paid)
+
+    fee_tiers = FeeTier.all(:community)
+    total_paid = Money.zero(:USD)
+    progress = Decimal.new(0)
+    current_fee = Decimal.div(contract.client.fee_pct, 100)
 
     %{
       total_paid: total_paid,
@@ -63,7 +79,7 @@ defmodule Algora.Contracts do
       current_fee: current_fee,
       transaction_fee: Payments.get_transaction_fee_pct(),
       total_fee: Decimal.add(current_fee, Payments.get_transaction_fee_pct()),
-      progress: FeeTier.calculate_progress(total_paid)
+      progress: progress
     }
   end
 
@@ -393,6 +409,7 @@ defmodule Algora.Contracts do
   defp maybe_generate_invoice(_contract, nil), do: {:ok, nil}
 
   defp maybe_generate_invoice(contract, charge) do
+    # TODO: add metadata to invoice %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
     invoice_params = %{auto_advance: false, customer: contract.client.customer.provider_id}
 
     with {:ok, invoice} <- Invoice.create(invoice_params, %{idempotency_key: "contract-#{contract.id}"}),
@@ -465,9 +482,7 @@ defmodule Algora.Contracts do
   defp maybe_pay_invoice(contract, invoice, txs) do
     pm_id = contract.client.customer.default_payment_method.provider_id
 
-    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}, %{
-           idempotency_key: "contract-#{contract.id}"
-         }) do
+    case Invoice.pay(invoice.id, %{off_session: true, payment_method: pm_id}) do
       {:ok, stripe_invoice} ->
         if stripe_invoice.paid, do: release_funds(contract, stripe_invoice, txs)
         {:ok, stripe_invoice}
@@ -538,12 +553,7 @@ defmodule Algora.Contracts do
   end
 
   defp mark_contract_as_paid(contract) do
-    contract
-    |> change(%{status: :paid})
-    |> Repo.update_with_activity(%{
-      type: :contract_paid,
-      notify_users: [contract.client_id, contract.contractor_id]
-    })
+    change(contract, %{status: :paid})
   end
 
   defp renew_contract(contract) do
@@ -562,7 +572,7 @@ defmodule Algora.Contracts do
     })
     |> Repo.insert_with_activity(%{
       type: :contract_renewed,
-      notify_users: [contract.client_id, contract.contractor_id]
+      notify_users: []
     })
   end
 
@@ -665,6 +675,9 @@ defmodule Algora.Contracts do
       {:id, id}, query ->
         from([c] in query, where: c.id == ^id)
 
+      {:contractor_id, contractor_id}, query ->
+        from([c] in query, where: c.contractor_id == ^contractor_id)
+
       {:client_id, client_id}, query ->
         from([c] in query, where: c.client_id == ^client_id)
 
@@ -679,6 +692,9 @@ defmodule Algora.Contracts do
 
       {:original?, true}, query ->
         from([c] in query, where: c.id == c.original_contract_id)
+
+      {:status, {:in, statuses}}, query ->
+        from([c] in query, where: c.status in ^statuses)
 
       {:status, status}, query ->
         from([c] in query, where: c.status == ^status)

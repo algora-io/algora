@@ -352,7 +352,7 @@ defmodule AlgoraWeb.BountyLive do
 
                     <div>
                       <.label>Recipient</.label>
-                      <.dropdown2 id="context-dropdown" class="mt-2">
+                      <.dropdown id="context-dropdown" class="mt-2">
                         <:img :if={@selected_context} src={@selected_context.avatar_url} />
                         <:title :if={@selected_context}>{@selected_context.name}</:title>
                         <:subtitle :if={@selected_context}>@{@selected_context.handle}</:subtitle>
@@ -370,7 +370,7 @@ defmodule AlgoraWeb.BountyLive do
                             </div>
                           </div>
                         </:link>
-                      </.dropdown2>
+                      </.dropdown>
                     </div>
 
                     <div>

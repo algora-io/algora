@@ -56,4 +56,33 @@ defmodule AlgoraWeb.Org.SettingsLiveTest do
       end
     end
   end
+
+  describe "get_user_role/2" do
+    test "returns :none for nil user", %{org: org} do
+      assert :none = AlgoraWeb.OrgAuth.get_user_role(nil, org)
+    end
+
+    test "returns :admin for system admin user", %{org: org} do
+      user = insert!(:user, is_admin: true)
+      assert :admin = AlgoraWeb.OrgAuth.get_user_role(user, org)
+    end
+
+    test "returns :admin when user is org owner", %{org: org} do
+      user = insert!(:user)
+      # Set org.id to match user.id
+      org = %{org | id: user.id}
+      assert :admin = AlgoraWeb.OrgAuth.get_user_role(user, org)
+    end
+
+    test "returns member role for org member", %{org: org} do
+      user = insert!(:user)
+      insert!(:member, user: user, org: org, role: :mod)
+      assert :mod = AlgoraWeb.OrgAuth.get_user_role(user, org)
+    end
+
+    test "returns :none for non-member user", %{org: org} do
+      user = insert!(:user)
+      assert :none = AlgoraWeb.OrgAuth.get_user_role(user, org)
+    end
+  end
 end

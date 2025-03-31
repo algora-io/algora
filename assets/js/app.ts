@@ -254,14 +254,10 @@ const Hooks = {
     value() {
       return this.el.dataset.value;
     },
-    notice() {
-      return this.el.dataset.notice;
-    },
+
     mounted() {
       this.el.addEventListener("click", () => {
-        navigator.clipboard.writeText(this.value()).then(() => {
-          this.pushEvent("copied_to_clipboard", { notice: this.notice() });
-        });
+        navigator.clipboard.writeText(this.value());
       });
     },
   },
@@ -461,6 +457,66 @@ const Hooks = {
       });
     },
   },
+  InfiniteScroll: {
+    mounted() {
+      this.setupObserver();
+    },
+
+    updated() {
+      // Disconnect previous observer before creating a new one
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+      this.setupObserver();
+    },
+
+    setupObserver() {
+      this.observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            this.pushEvent("load_more");
+          }
+        },
+        {
+          root: null, // viewport
+          rootMargin: "0px 0px 400px 0px", // trigger when indicator is 400px from viewport
+          threshold: 0.1,
+        }
+      );
+
+      // Look for the indicator inside this.el rather than document-wide
+      const loadMoreIndicator = this.el.querySelector(
+        "[data-load-more-indicator]"
+      );
+      if (loadMoreIndicator) {
+        this.observer.observe(loadMoreIndicator);
+      }
+    },
+
+    destroyed() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    },
+  },
+  AvatarImage: {
+    mounted() {
+      this.handleError = () => {
+        this.errored = true;
+        this.el.style.display = "none";
+      };
+      this.el.addEventListener("error", this.handleError);
+    },
+    updated() {
+      if (this.errored) {
+        this.el.style.display = "none";
+      }
+    },
+    destroyed() {
+      this.el.removeEventListener("error", this.handleError);
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling
@@ -563,7 +619,11 @@ topbar.config({
   barColors: { 0: "rgba(5, 150, 105, 1)" },
   shadowColor: "rgba(0, 0, 0, .3)",
 });
-window.addEventListener("phx:page-loading-start", (info) => topbar.show(300));
+window.addEventListener("phx:page-loading-start", (info) => {
+  if (!window.location.search.includes("screenshot")) {
+    topbar.show(300);
+  }
+});
 window.addEventListener("phx:page-loading-stop", (info) => topbar.hide());
 
 // Accessible routing
@@ -643,3 +703,5 @@ window.addEventListener("phx:open_popup", (e: CustomEvent) => {
     newWindow.focus();
   }
 });
+
+export default Hooks;

@@ -1,115 +1,139 @@
-<div>
-  <!-- Static sidebar for desktop -->
+<div :if={@current_user}>
+  <div
+    id="mobile-menu"
+    class="relative z-50 lg:!hidden hidden min-h-[100svh]"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="fixed inset-0 bg-gray-950/80" aria-hidden="true" id="mobile-menu-backdrop"></div>
+
+    <div class="fixed inset-0 flex">
+      <div id="mobile-menu-panel" class="relative mr-16 flex w-full max-w-md flex-1">
+        <div
+          id="mobile-menu-close"
+          class="absolute left-full top-0 !flex w-16 justify-center pt-5"
+        >
+          <button
+            type="button"
+            class="-m-2.5 p-2.5"
+            phx-click={
+              JS.hide(
+                to: "#mobile-menu",
+                transition:
+                  {"transition-opacity ease-linear duration-300", "opacity-100", "opacity-0"}
+              )
+              |> JS.hide(
+                to: "#mobile-menu-backdrop",
+                transition:
+                  {"transition-opacity ease-linear duration-300", "opacity-100", "opacity-0"}
+              )
+              |> JS.hide(
+                to: "#amobile-menu-panel",
+                transition:
+                  {"transition-transform ease-in-out duration-300 transform", "translate-x-0",
+                   "-translate-x-full"}
+              )
+              |> JS.hide(
+                to: "#mobile-menu-close",
+                transition:
+                  {"transition-opacity ease-in-out duration-300", "opacity-100", "opacity-0"}
+              )
+            }
+          >
+            <span class="sr-only">Close sidebar</span>
+            <.icon name="tabler-x" class="size-6 text-white" />
+          </button>
+        </div>
+
+        <div class="flex grow h-full flex-col gap-y-5 overflow-y-auto bg-gray-950 px-6 pb-2 ring-1 ring-white/10">
+          <div class="flex h-16 shrink-0 items-center">
+            <.wordmark class="h-8 w-auto text-white" />
+          </div>
+          <nav class="flex flex-1 flex-col">
+            <ul role="list" class="-mx-2 flex-1 space-y-1">
+              <%= for item <- @nav |> List.first() |> Map.get(:items) do %>
+                <li>
+                  <.link
+                    navigate={item.href}
+                    target={Map.get(item, :target)}
+                    class={[
+                      "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold",
+                      if(@active_tab == item.tab,
+                        do: "bg-gray-900 text-white",
+                        else: "text-gray-400 hover:bg-gray-900 hover:text-white"
+                      )
+                    ]}
+                  >
+                    <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                    <span>{item.label}</span>
+                  </.link>
+                </li>
+              <% end %>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- Static sidebar for desktop -->
   <div class="scrollbar-thin hidden border-r border-border/50 lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-16 lg:overflow-y-auto lg:bg-popover lg:pb-4">
     <div class="flex h-16 shrink-0 items-center justify-center">
       <.logo class="h-8 w-auto text-white" />
     </div>
     <nav class="mt-4">
-      <ul role="list" class="flex flex-col items-center space-y-1">
-        <li>
-          <.link
-            navigate={~p"/"}
-            class={[
-              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-              if(@active_tab == :dashboard,
-                do: "bg-gray-800 text-white",
-                else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )
-            ]}
-          >
-            <.icon name="tabler-home" class="h-6 w-6 shrink-0" />
-            <span class="sr-only">Dashboard</span>
-          </.link>
-        </li>
-        <li>
-          <.link
-            navigate={~p"/bounties"}
-            class={[
-              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-              if(@active_tab == :bounties,
-                do: "bg-gray-800 text-white",
-                else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )
-            ]}
-          >
-            <.icon name="tabler-diamond" class="h-6 w-6 shrink-0" />
-            <span class="sr-only">Bounties</span>
-          </.link>
-        </li>
-        <li>
-          <.link
-            navigate={~p"/experts"}
-            class={[
-              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-              if(@active_tab == :experts,
-                do: "bg-gray-800 text-white",
-                else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )
-            ]}
-          >
-            <.icon name="tabler-users" class="h-6 w-6 shrink-0" />
-            <span class="sr-only">Experts</span>
-          </.link>
-        </li>
-        <li>
-          <.link
-            navigate={~p"/user/transactions"}
-            class={[
-              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-              if(@active_tab == :transactions,
-                do: "bg-gray-800 text-white",
-                else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )
-            ]}
-          >
-            <.icon name="tabler-wallet" class="h-6 w-6 shrink-0" />
-            <span class="sr-only">Transactions</span>
-          </.link>
-        </li>
-        <li>
-          <.link
-            navigate={~p"/user/settings"}
-            class={[
-              "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
-              if(@active_tab == :settings,
-                do: "bg-gray-800 text-white",
-                else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-              )
-            ]}
-          >
-            <.icon name="tabler-settings" class="h-6 w-6 shrink-0" />
-            <span class="sr-only">Settings</span>
-          </.link>
-        </li>
-      </ul>
+      <%= for {section, index} <- Enum.with_index(@nav) do %>
+        <ul role="list" class="flex flex-col items-center space-y-1">
+          <%= for item <- section.items do %>
+            <li>
+              <.link
+                navigate={item.href}
+                target={Map.get(item, :target)}
+                class={[
+                  "group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white",
+                  if(@active_tab == item.tab,
+                    do: "bg-gray-800 text-white",
+                    else: "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  )
+                ]}
+              >
+                <.icon name={item.icon} class="h-6 w-6 shrink-0" />
+                <span class="sr-only">{item.label}</span>
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+        <.separator :if={index != length(@nav) - 1} class="mx-auto my-4 w-2/3" />
+      <% end %>
 
-      <.separator class="mx-auto my-4 w-2/3" />
-
-      <ul role="list" class="space-y-1">
-        <%= for org <- @online_orgs do %>
-          <li>
-            <.link
-              class="flex justify-center p-2"
-              navigate={Algora.Accounts.User.url(org)}
-              title={Algora.Accounts.User.handle(org)}
-            >
-              <div class="relative inline-block">
-                <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
-                  <img
-                    alt={Algora.Accounts.User.handle(org)}
-                    loading="lazy"
-                    decoding="async"
-                    src={org.avatar_url}
-                    class="h-full w-full object-cover"
-                  />
+      <%= if assigns[:threads] && assigns[:threads] != [] do %>
+        <.separator class="mx-auto my-4 w-2/3" />
+        <ul role="list" class="space-y-1">
+          <%= for %{contact: contact, path: path} <- @threads do %>
+            <li>
+              <.link
+                class="flex justify-center p-2"
+                navigate={path}
+                title={Algora.Accounts.User.handle(contact)}
+              >
+                <div class="relative inline-block">
+                  <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+                    <img
+                      alt={Algora.Accounts.User.handle(contact)}
+                      loading="lazy"
+                      decoding="async"
+                      src={contact.avatar_url}
+                      class="h-full w-full object-cover"
+                    />
+                  </div>
+                  <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
+                  </span>
                 </div>
-                <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
-                </span>
-              </div>
-            </.link>
-          </li>
-        <% end %>
-      </ul>
+              </.link>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
     </nav>
   </div>
 
@@ -119,15 +143,60 @@
       phx-hook="NavBar"
       class="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-x-6 border-b border-border bg-background px-4 shadow-sm sm:px-6 lg:px-8"
     >
-      <.wordmark class="h-8 w-auto text-white lg:hidden" />
-      <div class="flex items-center gap-x-6">
+      <!-- Mobile menu button -->
+      <div class="flex lg:hidden">
+        <button
+          type="button"
+          class="-m-2.5 p-2.5"
+          phx-click={
+            JS.show(
+              to: "#mobile-menu",
+              transition:
+                {"transition-opacity ease-linear duration-300", "opacity-0", "opacity-100"}
+            )
+            |> JS.show(
+              to: "#mobile-menu-backdrop",
+              transition:
+                {"transition-opacity ease-linear duration-300", "opacity-0", "opacity-100"}
+            )
+            |> JS.show(
+              to: "#amobile-menu-panel",
+              transition:
+                {"transition-transform ease-in-out duration-300 transform", "-translate-x-full",
+                 "translate-x-0"}
+            )
+            |> JS.show(
+              to: "#mobile-menu-close",
+              transition:
+                {"transition-opacity ease-in-out duration-300", "opacity-0", "opacity-100"}
+            )
+          }
+        >
+          <span class="sr-only">Open main menu</span>
+          <.icon name="tabler-menu" class="size-6 text-white" />
+        </button>
+      </div>
+      <%= if Map.get(assigns, :admin_page?) && Map.get(assigns, :selected_period) do %>
+        <ul role="list">
+          <.button
+            :for={period <- ["7d", "30d", "90d"]}
+            variant={if @selected_period == period, do: "default", else: "outline"}
+            phx-click="select_period"
+            phx-value-period={period}
+            class="w-[5rem] mx-auto text-base font-semibold"
+          >
+            {period}
+          </.button>
+        </ul>
+      <% end %>
+      <div class="ml-auto flex items-center gap-x-6">
         <.link
           class="group w-fit outline-none"
           target="_blank"
           rel="noopener"
           href={AlgoraWeb.Constants.get(:youtube_url)}
         >
-          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent px-2 text-center text-sm font-semibold transition duration-150 hover:bg-slate-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent px-2 text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
             <div class="flex w-full items-center justify-center gap-x-1">
               <AlgoraWeb.Components.Logos.youtube class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
             </div>
@@ -139,7 +208,7 @@
           target="_blank"
           href={AlgoraWeb.Constants.get(:discord_url)}
         >
-          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent px-2 text-center text-sm font-semibold transition duration-150 hover:bg-slate-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent px-2 text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
             <div class="flex w-full items-center justify-center gap-x-1">
               <AlgoraWeb.Components.Logos.discord class="h-7 w-7" />
             </div>
@@ -150,9 +219,9 @@
           class="group w-fit outline-none"
           target="_blank"
           rel="noopener"
-          href={AlgoraWeb.Constants.get(:github_url)}
+          href={AlgoraWeb.Constants.get(:github_repo_url)}
         >
-          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent p-2 text-center text-sm font-semibold transition duration-150 hover:bg-slate-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
+          <div class="rounded-[3px] hidden h-8 shrink-0 select-none items-center justify-center whitespace-nowrap bg-transparent p-2 text-center text-sm font-semibold transition duration-150 hover:bg-gray-850 disabled:opacity-50 group-focus:outline-none group-disabled:pointer-events-none group-disabled:opacity-75 lg:flex">
             <div class="flex w-full items-center justify-center gap-x-1">
               <AlgoraWeb.Components.Logos.github class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
               <span class="hidden xl:block">Star</span>
@@ -165,46 +234,29 @@
         <.link
           class="hidden whitespace-nowrap px-4 py-2 lg:flex"
           target="_blank"
+          href={AlgoraWeb.Constants.get(:github_repo_url) <> "/issues/new"}
+        >
+          <span class="relative text-sm font-semibold">Feedback</span>
+        </.link>
+        <.link
+          class="hidden whitespace-nowrap px-4 py-2 lg:flex"
+          target="_blank"
           href={AlgoraWeb.Constants.get(:docs_url)}
         >
           <span class="relative text-sm font-semibold">Docs</span>
         </.link>
         <%= if @current_user do %>
-          <div>
-            {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
-              id: "activity-timeline",
-              session: %{},
-              sticky: true,
-              assigns: %{current_user: @current_user}
-            )}
-          </div>
-          <div>
-            <.dropdown2 id="dashboard-dropdown">
-              <:img src={@current_user.avatar_url} alt={@current_user.handle} />
-              <:title>{@current_user.name}</:title>
-
-              <:link
-                :for={org <- Algora.Organizations.get_user_orgs(@current_user)}
-                href={~p"/set_context/#{org.handle}"}
-              >
-                <div class="flex items-center">
-                  <img src={org.avatar_url} alt={org.name} class="mr-3 h-8 w-8 rounded-full" />
-                  <div class="truncate">
-                    <div class="truncate font-semibold">{org.name}</div>
-                    <div class="truncate text-sm text-gray-500">@{org.handle}</div>
-                  </div>
-                </div>
-              </:link>
-              <:link href={~p"/auth/logout"}>
-                <div class="flex items-center whitespace-nowrap">
-                  <div class="mr-3 flex h-8 w-8 items-center justify-center">
-                    <.icon name="tabler-logout" class="h-5 w-5" />
-                  </div>
-                  <div class="font-semibold">Logout</div>
-                </div>
-              </:link>
-            </.dropdown2>
-          </div>
+          <%!-- {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
+            id: "activity-timeline",
+            session: %{},
+            sticky: true,
+            assigns: %{current_user: @current_user}
+          )} --%>
+          <.context_selector
+            current_user={@current_user}
+            current_context={@current_context}
+            all_contexts={@all_contexts}
+          />
         <% else %>
           <.link
             navigate="/auth/login"
@@ -221,4 +273,17 @@
       {@inner_content}
     </div>
   </div>
+</div>
+
+<div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-16">
+  <.flash_group flash={@flash} />
+  <AlgoraWeb.Components.Header.header />
+  {@inner_content}
+  <AlgoraWeb.Components.Footer.footer />
+</div>
+
+<div :if={assigns[:screenshot?]} class="relative">
+  <.flash_group flash={@flash} />
+  {@inner_content}
+  <AlgoraWeb.Components.Footer.footer />
 </div>

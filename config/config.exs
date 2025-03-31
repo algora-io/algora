@@ -12,7 +12,16 @@ config :algora,
   description:
     "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
   ecto_repos: [Algora.Repo],
-  generators: [timestamp_type: :utc_datetime_usec]
+  generators: [timestamp_type: :utc_datetime_usec],
+  redirects: [
+    {"/discord", "https://discord.gg/9RXD2nqbnG"},
+    {"/sdk", "https://github.com/algora-io/sdk"},
+    {"/healthcare", "https://blog.algora.io/post/healthcare"},
+    {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},
+    {"/create/org", "/onboarding/org"},
+    {"/solve", "/onboarding/dev"},
+    {"/onboarding/solver", "/onboarding/dev"}
+  ]
 
 # Configures the endpoint
 config :algora, AlgoraWeb.Endpoint,
@@ -26,10 +35,13 @@ config :algora, AlgoraWeb.Endpoint,
   live_view: [signing_salt: "lTPawhId"]
 
 config :algora, Oban,
+  notifier: Oban.Notifiers.PG,
   repo: Algora.Repo,
   queues: [
     event_consumers: 1,
     comment_consumers: 1,
+    search_consumers: 1,
+    delivery_consumers: 1,
     github_og_image: 5,
     notify_bounty: 1,
     notify_tip_intent: 1,
@@ -38,7 +50,8 @@ config :algora, Oban,
     prompt_payout_connect: 100,
     transfers: 1,
     activity_notifier: 1,
-    activity_mailer: 1
+    activity_mailer: 1,
+    activity_discord: 10
   ]
 
 # Configures the mailer
@@ -64,8 +77,9 @@ config :tailwind,
 
 # Configures Elixir's Logger
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  format: "[$level] $message $metadata\n",
+  level: String.to_atom(System.get_env("LOG_LEVEL") || "debug"),
+  metadata: [:mfa, :file, :line, :request_id, :user_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -143,6 +157,8 @@ config :tails,
   ]
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
+config :reverse_proxy_plug, :http_client, ReverseProxyPlug.HTTPClient.Adapters.HTTPoison
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

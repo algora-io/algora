@@ -9,6 +9,7 @@ defmodule AlgoraWeb.BountyLive do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
   alias Algora.Repo
+  alias Algora.Workspace
 
   require Logger
 
@@ -108,7 +109,22 @@ defmodule AlgoraWeb.BountyLive do
      |> assign(:selected_context, nil)
      |> assign(:line_items, [])
      |> assign(:reward_form, to_form(reward_changeset))
-     |> assign(:exclusive_form, to_form(exclusive_changeset))}
+     |> assign(:exclusive_form, to_form(exclusive_changeset))
+     |> assign_exclusives(bounty.shared_with)}
+  end
+
+  defp assign_exclusives(socket, shared_with) do
+    exclusives =
+      Enum.flat_map(shared_with, fn github_handle ->
+        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+             {:ok, user} <- Workspace.ensure_user(token, github_handle) do
+          [user]
+        else
+          _ -> []
+        end
+      end)
+
+    assign(socket, :exclusives, exclusives)
   end
 
   @impl true
@@ -176,14 +192,20 @@ defmodule AlgoraWeb.BountyLive do
 
     case apply_action(changeset, :save) do
       {:ok, data} ->
+        shared_with = Enum.uniq(bounty.shared_with ++ [data.github_handle])
+
         case bounty
-             |> Bounty.settings_changeset(%{shared_with: Enum.uniq(bounty.shared_with ++ [data.github_handle])})
+             |> Bounty.settings_changeset(%{shared_with: shared_with})
              |> Repo.update() do
           {:ok, _} ->
-            {:noreply, socket |> put_flash(:info, "Bounty shared") |> close_drawers()}
+            {:noreply,
+             socket
+             |> put_flash(:info, "Bounty shared!")
+             |> assign_exclusives(shared_with)
+             |> close_drawers()}
 
-          {:error, _reason} ->
-            Logger.error("Failed to share bounty: #{inspect(_reason)}")
+          {:error, reason} ->
+            Logger.error("Failed to share bounty: #{inspect(reason)}")
             {:noreply, put_flash(socket, :error, "Something went wrong")}
         end
 
@@ -328,62 +350,27 @@ defmodule AlgoraWeb.BountyLive do
                   Shared with
                 </.card_title>
                 <.button phx-click="exclusive">
-                  Share Exclusive
+                  Share
                 </.button>
               </div>
             </.card_header>
             <.card_content>
-              <div class="space-y-4">
-                <%!-- <div class="flex justify-between text-sm">
+              <%= for user <- @exclusives do %>
+                <div class="flex justify-between text-sm">
                   <span>
                     <div class="flex items-center gap-4">
                       <.avatar>
-                        <.avatar_image src={@bounty.owner.avatar_url} />
-                        <.avatar_fallback>{String.first(@bounty.owner.name)}</.avatar_fallback>
+                        <.avatar_image src={user.avatar_url} />
+                        <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
                       </.avatar>
                       <div>
-                        <p class="font-medium">{@bounty.owner.name} Contributors</p>
-                        <p class="text-sm text-muted-foreground">
-                          <% names =
-                            org_contributors(@bounty)
-                            |> Enum.map(&"@#{&1.handle}") %>
-                          {if length(names) > 3,
-                            do: "#{names |> Enum.take(3) |> Enum.join(", ")} and more",
-                            else: "#{names |> Algora.Util.format_name_list()}"}
-                        </p>
+                        <p class="font-medium">{user.name}</p>
+                        <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
                       </div>
                     </div>
                   </span>
                 </div>
-                <%= for user <- shared_users(@bounty) do %>
-                  <div class="flex justify-between text-sm">
-                    <span>
-                      <div class="flex items-center gap-4">
-                        <.avatar>
-                          <.avatar_image src={user.avatar_url} />
-                          <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
-                        </.avatar>
-                        <div>
-                          <p class="font-medium">{user.name}</p>
-                          <p class="text-sm text-muted-foreground">@{User.handle(user)}</p>
-                        </div>
-                      </div>
-                    </span>
-                  </div>
-                <% end %> --%>
-                <%= for user <- @bounty.shared_with do %>
-                  <div class="flex justify-between text-sm">
-                    <span>
-                      <div class="flex items-center gap-4">
-                        <.icon name="github" class="h-10 w-10 text-muted-foreground" />
-                        <div>
-                          <p class="font-medium">{user}</p>
-                        </div>
-                      </div>
-                    </span>
-                  </div>
-                <% end %>
-              </div>
+              <% end %>
             </.card_content>
           </.card>
         </div>
@@ -397,7 +384,7 @@ defmodule AlgoraWeb.BountyLive do
       direction="right"
     >
       <.drawer_header>
-        <.drawer_title>Share Exclusive</.drawer_title>
+        <.drawer_title>Share</.drawer_title>
         <.drawer_description>
           Make this bounty exclusive to specific users
         </.drawer_description>
@@ -533,21 +520,6 @@ defmodule AlgoraWeb.BountyLive do
       </.drawer_content>
     </.drawer>
     """
-  end
-
-  # TODO: implement this
-  defp shared_users(_bounty) do
-    Enum.drop(Accounts.list_featured_developers(), 3)
-  end
-
-  # TODO: implement this
-  defp invited_users(_bounty) do
-    ["alice@example.com", "bob@example.com"]
-  end
-
-  # TODO: implement this
-  defp org_contributors(_bounty) do
-    Enum.take(Accounts.list_featured_developers(), 3)
   end
 
   defp contexts(_bounty) do

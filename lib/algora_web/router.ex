@@ -67,7 +67,6 @@ defmodule AlgoraWeb.Router do
     pipe_through [:browser]
 
     get "/", RootController, :index
-    get "/og/*path", OGImageController, :generate
     get "/set_context/:context", ContextController, :set
     get "/a/:table_prefix/:activity_id", ActivityController, :get
     get "/auth/logout", OAuthCallbackController, :sign_out
@@ -162,6 +161,9 @@ defmodule AlgoraWeb.Router do
       live "/auth/login", SignInLive, :login
       live "/auth/signup", SignInLive, :signup
     end
+
+    live "/0/bounties/:id", OG.BountyLive, :show
+    get "/og/*path", OGImageController, :generate
 
     live_session :wildcard,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do

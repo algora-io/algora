@@ -262,12 +262,12 @@ defmodule AlgoraWeb.BountyLive do
   def render(assigns) do
     ~H"""
     <div class="flex">
-      <.scroll_area class="h-[calc(100vh-64px)] flex-1 p-4">
+      <.scroll_area class="h-[calc(100vh-64px)] flex-1 p-4 pr-6">
         <div class="space-y-4">
           <.card>
             <.card_content>
               <div class="flex justify-between">
-                <div class="flex items-center gap-4">
+                <div class="flex gap-4">
                   <.avatar class="h-12 w-12 rounded-full">
                     <.avatar_image src={@ticket.repository.user.avatar_url} />
                     <.avatar_fallback>
@@ -287,17 +287,14 @@ defmodule AlgoraWeb.BountyLive do
                     </div>
                   </div>
                 </div>
-                <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
-                  {Money.to_string!(@bounty.amount)}
+                <div class="flex flex-col gap-4">
+                  <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
+                    {Money.to_string!(@bounty.amount)}
+                  </div>
+                  <.button phx-click="reward">
+                    Reward
+                  </.button>
                 </div>
-              </div>
-              <div class="pt-4 flex gap-2">
-                <.button phx-click="reward">
-                  Reward
-                </.button>
-                <.button variant="secondary" phx-click="exclusive">
-                  <.icon name="tabler-lock" class="h-4 w-4 mr-2 -ml-1" /> Exclusive
-                </.button>
               </div>
             </.card_content>
           </.card>
@@ -308,6 +305,9 @@ defmodule AlgoraWeb.BountyLive do
                   <.card_title>
                     Exclusives
                   </.card_title>
+                  <.button variant="secondary" phx-click="exclusive">
+                    <.icon name="tabler-user-plus" class="h-4 w-4 mr-2 -ml-1" /> Add
+                  </.button>
                 </div>
               </.card_header>
               <.card_content>
@@ -336,7 +336,7 @@ defmodule AlgoraWeb.BountyLive do
                   <.card_title>
                     Share on socials
                   </.card_title>
-                  <div class="flex gap-2">
+                  <div class="flex gap-3 items-center">
                     <.social_share_button
                       id="twitter-share-url"
                       icon="tabler-brand-x"
@@ -629,10 +629,11 @@ defmodule AlgoraWeb.BountyLive do
 
   defp social_share_button(assigns) do
     ~H"""
-    <div
+    <.button
       id={@id}
       phx-hook="CopyToClipboard"
       data-value={@value}
+      variant="secondary"
       phx-click={
         %JS{}
         |> JS.hide(
@@ -644,16 +645,19 @@ defmodule AlgoraWeb.BountyLive do
           transition: {"transition-opacity", "opacity-0", "opacity-100"}
         )
       }
-      class="size-6 relative cursor-pointer mt-3 text-foreground/90 hover:text-foreground"
-      variant="outline"
+      class="size-8 relative cursor-pointer text-foreground/90 hover:text-foreground bg-muted"
     >
-      <.icon id={@id <> "-copy-icon"} name={@icon} class="absolute my-auto size-6 mr-2" />
+      <.icon
+        id={@id <> "-copy-icon"}
+        name={@icon}
+        class="absolute inset-0 m-auto size-5 flex items-center justify-center"
+      />
       <.icon
         id={@id <> "-check-icon"}
         name="tabler-check"
-        class="absolute my-auto hidden size-6 mr-2"
+        class="absolute inset-0 m-auto hidden size-5 flex items-center justify-center"
       />
-    </div>
+    </.button>
     """
   end
 

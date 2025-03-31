@@ -181,11 +181,11 @@ defmodule AlgoraWeb.User.DashboardLive do
         <!-- Availability Section -->
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <label for="available" class="text-sm font-medium">Available to work</label>
+            <label for="available" class="text-sm font-medium">Open to contract work</label>
             <.tooltip>
               <.icon name="tabler-help-circle" class="h-4 w-4 text-muted-foreground" />
-              <.tooltip_content side="bottom" class="text-xs">
-                When enabled, you will receive hourly contract offers
+              <.tooltip_content side="bottom" class="min-w-[300px]">
+                When enabled, you will receive contract work offers from companies on Algora.
               </.tooltip_content>
             </.tooltip>
           </div>

@@ -269,7 +269,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             primary_claim.target.repository.user.provider_login,
             primary_claim.target.repository.name,
             primary_claim.target.number,
-            "🎉 The pull request of #{names} has been merged. You can visit [Algora](#{Claim.reward_url(primary_claim)}) to award the bounty." <>
+            "🎉 The pull request of #{names} has been merged. The bounty can be rewarded [here](#{Claim.reward_url(primary_claim)})" <>
               if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
           )
         end

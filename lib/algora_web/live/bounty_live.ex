@@ -5,7 +5,6 @@ defmodule AlgoraWeb.BountyLive do
   import Ecto.Changeset
 
   alias Algora.Accounts
-  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
@@ -43,6 +42,25 @@ defmodule AlgoraWeb.BountyLive do
     end
   end
 
+  defmodule ExclusiveBountyForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :github_handle, :string
+      field :deadline, :date
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:github_handle, :deadline])
+      |> validate_required([:github_handle, :deadline])
+    end
+  end
+
   @impl true
   def mount(%{"id" => bounty_id}, _session, socket) do
     bounty =
@@ -65,10 +83,16 @@ defmodule AlgoraWeb.BountyLive do
 
     contexts = contexts(bounty)
 
-    changeset =
+    reward_changeset =
       RewardBountyForm.changeset(%RewardBountyForm{}, %{
         tip_percentage: 0,
         amount: Money.to_decimal(bounty.amount)
+      })
+
+    exclusive_changeset =
+      ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, %{
+        github_handle: "",
+        deadline: Date.utc_today()
       })
 
     {:ok,
@@ -80,9 +104,11 @@ defmodule AlgoraWeb.BountyLive do
      |> assign(:ticket_body_html, ticket_body_html)
      |> assign(:contexts, contexts)
      |> assign(:show_reward_modal, false)
+     |> assign(:show_exclusive_modal, false)
      |> assign(:selected_context, nil)
      |> assign(:line_items, [])
-     |> assign(:reward_form, to_form(changeset))}
+     |> assign(:reward_form, to_form(reward_changeset))
+     |> assign(:exclusive_form, to_form(exclusive_changeset))}
   end
 
   @impl true
@@ -103,8 +129,12 @@ defmodule AlgoraWeb.BountyLive do
     {:noreply, assign(socket, :show_reward_modal, true)}
   end
 
+  def handle_event("exclusive", _params, socket) do
+    {:noreply, assign(socket, :show_exclusive_modal, true)}
+  end
+
   def handle_event("close_drawer", _params, socket) do
-    {:noreply, assign(socket, :show_reward_modal, false)}
+    {:noreply, close_drawers(socket)}
   end
 
   def handle_event("validate_reward", %{"reward_bounty_form" => params}, socket) do
@@ -133,6 +163,35 @@ defmodule AlgoraWeb.BountyLive do
     end
   end
 
+  def handle_event("validate_exclusive", %{"exclusive_bounty_form" => params}, socket) do
+    {:noreply,
+     socket
+     |> assign(:exclusive_form, to_form(ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)))
+     |> assign_line_items()}
+  end
+
+  def handle_event("share_exclusive", %{"exclusive_bounty_form" => params}, socket) do
+    changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)
+    bounty = socket.assigns.bounty
+
+    case apply_action(changeset, :save) do
+      {:ok, data} ->
+        case bounty
+             |> Bounty.settings_changeset(%{shared_with: Enum.uniq(bounty.shared_with ++ [data.github_handle])})
+             |> Repo.update() do
+          {:ok, _} ->
+            {:noreply, socket |> put_flash(:info, "Bounty shared") |> close_drawers()}
+
+          {:error, _reason} ->
+            Logger.error("Failed to share bounty: #{inspect(_reason)}")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :exclusive_form, to_form(changeset))}
+    end
+  end
+
   defp assign_selected_context(socket, context_id) do
     case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
       nil ->
@@ -144,13 +203,17 @@ defmodule AlgoraWeb.BountyLive do
   end
 
   defp assign_line_items(socket) do
-    line_items =
-      Bounties.generate_line_items(
-        %{amount: calculate_final_amount(socket.assigns.reward_form.source)},
-        ticket_ref: ticket_ref(socket),
-        recipient: socket.assigns.selected_context
-      )
+    # line_items =
+    #   Bounties.generate_line_items(
+    #     %{
+    #       owner: socket.assigns.selected_context,
+    #       amount: calculate_final_amount(socket.assigns.reward_form.source)
+    #     },
+    #     ticket_ref: ticket_ref(socket),
+    #     recipient: socket.assigns.selected_context
+    #   )
 
+    line_items = []
     assign(socket, :line_items, line_items)
   end
 
@@ -264,14 +327,14 @@ defmodule AlgoraWeb.BountyLive do
                 <.card_title>
                   Shared with
                 </.card_title>
-                <.button phx-click="invite">
-                  Invite
+                <.button phx-click="exclusive">
+                  Share Exclusive
                 </.button>
               </div>
             </.card_header>
             <.card_content>
               <div class="space-y-4">
-                <div class="flex justify-between text-sm">
+                <%!-- <div class="flex justify-between text-sm">
                   <span>
                     <div class="flex items-center gap-4">
                       <.avatar>
@@ -307,12 +370,12 @@ defmodule AlgoraWeb.BountyLive do
                       </div>
                     </span>
                   </div>
-                <% end %>
-                <%= for user <- invited_users(@bounty) do %>
+                <% end %> --%>
+                <%= for user <- @bounty.shared_with do %>
                   <div class="flex justify-between text-sm">
                     <span>
                       <div class="flex items-center gap-4">
-                        <.icon name="tabler-mail" class="h-10 w-10 text-muted-foreground" />
+                        <.icon name="github" class="h-10 w-10 text-muted-foreground" />
                         <div>
                           <p class="font-medium">{user}</p>
                         </div>
@@ -327,6 +390,37 @@ defmodule AlgoraWeb.BountyLive do
       </div>
     </div>
 
+    <.drawer
+      :if={@current_user}
+      show={@show_exclusive_modal}
+      on_cancel="close_drawer"
+      direction="right"
+    >
+      <.drawer_header>
+        <.drawer_title>Share Exclusive</.drawer_title>
+        <.drawer_description>
+          Make this bounty exclusive to specific users
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.form for={@exclusive_form} phx-change="validate_exclusive" phx-submit="share_exclusive">
+          <div class="flex flex-col gap-8">
+            <div class="space-y-4">
+              <.input label="GitHub handle" field={@exclusive_form[:github_handle]} />
+              <.input type="date" label="Deadline" field={@exclusive_form[:deadline]} />
+            </div>
+            <div class="ml-auto flex gap-4">
+              <.button variant="secondary" phx-click="close_drawer" type="button">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Submit
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
       <.drawer_header>
         <.drawer_title>Reward Bounty</.drawer_title>
@@ -463,5 +557,11 @@ defmodule AlgoraWeb.BountyLive do
   # TODO: implement this
   defp bounty_frequency(_bounty) do
     "Monthly"
+  end
+
+  defp close_drawers(socket) do
+    socket
+    |> assign(:show_reward_modal, false)
+    |> assign(:show_exclusive_modal, false)
   end
 end

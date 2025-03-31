@@ -42,6 +42,12 @@ defmodule Algora.Bounties.Bounty do
     |> Algora.Validations.validate_money_positive(:amount)
   end
 
+  def settings_changeset(bounty, attrs) do
+    bounty
+    |> cast(attrs, [:visibility, :shared_with])
+    |> validate_required([:visibility, :shared_with])
+  end
+
   def url(%{repository: %{name: name, owner: %{login: login}}, ticket: %{provider: "github", number: number}}) do
     "https://github.com/#{login}/#{name}/issues/#{number}"
   end

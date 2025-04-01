@@ -807,8 +807,8 @@ defmodule AlgoraWeb.CoreComponents do
   def input(%{type: "textarea"} = assigns) do
     ~H"""
     <div>
-      <.label for={@id}>{@label}</.label>
-      <p :if={@helptext} class="mb-2 text-sm text-muted-foreground">{@helptext}</p>
+      <.label :if={@label} for={@id} class="mb-2">{@label}</.label>
+      <p :if={@helptext} class="-mt-2 mb-2 text-sm text-muted-foreground">{@helptext}</p>
       <textarea
         id={@id || @name}
         name={@name}

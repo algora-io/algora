@@ -7,7 +7,7 @@ defmodule AlgoraWeb.OGImageController do
 
   @opts [type: "png", width: 1200, height: 630, scale_factor: 1]
 
-  @max_age 600
+  defp max_age, do: Algora.config([AlgoraWeb.OGImageController, :max_age])
 
   def generate(conn, %{"path" => path}) do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])

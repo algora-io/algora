@@ -83,7 +83,9 @@ defmodule AlgoraWeb.Org.Nav do
                   %{
                     creator: socket.assigns.current_user,
                     owner: socket.assigns.current_org,
-                    amount: data.amount
+                    amount: data.amount,
+                    title: data.title,
+                    description: data.description
                   },
                   visibility: get_field(changeset, :visibility),
                   shared_with: get_field(changeset, :shared_with)

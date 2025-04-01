@@ -184,7 +184,8 @@ defmodule Algora.Bounties do
             creator: User.t(),
             owner: User.t(),
             amount: Money.t(),
-            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+            title: String.t(),
+            description: String.t()
           },
           opts :: [
             strategy: strategy(),

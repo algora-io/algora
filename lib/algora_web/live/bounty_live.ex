@@ -325,7 +325,7 @@ defmodule AlgoraWeb.BountyLive do
                       </.button>
                     </div>
                     <.button variant="secondary" phx-click="exclusive" class="mt-3">
-                      <.icon name="tabler-user-plus" class="h-4 w-4 mr-2 -ml-1" /> Add
+                      <.icon name="tabler-user-plus" class="size-5 mr-2 -ml-1" /> Add
                     </.button>
                   </div>
                   <div class="flex flex-col gap-4">
@@ -356,7 +356,7 @@ defmodule AlgoraWeb.BountyLive do
                     <.card_title>
                       Share on socials
                     </.card_title>
-                    <div class="pt-3 flex gap-3 items-center">
+                    <div class="pt-4 flex gap-3 items-center">
                       <.social_share_button
                         id="twitter-share-url"
                         icon="tabler-brand-x"
@@ -389,6 +389,11 @@ defmodule AlgoraWeb.BountyLive do
             </.card>
           </div>
           <.card>
+            <.card_header>
+              <.card_title>
+                Description
+              </.card_title>
+            </.card_header>
             <.card_content>
               <div class="prose dark:prose-invert">
                 {Phoenix.HTML.raw(@ticket_body_html)}
@@ -664,17 +669,17 @@ defmodule AlgoraWeb.BountyLive do
           transition: {"transition-opacity", "opacity-0", "opacity-100"}
         )
       }
-      class="size-8 relative cursor-pointer text-foreground/90 hover:text-foreground bg-muted"
+      class="size-9 relative cursor-pointer text-foreground/90 hover:text-foreground bg-muted"
     >
       <.icon
         id={@id <> "-copy-icon"}
         name={@icon}
-        class="absolute inset-0 m-auto size-5 flex items-center justify-center"
+        class="absolute inset-0 m-auto size-6 flex items-center justify-center"
       />
       <.icon
         id={@id <> "-check-icon"}
         name="tabler-check"
-        class="absolute inset-0 m-auto hidden size-5 flex items-center justify-center"
+        class="absolute inset-0 m-auto hidden size-6 flex items-center justify-center"
       />
     </.button>
     """

@@ -634,7 +634,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           {:noreply, assign(socket, :bounty_form, to_form(changeset))}
 
         {:error, :already_exists} ->
-          {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+          {:noreply, put_flash(socket, :warning, "You already have a bounty for this ticket")}
 
         {:error, _reason} ->
           {:noreply, put_flash(socket, :error, "Something went wrong")}

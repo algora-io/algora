@@ -2,8 +2,10 @@ defmodule AlgoraWeb.Org.Nav do
   @moduledoc false
   use Phoenix.Component
 
+  import Ecto.Changeset
   import Phoenix.LiveView
 
+  alias Algora.Bounties
   alias Algora.Organizations
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.OrgAuth
@@ -48,9 +50,47 @@ defmodule AlgoraWeb.Org.Nav do
   # TODO: handle submit
   # TODO: handle validate
 
-  defp handle_form_toggle_event("create_bounty_main", params, socket) do
-    dbg(params)
-    {:cont, socket}
+  defp handle_form_toggle_event("create_bounty_main" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+    if socket.assigns.has_fresh_token? do
+      changeset = %BountyForm{} |> BountyForm.changeset(params) |> Map.put(:action, :validate)
+
+      amount = get_field(changeset, :amount)
+      ticket_ref = get_field(changeset, :ticket_ref)
+
+      with %{valid?: true} <- changeset,
+           {:ok, _bounty} <-
+             Bounties.create_bounty(
+               %{
+                 creator: socket.assigns.current_user,
+                 owner: socket.assigns.current_org,
+                 amount: amount,
+                 ticket_ref: %{
+                   owner: ticket_ref.owner,
+                   repo: ticket_ref.repo,
+                   number: ticket_ref.number
+                 }
+               },
+               strategy: :create,
+               visibility: get_field(changeset, :visibility),
+               shared_with: get_field(changeset, :shared_with)
+             ) do
+        {:cont, put_flash(socket, :info, "Bounty created")}
+      else
+        %{valid?: false} ->
+          {:cont, assign(socket, :bounty_form, to_form(changeset))}
+
+        {:error, :already_exists} ->
+          {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}
+
+        {:error, _reason} ->
+          {:cont, put_flash(socket, :error, "Something went wrong")}
+      end
+    else
+      {:cont,
+       socket
+       |> assign(:pending_action, {event, unsigned_params})
+       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+    end
   end
 
   defp handle_form_toggle_event("open_main_bounty_form", _params, socket) do

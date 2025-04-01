@@ -134,8 +134,14 @@ defmodule AlgoraWeb.BountyLive do
       Chat.subscribe(thread.id)
     end
 
+    share_url =
+      url(
+        ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
+      )
+
     {:ok,
      socket
+     |> assign(:share_url, share_url)
      |> assign(:page_title, bounty.ticket.title)
      |> assign(:ticket, bounty.ticket)
      |> assign(:total_paid, total_paid)
@@ -341,38 +347,22 @@ defmodule AlgoraWeb.BountyLive do
                       <.social_share_button
                         id="twitter-share-url"
                         icon="tabler-brand-x"
-                        value={
-                          url(
-                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
-                          )
-                        }
+                        value={@share_url}
                       />
                       <.social_share_button
                         id="reddit-share-url"
                         icon="tabler-brand-reddit"
-                        value={
-                          url(
-                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
-                          )
-                        }
+                        value={@share_url}
                       />
                       <.social_share_button
                         id="linkedin-share-url"
                         icon="tabler-brand-linkedin"
-                        value={
-                          url(
-                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
-                          )
-                        }
+                        value={@share_url}
                       />
                       <.social_share_button
                         id="hackernews-share-url"
                         icon="tabler-brand-ycombinator"
-                        value={
-                          url(
-                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
-                          )
-                        }
+                        value={@share_url}
                       />
                     </div>
                   </div>

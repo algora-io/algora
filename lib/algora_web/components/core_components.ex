@@ -762,7 +762,7 @@ defmodule AlgoraWeb.CoreComponents do
 
   def input(%{type: "radio", value: value} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("radio", value) end)
+      assign_new(assigns, :checked, fn -> "radio" |> Phoenix.HTML.Form.normalize_value(value) |> dbg() end)
 
     ~H"""
     <div>

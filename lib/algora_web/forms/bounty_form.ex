@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
               }
             /> --%>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="main-bounty-form-tabs">
           <%= for {label, value} <- type_options() do %>
             <label class={[
               "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
@@ -73,12 +73,12 @@ defmodule AlgoraWeb.Forms.BountyForm do
               <.input
                 type="radio"
                 field={@form[:type]}
-                checked={get_field(@form.source, :type) == value}
+                checked={@form[:type].value == value}
                 value={value}
                 class="sr-only"
                 phx-click={
                   %JS{}
-                  |> JS.hide(to: "#main-bounty-form [data-tab]")
+                  |> JS.hide(to: "#main-bounty-form [data-tab]:not([data-tab=#{value}])")
                   |> JS.show(to: "#main-bounty-form [data-tab=#{value}]")
                 }
               />
@@ -93,7 +93,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
           <% end %>
         </div>
 
-        <div data-tab="github" class={if get_field(@form.source, :type) != :github, do: "hidden"}>
+        <div data-tab="github">
           <.input
             label="URL"
             field={@form[:url]}
@@ -101,13 +101,10 @@ defmodule AlgoraWeb.Forms.BountyForm do
           />
         </div>
 
-        <div
-          data-tab="custom"
-          class={classes([get_field(@form.source, :type) != :custom && "hidden", "space-y-4"])}
-        >
+        <div data-tab="custom" class="hidden space-y-4">
           <.input label="Title" field={@form[:title]} placeholder="Brief description of the bounty" />
           <.input
-            label="Description"
+            label="Description (optional)"
             field={@form[:description]}
             type="textarea"
             placeholder="Requirements and acceptance criteria"

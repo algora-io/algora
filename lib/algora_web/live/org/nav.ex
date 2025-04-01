@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{amount: Money.new(0, "USD")})))
      |> assign(:main_bounty_form_open?, false)
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)
@@ -51,41 +51,39 @@ defmodule AlgoraWeb.Org.Nav do
   # TODO: handle validate
 
   defp handle_event("create_bounty_main" = event, %{"bounty_form" => params} = unsigned_params, socket) do
-    dbg(params)
-
     if socket.assigns.has_fresh_token? do
-      changeset = %BountyForm{} |> BountyForm.changeset(params) |> Map.put(:action, :validate)
-      dbg(changeset)
-      amount = get_field(changeset, :amount)
-      ticket_ref = get_field(changeset, :ticket_ref)
+      changeset = BountyForm.changeset(%BountyForm{}, params)
 
-      with %{valid?: true} <- changeset,
-           {:ok, _bounty} <-
-             Bounties.create_bounty(
-               %{
-                 creator: socket.assigns.current_user,
-                 owner: socket.assigns.current_org,
-                 amount: amount,
-                 ticket_ref: %{
-                   owner: ticket_ref.owner,
-                   repo: ticket_ref.repo,
-                   number: ticket_ref.number
-                 }
-               },
-               strategy: :create,
-               visibility: get_field(changeset, :visibility),
-               shared_with: get_field(changeset, :shared_with)
-             ) do
-        {:cont, put_flash(socket, :info, "Bounty created")}
-      else
-        %{valid?: false} ->
+      case apply_action(changeset, :save) do
+        {:ok, data} ->
+          case Bounties.create_bounty(
+                 %{
+                   creator: socket.assigns.current_user,
+                   owner: socket.assigns.current_org,
+                   amount: data.amount,
+                   ticket_ref: %{
+                     owner: data.ticket_ref.owner,
+                     repo: data.ticket_ref.repo,
+                     number: data.ticket_ref.number
+                   }
+                 },
+                 strategy: :create,
+                 visibility: get_field(changeset, :visibility),
+                 shared_with: get_field(changeset, :shared_with)
+               ) do
+            {:ok, _bounty} ->
+              {:cont, put_flash(socket, :info, "Bounty created")}
+
+            {:error, :already_exists} ->
+              {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}
+
+            {:error, reason} ->
+              Logger.error("Failed to create bounty: #{inspect(reason)}")
+              {:cont, put_flash(socket, :error, "Something went wrong")}
+          end
+
+        {:error, changeset} ->
           {:cont, assign(socket, :main_bounty_form, to_form(changeset))}
-
-        {:error, :already_exists} ->
-          {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}
-
-        {:error, _reason} ->
-          {:cont, put_flash(socket, :error, "Something went wrong")}
       end
     else
       # TODO: handle pending action

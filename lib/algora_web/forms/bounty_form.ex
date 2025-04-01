@@ -1,7 +1,7 @@
 defmodule AlgoraWeb.Forms.BountyForm do
   @moduledoc false
   use Ecto.Schema
-  use AlgoraWeb, :live_view
+  use AlgoraWeb, :html
 
   import Ecto.Changeset
 
@@ -48,12 +48,12 @@ defmodule AlgoraWeb.Forms.BountyForm do
 
   def bounty_form(assigns) do
     ~H"""
-    <.form id="main-bounty-form" for={@main_bounty_form} phx-submit="create_bounty">
+    <.form id="main-bounty-form" for={@form} phx-submit="create_bounty_main">
       <div class="space-y-4">
-        <.input type="hidden" name="main_bounty_form[visibility]" value="exclusive" />
+        <%!-- <.input type="hidden" name="bounty_form[visibility]" value="exclusive" /> --%>
         <%!-- <.input
               type="hidden"
-              name="main_bounty_form[shared_with][]"
+              name="bounty_form[shared_with][]"
               value={
                 case @selected_developer do
                   %User{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
@@ -71,8 +71,8 @@ defmodule AlgoraWeb.Forms.BountyForm do
             ]}>
               <.input
                 type="radio"
-                field={@main_bounty_form[:type]}
-                checked={to_string(get_field(@main_bounty_form.source, :type)) == value}
+                field={@form[:type]}
+                checked={to_string(get_field(@form.source, :type)) == value}
                 value={value}
                 class="sr-only"
                 phx-click={
@@ -94,11 +94,11 @@ defmodule AlgoraWeb.Forms.BountyForm do
 
         <div
           data-tab="github"
-          class={if to_string(get_field(@main_bounty_form.source, :type)) != "github", do: "hidden"}
+          class={if to_string(get_field(@form.source, :type)) != "github", do: "hidden"}
         >
           <.input
             label="URL"
-            field={@main_bounty_form[:url]}
+            field={@form[:url]}
             placeholder="https://github.com/owner/repo/issues/123"
           />
         </div>
@@ -107,25 +107,21 @@ defmodule AlgoraWeb.Forms.BountyForm do
           data-tab="custom"
           class={
             classes([
-              to_string(get_field(@main_bounty_form.source, :type)) != "custom" && "hidden",
+              to_string(get_field(@form.source, :type)) != "custom" && "hidden",
               "space-y-4"
             ])
           }
         >
-          <.input
-            label="Title"
-            field={@main_bounty_form[:title]}
-            placeholder="Brief description of the bounty"
-          />
+          <.input label="Title" field={@form[:title]} placeholder="Brief description of the bounty" />
           <.input
             label="Description"
-            field={@main_bounty_form[:description]}
+            field={@form[:description]}
             type="textarea"
             placeholder="Requirements and acceptance criteria"
           />
         </div>
 
-        <.input label="Amount" icon="tabler-currency-dollar" field={@main_bounty_form[:amount]} />
+        <.input label="Amount" icon="tabler-currency-dollar" field={@form[:amount]} />
       </div>
       <div class="pt-4 ml-auto flex gap-4">
         <.button variant="secondary" phx-click="close_share_drawer" type="button">

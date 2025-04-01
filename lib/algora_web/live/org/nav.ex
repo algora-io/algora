@@ -48,6 +48,11 @@ defmodule AlgoraWeb.Org.Nav do
   # TODO: handle submit
   # TODO: handle validate
 
+  defp handle_form_toggle_event("create_bounty_main", params, socket) do
+    dbg(params)
+    {:cont, socket}
+  end
+
   defp handle_form_toggle_event("open_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, true)}
   end

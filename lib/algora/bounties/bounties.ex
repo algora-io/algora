@@ -27,7 +27,8 @@ defmodule Algora.Bounties do
   def base_query, do: Bounty
 
   @type criterion ::
-          {:limit, non_neg_integer() | :infinity}
+          {:id, String.t()}
+          | {:limit, non_neg_integer() | :infinity}
           | {:ticket_id, String.t()}
           | {:owner_id, String.t()}
           | {:status, :open | :paid}
@@ -695,7 +696,7 @@ defmodule Algora.Bounties do
             bounty_id: String.t(),
             claims: [Claim.t()]
           },
-          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}]
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
@@ -703,7 +704,8 @@ defmodule Algora.Bounties do
       %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
       ticket_ref: opts[:ticket_ref],
       bounty_id: bounty_id,
-      claims: claims
+      claims: claims,
+      recipient: opts[:recipient]
     )
   end
 
@@ -997,6 +999,9 @@ defmodule Algora.Bounties do
   @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
+      {:id, id}, query ->
+        from([b] in query, where: b.id == ^id)
+
       {:limit, :infinity}, query ->
         query
 

@@ -39,4 +39,14 @@ defmodule Algora.Validations do
       _ -> changeset
     end
   end
+
+  def validate_date_in_future(changeset, field) do
+    validate_change(changeset, field, fn _, date ->
+      if date && Date.before?(date, DateTime.utc_now()) do
+        [{field, "must be in the future"}]
+      else
+        []
+      end
+    end)
+  end
 end

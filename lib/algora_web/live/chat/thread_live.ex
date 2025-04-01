@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Chat.ThreadLive do
   end
 
   @impl true
-  def handle_info(%Message{} = message, socket) do
+  def handle_info(%{message: message}, socket) do
     if message.id in Enum.map(socket.assigns.messages, & &1.id) do
       {:noreply, socket}
     else

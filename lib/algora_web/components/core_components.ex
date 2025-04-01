@@ -1288,6 +1288,7 @@ defmodule AlgoraWeb.CoreComponents do
   defdelegate alert_title(assigns), to: Alert
   defdelegate alert(assigns), to: Alert
   defdelegate avatar_fallback(assigns), to: Avatar
+  defdelegate avatar_group(assigns), to: Avatar
   defdelegate avatar_image(assigns), to: Avatar
   defdelegate avatar(assigns), to: Avatar
   defdelegate badge(assigns), to: AlgoraWeb.Components.UI.Badge

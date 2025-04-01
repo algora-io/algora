@@ -27,7 +27,8 @@ defmodule Algora.Bounties do
   def base_query, do: Bounty
 
   @type criterion ::
-          {:limit, non_neg_integer() | :infinity}
+          {:id, String.t()}
+          | {:limit, non_neg_integer() | :infinity}
           | {:ticket_id, String.t()}
           | {:owner_id, String.t()}
           | {:status, :open | :paid}
@@ -998,6 +999,9 @@ defmodule Algora.Bounties do
   @spec apply_criteria(Ecto.Queryable.t(), [criterion()]) :: Ecto.Queryable.t()
   defp apply_criteria(query, criteria) do
     Enum.reduce(criteria, query, fn
+      {:id, id}, query ->
+        from([b] in query, where: b.id == ^id)
+
       {:limit, :infinity}, query ->
         query
 

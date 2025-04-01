@@ -31,14 +31,14 @@ defmodule AlgoraWeb.OG.BountyLive do
       <div class="flex flex-col items-center text-center">
         <div class="relative">
           <img
-            src={@bounty.owner.avatar_url}
+            src={@bounty.repository.owner.avatar_url}
             class="relative h-40 w-40 rounded-full bg-black"
             alt="Algora"
           />
         </div>
         <div class="mt-4 flex flex-col items-center font-display">
           <p class="text-7xl font-semibold text-foreground">
-            {@bounty.owner.name}
+            {@bounty.repository.owner.name}
           </p>
           <h1 class="mt-4 text-8xl font-extrabold tracking-tight text-white">
             <span class="text-emerald-400">

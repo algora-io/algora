@@ -330,7 +330,7 @@ defmodule AlgoraWeb.BountyLive do
             </.card_content>
           </.card>
           <div class="grid grid-cols-2 gap-4">
-            <.card>
+            <.card class="flex flex-col items-between justify-center">
               <.card_content>
                 <div class="flex items-center justify-between">
                   <div>
@@ -384,7 +384,7 @@ defmodule AlgoraWeb.BountyLive do
                 </div>
               </.card_content>
             </.card>
-            <.card class="col">
+            <.card class="flex flex-col items-between justify-center">
               <.card_content>
                 <div class="flex items-center justify-between">
                   <div>
@@ -407,7 +407,11 @@ defmodule AlgoraWeb.BountyLive do
                             />
                           </.button>
                         <% else %>
-                          <span class="underline cursor-pointer" phx-click="exclusive">
+                          <span
+                            :if={@exclusives != []}
+                            class="underline cursor-pointer"
+                            phx-click="exclusive"
+                          >
                             Add a deadline
                           </span>
                         <% end %>

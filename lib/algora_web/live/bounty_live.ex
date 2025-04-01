@@ -305,7 +305,7 @@ defmodule AlgoraWeb.BountyLive do
             <.card_content>
               <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <.avatar class="h-12 w-12 sm:h-20 sm:w-20 rounded-2xl">
+                  <.avatar class="h-12 w-12 sm:h-20 sm:w-20 rounded-lg sm:rounded-2xl">
                     <.avatar_image src={@ticket.repository.user.avatar_url} />
                     <.avatar_fallback>
                       {Util.initials(@ticket.repository.user.provider_login)}
@@ -338,8 +338,8 @@ defmodule AlgoraWeb.BountyLive do
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <.card class="flex flex-col items-between justify-center">
               <.card_content>
-                <div class="flex items-center justify-between">
-                  <div>
+                <div class="flex items-center justify-between gap-6">
+                  <div class="shrink-1">
                     <.card_title>
                       Share on socials
                     </.card_title>
@@ -366,23 +366,25 @@ defmodule AlgoraWeb.BountyLive do
                       />
                     </div>
                   </div>
-                  <img
-                    src={~p"/og/0/bounties/#{@bounty.id}"}
-                    alt={@bounty.ticket.title}
-                    class="mt-3 w-full aspect-[1200/630] max-w-[11rem] rounded-lg ring-1 ring-input bg-black"
-                  />
+                  <div class="relative aspect-[1200/630] max-w-[11rem] rounded-lg ring-1 ring-input bg-black">
+                    <img
+                      src={~p"/og/0/bounties/#{@bounty.id}"}
+                      alt={@bounty.ticket.title}
+                      class="object-cover"
+                    />
+                  </div>
                 </div>
               </.card_content>
             </.card>
             <.card class="flex flex-col items-between justify-center">
               <.card_content>
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-2">
                   <div>
                     <.card_title>
                       Exclusives
                     </.card_title>
                     <div class="flex items-center">
-                      <span class="text-sm text-muted-foreground">
+                      <span class="text-sm text-muted-foreground whitespace-nowrap">
                         <%= if @bounty.deadline do %>
                           Expires on {Calendar.strftime(@bounty.deadline, "%b %d, %Y")}
                           <.button
@@ -420,9 +422,13 @@ defmodule AlgoraWeb.BountyLive do
                               <.avatar_image src={user.avatar_url} />
                               <.avatar_fallback>{Util.initials(user.name)}</.avatar_fallback>
                             </.avatar>
-                            <div>
-                              <p class="font-medium">{user.name}</p>
-                              <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
+                            <div class="max-w-[6rem] sm:max-w-none">
+                              <p class="font-medium truncate">
+                                {user.name}
+                              </p>
+                              <p class="text-sm text-muted-foreground truncate">
+                                @{user.provider_login}
+                              </p>
                             </div>
                           </div>
                         </span>
@@ -749,17 +755,17 @@ defmodule AlgoraWeb.BountyLive do
           transition: {"transition-opacity", "opacity-0", "opacity-100"}
         )
       }
-      class="size-9 relative cursor-pointer text-foreground/90 hover:text-foreground bg-muted"
+      class="size-6 sm:size-9 relative cursor-pointer text-foreground/90 hover:text-foreground bg-muted"
     >
       <.icon
         id={@id <> "-copy-icon"}
         name={@icon}
-        class="absolute inset-0 m-auto size-6 flex items-center justify-center"
+        class="absolute inset-0 m-auto size-6 sm:size-6 flex items-center justify-center"
       />
       <.icon
         id={@id <> "-check-icon"}
         name="tabler-check"
-        class="absolute inset-0 m-auto hidden size-6 items-center justify-center"
+        class="absolute inset-0 m-auto hidden size-6 sm:size-6 items-center justify-center"
       />
     </.button>
     """

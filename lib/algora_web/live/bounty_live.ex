@@ -6,6 +6,7 @@ defmodule AlgoraWeb.BountyLive do
   import Ecto.Query
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Admin
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
@@ -68,15 +69,22 @@ defmodule AlgoraWeb.BountyLive do
       |> Repo.get!(bounty_id)
       |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
 
-    ticket_ref = %{
-      owner: bounty.ticket.repository.user.provider_login,
-      repo: bounty.ticket.repository.name,
-      number: bounty.ticket.number
-    }
+    {host, ticket_ref} =
+      if bounty.ticket.repository do
+        {bounty.ticket.repository.user,
+         %{
+           owner: bounty.ticket.repository.user.provider_login,
+           repo: bounty.ticket.repository.name,
+           number: bounty.ticket.number
+         }}
+      else
+        {bounty.owner, nil}
+      end
 
     socket
     |> assign(:bounty, bounty)
     |> assign(:ticket_ref, ticket_ref)
+    |> assign(:host, host)
     |> on_mount(bounty)
   end
 
@@ -105,6 +113,7 @@ defmodule AlgoraWeb.BountyLive do
     socket
     |> assign(:bounty, bounty)
     |> assign(:ticket_ref, ticket_ref)
+    |> assign(:host, bounty.ticket.repository.user)
     |> on_mount(bounty)
   end
 
@@ -135,9 +144,13 @@ defmodule AlgoraWeb.BountyLive do
     end
 
     share_url =
-      url(
-        ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
-      )
+      if socket.assigns.ticket_ref do
+        url(
+          ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
+        )
+      else
+        url(~p"/org/#{socket.assigns.bounty.owner.handle}/bounties/#{socket.assigns.bounty.id}")
+      end
 
     {:ok,
      socket
@@ -311,9 +324,9 @@ defmodule AlgoraWeb.BountyLive do
               <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
                 <div class="flex flex-col gap-4 xl:flex-row xl:items-center">
                   <.avatar class="h-12 w-12 sm:h-20 sm:w-20 rounded-lg sm:rounded-2xl">
-                    <.avatar_image src={@ticket.repository.user.avatar_url} />
+                    <.avatar_image src={@host.avatar_url} />
                     <.avatar_fallback>
-                      {Util.initials(@ticket.repository.user.provider_login)}
+                      {Util.initials(User.handle(@host))}
                     </.avatar_fallback>
                   </.avatar>
                   <div>
@@ -331,7 +344,7 @@ defmodule AlgoraWeb.BountyLive do
                       rel="noopener"
                       class="block text-base font-display sm:text-xl font-medium text-muted-foreground hover:underline"
                     >
-                      {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
+                      {@host.provider_login}<span :if={@ticket.repository}>/{@ticket.repository.name}#{@ticket.number}</span>
                     </.link>
                   </div>
                 </div>

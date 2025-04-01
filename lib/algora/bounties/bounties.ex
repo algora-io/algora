@@ -410,9 +410,10 @@ defmodule Algora.Bounties do
   end
 
   @spec notify_bounty(%{owner: User.t(), bounty: Bounty.t()}, opts :: []) ::
-          {:ok, Oban.Job.t()} | {:error, atom()}
+          {:ok, nil} | {:error, atom()}
   def notify_bounty(%{owner: _owner, bounty: bounty}, _opts) do
     Algora.Admin.alert("Notify bounty: #{inspect(bounty)}", :error)
+    {:ok, nil}
   end
 
   @spec do_claim_bounty(%{

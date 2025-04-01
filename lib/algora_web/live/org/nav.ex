@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.Org.Nav do
   @moduledoc false
   use Phoenix.Component
+  use AlgoraWeb, :verified_routes
 
   import Ecto.Changeset
   import Phoenix.LiveView
@@ -93,8 +94,17 @@ defmodule AlgoraWeb.Org.Nav do
             end
 
           case bounty_res do
-            {:ok, _bounty} ->
-              {:cont, put_flash(socket, :info, "Bounty created")}
+            {:ok, bounty} ->
+              to =
+                case data.type do
+                  :github ->
+                    ~p"/#{data.ticket_ref.owner}/#{data.ticket_ref.repo}/issues/#{data.ticket_ref.number}"
+
+                  :custom ->
+                    ~p"/org/#{socket.assigns.current_org.handle}/bounties/#{bounty.id}"
+                end
+
+              {:cont, redirect(socket, to: to)}
 
             {:error, :already_exists} ->
               {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}

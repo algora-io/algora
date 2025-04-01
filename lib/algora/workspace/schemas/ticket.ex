@@ -32,7 +32,7 @@ defmodule Algora.Workspace.Ticket do
   def changeset(ticket, params) do
     ticket
     |> cast(params, [:title, :description, :url])
-    |> validate_required([:title, :url])
+    |> validate_required([:title])
     |> generate_id()
   end
 

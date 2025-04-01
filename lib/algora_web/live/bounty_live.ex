@@ -107,7 +107,7 @@ defmodule AlgoraWeb.BountyLive do
      |> assign(:total_paid, total_paid)
      |> assign(:ticket_body_html, ticket_body_html)
      |> assign(:contexts, contexts)
-     |> assign(:show_reward_modal, true)
+     |> assign(:show_reward_modal, false)
      |> assign(:show_exclusive_modal, false)
      |> assign(:selected_context, nil)
      |> assign(:recipient, nil)
@@ -739,7 +739,7 @@ defmodule AlgoraWeb.BountyLive do
       <.icon
         id={@id <> "-check-icon"}
         name="tabler-check"
-        class="absolute inset-0 m-auto hidden size-6 flex items-center justify-center"
+        class="absolute inset-0 m-auto hidden size-6 items-center justify-center"
       />
     </.button>
     """

@@ -181,17 +181,18 @@ defmodule AlgoraWeb.BountyLive do
 
     case apply_action(changeset, :save) do
       {:ok, data} ->
-        shared_with = Enum.uniq(bounty.shared_with ++ [data.github_handle])
-
-        case bounty
-             |> Bounty.settings_changeset(%{shared_with: shared_with})
-             |> Repo.update() do
-          {:ok, _} ->
-            {:noreply,
-             socket
-             |> put_flash(:info, "Bounty shared!")
-             |> assign_exclusives(shared_with)
-             |> close_drawers()}
+        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
+             {:ok, user} <- Workspace.ensure_user(token, data.github_handle),
+             shared_with = Enum.uniq(bounty.shared_with ++ [user.provider_id]),
+             {:ok, _} <- bounty |> Bounty.settings_changeset(%{shared_with: shared_with}) |> Repo.update() do
+          {:noreply,
+           socket
+           |> put_flash(:info, "Bounty shared!")
+           |> assign_exclusives(shared_with)
+           |> close_drawers()}
+        else
+          nil ->
+            {:noreply, put_flash(socket, :error, "User not found")}
 
           {:error, reason} ->
             Logger.error("Failed to share bounty: #{inspect(reason)}")
@@ -691,9 +692,9 @@ defmodule AlgoraWeb.BountyLive do
 
   defp assign_exclusives(socket, shared_with) do
     exclusives =
-      Enum.flat_map(shared_with, fn github_handle ->
+      Enum.flat_map(shared_with, fn provider_id ->
         with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
-             {:ok, user} <- Workspace.ensure_user(token, github_handle) do
+             {:ok, user} <- Workspace.ensure_user_by_provider_id(token, provider_id) do
           [user]
         else
           _ -> []

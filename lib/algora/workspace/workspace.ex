@@ -200,6 +200,13 @@ defmodule Algora.Workspace do
     end
   end
 
+  def ensure_user_by_provider_id(token, provider_id) do
+    case Repo.get_by(User, provider: "github", provider_id: provider_id) do
+      %User{} = user -> {:ok, user}
+      nil -> create_user_from_github(token, provider_id)
+    end
+  end
+
   def sync_user(user, repository, owner, repo) do
     github_user = repository["owner"]
 

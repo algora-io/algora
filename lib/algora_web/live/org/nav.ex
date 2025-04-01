@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{type: "github"})))
+     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:main_bounty_form_open?, false)
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)

@@ -29,6 +29,13 @@ defmodule Algora.Workspace.Ticket do
     timestamps()
   end
 
+  def changeset(ticket, params) do
+    ticket
+    |> cast(params, [:title, :description, :url])
+    |> validate_required([:title])
+    |> generate_id()
+  end
+
   def github_changeset(meta, repo) do
     params = %{
       provider_id: to_string(meta["id"]),

@@ -16,6 +16,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Contracts
   alias Algora.Github
   alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -50,7 +51,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def mount(_params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
-    if socket.assigns.current_user_role in [:admin, :mod] do
+    if Member.can_create_bounty?(socket.assigns.current_user_role) do
       if connected?(socket) do
         Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
       end
@@ -633,7 +634,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           {:noreply, assign(socket, :bounty_form, to_form(changeset))}
 
         {:error, :already_exists} ->
-          {:noreply, put_flash(socket, :warning, "You have already created a bounty for this ticket")}
+          {:noreply, put_flash(socket, :warning, "You already have a bounty for this ticket")}
 
         {:error, _reason} ->
           {:noreply, put_flash(socket, :error, "Something went wrong")}
@@ -1427,6 +1428,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <img
             src={~p"/og/org/#{@current_org.handle}/home"}
             alt={@current_org.name}
+            loading="lazy"
             class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
           />
         </div>

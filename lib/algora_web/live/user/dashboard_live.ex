@@ -300,6 +300,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             src={~p"/og/@/#{@current_user.handle}"}
             alt={@current_user.name}
             class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
+            loading="lazy"
           />
         </div>
       </aside>

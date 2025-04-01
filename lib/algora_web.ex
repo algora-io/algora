@@ -56,8 +56,6 @@ defmodule AlgoraWeb do
       use Phoenix.LiveView,
         layout: {AlgoraWeb.Layouts, :app}
 
-      import Tails, only: [classes: 1]
-
       unquote(html_helpers())
     end
   end
@@ -87,13 +85,17 @@ defmodule AlgoraWeb do
     quote do
       use Gettext, backend: AlgoraWeb.Gettext
 
-      import AlgoraWeb.CoreComponents
-      import LiveSvelte
-      # HTML escaping functionality
-      import Phoenix.HTML
       # Core UI components and translation
+      import AlgoraWeb.CoreComponents
 
       # Enable rendering Svelte components
+      import LiveSvelte
+
+      # HTML escaping functionality
+      import Phoenix.HTML
+
+      # class helpers
+      import Tails, only: [classes: 1]
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Org.TeamLive do
   alias Algora.Accounts.User
   alias Algora.Organizations
 
+  @impl true
   def mount(%{"org_handle" => handle}, _session, socket) do
     org = Organizations.get_org_by_handle!(handle)
     members = Organizations.list_org_members(org)
@@ -18,6 +19,7 @@ defmodule AlgoraWeb.Org.TeamLive do
      |> assign(:contractors, contractors)}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">
@@ -114,5 +116,10 @@ defmodule AlgoraWeb.Org.TeamLive do
       </.card>
     </div>
     """
+  end
+
+  @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
   end
 end

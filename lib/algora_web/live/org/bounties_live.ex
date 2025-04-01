@@ -287,6 +287,10 @@ defmodule AlgoraWeb.Org.BountiesLive do
      end}
   end
 
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
   def handle_params(params, _uri, socket) do
     current_org = socket.assigns.current_org
     current_status = get_current_status(params)

@@ -6,6 +6,8 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   attr :class, :string, default: nil
   attr :rest, :global
 
+  slot :inner_block, required: true
+
   def avatar(assigns) do
     ~H"""
     <div class={classes(["relative h-10 w-10 shrink-0 overflow-hidden rounded-full", @class])} {@rest}>
@@ -46,6 +48,33 @@ defmodule AlgoraWeb.Components.UI.Avatar do
     >
       {render_slot(@inner_block)}
     </span>
+    """
+  end
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+  attr :srcs, :list, default: []
+  attr :limit, :integer, default: 3
+
+  def avatar_group(assigns) do
+    ~H"""
+    <div class="relative flex -space-x-1">
+      <%= for src <- @srcs |> Enum.take(@limit) do %>
+        <.avatar class={@class}>
+          <.avatar_image src={src} />
+          <.avatar_fallback>
+            {Algora.Util.initials(src)}
+          </.avatar_fallback>
+        </.avatar>
+      <% end %>
+      <%= if length(@srcs) > @limit do %>
+        <.avatar class={@class}>
+          <.avatar_fallback>
+            +{length(@srcs) - @limit}
+          </.avatar_fallback>
+        </.avatar>
+      <% end %>
+    </div>
     """
   end
 end

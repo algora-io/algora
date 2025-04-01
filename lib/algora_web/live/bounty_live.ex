@@ -143,18 +143,14 @@ defmodule AlgoraWeb.BountyLive do
   @impl true
   def handle_info(%Chat.MessageCreated{message: message, participant: participant}, socket) do
     socket =
-      if message.id in Enum.map(socket.assigns.messages, & &1.id) do
-        socket
-      else
-        Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))
-      end
+      if message.id in Enum.map(socket.assigns.messages, & &1.id),
+        do: socket,
+        else: Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))
 
     socket =
-      if participant.id in Enum.map(socket.assigns.participants, & &1.id) do
-        socket
-      else
-        Phoenix.Component.update(socket, :participants, &(&1 ++ [participant]))
-      end
+      if participant.id in Enum.map(socket.assigns.participants, & &1.id),
+        do: socket,
+        else: Phoenix.Component.update(socket, :participants, &(&1 ++ [participant]))
 
     {:noreply, socket}
   end
@@ -475,27 +471,12 @@ defmodule AlgoraWeb.BountyLive do
             <h2 class="text-lg font-semibold">
               Contributor chat
             </h2>
-            <div class="relative flex -space-x-2">
-              <%= for participant <- @participants |> Enum.take(3) do %>
-                <.avatar class="ring-4 ring-background">
-                  <.avatar_image
-                    src={participant.user.avatar_url}
-                    alt="Developer avatar"
-                    class="ring-2 ring-background"
-                  />
-                  <.avatar_fallback>
-                    {Algora.Util.initials(participant.user.name)}
-                  </.avatar_fallback>
-                </.avatar>
-              <% end %>
-              <%= if length(@participants) > 3 do %>
-                <.avatar class="ring-4 ring-background">
-                  <.avatar_fallback>
-                    +{length(@participants) - 3}
-                  </.avatar_fallback>
-                </.avatar>
-              <% end %>
-            </div>
+
+            <.avatar_group
+              srcs={Enum.map(@participants, & &1.user.avatar_url)}
+              limit={4}
+              class="ring-4 ring-background"
+            />
           </div>
         </div>
 

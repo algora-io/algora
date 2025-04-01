@@ -57,6 +57,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
               "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
             ]}>
               <.input
+                id={"main-bounty-form-type-#{value}"}
                 type="radio"
                 field={@form[:type]}
                 checked={@form[:type].value == value}

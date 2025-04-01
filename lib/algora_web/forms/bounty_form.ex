@@ -26,7 +26,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
   end
 
   def type_options do
-    [{"GitHub issue", "github"}, {"Custom", "custom"}]
+    [{"GitHub issue", :github}, {"Custom", :custom}]
   end
 
   def changeset(form, params) do
@@ -73,7 +73,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
               <.input
                 type="radio"
                 field={@form[:type]}
-                checked={to_string(get_field(@form.source, :type)) == value}
+                checked={get_field(@form.source, :type) == value}
                 value={value}
                 class="sr-only"
                 phx-click={

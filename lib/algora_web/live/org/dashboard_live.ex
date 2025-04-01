@@ -1630,7 +1630,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.card_content>
       </.card>
 
-      <div class="ml-auto flex gap-4">
+      <div class="pt-4 ml-auto flex gap-4">
         <.button variant="secondary" phx-click="close_share_drawer" type="button">
           Cancel
         </.button>
@@ -1672,7 +1672,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.card_content>
       </.card>
 
-      <div class="ml-auto flex gap-4">
+      <div class="pt-4 ml-auto flex gap-4">
         <.button variant="secondary" phx-click="close_share_drawer" type="button">
           Cancel
         </.button>
@@ -1709,7 +1709,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.card_content>
       </.card>
 
-      <div class="ml-auto flex gap-4">
+      <div class="pt-4 ml-auto flex gap-4">
         <.button variant="secondary" phx-click="close_share_drawer" type="button">
           Cancel
         </.button>

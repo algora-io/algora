@@ -104,9 +104,8 @@ defmodule AlgoraWeb.BountyLive do
         where: u.provider_login == ^repo_owner,
         where: r.name == ^repo_name,
         where: t.number == ^number,
-        # TODO: pool bounties
-        limit: 1,
-        order_by: [asc: b.inserted_at]
+        order_by: fragment("CASE WHEN ? = ? THEN 0 ELSE 1 END", u.id, ^socket.assigns.current_org.id),
+        limit: 1
       )
       |> Repo.one()
       |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])

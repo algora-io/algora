@@ -1,12 +1,18 @@
 defmodule AlgoraWeb.Org.RepoNav do
   @moduledoc false
   use Phoenix.Component
+  use AlgoraWeb, :verified_routes
 
+  import Ecto.Changeset
   import Phoenix.LiveView
 
+  alias Algora.Bounties
   alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.OrgAuth
+
+  require Logger
 
   def on_mount(:default, %{"repo_owner" => repo_owner} = params, _session, socket) do
     current_user = socket.assigns[:current_user]

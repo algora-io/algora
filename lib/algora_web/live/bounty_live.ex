@@ -8,6 +8,7 @@ defmodule AlgoraWeb.BountyLive do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
+  alias Algora.Chat
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
@@ -95,6 +96,14 @@ defmodule AlgoraWeb.BountyLive do
 
     exclusive_changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, %{})
 
+    {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
+    messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
+    participants = thread.id |> Chat.list_participants() |> Repo.preload(:user)
+
+    if connected?(socket) do
+      Chat.subscribe(thread.id)
+    end
+
     {:ok,
      socket
      |> assign(:page_title, bounty.ticket.title)
@@ -107,7 +116,9 @@ defmodule AlgoraWeb.BountyLive do
      |> assign(:show_exclusive_modal, false)
      |> assign(:selected_context, nil)
      |> assign(:line_items, [])
-     |> assign(:messages, [])
+     |> assign(:thread, thread)
+     |> assign(:messages, messages)
+     |> assign(:participants, participants)
      |> assign(:reward_form, to_form(reward_changeset))
      |> assign(:exclusive_form, to_form(exclusive_changeset))
      |> assign_exclusives(bounty.shared_with)}
@@ -118,12 +129,50 @@ defmodule AlgoraWeb.BountyLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_params(%{"context" => context_id}, _url, socket) do
     {:noreply, socket |> assign_selected_context(context_id) |> assign_line_items()}
   end
 
+  @impl true
   def handle_params(_params, _url, socket) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(%Chat.MessageCreated{message: message, participant: participant}, socket) do
+    socket =
+      if message.id in Enum.map(socket.assigns.messages, & &1.id) do
+        socket
+      else
+        Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))
+      end
+
+    socket =
+      if participant.id in Enum.map(socket.assigns.participants, & &1.id) do
+        socket
+      else
+        Phoenix.Component.update(socket, :participants, &(&1 ++ [participant]))
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("send_message", %{"message" => content}, socket) do
+    {:ok, message} =
+      Chat.send_message(
+        socket.assigns.thread.id,
+        socket.assigns.current_user.id,
+        content
+      )
+
+    message = Repo.preload(message, :sender)
+
+    {:noreply,
+     socket
+     |> update(:messages, &(&1 ++ [message]))
+     |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
   @impl true
@@ -131,14 +180,17 @@ defmodule AlgoraWeb.BountyLive do
     {:noreply, assign(socket, :show_reward_modal, true)}
   end
 
+  @impl true
   def handle_event("exclusive", _params, socket) do
     {:noreply, assign(socket, :show_exclusive_modal, true)}
   end
 
+  @impl true
   def handle_event("close_drawer", _params, socket) do
     {:noreply, close_drawers(socket)}
   end
 
+  @impl true
   def handle_event("validate_reward", %{"reward_bounty_form" => params}, socket) do
     {:noreply,
      socket
@@ -146,6 +198,7 @@ defmodule AlgoraWeb.BountyLive do
      |> assign_line_items()}
   end
 
+  @impl true
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
     changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
 
@@ -165,6 +218,7 @@ defmodule AlgoraWeb.BountyLive do
     end
   end
 
+  @impl true
   def handle_event("validate_exclusive", %{"exclusive_bounty_form" => params}, socket) do
     {:noreply,
      socket
@@ -172,6 +226,7 @@ defmodule AlgoraWeb.BountyLive do
      |> assign_line_items()}
   end
 
+  @impl true
   def handle_event("share_exclusive", %{"exclusive_bounty_form" => params}, socket) do
     changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)
     bounty = socket.assigns.bounty
@@ -420,11 +475,11 @@ defmodule AlgoraWeb.BountyLive do
               Contributor chat
             </h2>
             <div class="relative flex -space-x-2">
-              <%= for user <- @exclusives do %>
+              <%= for participant <- @participants do %>
                 <.avatar>
-                  <.avatar_image src={user.avatar_url} alt="Developer avatar" />
+                  <.avatar_image src={participant.user.avatar_url} alt="Developer avatar" />
                   <.avatar_fallback>
-                    {Algora.Util.initials(@bounty.owner.name)}
+                    {Algora.Util.initials(participant.user.name)}
                   </.avatar_fallback>
                 </.avatar>
               <% end %>

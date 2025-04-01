@@ -292,14 +292,14 @@ defmodule AlgoraWeb.BountyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class={classes(["flex p-4", if(!@current_user, do: "pb-16 sm:pb-24")])}>
-      <.scroll_area class="h-[calc(100vh-96px)] flex-1 pr-6">
+    <div class={classes(["sm:flex p-4", if(!@current_user, do: "pb-16 sm:pb-24")])}>
+      <.scroll_area class="sm:h-[calc(100svh-96px)] flex-1 pr-6">
         <div class="space-y-4">
           <.card>
             <.card_content>
-              <div class="flex justify-between">
-                <div class="flex gap-4 items-center">
-                  <.avatar class="h-20 w-20 rounded-2xl">
+              <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <.avatar class="h-12 w-12 sm:h-20 sm:w-20 rounded-2xl">
                     <.avatar_image src={@ticket.repository.user.avatar_url} />
                     <.avatar_fallback>
                       {Util.initials(@ticket.repository.user.provider_login)}
@@ -308,12 +308,12 @@ defmodule AlgoraWeb.BountyLive do
                   <div>
                     <.link
                       href={@ticket.url}
-                      class="text-3xl font-semibold hover:underline"
+                      class="text-xl sm:text-3xl font-semibold hover:underline"
                       target="_blank"
                     >
                       {@ticket.title}
                     </.link>
-                    <div class="pt-1 text-xl font-medium text-muted-foreground">
+                    <div class="pt-1 text-base sm:text-xl font-medium text-muted-foreground">
                       {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
                     </div>
                   </div>
@@ -329,7 +329,7 @@ defmodule AlgoraWeb.BountyLive do
               </div>
             </.card_content>
           </.card>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <.card class="flex flex-col items-between justify-center">
               <.card_content>
                 <div class="flex items-center justify-between">
@@ -458,7 +458,7 @@ defmodule AlgoraWeb.BountyLive do
         </div>
       </.scroll_area>
 
-      <div class="h-[calc(100vh-96px)] w-[400px] flex flex-none flex-col border rounded-xl">
+      <div class="h-[calc(100svh-96px)] sm:w-[400px] flex sm:flex-none flex-col border rounded-xl">
         <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div class="flex justify-between items-center w-full">
             <h2 class="text-lg font-semibold">

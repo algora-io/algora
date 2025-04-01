@@ -88,6 +88,15 @@ defmodule AlgoraWeb.Router do
       end
     end
 
+    scope "/:repo_owner/:repo_name" do
+      live_session :repo,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
+        live "/issues/:number", BountyLive
+        live "/pull/:number", BountyLive
+      end
+    end
+
     scope "/org/:org_handle" do
       live_session :org,
         layout: {AlgoraWeb.Layouts, :user},
@@ -95,6 +104,7 @@ defmodule AlgoraWeb.Router do
         live "/", Org.DashboardLive, :index
         live "/home", Org.HomeLive, :index
         live "/bounties", Org.BountiesLive, :index
+        live "/bounties/:id", BountyLive, :index
         live "/contracts/:id", Contract.ViewLive
         live "/team", Org.TeamLive, :index
         live "/leaderboard", Org.LeaderboardLive, :index

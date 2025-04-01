@@ -147,6 +147,7 @@ defmodule Algora.Accounts do
       type: u.type,
       id: u.id,
       handle: u.handle,
+      provider_login: u.provider_login,
       name: u.name,
       provider_login: u.provider_login,
       provider_meta: u.provider_meta,

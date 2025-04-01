@@ -8,8 +8,13 @@ defmodule Algora.Chat do
   alias Algora.Chat.Thread
   alias Algora.Repo
 
-  def broadcast(message) do
-    Phoenix.PubSub.broadcast(Algora.PubSub, "chat:thread:#{message.thread_id}", message)
+  defmodule MessageCreated do
+    @moduledoc false
+    defstruct message: nil, participant: nil
+  end
+
+  def broadcast(%MessageCreated{} = event) do
+    Phoenix.PubSub.broadcast(Algora.PubSub, "chat:thread:#{event.message.thread_id}", event)
   end
 
   def subscribe(thread_id) do
@@ -23,7 +28,6 @@ defmodule Algora.Chat do
         |> Thread.changeset(%{title: "#{User.handle(user_1)} <> #{User.handle(user_2)}"})
         |> Repo.insert()
 
-      # Add participants
       for user <- [user_1, user_2] do
         %Participant{}
         |> Participant.changeset(%{
@@ -46,7 +50,7 @@ defmodule Algora.Chat do
         |> Repo.insert()
 
       participants = Enum.uniq_by([user | admins], & &1.id)
-      # Add participants
+
       for u <- participants do
         %Participant{}
         |> Participant.changeset(%{
@@ -61,20 +65,41 @@ defmodule Algora.Chat do
     end)
   end
 
-  def send_message(thread_id, sender_id, content) do
-    case %Message{}
-         |> Message.changeset(%{
-           thread_id: thread_id,
-           sender_id: sender_id,
-           content: content
-         })
-         |> Repo.insert() do
-      {:ok, message} ->
-        message |> Repo.preload(:sender) |> broadcast()
-        {:ok, message}
+  defp ensure_participant(thread_id, user_id) do
+    case Repo.fetch_by(Participant, thread_id: thread_id, user_id: user_id) do
+      {:ok, participant} ->
+        {:ok, participant}
 
-      {:error, changeset} ->
-        {:error, changeset}
+      {:error, _} ->
+        %Participant{}
+        |> Participant.changeset(%{
+          thread_id: thread_id,
+          user_id: user_id,
+          last_read_at: DateTime.utc_now()
+        })
+        |> Repo.insert()
+    end
+  end
+
+  defp insert_message(thread_id, sender_id, content) do
+    %Message{}
+    |> Message.changeset(%{
+      thread_id: thread_id,
+      sender_id: sender_id,
+      content: content
+    })
+    |> Repo.insert()
+  end
+
+  def send_message(thread_id, sender_id, content) do
+    with {:ok, participant} <- ensure_participant(thread_id, sender_id),
+         {:ok, message} <- insert_message(thread_id, sender_id, content) do
+      broadcast(%MessageCreated{
+        message: Repo.preload(message, :sender),
+        participant: Repo.preload(participant, :user)
+      })
+
+      {:ok, message}
     end
   end
 
@@ -104,6 +129,12 @@ defmodule Algora.Chat do
     |> join(:left, [t], lm in subquery(last_message_query), on: t.id == lm.thread_id)
     |> order_by([t, lm], desc: lm.last_message_at)
     |> preload(participants: :user)
+    |> Repo.all()
+  end
+
+  def list_participants(thread_id) do
+    Participant
+    |> where(thread_id: ^thread_id)
     |> Repo.all()
   end
 
@@ -143,6 +174,18 @@ defmodule Algora.Chat do
     case get_thread_for_users([current_user] ++ admins) do
       nil -> create_admin_thread(current_user, admins)
       thread -> {:ok, thread}
+    end
+  end
+
+  def get_or_create_bounty_thread(bounty) do
+    case Repo.fetch_by(Thread, bounty_id: bounty.id) do
+      {:ok, thread} ->
+        {:ok, thread}
+
+      {:error, _} ->
+        %Thread{}
+        |> Thread.changeset(%{title: "Contributor chat", bounty_id: bounty.id})
+        |> Repo.insert()
     end
   end
 end

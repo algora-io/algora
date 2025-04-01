@@ -32,5 +32,7 @@ config :algora,
   assets_url: System.get_env("ASSETS_URL"),
   ingest_url: System.get_env("INGEST_URL")
 
+config :algora, AlgoraWeb.OGImageController, max_age: 600
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

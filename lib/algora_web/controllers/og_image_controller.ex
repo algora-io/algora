@@ -7,7 +7,7 @@ defmodule AlgoraWeb.OGImageController do
 
   @opts [type: "png", width: 1200, height: 630, scale_factor: 1]
 
-  @max_age 600
+  defp max_age, do: Algora.config([AlgoraWeb.OGImageController, :max_age])
 
   def generate(conn, %{"path" => path}) do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
@@ -49,7 +49,7 @@ defmodule AlgoraWeb.OGImageController do
       {_, last_modified} ->
         case DateTime.from_iso8601(convert_to_iso8601(last_modified)) do
           {:ok, modified_at, _} ->
-            DateTime.diff(DateTime.utc_now(), modified_at, :second) > @max_age
+            DateTime.diff(DateTime.utc_now(), modified_at, :second) > max_age()
 
           _error ->
             true
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.OGImageController do
             Task.start(fn ->
               Algora.S3.upload(body, object_path,
                 content_type: "image/png",
-                cache_control: "public, max-age=#{@max_age}"
+                cache_control: "public, max-age=#{max_age()}"
               )
 
               File.rm(filepath)

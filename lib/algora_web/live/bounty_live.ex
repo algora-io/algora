@@ -16,14 +16,7 @@ defmodule AlgoraWeb.BountyLive do
 
   require Logger
 
-  defp tip_options do
-    [
-      {"None", 0},
-      {"10%", 10},
-      {"20%", 20},
-      {"50%", 50}
-    ]
-  end
+  defp tip_options, do: [{"None", 0}, {"10%", 10}, {"20%", 20}, {"50%", 50}]
 
   defmodule RewardBountyForm do
     @moduledoc false
@@ -34,13 +27,14 @@ defmodule AlgoraWeb.BountyLive do
     @primary_key false
     embedded_schema do
       field :amount, :decimal
+      field :github_handle, :string
       field :tip_percentage, :decimal
     end
 
     def changeset(form, attrs) do
       form
-      |> cast(attrs, [:amount, :tip_percentage])
-      |> validate_required([:amount])
+      |> cast(attrs, [:amount, :tip_percentage, :github_handle])
+      |> validate_required([:amount, :github_handle])
       |> validate_number(:tip_percentage, greater_than_or_equal_to: 0)
       |> validate_number(:amount, greater_than: 0)
     end
@@ -113,16 +107,18 @@ defmodule AlgoraWeb.BountyLive do
      |> assign(:total_paid, total_paid)
      |> assign(:ticket_body_html, ticket_body_html)
      |> assign(:contexts, contexts)
-     |> assign(:show_reward_modal, false)
+     |> assign(:show_reward_modal, true)
      |> assign(:show_exclusive_modal, false)
      |> assign(:selected_context, nil)
+     |> assign(:recipient, nil)
      |> assign(:line_items, [])
      |> assign(:thread, thread)
      |> assign(:messages, messages)
      |> assign(:participants, participants)
      |> assign(:reward_form, to_form(reward_changeset))
      |> assign(:exclusive_form, to_form(exclusive_changeset))
-     |> assign_exclusives(bounty.shared_with)}
+     |> assign_exclusives(bounty.shared_with)
+     |> assign_line_items()}
   end
 
   @impl true
@@ -130,10 +126,10 @@ defmodule AlgoraWeb.BountyLive do
     {:noreply, socket}
   end
 
-  @impl true
-  def handle_params(%{"context" => context_id}, _url, socket) do
-    {:noreply, socket |> assign_selected_context(context_id) |> assign_line_items()}
-  end
+  # @impl true
+  # def handle_params(%{"context" => context_id}, _url, socket) do
+  #   {:noreply, socket |> assign_selected_context(context_id) |> assign_line_items(nil)}
+  # end
 
   @impl true
   def handle_params(_params, _url, socket) do
@@ -196,12 +192,20 @@ defmodule AlgoraWeb.BountyLive do
   end
 
   @impl true
+  def handle_event("assign_line_items", %{"reward_bounty_form" => params}, socket) do
+    {:noreply,
+     socket
+     |> assign_recipient(params["github_handle"])
+     |> assign_line_items()}
+  end
+
+  @impl true
   def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
     changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
 
     case apply_action(changeset, :save) do
-      {:ok, data} ->
-        case create_payment_session(socket, data) do
+      {:ok, _data} ->
+        case reward_bounty(socket, socket.assigns.bounty, changeset) do
           {:ok, session_url} ->
             {:noreply, redirect(socket, external: session_url)}
 
@@ -217,10 +221,7 @@ defmodule AlgoraWeb.BountyLive do
 
   @impl true
   def handle_event("validate_exclusive", %{"exclusive_bounty_form" => params}, socket) do
-    {:noreply,
-     socket
-     |> assign(:exclusive_form, to_form(ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)))
-     |> assign_line_items()}
+    {:noreply, assign(socket, :exclusive_form, to_form(ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, params)))}
   end
 
   @impl true
@@ -260,62 +261,6 @@ defmodule AlgoraWeb.BountyLive do
     end
   end
 
-  defp assign_selected_context(socket, context_id) do
-    case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
-      nil ->
-        socket
-
-      context ->
-        assign(socket, :selected_context, context)
-    end
-  end
-
-  defp assign_line_items(socket) do
-    # line_items =
-    #   Bounties.generate_line_items(
-    #     %{
-    #       owner: socket.assigns.selected_context,
-    #       amount: calculate_final_amount(socket.assigns.reward_form.source)
-    #     },
-    #     ticket_ref: ticket_ref(socket),
-    #     recipient: socket.assigns.selected_context
-    #   )
-
-    line_items = []
-    assign(socket, :line_items, line_items)
-  end
-
-  defp ticket_ref(socket) do
-    %{
-      owner: socket.assigns.ticket.repository.user.provider_login,
-      repo: socket.assigns.ticket.repository.name,
-      number: socket.assigns.ticket.number
-    }
-  end
-
-  defp create_payment_session(socket, data) do
-    final_amount = calculate_final_amount(data)
-
-    Bounties.reward_bounty(
-      %{
-        owner: socket.assigns.current_user,
-        amount: final_amount,
-        bounty_id: socket.assigns.bounty.id,
-        claims: []
-      },
-      ticket_ref: ticket_ref(socket),
-      recipient: socket.assigns.selected_context
-    )
-  end
-
-  defp calculate_final_amount(data_or_changeset) do
-    tip_percentage = get_field(data_or_changeset, :tip_percentage) || Decimal.new(0)
-    amount = get_field(data_or_changeset, :amount) || Decimal.new(0)
-
-    multiplier = tip_percentage |> Decimal.div(100) |> Decimal.add(1)
-    amount |> Money.new!(:USD) |> Money.mult!(multiplier)
-  end
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -335,12 +280,12 @@ defmodule AlgoraWeb.BountyLive do
                   <div>
                     <.link
                       href={@ticket.url}
-                      class="text-4xl font-semibold hover:underline"
+                      class="text-3xl font-semibold hover:underline"
                       target="_blank"
                     >
                       {@ticket.title}
                     </.link>
-                    <div class="pt-2 text-2xl font-medium text-muted-foreground">
+                    <div class="pt-1 text-xl font-medium text-muted-foreground">
                       {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
                     </div>
                   </div>
@@ -613,30 +558,12 @@ defmodule AlgoraWeb.BountyLive do
                       icon="tabler-currency-dollar"
                       field={@reward_form[:amount]}
                     />
-
-                    <div>
-                      <.label>Recipient</.label>
-                      <.dropdown id="context-dropdown" class="mt-2">
-                        <:img :if={@selected_context} src={@selected_context.avatar_url} />
-                        <:title :if={@selected_context}>{@selected_context.name}</:title>
-                        <:subtitle :if={@selected_context}>@{@selected_context.handle}</:subtitle>
-
-                        <:link :for={context <- @contexts} patch={"?context=#{context.id}"}>
-                          <div class="flex items-center whitespace-nowrap">
-                            <img
-                              src={context.avatar_url}
-                              alt={context.name}
-                              class="mr-3 h-10 w-10 rounded-full"
-                            />
-                            <div>
-                              <div class="font-semibold">{context.name}</div>
-                              <div class="text-sm text-gray-500">@{context.handle}</div>
-                            </div>
-                          </div>
-                        </:link>
-                      </.dropdown>
-                    </div>
-
+                    <.input
+                      label="GitHub handle"
+                      field={@reward_form[:github_handle]}
+                      phx-change="assign_line_items"
+                      phx-debounce="500"
+                    />
                     <div>
                       <.label>Tip</.label>
                       <div class="mt-2">
@@ -662,6 +589,9 @@ defmodule AlgoraWeb.BountyLive do
                           <%= if line_item.image do %>
                             <.avatar>
                               <.avatar_image src={line_item.image} />
+                              <.avatar_fallback>
+                                {Util.initials(line_item.title)}
+                              </.avatar_fallback>
                             </.avatar>
                           <% else %>
                             <div class="w-10" />
@@ -703,6 +633,87 @@ defmodule AlgoraWeb.BountyLive do
       </.drawer_content>
     </.drawer>
     """
+  end
+
+  # defp assign_selected_context(socket, context_id) do
+  #   case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
+  #     nil ->
+  #       socket
+
+  #     context ->
+  #       assign(socket, :selected_context, context)
+  #   end
+  # end
+
+  defp assign_recipient(socket, github_handle) do
+    case Workspace.ensure_user(Admin.token!(), github_handle) do
+      {:ok, recipient} ->
+        assign(socket, :recipient, recipient)
+
+      _ ->
+        assign(socket, :recipient, nil)
+    end
+  end
+
+  defp assign_line_items(socket) do
+    amount = calculate_final_amount(socket.assigns.reward_form.source)
+    recipient = socket.assigns.recipient
+    ticket_ref = ticket_ref(socket)
+
+    line_items =
+      if recipient do
+        []
+      else
+        [
+          %LineItem{
+            amount: amount,
+            title: "Recipient",
+            image: ~p"/images/placeholder-avatar.png",
+            description: if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
+          }
+        ]
+      end ++
+        Bounties.generate_line_items(
+          %{
+            owner: socket.assigns.bounty.owner,
+            amount: amount
+          },
+          ticket_ref: ticket_ref,
+          recipient: recipient
+        )
+
+    assign(socket, :line_items, line_items)
+  end
+
+  defp ticket_ref(socket) do
+    %{
+      owner: socket.assigns.ticket.repository.user.provider_login,
+      repo: socket.assigns.ticket.repository.name,
+      number: socket.assigns.ticket.number
+    }
+  end
+
+  defp reward_bounty(socket, bounty, changeset) do
+    final_amount = calculate_final_amount(changeset)
+
+    Bounties.reward_bounty(
+      %{
+        owner: bounty.owner,
+        amount: final_amount,
+        bounty_id: bounty.id,
+        claims: []
+      },
+      ticket_ref: ticket_ref(socket),
+      recipient: socket.assigns.recipient
+    )
+  end
+
+  defp calculate_final_amount(data_or_changeset) do
+    tip_percentage = get_field(data_or_changeset, :tip_percentage) || Decimal.new(0)
+    amount = get_field(data_or_changeset, :amount) || Decimal.new(0)
+
+    multiplier = tip_percentage |> Decimal.div(100) |> Decimal.add(1)
+    amount |> Money.new!(:USD) |> Money.mult!(multiplier)
   end
 
   defp social_share_button(assigns) do

@@ -703,7 +703,8 @@ defmodule Algora.Bounties do
       %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
       ticket_ref: opts[:ticket_ref],
       bounty_id: bounty_id,
-      claims: claims
+      claims: claims,
+      recipient: opts[:recipient]
     )
   end
 

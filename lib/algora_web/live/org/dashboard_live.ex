@@ -1795,14 +1795,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp share_drawer(assigns) do
     ~H"""
-    <.drawer show={@show_share_drawer} direction="right" on_cancel="close_share_drawer">
+    <.drawer show={@show_share_drawer} direction="bottom" on_cancel="close_share_drawer">
       <.share_drawer_header
         :if={@selected_developer}
         selected_developer={@selected_developer}
         share_drawer_type={@share_drawer_type}
       />
       <.drawer_content :if={@selected_developer} class="mt-4">
-        <div class="flex flex-col gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <.share_drawer_developer_info selected_developer={@selected_developer} />
           <%= if incomplete?(@achievements, :connect_github_status) do %>
             <div class="relative">

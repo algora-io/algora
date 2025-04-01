@@ -45,13 +45,11 @@ defmodule AlgoraWeb.Org.Nav do
      |> attach_hook(:form_toggle, :handle_event, &handle_form_toggle_event/3)}
   end
 
-  def handle_form_toggle_event("open_main_bounty_form", _params, socket) do
-    dbg("open_main_bounty_form")
+  defp handle_form_toggle_event("open_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, true)}
   end
 
-  def handle_form_toggle_event("close_main_bounty_form", _params, socket) do
-    dbg("close_main_bounty_form")
+  defp handle_form_toggle_event("close_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, false)}
   end
 

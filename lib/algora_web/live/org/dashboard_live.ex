@@ -89,7 +89,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
        # Will be initialized when chat starts
        |> assign(:thread, nil)
        |> assign(:messages, [])
-       |> assign(:show_chat, false)}
+       |> assign(:show_chat, false)
+       |> assign(:bounty_form_type, "github")}
     else
       {:ok, redirect(socket, to: ~p"/org/#{current_org.handle}/home")}
     end
@@ -1662,24 +1663,89 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 end
               }
             />
-            <.input
-              label="URL"
-              field={@bounty_form[:url]}
-              placeholder="https://github.com/owner/repo/issues/123"
-            />
+
+            <div class="grid grid-cols-2 gap-4">
+              <label class={[
+                "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+              ]}>
+                <input
+                  type="radio"
+                  name="bounty_form[type]"
+                  value="github"
+                  checked={@bounty_form_type == "github"}
+                  class="sr-only"
+                  phx-click={JS.show(to: "#github-form") |> JS.hide(to: "#custom-form")}
+                />
+                <span class="flex flex-1 items-center justify-between">
+                  <span class="text-sm font-medium">GitHub issue</span>
+                  <.icon
+                    name="tabler-check"
+                    class="invisible size-5 text-primary group-has-[:checked]:visible"
+                  />
+                </span>
+              </label>
+              <label class={[
+                "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+              ]}>
+                <input
+                  type="radio"
+                  name="bounty_form[type]"
+                  value="custom"
+                  checked={@bounty_form_type == "custom"}
+                  class="sr-only"
+                  phx-click={JS.show(to: "#custom-form") |> JS.hide(to: "#github-form")}
+                />
+                <span class="flex flex-1 items-center justify-between">
+                  <span class="text-sm font-medium">Custom</span>
+                  <.icon
+                    name="tabler-check"
+                    class="invisible size-5 text-primary group-has-[:checked]:visible"
+                  />
+                </span>
+              </label>
+            </div>
+
+            <div id="github-form" class={if @bounty_form_type == "custom", do: "hidden"}>
+              <.input
+                label="URL"
+                field={@bounty_form[:url]}
+                placeholder="https://github.com/owner/repo/issues/123"
+              />
+            </div>
+
+            <div
+              id="custom-form"
+              class={classes([@bounty_form_type == "github" && "hidden", "space-y-4"])}
+            >
+              <.input
+                label="Title"
+                field={@bounty_form[:title]}
+                placeholder="Brief description of the bounty"
+              />
+              <.input
+                label="Description"
+                field={@bounty_form[:description]}
+                type="textarea"
+                placeholder="Requirements and acceptance criteria"
+              />
+            </div>
+
             <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+          </div>
+          <div class="pt-4 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
           </div>
         </.card_content>
       </.card>
-
-      <div class="pt-4 ml-auto flex gap-4">
-        <.button variant="secondary" phx-click="close_share_drawer" type="button">
-          Cancel
-        </.button>
-        <.button type="submit">
-          Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-        </.button>
-      </div>
     </.form>
     """
   end
@@ -1795,7 +1861,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp share_drawer(assigns) do
     ~H"""
-    <.drawer show={@show_share_drawer} direction="bottom" on_cancel="close_share_drawer">
+    <.drawer
+      show={@show_share_drawer}
+      direction="bottom"
+      on_cancel="close_share_drawer"
+      class={if @share_drawer_type == "bounty", do: "h-[100svh]"}
+    >
       <.share_drawer_header
         :if={@selected_developer}
         selected_developer={@selected_developer}
@@ -1815,6 +1886,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   bounty_form={@bounty_form}
                   tip_form={@tip_form}
                   contract_form={@contract_form}
+                  bounty_form_type={@bounty_form_type}
                 />
               </div>
               <.alert
@@ -1838,6 +1910,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               bounty_form={@bounty_form}
               tip_form={@tip_form}
               contract_form={@contract_form}
+              bounty_form_type={@bounty_form_type}
             />
           <% end %>
         </div>

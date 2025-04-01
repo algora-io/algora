@@ -83,4 +83,9 @@ defmodule AlgoraWeb.Org.LeaderboardLive do
     </div>
     """
   end
+
+  @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
 end

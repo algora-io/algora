@@ -296,6 +296,11 @@ defmodule AlgoraWeb.BountyLive do
   end
 
   @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class={classes(["xl:flex p-4", if(!@current_user, do: "pb-16 xl:pb-24")])}>

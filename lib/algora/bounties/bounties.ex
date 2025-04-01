@@ -94,6 +94,8 @@ defmodule Algora.Bounties do
     end
   end
 
+  def create_bounty(_params, opts \\ [])
+
   @spec create_bounty(
           %{
             creator: User.t(),
@@ -118,7 +120,7 @@ defmodule Algora.Bounties do
           amount: amount,
           ticket_ref: %{owner: repo_owner, repo: repo_name, number: number} = ticket_ref
         },
-        opts \\ []
+        opts
       ) do
     command_id = opts[:command_id]
     shared_with = opts[:shared_with] || []
@@ -167,6 +169,48 @@ defmodule Algora.Bounties do
                command_id: command_id,
                command_source: opts[:command_source]
              ) do
+        broadcast()
+        {:ok, bounty}
+      else
+        {:error, _reason} = error ->
+          Algora.Admin.alert("Error creating bounty: #{inspect(error)}", :error)
+          error
+      end
+    end)
+  end
+
+  @spec create_bounty(
+          %{
+            creator: User.t(),
+            owner: User.t(),
+            amount: Money.t(),
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}
+          },
+          opts :: [
+            strategy: strategy(),
+            visibility: Bounty.visibility() | nil,
+            shared_with: [String.t()] | nil
+          ]
+        ) ::
+          {:ok, Bounty.t()} | {:error, atom()}
+  def create_bounty(%{creator: creator, owner: owner, amount: amount, title: title, description: description}, opts) do
+    shared_with = opts[:shared_with] || []
+
+    Repo.transact(fn ->
+      with {:ok, ticket} <-
+             %Ticket{type: :issue}
+             |> Ticket.changeset(%{title: title, description: description})
+             |> Repo.insert(),
+           {:ok, bounty} <-
+             do_create_bounty(%{
+               creator: creator,
+               owner: owner,
+               amount: amount,
+               ticket: ticket,
+               visibility: opts[:visibility],
+               shared_with: shared_with
+             }),
+           {:ok, _job} <- notify_bounty(%{owner: owner, bounty: bounty}) do
         broadcast()
         {:ok, bounty}
       else
@@ -337,6 +381,8 @@ defmodule Algora.Bounties do
     end
   end
 
+  def notify_bounty(bounty, opts \\ [])
+
   @spec notify_bounty(
           %{
             owner: User.t(),
@@ -346,7 +392,7 @@ defmodule Algora.Bounties do
           opts :: [installation_id: integer(), command_id: integer(), command_source: :ticket | :comment]
         ) ::
           {:ok, Oban.Job.t()} | {:error, atom()}
-  def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, opts \\ []) do
+  def notify_bounty(%{owner: owner, bounty: bounty, ticket_ref: ticket_ref}, opts) do
     %{
       owner_login: owner.provider_login,
       amount: Money.to_string!(bounty.amount, no_fraction_if_integer: true),
@@ -360,6 +406,12 @@ defmodule Algora.Bounties do
     }
     |> Jobs.NotifyBounty.new()
     |> Oban.insert()
+  end
+
+  @spec notify_bounty(%{owner: User.t(), bounty: Bounty.t()}, opts :: []) ::
+          {:ok, Oban.Job.t()} | {:error, atom()}
+  def notify_bounty(%{owner: _owner, bounty: bounty}, _opts) do
+    Algora.Admin.alert("Notify bounty: #{inspect(bounty)}", :error)
   end
 
   @spec do_claim_bounty(%{

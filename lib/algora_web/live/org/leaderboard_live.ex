@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Org.LeaderboardLive do
   alias Algora.Accounts.User
   alias Algora.Organizations
 
+  @impl true
   def mount(%{"org_handle" => handle}, _session, socket) do
     org = Organizations.get_org_by_handle!(handle)
     top_earners = Accounts.list_developers(org_id: org.id, earnings_gt: Money.zero(:USD))
@@ -17,6 +18,7 @@ defmodule AlgoraWeb.Org.LeaderboardLive do
      |> assign(:top_earners, top_earners)}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-6">

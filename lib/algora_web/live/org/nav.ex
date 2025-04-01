@@ -10,6 +10,8 @@ defmodule AlgoraWeb.Org.Nav do
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.OrgAuth
 
+  require Logger
+
   def on_mount(:default, %{"org_handle" => org_handle} = params, _session, socket) do
     current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
@@ -37,7 +39,7 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{amount: Money.new(0, "USD")})))
+     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
      |> assign(:main_bounty_form_open?, false)
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)
@@ -56,21 +58,39 @@ defmodule AlgoraWeb.Org.Nav do
 
       case apply_action(changeset, :save) do
         {:ok, data} ->
-          case Bounties.create_bounty(
-                 %{
-                   creator: socket.assigns.current_user,
-                   owner: socket.assigns.current_org,
-                   amount: data.amount,
-                   ticket_ref: %{
-                     owner: data.ticket_ref.owner,
-                     repo: data.ticket_ref.repo,
-                     number: data.ticket_ref.number
-                   }
-                 },
-                 strategy: :create,
-                 visibility: get_field(changeset, :visibility),
-                 shared_with: get_field(changeset, :shared_with)
-               ) do
+          dbg(data)
+
+          bounty_res =
+            case data.type do
+              :github ->
+                Bounties.create_bounty(
+                  %{
+                    creator: socket.assigns.current_user,
+                    owner: socket.assigns.current_org,
+                    amount: data.amount,
+                    ticket_ref: %{
+                      owner: data.ticket_ref.owner,
+                      repo: data.ticket_ref.repo,
+                      number: data.ticket_ref.number
+                    }
+                  },
+                  visibility: get_field(changeset, :visibility),
+                  shared_with: get_field(changeset, :shared_with)
+                )
+
+              :custom ->
+                Bounties.create_bounty(
+                  %{
+                    creator: socket.assigns.current_user,
+                    owner: socket.assigns.current_org,
+                    amount: data.amount
+                  },
+                  visibility: get_field(changeset, :visibility),
+                  shared_with: get_field(changeset, :shared_with)
+                )
+            end
+
+          case bounty_res do
             {:ok, _bounty} ->
               {:cont, put_flash(socket, :info, "Bounty created")}
 

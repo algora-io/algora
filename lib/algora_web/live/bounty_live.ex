@@ -268,8 +268,8 @@ defmodule AlgoraWeb.BountyLive do
           <.card>
             <.card_content>
               <div class="flex justify-between">
-                <div class="flex gap-4">
-                  <.avatar class="h-12 w-12 rounded-full">
+                <div class="flex gap-4 items-center">
+                  <.avatar class="h-20 w-20 rounded-2xl">
                     <.avatar_image src={@ticket.repository.user.avatar_url} />
                     <.avatar_fallback>
                       {String.first(@ticket.repository.user.provider_login)}
@@ -278,12 +278,12 @@ defmodule AlgoraWeb.BountyLive do
                   <div>
                     <.link
                       href={@ticket.url}
-                      class="text-xl font-semibold hover:underline"
+                      class="text-4xl font-semibold hover:underline"
                       target="_blank"
                     >
                       {@ticket.title}
                     </.link>
-                    <div class="text-sm text-muted-foreground">
+                    <div class="pt-2 text-2xl font-medium text-muted-foreground">
                       {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
                     </div>
                   </div>

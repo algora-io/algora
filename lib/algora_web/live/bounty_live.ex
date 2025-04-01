@@ -266,7 +266,7 @@ defmodule AlgoraWeb.BountyLive do
                bounty
                |> Bounty.settings_changeset(%{
                  shared_with: shared_with,
-                 deadline: DateTime.new!(data.deadline, ~T[00:00:00], "Etc/UTC")
+                 deadline: if(data.deadline, do: DateTime.new!(data.deadline, ~T[00:00:00], "Etc/UTC"))
                })
                |> Repo.update() do
           {:noreply,

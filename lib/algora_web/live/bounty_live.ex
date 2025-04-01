@@ -9,6 +9,7 @@ defmodule AlgoraWeb.BountyLive do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
   alias Algora.Repo
+  alias Algora.Util
   alias Algora.Workspace
 
   require Logger

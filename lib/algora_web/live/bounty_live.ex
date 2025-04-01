@@ -401,7 +401,7 @@ defmodule AlgoraWeb.BountyLive do
                           <div class="flex items-center gap-4">
                             <.avatar>
                               <.avatar_image src={user.avatar_url} />
-                              <.avatar_fallback>{String.first(user.name)}</.avatar_fallback>
+                              <.avatar_fallback>{Util.initials(user.name)}</.avatar_fallback>
                             </.avatar>
                             <div>
                               <p class="font-medium">{user.name}</p>
@@ -476,11 +476,22 @@ defmodule AlgoraWeb.BountyLive do
               Contributor chat
             </h2>
             <div class="relative flex -space-x-2">
-              <%= for participant <- @participants do %>
-                <.avatar>
-                  <.avatar_image src={participant.user.avatar_url} alt="Developer avatar" />
+              <%= for participant <- @participants |> Enum.take(3) do %>
+                <.avatar class="ring-4 ring-background">
+                  <.avatar_image
+                    src={participant.user.avatar_url}
+                    alt="Developer avatar"
+                    class="ring-2 ring-background"
+                  />
                   <.avatar_fallback>
                     {Algora.Util.initials(participant.user.name)}
+                  </.avatar_fallback>
+                </.avatar>
+              <% end %>
+              <%= if length(@participants) > 3 do %>
+                <.avatar class="ring-4 ring-background">
+                  <.avatar_fallback>
+                    +{length(@participants) - 3}
                   </.avatar_fallback>
                 </.avatar>
               <% end %>

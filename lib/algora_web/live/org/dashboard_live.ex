@@ -1428,6 +1428,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <img
             src={~p"/og/org/#{@current_org.handle}/home"}
             alt={@current_org.name}
+            loading="lazy"
             class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"
           />
         </div>

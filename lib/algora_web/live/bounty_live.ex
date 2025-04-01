@@ -382,6 +382,7 @@ defmodule AlgoraWeb.BountyLive do
                       src={~p"/og/0/bounties/#{@bounty.id}"}
                       alt={@bounty.ticket.title}
                       class="object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>

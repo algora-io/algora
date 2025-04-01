@@ -3,6 +3,7 @@ defmodule AlgoraWeb.BountyLive do
   use AlgoraWeb, :live_view
 
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Algora.Accounts
   alias Algora.Admin
@@ -65,13 +66,49 @@ defmodule AlgoraWeb.BountyLive do
     bounty =
       Bounty
       |> Repo.get!(bounty_id)
-      |> Repo.preload([
-        :owner,
-        :creator,
-        :transactions,
-        ticket: [repository: [:user]]
-      ])
+      |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
 
+    ticket_ref = %{
+      owner: bounty.ticket.repository.user.provider_login,
+      repo: bounty.ticket.repository.name,
+      number: bounty.ticket.number
+    }
+
+    socket
+    |> assign(:bounty, bounty)
+    |> assign(:ticket_ref, ticket_ref)
+    |> on_mount(bounty)
+  end
+
+  @impl true
+  def mount(%{"repo_owner" => repo_owner, "repo_name" => repo_name, "number" => number}, _session, socket) do
+    number = String.to_integer(number)
+
+    ticket_ref = %{owner: repo_owner, repo: repo_name, number: number}
+
+    bounty =
+      from(b in Bounty,
+        join: t in assoc(b, :ticket),
+        join: r in assoc(t, :repository),
+        join: u in assoc(r, :user),
+        where: u.provider == "github",
+        where: u.provider_login == ^repo_owner,
+        where: r.name == ^repo_name,
+        where: t.number == ^number,
+        # TODO: pool bounties
+        limit: 1,
+        order_by: [asc: b.inserted_at]
+      )
+      |> Repo.one()
+      |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
+
+    socket
+    |> assign(:bounty, bounty)
+    |> assign(:ticket_ref, ticket_ref)
+    |> on_mount(bounty)
+  end
+
+  defp on_mount(socket, bounty) do
     debits = Enum.filter(bounty.transactions, &(&1.type == :debit and &1.status == :succeeded))
 
     total_paid =
@@ -80,8 +117,6 @@ defmodule AlgoraWeb.BountyLive do
       |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
 
     ticket_body_html = Algora.Markdown.render(bounty.ticket.description)
-
-    contexts = contexts(bounty)
 
     reward_changeset =
       RewardBountyForm.changeset(%RewardBountyForm{}, %{
@@ -102,11 +137,9 @@ defmodule AlgoraWeb.BountyLive do
     {:ok,
      socket
      |> assign(:page_title, bounty.ticket.title)
-     |> assign(:bounty, bounty)
      |> assign(:ticket, bounty.ticket)
      |> assign(:total_paid, total_paid)
      |> assign(:ticket_body_html, ticket_body_html)
-     |> assign(:contexts, contexts)
      |> assign(:show_reward_modal, false)
      |> assign(:show_exclusive_modal, false)
      |> assign(:selected_context, nil)
@@ -125,11 +158,6 @@ defmodule AlgoraWeb.BountyLive do
   def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
     {:noreply, socket}
   end
-
-  # @impl true
-  # def handle_params(%{"context" => context_id}, _url, socket) do
-  #   {:noreply, socket |> assign_selected_context(context_id) |> assign_line_items(nil)}
-  # end
 
   @impl true
   def handle_params(_params, _url, socket) do
@@ -164,7 +192,7 @@ defmodule AlgoraWeb.BountyLive do
 
     {:noreply,
      socket
-     |> update(:messages, &(&1 ++ [message]))
+     |> Phoenix.Component.update(:messages, &(&1 ++ [message]))
      |> push_event("clear-input", %{selector: "#message-input"})}
   end
 
@@ -367,22 +395,38 @@ defmodule AlgoraWeb.BountyLive do
                       <.social_share_button
                         id="twitter-share-url"
                         icon="tabler-brand-x"
-                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                        value={
+                          url(
+                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
+                          )
+                        }
                       />
                       <.social_share_button
                         id="reddit-share-url"
                         icon="tabler-brand-reddit"
-                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                        value={
+                          url(
+                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
+                          )
+                        }
                       />
                       <.social_share_button
                         id="linkedin-share-url"
                         icon="tabler-brand-linkedin"
-                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                        value={
+                          url(
+                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
+                          )
+                        }
                       />
                       <.social_share_button
                         id="hackernews-share-url"
                         icon="tabler-brand-ycombinator"
-                        value={url(~p"/org/#{@bounty.owner.handle}/bounties/#{@bounty.id}")}
+                        value={
+                          url(
+                            ~p"/#{@ticket_ref.owner}/#{@ticket_ref.repo}/issues/#{@ticket_ref.number}"
+                          )
+                        }
                       />
                     </div>
                   </div>
@@ -635,16 +679,6 @@ defmodule AlgoraWeb.BountyLive do
     """
   end
 
-  # defp assign_selected_context(socket, context_id) do
-  #   case Enum.find(socket.assigns.contexts, &(&1.id == context_id)) do
-  #     nil ->
-  #       socket
-
-  #     context ->
-  #       assign(socket, :selected_context, context)
-  #   end
-  # end
-
   defp assign_recipient(socket, github_handle) do
     case Workspace.ensure_user(Admin.token!(), github_handle) do
       {:ok, recipient} ->
@@ -658,7 +692,7 @@ defmodule AlgoraWeb.BountyLive do
   defp assign_line_items(socket) do
     amount = calculate_final_amount(socket.assigns.reward_form.source)
     recipient = socket.assigns.recipient
-    ticket_ref = ticket_ref(socket)
+    ticket_ref = socket.assigns.ticket_ref
 
     line_items =
       if recipient do
@@ -685,20 +719,12 @@ defmodule AlgoraWeb.BountyLive do
     assign(socket, :line_items, line_items)
   end
 
-  defp ticket_ref(socket) do
-    %{
-      owner: socket.assigns.ticket.repository.user.provider_login,
-      repo: socket.assigns.ticket.repository.name,
-      number: socket.assigns.ticket.number
-    }
-  end
-
   defp reward_bounty(socket, bounty, changeset) do
     final_amount = calculate_final_amount(changeset)
 
     Bounties.reward_bounty(
       %{owner: bounty.owner, amount: final_amount, bounty_id: bounty.id, claims: []},
-      ticket_ref: ticket_ref(socket),
+      ticket_ref: socket.assigns.ticket_ref,
       recipient: socket.assigns.recipient
     )
   end
@@ -743,10 +769,6 @@ defmodule AlgoraWeb.BountyLive do
       />
     </.button>
     """
-  end
-
-  defp contexts(_bounty) do
-    Accounts.list_featured_developers()
   end
 
   defp close_drawers(socket) do

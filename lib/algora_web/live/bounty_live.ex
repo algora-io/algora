@@ -472,11 +472,7 @@ defmodule AlgoraWeb.BountyLive do
               Contributor chat
             </h2>
 
-            <.avatar_group
-              srcs={Enum.map(@participants, & &1.user.avatar_url)}
-              limit={4}
-              class="ring-4 ring-background"
-            />
+            <.avatar_group srcs={Enum.map(@participants, & &1.user.avatar_url)} />
           </div>
         </div>
 

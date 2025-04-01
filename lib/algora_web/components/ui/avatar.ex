@@ -54,13 +54,13 @@ defmodule AlgoraWeb.Components.UI.Avatar do
   attr :class, :string, default: nil
   attr :rest, :global
   attr :srcs, :list, default: []
-  attr :limit, :integer, default: 3
+  attr :limit, :integer, default: 4
 
   def avatar_group(assigns) do
     ~H"""
     <div class="relative flex -space-x-1">
       <%= for src <- @srcs |> Enum.take(@limit) do %>
-        <.avatar class={@class}>
+        <.avatar class={classes(["ring-4 ring-background", @class])}>
           <.avatar_image src={src} />
           <.avatar_fallback>
             {Algora.Util.initials(src)}
@@ -68,7 +68,7 @@ defmodule AlgoraWeb.Components.UI.Avatar do
         </.avatar>
       <% end %>
       <%= if length(@srcs) > @limit do %>
-        <.avatar class={@class}>
+        <.avatar class={classes(["ring-4 ring-background", @class])}>
           <.avatar_fallback>
             +{length(@srcs) - @limit}
           </.avatar_fallback>

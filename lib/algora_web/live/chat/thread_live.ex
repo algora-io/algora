@@ -3,7 +3,6 @@ defmodule AlgoraWeb.Chat.ThreadLive do
   use AlgoraWeb, :live_view
 
   alias Algora.Chat
-  alias Algora.Chat.Message
   alias Algora.Repo
 
   @impl true

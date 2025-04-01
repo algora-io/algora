@@ -2,7 +2,6 @@ defmodule Algora.Admin do
   @moduledoc false
   import Ecto.Query
 
-  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Activities.SendDiscord
   alias Algora.Bounties.Claim

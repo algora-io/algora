@@ -37,23 +37,25 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{type: "github"})))
      |> assign(:main_bounty_form_open?, false)
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)
      |> assign(:nav, nav_items(current_org.handle, current_user_role))
      |> assign(:contacts, contacts)
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
-     |> attach_hook(:form_toggle, :handle_event, &handle_form_toggle_event/3)}
+     |> attach_hook(:handle_event, :handle_event, &handle_event/3)}
   end
 
   # TODO: handle submit
   # TODO: handle validate
 
-  defp handle_form_toggle_event("create_bounty_main" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+  defp handle_event("create_bounty_main" = event, %{"bounty_form" => params} = unsigned_params, socket) do
+    dbg(params)
+
     if socket.assigns.has_fresh_token? do
       changeset = %BountyForm{} |> BountyForm.changeset(params) |> Map.put(:action, :validate)
-
+      dbg(changeset)
       amount = get_field(changeset, :amount)
       ticket_ref = get_field(changeset, :ticket_ref)
 
@@ -77,7 +79,7 @@ defmodule AlgoraWeb.Org.Nav do
         {:cont, put_flash(socket, :info, "Bounty created")}
       else
         %{valid?: false} ->
-          {:cont, assign(socket, :bounty_form, to_form(changeset))}
+          {:cont, assign(socket, :main_bounty_form, to_form(changeset))}
 
         {:error, :already_exists} ->
           {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}
@@ -86,6 +88,7 @@ defmodule AlgoraWeb.Org.Nav do
           {:cont, put_flash(socket, :error, "Something went wrong")}
       end
     else
+      # TODO: handle pending action
       {:cont,
        socket
        |> assign(:pending_action, {event, unsigned_params})
@@ -93,11 +96,11 @@ defmodule AlgoraWeb.Org.Nav do
     end
   end
 
-  defp handle_form_toggle_event("open_main_bounty_form", _params, socket) do
+  defp handle_event("open_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, true)}
   end
 
-  defp handle_form_toggle_event("close_main_bounty_form", _params, socket) do
+  defp handle_event("close_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, false)}
   end
 

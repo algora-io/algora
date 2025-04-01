@@ -36,12 +36,13 @@ defmodule AlgoraWeb.Forms.BountyForm do
     |> validate_type_fields()
     |> Validations.validate_money_positive(:amount)
     |> Validations.validate_ticket_ref(:url, :ticket_ref)
-    |> validate_subset(:type, Enum.map(type_options(), &elem(&1, 1)))
+
+    # |> validate_subset(:type, Enum.map(type_options(), &elem(&1, 1)))
   end
 
   defp validate_type_fields(changeset) do
     case get_field(changeset, :type) do
-      "custom" -> validate_required(changeset, [:title, :description])
+      :custom -> validate_required(changeset, [:title])
       _ -> validate_required(changeset, [:url])
     end
   end
@@ -92,10 +93,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
           <% end %>
         </div>
 
-        <div
-          data-tab="github"
-          class={if to_string(get_field(@form.source, :type)) != "github", do: "hidden"}
-        >
+        <div data-tab="github" class={if get_field(@form.source, :type) != :github, do: "hidden"}>
           <.input
             label="URL"
             field={@form[:url]}
@@ -105,12 +103,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
 
         <div
           data-tab="custom"
-          class={
-            classes([
-              to_string(get_field(@form.source, :type)) != "custom" && "hidden",
-              "space-y-4"
-            ])
-          }
+          class={classes([get_field(@form.source, :type) != :custom && "hidden", "space-y-4"])}
         >
           <.input label="Title" field={@form[:title]} placeholder="Brief description of the bounty" />
           <.input

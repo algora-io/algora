@@ -314,14 +314,20 @@ defmodule AlgoraWeb.BountyLive do
                   <div>
                     <.link
                       href={@ticket.url}
-                      class="text-xl sm:text-3xl font-semibold hover:underline"
                       target="_blank"
+                      rel="noopener"
+                      class="block text-xl sm:text-3xl font-semibold text-foreground/90 hover:underline"
                     >
                       {@ticket.title}
                     </.link>
-                    <div class="pt-1 text-base sm:text-xl font-medium text-muted-foreground">
+                    <.link
+                      href={@ticket.url}
+                      target="_blank"
+                      rel="noopener"
+                      class="block text-base font-display sm:text-xl font-medium text-muted-foreground hover:underline"
+                    >
                       {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
-                    </div>
+                    </.link>
                   </div>
                 </div>
                 <div class="flex flex-col gap-4">

@@ -26,7 +26,7 @@ defmodule AlgoraWeb.BountyLive do
 
     @primary_key false
     embedded_schema do
-      field :amount, :decimal
+      field :amount, Algora.Types.USD
       field :github_handle, :string
       field :tip_percentage, :decimal
     end
@@ -36,7 +36,7 @@ defmodule AlgoraWeb.BountyLive do
       |> cast(attrs, [:amount, :tip_percentage, :github_handle])
       |> validate_required([:amount, :github_handle])
       |> validate_number(:tip_percentage, greater_than_or_equal_to: 0)
-      |> validate_number(:amount, greater_than: 0)
+      |> Algora.Validations.validate_money_positive(:amount)
     end
   end
 
@@ -86,7 +86,7 @@ defmodule AlgoraWeb.BountyLive do
     reward_changeset =
       RewardBountyForm.changeset(%RewardBountyForm{}, %{
         tip_percentage: 0,
-        amount: Money.to_decimal(bounty.amount)
+        amount: bounty.amount
       })
 
     exclusive_changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, %{})
@@ -697,12 +697,7 @@ defmodule AlgoraWeb.BountyLive do
     final_amount = calculate_final_amount(changeset)
 
     Bounties.reward_bounty(
-      %{
-        owner: bounty.owner,
-        amount: final_amount,
-        bounty_id: bounty.id,
-        claims: []
-      },
+      %{owner: bounty.owner, amount: final_amount, bounty_id: bounty.id, claims: []},
       ticket_ref: ticket_ref(socket),
       recipient: socket.assigns.recipient
     )
@@ -710,10 +705,10 @@ defmodule AlgoraWeb.BountyLive do
 
   defp calculate_final_amount(data_or_changeset) do
     tip_percentage = get_field(data_or_changeset, :tip_percentage) || Decimal.new(0)
-    amount = get_field(data_or_changeset, :amount) || Decimal.new(0)
+    amount = get_field(data_or_changeset, :amount) || Money.zero(:USD, no_fraction_if_integer: true)
 
     multiplier = tip_percentage |> Decimal.div(100) |> Decimal.add(1)
-    amount |> Money.new!(:USD) |> Money.mult!(multiplier)
+    Money.mult!(amount, multiplier)
   end
 
   defp social_share_button(assigns) do

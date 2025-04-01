@@ -598,7 +598,10 @@ let csrfToken = document
   .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: { ...Hooks, ...getHooks(Components) },
-  params: { _csrf_token: csrfToken },
+  params: {
+    _csrf_token: csrfToken,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  },
   dom: {
     onNodeAdded(node) {
       if (node instanceof HTMLElement && node.autofocus) {

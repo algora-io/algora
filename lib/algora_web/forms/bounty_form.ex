@@ -36,8 +36,6 @@ defmodule AlgoraWeb.Forms.BountyForm do
     |> validate_type_fields()
     |> Validations.validate_money_positive(:amount)
     |> Validations.validate_ticket_ref(:url, :ticket_ref)
-
-    # |> validate_subset(:type, Enum.map(type_options(), &elem(&1, 1)))
   end
 
   defp validate_type_fields(changeset) do
@@ -51,18 +49,6 @@ defmodule AlgoraWeb.Forms.BountyForm do
     ~H"""
     <.form id="main-bounty-form" for={@form} phx-submit="create_bounty_main">
       <div class="space-y-4">
-        <%!-- <.input type="hidden" name="bounty_form[visibility]" value="exclusive" /> --%>
-        <%!-- <.input
-              type="hidden"
-              name="bounty_form[shared_with][]"
-              value={
-                case @selected_developer do
-                  %User{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
-                  %User{id: id} -> [id]
-                end
-              }
-            /> --%>
-
         <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="main-bounty-form-tabs">
           <%= for {label, value} <- type_options() do %>
             <label class={[

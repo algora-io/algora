@@ -50,79 +50,68 @@ defmodule AlgoraWeb.Org.Nav do
      |> attach_hook(:handle_event, :handle_event, &handle_event/3)}
   end
 
-  # TODO: handle submit
-  # TODO: handle validate
+  defp handle_event("create_bounty_main" = event, %{"bounty_form" => params}, socket) do
+    changeset = BountyForm.changeset(%BountyForm{}, params)
 
-  defp handle_event("create_bounty_main" = event, %{"bounty_form" => params} = unsigned_params, socket) do
-    if socket.assigns.has_fresh_token? do
-      changeset = BountyForm.changeset(%BountyForm{}, params)
+    case apply_action(changeset, :save) do
+      {:ok, data} ->
+        dbg(data)
 
-      case apply_action(changeset, :save) do
-        {:ok, data} ->
-          dbg(data)
+        bounty_res =
+          case data.type do
+            :github ->
+              Bounties.create_bounty(
+                %{
+                  creator: socket.assigns.current_user,
+                  owner: socket.assigns.current_org,
+                  amount: data.amount,
+                  ticket_ref: %{
+                    owner: data.ticket_ref.owner,
+                    repo: data.ticket_ref.repo,
+                    number: data.ticket_ref.number
+                  }
+                },
+                visibility: get_field(changeset, :visibility),
+                shared_with: get_field(changeset, :shared_with)
+              )
 
-          bounty_res =
-            case data.type do
-              :github ->
-                Bounties.create_bounty(
-                  %{
-                    creator: socket.assigns.current_user,
-                    owner: socket.assigns.current_org,
-                    amount: data.amount,
-                    ticket_ref: %{
-                      owner: data.ticket_ref.owner,
-                      repo: data.ticket_ref.repo,
-                      number: data.ticket_ref.number
-                    }
-                  },
-                  visibility: get_field(changeset, :visibility),
-                  shared_with: get_field(changeset, :shared_with)
-                )
-
-              :custom ->
-                Bounties.create_bounty(
-                  %{
-                    creator: socket.assigns.current_user,
-                    owner: socket.assigns.current_org,
-                    amount: data.amount,
-                    title: data.title,
-                    description: data.description
-                  },
-                  visibility: get_field(changeset, :visibility),
-                  shared_with: get_field(changeset, :shared_with)
-                )
-            end
-
-          case bounty_res do
-            {:ok, bounty} ->
-              to =
-                case data.type do
-                  :github ->
-                    ~p"/#{data.ticket_ref.owner}/#{data.ticket_ref.repo}/issues/#{data.ticket_ref.number}"
-
-                  :custom ->
-                    ~p"/org/#{socket.assigns.current_org.handle}/bounties/#{bounty.id}"
-                end
-
-              {:cont, redirect(socket, to: to)}
-
-            {:error, :already_exists} ->
-              {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}
-
-            {:error, reason} ->
-              Logger.error("Failed to create bounty: #{inspect(reason)}")
-              {:cont, put_flash(socket, :error, "Something went wrong")}
+            :custom ->
+              Bounties.create_bounty(
+                %{
+                  creator: socket.assigns.current_user,
+                  owner: socket.assigns.current_org,
+                  amount: data.amount,
+                  title: data.title,
+                  description: data.description
+                },
+                visibility: get_field(changeset, :visibility),
+                shared_with: get_field(changeset, :shared_with)
+              )
           end
 
-        {:error, changeset} ->
-          {:cont, assign(socket, :main_bounty_form, to_form(changeset))}
-      end
-    else
-      # TODO: handle pending action
-      {:cont,
-       socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+        case bounty_res do
+          {:ok, bounty} ->
+            to =
+              case data.type do
+                :github ->
+                  ~p"/#{data.ticket_ref.owner}/#{data.ticket_ref.repo}/issues/#{data.ticket_ref.number}"
+
+                :custom ->
+                  ~p"/org/#{socket.assigns.current_org.handle}/bounties/#{bounty.id}"
+              end
+
+            {:cont, redirect(socket, to: to)}
+
+          {:error, :already_exists} ->
+            {:cont, put_flash(socket, :warning, "You already have a bounty for this ticket")}
+
+          {:error, reason} ->
+            Logger.error("Failed to create bounty: #{inspect(reason)}")
+            {:cont, put_flash(socket, :error, "Something went wrong")}
+        end
+
+      {:error, changeset} ->
+        {:cont, assign(socket, :main_bounty_form, to_form(changeset))}
     end
   end
 

@@ -189,6 +189,24 @@
           </.button>
         </ul>
       <% end %>
+      <%= if main_bounty_form = Map.get(assigns, :main_bounty_form) do %>
+        <.button phx-click="open_main_bounty_form">Create new bounty</.button>
+        <.drawer
+          show={@main_bounty_form_open?}
+          direction="right"
+          on_cancel="close_main_bounty_form"
+        >
+          <.drawer_header>
+            <.drawer_title>Create new bounty</.drawer_title>
+            <.drawer_description>
+              Create and fund a bounty for an issue
+            </.drawer_description>
+          </.drawer_header>
+          <.drawer_content class="mt-4">
+            <AlgoraWeb.Forms.BountyForm.bounty_form main_bounty_form={main_bounty_form} />
+          </.drawer_content>
+        </.drawer>
+      <% end %>
       <div class="ml-auto flex items-center gap-x-6">
         <.link
           class="group w-fit outline-none"

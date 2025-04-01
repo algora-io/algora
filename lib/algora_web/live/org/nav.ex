@@ -5,6 +5,7 @@ defmodule AlgoraWeb.Org.Nav do
   import Phoenix.LiveView
 
   alias Algora.Organizations
+  alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.OrgAuth
 
   def on_mount(:default, %{"org_handle" => org_handle} = params, _session, socket) do
@@ -34,12 +35,24 @@ defmodule AlgoraWeb.Org.Nav do
     {:cont,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:main_bounty_form_open?, false)
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)
      |> assign(:nav, nav_items(current_org.handle, current_user_role))
      |> assign(:contacts, contacts)
-     |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+     |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
+     |> attach_hook(:form_toggle, :handle_event, &handle_form_toggle_event/3)}
+  end
+
+  def handle_form_toggle_event("open_main_bounty_form", _params, socket) do
+    dbg("open_main_bounty_form")
+    {:cont, assign(socket, :main_bounty_form_open?, true)}
+  end
+
+  def handle_form_toggle_event("close_main_bounty_form", _params, socket) do
+    dbg("close_main_bounty_form")
+    {:cont, assign(socket, :main_bounty_form_open?, false)}
   end
 
   defp handle_active_tab_params(_params, _url, socket) do

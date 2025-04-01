@@ -131,6 +131,10 @@ defmodule AlgoraWeb.Org.TransactionsLive do
     end
   end
 
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
   defp assign_transactions(socket) do
     transactions =
       Payments.list_transactions(

@@ -231,6 +231,11 @@ defmodule AlgoraWeb.Org.HomeLive do
     """
   end
 
+  @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
   defp social_links do
     [
       {:website, "tabler-world"},

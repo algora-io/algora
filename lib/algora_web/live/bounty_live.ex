@@ -6,11 +6,13 @@ defmodule AlgoraWeb.BountyLive do
   import Ecto.Query
 
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Admin
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
   alias Algora.Chat
+  alias Algora.Organizations.Member
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
@@ -68,15 +70,22 @@ defmodule AlgoraWeb.BountyLive do
       |> Repo.get!(bounty_id)
       |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
 
-    ticket_ref = %{
-      owner: bounty.ticket.repository.user.provider_login,
-      repo: bounty.ticket.repository.name,
-      number: bounty.ticket.number
-    }
+    {host, ticket_ref} =
+      if bounty.ticket.repository do
+        {bounty.ticket.repository.user,
+         %{
+           owner: bounty.ticket.repository.user.provider_login,
+           repo: bounty.ticket.repository.name,
+           number: bounty.ticket.number
+         }}
+      else
+        {bounty.owner, nil}
+      end
 
     socket
     |> assign(:bounty, bounty)
     |> assign(:ticket_ref, ticket_ref)
+    |> assign(:host, host)
     |> on_mount(bounty)
   end
 
@@ -95,9 +104,8 @@ defmodule AlgoraWeb.BountyLive do
         where: u.provider_login == ^repo_owner,
         where: r.name == ^repo_name,
         where: t.number == ^number,
-        # TODO: pool bounties
-        limit: 1,
-        order_by: [asc: b.inserted_at]
+        order_by: fragment("CASE WHEN ? = ? THEN 0 ELSE 1 END", u.id, ^socket.assigns.current_org.id),
+        limit: 1
       )
       |> Repo.one()
       |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
@@ -105,6 +113,7 @@ defmodule AlgoraWeb.BountyLive do
     socket
     |> assign(:bounty, bounty)
     |> assign(:ticket_ref, ticket_ref)
+    |> assign(:host, bounty.ticket.repository.user)
     |> on_mount(bounty)
   end
 
@@ -135,12 +144,17 @@ defmodule AlgoraWeb.BountyLive do
     end
 
     share_url =
-      url(
-        ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
-      )
+      if socket.assigns.ticket_ref do
+        url(
+          ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
+        )
+      else
+        url(~p"/org/#{socket.assigns.bounty.owner.handle}/bounties/#{socket.assigns.bounty.id}")
+      end
 
     {:ok,
      socket
+     |> assign(:can_create_bounty, Member.can_create_bounty?(socket.assigns.current_user_role))
      |> assign(:share_url, share_url)
      |> assign(:page_title, bounty.ticket.title)
      |> assign(:ticket, bounty.ticket)
@@ -296,6 +310,11 @@ defmodule AlgoraWeb.BountyLive do
   end
 
   @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class={classes(["xl:flex p-4", if(!@current_user, do: "pb-16 xl:pb-24")])}>
@@ -306,9 +325,9 @@ defmodule AlgoraWeb.BountyLive do
               <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
                 <div class="flex flex-col gap-4 xl:flex-row xl:items-center">
                   <.avatar class="h-12 w-12 sm:h-20 sm:w-20 rounded-lg sm:rounded-2xl">
-                    <.avatar_image src={@ticket.repository.user.avatar_url} />
+                    <.avatar_image src={@host.avatar_url} />
                     <.avatar_fallback>
-                      {Util.initials(@ticket.repository.user.provider_login)}
+                      {Util.initials(User.handle(@host))}
                     </.avatar_fallback>
                   </.avatar>
                   <div>
@@ -326,7 +345,7 @@ defmodule AlgoraWeb.BountyLive do
                       rel="noopener"
                       class="block text-base font-display sm:text-xl font-medium text-muted-foreground hover:underline"
                     >
-                      {@ticket.repository.user.provider_login}/{@ticket.repository.name}#{@ticket.number}
+                      {@host.provider_login}<span :if={@ticket.repository}>/{@ticket.repository.name}#{@ticket.number}</span>
                     </.link>
                   </div>
                 </div>
@@ -334,7 +353,7 @@ defmodule AlgoraWeb.BountyLive do
                   <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
                     {Money.to_string!(@bounty.amount)}
                   </div>
-                  <.button phx-click="reward">
+                  <.button :if={@can_create_bounty} phx-click="reward">
                     Reward
                   </.button>
                 </div>
@@ -377,6 +396,7 @@ defmodule AlgoraWeb.BountyLive do
                       src={~p"/og/0/bounties/#{@bounty.id}"}
                       alt={@bounty.ticket.title}
                       class="object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -394,6 +414,7 @@ defmodule AlgoraWeb.BountyLive do
                         <%= if @bounty.deadline do %>
                           Expires on {Calendar.strftime(@bounty.deadline, "%b %d, %Y")}
                           <.button
+                            :if={@can_create_bounty}
                             variant="ghost"
                             size="icon-sm"
                             phx-click="exclusive"
@@ -406,7 +427,7 @@ defmodule AlgoraWeb.BountyLive do
                           </.button>
                         <% else %>
                           <span
-                            :if={@exclusives != []}
+                            :if={@exclusives != [] and @can_create_bounty}
                             class="underline cursor-pointer"
                             phx-click="exclusive"
                           >
@@ -415,9 +436,17 @@ defmodule AlgoraWeb.BountyLive do
                         <% end %>
                       </span>
                     </div>
-                    <.button variant="secondary" phx-click="exclusive" class="mt-3">
+                    <.button
+                      :if={@can_create_bounty}
+                      variant="secondary"
+                      phx-click="exclusive"
+                      class="mt-3"
+                    >
                       <.icon name="tabler-user-plus" class="size-5 mr-2 -ml-1" /> Add
                     </.button>
+                    <div :if={@exclusives == [] and !@can_create_bounty} class="pt-2">
+                      Open to everyone
+                    </div>
                   </div>
                   <div class="flex flex-col gap-4">
                     <%= for user <- @exclusives do %>

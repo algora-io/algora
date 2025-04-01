@@ -11,15 +11,22 @@ defmodule AlgoraWeb.OG.BountyLive do
       |> Repo.get!(id)
       |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
 
-    ticket_ref = %{
-      owner: bounty.ticket.repository.user.provider_login,
-      repo: bounty.ticket.repository.name,
-      number: bounty.ticket.number
-    }
+    {host, ticket_ref} =
+      if bounty.ticket.repository do
+        {bounty.ticket.repository.user,
+         %{
+           owner: bounty.ticket.repository.user.provider_login,
+           repo: bounty.ticket.repository.name,
+           number: bounty.ticket.number
+         }}
+      else
+        {bounty.owner, nil}
+      end
 
     {:ok,
      socket
      |> assign(:bounty, bounty)
+     |> assign(:host, host)
      |> assign(:ticket_ref, ticket_ref)}
   end
 
@@ -29,20 +36,19 @@ defmodule AlgoraWeb.OG.BountyLive do
       <div class="absolute left-[3rem] top-8 text-2xl font-display font-medium text-muted-foreground">
         algora.io
       </div>
-      <div class="absolute right-8 top-8 font-display text-2xl font-medium text-muted-foreground">
+      <div
+        :if={@bounty.ticket.repository}
+        class="absolute right-8 top-8 font-display text-2xl font-medium text-muted-foreground"
+      >
         {@bounty.ticket.repository.name}#{@bounty.ticket.number}
       </div>
       <div class="flex flex-col items-center text-center">
         <div class="relative">
-          <img
-            src={@bounty.ticket.repository.user.avatar_url}
-            class="relative h-40 w-40 rounded-full bg-black"
-            alt="Algora"
-          />
+          <img src={@host.avatar_url} class="relative h-40 w-40 rounded-full bg-black" alt="Algora" />
         </div>
         <div class="mt-4 flex flex-col items-center font-display">
           <p class="text-7xl font-semibold text-foreground">
-            {@bounty.ticket.repository.user.provider_login}
+            {@host.provider_login}
           </p>
           <h1 class="mt-4 text-8xl font-extrabold tracking-tight text-white">
             <span class="text-emerald-400">

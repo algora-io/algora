@@ -34,4 +34,6 @@ defmodule Algora.Organizations.Member do
       join: o in assoc(m, :org),
       where: o.id == ^org_id
   end
+
+  def can_create_bounty?(role), do: role in [:admin, :mod]
 end

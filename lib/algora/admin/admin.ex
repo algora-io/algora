@@ -29,11 +29,7 @@ defmodule Algora.Admin do
   end
 
   def magic(identifier, return_to \\ nil) do
-    if String.match?(identifier, ~r/@/) do
-      magic(:email, identifier, return_to)
-    else
-      magic(:handle, identifier, return_to)
-    end
+    magic(if(String.match?(identifier, ~r/@/), do: :email, else: :handle), identifier, return_to)
   end
 
   def screenshot(path), do: AlgoraWeb.OGImageController.take_and_upload_screenshot([path])

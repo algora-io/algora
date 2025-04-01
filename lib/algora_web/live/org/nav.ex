@@ -61,8 +61,6 @@ defmodule AlgoraWeb.Org.Nav do
 
     case apply_action(changeset, :save) do
       {:ok, data} ->
-        dbg(data)
-
         bounty_res =
           case data.type do
             :github ->

@@ -5,6 +5,7 @@ defmodule AlgoraWeb.BountyLive do
   import Ecto.Changeset
 
   alias Algora.Accounts
+  alias Algora.Admin
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
@@ -322,8 +323,8 @@ defmodule AlgoraWeb.BountyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex">
-      <.scroll_area class="h-[calc(100vh-64px)] flex-1 p-4 pr-6">
+    <div class={classes(["flex p-4", if(!@current_user, do: "pb-16 sm:pb-24")])}>
+      <.scroll_area class="h-[calc(100vh-96px)] flex-1 pr-6">
         <div class="space-y-4">
           <.card>
             <.card_content>
@@ -332,7 +333,7 @@ defmodule AlgoraWeb.BountyLive do
                   <.avatar class="h-20 w-20 rounded-2xl">
                     <.avatar_image src={@ticket.repository.user.avatar_url} />
                     <.avatar_fallback>
-                      {String.first(@ticket.repository.user.provider_login)}
+                      {Util.initials(@ticket.repository.user.provider_login)}
                     </.avatar_fallback>
                   </.avatar>
                   <div>
@@ -468,7 +469,7 @@ defmodule AlgoraWeb.BountyLive do
         </div>
       </.scroll_area>
 
-      <div class="h-[calc(100vh-64px)] w-[400px] flex flex-none flex-col border-l border-border">
+      <div class="h-[calc(100vh-96px)] w-[400px] flex flex-none flex-col border rounded-xl">
         <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div class="flex justify-between items-center w-full">
             <h2 class="text-lg font-semibold">
@@ -763,10 +764,8 @@ defmodule AlgoraWeb.BountyLive do
   defp assign_exclusives(socket, shared_with) do
     exclusives =
       Enum.flat_map(shared_with, fn provider_id ->
-        with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
-             {:ok, user} <- Workspace.ensure_user_by_provider_id(token, provider_id) do
-          [user]
-        else
+        case Workspace.ensure_user_by_provider_id(Admin.token!(), provider_id) do
+          {:ok, user} -> [user]
           _ -> []
         end
       end)

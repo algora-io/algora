@@ -330,60 +330,6 @@ defmodule AlgoraWeb.BountyLive do
             </.card_content>
           </.card>
           <div class="grid grid-cols-2 gap-4">
-            <.card class="col">
-              <.card_content>
-                <div class="flex items-center justify-between">
-                  <div>
-                    <.card_title>
-                      Exclusives
-                    </.card_title>
-                    <div class="flex items-center">
-                      <span class="text-sm text-muted-foreground">
-                        <%= if @bounty.deadline do %>
-                          Expires on {Calendar.strftime(@bounty.deadline, "%b %d, %Y")}
-                          <.button
-                            variant="ghost"
-                            size="icon-sm"
-                            phx-click="exclusive"
-                            class="group h-6 w-6"
-                          >
-                            <.icon
-                              name="tabler-pencil"
-                              class="h-4 w-4 text-muted-foreground group-hover:text-foreground"
-                            />
-                          </.button>
-                        <% else %>
-                          <span class="underline cursor-pointer" phx-click="exclusive">
-                            Add a deadline
-                          </span>
-                        <% end %>
-                      </span>
-                    </div>
-                    <.button variant="secondary" phx-click="exclusive" class="mt-3">
-                      <.icon name="tabler-user-plus" class="size-5 mr-2 -ml-1" /> Add
-                    </.button>
-                  </div>
-                  <div class="flex flex-col gap-4">
-                    <%= for user <- @exclusives do %>
-                      <div class="flex justify-between text-sm">
-                        <span>
-                          <div class="flex items-center gap-4">
-                            <.avatar>
-                              <.avatar_image src={user.avatar_url} />
-                              <.avatar_fallback>{Util.initials(user.name)}</.avatar_fallback>
-                            </.avatar>
-                            <div>
-                              <p class="font-medium">{user.name}</p>
-                              <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
-                            </div>
-                          </div>
-                        </span>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
-              </.card_content>
-            </.card>
             <.card>
               <.card_content>
                 <div class="flex items-center justify-between">
@@ -435,6 +381,60 @@ defmodule AlgoraWeb.BountyLive do
                     alt={@bounty.ticket.title}
                     class="mt-3 w-full aspect-[1200/630] max-w-[11rem] rounded-lg ring-1 ring-input bg-black"
                   />
+                </div>
+              </.card_content>
+            </.card>
+            <.card class="col">
+              <.card_content>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <.card_title>
+                      Exclusives
+                    </.card_title>
+                    <div class="flex items-center">
+                      <span class="text-sm text-muted-foreground">
+                        <%= if @bounty.deadline do %>
+                          Expires on {Calendar.strftime(@bounty.deadline, "%b %d, %Y")}
+                          <.button
+                            variant="ghost"
+                            size="icon-sm"
+                            phx-click="exclusive"
+                            class="group h-6 w-6"
+                          >
+                            <.icon
+                              name="tabler-pencil"
+                              class="h-4 w-4 text-muted-foreground group-hover:text-foreground"
+                            />
+                          </.button>
+                        <% else %>
+                          <span class="underline cursor-pointer" phx-click="exclusive">
+                            Add a deadline
+                          </span>
+                        <% end %>
+                      </span>
+                    </div>
+                    <.button variant="secondary" phx-click="exclusive" class="mt-3">
+                      <.icon name="tabler-user-plus" class="size-5 mr-2 -ml-1" /> Add
+                    </.button>
+                  </div>
+                  <div class="flex flex-col gap-4">
+                    <%= for user <- @exclusives do %>
+                      <div class="flex justify-between text-sm">
+                        <span>
+                          <div class="flex items-center gap-4">
+                            <.avatar>
+                              <.avatar_image src={user.avatar_url} />
+                              <.avatar_fallback>{Util.initials(user.name)}</.avatar_fallback>
+                            </.avatar>
+                            <div>
+                              <p class="font-medium">{user.name}</p>
+                              <p class="text-sm text-muted-foreground">@{user.provider_login}</p>
+                            </div>
+                          </div>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
                 </div>
               </.card_content>
             </.card>

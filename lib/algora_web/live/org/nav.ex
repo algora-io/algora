@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Org.Nav do
 
   alias Algora.Bounties
   alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.OrgAuth
 
@@ -37,10 +38,15 @@ defmodule AlgoraWeb.Org.Nav do
     #     }
     #   end)
 
+    main_bounty_form =
+      if Member.can_create_bounty?(current_user_role) do
+        to_form(BountyForm.changeset(%BountyForm{}, %{}))
+      end
+
     {:cont,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:main_bounty_form, main_bounty_form)
      |> assign(:main_bounty_form_open?, false)
      |> assign(:current_org, current_org)
      |> assign(:current_user_role, current_user_role)
@@ -50,7 +56,7 @@ defmodule AlgoraWeb.Org.Nav do
      |> attach_hook(:handle_event, :handle_event, &handle_event/3)}
   end
 
-  defp handle_event("create_bounty_main" = event, %{"bounty_form" => params}, socket) do
+  defp handle_event("create_bounty_main", %{"bounty_form" => params}, socket) do
     changeset = BountyForm.changeset(%BountyForm{}, params)
 
     case apply_action(changeset, :save) do
@@ -121,6 +127,10 @@ defmodule AlgoraWeb.Org.Nav do
 
   defp handle_event("close_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, false)}
+  end
+
+  defp handle_event(_event, _params, socket) do
+    {:cont, socket}
   end
 
   defp handle_active_tab_params(_params, _url, socket) do

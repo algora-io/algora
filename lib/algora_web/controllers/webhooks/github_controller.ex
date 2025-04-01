@@ -338,7 +338,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       end
 
     # TODO: community bounties?
-    with {:ok, role} when role in [:admin, :mod] <- authorize_user(webhook),
+    with {:ok, role} <- authorize_user(webhook),
+         true <- Member.can_create_bounty?(role),
          {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
          {:ok, installation} <-
            Workspace.fetch_installation_by(
@@ -364,7 +365,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         command_source: command_source
       )
     else
-      {:ok, _role} ->
+      false ->
         {:error, :unauthorized}
 
       {:error, _reason} = error ->
@@ -382,114 +383,114 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       number: payload["issue"]["number"]
     }
 
-    case authorize_user(webhook) do
-      {:ok, role} when role in [:admin, :mod] ->
-        installation =
-          Repo.get_by(Installation,
-            provider: "github",
-            provider_id: to_string(payload["installation"]["id"])
-          )
+    with {:ok, role} <- authorize_user(webhook),
+         true <- Member.can_create_bounty?(role) do
+      installation =
+        Repo.get_by(Installation,
+          provider: "github",
+          provider_id: to_string(payload["installation"]["id"])
+        )
 
-        customer =
-          Repo.one(
-            from c in Customer,
-              left_join: p in assoc(c, :default_payment_method),
-              where: c.user_id == ^installation.connected_user_id,
-              select_merge: %{default_payment_method: p}
-          )
+      customer =
+        Repo.one(
+          from c in Customer,
+            left_join: p in assoc(c, :default_payment_method),
+            where: c.user_id == ^installation.connected_user_id,
+            select_merge: %{default_payment_method: p}
+        )
 
-        {:ok, recipient} = get_tip_recipient(webhook, {:tip, args})
+      {:ok, recipient} = get_tip_recipient(webhook, {:tip, args})
 
-        {:ok, token} = Github.get_installation_token(payload["installation"]["id"])
+      {:ok, token} = Github.get_installation_token(payload["installation"]["id"])
 
-        {:ok, ticket} =
-          Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number)
+      {:ok, ticket} =
+        Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number)
 
-        autopay_cooldown_expired? = fn ->
-          from(t in Tip,
-            join: recipient in assoc(t, :recipient),
-            where: recipient.provider_login == ^recipient,
-            where: t.ticket_id == ^ticket.id,
-            where: t.status != :cancelled,
-            order_by: [desc: t.inserted_at],
-            limit: 1
-          )
-          |> Repo.one()
-          |> case do
-            nil ->
-              true
+      autopay_cooldown_expired? = fn ->
+        from(t in Tip,
+          join: recipient in assoc(t, :recipient),
+          where: recipient.provider_login == ^recipient,
+          where: t.ticket_id == ^ticket.id,
+          where: t.status != :cancelled,
+          order_by: [desc: t.inserted_at],
+          limit: 1
+        )
+        |> Repo.one()
+        |> case do
+          nil ->
+            true
 
-            tip ->
-              DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > :timer.hours(1)
-          end
+          tip ->
+            DateTime.diff(DateTime.utc_now(), tip.inserted_at, :millisecond) > :timer.hours(1)
         end
+      end
 
-        autopayable? =
-          not is_nil(installation) and
-            not is_nil(customer) and
-            not is_nil(customer.default_payment_method) and
-            not is_nil(recipient) and
-            not is_nil(amount) and
-            autopay_cooldown_expired?.()
+      autopayable? =
+        not is_nil(installation) and
+          not is_nil(customer) and
+          not is_nil(customer.default_payment_method) and
+          not is_nil(recipient) and
+          not is_nil(amount) and
+          autopay_cooldown_expired?.()
 
-        autopay_result =
-          if autopayable? do
-            with {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
-                 {:ok, creator} <-
-                   Workspace.ensure_user(token, payload["repository"]["owner"]["login"]),
-                 {:ok, recipient} <- Workspace.ensure_user(token, recipient),
-                 {:ok, tip} <-
-                   Bounties.do_create_tip(
-                     %{creator: creator, owner: owner, recipient: recipient, amount: amount},
-                     ticket_ref: ticket_ref,
-                     installation_id: payload["installation"]["id"]
-                   ),
-                 {:ok, invoice} <-
-                   Bounties.create_invoice(
-                     %{
-                       owner: owner,
-                       amount: amount,
-                       idempotency_key: "tip-#{recipient.provider_login}-#{webhook.delivery}"
-                     },
-                     ticket_ref: ticket_ref,
-                     tip_id: tip.id,
-                     recipient: recipient
-                   ),
-                 {:ok, _invoice} <-
-                   Invoice.pay(invoice, %{payment_method: customer.default_payment_method.provider_id, off_session: true}) do
+      autopay_result =
+        if autopayable? do
+          with {:ok, owner} <- Accounts.fetch_user_by(id: installation.connected_user_id),
+               {:ok, creator} <-
+                 Workspace.ensure_user(token, payload["repository"]["owner"]["login"]),
+               {:ok, recipient} <- Workspace.ensure_user(token, recipient),
+               {:ok, tip} <-
+                 Bounties.do_create_tip(
+                   %{creator: creator, owner: owner, recipient: recipient, amount: amount},
+                   ticket_ref: ticket_ref,
+                   installation_id: payload["installation"]["id"]
+                 ),
+               {:ok, invoice} <-
+                 Bounties.create_invoice(
+                   %{
+                     owner: owner,
+                     amount: amount,
+                     idempotency_key: "tip-#{recipient.provider_login}-#{webhook.delivery}"
+                   },
+                   ticket_ref: ticket_ref,
+                   tip_id: tip.id,
+                   recipient: recipient
+                 ),
+               {:ok, _invoice} <-
+                 Invoice.pay(invoice, %{payment_method: customer.default_payment_method.provider_id, off_session: true}) do
+            Algora.Admin.alert(
+              "Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).",
+              :info
+            )
+
+            {:ok, tip}
+          else
+            {:error, reason} ->
               Algora.Admin.alert(
-                "Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).",
-                :info
+                "Autopay failed (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}): #{inspect(reason)}",
+                :error
               )
 
-              {:ok, tip}
-            else
-              {:error, reason} ->
-                Algora.Admin.alert(
-                  "Autopay failed (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}): #{inspect(reason)}",
-                  :error
-                )
-
-                {:error, reason}
-            end
+              {:error, reason}
           end
-
-        case autopay_result do
-          {:ok, tip} ->
-            {:ok, tip}
-
-          _ ->
-            Bounties.create_tip_intent(
-              %{
-                recipient: recipient,
-                amount: amount,
-                ticket_ref: ticket_ref
-              },
-              installation_id: payload["installation"]["id"]
-            )
         end
 
-      {:ok, _role} ->
+      case autopay_result do
+        {:ok, tip} ->
+          {:ok, tip}
+
+        _ ->
+          Bounties.create_tip_intent(
+            %{
+              recipient: recipient,
+              amount: amount,
+              ticket_ref: ticket_ref
+            },
+            installation_id: payload["installation"]["id"]
+          )
+      end
+    else
+      false ->
         {:error, :unauthorized}
 
       {:error, _reason} = error ->

@@ -12,6 +12,7 @@ defmodule AlgoraWeb.BountyLive do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
   alias Algora.Chat
+  alias Algora.Organizations.Member
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
@@ -154,6 +155,7 @@ defmodule AlgoraWeb.BountyLive do
 
     {:ok,
      socket
+     |> assign(:can_create_bounty, Member.can_create_bounty?(socket.assigns.current_user_role))
      |> assign(:share_url, share_url)
      |> assign(:page_title, bounty.ticket.title)
      |> assign(:ticket, bounty.ticket)
@@ -352,7 +354,7 @@ defmodule AlgoraWeb.BountyLive do
                   <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
                     {Money.to_string!(@bounty.amount)}
                   </div>
-                  <.button phx-click="reward">
+                  <.button :if={@can_create_bounty} phx-click="reward">
                     Reward
                   </.button>
                 </div>
@@ -413,6 +415,7 @@ defmodule AlgoraWeb.BountyLive do
                         <%= if @bounty.deadline do %>
                           Expires on {Calendar.strftime(@bounty.deadline, "%b %d, %Y")}
                           <.button
+                            :if={@can_create_bounty}
                             variant="ghost"
                             size="icon-sm"
                             phx-click="exclusive"
@@ -425,7 +428,7 @@ defmodule AlgoraWeb.BountyLive do
                           </.button>
                         <% else %>
                           <span
-                            :if={@exclusives != []}
+                            :if={@exclusives != [] and @can_create_bounty}
                             class="underline cursor-pointer"
                             phx-click="exclusive"
                           >
@@ -434,9 +437,17 @@ defmodule AlgoraWeb.BountyLive do
                         <% end %>
                       </span>
                     </div>
-                    <.button variant="secondary" phx-click="exclusive" class="mt-3">
+                    <.button
+                      :if={@can_create_bounty}
+                      variant="secondary"
+                      phx-click="exclusive"
+                      class="mt-3"
+                    >
                       <.icon name="tabler-user-plus" class="size-5 mr-2 -ml-1" /> Add
                     </.button>
+                    <div :if={@exclusives == [] and !@can_create_bounty} class="pt-2">
+                      Open to everyone
+                    </div>
                   </div>
                   <div class="flex flex-col gap-4">
                     <%= for user <- @exclusives do %>

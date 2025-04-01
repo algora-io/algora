@@ -16,6 +16,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Contracts
   alias Algora.Github
   alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
@@ -50,7 +51,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def mount(_params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
-    if socket.assigns.current_user_role in [:admin, :mod] do
+    if Member.can_create_bounty?(socket.assigns.current_user_role) do
       if connected?(socket) do
         Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
       end

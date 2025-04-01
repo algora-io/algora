@@ -14,6 +14,7 @@ defmodule Algora.Bounties.Bounty do
     field :autopay_disabled, :boolean, default: false
     field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :community
     field :shared_with, {:array, :string}, null: false, default: []
+    field :deadline, :utc_datetime_usec
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
@@ -44,7 +45,8 @@ defmodule Algora.Bounties.Bounty do
 
   def settings_changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:visibility, :shared_with])
+    |> cast(attrs, [:visibility, :shared_with, :deadline])
+    |> Algora.Validations.validate_date_in_future(:deadline)
     |> validate_required([:visibility, :shared_with])
   end
 

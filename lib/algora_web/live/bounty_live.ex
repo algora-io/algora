@@ -59,7 +59,8 @@ defmodule AlgoraWeb.BountyLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:github_handle, :deadline])
-      |> validate_required([:github_handle, :deadline])
+      |> validate_required([:github_handle])
+      |> Algora.Validations.validate_date_in_future(:deadline)
     end
   end
 
@@ -92,11 +93,7 @@ defmodule AlgoraWeb.BountyLive do
         amount: Money.to_decimal(bounty.amount)
       })
 
-    exclusive_changeset =
-      ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, %{
-        github_handle: "",
-        deadline: Date.utc_today()
-      })
+    exclusive_changeset = ExclusiveBountyForm.changeset(%ExclusiveBountyForm{}, %{})
 
     {:ok,
      socket
@@ -184,10 +181,17 @@ defmodule AlgoraWeb.BountyLive do
         with {:ok, token} <- Accounts.get_access_token(socket.assigns.current_user),
              {:ok, user} <- Workspace.ensure_user(token, data.github_handle),
              shared_with = Enum.uniq(bounty.shared_with ++ [user.provider_id]),
-             {:ok, _} <- bounty |> Bounty.settings_changeset(%{shared_with: shared_with}) |> Repo.update() do
+             {:ok, bounty} <-
+               bounty
+               |> Bounty.settings_changeset(%{
+                 shared_with: shared_with,
+                 deadline: DateTime.new!(data.deadline, ~T[00:00:00], "Etc/UTC")
+               })
+               |> Repo.update() do
           {:noreply,
            socket
            |> put_flash(:info, "Bounty shared!")
+           |> assign(:bounty, bounty)
            |> assign_exclusives(shared_with)
            |> close_drawers()}
         else
@@ -310,19 +314,25 @@ defmodule AlgoraWeb.BountyLive do
                     </.card_title>
                     <div class="flex items-center">
                       <span class="text-sm text-muted-foreground">
-                        Expires on {Calendar.strftime(@bounty.inserted_at, "%b %d, %Y")}
+                        <%= if @bounty.deadline do %>
+                          Expires on {Calendar.strftime(@bounty.deadline, "%b %d, %Y")}
+                          <.button
+                            variant="ghost"
+                            size="icon-sm"
+                            phx-click="exclusive"
+                            class="group h-6 w-6"
+                          >
+                            <.icon
+                              name="tabler-pencil"
+                              class="h-4 w-4 text-muted-foreground group-hover:text-foreground"
+                            />
+                          </.button>
+                        <% else %>
+                          <span class="underline cursor-pointer" phx-click="exclusive">
+                            Add a deadline
+                          </span>
+                        <% end %>
                       </span>
-                      <.button
-                        variant="ghost"
-                        size="icon-sm"
-                        phx-click="exclusive"
-                        class="group h-6 w-6"
-                      >
-                        <.icon
-                          name="tabler-pencil"
-                          class="h-4 w-4 text-muted-foreground group-hover:text-foreground"
-                        />
-                      </.button>
                     </div>
                     <.button variant="secondary" phx-click="exclusive" class="mt-3">
                       <.icon name="tabler-user-plus" class="size-5 mr-2 -ml-1" /> Add

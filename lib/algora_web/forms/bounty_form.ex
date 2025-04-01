@@ -25,6 +25,10 @@ defmodule AlgoraWeb.Forms.BountyForm do
     end
   end
 
+  def type_options do
+    [{"GitHub issue", "github"}, {"Custom", "custom"}]
+  end
+
   def changeset(form, params) do
     form
     |> cast(params, [:url, :amount, :visibility, :shared_with, :type, :title, :description])
@@ -32,6 +36,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
     |> validate_type_fields()
     |> Validations.validate_money_positive(:amount)
     |> Validations.validate_ticket_ref(:url, :ticket_ref)
+    |> validate_subset(:type, Enum.map(type_options(), &elem(&1, 1)))
   end
 
   defp validate_type_fields(changeset) do
@@ -43,7 +48,7 @@ defmodule AlgoraWeb.Forms.BountyForm do
 
   def bounty_form(assigns) do
     ~H"""
-    <.form for={@main_bounty_form} phx-submit="create_bounty">
+    <.form id="main-bounty-form" for={@main_bounty_form} phx-submit="create_bounty">
       <div class="space-y-4">
         <.input type="hidden" name="main_bounty_form[visibility]" value="exclusive" />
         <%!-- <.input
@@ -58,51 +63,39 @@ defmodule AlgoraWeb.Forms.BountyForm do
             /> --%>
 
         <div class="grid grid-cols-2 gap-4">
-          <label class={[
-            "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
-            "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
-            "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-          ]}>
-            <input
-              type="radio"
-              name="main_bounty_form[type]"
-              value="github"
-              checked={@main_bounty_form[:type].value == "github"}
-              class="sr-only"
-              phx-click={JS.show(to: "#github-form") |> JS.hide(to: "#custom-form")}
-            />
-            <span class="flex flex-1 items-center justify-between">
-              <span class="text-sm font-medium">GitHub issue</span>
-              <.icon
-                name="tabler-check"
-                class="invisible size-5 text-primary group-has-[:checked]:visible"
+          <%= for {label, value} <- type_options() do %>
+            <label class={[
+              "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+              "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+              "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+            ]}>
+              <.input
+                type="radio"
+                field={@main_bounty_form[:type]}
+                checked={to_string(get_field(@main_bounty_form.source, :type)) == value}
+                value={value}
+                class="sr-only"
+                phx-click={
+                  %JS{}
+                  |> JS.hide(to: "#main-bounty-form [data-tab]")
+                  |> JS.show(to: "#main-bounty-form [data-tab=#{value}]")
+                }
               />
-            </span>
-          </label>
-          <label class={[
-            "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
-            "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
-            "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-          ]}>
-            <input
-              type="radio"
-              name="main_bounty_form[type]"
-              value="custom"
-              checked={@main_bounty_form[:type].value == "custom"}
-              class="sr-only"
-              phx-click={JS.show(to: "#custom-form") |> JS.hide(to: "#github-form")}
-            />
-            <span class="flex flex-1 items-center justify-between">
-              <span class="text-sm font-medium">Custom</span>
-              <.icon
-                name="tabler-check"
-                class="invisible size-5 text-primary group-has-[:checked]:visible"
-              />
-            </span>
-          </label>
+              <span class="flex flex-1 items-center justify-between">
+                <span class="text-sm font-medium">{label}</span>
+                <.icon
+                  name="tabler-check"
+                  class="invisible size-5 text-primary group-has-[:checked]:visible"
+                />
+              </span>
+            </label>
+          <% end %>
         </div>
 
-        <div id="github-form" class={if @main_bounty_form[:type].value == "custom", do: "hidden"}>
+        <div
+          data-tab="github"
+          class={if to_string(get_field(@main_bounty_form.source, :type)) != "github", do: "hidden"}
+        >
           <.input
             label="URL"
             field={@main_bounty_form[:url]}
@@ -111,8 +104,13 @@ defmodule AlgoraWeb.Forms.BountyForm do
         </div>
 
         <div
-          id="custom-form"
-          class={classes([@main_bounty_form[:type].value == "github" && "hidden", "space-y-4"])}
+          data-tab="custom"
+          class={
+            classes([
+              to_string(get_field(@main_bounty_form.source, :type)) != "custom" && "hidden",
+              "space-y-4"
+            ])
+          }
         >
           <.input
             label="Title"

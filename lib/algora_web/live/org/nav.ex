@@ -45,6 +45,9 @@ defmodule AlgoraWeb.Org.Nav do
      |> attach_hook(:form_toggle, :handle_event, &handle_form_toggle_event/3)}
   end
 
+  # TODO: handle submit
+  # TODO: handle validate
+
   defp handle_form_toggle_event("open_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, true)}
   end

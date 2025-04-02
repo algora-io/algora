@@ -4,6 +4,8 @@ defmodule Algora.Admin do
 
   alias Algora.Accounts.User
   alias Algora.Activities.SendDiscord
+  alias Algora.Bounties
+  alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Github
   alias Algora.Parser
@@ -16,16 +18,6 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Ticket
 
   require Logger
-
-  def parse_ticket_url(url) do
-    case Parser.full_ticket_ref(url) do
-      {:ok, [ticket_ref: [owner: owner, repo: repo, type: _type, number: number]], _, _, _, _} ->
-        %{owner: owner, repo: repo, number: number}
-
-      error ->
-        raise error
-    end
-  end
 
   def find_claims(url) do
     %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
@@ -44,12 +36,150 @@ defmodule Algora.Admin do
     )
   end
 
-  def comment(url, body) do
+  def autopay_pr(url) do
     %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
 
-    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
+    with installation_id when not is_nil(installation_id) <-
+           Workspace.get_installation_id_by_owner(owner),
+         {:ok, installation} <-
+           Workspace.fetch_installation_by(
+             provider: "github",
+             provider_id: to_string(installation_id)
+           ),
+         {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, source} <- Workspace.ensure_ticket(token, owner, repo, number) do
+      claims =
+        case Repo.one(
+               from c in Claim,
+                 join: s in assoc(c, :source),
+                 join: u in assoc(c, :user),
+                 where: c.status != :cancelled,
+                 where: s.id == ^source.id,
+                 where:
+                   fragment(
+                     "NOT EXISTS (SELECT 1 FROM transactions t WHERE t.claim_id = ? AND t.status = ANY(?))",
+                     c.id,
+                     ^["initialized", "processing", "succeeded"]
+                   ),
+                 order_by: [asc: c.inserted_at],
+                 limit: 1
+             ) do
+          nil ->
+            []
+
+          %Claim{group_id: group_id} ->
+            Repo.update_all(
+              from(c in Claim, where: c.group_id == ^group_id, where: c.status != :cancelled),
+              set: [status: :approved]
+            )
+
+            Repo.all(
+              from c in Claim,
+                join: t in assoc(c, :target),
+                join: tr in assoc(t, :repository),
+                join: tru in assoc(tr, :user),
+                join: u in assoc(c, :user),
+                where: c.group_id == ^group_id,
+                where: c.status != :cancelled,
+                order_by: [desc: c.group_share, asc: c.inserted_at],
+                select_merge: %{
+                  target: %{t | repository: %{tr | user: tru}},
+                  user: u
+                }
+            )
+        end
+
+      if claims == [] do
+        :noop
+      else
+        primary_claim = List.first(claims)
+
+        bounties =
+          Repo.all(
+            from(b in Bounty,
+              join: t in assoc(b, :ticket),
+              join: o in assoc(b, :owner),
+              left_join: u in assoc(b, :creator),
+              left_join: c in assoc(o, :customer),
+              left_join: p in assoc(c, :default_payment_method),
+              where: t.id == ^primary_claim.target_id,
+              select_merge: %{owner: %{o | customer: %{default_payment_method: p}}, creator: u}
+            )
+          )
+
+        autopayable_bounty =
+          Enum.find(
+            bounties,
+            &(not &1.autopay_disabled and
+                not is_nil(installation) and
+                &1.owner.id == installation.connected_user_id and
+                not is_nil(&1.owner.customer) and
+                not is_nil(&1.owner.customer.default_payment_method))
+          )
+
+        if autopayable_bounty do
+          with {:ok, invoice} <-
+                 Bounties.create_invoice(
+                   %{
+                     owner: autopayable_bounty.owner,
+                     amount: autopayable_bounty.amount,
+                     idempotency_key: "bounty-#{autopayable_bounty.id}"
+                   },
+                   ticket_ref: %{owner: owner, repo: repo, number: number},
+                   bounty_id: autopayable_bounty.id,
+                   claims: claims
+                 ),
+               {:ok, _invoice} <-
+                 Algora.PSP.Invoice.pay(
+                   invoice,
+                   %{
+                     payment_method:
+                       autopayable_bounty.owner.customer.default_payment_method.provider_id,
+                     off_session: true
+                   }
+                 ) do
+            Algora.Admin.alert(
+              "Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).",
+              :info
+            )
+
+            :ok
+          else
+            {:error, reason} ->
+              Algora.Admin.alert(
+                "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}",
+                :error
+              )
+
+              :error
+          end
+        end
+      end
+    end
+  end
+
+  def comment(url, body) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+    Github.create_issue_comment(token_for(owner), owner, repo, number, body)
+  end
+
+  defp parse_ticket_url(url) do
+    case Parser.full_ticket_ref(url) do
+      {:ok, [ticket_ref: [owner: owner, repo: repo, type: _type, number: number]], _, _, _, _} ->
+        %{owner: owner, repo: repo, number: number}
+
+      error ->
+        raise error
+    end
+  end
+
+  defp token_for(user) do
+    with installation_id when not is_nil(installation_id) <-
+           Workspace.get_installation_id_by_owner(user),
          {:ok, token} <- Github.get_installation_token(installation_id) do
-      Github.create_issue_comment(token, owner, repo, number, body)
+      token
+    else
+      _ -> raise "No installation found for #{user}"
     end
   end
 

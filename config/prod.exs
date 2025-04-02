@@ -18,9 +18,6 @@ config :logger,
   level: String.to_atom(System.get_env("LOG_LEVEL") || "info"),
   metadata: :all
 
-config :algora,
-  auto_start_pollers: true
-
 config :algora, AlgoraWeb.OGImageController, max_age: 600
 
 # Runtime production configuration, including reading

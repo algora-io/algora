@@ -24,7 +24,7 @@ FROM ${NODE_IMAGE} as node_stage
 
 ENV PUPPETEER_CACHE_DIR="/app/puppeteer"
 
-RUN npx --yes puppeteer browsers install
+RUN npx --yes puppeteer browsers install chrome@134.0.6998.35
 
 FROM ${BUILDER_IMAGE} as builder
 

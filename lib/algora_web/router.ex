@@ -25,7 +25,7 @@ defmodule AlgoraWeb.Router do
 
   # Legacy tRPC pipeline
   pipeline :trpc do
-    plug CorsPlug
+    plug CORSPlug
   end
 
   @redirects Application.compile_env(:algora, :redirects, [])

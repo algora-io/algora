@@ -213,7 +213,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
           src={@plausible_url}
           plausible-embed=""
           loading="lazy"
-          style="width: 1; min-width: 100%; height: 609px;"
+          style="width: 1; min-width: 1280px; height: 2100px; margin-left: -1rem;"
         />
       </section>
     </div>

@@ -10,7 +10,7 @@ import Config
 config :algora,
   title: "Algora",
   description:
-    "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
+    "Discover GitHub bounties, contract work and jobs. Hire the top 1% open source developers.",
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec],
   redirects: [

@@ -56,6 +56,8 @@ defmodule AlgoraWeb.HomeLive do
 
     {:ok,
      socket
+     |> assign(:page_title, "Algora - The open source Upwork for engineers")
+     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
      |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
      |> assign(:featured_devs, Accounts.list_featured_developers(country_code))

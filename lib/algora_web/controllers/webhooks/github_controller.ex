@@ -244,34 +244,38 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             end
           end
 
-        unpaid_bounties =
-          Enum.filter(
-            bounties,
-            &case autopay_result do
-              :ok -> &1.id != autopayable_bounty.id
-              _ -> true
-            end
-          )
+        if autopay_result do
+          autopay_result
+        else
+          unpaid_bounties =
+            Enum.filter(
+              bounties,
+              &case autopay_result do
+                :ok -> &1.id != autopayable_bounty.id
+                _ -> true
+              end
+            )
 
-        sponsors_to_notify =
-          unpaid_bounties
-          |> Enum.map(&(&1.creator || &1.owner))
-          |> Enum.map_join(", ", &"@#{&1.provider_login}")
+          sponsors_to_notify =
+            unpaid_bounties
+            |> Enum.map(&(&1.creator || &1.owner))
+            |> Enum.map_join(", ", &"@#{&1.provider_login}")
 
-        if unpaid_bounties != [] do
-          names =
-            claims
-            |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
-            |> Algora.Util.format_name_list()
+          if unpaid_bounties != [] do
+            names =
+              claims
+              |> Enum.map(fn c -> "@#{c.user.provider_login}" end)
+              |> Algora.Util.format_name_list()
 
-          Github.create_issue_comment(
-            token,
-            primary_claim.target.repository.user.provider_login,
-            primary_claim.target.repository.name,
-            primary_claim.target.number,
-            "🎉 The pull request of #{names} has been merged. The bounty can be rewarded [here](#{Claim.reward_url(primary_claim)})" <>
-              if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
-          )
+            Github.create_issue_comment(
+              token,
+              primary_claim.target.repository.user.provider_login,
+              primary_claim.target.repository.name,
+              primary_claim.target.number,
+              "🎉 The pull request of #{names} has been merged. The bounty can be rewarded [here](#{Claim.reward_url(primary_claim)})" <>
+                if(sponsors_to_notify == "", do: "", else: "\n\ncc #{sponsors_to_notify}")
+            )
+          end
         end
 
         :ok

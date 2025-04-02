@@ -209,10 +209,10 @@ defmodule AlgoraWeb.PricingLive do
                     <div class="flex justify-between">
                       <div class="flex items-end">
                         <p class="font-display text-4xl text-emerald-400">
-                          0%
+                          100%
                         </p>
                         <p class="text-foreground-lighter text-sm mb-1.5 ml-2 leading-4">
-                          service fee
+                          received
                         </p>
                       </div>
                     </div>

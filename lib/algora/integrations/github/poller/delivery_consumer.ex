@@ -22,7 +22,6 @@ defmodule Algora.Github.Poller.DeliveryConsumer do
       ) || 0
 
     if attempts_count <= @max_attempts do
-      Algora.Admin.alert("Retrying delivery #{delivery["id"]} (attempt #{attempts_count})", :info)
       Github.redeliver(delivery["id"])
     else
       Algora.Admin.alert("Max attempts reached for delivery #{delivery["id"]}", :error)

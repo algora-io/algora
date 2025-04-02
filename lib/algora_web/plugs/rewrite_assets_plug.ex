@@ -1,5 +1,7 @@
 defmodule AlgoraWeb.Plugs.RewriteAssetsPlug do
   @moduledoc false
-  defdelegate init(opts), to: ReverseProxyPlug
-  defdelegate call(conn, opts), to: ReverseProxyPlug
+  alias AlgoraWeb.Plugs.RuntimeRewritePlug
+
+  defdelegate init(opts), to: RuntimeRewritePlug
+  defdelegate call(conn, opts), to: RuntimeRewritePlug
 end

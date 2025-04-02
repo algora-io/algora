@@ -393,6 +393,8 @@ defmodule Algora.Accounts do
     end
   end
 
+  def has_fresh_token?(nil), do: false
+
   def has_fresh_token?(%User{} = user) do
     # TODO: use refresh tokens and check expiration
     case get_access_token(user) do

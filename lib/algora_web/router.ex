@@ -7,8 +7,6 @@ defmodule AlgoraWeb.Router do
   import Oban.Web.Router
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 
-  alias AlgoraWeb.Plugs.RuntimeRewritePlug
-
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -23,6 +21,11 @@ defmodule AlgoraWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  # Legacy tRPC pipeline
+  pipeline :trpc do
+    plug CorsPlug
   end
 
   @redirects Application.compile_env(:algora, :redirects, [])
@@ -182,8 +185,12 @@ defmodule AlgoraWeb.Router do
     pipe_through :api
 
     # Legacy tRPC endpoints
-    get "/trpc/bounty.list", BountyController, :index
-    post "/trpc/bounty.list", BountyController, :index
+    scope "/trpc" do
+      pipe_through :trpc
+
+      get "/bounty.list", BountyController, :index
+      post "/bounty.list", BountyController, :index
+    end
 
     # Legacy OG Image redirects
     get "/og/:org_handle/:asset", OGRedirectController, :redirect_to_org_path

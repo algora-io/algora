@@ -9,12 +9,7 @@ defmodule Algora.Github.Client do
   @type token :: String.t()
 
   def http(host, method, path, headers, body) do
-    # TODO: remove after migration
-    if Algora.Settings.migration_in_progress?() do
-      run_cached(path, fn -> do_http_request(host, method, path, headers, body) end)
-    else
-      do_http_request(host, method, path, headers, body)
-    end
+    do_http_request(host, method, path, headers, body)
   end
 
   defp do_http_request(host, method, path, headers, body) do

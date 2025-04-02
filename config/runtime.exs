@@ -130,7 +130,6 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  # TODO: remove after migration
   config :algora, Algora.Mailer,
     adapter: Swoosh.Adapters.Sendgrid,
     api_key: System.get_env("SENDGRID_API_KEY")

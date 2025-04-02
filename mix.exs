@@ -118,7 +118,6 @@ defmodule Algora.MixProject do
       "ecto.setup": [
         "ecto.create",
         "ecto.migrate",
-        # "run scripts/database_migration.exs",
         "ecto.seed"
       ],
       "ecto.seed": ["run priv/repo/seeds.exs"],

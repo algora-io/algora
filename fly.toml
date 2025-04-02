@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for staging-algora-console on 2025-01-28T17:48:23+03:00
+# fly.toml app configuration file generated for algora on 2025-04-02T14:15:15+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'staging-algora-console'
+app = 'algora'
 primary_region = 'iad'
 kill_signal = 'SIGTERM'
 
@@ -13,7 +13,7 @@ kill_signal = 'SIGTERM'
   release_command = '/app/bin/migrate'
 
 [env]
-  PHX_HOST = 'staging.algora.io'
+  PHX_HOST = 'app.algora.io'
   PORT = '4000'
 
 [http_service]

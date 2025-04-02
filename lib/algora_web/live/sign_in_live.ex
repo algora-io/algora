@@ -329,13 +329,6 @@ defmodule AlgoraWeb.SignInLive do
     Enum.random([
       %{
         text:
-          "Through our $15,000 bounty, we got hundreds of GitHub stars, more than 100 new users on our Discord, and some really fantastic Rust engineers.",
-        author: "John A. De Goes",
-        role: "Founder & CEO, Golem Cloud",
-        avatar: ~p"/images/people/john-de-goes-2.jpg"
-      },
-      %{
-        text:
           "That's one massive advantage open source companies have versus closed source. You get to show people your work, plus you can point to your contributions as proof of your abilities.",
         author: "Eric Allam",
         role: "Founder & CTO, Trigger.dev (YC W23)",
@@ -375,13 +368,6 @@ defmodule AlgoraWeb.SignInLive do
         author: "Josh Pigford",
         role: "Co-founder & CEO, Maybe",
         avatar: "https://avatars.githubusercontent.com/u/35243?v=4"
-      },
-      %{
-        text:
-          "Instead of doing work for free, I was able to get paid and it gives you a really nice feeling that you feel rewarded, that you feel appreciated.",
-        author: "Lucas Smith",
-        role: "Co-founder & CTO, Documenso",
-        avatar: "https://avatars.githubusercontent.com/u/13398220?v=4"
       }
     ])
   end

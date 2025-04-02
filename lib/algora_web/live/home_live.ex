@@ -433,7 +433,7 @@ defmodule AlgoraWeb.HomeLive do
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid grid-cols-1 items-center gap-x-12 gap-y-8 lg:grid-cols-10">
                 <div class="lg:col-span-4">
-                  <div class="relative flex aspect-square size-[18rem] sm:size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                  <div class="relative flex aspect-square size-[12rem] sm:size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
                       src={~p"/images/people/tal-borenstein.jpeg"}
                       alt="Tal Borenstein"
@@ -453,7 +453,7 @@ defmodule AlgoraWeb.HomeLive do
                     >
                       42 integrations <.icon name="tabler-external-link" class="size-5 ml-1 mb-4" />
                     </.link>
-                    were built by <span class="text-success">22 developers</span>
+                    were built
                     using <span class="text-success">bounties on Algora</span>.
                   </h3>
                   <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
@@ -523,19 +523,19 @@ defmodule AlgoraWeb.HomeLive do
                     <img
                       src="https://github.com/calcom.png"
                       alt="Cal.com"
-                      class="size-24 sm:size-40 rounded-2xl"
+                      class="size-32 sm:size-40 rounded-2xl"
                       loading="lazy"
                     />
                     <img
                       src={~p"/images/people/peer-rich.jpeg"}
                       alt="PeerRich"
-                      class="size-24 sm:size-40 rounded-full"
+                      class="size-32 sm:size-40 rounded-full"
                       loading="lazy"
                     />
                     <img
                       src={~p"/images/people/bailey-pumfleet.jpeg"}
                       alt="Bailey Pumfleet"
-                      class="size-24 sm:size-40 rounded-full"
+                      class="size-32 sm:size-40 rounded-full"
                       loading="lazy"
                     />
                   </div>

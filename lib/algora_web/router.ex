@@ -105,6 +105,7 @@ defmodule AlgoraWeb.Router do
         live "/home", Org.HomeLive, :index
         live "/bounties", Org.BountiesLive, :index
         live "/bounties/new", Org.BountiesNewLive, :index
+        live "/bounties/community", Org.BountiesNewLive, :index
         live "/bounties/:id", BountyLive, :index
         live "/contracts/:id", Contract.ViewLive
         live "/team", Org.TeamLive, :index

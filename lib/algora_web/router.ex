@@ -7,6 +7,8 @@ defmodule AlgoraWeb.Router do
   import Oban.Web.Router
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 
+  alias AlgoraWeb.Plugs.RuntimeRewritePlug
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -30,13 +32,8 @@ defmodule AlgoraWeb.Router do
   end
 
   scope "/" do
-    forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug,
-      upstream: "#{Application.compile_env(:algora, :assets_url)}",
-      response_mode: :buffer
-
-    forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug,
-      upstream: "#{Application.compile_env(:algora, :ingest_url)}",
-      response_mode: :buffer
+    forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
+    forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
 
     # forward "/docs", AlgoraWeb.Plugs.RewriteDocsPlug,
     #   upstream: "https://docs.algora.io",

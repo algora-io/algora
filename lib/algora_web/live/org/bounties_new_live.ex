@@ -280,7 +280,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
              Bounties.create_bounty(
                %{
                  creator: socket.assigns.current_user,
-                 owner: socket.assigns.current_user,
+                 owner: socket.assigns.current_context,
                  amount: amount,
                  ticket_ref: %{
                    owner: ticket_ref.owner,

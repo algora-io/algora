@@ -32,9 +32,9 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
     }
 
     body = """
-    💎 **#{owner_login}** is offering a **#{amount}** bounty for this issue, View and reward the bounty at #{AlgoraWeb.Endpoint.host()}/#{ticket_ref.owner}/#{ticket_ref.repo}/issues/#{ticket_ref.number}
+    💎 **#{owner_login}** is offering a **#{amount}** bounty for this issue. View and reward the bounty at `#{AlgoraWeb.Endpoint.host()}/#{ticket_ref.owner}/#{ticket_ref.repo}/issues/#{ticket_ref.number}`
 
-    👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining #{AlgoraWeb.Endpoint.host()}
+    👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining `#{AlgoraWeb.Endpoint.host()}`
     """
 
     if Github.pat_enabled() do
@@ -85,10 +85,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
          {:ok, ticket} <-
            Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number),
          bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
-         {:ok, _} <-
-           Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, [
-             "💎 Bounty"
-           ]) do
+         {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💎 Bounty"]) do
       attempts = Bounties.list_attempts_for_ticket(ticket.id)
       claims = Bounties.list_claims([ticket.id])
 

@@ -19,7 +19,6 @@ config :logger,
   metadata: :all
 
 config :algora,
-  swift_mode: true,
   auto_start_pollers: true
 
 config :algora, AlgoraWeb.OGImageController, max_age: 600

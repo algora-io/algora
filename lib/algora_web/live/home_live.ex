@@ -250,164 +250,166 @@ defmodule AlgoraWeb.HomeLive do
                   </.link>
                 </div>
               </div>
-              <div class="mt-20 sm:mt-40 relative grid items-center grid-cols-1 lg:grid-cols-5 w-full gap-8 lg:gap-x-12 rounded-xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-2 ring-success/20 transition-colors">
-                <div class="lg:col-span-2 text-base leading-6 flex-1">
-                  <div class="text-2xl sm:text-3xl font-semibold text-foreground">
-                    Fund any issue
-                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-                      in seconds
-                    </span>
-                  </div>
-                  <div class="pt-2 text-sm sm:text-lg xl:text-lg font-medium text-muted-foreground">
-                    Help improve the OSS you love and rely on
-                  </div>
-                  <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Pay when PRs are merged
+              <div class="flex flex-col-reverse sm:flex-col">
+                <div class="mt-20 sm:mt-40 relative grid items-center grid-cols-1 lg:grid-cols-5 w-full gap-8 lg:gap-x-12 rounded-xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-2 ring-success/20 transition-colors">
+                  <div class="lg:col-span-2 text-base leading-6 flex-1">
+                    <div class="text-2xl sm:text-3xl font-semibold text-foreground">
+                      Fund any issue
+                      <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+                        in seconds
+                      </span>
                     </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Pool bounties with other sponsors
+                    <div class="pt-2 text-sm sm:text-lg xl:text-lg font-medium text-muted-foreground">
+                      Help improve the OSS you love and rely on
                     </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
-                      Algora handles invoices, payouts, compliance<span class="hidden sm:inline"> & 1099s</span>
-                    </div>
-                  </div>
-                </div>
-                <.form
-                  for={@bounty_form}
-                  phx-submit="create_bounty"
-                  class="lg:col-span-3 grid grid-cols-1 gap-4 sm:gap-6 w-full"
-                >
-                  <.input
-                    label="URL"
-                    field={@bounty_form[:url]}
-                    placeholder="https://github.com/owner/repo/issues/1337"
-                  />
-                  <.input
-                    label="Amount"
-                    icon="tabler-currency-dollar"
-                    field={@bounty_form[:amount]}
-                    class="placeholder:text-success"
-                  />
-                  <div class="flex flex-col items-center gap-2">
-                    <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
-                      Fund issue
-                    </.button>
-                    <div class="text-sm text-muted-foreground">No credit card required</div>
-                  </div>
-                </.form>
-              </div>
-              <div class="pt-20 sm:pt-40 grid grid-cols-1 gap-16">
-                <.link
-                  href="https://github.com/zed-industries/zed/issues/4440"
-                  rel="noopener"
-                  target="_blank"
-                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
-                >
-                  <div class="flex -space-x-4 shrink-0">
-                    <img
-                      class="size-20 rounded-full z-0"
-                      src="https://github.com/zed-industries.png"
-                      alt="Zed"
-                      loading="lazy"
-                    />
-                    <img
-                      class="size-20 rounded-full z-10"
-                      src="https://github.com/schacon.png"
-                      alt="Scott Chacon"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="text-base leading-6 flex-1">
-                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                      GitHub cofounder funds new feature in Zed Editor
-                    </div>
-                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
-                      Zed Editor, Scott Chacon
+                    <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
+                      <div>
+                        <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                        Pay when PRs are merged
+                      </div>
+                      <div>
+                        <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                        Pool bounties with other sponsors
+                      </div>
+                      <div>
+                        <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                        Algora handles invoices, payouts, compliance<span class="hidden sm:inline"> & 1099s</span>
+                      </div>
                     </div>
                   </div>
-                  <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
-                    <Logos.github class="size-5 mr-3" /> View issue
-                  </.button>
-                </.link>
-
-                <.link
-                  href="https://github.com/PX4/PX4-Autopilot/issues/22464"
-                  rel="noopener"
-                  target="_blank"
-                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
-                >
-                  <div class="flex items-center -space-x-6 shrink-0">
-                    <img
-                      class="size-20 rounded-full z-0"
-                      src={~p"/images/people/alex-klimaj.jpg"}
-                      alt="Alex Klimaj"
-                      loading="lazy"
-                    />
-                    <img
-                      class="size-16 z-20"
-                      src="https://github.com/PX4.png"
-                      alt="PX4"
-                      loading="lazy"
-                    />
-                    <img
-                      class="size-20 rounded-full z-10"
-                      src={~p"/images/people/andrew-wilkins.jpg"}
-                      alt="Andrew Wilkins"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="text-base leading-6 flex-1">
-                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                      DefenceTech CEOs fund obstacle avoidance in PX4 Autopilot
-                    </div>
-                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
-                      Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
-                    </div>
-                  </div>
-                  <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
-                    <Logos.github class="size-5 mr-3" /> View issue
-                  </.button>
-                </.link>
-
-                <.link
-                  href={~p"/org/coollabsio"}
-                  rel="noopener"
-                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
-                >
-                  <div class="flex -space-x-4 shrink-0">
-                    <img
-                      class="size-20 rounded-full z-0"
-                      src={~p"/images/logos/coolify.jpg"}
-                      alt="Coolify"
-                      loading="lazy"
-                    />
-                    <img
-                      class="size-20 rounded-full z-10"
-                      src="https://github.com/andrasbacsai.png"
-                      alt="Andras Bacsai"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="text-base leading-6 flex-1">
-                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
-                      Coolify community crowdfunds new feature development
-                    </div>
-                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
-                      Andras Bacsai, Founder of Coolify
-                    </div>
-                  </div>
-                  <.button
-                    size="lg"
-                    variant="secondary"
-                    class="hidden sm:flex mt-2 sm:mt-0 ring-2 ring-emerald-500"
+                  <.form
+                    for={@bounty_form}
+                    phx-submit="create_bounty"
+                    class="lg:col-span-3 grid grid-cols-1 gap-4 sm:gap-6 w-full"
                   >
-                    View bounty board
-                  </.button>
-                </.link>
+                    <.input
+                      label="URL"
+                      field={@bounty_form[:url]}
+                      placeholder="https://github.com/owner/repo/issues/1337"
+                    />
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@bounty_form[:amount]}
+                      class="placeholder:text-success"
+                    />
+                    <div class="flex flex-col items-center gap-2">
+                      <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                        Fund issue
+                      </.button>
+                      <div class="text-sm text-muted-foreground">No credit card required</div>
+                    </div>
+                  </.form>
+                </div>
+                <div class="pt-20 sm:pt-40 grid grid-cols-1 gap-16">
+                  <.link
+                    href="https://github.com/zed-industries/zed/issues/4440"
+                    rel="noopener"
+                    target="_blank"
+                    class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                  >
+                    <div class="flex -space-x-4 shrink-0">
+                      <img
+                        class="size-20 rounded-full z-0"
+                        src="https://github.com/zed-industries.png"
+                        alt="Zed"
+                        loading="lazy"
+                      />
+                      <img
+                        class="size-20 rounded-full z-10"
+                        src="https://github.com/schacon.png"
+                        alt="Scott Chacon"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="text-base leading-6 flex-1">
+                      <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                        GitHub cofounder funds new feature in Zed Editor
+                      </div>
+                      <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                        Zed Editor, Scott Chacon
+                      </div>
+                    </div>
+                    <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                      <Logos.github class="size-5 mr-3" /> View issue
+                    </.button>
+                  </.link>
+
+                  <.link
+                    href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                    rel="noopener"
+                    target="_blank"
+                    class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                  >
+                    <div class="flex items-center -space-x-6 shrink-0">
+                      <img
+                        class="size-20 rounded-full z-0"
+                        src={~p"/images/people/alex-klimaj.jpg"}
+                        alt="Alex Klimaj"
+                        loading="lazy"
+                      />
+                      <img
+                        class="size-16 z-20"
+                        src="https://github.com/PX4.png"
+                        alt="PX4"
+                        loading="lazy"
+                      />
+                      <img
+                        class="size-20 rounded-full z-10"
+                        src={~p"/images/people/andrew-wilkins.jpg"}
+                        alt="Andrew Wilkins"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="text-base leading-6 flex-1">
+                      <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                        DefenceTech CEOs fund obstacle avoidance in PX4 Autopilot
+                      </div>
+                      <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                        Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                      </div>
+                    </div>
+                    <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                      <Logos.github class="size-5 mr-3" /> View issue
+                    </.button>
+                  </.link>
+
+                  <.link
+                    href={~p"/org/coollabsio"}
+                    rel="noopener"
+                    class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                  >
+                    <div class="flex -space-x-4 shrink-0">
+                      <img
+                        class="size-20 rounded-full z-0"
+                        src={~p"/images/logos/coolify.jpg"}
+                        alt="Coolify"
+                        loading="lazy"
+                      />
+                      <img
+                        class="size-20 rounded-full z-10"
+                        src="https://github.com/andrasbacsai.png"
+                        alt="Andras Bacsai"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="text-base leading-6 flex-1">
+                      <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                        Coolify community crowdfunds new feature development
+                      </div>
+                      <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                        Andras Bacsai, Founder of Coolify
+                      </div>
+                    </div>
+                    <.button
+                      size="lg"
+                      variant="secondary"
+                      class="hidden sm:flex mt-2 sm:mt-0 ring-2 ring-emerald-500"
+                    >
+                      View bounty board
+                    </.button>
+                  </.link>
+                </div>
               </div>
             </div>
           </div>

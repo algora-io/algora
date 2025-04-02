@@ -17,7 +17,6 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
 
   def perform(%Oban.Job{
         args: %{
-          "bounty_id" => bounty_id,
           "owner_login" => owner_login,
           "amount" => amount,
           "ticket_ref" => ticket_ref,
@@ -33,7 +32,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
     }
 
     body = """
-    💎 **#{owner_login}** is offering a **#{amount}** bounty for this issue, View and reward the bounty at #{AlgoraWeb.Endpoint.host()}/bounties/#{bounty_id}
+    💎 **#{owner_login}** is offering a **#{amount}** bounty for this issue, View and reward the bounty at #{AlgoraWeb.Endpoint.host()}/#{ticket_ref.owner}/#{ticket_ref.repo}/issues/#{ticket_ref.number}
 
     👉 Got a pull request resolving this? Claim the bounty by commenting `/claim ##{ticket_ref.number}` in your PR and joining #{AlgoraWeb.Endpoint.host()}
     """

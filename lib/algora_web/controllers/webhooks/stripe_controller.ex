@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
 
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
   alias Algora.Bounties.Tip
   alias Algora.Contracts.Contract
   alias Algora.Payments
@@ -137,10 +138,13 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
       Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
       Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
       Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
+      # TODO: add and use a new "paid" status for claims
+      Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
 
       activities_result =
         txs

@@ -581,7 +581,7 @@ defmodule Algora.Bounties do
     Repo.all(
       from c in Claim,
         where: c.source_id == ^source_id,
-        where: c.status != :cancelled,
+        where: c.status == :pending,
         preload: [:user]
     )
   end

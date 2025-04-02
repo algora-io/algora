@@ -94,10 +94,17 @@ defmodule Algora.Chat do
   def send_message(thread_id, sender_id, content) do
     with {:ok, participant} <- ensure_participant(thread_id, sender_id),
          {:ok, message} <- insert_message(thread_id, sender_id, content) do
+      message = Repo.preload(message, :sender)
+
       broadcast(%MessageCreated{
-        message: Repo.preload(message, :sender),
+        message: message,
         participant: Repo.preload(participant, :user)
       })
+
+      Algora.Admin.alert(
+        "Message received by #{message.sender.email}: #{AlgoraWeb.Endpoint.url()}/admin/chat/#{thread_id}",
+        :info
+      )
 
       {:ok, message}
     end

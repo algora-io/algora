@@ -305,7 +305,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
               <div class="mb-1 text-sm text-muted-foreground">
                 {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}
               </div>
-              <div class="font-medium">
+              <div class="font-medium break-all">
                 {transaction.bounty.ticket.title}
               </div>
               <div class="mt-1 text-xs text-muted-foreground">

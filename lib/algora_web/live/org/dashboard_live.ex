@@ -564,7 +564,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def handle_info(%Chat.Message{} = message, socket) do
+  def handle_info(%Chat.MessageCreated{message: message}, socket) do
     if message.id in Enum.map(socket.assigns.messages, & &1.id) do
       {:noreply, socket}
     else

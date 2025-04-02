@@ -17,6 +17,42 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def parse_ticket_url(url) do
+    case Parser.full_ticket_ref(url) do
+      {:ok, [ticket_ref: [owner: owner, repo: repo, type: _type, number: number]], _, _, _, _} ->
+        %{owner: owner, repo: repo, number: number}
+
+      error ->
+        raise error
+    end
+  end
+
+  def find_claims(url) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+
+    Repo.all(
+      from c in Claim,
+        join: s in assoc(c, :source),
+        join: r in assoc(s, :repository),
+        join: ro in assoc(r, :user),
+        join: u in assoc(c, :user),
+        where: ro.provider == "github",
+        where: ro.provider_login == ^owner,
+        where: r.name == ^repo,
+        where: s.number == ^number,
+        select_merge: %{user: u}
+    )
+  end
+
+  def comment(url, body) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
+         {:ok, token} <- Github.get_installation_token(installation_id) do
+      Github.create_issue_comment(token, owner, repo, number, body)
+    end
+  end
+
   def magic(:email, email, return_to),
     do: AlgoraWeb.Endpoint.url() <> AlgoraWeb.UserAuth.generate_login_path(email, return_to)
 

@@ -250,7 +250,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
         <.section
           :if={@contributors != []}
-          title={"#{@current_org.name} Contributors"}
+          title={"#{header_prefix(@current_org)} Contributors"}
           subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
           <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
@@ -292,7 +292,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div class="mb-2">
             <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
               <div>
-                <h2 class="text-2xl font-bold dark:text-white">{@current_org.name} Bounties</h2>
+                <h2 class="text-2xl font-bold dark:text-white">
+                  {header_prefix(@current_org)} Bounties
+                </h2>
                 <p class="text-sm dark:text-gray-300">
                   Create new bounties by commenting
                   <code class="mx-1 inline-block rounded bg-emerald-950/75 px-1 py-0.5 font-mono text-sm text-emerald-400 ring-1 ring-emerald-400/25">
@@ -460,7 +462,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
 
         <.section
-          title={"#{@current_org.name} Ecosystem"}
+          title={"#{header_prefix(@current_org)} Ecosystem"}
           subtitle="Help maintain and grow your ecosystem by creating bounties and tips in your dependencies"
         >
           <div class="pt-8 flex flex-col gap-8">
@@ -1846,5 +1848,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </.drawer_content>
     </.drawer>
     """
+  end
+
+  defp header_prefix(current_org) do
+    case current_org.type do
+      :organization -> current_org.name
+      _ -> "Your"
+    end
   end
 end

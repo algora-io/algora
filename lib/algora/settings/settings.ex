@@ -48,15 +48,4 @@ defmodule Algora.Settings do
   def set_featured_developers(handles) when is_list(handles) do
     set("featured_developers", %{"handles" => handles})
   end
-
-  def migration_in_progress? do
-    case get("migration_in_progress") do
-      %{"active" => active} when is_boolean(active) -> active
-      _ -> false
-    end
-  end
-
-  def set_migration_in_progress!(active) when is_boolean(active) do
-    set!("migration_in_progress", %{"active" => active})
-  end
 end

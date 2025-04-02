@@ -37,7 +37,7 @@ defmodule Algora.Organizations.Org do
       :linkedin_url
     ])
     |> generate_id()
-    |> validate_required([:type, :handle, :display_name])
+    |> validate_required([:type, :handle])
     |> User.validate_handle()
   end
 end

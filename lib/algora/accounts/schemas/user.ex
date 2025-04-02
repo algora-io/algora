@@ -157,7 +157,7 @@ defmodule Algora.Accounts.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:email, :display_name, :handle])
+      |> validate_required([:email, :handle])
       |> validate_handle()
       |> validate_email()
       |> unique_constraint(:email)
@@ -215,7 +215,7 @@ defmodule Algora.Accounts.User do
         :provider_meta
       ])
       |> generate_id()
-      |> validate_required([:email, :display_name, :handle])
+      |> validate_required([:email, :handle])
       |> validate_handle()
       |> validate_email()
       |> unique_constraint(:email)

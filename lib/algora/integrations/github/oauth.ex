@@ -2,6 +2,8 @@ defmodule Algora.Github.OAuth do
   @moduledoc false
   alias Algora.Github
 
+  require Logger
+
   def exchange_access_token(opts) do
     code = Keyword.fetch!(opts, :code)
     state = Keyword.fetch!(opts, :state)
@@ -27,6 +29,13 @@ defmodule Algora.Github.OAuth do
     with {:ok, %Finch.Response{body: body}} <- Finch.request(request, Algora.Finch),
          {:ok, %{"access_token" => token}} <- Jason.decode(body) do
       {:ok, token}
+    else
+      {:ok, %{"error" => error}} ->
+        Logger.error("failed GitHub exchange #{inspect(error)}")
+        {:error, error}
+
+      {:error, _reason} = err ->
+        err
     end
   end
 

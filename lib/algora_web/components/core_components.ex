@@ -210,13 +210,13 @@ defmodule AlgoraWeb.CoreComponents do
       </:subtitle>
       <:subtitle :if={
         @current_context.handle && @current_context.id == @current_user.id &&
-          @current_user.last_context == "personal"
+          (@current_user.last_context == "personal" or is_nil(@current_user.last_context))
       }>
         Solver dashboard
       </:subtitle>
       <:subtitle :if={
         @current_context.handle && @current_context.id == @current_user.id &&
-          @current_user.last_context != "personal"
+          not (@current_user.last_context == "personal" or is_nil(@current_user.last_context))
       }>
         Bounty board
       </:subtitle>

@@ -93,15 +93,14 @@ defmodule Algora.MixProject do
       {:reverse_proxy_plug, "~> 3.0"},
       {:cors_plug, "~> 2.0"},
       {:timex, "~> 3.7"},
+      {:yaml_elixir, "~> 2.9"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:hackney, "~> 1.9"},
       # monitoring, logging
       {:appsignal_phoenix, "~> 2.6"},
-      {:logfmt_ex, "~> 0.4"},
-      # TODO: delete after migration
-      {:yaml_elixir, "~> 2.9"}
+      {:logfmt_ex, "~> 0.4"}
     ]
   end
 
@@ -118,7 +117,6 @@ defmodule Algora.MixProject do
       "ecto.setup": [
         "ecto.create",
         "ecto.migrate",
-        # "run scripts/database_migration.exs",
         "ecto.seed"
       ],
       "ecto.seed": ["run priv/repo/seeds.exs"],

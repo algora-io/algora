@@ -546,8 +546,10 @@ defmodule Algora.Workspace do
         join: ro in assoc(r, :user),
         where: ro.provider_login == ^repo_owner,
         join: u in assoc(c, :user),
+        distinct: [c.user_id],
         select_merge: %{user: u},
-        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
+        order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id],
+        limit: 50
       )
     )
   end

@@ -35,7 +35,8 @@ if config_env() == :prod do
     oauth_state_salt: System.fetch_env!("GITHUB_OAUTH_STATE_SALT")
 
   config :stripity_stripe,
-    api_key: System.fetch_env!("STRIPE_SECRET_KEY")
+    api_key: System.fetch_env!("STRIPE_SECRET_KEY"),
+    api_version: "2022-11-15"
 
   config :algora, :stripe,
     secret_key: System.fetch_env!("STRIPE_SECRET_KEY"),

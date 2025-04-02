@@ -116,7 +116,9 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
-          <.pattern />
+          <div class="hidden md:block">
+            <.pattern />
+          </div>
 
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
@@ -172,7 +174,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
 
-          <div class="relative isolate py-[35vw] sm:py-[25vw]">
+          <div class="relative isolate -z-10 py-[35vw] sm:py-[25vw]">
             <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               <div class="scale-[300%] sm:scale-[150%] opacity-75">
                 <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
@@ -995,7 +997,11 @@ defmodule AlgoraWeb.HomeLive do
               <.button navigate={~p"/auth/signup"}>
                 Get started
               </.button>
-              <.button href={AlgoraWeb.Constants.get(:github_repo_url)} variant="secondary">
+              <.button
+                class="pointer-events-none opacity-75"
+                href={AlgoraWeb.Constants.get(:github_repo_url)}
+                variant="secondary"
+              >
                 <.icon name="github" class="size-4 mr-2 -ml-1" /> View source code
               </.button>
             </div>

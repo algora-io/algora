@@ -78,7 +78,7 @@ defmodule Algora.MixProject do
       {:tails, "~> 0.1.5"},
       {:number, "~> 1.0.1"},
       {:tzdata, "~> 1.1"},
-      {:stripity_stripe, "~> 2.0"},
+      {:stripity_stripe, "~> 2.17.3"},
       {:live_svelte, "~> 0.14.1"},
       {:nimble_parsec, "~> 1.4"},
       {:oban, "~> 2.19"},

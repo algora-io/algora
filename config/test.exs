@@ -50,7 +50,6 @@ config :algora, :github_client, Algora.Support.GithubMock
 
 config :algora,
   cloudflare_tunnel: System.get_env("CLOUDFLARE_TUNNEL"),
-  swift_mode: false,
   auto_start_pollers: System.get_env("AUTO_START_POLLERS") == "true"
 
 config :algora, :stripe,

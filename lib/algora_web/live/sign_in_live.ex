@@ -4,12 +4,11 @@ defmodule AlgoraWeb.SignInLive do
 
   alias Algora.Accounts.User
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.LocalStore
   alias AlgoraWeb.UserAuth
   alias Swoosh.Email
 
   require Logger
-
-  @store_key "algora-sign-in"
 
   @impl true
   def render(assigns) do
@@ -248,11 +247,14 @@ defmodule AlgoraWeb.SignInLive do
   @impl true
   def handle_params(params, _uri, socket) do
     socket =
-      if connected?(socket) && params["verify"] == "1" do
-        push_event(socket, "restore", %{key: @store_key, event: "restore_settings"})
-      else
-        socket
-      end
+      LocalStore.init(socket,
+        key: __MODULE__,
+        salt: UserAuth.login_code_salt(),
+        max_age: UserAuth.login_code_ttl(),
+        ok?: &match?(%{secret_code: _, email: _}, &1)
+      )
+
+    socket = if params["verify"] == "1", do: LocalStore.subscribe(socket), else: socket
 
     socket =
       socket
@@ -274,9 +276,9 @@ defmodule AlgoraWeb.SignInLive do
           {:ok, _id} ->
             {:noreply,
              socket
+             |> LocalStore.assign_cached(:secret_code, code)
+             |> LocalStore.assign_cached(:email, email)
              |> push_patch(to: ~p"/auth/login?#{%{verify: "1", return_to: socket.assigns[:return_to]}}")
-             |> push_event("store", %{key: @store_key, data: serialize_to_token(%{code: code, email: email})})
-             |> assign(:secret_code, code)
              |> assign(:user, user)
              |> assign_form(changeset)}
 
@@ -307,53 +309,16 @@ defmodule AlgoraWeb.SignInLive do
     end
   end
 
-  def handle_event("restore_settings", token_data, socket) when is_binary(token_data) do
-    socket =
-      case restore_from_token(token_data) do
-        {:ok, nil} ->
-          socket
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
 
-        {:ok, %{code: code, email: email}} ->
-          socket
-          |> assign(:secret_code, code)
-          |> assign(:user, Algora.Accounts.get_user_by_email(email))
+    case socket.assigns[:email] do
+      nil ->
+        {:noreply, socket}
 
-        {:ok, state} ->
-          Logger.error("Failed to restore previous state. State: #{inspect(state)}.")
-          clear_browser_storage(socket)
-
-        {:error, reason} ->
-          Logger.error("Failed to restore previous state. Reason: #{inspect(reason)}.")
-          clear_browser_storage(socket)
-      end
-
-    {:noreply, socket}
-  end
-
-  def handle_event("restore_settings", _token_data, socket) do
-    {:noreply, socket}
-  end
-
-  defp restore_from_token(nil), do: {:ok, nil}
-
-  defp restore_from_token(token) do
-    case Phoenix.Token.decrypt(
-           AlgoraWeb.Endpoint,
-           UserAuth.login_code_salt(),
-           token,
-           max_age: UserAuth.login_code_ttl()
-         ) do
-      {:ok, data} -> {:ok, data}
-      {:error, reason} -> {:error, "Failed to restore previous state. Reason: #{inspect(reason)}."}
+      email ->
+        {:noreply, assign(socket, :user, Algora.Accounts.get_user_by_email(email))}
     end
-  end
-
-  defp serialize_to_token(state_data) do
-    Phoenix.Token.encrypt(AlgoraWeb.Endpoint, UserAuth.login_code_salt(), state_data)
-  end
-
-  defp clear_browser_storage(socket) do
-    push_event(socket, "clear", %{key: @store_key})
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

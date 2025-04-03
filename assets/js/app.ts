@@ -529,7 +529,7 @@ const Hooks = {
     },
 
     restore(obj) {
-      var data = sessionStorage.getItem(obj.key);
+      const data = sessionStorage.getItem(obj.key);
       this.pushEvent(obj.event, data);
     },
 

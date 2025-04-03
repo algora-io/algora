@@ -35,7 +35,7 @@ defmodule Algora.Crawler do
                   og_description: find_description(html_tree),
                   og_image_url: find_og_image(html_tree),
                   favicon_url: find_logo(html_tree, url),
-                  socials: find_social_links(html_tree)
+                  socials: find_social_links(html_tree, url)
                 }
 
                 # Enhance metadata with GitHub info if available
@@ -266,17 +266,17 @@ defmodule Algora.Crawler do
     |> Enum.join(" ")
   end
 
-  defp find_social_links(html_tree) do
+  defp find_social_links(html_tree, url) do
     %{
-      twitter: find_social_url(html_tree, :twitter),
-      discord: find_social_url(html_tree, :discord),
-      github: find_social_url(html_tree, :github),
-      instagram: find_social_url(html_tree, :instagram),
-      youtube: find_social_url(html_tree, :youtube),
-      producthunt: find_social_url(html_tree, :producthunt),
-      hackernews: find_social_url(html_tree, :hackernews),
-      slack: find_social_url(html_tree, :slack),
-      linkedin: find_social_url(html_tree, :linkedin)
+      twitter: find_social_url(html_tree, :twitter, url),
+      discord: find_social_url(html_tree, :discord, url),
+      github: find_social_url(html_tree, :github, url),
+      instagram: find_social_url(html_tree, :instagram, url),
+      youtube: find_social_url(html_tree, :youtube, url),
+      producthunt: find_social_url(html_tree, :producthunt, url),
+      hackernews: find_social_url(html_tree, :hackernews, url),
+      slack: find_social_url(html_tree, :slack, url),
+      linkedin: find_social_url(html_tree, :linkedin, url)
     }
     |> Enum.reject(fn {_k, v} -> is_nil(v) end)
     |> Map.new()
@@ -332,7 +332,7 @@ defmodule Algora.Crawler do
     ]
   }
 
-  defp find_social_url(html_tree, platform) do
+  defp find_social_url(html_tree, platform, base_url) do
     selectors = @social_selectors[platform]
 
     Enum.find_value(selectors, fn selector ->
@@ -349,7 +349,7 @@ defmodule Algora.Crawler do
 
       case url do
         nil -> nil
-        url -> follow_redirect(url)
+        url -> follow_redirect(make_absolute_url(url, base_url))
       end
     end)
   end

@@ -13,7 +13,7 @@ defmodule AlgoraWeb.SignInLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="flex min-h-[100svh] bg-[#111113]" id="algora-sign-in" phx-hook="LocalStateStore">
+    <div class="flex min-h-[100svh] bg-[#111113]" id="sign-in-page" phx-hook="LocalStateStore">
       <div class="relative flex flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:flex-none lg:px-20 xl:px-24 lg:border-r lg:border-border">
         <.wordmark class="h-10 w-auto absolute top-4 left-4 sm:top-8 sm:left-8" />
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col min-h-[426px]">
@@ -251,7 +251,8 @@ defmodule AlgoraWeb.SignInLive do
         key: __MODULE__,
         salt: UserAuth.login_code_salt(),
         max_age: UserAuth.login_code_ttl(),
-        ok?: &match?(%{secret_code: _, email: _}, &1)
+        ok?: &match?(%{secret_code: _, email: _}, &1),
+        checkpoint_url: ~p"/auth/login?#{%{verify: "1", return_to: socket.assigns[:return_to]}}"
       )
 
     socket = if params["verify"] == "1", do: LocalStore.subscribe(socket), else: socket
@@ -278,7 +279,6 @@ defmodule AlgoraWeb.SignInLive do
              socket
              |> LocalStore.assign_cached(:secret_code, code)
              |> LocalStore.assign_cached(:email, email)
-             |> push_patch(to: ~p"/auth/login?#{%{verify: "1", return_to: socket.assigns[:return_to]}}")
              |> assign(:user, user)
              |> assign_form(changeset)}
 
@@ -313,11 +313,8 @@ defmodule AlgoraWeb.SignInLive do
     socket = LocalStore.restore(socket, params)
 
     case socket.assigns[:email] do
-      nil ->
-        {:noreply, socket}
-
-      email ->
-        {:noreply, assign(socket, :user, Algora.Accounts.get_user_by_email(email))}
+      nil -> {:noreply, socket}
+      email -> {:noreply, assign(socket, :user, Algora.Accounts.get_user_by_email(email))}
     end
   end
 

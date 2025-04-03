@@ -1156,7 +1156,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
               <div
                 :if={@user.provider_meta}
-                class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
               >
                 <.link
                   :if={@user.provider_login}
@@ -1164,8 +1164,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
-                  <Logos.github class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@user.provider_login}</span>
+                  <Logos.github class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@user.provider_login}</span>
                 </.link>
                 <.link
                   :if={@user.provider_meta["twitter_handle"]}
@@ -1173,16 +1173,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
-                  <.icon name="tabler-brand-x" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@user.provider_meta["twitter_handle"]}</span>
+                  <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@user.provider_meta["twitter_handle"]}</span>
                 </.link>
                 <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
-                  <.icon name="tabler-map-pin" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@user.provider_meta["location"]}</span>
+                  <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@user.provider_meta["location"]}</span>
                 </div>
                 <div :if={@user.provider_meta["company"]} class="flex items-center gap-1">
-                  <.icon name="tabler-building" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">
+                  <.icon name="tabler-building" class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">
                     {@user.provider_meta["company"] |> String.trim_leading("@")}
                   </span>
                 </div>

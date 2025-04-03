@@ -290,7 +290,7 @@ defmodule Algora.Accounts do
 
       with true <- old_user && old_user.id != user.id,
            {:ok, old_user} <- old_user |> change(provider: nil, provider_id: nil, provider_login: nil) |> Repo.update() do
-        migrate_user(old_user, user)
+        migrate_user(old_user.id, user.id)
       else
         {:error, reason} ->
           Logger.error("Failed to migrate user: #{inspect(reason)}")
@@ -313,36 +313,36 @@ defmodule Algora.Accounts do
     end)
   end
 
-  def migrate_user(old_user, new_user) do
+  def migrate_user(old_user_id, new_user_id) do
     # TODO: enqueue job
     Repo.update_all(
-      from(r in Repository, where: r.user_id == ^old_user.id),
-      set: [user_id: new_user.id]
+      from(r in Repository, where: r.user_id == ^old_user_id),
+      set: [user_id: new_user_id]
     )
 
     Repo.update_all(
-      from(c in Contributor, where: c.user_id == ^old_user.id),
-      set: [user_id: new_user.id]
+      from(c in Contributor, where: c.user_id == ^old_user_id),
+      set: [user_id: new_user_id]
     )
 
     Repo.update_all(
-      from(c in Contract, where: c.contractor_id == ^old_user.id),
-      set: [contractor_id: new_user.id]
+      from(c in Contract, where: c.contractor_id == ^old_user_id),
+      set: [contractor_id: new_user_id]
     )
 
     Repo.update_all(
-      from(i in Installation, where: i.owner_id == ^old_user.id),
-      set: [owner_id: new_user.id]
+      from(i in Installation, where: i.owner_id == ^old_user_id),
+      set: [owner_id: new_user_id]
     )
 
     Repo.update_all(
-      from(i in Installation, where: i.provider_user_id == ^old_user.id),
-      set: [provider_user_id: new_user.id]
+      from(i in Installation, where: i.provider_user_id == ^old_user_id),
+      set: [provider_user_id: new_user_id]
     )
 
     Repo.update_all(
-      from(i in Installation, where: i.connected_user_id == ^old_user.id),
-      set: [connected_user_id: new_user.id]
+      from(i in Installation, where: i.connected_user_id == ^old_user_id),
+      set: [connected_user_id: new_user_id]
     )
 
     :ok

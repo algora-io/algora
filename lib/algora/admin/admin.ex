@@ -2,6 +2,8 @@ defmodule Algora.Admin do
   @moduledoc false
   import Ecto.Query
 
+  alias Algora.Accounts
+  alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Activities.SendDiscord
   alias Algora.Bounties
@@ -18,6 +20,39 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Ticket
 
   require Logger
+
+  def migrate_user!(old_user_id, new_user_id) do
+    old_user = Accounts.get_user!(old_user_id)
+
+    Repo.transact(fn ->
+      Accounts.migrate_user(old_user_id, new_user_id)
+
+      Repo.update_all(
+        from(i in Identity, where: i.user_id == ^old_user_id),
+        set: [user_id: new_user_id]
+      )
+
+      Repo.update_all(from(u in User, where: u.id == ^old_user_id),
+        set: [
+          provider: nil,
+          provider_id: nil,
+          provider_meta: nil,
+          provider_login: nil
+        ]
+      )
+
+      Repo.update_all(from(u in User, where: u.id == ^new_user_id),
+        set: [
+          provider: old_user.provider,
+          provider_id: old_user.provider_id,
+          provider_meta: old_user.provider_meta,
+          provider_login: old_user.provider_login
+        ]
+      )
+
+      :ok
+    end)
+  end
 
   def find_claims(url) do
     %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
@@ -133,8 +168,7 @@ defmodule Algora.Admin do
                  Algora.PSP.Invoice.pay(
                    invoice,
                    %{
-                     payment_method:
-                       autopayable_bounty.owner.customer.default_payment_method.provider_id,
+                     payment_method: autopayable_bounty.owner.customer.default_payment_method.provider_id,
                      off_session: true
                    }
                  ) do

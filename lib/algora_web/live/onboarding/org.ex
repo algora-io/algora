@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias Algora.Accounts.User
   alias Algora.Organizations
   alias AlgoraWeb.Components.Wordmarks
+  alias AlgoraWeb.LocalStore
   alias Phoenix.LiveView.AsyncResult
   alias Swoosh.Email
 
@@ -237,6 +238,24 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   # === EVENT HANDLERS === #
 
+  def handle_params(params, _uri, socket) do
+    socket =
+      LocalStore.init(socket,
+        key: __MODULE__,
+        salt: AlgoraWeb.UserAuth.login_code_salt(),
+        max_age: AlgoraWeb.UserAuth.login_code_ttl(),
+        checkpoint_url: ~p"/onboarding/org?#{%{checkpoint: "1"}}"
+      )
+
+    socket = if params["checkpoint"] == "1", do: LocalStore.subscribe(socket), else: socket
+
+    {:noreply, socket}
+  end
+
+  def handle_event("restore_settings", params, socket) do
+    {:noreply, LocalStore.restore(socket, params)}
+  end
+
   def handle_event("prev_step", _, socket) do
     current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
     prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
@@ -260,12 +279,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       %{valid?: true} ->
         {:noreply,
          socket
-         |> assign(:tech_stack_form, to_form(changeset))
-         |> assign_matching_devs()
-         |> assign(step: :email)}
+         |> LocalStore.assign_cached(:tech_stack_form, to_form(changeset))
+         |> LocalStore.assign_cached(:step, :email)
+         |> assign_matching_devs()}
 
       %{valid?: false} ->
-        {:noreply, assign(socket, tech_stack_form: to_form(changeset))}
+        {:noreply, LocalStore.assign_cached(socket, :tech_stack_form, to_form(changeset))}
     end
   end
 
@@ -294,14 +313,14 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         {:noreply,
          socket
-         |> assign(:email_form, to_form(changeset))
-         |> assign(:code_sent?, true)
+         |> LocalStore.assign_cached(:email_form, to_form(changeset))
+         |> LocalStore.assign_cached(:code_sent?, true)
          |> assign_matching_devs()
          |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
          |> assign(:user_metadata, AsyncResult.loading())}
 
       %{valid?: false} = changeset ->
-        {:noreply, assign(socket, :email_form, to_form(changeset))}
+        {:noreply, LocalStore.assign_cached(socket, :email_form, to_form(changeset))}
     end
   end
 
@@ -415,7 +434,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         {:noreply, socket}
 
       %{valid?: false} ->
-        {:noreply, assign(socket, preferences_form: to_form(changeset))}
+        {:noreply, LocalStore.assign_cached(socket, :preferences_form, to_form(changeset))}
     end
   end
 
@@ -434,18 +453,18 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           {:ok, _login_token} ->
             {:noreply,
              socket
-             |> assign(:verification_form, to_form(changeset))
-             |> assign(step: :preferences)}
+             |> LocalStore.assign_cached(:verification_form, to_form(changeset))
+             |> LocalStore.assign_cached(:step, :preferences)}
 
           {:error, _reason} ->
             {:noreply,
              socket
-             |> assign(:verification_form, to_form(changeset))
-             |> assign(:code_valid?, false)}
+             |> LocalStore.assign_cached(:verification_form, to_form(changeset))
+             |> LocalStore.assign_cached(:code_valid?, false)}
         end
 
       %{valid?: false} = changeset ->
-        {:noreply, assign(socket, :verification_form, to_form(changeset))}
+        {:noreply, LocalStore.assign_cached(socket, :verification_form, to_form(changeset))}
     end
   end
 
@@ -454,7 +473,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
     {:noreply,
      socket
-     |> assign(:tech_stack_form, to_form(changeset))
+     |> LocalStore.assign_cached(:tech_stack_form, to_form(changeset))
      |> assign_matching_devs()}
   end
 
@@ -711,7 +730,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-card">
+    <div class="min-h-screen bg-card" phx-hook="LocalStateStore" id="onboarding-page">
       <div class="flex flex-col lg:flex-row flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">
@@ -862,7 +881,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   end
 
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+    {:noreply, LocalStore.assign_cached(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
   end
 
   def handle_async(:fetch_metadata, {:exit, reason}, socket) do

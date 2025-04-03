@@ -71,11 +71,49 @@ defmodule Algora.Admin do
     )
   end
 
+  def claim_bounty(source_url, target_url, opts \\ []) do
+    source_ticket_ref = parse_ticket_url(source_url)
+    target_ticket_ref = parse_ticket_url(target_url)
+
+    with installation_id when not is_nil(installation_id) <-
+           Workspace.get_installation_id_by_owner(target_ticket_ref.owner),
+         {:ok, token} <- Github.get_installation_token(installation_id),
+         {:ok, source_ticket} <-
+           Workspace.ensure_ticket(token, source_ticket_ref.owner, source_ticket_ref.repo, source_ticket_ref.number),
+         {:ok, user} <- Workspace.ensure_user(token, source_ticket.provider_meta["user"]["login"]),
+         {:ok, target_ticket} <-
+           Workspace.ensure_ticket(token, target_ticket_ref.owner, target_ticket_ref.repo, target_ticket_ref.number),
+         {:ok, claims} <-
+           Bounties.claim_bounty(
+             %{
+               user: user,
+               coauthor_provider_logins: opts[:splits] || [],
+               target_ticket_ref: target_ticket_ref,
+               source_ticket_ref: source_ticket_ref,
+               status: if(source_ticket.provider_meta["pull_request"]["merged_at"], do: :approved, else: :pending),
+               type: :pull_request
+             },
+             installation_id: installation_id
+           ) do
+      Bounties.try_refresh_bounty_response(token, target_ticket_ref, target_ticket)
+      {:ok, claims}
+    end
+  end
+
+  def prompt_payment(url, id, solver, sponsor) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+
+    Github.create_issue_comment(token_for(owner), owner, repo, number, """
+    🎉 The pull request of @#{solver} has been merged. The bounty can be rewarded [here](#{AlgoraWeb.Endpoint.url()}/claims/#{id})
+
+    cc @#{sponsor}
+    """)
+  end
+
   def autopay_pr(url) do
     %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
 
-    with installation_id when not is_nil(installation_id) <-
-           Workspace.get_installation_id_by_owner(owner),
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
          {:ok, installation} <-
            Workspace.fetch_installation_by(
              provider: "github",

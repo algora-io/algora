@@ -266,7 +266,7 @@ defmodule Algora.Accounts do
       case {current_user, Repo.all(query)} do
         {_, []} -> nil
         {_, [user]} -> user
-        {nil, users} -> Enum.find(users, &(&1.email == primary_email))
+        {nil, users} -> Enum.find(users, &(&1.provider == "github" and &1.provider_id == to_string(info["id"])))
         {user, users} -> Enum.find(users, &(&1.id == user.id))
       end
 

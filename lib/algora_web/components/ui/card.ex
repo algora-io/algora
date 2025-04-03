@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Components.UI.Card do
 
   def card_header(assigns) do
     ~H"""
-    <div class={classes(["flex flex-col space-y-1.5 p-6 pb-0", @class])} {@rest}>
+    <div class={classes(["flex flex-col space-y-1.5 p-6", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

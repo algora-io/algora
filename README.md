@@ -1,13 +1,14 @@
 <!-- PROJECT LOGO -->
 <p align="center">
-  <a href="https://github.com/algora-io/console">
-   <img src="https://user-images.githubusercontent.com/17045339/231901505-2936b331-3716-4418-9386-4a5d9cb694ba.svg" alt="Logo">
+  <a href="https://algora.io">
+    <img src="https://algora.io/images/og/home.png" alt="Homepage">
   </a>
 
-  <h3 align="center">Algora Console</h3>
+  <h3 align="center">Algora</h3>
 
   <p align="center">
-    Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.
+  The open source Upwork for engineers
+    <!-- Discover GitHub bounties, contract work and jobs. Hire the top 1% open source developers. -->
     <br/>
     <a href="https://algora.io">Website</a>
     ·
@@ -20,15 +21,44 @@
     <a href="https://github.com/algora-io/console/issues">Issues</a>
   </p>
 
-  <p align="center">
-    <a href="https://algora.io/org/algora/bounties?status=open">
-      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Falgora.io%2Fapi%2Fshields%2Falgora%2Fbounties%3Fstatus%3Dopen" alt="Open Bounties">
-    </a>
-    <a href="https://algora.io/org/algora/bounties?status=completed">
-      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Falgora.io%2Fapi%2Fshields%2Falgora%2Fbounties%3Fstatus%3Dcompleted" alt="Rewarded Bounties">
-    </a>
-  </p>
 </p>
+
+Algora exists to reduce the friction in hiring, collaborating and paying open source developers.
+
+Algora combines:
+
+- a GitHub app to reward bounties and tips on issues/PRs
+- a payment processor to handle payouts, compliance & 1099s
+- a web app for sharing bounties, contracts and jobs
+- a history of transactions, invoices and peer reviews
+- a marketplace to meet and collaborate with top contributors
+
+| Use with your                | Benefit                                           |
+| ---------------------------- | ------------------------------------------------- |
+| **open source community**    | fund, solve and reward bounties on GitHub issues  |
+| **contractors**              | manage work and complete outcome based payments   |
+| **job candidates**           | collaborate on paid projects for interviews       |
+| **teammates**                | run an internal bounty program for fun and profit |
+| **Algora community experts** | get work done and grow your team                  |
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://algora.io/og/@/mogery" alt="Homepage" width="250">
+    </td>
+    <td align="center">
+      <img src="https://algora.io/og/@/neo773" alt="Homepage" width="250">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://algora.io/og/org/cal/home" alt="Homepage" width="250">
+    </td>
+    <td align="center">
+      <img src="https://algora.io/og/org/zio/leaderboard" alt="Homepage" width="250">
+    </td>
+  </tr>
+</table>
 
 <!-- GETTING STARTED -->
 

@@ -631,6 +631,7 @@ let csrfToken = document
   .querySelector("meta[name='csrf-token']")!
   .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
+  ...{ disconnectedTimeout: 3000 },
   hooks: { ...Hooks, ...getHooks(Components) },
   params: {
     _csrf_token: csrfToken,

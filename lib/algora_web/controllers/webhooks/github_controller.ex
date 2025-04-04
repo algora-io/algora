@@ -247,21 +247,12 @@ defmodule AlgoraWeb.Webhooks.GithubController do
         if autopay_result do
           autopay_result
         else
-          unpaid_bounties =
-            Enum.filter(
-              bounties,
-              &case autopay_result do
-                :ok -> &1.id != autopayable_bounty.id
-                _ -> true
-              end
-            )
-
           sponsors_to_notify =
-            unpaid_bounties
+            bounties
             |> Enum.map(&(&1.creator || &1.owner))
             |> Enum.map_join(", ", &"@#{&1.provider_login}")
 
-          if unpaid_bounties != [] do
+          if bounties != [] do
             names =
               claims
               |> Enum.map(fn c -> "@#{c.user.provider_login}" end)

@@ -30,7 +30,7 @@ defmodule AlgoraWeb.LocalStore do
     end
   end
 
-  def restore(socket, token) when is_binary(token) do
+  def restore(socket, token) do
     store = socket.assigns._store
 
     case restore_from_token(store, token) do
@@ -56,8 +56,6 @@ defmodule AlgoraWeb.LocalStore do
         clear_browser_storage(socket)
     end
   end
-
-  def restore(socket, _token), do: socket
 
   def assign_cached(socket, key, data) do
     store = socket.assigns._store

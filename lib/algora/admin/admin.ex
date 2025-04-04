@@ -184,7 +184,6 @@ defmodule Algora.Admin do
           Enum.find(
             bounties,
             &(not &1.autopay_disabled and
-                not is_nil(installation) and
                 &1.owner.id == installation.connected_user_id and
                 not is_nil(&1.owner.customer) and
                 not is_nil(&1.owner.customer.default_payment_method))

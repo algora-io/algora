@@ -21,6 +21,12 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def init_contributors(repo_owner, repo_name) do
+    with {:ok, repo} <- Workspace.ensure_repository(token(), repo_owner, repo_name) do
+      Workspace.ensure_contributors(token(), repo)
+    end
+  end
+
   def migrate_user!(old_user_id, new_user_id) do
     old_user = Accounts.get_user!(old_user_id)
 

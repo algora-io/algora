@@ -2,6 +2,7 @@ defmodule Algora.Settings do
   @moduledoc false
   use Ecto.Schema
 
+  alias Algora.Accounts
   alias Algora.Repo
 
   @primary_key {:key, :string, []}
@@ -49,14 +50,47 @@ defmodule Algora.Settings do
     set("featured_developers", %{"handles" => handles})
   end
 
-  def get_org_matches(org_handle) when is_binary(org_handle) do
-    case get("org_matches:#{org_handle}") do
-      %{"handles" => handles} when is_list(handles) -> handles
-      _ -> nil
+  def get_org_matches(org) do
+    case get("org_matches:#{org.handle}") do
+      %{"matches" => matches} when is_list(matches) ->
+        user_map =
+          [handles: Enum.map(matches, & &1["handle"])]
+          |> Accounts.list_developers()
+          |> Map.new(fn user -> {user.handle, user} end)
+
+        Enum.flat_map(matches, fn match ->
+          if user = Map.get(user_map, match["handle"]) do
+            # TODO: N+1
+            projects = Accounts.list_contributed_projects(user, limit: 2, tech_stack: org.tech_stack)
+
+            [
+              %{
+                user: user,
+                projects: projects,
+                badge_variant: match["badge_variant"],
+                badge_text: match["badge_text"]
+              }
+            ]
+          else
+            []
+          end
+        end)
+
+      _ ->
+        nil
     end
   end
 
-  def set_org_matches(org_handle, handles) when is_binary(org_handle) and is_list(handles) do
-    set("org_matches:#{org_handle}", %{"handles" => handles})
+  def set_org_matches(org_handle, matches) when is_binary(org_handle) and is_list(matches) do
+    matches_map =
+      Enum.map(matches, fn match ->
+        %{
+          "handle" => match.handle,
+          "badge_variant" => match.badge_variant,
+          "badge_text" => match.badge_text
+        }
+      end)
+
+    set("org_matches:#{org_handle}", %{"matches" => matches_map})
   end
 end

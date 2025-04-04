@@ -46,7 +46,10 @@ defmodule AlgoraWeb.Components.UI.Badge do
       "destructive" => "bg-destructive/10 text-destructive border-destructive/20",
       "success" => "bg-success/10 text-success border-success/20",
       "warning" => "bg-warning/10 text-warning border-warning/20",
-      "outline" => "bg-transparent text-foreground border-foreground/30"
+      "outline" => "bg-transparent text-foreground border-foreground/30",
+      "indigo" => "bg-indigo-400/10 text-indigo-400 border-indigo-400/20",
+      "purple" => "bg-purple-400/10 text-purple-400 border-purple-400/20",
+      "blue" => "bg-blue-400/10 text-blue-400 border-blue-400/20"
     }
   }
 

@@ -9,8 +9,8 @@ defmodule AlgoraWeb.UserAuth do
   alias Algora.Accounts.User
   alias Phoenix.LiveView
 
-  def login_code_ttl, do: Algora.config([:login_code, :ttl])
-  def login_code_salt, do: Algora.config([:login_code, :salt])
+  defp login_code_ttl, do: Algora.config([:login_code, :ttl])
+  defp login_code_salt, do: Algora.config([:login_code, :salt])
 
   def on_mount(:current_user, _params, session, socket) do
     case session do

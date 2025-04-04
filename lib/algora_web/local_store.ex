@@ -4,7 +4,10 @@ defmodule AlgoraWeb.LocalStore do
 
   require Logger
 
-  defstruct [:key, :salt, :max_age, :ok?, :data, :checkpoint_url, :checkpointed?]
+  defstruct [:key, :ok?, :data, :checkpoint_url, :checkpointed?]
+
+  defp ttl, do: Algora.config([:local_store, :ttl])
+  defp salt(%__MODULE__{} = store), do: to_string(store.key) <> Algora.config([:local_store, :salt])
 
   def init(socket, opts) do
     store =
@@ -86,14 +89,14 @@ defmodule AlgoraWeb.LocalStore do
   defp restore_from_token(_store, nil), do: {:ok, nil}
 
   defp restore_from_token(%__MODULE__{} = store, token) do
-    case Phoenix.Token.decrypt(AlgoraWeb.Endpoint, store.salt, token, max_age: store.max_age) do
+    case Phoenix.Token.decrypt(AlgoraWeb.Endpoint, salt(store), token, max_age: ttl()) do
       {:ok, data} -> {:ok, :erlang.binary_to_term(data)}
       {:error, reason} -> {:error, "Failed to restore previous state. Reason: #{inspect(reason)}."}
     end
   end
 
   defp serialize_to_token(%__MODULE__{} = store) do
-    Phoenix.Token.encrypt(AlgoraWeb.Endpoint, store.salt, :erlang.term_to_binary(store.data))
+    Phoenix.Token.encrypt(AlgoraWeb.Endpoint, salt(store), :erlang.term_to_binary(store.data))
   end
 
   defp clear_browser_storage(socket) do

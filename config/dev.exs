@@ -137,6 +137,10 @@ config :algora, :login_code,
   ttl: String.to_integer(System.get_env("LOGIN_CODE_TTL", "3600")),
   salt: System.get_env("LOGIN_CODE_SALT", "algora-login-code")
 
+config :algora, :local_store,
+  ttl: String.to_integer(System.get_env("LOCAL_STORE_TTL", "3600")),
+  salt: System.get_env("LOCAL_STORE_SALT", "algora-local-store")
+
 config :algora,
   plausible_url: System.get_env("PLAUSIBLE_URL"),
   assets_url: System.get_env("ASSETS_URL"),

@@ -5,7 +5,6 @@ defmodule AlgoraWeb.SignInLive do
   alias Algora.Accounts.User
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.LocalStore
-  alias AlgoraWeb.UserAuth
   alias Swoosh.Email
 
   require Logger
@@ -249,8 +248,6 @@ defmodule AlgoraWeb.SignInLive do
     socket =
       LocalStore.init(socket,
         key: __MODULE__,
-        salt: UserAuth.login_code_salt(),
-        max_age: UserAuth.login_code_ttl(),
         ok?: &match?(%{secret_code: _, email: _}, &1),
         checkpoint_url: ~p"/auth/login?#{%{verify: "1", return_to: socket.assigns[:return_to]}}"
       )

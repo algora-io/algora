@@ -29,6 +29,10 @@ defmodule AlgoraWeb.API.BountyController do
     render(conn, :index, bounties: bounties)
   end
 
+  def options(conn, _params) do
+    send_resp(conn, 200, "")
+  end
+
   # Convert JSON/map parameters to keyword list criteria
   defp to_criteria(params) when is_map(params) do
     params

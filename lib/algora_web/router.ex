@@ -25,7 +25,7 @@ defmodule AlgoraWeb.Router do
 
   # Legacy tRPC pipeline
   pipeline :trpc do
-    plug CORSPlug
+    plug CORSPlug, headers: ["Content-Type"]
   end
 
   @redirects Application.compile_env(:algora, :redirects, [])
@@ -191,8 +191,8 @@ defmodule AlgoraWeb.Router do
     scope "/trpc" do
       pipe_through :trpc
 
+      options "/bounty.list", BountyController, :options
       get "/bounty.list", BountyController, :index
-      post "/bounty.list", BountyController, :index
     end
 
     # Legacy OG Image redirects

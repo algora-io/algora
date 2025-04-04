@@ -49,7 +49,7 @@ defmodule Algora.Github.Client do
 
   defp maybe_handle_error(body), do: {:ok, body}
 
-  defp run_cached(path, fun) do
+  def run_cached(path, fun) do
     case read_from_cache(path) do
       :not_found ->
         Logger.warning("❌ Cache miss for #{path}")

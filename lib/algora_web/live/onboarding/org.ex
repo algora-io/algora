@@ -242,8 +242,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     socket =
       LocalStore.init(socket,
         key: __MODULE__,
-        salt: AlgoraWeb.UserAuth.login_code_salt(),
-        max_age: AlgoraWeb.UserAuth.login_code_ttl(),
         checkpoint_url: ~p"/onboarding/org?#{%{checkpoint: "1"}}"
       )
 

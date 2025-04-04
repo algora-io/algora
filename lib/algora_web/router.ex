@@ -3,7 +3,7 @@ defmodule AlgoraWeb.Router do
 
   import AlgoraWeb.Analytics, only: [fetch_current_country: 2, fetch_current_page: 2]
   import AlgoraWeb.RedirectPlug
-  import AlgoraWeb.UserAuth, only: [fetch_current_user: 2, require_authenticated_admin: 2]
+  import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
   import Oban.Web.Router
   import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
 

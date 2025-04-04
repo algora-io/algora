@@ -64,5 +64,14 @@
   </head>
   <body class="dark">
     {@inner_content}
+    <div
+      :if={Application.get_env(:algora, :ingest_token)}
+      id="capture"
+      phx-hook="Capture"
+      data-token={Application.get_env(:algora, :ingest_token)}
+      data-host={AlgoraWeb.Endpoint.url() <> "/ingest"}
+      data-email={if @current_user, do: @current_user.email}
+    >
+    </div>
   </body>
 </html>

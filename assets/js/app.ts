@@ -4,6 +4,7 @@ import { LiveSocket, type ViewHook } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 import { getHooks } from "live_svelte";
 import * as Components from "../svelte/**/*.svelte";
+import posthog from "posthog-js";
 import "emoji-picker-element";
 
 // TODO: add eslint & biome
@@ -41,6 +42,19 @@ let execJS = (selector, attr) => {
 };
 
 const Hooks = {
+  Capture: {
+    mounted() {
+      const token = this.el.getAttribute("data-token");
+      if (!token) return;
+
+      posthog.init(token, { api_host: this.el.getAttribute("data-host") });
+
+      const email = this.el.getAttribute("data-email");
+      if (!email) return;
+
+      posthog.identify(email, { email });
+    },
+  },
   Flash: {
     mounted() {
       let hide = () =>

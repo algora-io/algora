@@ -36,6 +36,7 @@ defmodule AlgoraWeb.Router do
 
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
+    forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug, upstream: :ingest_static_url
     forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
 
     # forward "/docs", AlgoraWeb.Plugs.RewriteDocsPlug,

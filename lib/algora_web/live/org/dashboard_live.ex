@@ -63,6 +63,17 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       contributors = list_contributors(current_org)
 
+      matches =
+        if current_org.handle do
+          if handles = Algora.Settings.get_org_matches(current_org.handle) do
+            Repo.all(
+              from u in User,
+                where: u.handle in ^handles,
+                order_by: fragment("array_position(?, ?::text)", ^handles, u.handle)
+            )
+          end
+        end
+
       admins_last_active = Algora.Admin.admins_last_active()
 
       {:ok,
@@ -72,6 +83,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:installations, installations)
        |> assign(:experts, experts)
        |> assign(:contributors, contributors)
+       |> assign(:matches, matches)
        |> assign(:developers, contributors |> Enum.map(& &1.user) |> Enum.concat(experts))
        |> assign(:has_more_bounties, false)
        |> assign(:has_more_transactions, false)
@@ -257,6 +269,26 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %Contributor{user: user} <- @contributors do %>
+                  <.developer_card
+                    user={user}
+                    contract_for_user={contract_for_user(@contracts, user)}
+                    current_org={@current_org}
+                  />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </.section>
+
+        <.section
+          :if={@matches != nil && @matches != []}
+          title="Algora Matches"
+          subtitle="Developers that match your tech stack and requirements"
+        >
+          <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
+            <table class="w-full caption-bottom text-sm">
+              <tbody>
+                <%= for user <- @matches do %>
                   <.developer_card
                     user={user}
                     contract_for_user={contract_for_user(@contracts, user)}

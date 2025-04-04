@@ -48,4 +48,15 @@ defmodule Algora.Settings do
   def set_featured_developers(handles) when is_list(handles) do
     set("featured_developers", %{"handles" => handles})
   end
+
+  def get_org_matches(org_handle) when is_binary(org_handle) do
+    case get("org_matches:#{org_handle}") do
+      %{"handles" => handles} when is_list(handles) -> handles
+      _ -> nil
+    end
+  end
+
+  def set_org_matches(org_handle, handles) when is_binary(org_handle) and is_list(handles) do
+    set("org_matches:#{org_handle}", %{"handles" => handles})
+  end
 end

@@ -21,8 +21,11 @@ defmodule AlgoraWeb.Admin.AdminLive do
     # Get saved queries from settings
     saved_queries = get_saved_queries()
 
+    timezone = if(params = get_connect_params(socket), do: params["timezone"])
+
     {:ok,
      socket
+     |> assign(:timezone, timezone)
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
      |> assign(:selected_period, "30d")
@@ -44,8 +47,11 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
   def cell(%{value: %NaiveDateTime{} = value} = assigns) do
     ~H"""
-    <span class="tabular-nums whitespace-nowrap text-sm">
-      {Calendar.strftime(value, "%Y/%m/%d, %H:%M:%S")}
+    <span :if={@timezone} class="tabular-nums whitespace-nowrap text-sm">
+      {Calendar.strftime(
+        DateTime.from_naive!(value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
+        "%Y/%m/%d, %H:%M:%S"
+      )}
     </span>
     """
   end
@@ -66,7 +72,9 @@ defmodule AlgoraWeb.Admin.AdminLive do
         String.starts_with?(value, "https://www.gravatar.com") or
           String.starts_with?(value, "https://gravatar.com") ->
         ~H"""
-        <img src={@value} class="h-6 w-6 rounded-full" />
+        <div class="flex justify-center">
+          <img src={@value} class="h-6 w-6 rounded-full" />
+        </div>
         """
 
       String.length(value) == 2 ->
@@ -87,7 +95,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
   def cell(%{value: value} = assigns) when is_list(value) do
     ~H"""
-    <div class="flex gap-2">
+    <div class="flex gap-2 whitespace-nowrap">
       <%= for item <- @value do %>
         <.badge>{item}</.badge>
       <% end %>
@@ -97,7 +105,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
   def cell(%{value: {currency, amount}} = assigns) do
     ~H"""
-    <div class="font-display font-semibold text-lg tabular-nums text-right">
+    <div class="font-display font-medium text-base text-emerald-400 tabular-nums text-right">
       {Money.new!(currency, amount, no_fraction_if_integer: true)}
     </div>
     """
@@ -173,7 +181,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
                   <%= for row <- results.rows do %>
                     <tr class="border-b border-border">
                       <%= for value <- row do %>
-                        <td class="p-4"><.cell value={value} /></td>
+                        <td class="p-4"><.cell value={value} timezone={@timezone} /></td>
                       <% end %>
                     </tr>
                   <% end %>

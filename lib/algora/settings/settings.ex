@@ -78,7 +78,7 @@ defmodule Algora.Settings do
         end)
 
       _ ->
-        nil
+        []
     end
   end
 

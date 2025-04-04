@@ -169,6 +169,36 @@ defmodule Algora.Accounts do
     list_developers_with(base_query(), criteria)
   end
 
+  def list_contributed_projects(user, opts \\ []) do
+    query =
+      from tx in Transaction,
+        where: tx.type == :credit,
+        where: tx.status == :succeeded,
+        where: tx.user_id == ^user.id,
+        left_join: bounty in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == bounty.ticket_id or t.id == tip.ticket_id,
+        left_join: r in assoc(t, :repository),
+        as: :r,
+        left_join: ro in assoc(r, :user),
+        group_by: ro.id,
+        order_by: [desc: sum(tx.net_amount)],
+        select: {ro, sum(tx.net_amount)},
+        limit: ^opts[:limit]
+
+    query =
+      if opts[:tech_stack] do
+        from([b, r: r] in query,
+          where: fragment("? && ?::citext[]", r.tech_stack, ^opts[:tech_stack])
+        )
+      else
+        query
+      end
+
+    Repo.all(query)
+  end
+
   @spec fetch_developer(binary()) :: {:ok, User.t()} | {:error, :not_found}
   def fetch_developer(id) do
     case list_developers(id: id, limit: 1) do

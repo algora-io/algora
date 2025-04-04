@@ -10,6 +10,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Logos
+  alias AlgoraWeb.LocalStore
 
   require Logger
 
@@ -95,7 +96,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-card">
+    <div class="min-h-screen bg-card" phx-hook="LocalStateStore" id="onboarding-dev-page">
       <div class="flex flex-col lg:flex-row flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">
@@ -126,6 +127,19 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    socket =
+      LocalStore.init(socket,
+        key: __MODULE__,
+        checkpoint_url: ~p"/onboarding/dev?#{%{checkpoint: "1"}}"
+      )
+
+    socket = if params["checkpoint"] == "1", do: LocalStore.subscribe(socket), else: socket
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:authenticated, user}, socket) do
     tech_stack = get_field(socket.assigns.info_form.source, :tech_stack)
     intentions = get_field(socket.assigns.info_form.source, :intentions)
@@ -148,6 +162,11 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
+  def handle_event("restore_settings", params, socket) do
+    {:noreply, LocalStore.restore(socket, params)}
+  end
+
+  @impl true
   def handle_event("sign_in_with_github", _params, socket) do
     popup_url = Github.authorize_url(%{socket_id: socket.id})
     {:noreply, push_event(socket, "open_popup", %{url: popup_url})}
@@ -161,8 +180,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
-  def handle_event("tech_stack_changed", _params, socket) do
-    {:noreply, socket}
+  def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
+    changeset = InfoForm.changeset(%InfoForm{}, %{tech_stack: tech_stack})
+
+    {:noreply, LocalStore.assign_cached(socket, :info_form, to_form(changeset))}
   end
 
   @impl true
@@ -183,11 +204,11 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       %{valid?: true} ->
         {:noreply,
          socket
-         |> assign(:info_form, to_form(changeset))
-         |> assign(step: :oauth)}
+         |> LocalStore.assign_cached(:info_form, to_form(changeset))
+         |> LocalStore.assign_cached(:step, :oauth)}
 
       %{valid?: false} ->
-        {:noreply, assign(socket, info_form: to_form(changeset))}
+        {:noreply, LocalStore.assign_cached(socket, :info_form, to_form(changeset))}
     end
   end
 

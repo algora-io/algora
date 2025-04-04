@@ -68,7 +68,8 @@ defmodule Algora.Settings do
                 user: user,
                 projects: projects,
                 badge_variant: match["badge_variant"],
-                badge_text: match["badge_text"]
+                badge_text: match["badge_text"],
+                hourly_rate: Money.new(:USD, match["hourly_rate"], no_fraction_if_integer: true)
               }
             ]
           else
@@ -82,15 +83,6 @@ defmodule Algora.Settings do
   end
 
   def set_org_matches(org_handle, matches) when is_binary(org_handle) and is_list(matches) do
-    matches_map =
-      Enum.map(matches, fn match ->
-        %{
-          "handle" => match.handle,
-          "badge_variant" => match.badge_variant,
-          "badge_text" => match.badge_text
-        }
-      end)
-
-    set("org_matches:#{org_handle}", %{"matches" => matches_map})
+    set("org_matches:#{org_handle}", %{"matches" => matches})
   end
 end

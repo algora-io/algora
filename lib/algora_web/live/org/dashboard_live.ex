@@ -1289,7 +1289,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border bg-card rounded-xl text-card-foreground shadow p-6 divide-x divide-border">
+    <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
       <div>
         <div class="flex items-center gap-4">
           <.link navigate={User.url(@match.user)}>
@@ -1303,7 +1303,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
           <div>
             <div class="flex items-center gap-4 text-foreground">
-              <.link navigate={User.url(@match.user)} class="text-xl font-semibold hover:underline">
+              <.link
+                navigate={User.url(@match.user)}
+                class="text-lg sm:text-xl font-semibold hover:underline truncate"
+              >
                 {@match.user.name}
               </.link>
               <.badge variant={@match.badge_variant} size="lg">
@@ -1312,7 +1315,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </div>
             <div
               :if={@match.user.provider_meta}
-              class="pt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
+              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
             >
               <.link
                 :if={@match.user.provider_login}
@@ -1333,9 +1336,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
               </.link>
             </div>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm">
+              <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
+                {Money.to_string!(@match.hourly_rate)}/hr
+              </span>
+            </div>
           </div>
         </div>
-        <div class="pt-4 grid grid-cols-1 lg:grid-cols-3 gap-2 w-[22rem]">
+        <div class="pt-4 grid grid-cols-2 gap-2 xl:w-[20rem]">
           <.button
             phx-click="share_opportunity"
             phx-value-user_id={@match.user.id}
@@ -1345,16 +1353,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
           >
             <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
           </.button>
-          <.button
-            phx-click="share_opportunity"
-            phx-value-user_id={@match.user.id}
-            phx-value-type="tip"
-            variant="none"
-            class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-800/10 hover:text-red-300 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-800/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
-          >
-            <.icon name="tabler-heart" class="size-4 text-current mr-2 -ml-1" /> Tip
-          </.button>
-
           <.button
             :if={@contract_for_user && @contract_for_user.status in [:active, :paid]}
             navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
@@ -1384,8 +1382,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
       </div>
 
-      <div class="pl-12 w-[35rem]">
-        <div class="text-base text-foreground font-medium">
+      <div class="pt-2 xl:pt-0 xl:pl-8 xl:w-[35rem] xl:border-l xl:border-border">
+        <div class="text-sm sm:text-base text-foreground font-medium">
           Completed <span class="font-semibold font-display">{@match.user.transactions_count}</span>
           bounties across
           <span class="font-semibold font-display">{@match.user.contributed_projects_count}</span>
@@ -1394,30 +1392,30 @@ defmodule AlgoraWeb.Org.DashboardLive do
             ({Money.to_string!(@match.user.total_earned)})
           </span>
         </div>
-        <div class="pt-2 grid grid-cols-2 gap-8">
+        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
               navigate={~p"/org/#{@current_org.handle}"}
-              class="flex items-center gap-4 text-sm p-2 rounded-lg"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
             >
-              <.avatar class="h-12 w-12 rounded-lg saturate-0">
+              <.avatar class="h-10 w-10 sm:h-12 sm:w-12 rounded-lg saturate-0">
                 <.avatar_image src={project.avatar_url} alt={project.name} />
                 <.avatar_fallback class="rounded-lg">
                   {Algora.Util.initials(project.name)}
                 </.avatar_fallback>
               </.avatar>
               <div class="flex flex-col">
-                <div class="text-lg font-medium">
+                <div class="text-base sm:text-lg font-medium">
                   {project.name}
                 </div>
 
                 <div class="flex items-center gap-2 whitespace-nowrap">
-                  <div class="text-base text-foreground font-display font-semibold">
-                    <.icon name="tabler-star-filled" class="size-5 text-amber-400 mr-1" />{format_number(
+                  <div class="text-sm sm:text-base text-foreground font-display font-semibold">
+                    <.icon name="tabler-star-filled" class="size-4 sm:size-5 text-amber-400 mr-1" />{format_number(
                       project.stargazers_count
                     )}
                   </div>
-                  <div class="text-base text-foreground">
+                  <div class="text-sm sm:text-base text-foreground">
                     <span class="text-emerald-400 font-display font-semibold">
                       {total_earned}
                     </span>

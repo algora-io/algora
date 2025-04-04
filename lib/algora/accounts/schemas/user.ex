@@ -246,7 +246,7 @@ defmodule Algora.Accounts.User do
       :last_context
     ])
     |> generate_id()
-    |> validate_required([:type, :handle, :email, :display_name])
+    |> validate_required([:type, :handle, :email])
     |> validate_email()
     |> unique_constraint(:handle)
     |> unique_constraint(:email)
@@ -271,7 +271,7 @@ defmodule Algora.Accounts.User do
       :hourly_rate_min,
       :hours_per_week
     ])
-    |> validate_required([:handle, :display_name])
+    |> validate_required([:handle])
     |> validate_handle()
     |> validate_timezone()
   end

@@ -1392,7 +1392,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             ({Money.to_string!(@match.user.total_earned)})
           </span>
         </div>
-        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap gap-4 xl:gap-8">
+        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
               navigate={~p"/org/#{@current_org.handle}"}

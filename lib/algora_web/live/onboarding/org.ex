@@ -399,7 +399,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             avatar_url: get_in(metadata, [:avatar_url]),
             handle: user_handle,
             tech_stack: tech_stack,
-            last_context: org_handle,
             timezone: socket.assigns.timezone
           }
 
@@ -417,8 +416,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
         socket =
           case Algora.Organizations.onboard_organization(params) do
-            {:ok, %{org: org}} ->
-              redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code, User.url(org)))
+            {:ok, _} ->
+              redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code))
 
             {:error, name, changeset, _created} ->
               Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")

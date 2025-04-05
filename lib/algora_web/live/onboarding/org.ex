@@ -87,13 +87,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:email, :domain])
-      |> validate_required([:email])
+      |> validate_required([:email, :domain])
       |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must be a valid email address")
       |> validate_format(:domain, ~r/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/,
         message: "must be a valid domain"
       )
       |> validate_domain_not_blacklisted()
-      |> validate_email_is_company_domain()
     end
   end
 

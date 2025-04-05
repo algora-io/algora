@@ -17,43 +17,29 @@ defmodule AlgoraWeb.Org.Nav do
   def on_mount(:default, %{"org_handle" => org_handle} = params, _session, socket) do
     current_user = socket.assigns[:current_user]
     current_org = Organizations.get_org_by(handle: org_handle)
-    current_user_role = OrgAuth.get_user_role(current_user, current_org)
 
-    # TODO: restore once chat is implemented
-    contacts = []
+    if current_org do
+      current_user_role = OrgAuth.get_user_role(current_user, current_org)
 
-    # members = Organizations.list_org_members(current_org) |> Enum.map(& &1.user)
-    # contractors = Organizations.list_org_contractors(current_org)
-    # contacts =
-    #   (contractors ++ members)
-    #   |> Enum.uniq_by(& &1.id)
-    #   |> Enum.reject(&(&1.id == socket.assigns.current_user.id))
-    #   |> Enum.map(fn user ->
-    #     %{
-    #       id: user.id,
-    #       name: user.name || user.handle,
-    #       handle: user.handle,
-    #       avatar_url: user.avatar_url,
-    #       type: :individual
-    #     }
-    #   end)
+      main_bounty_form =
+        if Member.can_create_bounty?(current_user_role) do
+          to_form(BountyForm.changeset(%BountyForm{}, %{}))
+        end
 
-    main_bounty_form =
-      if Member.can_create_bounty?(current_user_role) do
-        to_form(BountyForm.changeset(%BountyForm{}, %{}))
-      end
-
-    {:cont,
-     socket
-     |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:main_bounty_form, main_bounty_form)
-     |> assign(:main_bounty_form_open?, false)
-     |> assign(:current_org, current_org)
-     |> assign(:current_user_role, current_user_role)
-     |> assign(:nav, nav_items(current_org.handle, current_user_role))
-     |> assign(:contacts, contacts)
-     |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
-     |> attach_hook(:handle_event, :handle_event, &handle_event/3)}
+      {:cont,
+       socket
+       |> assign(:screenshot?, not is_nil(params["screenshot"]))
+       |> assign(:main_bounty_form, main_bounty_form)
+       |> assign(:main_bounty_form_open?, false)
+       |> assign(:current_org, current_org)
+       |> assign(:current_user_role, current_user_role)
+       |> assign(:nav, nav_items(current_org.handle, current_user_role))
+       |> assign(:contacts, [])
+       |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
+       |> attach_hook(:handle_event, :handle_event, &handle_event/3)}
+    else
+      raise AlgoraWeb.NotFoundError
+    end
   end
 
   defp handle_event("create_bounty_main", %{"bounty_form" => params}, socket) do

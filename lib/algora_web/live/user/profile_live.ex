@@ -10,17 +10,21 @@ defmodule AlgoraWeb.User.ProfileLive do
 
   @impl true
   def mount(%{"handle" => handle}, _session, socket) do
-    {:ok, user} = Accounts.fetch_developer_by(handle: handle)
+    case Accounts.fetch_developer_by(handle: handle) do
+      {:ok, user} ->
+        transactions = Payments.list_received_transactions(user.id, limit: page_size())
 
-    transactions = Payments.list_received_transactions(user.id, limit: page_size())
+        {:ok,
+         socket
+         |> assign(:user, user)
+         |> assign(:page_title, "#{user.name}")
+         |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
+         |> assign(:transactions, to_transaction_rows(transactions))
+         |> assign(:has_more_transactions, length(transactions) >= page_size())}
 
-    {:ok,
-     socket
-     |> assign(:user, user)
-     |> assign(:page_title, "#{user.name}")
-     |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
-     |> assign(:transactions, to_transaction_rows(transactions))
-     |> assign(:has_more_transactions, length(transactions) >= page_size())}
+      {:error, :not_found} ->
+        raise AlgoraWeb.NotFoundError
+    end
   end
 
   @impl true

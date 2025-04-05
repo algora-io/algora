@@ -16,7 +16,9 @@ defmodule AlgoraWeb.Admin.AdminLive do
     :ok = Activities.subscribe()
 
     mainthing = Mainthings.get_latest()
-    notes_changeset = Mainthing.changeset(%Mainthing{content: (mainthing && mainthing.content) || ""}, %{})
+
+    notes_changeset =
+      Mainthing.changeset(%Mainthing{content: (mainthing && mainthing.content) || ""}, %{})
 
     # Get saved queries from settings
     saved_queries = get_saved_queries()
@@ -39,7 +41,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:sql_query, "")
      |> assign(:query_results, nil)
      |> assign(:saved_queries, saved_queries)
-     |> assign(:show_save_dialog, false)
+     |> assign(:save_dialog, false)
      |> assign(:new_query_name, "")
      |> stream(:activities, [])
      |> start_async(:get_activities, fn -> Activities.all() end)}
@@ -78,9 +80,11 @@ defmodule AlgoraWeb.Admin.AdminLive do
         """
 
       String.length(value) == 2 ->
+        country_emoji = Algora.Misc.CountryEmojis.get(value)
+
         ~H"""
         <div class="flex justify-center">
-          {Algora.Misc.CountryEmojis.get(value)}
+          {if country_emoji, do: country_emoji, else: @value}
         </div>
         """
 
@@ -138,33 +142,24 @@ defmodule AlgoraWeb.Admin.AdminLive do
             <% end %>
           </div>
         </div>
-
-        <.simple_form for={%{}} phx-submit="execute_query" phx-change="validate_query">
-          <div class="mb-4">
-            <.input
-              type="textarea"
-              name="query"
-              value={@sql_query}
-              rows={if @sql_query != "", do: "12"}
-              class="font-mono"
-            />
-          </div>
-          <div class="flex justify-end gap-2">
-            <.button type="button" phx-click="show_save_dialog">Save Query</.button>
-            <.button type="submit">Execute Query</.button>
+        <.simple_form for={%{}} phx-submit="save_query">
+          <div class="flex items-center justify-between gap-4 w-full">
+            <div class="flex-1 w-full">
+              <.input type="text" name="query_name" value={@new_query_name} placeholder="Query name" />
+            </div>
+            <.button type="submit">Save</.button>
           </div>
         </.simple_form>
-
-        <%= if @show_save_dialog do %>
-          <div class="mt-4">
-            <.simple_form for={%{}} phx-submit="save_query">
-              <.input type="text" name="name" value={@new_query_name} placeholder="Query name" />
-              <:actions>
-                <.button type="submit">Save</.button>
-              </:actions>
-            </.simple_form>
-          </div>
-        <% end %>
+        <.simple_form for={%{}} phx-submit="execute_query" phx-change="validate_query" class="pt-4">
+          <.input
+            type="textarea"
+            name="query"
+            value={@sql_query}
+            rows={if @sql_query != "", do: "12"}
+            class="font-mono"
+            phx-hook="CtrlEnterSubmit"
+          />
+        </.simple_form>
 
         <div class="mt-4 overflow-x-auto">
           <%= case @query_results do %>
@@ -422,7 +417,10 @@ defmodule AlgoraWeb.Admin.AdminLive do
          |> put_flash(:info, "Notes saved successfully")}
 
       {:error, changeset} ->
-        {:noreply, socket |> assign(:notes_form, to_form(changeset)) |> put_flash(:error, "Error saving notes")}
+        {:noreply,
+         socket
+         |> assign(:notes_form, to_form(changeset))
+         |> put_flash(:error, "Error saving notes")}
     end
   end
 
@@ -443,25 +441,17 @@ defmodule AlgoraWeb.Admin.AdminLive do
     {:noreply, socket |> assign(:sql_query, query) |> assign(:query_results, results)}
   end
 
-  def handle_event("show_save_dialog", _, socket) do
-    {:noreply, assign(socket, show_save_dialog: true)}
-  end
-
-  def handle_event("save_query", %{"name" => name}, socket) when byte_size(name) > 0 do
+  def handle_event("save_query", %{"query_name" => name}, socket) when byte_size(name) > 0 do
     save_query(name, socket.assigns.sql_query)
     saved_queries = get_saved_queries()
 
-    {:noreply,
-     socket
-     |> assign(:saved_queries, saved_queries)
-     |> assign(:show_save_dialog, false)
-     |> assign(:new_query_name, "")}
+    {:noreply, assign(socket, :saved_queries, saved_queries)}
   end
 
   def handle_event("load_query", %{"name" => name}, socket) do
     queries = get_saved_queries()
     query = Map.get(queries, name)
-    {:noreply, assign(socket, sql_query: query)}
+    {:noreply, assign(socket, sql_query: query, new_query_name: name)}
   end
 
   def handle_info(%Activities.Activity{} = activity, socket) do

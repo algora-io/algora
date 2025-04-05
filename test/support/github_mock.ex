@@ -170,4 +170,9 @@ defmodule Algora.Support.GithubMock do
   def add_labels(_access_token, _owner, _repo, _number, _labels) do
     {:ok, []}
   end
+
+  @impl true
+  def create_label(_access_token, _owner, _repo, _label) do
+    {:ok, %{"id" => random_id()}}
+  end
 end

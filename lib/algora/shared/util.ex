@@ -28,6 +28,33 @@ defmodule Algora.Util do
     |> :erlang.binary_to_term()
   end
 
+  def format_number_compact(number) when is_struct(number, Decimal) do
+    number
+    |> Decimal.to_float()
+    |> format_number_compact()
+  end
+
+  def format_number_compact(number) do
+    n = trunc(number)
+
+    case n do
+      n when n >= 1_000_000 ->
+        "#{(n / 1_000_000) |> Float.round(1) |> trim_trailing_zero()}M"
+
+      n when n >= 1_000 ->
+        "#{(n / 1_000) |> Float.round(1) |> trim_trailing_zero()}K"
+
+      n ->
+        to_string(n)
+    end
+  end
+
+  defp trim_trailing_zero(number) do
+    number
+    |> Float.to_string()
+    |> String.replace(~r/\.0+$/, "")
+  end
+
   def time_ago(datetime) do
     now = NaiveDateTime.utc_now()
     diff = NaiveDateTime.diff(now, datetime, :second)

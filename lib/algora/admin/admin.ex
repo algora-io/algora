@@ -21,6 +21,15 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def add_label(url, amount) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
+         {:ok, token} <- Github.get_installation_token(installation_id) do
+      Workspace.add_amount_label(token, owner, repo, number, amount)
+    end
+  end
+
   def init_contributors(repo_owner, repo_name) do
     with {:ok, repo} <- Workspace.ensure_repository(token(), repo_owner, repo_name) do
       Workspace.ensure_contributors(token(), repo)

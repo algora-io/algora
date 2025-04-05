@@ -68,7 +68,7 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
   @impl Oban.Worker
   def perform(%Oban.Job{
         args: %{
-          "amount" => _amount,
+          "amount" => amount,
           "ticket_ref" => ticket_ref,
           "installation_id" => installation_id,
           "command_id" => command_id,
@@ -85,7 +85,9 @@ defmodule Algora.Bounties.Jobs.NotifyBounty do
          {:ok, ticket} <-
            Workspace.ensure_ticket(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number),
          bounties when bounties != [] <- Bounties.list_bounties(ticket_id: ticket.id),
-         {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💎 Bounty"]) do
+         {:ok, _} <- Github.add_labels(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, ["💎 Bounty"]),
+         :ok <-
+           Workspace.add_amount_label(token, ticket_ref.owner, ticket_ref.repo, ticket_ref.number, Money.parse(amount)) do
       attempts = Bounties.list_attempts_for_ticket(ticket.id)
       claims = Bounties.list_claims([ticket.id])
 

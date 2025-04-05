@@ -147,4 +147,7 @@ defmodule Algora.Github do
 
   @impl true
   def create_label(token, owner, repo, label), do: client().create_label(token, owner, repo, label)
+
+  @impl true
+  def get_label(token, owner, repo, label), do: client().get_label(token, owner, repo, label)
 end

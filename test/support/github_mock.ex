@@ -175,4 +175,9 @@ defmodule Algora.Support.GithubMock do
   def create_label(_access_token, _owner, _repo, _label) do
     {:ok, %{"id" => random_id()}}
   end
+
+  @impl true
+  def get_label(_access_token, _owner, _repo, _label) do
+    {:ok, %{"id" => random_id()}}
+  end
 end

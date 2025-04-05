@@ -277,4 +277,9 @@ defmodule Algora.Github.Client do
   def create_label(access_token, owner, repo, label) do
     fetch(access_token, "/repos/#{owner}/#{repo}/labels", "POST", label)
   end
+
+  @impl true
+  def get_label(access_token, owner, repo, label) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/labels/#{label}")
+  end
 end

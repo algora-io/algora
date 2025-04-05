@@ -555,10 +555,20 @@ defmodule Algora.Workspace do
     Repo.fetch_by(Contributor, repository_id: repository_id, user_id: user_id)
   end
 
+  def get_or_create_label(token, owner, repo, label) do
+    case Github.Client.fetch(token, "/repos/#{owner}/#{repo}/labels/#{label}") do
+      {:ok, _} ->
+        {:ok, label}
+
+      {:error, _reason} ->
+        Github.create_label(token, owner, repo, %{"name" => label, "color" => "34d399"})
+    end
+  end
+
   def add_amount_label(token, owner, repo, number, amount) do
     label = "$#{amount |> Money.to_decimal() |> Util.format_number_compact()}"
 
-    with {:ok, _} <- Github.create_label(token, owner, repo, %{"name" => label, "color" => "34d399"}),
+    with {:ok, _} <- get_or_create_label(token, owner, repo, label),
          {:ok, _} <- Github.add_labels(token, owner, repo, number, [label]) do
       :ok
     else

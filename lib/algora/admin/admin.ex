@@ -21,6 +21,42 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def add_label(url, amount) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
+         {:ok, token} <- Github.get_installation_token(installation_id) do
+      Workspace.add_amount_label(token, owner, repo, number, Money.parse(amount))
+    end
+  end
+
+  def backfill_labels(org_handle, opts \\ []) do
+    with org when not is_nil(org) <- Repo.get_by(User, handle: org_handle),
+         installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(org.provider_login),
+         {:ok, token} <- Github.get_installation_token(installation_id) do
+      bounties =
+        Bounties.list_bounties(
+          owner_id: org.id,
+          limit: :infinity,
+          status: :open
+        )
+
+      Enum.each(bounties, fn bounty ->
+        if opts[:dry_run] do
+          Logger.info("#{org.provider_login} - #{bounty.repository.name} - #{bounty.ticket.number} - #{bounty.amount}")
+        else
+          Workspace.add_amount_label(
+            token,
+            org.provider_login,
+            bounty.repository.name,
+            bounty.ticket.number,
+            bounty.amount
+          )
+        end
+      end)
+    end
+  end
+
   def init_contributors(repo_owner, repo_name) do
     with {:ok, repo} <- Workspace.ensure_repository(token(), repo_owner, repo_name) do
       Workspace.ensure_contributors(token(), repo)

@@ -30,4 +30,6 @@ defmodule Algora.Github.Behaviour do
   @callback list_repository_languages(token(), String.t(), String.t()) :: {:ok, [map()]} | {:error, String.t()}
   @callback list_repository_contributors(token(), String.t(), String.t()) :: {:ok, [map()]} | {:error, String.t()}
   @callback add_labels(token(), String.t(), String.t(), integer(), [String.t()]) :: {:ok, [map()]} | {:error, String.t()}
+  @callback create_label(token(), String.t(), String.t(), map()) :: {:ok, map()} | {:error, String.t()}
+  @callback get_label(token(), String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, String.t()}
 end

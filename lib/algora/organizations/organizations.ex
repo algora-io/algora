@@ -27,13 +27,15 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
+    org_handle = ensure_unique_org_handle(params.organization.handle)
+
     Repo.transact(fn ->
       {:ok, user} =
         case Repo.get_by(User, email: params.user.email) do
           nil ->
             handle = ensure_unique_handle(params.user.handle)
 
-            %User{type: :individual}
+            %User{type: :individual, last_context: org_handle}
             |> User.org_registration_changeset(Map.put(params.user, :handle, handle))
             |> Repo.insert()
 
@@ -53,10 +55,8 @@ defmodule Algora.Organizations do
                  limit: 1
              ) do
           nil ->
-            handle = ensure_unique_org_handle(params.organization.handle)
-
             %User{type: :organization}
-            |> Org.changeset(Map.put(params.organization, :handle, handle))
+            |> Org.changeset(Map.put(params.organization, :handle, org_handle))
             |> Repo.insert()
 
           existing_org ->

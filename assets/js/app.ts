@@ -551,6 +551,17 @@ const Hooks = {
       sessionStorage.removeItem(obj.key);
     },
   },
+  CtrlEnterSubmit: {
+    mounted() {
+      this.el.addEventListener("keydown", (e) => {
+        if (e.key == "Enter" && e.ctrlKey) {
+          this.el.form.dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+          );
+        }
+      });
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

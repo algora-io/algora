@@ -229,12 +229,43 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
               Hire by building product
             </h2>
-            <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Find your next team member through real-world collaboration. Use bounties to evaluate developers based on actual contributions to your codebase.
+            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+              Use bounties to evaluate developers based on actual contributions to your codebase.
             </p>
+
+            <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
+              <div class="flex gap-4 sm:gap-8 lg:gap-x-16">
+                <div class="w-[40%]">
+                  <.modal_video
+                    class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
+                    src="https://www.youtube.com/embed/xObOGcUdtY0"
+                    start={122}
+                    title="$15,000 Open source bounty to hire a Rust engineer"
+                    poster={~p"/images/people/john-de-goes.jpg"}
+                    alt="John A De Goes"
+                  />
+                </div>
+                <div class="w-[60%]">
+                  <.link
+                    href="https://github.com/golemcloud/golem/issues/1004"
+                    rel="noopener"
+                    target="_blank"
+                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none bg-gray-800"
+                  >
+                    <img
+                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                      alt="Golem bounty to hire"
+                      class="object-cover"
+                      loading="lazy"
+                    />
+                  </.link>
+                </div>
+              </div>
+            </div>
+
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
                 <div class="lg:col-span-6 order-first lg:order-last">
@@ -312,7 +343,7 @@ defmodule AlgoraWeb.HomeLive do
                   <h2 class="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
                     Simple, transparent pricing
                   </h2>
-                  <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
+                  <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
                     For individuals, OSS communities, and open/closed source companies
                   </p>
                 </div>

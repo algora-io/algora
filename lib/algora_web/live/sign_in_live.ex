@@ -236,6 +236,7 @@ defmodule AlgoraWeb.SignInLive do
 
     {:ok,
      socket
+     |> assign(:return_to, params["return_to"])
      |> assign(:authorize_url, authorize_url)
      |> assign(:secret_code, nil)
      |> assign(:user_type, "company")
@@ -254,12 +255,7 @@ defmodule AlgoraWeb.SignInLive do
 
     socket = if params["verify"] == "1", do: LocalStore.subscribe(socket), else: socket
 
-    socket =
-      socket
-      |> assign(:return_to, params["return_to"])
-      |> assign(:mode, socket.assigns.live_action)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, :mode, socket.assigns.live_action)}
   end
 
   @impl true

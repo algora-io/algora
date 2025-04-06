@@ -1309,7 +1309,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               >
                 {@match.user.name}
               </.link>
-              <.badge variant={@match.badge_variant} size="lg">
+              <.badge :if={@match.badge_text} variant={@match.badge_variant} size="lg">
                 {@match.badge_text}
               </.badge>
             </div>

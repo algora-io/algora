@@ -61,7 +61,7 @@ defmodule Algora.Settings do
         Enum.flat_map(matches, fn match ->
           if user = Map.get(user_map, match["handle"]) do
             # TODO: N+1
-            projects = Accounts.list_contributed_projects(user, limit: 2, tech_stack: org.tech_stack)
+            projects = Accounts.list_contributed_projects(user, limit: 2)
 
             [
               %{

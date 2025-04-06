@@ -111,7 +111,29 @@ defmodule Algora.Github.Poller.Search do
   defp process_batch(tickets, state) do
     Repo.transact(fn ->
       with :ok <- process_tickets(tickets, state) do
-        update_last_polled(state.cursor, List.last(tickets))
+        timestamps =
+          tickets
+          |> Enum.flat_map(fn ticket -> ticket["comments"]["nodes"] end)
+          |> Enum.flat_map(fn comment ->
+            case DateTime.from_iso8601(comment["updatedAt"]) do
+              {:ok, updated_at, _} -> [updated_at]
+              _ -> []
+            end
+          end)
+
+        fallback_timestamp = DateTime.truncate(DateTime.utc_now(), :second)
+
+        timestamp =
+          case timestamps do
+            [] -> fallback_timestamp
+            timestamps -> Enum.max(timestamps)
+          end
+
+        if DateTime.after?(timestamp, state.cursor.timestamp) do
+          update_last_polled(state.cursor, timestamp)
+        else
+          update_last_polled(state.cursor, fallback_timestamp)
+        end
       end
     end)
   end
@@ -145,15 +167,12 @@ defmodule Algora.Github.Poller.Search do
     end
   end
 
-  defp update_last_polled(search_cursor, %{"updatedAt" => updated_at}) do
-    with {:ok, updated_at, _} <- DateTime.from_iso8601(updated_at),
-         {:ok, cursor} <-
-           Search.update_search_cursor(search_cursor, %{
-             timestamp: updated_at,
-             last_polled_at: DateTime.utc_now()
-           }) do
-      {:ok, cursor}
-    else
+  defp update_last_polled(search_cursor, timestamp) do
+    case Search.update_search_cursor(search_cursor, %{
+           timestamp: timestamp,
+           last_polled_at: DateTime.utc_now()
+         }) do
+      {:ok, cursor} -> {:ok, cursor}
       {:error, reason} -> Logger.error("Failed to update search cursor: #{inspect(reason)}")
     end
   end
@@ -175,8 +194,11 @@ defmodule Algora.Github.Poller.Search do
       |> Enum.reject(fn comment ->
         already_processed? =
           case DateTime.from_iso8601(comment["updatedAt"]) do
-            {:ok, comment_updated_at, _} -> DateTime.before?(comment_updated_at, state.cursor.timestamp)
-            {:error, _} -> true
+            {:ok, comment_updated_at, _} ->
+              not DateTime.after?(comment_updated_at, state.cursor.timestamp)
+
+            {:error, _} ->
+              true
           end
 
         bot? = comment["author"]["login"] == Github.bot_handle()
@@ -234,7 +256,7 @@ defmodule Algora.Github.Poller.Search do
           ... on Issue {
             url
             updatedAt
-            comments(last: 3, orderBy: {field: UPDATED_AT, direction: DESC}) {
+            comments(first: 3, orderBy: {field: UPDATED_AT, direction: DESC}) {
               nodes {
                 updatedAt
                 databaseId

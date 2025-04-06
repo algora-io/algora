@@ -36,10 +36,7 @@ defmodule AlgoraWeb.TipController do
     else
       # TODO: just use a plug
       {:error, :unauthorized} ->
-        conn
-        |> put_session(:user_return_to, conn.request_path <> "?" <> conn.query_string)
-        |> put_flash(:error, "You must be logged in to tip")
-        |> redirect(to: ~p"/auth/login")
+        redirect(conn, to: ~p"/auth/login?#{%{return_to: conn.request_path <> "?" <> conn.query_string}}")
 
       {:error, reason} ->
         conn

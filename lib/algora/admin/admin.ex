@@ -23,7 +23,7 @@ defmodule Algora.Admin do
 
   def create_tip_intent(recipient, amount, ticket_ref) do
     with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(ticket_ref.owner) do
-      Bounties.do_create_tip_intent(
+      Bounties.build_tip_intent(
         %{
           recipient: recipient,
           amount: amount,

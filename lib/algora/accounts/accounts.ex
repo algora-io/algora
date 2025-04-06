@@ -170,7 +170,14 @@ defmodule Algora.Accounts do
   end
 
   def list_contributed_projects(user, opts \\ []) do
-    query =
+    # order_by =
+    #   if tech_stack = opts[:tech_stack] do
+    #     dynamic([tx, r: r], fragment("? && ?::citext[]", r.tech_stack, ^tech_stack))
+    #   else
+    #     true
+    #   end
+
+    Repo.all(
       from tx in Transaction,
         where: tx.type == :credit,
         where: tx.status == :succeeded,
@@ -182,21 +189,12 @@ defmodule Algora.Accounts do
         left_join: r in assoc(t, :repository),
         as: :r,
         left_join: ro in assoc(r, :user),
-        group_by: ro.id,
+        # order_by: ^[desc: order_by],
         order_by: [desc: sum(tx.net_amount)],
+        group_by: [ro.id],
         select: {ro, sum(tx.net_amount)},
         limit: ^opts[:limit]
-
-    query =
-      if opts[:tech_stack] do
-        from([b, r: r] in query,
-          where: fragment("? && ?::citext[]", r.tech_stack, ^opts[:tech_stack])
-        )
-      else
-        query
-      end
-
-    Repo.all(query)
+    )
   end
 
   @spec fetch_developer(binary()) :: {:ok, User.t()} | {:error, :not_found}

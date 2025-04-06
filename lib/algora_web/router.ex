@@ -155,6 +155,8 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.Analytics, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
+      live "/crowdfund", CrowdfundLive, :index
+      live "/testimonials", TestimonialsLive, :index
       live "/pricing", PricingLive
       live "/challenges", ChallengesLive
       live "/challenges/prettier", Challenges.PrettierLive

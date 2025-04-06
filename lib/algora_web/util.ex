@@ -9,12 +9,15 @@ defmodule AlgoraWeb.Util do
   def build_safe_redirect(url) do
     app_host = AlgoraWeb.Endpoint.host()
 
-    case URI.parse(url) do
+    uri = URI.parse(url)
+    query = if uri.query, do: "?#{uri.query}", else: ""
+
+    case uri do
       %URI{host: nil, path: nil} ->
-        [to: ~p"/"]
+        [to: ~p"/#{query}"]
 
       %URI{host: host, path: path} when is_nil(host) or host == app_host ->
-        [to: path]
+        [to: "#{path}#{query}"]
 
       %URI{host: host} ->
         case host |> String.split(".") |> Enum.take(-2) |> Enum.join(".") do
@@ -22,7 +25,7 @@ defmodule AlgoraWeb.Util do
           "algora.tv" -> [external: url]
           "stripe.com" -> [external: url]
           "github.com" -> [external: url]
-          _ -> [to: ~p"/"]
+          _ -> [to: ~p"/#{query}"]
         end
     end
   rescue

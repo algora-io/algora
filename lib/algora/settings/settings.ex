@@ -69,7 +69,10 @@ defmodule Algora.Settings do
                 projects: projects,
                 badge_variant: match["badge_variant"],
                 badge_text: match["badge_text"],
-                hourly_rate: Money.new(:USD, match["hourly_rate"], no_fraction_if_integer: true)
+                hourly_rate:
+                  if match["hourly_rate"] do
+                    Money.new(:USD, match["hourly_rate"], no_fraction_if_integer: true)
+                  end
               }
             ]
           else

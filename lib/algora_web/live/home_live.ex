@@ -233,10 +233,10 @@ defmodule AlgoraWeb.HomeLive do
               Hire by building product
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Use bounties to evaluate developers based on actual contributions to your codebase.
+              Use bounties to evaluate developers based on actual contributions to your codebase
             </p>
 
-            <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6">
               <div class="flex gap-4 sm:gap-8">
                 <div class="w-[40%]">
                   <.modal_video
@@ -307,7 +307,7 @@ defmodule AlgoraWeb.HomeLive do
                     src="https://www.youtube.com/embed/3wZGDuoPajk"
                     start={13}
                     title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
-                    poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
+                    poster={~p"/images/misc/3wZGDuoPajk.png"}
                     alt="Tushar Mathur"
                   />
                 </div>
@@ -335,7 +335,7 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40">
+        <section class="relative isolate py-16 sm:py-40 z-10">
           <div class="mx-auto px-6 lg:px-8">
             <div class="relative z-10 pb-4 xl:py-16">
               <div class="mx-auto max-w-7xl sm:text-center">

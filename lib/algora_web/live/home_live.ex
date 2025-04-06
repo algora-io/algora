@@ -1,6 +1,7 @@
 defmodule AlgoraWeb.HomeLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
   import Ecto.Changeset
   import Ecto.Query
@@ -175,7 +176,9 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
+        </section>
 
+        <section class="relative isolate">
           <div class="relative isolate -z-10 py-[35vw] sm:py-[25vw]">
             <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
               <div class="scale-[300%] sm:scale-[150%] opacity-75">

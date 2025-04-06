@@ -67,6 +67,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       admins_last_active = Algora.Admin.admins_last_active()
 
+      developers =
+        contributors
+        |> Enum.map(& &1.user)
+        |> Enum.concat(experts)
+        |> Enum.concat(Enum.map(matches, & &1.user))
+
       {:ok,
        socket
        |> assign(:admins_last_active, admins_last_active)
@@ -75,7 +81,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:experts, experts)
        |> assign(:contributors, contributors)
        |> assign(:matches, matches)
-       |> assign(:developers, contributors |> Enum.map(& &1.user) |> Enum.concat(experts))
+       |> assign(:developers, developers)
        |> assign(:has_more_bounties, false)
        |> assign(:has_more_transactions, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
@@ -1341,9 +1347,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
               </.link>
             </div>
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm">
+            <div
+              :if={@match[:hourly_rate]}
+              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
+            >
               <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
-                {Money.to_string!(@match.hourly_rate)}/hr
+                {Money.to_string!(@match[:hourly_rate])}/hr
               </span>
             </div>
           </div>
@@ -1830,8 +1839,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
               name="bounty_form[shared_with][]"
               value={
                 case @selected_developer do
-                  %User{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
-                  %User{id: id} -> [id]
+                  %{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
+                  %{id: id} -> [id]
                 end
               }
             />

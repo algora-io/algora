@@ -1319,7 +1319,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 :if={@match.badge_text}
                 variant={@match.badge_variant}
                 size="lg"
-                class="shrink-0"
+                class="shrink-0 absolute top-0 left-0"
               >
                 {@match.badge_text}
               </.badge>
@@ -1422,7 +1422,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
-              navigate={~p"/org/#{@current_org.handle}"}
+              navigate={~p"/org/#{project.handle}"}
               class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
             >
               <.avatar class="h-10 w-10 rounded-lg saturate-0 bg-gradient-to-br brightness-75">

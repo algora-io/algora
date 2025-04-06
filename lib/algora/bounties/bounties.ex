@@ -639,7 +639,7 @@ defmodule Algora.Bounties do
     |> Oban.insert()
   end
 
-  @spec do_create_tip_intent(
+  @spec build_tip_intent(
           %{
             recipient: String.t() | nil,
             amount: Money.t() | nil,
@@ -647,8 +647,8 @@ defmodule Algora.Bounties do
           },
           opts :: [installation_id: integer()]
         ) ::
-          {:ok, String.t()} | {:error, atom()}
-  def do_create_tip_intent(
+          Oban.Job.changeset()
+  def build_tip_intent(
         %{recipient: recipient, amount: amount, ticket_ref: %{owner: owner, repo: repo, number: number}},
         opts \\ []
       ) do
@@ -697,10 +697,10 @@ defmodule Algora.Bounties do
           },
           opts :: [installation_id: integer()]
         ) ::
-          {:ok, String.t()} | {:error, atom()}
+          {:ok, Oban.Job.t()} | {:error, atom()}
   def create_tip_intent(params, opts \\ []) do
     params
-    |> do_create_tip_intent(opts)
+    |> build_tip_intent(opts)
     |> Oban.insert()
   end
 

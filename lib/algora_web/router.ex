@@ -181,6 +181,8 @@ defmodule AlgoraWeb.Router do
     live_session :wildcard,
       on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       live "/2", Home2Live, :index
+      live "/crowdfund", CrowdfundLive, :index
+      live "/customers", CustomersLive, :index
       live "/:country_code", HomeLive, :index
     end
   end

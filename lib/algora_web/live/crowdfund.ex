@@ -1,6 +1,7 @@
-defmodule AlgoraWeb.Home2Live do
+defmodule AlgoraWeb.CrowdfundLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
   import Ecto.Changeset
   import Ecto.Query
@@ -116,59 +117,257 @@ defmodule AlgoraWeb.Home2Live do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto px-6 lg:px-8">
-            <div class="relative z-10 pb-4 xl:py-16">
-              <div class="mx-auto max-w-7xl sm:text-center">
-                <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-                  <h2 class="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-                    Simple, transparent pricing
-                  </h2>
-                  <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
-                    For individuals, OSS communities, and open/closed source companies
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
-              <div class="flex items-start gap-4">
-                <div class="flex-1">
-                  <h3 class="text-2xl font-semibold text-foreground mb-2">
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
+          <div class="hidden md:block">
+            <.pattern />
+          </div>
+          <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+              Crowdfund GitHub issues
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground mb-8 sm:mb-16">
+              Fund GitHub issues with USD rewards and pay when work is merged
+            </p>
+            <div class="flex flex-col-reverse sm:flex-col">
+              <div class="relative grid items-center grid-cols-1 lg:grid-cols-5 w-full gap-8 lg:gap-x-12 rounded-xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-2 ring-success/20 transition-colors">
+                <div class="lg:col-span-2 text-base leading-6 flex-1">
+                  <div class="text-2xl sm:text-3xl font-semibold text-foreground">
+                    Fund any issue
+                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
+                      in seconds
+                    </span>
+                  </div>
+                  <div class="pt-2 text-sm sm:text-lg xl:text-lg font-medium text-muted-foreground">
+                    Help improve the OSS you love and rely on
+                  </div>
+                  <div class="pt-4 col-span-3 text-sm text-muted-foreground space-y-1">
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pay when PRs are merged
                     </div>
-                  </h3>
-                  <p class="text-base text-foreground-light">
-                    Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
-              <%= for plan <- @plans1 do %>
-                <AlgoraWeb.PricingLive.pricing_card1 plan={plan} plans={@plans1} />
-              <% end %>
-            </div>
-
-            <div class="mx-auto lg:max-w-[95rem] mt-16 mb-8">
-              <div class="flex items-start gap-4">
-                <div class="flex-1">
-                  <h3 class="text-2xl font-semibold text-foreground mb-2">
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-building-store" class="h-6 w-6 text-purple-400" /> Platform
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Pool bounties with other sponsors
                     </div>
-                  </h3>
-                  <p class="text-base text-foreground-light">
-                    Connect with top open source talent, increase project visibility, and hire proven contributors
-                  </p>
+                    <div>
+                      <.icon name="tabler-check" class="h-4 w-4 mr-1 text-success-400" />
+                      Algora handles invoices, payouts, compliance<span class="hidden sm:inline"> & 1099s</span>
+                    </div>
+                  </div>
                 </div>
+                <.form
+                  for={@bounty_form}
+                  phx-submit="create_bounty"
+                  class="lg:col-span-3 grid grid-cols-1 gap-4 sm:gap-6 w-full"
+                >
+                  <.input
+                    label="URL"
+                    field={@bounty_form[:url]}
+                    placeholder="https://github.com/owner/repo/issues/1337"
+                  />
+                  <.input
+                    label="Amount"
+                    icon="tabler-currency-dollar"
+                    field={@bounty_form[:amount]}
+                    class="placeholder:text-success"
+                  />
+                  <div class="flex flex-col items-center gap-2">
+                    <.button size="lg" class="w-full drop-shadow-[0_1px_5px_#34d39980]">
+                      Fund issue
+                    </.button>
+                    <div class="text-sm text-muted-foreground">No credit card required</div>
+                  </div>
+                </.form>
+              </div>
+              <div class="pt-20 sm:pt-40 grid grid-cols-1 gap-16">
+                <.link
+                  href="https://github.com/zed-industries/zed/issues/4440"
+                  rel="noopener"
+                  target="_blank"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                >
+                  <div class="flex -space-x-4 shrink-0">
+                    <img
+                      class="size-20 rounded-full z-0"
+                      src="https://github.com/zed-industries.png"
+                      alt="Zed"
+                      loading="lazy"
+                    />
+                    <img
+                      class="size-20 rounded-full z-10"
+                      src="https://github.com/schacon.png"
+                      alt="Scott Chacon"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="text-base leading-6 flex-1">
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      GitHub cofounder funds new feature in Zed Editor
+                    </div>
+                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                      Zed Editor, Scott Chacon
+                    </div>
+                  </div>
+                  <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                    <Logos.github class="size-5 mr-3" /> View issue
+                  </.button>
+                </.link>
+
+                <.link
+                  href="https://github.com/PX4/PX4-Autopilot/issues/22464"
+                  rel="noopener"
+                  target="_blank"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                >
+                  <div class="flex items-center -space-x-6 shrink-0">
+                    <img
+                      class="size-20 rounded-full z-0"
+                      src={~p"/images/people/alex-klimaj.jpg"}
+                      alt="Alex Klimaj"
+                      loading="lazy"
+                    />
+                    <img
+                      class="size-16 z-20"
+                      src="https://github.com/PX4.png"
+                      alt="PX4"
+                      loading="lazy"
+                    />
+                    <img
+                      class="size-20 rounded-full z-10"
+                      src={~p"/images/people/andrew-wilkins.jpg"}
+                      alt="Andrew Wilkins"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="text-base leading-6 flex-1">
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      DefenceTech CEOs fund obstacle avoidance in PX4 Autopilot
+                    </div>
+                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                      Alex Klimaj, Founder of ARK Electronics & Andrew Wilkins, CEO of Ascend Engineering
+                    </div>
+                  </div>
+                  <.button size="lg" variant="secondary" class="hidden sm:flex mt-2 sm:mt-0">
+                    <Logos.github class="size-5 mr-3" /> View issue
+                  </.button>
+                </.link>
+
+                <.link
+                  href={~p"/org/coollabsio"}
+                  rel="noopener"
+                  class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
+                >
+                  <div class="flex -space-x-4 shrink-0">
+                    <img
+                      class="size-20 rounded-full z-0"
+                      src={~p"/images/logos/coolify.jpg"}
+                      alt="Coolify"
+                      loading="lazy"
+                    />
+                    <img
+                      class="size-20 rounded-full z-10"
+                      src="https://github.com/andrasbacsai.png"
+                      alt="Andras Bacsai"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="text-base leading-6 flex-1">
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      Coolify community crowdfunds new feature development
+                    </div>
+                    <div class="text-base sm:text-lg font-medium text-muted-foreground">
+                      Andras Bacsai, Founder of Coolify
+                    </div>
+                  </div>
+                  <.button
+                    size="lg"
+                    variant="secondary"
+                    class="hidden sm:flex mt-2 sm:mt-0 ring-2 ring-emerald-500"
+                  >
+                    View bounty board
+                  </.button>
+                </.link>
               </div>
             </div>
-            <div class="mx-auto grid grid-cols-1 gap-4 lg:max-w-[95rem] xl:gap-0">
-              <%= for plan <- @plans2 do %>
-                <AlgoraWeb.PricingLive.pricing_card2 plan={plan} plans={@plans2} />
-              <% end %>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:py-40">
+          <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+              Did you know?
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground mb-8 sm:mb-16">
+              You can tip your favorite open source contributors with Algora.
+            </p>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+              <div class="w-full lg:max-w-6xl relative rounded-2xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-1 ring-indigo-500/20 transition-colors backdrop-blur-sm">
+                <div class="grid grid-cols-1 items-center lg:grid-cols-7 gap-8 h-full">
+                  <div class="lg:col-span-3 text-base leading-6">
+                    <h3 class="text-2xl sm:text-3xl font-semibold text-foreground">
+                      Tip any contributor <br class="hidden lg:block" />
+                      <span class="text-indigo-500 drop-shadow-[0_1px_5px_#60a5fa80]">instantly</span>
+                    </h3>
+                    <p class="mt-4 text-base sm:text-lg font-medium text-muted-foreground">
+                      Support the maintainers behind your favorite open source projects
+                    </p>
+                    <div class="mt-4 sm:mt-6 space-y-3">
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-check" class="h-5 w-5 text-indigo-400 flex-none" />
+                        <span>Send tips directly to GitHub usernames</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-check" class="h-5 w-5 text-indigo-400 flex-none" />
+                        <span>Algora handles payouts, compliance & 1099s</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <.form
+                    for={@tip_form}
+                    phx-submit="create_tip"
+                    class="lg:col-span-4 space-y-4 sm:space-y-6"
+                  >
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-y-4 sm:gap-y-6 gap-x-3">
+                      <.input
+                        label="GitHub handle"
+                        field={@tip_form[:github_handle]}
+                        placeholder="jsmith"
+                      />
+                      <.input
+                        label="Amount"
+                        icon="tabler-currency-dollar"
+                        field={@tip_form[:amount]}
+                        class="placeholder:text-indigo-500"
+                      />
+                    </div>
+                    <.input
+                      label="URL"
+                      field={@tip_form[:url]}
+                      placeholder="https://github.com/owner/repo/issues/123"
+                      helptext="We'll comment to notify the developer."
+                    />
+                    <div class="flex flex-col gap-2">
+                      <.button
+                        size="lg"
+                        class="w-full drop-shadow-[0_1px_5px_#818cf880]"
+                        variant="indigo"
+                      >
+                        Tip contributor
+                      </.button>
+                    </div>
+                  </.form>
+                </div>
+              </div>
+
+              <div class="order-first lg:order-last">
+                <img
+                  src={~p"/images/screenshots/tip-remotion.png"}
+                  alt="Tip contributor"
+                  class="w-full h-full object-contain"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </section>

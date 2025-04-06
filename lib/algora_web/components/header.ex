@@ -10,6 +10,8 @@ defmodule AlgoraWeb.Components.Header do
       %{name: "Bounties", path: ~p"/bounties"},
       %{name: "Projects", path: ~p"/projects"},
       %{name: "Community", path: ~p"/community"},
+      %{name: "Customers", path: ~p"/customers"},
+      %{name: "Crowdfund", path: ~p"/crowdfund"},
       %{name: "Pricing", path: ~p"/pricing"}
     ]
   end

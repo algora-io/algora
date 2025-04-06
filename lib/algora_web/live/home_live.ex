@@ -237,7 +237,7 @@ defmodule AlgoraWeb.HomeLive do
             </p>
 
             <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
-              <div class="flex gap-4 sm:gap-8 lg:gap-x-16">
+              <div class="flex gap-4 sm:gap-8">
                 <div class="w-[40%]">
                   <.modal_video
                     class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
@@ -253,7 +253,7 @@ defmodule AlgoraWeb.HomeLive do
                     href="https://github.com/golemcloud/golem/issues/1004"
                     rel="noopener"
                     target="_blank"
-                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none bg-gray-800"
+                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
                   >
                     <img
                       src={~p"/images/screenshots/bounty-to-hire-golem2.png"}

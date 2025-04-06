@@ -72,6 +72,8 @@ defmodule AlgoraWeb.Admin.AdminLive do
         String.starts_with?(value, "https://console.algora.io/asset") or
         String.starts_with?(value, "https://algora.io/asset") or
         String.starts_with?(value, "https://www.gravatar.com") or
+        String.starts_with?(value, "https://media.licdn.com") or
+        String.starts_with?(value, "https://pbs.twimg.com") or
           String.starts_with?(value, "https://gravatar.com") ->
         ~H"""
         <div class="flex justify-center">

@@ -128,12 +128,20 @@ defmodule AlgoraWeb.Webhooks.StripeController do
     end
   end
 
-  defp process_charge_succeeded(%Stripe.Event{type: "charge.succeeded"}, group_id) when is_binary(group_id) do
+  defp process_charge_succeeded(
+         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{id: charge_id}}},
+         group_id
+       )
+       when is_binary(group_id) do
     Repo.transact(fn ->
       {_, txs} =
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
           set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
         )
+
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id),
+        set: [provider: "stripe", provider_id: charge_id]
+      )
 
       bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()

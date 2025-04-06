@@ -227,6 +227,55 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
+        <section class="relative isolate">
+          <div class="relative isolate -z-10 py-[35vw] sm:py-[25vw]">
+            <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+              <div class="scale-[300%] sm:scale-[150%] opacity-75">
+                <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
+                  <img
+                    alt="Algora dashboard"
+                    width="1200"
+                    height="630"
+                    loading="lazy"
+                    class="border border-border bg-muted mix-blend-overlay [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
+                    style="color:transparent"
+                    src={~p"/images/screenshots/org-home.png"}
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
+              <.glow class="absolute opacity-25 xl:opacity-75 top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" />
+
+              <.form
+                for={@repo_form}
+                phx-submit="submit_repo"
+                class="mt-6 sm:mt-10 w-full max-w-lg xl:max-w-2xl mx-auto"
+              >
+                <div class="relative">
+                  <.input
+                    field={@repo_form[:url]}
+                    placeholder="github.com/your/repo"
+                    class={
+                      classes([
+                        "w-full h-10 sm:h-16 text-sm sm:text-lg xl:text-2xl pl-8 sm:pl-[3.75rem] pr-24 sm:pr-48 ring-2 ring-emerald-500 font-display rounded-lg sm:rounded-xl",
+                        @repo_form[:url].errors != [] && "ring-destructive"
+                      ])
+                    }
+                  />
+                  <Logos.github class="size-5 sm:size-10 absolute left-2 sm:left-3 top-2 sm:top-3 text-muted-foreground/50" />
+                  <.button
+                    type="submit"
+                    class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-2 sm:px-8 h-7 sm:h-[3rem] text-sm sm:text-xl sm:font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
+                  >
+                    Get Started
+                  </.button>
+                </div>
+              </.form>
+            </div>
+          </div>
+        </section>
+
         <section class="relative isolate py-16 sm:py-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <img

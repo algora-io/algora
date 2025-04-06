@@ -8,9 +8,7 @@ defmodule AlgoraWeb.Components.Header do
   defp nav_links do
     [
       %{name: "Bounties", path: ~p"/bounties"},
-      %{name: "Projects", path: ~p"/projects"},
-      %{name: "Community", path: ~p"/community"},
-      %{name: "Customers", path: ~p"/customers"},
+      %{name: "Testimonials", path: ~p"/testimonials"},
       %{name: "Crowdfund", path: ~p"/crowdfund"},
       %{name: "Pricing", path: ~p"/pricing"}
     ]

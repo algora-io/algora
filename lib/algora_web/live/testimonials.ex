@@ -1,6 +1,7 @@
-defmodule AlgoraWeb.Home2Live do
+defmodule AlgoraWeb.TestimonialsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
+  use LiveSvelte.Components
 
   import Ecto.Changeset
   import Ecto.Query
@@ -116,59 +117,393 @@ defmodule AlgoraWeb.Home2Live do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto px-6 lg:px-8">
-            <div class="relative z-10 pb-4 xl:py-16">
-              <div class="mx-auto max-w-7xl sm:text-center">
-                <div class="mx-auto max-w-3xl space-y-2 lg:max-w-none">
-                  <h2 class="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-                    Simple, transparent pricing
-                  </h2>
-                  <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
-                    For individuals, OSS communities, and open/closed source companies
-                  </p>
-                </div>
-              </div>
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <img
+              src={~p"/images/logos/yc.svg"}
+              class="h-16 sm:h-24 mx-auto"
+              alt="Y Combinator Logo"
+              loading="lazy"
+            />
+            <h2 class="mt-4 sm:mt-8 font-display text-lg sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+              YCombinator companies use Algora<br />to build product and hire engineers
+            </h2>
+            <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">
+              <.yc_logo_cloud />
             </div>
 
-            <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
-              <div class="flex items-start gap-4">
-                <div class="flex-1">
-                  <h3 class="text-2xl font-semibold text-foreground mb-2">
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-wallet" class="h-6 w-6 text-emerald-400" /> Payments
-                    </div>
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid grid-cols-1 items-center gap-x-12 gap-y-8 lg:grid-cols-10">
+                <div class="lg:col-span-4">
+                  <div class="relative flex aspect-square size-[12rem] sm:size-[24rem] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <img
+                      src={~p"/images/people/tal-borenstein.jpeg"}
+                      alt="Tal Borenstein"
+                      class="object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-6">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                    Keep has 90+ integrations to alert our customers about critical events. Of these,
+                    <.link
+                      href="https://github.com/keephq/keep/issues?q=state%3Aclosed%20label%3A%22%F0%9F%92%8E%20Bounty%22%20%20label%3A%22%F0%9F%92%B0%20Rewarded%22%20label%3AProvider%20"
+                      rel="noopener"
+                      target="_blank"
+                      class="text-success inline-flex items-center hover:text-success-300"
+                    >
+                      42 integrations <.icon name="tabler-external-link" class="size-5 ml-1 mb-4" />
+                    </.link>
+                    were built
+                    using <span class="text-success">bounties on Algora</span>.
                   </h3>
-                  <p class="text-base text-foreground-light">
-                    Fund GitHub issues with USD rewards and pay when work is merged. Set up contracts for ongoing development work. Simple, outcome-based payments.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
-              <%= for plan <- @plans1 do %>
-                <AlgoraWeb.PricingLive.pricing_card1 plan={plan} plans={@plans1} />
-              <% end %>
-            </div>
-
-            <div class="mx-auto lg:max-w-[95rem] mt-16 mb-8">
-              <div class="flex items-start gap-4">
-                <div class="flex-1">
-                  <h3 class="text-2xl font-semibold text-foreground mb-2">
-                    <div class="flex items-center gap-2">
-                      <.icon name="tabler-building-store" class="h-6 w-6 text-purple-400" /> Platform
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Tal Borenstein
+                        </div>
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                          Co-founder & CEO at Keep (YC W23)
+                        </div>
+                      </div>
                     </div>
-                  </h3>
-                  <p class="text-base text-foreground-light">
-                    Connect with top open source talent, increase project visibility, and hire proven contributors
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="mx-auto grid grid-cols-1 gap-4 lg:max-w-[95rem] xl:gap-0">
-              <%= for plan <- @plans2 do %>
-                <AlgoraWeb.PricingLive.pricing_card2 plan={plan} plans={@plans2} />
-              <% end %>
+          </div>
+        </section>
+
+        <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
+          <div class="p-4 sm:p-6 md:p-8">
+            <div class="mx-auto max-w-6xl gap-8 text-sm leading-6 py-8 sm:py-16 md:py-24 lg:py-40">
+              <div class="pt-20 sm:pt-40 flex gap-4 sm:gap-8 lg:gap-x-16">
+                <div class="w-[40%]">
+                  <.modal_video
+                    class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
+                    src="https://www.youtube.com/embed/xObOGcUdtY0"
+                    start={122}
+                    title="$15,000 Open source bounty to hire a Rust engineer"
+                    poster={~p"/images/people/john-de-goes.jpg"}
+                    alt="John A De Goes"
+                  />
+                </div>
+                <div class="w-[60%]">
+                  <.link
+                    href="https://github.com/golemcloud/golem/issues/1004"
+                    rel="noopener"
+                    target="_blank"
+                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none bg-gray-800"
+                  >
+                    <img
+                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                      alt="Golem bounty to hire"
+                      class="object-cover"
+                      loading="lazy"
+                    />
+                  </.link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+              Build product faster
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground mb-12 max-w-2xl mx-auto">
+              Use bounties for outcome-based contract work with full GitHub integration.
+            </p>
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid grid-cols-1 items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-5 order-first lg:order-last">
+                  <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-gray-800">
+                    <img
+                      src={~p"/images/people/louis-beaumont.png"}
+                      alt="Louis Beaumont"
+                      class="object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-6 order-last lg:order-first">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                    I posted our bounty on <span class="text-success">Upwork</span>
+                    to try it, overall it's <span class="text-success">1000x more friction</span>
+                    than OSS bounties with Algora.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-4 sm:pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Louis Beaumont
+                        </div>
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                          Co-founder & CEO at Screenpipe
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid grid-cols-1 items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-6">
+                  <div class="relative flex -space-x-4">
+                    <img
+                      src="https://github.com/calcom.png"
+                      alt="Cal.com"
+                      class="size-32 sm:size-40 rounded-2xl"
+                      loading="lazy"
+                    />
+                    <img
+                      src={~p"/images/people/peer-rich.jpeg"}
+                      alt="PeerRich"
+                      class="size-32 sm:size-40 rounded-full"
+                      loading="lazy"
+                    />
+                    <img
+                      src={~p"/images/people/bailey-pumfleet.jpeg"}
+                      alt="Bailey Pumfleet"
+                      class="size-32 sm:size-40 rounded-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-6 sm:pt-8">
+                    <div class="flex flex-col sm:gap-4 text-xl sm:text-2xl xl:text-5xl font-semibold font-display">
+                      <div>
+                        Used bounties
+                      </div>
+                      <div class="text-success">
+                        every month
+                      </div>
+                      <div class="text-success">
+                        for 2+ years
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="lg:col-span-5">
+                  <div class="text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
+                    Shipped by <span class="text-success">86 contributors</span>
+                  </div>
+                  <ul class="pt-2 text-xl sm:text-2xl xl:text-3xl font-display font-semibold leading-[1.5] sm:leading-[3rem]">
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">14</span>
+                      High Priority tickets
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">24</span> Improvements
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">21</span> Bugs
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">36</span>
+                      Medium priority tickets
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">13</span> UI updates
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">68</span> New Features
+                    </li>
+                    <li class="flex items-center gap-x-4">
+                      <.icon name="tabler-check" class="size-6 sm:size-8 text-success" />
+                      <span class="text-success tabular-nums font-bold">18</span> Integrations
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-5 order-first lg:order-last">
+                  <div class="relative flex aspect-[1091/1007] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
+                    <img
+                      src={~p"/images/people/josh-pigford.png"}
+                      alt="Josh Pigford"
+                      class="object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-6 order-last lg:order-first">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                    <span class="text-success">Let's offer a bounty</span>
+                    to say "Hey, someone please prioritize this, who has the skillset for it?" I think long term I'd like to make it a
+                    <span class="text-success">very consistent</span>
+                    part of our development process.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          Josh Pigford
+                        </div>
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                          Co-founder & CEO at Maybe
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                <div class="lg:col-span-6">
+                  <div class="relative flex items-center justify-center">
+                    <img
+                      src={~p"/images/people/john-de-goes-2.jpg"}
+                      alt="John A De Goes"
+                      class="object-cover size-84 rounded-2xl"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <div class="lg:col-span-5">
+                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                    We used Algora extensively at Ziverge to reward over
+                    <span class="text-success">$70,000</span>
+                    in bounties and introduce a whole
+                    <span class="text-success">new generation of contributors</span>
+                    to the ZIO ecosystem.
+                  </h3>
+                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
+                    <div class="flex items-center gap-4">
+                      <div>
+                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                          John A De Goes
+                        </div>
+                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                          Founder & CEO at Ziverge
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <%!-- <dl class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-8 xl:flex-nowrap">
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Total awarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        $77,175
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Bounties completed
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        359
+                      </dd>
+                    </div>
+                    <div class="flex flex-col-reverse">
+                      <dt class="text-lg text-muted-foreground font-medium whitespace-nowrap">
+                        Contributors rewarded
+                      </dt>
+                      <dd class="font-display text-5xl font-bold tracking-tight text-white">
+                        79
+                      </dd>
+                    </div>
+                  </dl> --%>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate py-16 sm:py-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+              <.link
+                class="font-bold font-display text-2xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
+                aria-label="Logo"
+                navigate={~p"/org/mendableai"}
+              >
+                🔥
+                Firecrawl
+              </.link>
+              <h2 class="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4 !leading-[1.25]">
+                Open source contributor to full-time engineer
+              </h2>
+              <div class="flex items-center justify-center gap-8">
+                <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
+                  <div class="flex items-center gap-2 sm:gap-4">
+                    <div class="text-right">
+                      <div class="text-sm sm:text-base font-medium text-foreground whitespace-nowrap">
+                        Nicolas Camara
+                      </div>
+                      <div class="pt-1 text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
+                        Founder & CTO
+                      </div>
+                    </div>
+                    <img
+                      src={~p"/images/people/nicolas-camara.jpg"}
+                      alt="Nicolas Camara"
+                      class="size-12 rounded-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+                <.icon
+                  name="tabler-git-merge"
+                  class="size-6 sm:size-8 text-purple-400 hidden sm:block"
+                />
+                <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
+                  <div class="flex items-center gap-2 sm:gap-4">
+                    <img
+                      src="https://github.com/mogery.png"
+                      alt="Gergő Móricz"
+                      class="size-12 rounded-full object-cover"
+                      loading="lazy"
+                    />
+                    <div>
+                      <div class="text-sm sm:text-base font-semibold text-foreground whitespace-nowrap">
+                        Gergő Móricz
+                      </div>
+                      <div class="pt-2 text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
+                        Contributor
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-8 sm:pt-12 flex gap-4 sm:gap-8 lg:gap-x-16">
+                <div class="w-[24%]">
+                  <.modal_video
+                    class="aspect-[9/16] rounded-xl lg:rounded-2xl"
+                    src="https://www.youtube.com/embed/j4fLNIJCywk"
+                    title="High school student solves #opensource bounties"
+                    poster="https://img.youtube.com/vi/j4fLNIJCywk/maxresdefault.jpg"
+                    alt="Gergő Móricz"
+                  />
+                </div>
+                <div class="w-[76%]">
+                  <.modal_video
+                    class="rounded-xl lg:rounded-2xl"
+                    src="https://www.youtube.com/embed/HhTT-GX5tjQ"
+                    start={293}
+                    title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
+                    poster={~p"/images/people/mogery.png"}
+                    alt="Gergő Móricz"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>

@@ -21,6 +21,19 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def create_tip_intent(recipient, amount, ticket_ref) do
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(ticket_ref.owner) do
+      Bounties.do_create_tip_intent(
+        %{
+          recipient: recipient,
+          amount: amount,
+          ticket_ref: ticket_ref
+        },
+        installation_id: installation_id
+      )
+    end
+  end
+
   def add_label(url, amount) do
     %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
 

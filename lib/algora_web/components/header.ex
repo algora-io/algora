@@ -5,6 +5,15 @@ defmodule AlgoraWeb.Components.Header do
 
   import AlgoraWeb.CoreComponents
 
+  defp nav_links do
+    [
+      %{name: "Bounties", path: ~p"/bounties"},
+      %{name: "Projects", path: ~p"/projects"},
+      %{name: "Community", path: ~p"/community"},
+      %{name: "Pricing", path: ~p"/pricing"}
+    ]
+  end
+
   def header(assigns) do
     ~H"""
     <header class="absolute inset-x-0 top-0 z-50">
@@ -25,30 +34,14 @@ defmodule AlgoraWeb.Components.Header do
         </div>
         <!-- Desktop nav -->
         <div class="hidden lg:flex lg:gap-x-12">
-          <.link
-            navigate={~p"/bounties"}
-            class="text-sm/6 font-medium text-foreground/80 hover:text-foreground"
-          >
-            Bounties
-          </.link>
-          <.link
-            navigate={~p"/projects"}
-            class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
-          >
-            Projects
-          </.link>
-          <.link
-            navigate={~p"/community"}
-            class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
-          >
-            Community
-          </.link>
-          <.link
-            navigate={~p"/pricing"}
-            class="text-sm/6 font-semibold text-foreground/80 hover:text-foreground"
-          >
-            Pricing
-          </.link>
+          <%= for link <- nav_links() do %>
+            <.link
+              navigate={link.path}
+              class="text-sm/6 font-medium text-foreground/80 hover:text-foreground"
+            >
+              {link.name}
+            </.link>
+          <% end %>
         </div>
 
         <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-2">
@@ -101,44 +94,22 @@ defmodule AlgoraWeb.Components.Header do
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-border">
               <div class="space-y-2 py-6">
-                <.link
-                  href={AlgoraWeb.Constants.get(:docs_url)}
-                  class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
-                >
-                  Docs
-                </.link>
-                <.link
-                  href={AlgoraWeb.Constants.get(:blog_url)}
-                  class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
-                >
-                  Blog
-                </.link>
-                <.link
-                  navigate={~p"/pricing"}
-                  class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
-                >
-                  Pricing
-                </.link>
-                <.link
-                  href={AlgoraWeb.Constants.get(:github_url)}
-                  class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
-                >
-                  GitHub
-                </.link>
+                <%= for link <- nav_links() do %>
+                  <.link
+                    navigate={link.path}
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
+                  >
+                    {link.name}
+                  </.link>
+                <% end %>
               </div>
-              <div class="py-6">
-                <.link
-                  navigate={~p"/auth/signup"}
-                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
-                >
+              <div class="py-6 space-y-4">
+                <.button navigate={~p"/auth/signup"} class="w-full">
                   Sign up
-                </.link>
-                <.link
-                  navigate={~p"/auth/login"}
-                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-muted-foreground hover:bg-muted"
-                >
+                </.button>
+                <.button navigate={~p"/auth/login"} class="w-full" variant="secondary">
                   Sign in
-                </.link>
+                </.button>
               </div>
             </div>
           </div>

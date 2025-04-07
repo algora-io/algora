@@ -120,14 +120,14 @@ defmodule AlgoraWeb.CrowdfundLive do
           <div class="hidden md:block">
             <.pattern />
           </div>
-          <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8">
+          <div class="mx-auto 2xl:max-w-[90rem] px-6 lg:px-8 pt-24 xl:pt-0">
             <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Crowdfund GitHub issues
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground mb-8 sm:mb-16">
               Fund GitHub issues with USD rewards and pay when work is merged
             </p>
-            <div class="flex flex-col-reverse sm:flex-col">
+            <div class="flex flex-col">
               <div class="relative grid items-center grid-cols-1 lg:grid-cols-5 w-full gap-8 lg:gap-x-12 rounded-xl bg-black/25 p-4 sm:p-8 lg:p-12 ring-2 ring-success/20 transition-colors">
                 <div class="lg:col-span-2 text-base leading-6 flex-1">
                   <div class="text-2xl sm:text-3xl font-semibold text-foreground">

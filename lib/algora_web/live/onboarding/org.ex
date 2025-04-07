@@ -505,11 +505,11 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }"
       >
         <div>
-          <h2 class="mb-3 text-4xl font-semibold">
-            What is your tech stack?
+          <h2 class="mb-3 text-3xl sm:text-4xl font-semibold">
+            What's your tech stack?
           </h2>
           <p class="text-muted-foreground">
-            Enter a comma-separated list of technologies you work with
+            Enter a comma-separated list
           </p>
 
           <.TechStack
@@ -537,8 +537,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   defp main_content(%{step: :email, code_sent?: false} = assigns) do
     ~H"""
     <div class="space-y-4">
-      <h2 class="mb-3 text-4xl font-semibold">
-        Join Algora with your team
+      <h2 class="mb-3 text-3xl sm:text-4xl font-semibold">
+        Join with your team
       </h2>
 
       <.form for={@email_form} phx-submit="submit_email" class="space-y-6">
@@ -557,7 +557,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           field={@email_form[:domain]}
           icon="tabler-at"
           label="Company Domain"
-          helptext="We will add your teammates to your organization if they sign up with a verified email address from this domain"
+          helptext="This will let your teammates auto-join your org"
           type="text"
           placeholder="company.com"
           class="w-full border-input bg-background"
@@ -588,7 +588,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="mb-3 text-4xl font-semibold">
+        <h2 class="mb-3 text-3xl sm:text-4xl font-semibold">
           Verify your email
         </h2>
         <p class="text-muted-foreground">
@@ -626,7 +626,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     <div class="space-y-6">
       <.form for={@preferences_form} phx-submit="submit_preferences" class="space-y-8">
         <div>
-          <h2 class="text-4xl font-semibold">
+          <h2 class="text-3xl sm:text-4xl font-semibold">
             Let's personalize your experience
           </h2>
           <p class="mt-2 text-muted-foreground">
@@ -730,19 +730,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
       <div class="flex flex-col lg:flex-row flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">
-            <div class="mb-4 flex items-center gap-4 text-lg">
-              <span class="text-muted-foreground">
-                {Enum.find_index(@steps, &(&1 == @step)) + 1} / {length(@steps)}
-              </span>
-              <h1 class="text-lg font-semibold uppercase">
-                <%= if @step == Enum.at(@steps, -1) do %>
-                  Last step
-                <% else %>
-                  Get started
-                <% end %>
-              </h1>
-            </div>
-
             <div class="mb-4">
               {main_content(assigns)}
             </div>

@@ -31,14 +31,14 @@ defmodule AlgoraWeb.TestimonialsLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
             <img
               src={~p"/images/logos/yc.svg"}
               class="h-16 sm:h-24 mx-auto"
               alt="Y Combinator Logo"
               loading="lazy"
             />
-            <h2 class="mt-4 sm:mt-8 font-display text-lg sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
+            <h2 class="mt-4 sm:mt-8 font-display text-xl sm:text-3xl xl:text-6xl font-semibold tracking-tight text-foreground text-center mb-4 !leading-[1.25]">
               YCombinator companies use Algora<br />to build product and hire engineers
             </h2>
             <div class="mx-auto mt-8 max-w-5xl gap-12 text-sm leading-6 sm:mt-16">

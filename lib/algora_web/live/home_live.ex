@@ -44,11 +44,14 @@ defmodule AlgoraWeb.HomeLive do
   def mount(%{"country_code" => country_code} = params, _session, socket) do
     Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
 
+    total_contributors = get_contributors_count()
+    total_countries = get_countries_count()
+
     stats = [
       %{label: "Paid Out", value: format_money(get_total_paid_out())},
       %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())},
-      %{label: "Contributors", value: format_number(get_contributors_count())},
-      %{label: "Countries", value: format_number(get_countries_count())}
+      %{label: "Contributors", value: format_number(total_contributors)},
+      %{label: "Countries", value: format_number(total_countries)}
     ]
 
     featured_devs = Accounts.list_featured_developers(country_code)
@@ -67,6 +70,8 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
+     |> assign(:total_contributors, total_contributors)
+     |> assign(:total_countries, total_countries)
      |> assign(:selected_developer, nil)
      |> assign(:share_drawer_type, nil)
      |> assign(:show_share_drawer, false)}
@@ -110,19 +115,19 @@ defmodule AlgoraWeb.HomeLive do
   defp user_features do
     [
       %{
-        title: "Find work",
-        description: "Browse open bounties and contracts",
+        title: "Bounties & contracts",
+        description: "Work on new projects and grow your career",
         src: ~p"/images/screenshots/user-dashboard.png"
+      },
+      %{
+        title: "Your new resume",
+        description: "Showcase your open source contributions",
+        src: ~p"/images/screenshots/profile.png"
       },
       %{
         title: "Embed on your site",
         description: "Let anyone share a bounty/contract with you",
         src: ~p"/images/screenshots/embed-profile.png"
-      },
-      %{
-        title: "Developer profile",
-        description: "Showcase your open source contributions",
-        src: ~p"/images/screenshots/profile.png"
       },
       %{
         title: "Payment history",
@@ -324,7 +329,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="pt-1 text-sm text-muted-foreground">
                   {feature.description}
                 </div>
-                <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative overflow-hidden">
+                <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative">
                   <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
                 </div>
               </div>
@@ -333,8 +338,9 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            ✨ Loved by developers worldwide
+          <div class="mb-4 text-center text-3xl sm:text-6xl">🌎</div>
+          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
+            Join {@total_contributors} contributors from {@total_countries} countries
           </h2>
 
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
@@ -347,11 +353,11 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            <span class="text-emerald-400">Earn with open source</span>
-            and <span class="block sm:inline">freelance</span>
+            <span class="text-emerald-400">Get paid for open source</span>
+            and <span class="block sm:inline">freelance work</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Flexible work based on your time,
+            Work on your own schedule, from anywhere in the world
           </p>
           <div class="hidden lg:grid lg:grid-cols-4 items-center lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
@@ -420,7 +426,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="pt-1 text-sm text-muted-foreground">
                   {feature.description}
                 </div>
-                <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative overflow-hidden">
+                <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative">
                   <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
                 </div>
               </div>

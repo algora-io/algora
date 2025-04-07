@@ -75,12 +75,12 @@ defmodule AlgoraWeb.HomeLive do
   defp org_features do
     [
       %{
-        title: "Bounty board",
+        title: "Reward bounties on GitHub",
         description: "Create bounties for GitHub issues and track progress",
         src: ~p"/images/screenshots/org-home.png"
       },
       %{
-        title: "Developer matching",
+        title: "Match with top developers",
         description: "Connect with developers who have relevant open source experience",
         src: ~p"/images/screenshots/org-matches.png"
       },
@@ -242,120 +242,12 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
-              Hire by building product
-            </h2>
-            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Use bounties to evaluate developers based on actual contributions to your codebase
-            </p>
-
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6">
-              <div class="flex gap-4 sm:gap-8">
-                <div class="w-[40%]">
-                  <.modal_video
-                    class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
-                    src="https://www.youtube.com/embed/xObOGcUdtY0"
-                    start={122}
-                    title="$15,000 Open source bounty to hire a Rust engineer"
-                    poster={~p"/images/people/john-de-goes.jpg"}
-                    alt="John A De Goes"
-                  />
-                </div>
-                <div class="w-[60%]">
-                  <.link
-                    href="https://github.com/golemcloud/golem/issues/1004"
-                    rel="noopener"
-                    target="_blank"
-                    class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
-                  >
-                    <img
-                      src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                      alt="Golem bounty to hire"
-                      class="object-cover"
-                      loading="lazy"
-                    />
-                  </.link>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
-                <div class="lg:col-span-6 order-first lg:order-last">
-                  <.modal_video
-                    class="rounded-xl lg:rounded-2xl"
-                    src="https://www.youtube.com/embed/FXQVD02rfg8"
-                    start={8}
-                    title="How Nick got a job with Open Source Software"
-                    poster="https://img.youtube.com/vi/FXQVD02rfg8/maxresdefault.jpg"
-                    alt="Eric Allam"
-                  />
-                </div>
-                <div class="lg:col-span-6 order-last lg:order-first">
-                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
-                    It was the <span class="text-success">easiest hire</span>
-                    because we already knew how great he was
-                  </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
-                    <div class="flex items-center gap-4">
-                      <div>
-                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
-                          Eric Allam
-                        </div>
-                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
-                          Co-founder & CTO at Trigger.dev (YC W23)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-              <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-5">
-                  <.modal_video
-                    class="rounded-xl lg:rounded-2xl"
-                    src="https://www.youtube.com/embed/3wZGDuoPajk"
-                    start={13}
-                    title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
-                    poster={~p"/images/misc/3wZGDuoPajk.png"}
-                    alt="Tushar Mathur"
-                  />
-                </div>
-                <div class="lg:col-span-6">
-                  <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
-                    Bounties help us control our burn rate, get work done & meet new hires. I've made
-                    <span class="text-success">3 full-time hires</span>
-                    using Algora
-                  </h3>
-                  <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
-                    <div class="flex items-center gap-4">
-                      <div>
-                        <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
-                          Tushar Mathur
-                        </div>
-                        <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
-                          Founder & CEO at Tailcall
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            A complete platform for open source hiring
+            Everything you need to <span class="text-emerald-400">reward your contributors</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Post bounties, evaluate developers, and hire through contributions
+            Build your product and team in one place
           </p>
           <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
             <div class="col-span-1">

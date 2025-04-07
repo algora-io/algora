@@ -340,7 +340,8 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative py-16 sm:py-40">
           <div class="mb-4 text-center text-3xl sm:text-6xl">🌎</div>
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            Join {@total_contributors} contributors<span class="block sm:inline">from {@total_countries} countries</span>
+            Join {@total_contributors} contributors
+            <span class="block sm:inline">from {@total_countries} countries</span>
           </h2>
 
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">

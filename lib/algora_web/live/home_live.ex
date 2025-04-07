@@ -90,7 +90,7 @@ defmodule AlgoraWeb.HomeLive do
         src: ~p"/images/screenshots/autopay-on-merge.png"
       },
       %{
-        title: "Payment history",
+        title: "Transaction history",
         description: "View all payments and export summaries",
         src: ~p"/images/screenshots/org-transactions.png"
       },
@@ -100,8 +100,8 @@ defmodule AlgoraWeb.HomeLive do
       #   src: ~p"/images/screenshots/pool-bounties.png"
       # }
       %{
-        title: "Global payments",
-        description: "Payouts, compliance, reporting, 1099s",
+        title: "Global payouts",
+        description: "Streamline payouts, compliance, reporting, 1099s",
         src: ~p"/images/screenshots/global-payments.png"
       }
     ]
@@ -115,9 +115,9 @@ defmodule AlgoraWeb.HomeLive do
         src: ~p"/images/screenshots/user-dashboard.png"
       },
       %{
-        title: "Developer profile",
-        description: "Showcase your open source contributions",
-        src: ~p"/images/screenshots/profile.png"
+        title: "Embed on your site",
+        description: "Let anyone share a bounty/contract with you",
+        src: ~p"/images/screenshots/embed-profile.png"
       },
       %{
         title: "Developer profile",
@@ -144,6 +144,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
+          <.pattern />
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="px-6 lg:px-8 lg:pr-0 xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
@@ -297,7 +298,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-3">
-              <div class="aspect-[1200/630] w-full relative">
+              <div class="aspect-[1200/630] rounded-xl overflow-hidden w-full relative">
                 <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
                   <img
                     data-org-feature-img={feature.src}
@@ -305,7 +306,7 @@ defmodule AlgoraWeb.HomeLive do
                     alt={feature.title}
                     class={
                       classes([
-                        "w-full h-full object-contain absolute inset-0 opacity-0 transition-all",
+                        "w-full h-full object-contain absolute opacity-0 transition-all",
                         if(index == 0, do: "opacity-100")
                       ])
                     }
@@ -323,7 +324,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="pt-1 text-sm text-muted-foreground">
                   {feature.description}
                 </div>
-                <div class="mt-4 aspect-[1200/630] w-full relative overflow-hidden">
+                <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative overflow-hidden">
                   <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
                 </div>
               </div>
@@ -332,8 +333,8 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            ✨ Match with top OSS engineers open to work
+          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            ✨ Loved by developers worldwide
           </h2>
 
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
@@ -346,11 +347,11 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            Everything you need to
-            <span class="text-emerald-400 block sm:inline">contribute and get rewarded</span>
+            <span class="text-emerald-400">Earn with open source</span>
+            and <span class="block sm:inline">freelance</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Find new collaborators, solve bounties and complete contract work
+            Flexible work based on your time,
           </p>
           <div class="hidden lg:grid lg:grid-cols-4 items-center lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
@@ -393,7 +394,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-3">
-              <div class="aspect-[1200/630] w-full relative">
+              <div class="aspect-[1200/630] rounded-xl overflow-hidden w-full relative">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
                   <img
                     data-user-feature-img={feature.src}
@@ -419,7 +420,7 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="pt-1 text-sm text-muted-foreground">
                   {feature.description}
                 </div>
-                <div class="mt-4 aspect-[1200/630] w-full relative overflow-hidden">
+                <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative overflow-hidden">
                   <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
                 </div>
               </div>
@@ -1155,7 +1156,7 @@ defmodule AlgoraWeb.HomeLive do
 
   defp collab_card(assigns) do
     ~H"""
-    <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+    <div class="group/collab relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6 ring-1 ring-transparent transition-all duration-500 hover:ring-1 hover:ring-success">
       <div class="xl:basis-[35%]">
         <div class="flex items-center gap-4">
           <.link navigate={User.url(@collab.user)}>
@@ -1171,7 +1172,7 @@ defmodule AlgoraWeb.HomeLive do
             <div class="flex items-center gap-4 text-foreground">
               <.link
                 navigate={User.url(@collab.user)}
-                class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                class="text-lg sm:text-xl font-semibold truncate"
               >
                 {@collab.user.name} {Algora.Misc.CountryEmojis.get(@collab.user.country)}
               </.link>
@@ -1200,7 +1201,7 @@ defmodule AlgoraWeb.HomeLive do
               </.link>
             </div>
             <div class="pt-2 flex items-center gap-2">
-              <%= for tech <- @collab.user.tech_stack |> Enum.take(3) do %>
+              <%= for tech <- @collab.user.tech_stack |> Enum.reject(& &1 in ["HTML", "MDX", "Dockerfile"]) |> Enum.take(3) do %>
                 <.badge variant="outline">{tech}</.badge>
               <% end %>
             </div>
@@ -1208,7 +1209,7 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </div>
 
-      <div class="flex xl:flex-col gap-2 xl:basis-[15%] xl:ml-auto">
+      <div class="flex xl:flex-col gap-2 xl:basis-[15%] xl:ml-auto transition-opacity duration-500 opacity-0 group-hover/collab:opacity-100">
         <.button
           phx-click="share_opportunity"
           phx-value-user_id={@collab.user.id}
@@ -1230,7 +1231,7 @@ defmodule AlgoraWeb.HomeLive do
       </div>
 
       <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[50%] xl:border-l xl:border-border">
-        <div class="text-sm sm:text-base text-foreground font-medium">
+        <div class="flex gap-1 text-sm sm:text-base text-foreground font-medium">
           Completed
           <span class="font-semibold font-display">
             {@collab.user.transactions_count}
@@ -1247,8 +1248,8 @@ defmodule AlgoraWeb.HomeLive do
               @collab.user.contributed_projects_count
             )}
           </span>
-          <span class="font-semibold font-display">
-            ({Money.to_string!(@collab.user.total_earned)})
+          <span class="ml-auto font-semibold text-lg font-display text-success">
+            +{Money.to_string!(@collab.user.total_earned)}
           </span>
         </div>
         <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
@@ -1257,7 +1258,7 @@ defmodule AlgoraWeb.HomeLive do
               navigate={User.url(project)}
               class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
             >
-              <.avatar class="h-10 w-10 rounded-lg">
+              <.avatar class="h-10 w-10 rounded-lg saturate-0">
                 <.avatar_image src={project.avatar_url} alt={project.name} />
                 <.avatar_fallback class="rounded-lg">
                   {Algora.Util.initials(project.name)}
@@ -1270,12 +1271,12 @@ defmodule AlgoraWeb.HomeLive do
 
                 <div class="flex items-center gap-2 whitespace-nowrap">
                   <div class="text-sm text-muted-foreground font-display font-semibold">
-                    <.icon name="tabler-star-filled" class="size-4 text-amber-400 mr-1" />{format_number(
+                    <.icon name="tabler-star-filled" class="size-4 text-amber-400 mr-1" />{Algora.Util.format_number_compact(
                       project.stargazers_count
                     )}
                   </div>
                   <div class="text-sm text-muted-foreground">
-                    <span class="text-emerald-400 font-display font-semibold">
+                    <span class="text-foreground font-display font-semibold">
                       {total_earned}
                     </span>
                     awarded
@@ -1552,6 +1553,45 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </.drawer_content>
     </.drawer>
+    """
+  end
+
+  defp pattern(assigns) do
+    ~H"""
+    <div
+      class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
+      aria-hidden="true"
+    >
+      <div
+        class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-gray-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
+      >
+      </div>
+    </div>
+
+    <div class="[mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)] absolute inset-x-0 -z-10 h-screen w-full stroke-border">
+      <defs>
+        <pattern
+          id="grid-pattern"
+          width="200"
+          height="200"
+          x="50%"
+          y="-1"
+          patternUnits="userSpaceOnUse"
+        >
+          <path d="M.5 200V.5H200" fill="none" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" stroke-width="0" fill="url(#grid-pattern)" opacity="0.25" />
+    </div>
+
+    <div class="absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl" aria-hidden="true">
+      <div
+        class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-gray-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
+      >
+      </div>
+    </div>
     """
   end
 end

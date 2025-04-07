@@ -1313,7 +1313,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 navigate={User.url(@match.user)}
                 class="text-lg sm:text-xl font-semibold hover:underline truncate"
               >
-                {@match.user.name}
+                {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
               </.link>
               <.badge
                 :if={@match.badge_text}
@@ -1812,7 +1812,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.card_header>
           <.card_title>Contract Details</.card_title>
         </.card_header>
-        <.card_content>
+        <.card_content class="pt-0 flex flex-col">
           <div class="space-y-4">
             <.input
               label="Hourly Rate"
@@ -1821,17 +1821,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
             />
             <.input label="Hours per Week" field={@contract_form[:hours_per_week]} />
           </div>
+          <div class="pt-8 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Send Contract Offer <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
+          </div>
         </.card_content>
       </.card>
-
-      <div class="pt-4 ml-auto flex gap-4">
-        <.button variant="secondary" phx-click="close_share_drawer" type="button">
-          Cancel
-        </.button>
-        <.button type="submit">
-          Send Contract Offer <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-        </.button>
-      </div>
     </.form>
     """
   end
@@ -1843,7 +1842,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.card_header>
           <.card_title>Bounty Details</.card_title>
         </.card_header>
-        <.card_content>
+        <.card_content class="pt-0 flex flex-col">
           <div class="space-y-4">
             <.input type="hidden" name="bounty_form[visibility]" value="exclusive" />
             <.input
@@ -1863,17 +1862,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
             />
             <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
           </div>
+          <div class="pt-8 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
+          </div>
         </.card_content>
       </.card>
-
-      <div class="pt-4 ml-auto flex gap-4">
-        <.button variant="secondary" phx-click="close_share_drawer" type="button">
-          Cancel
-        </.button>
-        <.button type="submit">
-          Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-        </.button>
-      </div>
     </.form>
     """
   end
@@ -1885,7 +1883,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.card_header>
           <.card_title>Tip Details</.card_title>
         </.card_header>
-        <.card_content>
+        <.card_content class="pt-0 flex flex-col">
           <div class="space-y-4">
             <input
               type="hidden"
@@ -1900,17 +1898,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
               helptext="We'll add a comment to the issue to notify the developer."
             />
           </div>
+          <div class="pt-8 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Send Tip <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
+          </div>
         </.card_content>
       </.card>
-
-      <div class="pt-4 ml-auto flex gap-4">
-        <.button variant="secondary" phx-click="close_share_drawer" type="button">
-          Cancel
-        </.button>
-        <.button type="submit">
-          Send Tip <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
-        </.button>
-      </div>
     </.form>
     """
   end
@@ -1921,7 +1918,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <.card_header>
         <.card_title>Developer</.card_title>
       </.card_header>
-      <.card_content>
+      <.card_content class="pt-0">
         <div class="flex items-start gap-4">
           <.avatar class="h-20 w-20 rounded-full">
             <.avatar_image src={@selected_developer.avatar_url} alt={@selected_developer.name} />
@@ -1933,6 +1930,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div>
             <div class="flex items-center gap-1 text-base text-foreground">
               <span class="font-semibold">{@selected_developer.name}</span>
+              {Algora.Misc.CountryEmojis.get(@selected_developer.country)}
             </div>
 
             <div

@@ -4,6 +4,8 @@ defmodule AlgoraWeb.Util do
   use AlgoraWeb, :verified_routes
   use AlgoraWeb, :controller
 
+  alias Phoenix.LiveView.JS
+
   require Logger
 
   def build_safe_redirect(url) do
@@ -34,5 +36,12 @@ defmodule AlgoraWeb.Util do
 
   def redirect_safe(conn, url) do
     redirect(conn, AlgoraWeb.Util.build_safe_redirect(url))
+  end
+
+  def transition(js \\ %JS{}, attr, eq, opts) do
+    js
+    |> JS.remove_class(opts[:to], to: "[#{attr}]:not([#{attr}='#{eq}'])")
+    |> JS.add_class(opts[:from], to: "[#{attr}]:not([#{attr}='#{eq}'])")
+    |> JS.add_class(opts[:to], to: "[#{attr}='#{eq}']")
   end
 end

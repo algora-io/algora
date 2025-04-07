@@ -526,7 +526,7 @@ defmodule Algora.Accounts do
           )
         )
 
-      if membership do
+      if membership || user.is_admin do
         update_settings(user, %{last_context: context})
       else
         {:error, :unauthorized}

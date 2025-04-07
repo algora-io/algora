@@ -50,6 +50,17 @@ defmodule Algora.Settings do
     set("featured_developers", %{"handles" => handles})
   end
 
+  def get_featured_collabs do
+    case get("featured_collabs") do
+      %{"handles" => handles} when is_list(handles) -> handles
+      _ -> nil
+    end
+  end
+
+  def set_featured_collabs(handles) when is_list(handles) do
+    set("featured_collabs", %{"handles" => handles})
+  end
+
   def get_org_matches(org) do
     case get("org_matches:#{org.handle}") do
       %{"matches" => matches} when is_list(matches) ->

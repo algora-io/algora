@@ -24,24 +24,29 @@ defmodule AlgoraWeb.Org.SettingsLive do
 
       <.card>
         <.card_header>
-          <.card_title>
-            <div class="flex items-center gap-2">
-              Auto-pay on merge
+          <div class="flex flex-wrap gap-8 justify-between">
+            <div>
+              <.card_title>
+                Auto-pay on merge
+              </.card_title>
+              <.card_description class="pt-4">
+                Once enabled, we will charge your saved payment method automatically when
+              </.card_description>
+              <ul class="mt-2 space-y-1 pl-4 list-disc text-sm text-muted-foreground">
+                <li>a pull request that claims a bounty is merged</li>
+                <li>
+                  <.badge><code>/tip</code></.badge>
+                  command is used by you or any other
+                  <.link navigate={~p"/org/#{@current_org.handle}/team"} class="font-semibold">
+                    {@current_org.name} admins
+                  </.link>
+                </li>
+              </ul>
             </div>
-          </.card_title>
-          <.card_description>
-            Once enabled, we will charge your saved payment method automatically when
-          </.card_description>
-          <ul class="mt-1 pl-4 list-disc text-sm text-muted-foreground">
-            <li>a pull request that claims a bounty is merged</li>
-            <li>
-              <.badge><code>/tip</code></.badge>
-              command is used by you or any other
-              <.link navigate={~p"/org/#{@current_org.handle}/team"} class="font-semibold">
-                {@current_org.name} admins
-              </.link>
-            </li>
-          </ul>
+            <div>
+              <AlgoraWeb.Components.Autopay.autopay />
+            </div>
+          </div>
         </.card_header>
         <.card_content>
           <div class="flex">

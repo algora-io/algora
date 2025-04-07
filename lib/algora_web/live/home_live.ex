@@ -98,6 +98,11 @@ defmodule AlgoraWeb.HomeLive do
         title: "Payment history",
         description: "View all bounty and contract payments in one place",
         src: ~p"/images/screenshots/org-transactions.png"
+      },
+      %{
+        title: "Pool bounties together",
+        description: "Pool bounties together to reward contributors",
+        src: ~p"/images/screenshots/org-pool-bounties.png"
       }
     ]
   end

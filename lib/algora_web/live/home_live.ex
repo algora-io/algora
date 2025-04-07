@@ -321,6 +321,15 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
+            Loved by developers and companies
+          </h2>
+          <div class="pt-12 max-w-7xl mx-auto px-6 lg:px-8">
+            <.contributors />
+          </div>
+        </section>
+
+        <section class="relative py-16 sm:py-40">
+          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
             Everything you need to
             <span class="text-emerald-400 block sm:inline">contribute and get rewarded</span>
           </h2>
@@ -1085,6 +1094,1791 @@ defmodule AlgoraWeb.HomeLive do
           </radialGradient>
         </defs>
       </svg>
+    </div>
+    """
+  end
+
+  defp contributors(assigns) do
+    ~H"""
+    <div class="relative w-full flex flex-col gap-8">
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/ghostdogpr"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sWEWq2wbkzB"
+                  src="https://algora-console.fly.storage.tigris.dev/avatars/ghostdogpr.jpg"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Pierre Ricadat"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  PI
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/ghostdogpr"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Pierre Ricadat 🇰🇷
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/ghostdogpr"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">ghostdogpr</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="clv1r9yxx0000l60g8kgd10fo"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="clv1r9yxx0000l60g8kgd10fo"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              2
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              across 2 projects
+            </span>
+            <span class="font-semibold font-display">
+              ($1,750)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/ZIO"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sWM7JSwbk0B"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/ZIO-logo.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="ZIO"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  ZI
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  ZIO
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->4.2K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $1,250
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <a
+              href="http://localhost:4000/org/getkyo"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sWOoZ-wbk1B"
+                  src="https://avatars.githubusercontent.com/u/128566993?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Kyo"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  KY
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Kyo
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->628
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $500
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/pablf"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sWQsCWwbk2B"
+                  src="https://algora-console.fly.storage.tigris.dev/avatars/pablf.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Pablo Femenía"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  PA
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/pablf"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Pablo Femenía 🇪🇸
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/pablf"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">pablf</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="clhqz0nwc000amf0fjkpapthz"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="clhqz0nwc000amf0fjkpapthz"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              34
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              across 4 projects
+            </span>
+            <span class="font-semibold font-display">
+              ($9,050)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/ZIO"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sWYAFewbk3B"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/ZIO-logo.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="ZIO"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  ZI
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  ZIO
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->4.2K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $7,700
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <a
+              href="http://localhost:4000/org/getkyo"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sWa53-wbk4B"
+                  src="https://avatars.githubusercontent.com/u/128566993?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Kyo"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  KY
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Kyo
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->628
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $500
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/melkstam"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sWcmLKwbk5B"
+                  src="https://algora-console.fly.storage.tigris.dev/avatars/melkstam.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Vilhelm Melkstam"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  VI
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/melkstam"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Vilhelm Melkstam 🇸🇪
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/melkstam"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">melkstam</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="cm84w1on40002jo0362h4d9vl"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="cm84w1on40002jo0362h4d9vl"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              1
+              bounty
+            </span>
+            <span class="font-semibold font-display">
+              in 1 project
+            </span>
+            <span class="font-semibold font-display">
+              ($1,000)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/encoredev"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sWkH1qwbk6B"
+                  src="https://avatars.githubusercontent.com/u/50438175?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Encore"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  EN
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Encore
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->272
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $1,000
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/itsparser"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sWmLTWwbk7B"
+                  src="https://algora-console.fly.storage.tigris.dev/avatars/itsparser.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Vasanth K."
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  VA
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/itsparser"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Vasanth K. 🇮🇳
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/itsparser"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">itsparser</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="cm4v33kc50000kz03dymiv698"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="cm4v33kc50000kz03dymiv698"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              1
+              bounty
+            </span>
+            <span class="font-semibold font-display">
+              in 1 project
+            </span>
+            <span class="font-semibold font-display">
+              ($10,000)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/golemcloud"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sWtsHiwbk8B"
+                  src="https://avatars.githubusercontent.com/u/133607167?s=200&amp;v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Golem Cloud"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  GO
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Golem Cloud
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->738
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $10,000
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/mehulmathur16"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sWvsIuwbk9B"
+                  src="https://avatars.githubusercontent.com/u/64700961?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Mehul Mathur"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  ME
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/mehulmathur16"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Mehul Mathur 🇮🇳
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/mehulmathur16"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">mehulmathur16</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="clrlrbv720000l90f8qzmtqc9"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="clrlrbv720000l90f8qzmtqc9"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              37
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              across 7 projects
+            </span>
+            <span class="font-semibold font-display">
+              ($3,050)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/tailcallhq"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sW3Njqwbk-B"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/cli0b0kdt0000mh0fngt4r4bk-1741007407053"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Tailcall Inc."
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  TA
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Tailcall Inc.
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->1.4K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $1,760
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <a
+              href="http://localhost:4000/org/spaceandtimelabs"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sW5Jq2wbk_B"
+                  src="https://avatars.githubusercontent.com/u/101605166?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Space and Time"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  SP
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Space and Time
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->5.6K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $600
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/adamgfraser"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sW64n2wblAB"
+                  src="https://avatars.githubusercontent.com/u/20825463?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Adam Fraser"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  AD
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/adamgfraser"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Adam Fraser 🇺🇸
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/adamgfraser"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">adamgfraser</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="clgxc4nos0000jt0fygp77a9x"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="clgxc4nos0000jt0fygp77a9x"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              17
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              across 2 projects
+            </span>
+            <span class="font-semibold font-display">
+              ($5,300)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/ZIO"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXCYxSwblBB"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/ZIO-logo.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="ZIO"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  ZI
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  ZIO
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->4.2K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $4,975
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <a
+              href="https://github.com/zio-archive"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXD9V2wblCB"
+                  src="https://avatars.githubusercontent.com/u/194811391?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="zio-archive"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  ZI
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  zio-archive
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->0
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $325
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/gerred"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sXF6g6wblDB"
+                  src="https://algora-console.fly.storage.tigris.dev/avatars/gerred.png"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Gerred Dillon"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  GE
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/gerred"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Gerred Dillon 🇺🇸
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/gerred"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">gerred</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="cm5fkrufe0000mw03aryl2im0"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="cm5fkrufe0000mw03aryl2im0"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              1
+              bounty
+            </span>
+            <span class="font-semibold font-display">
+              in 1 project
+            </span>
+            <span class="font-semibold font-display">
+              ($2,000)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/trieve"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXNpQOwblEB"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/clmjr82fr0007mi0f3skac022-1720036458247"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Trieve (YC W24)"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  TR
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Trieve (YC W24)
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->2.0K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $2,000
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/JoshAntBrown"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sXPvo6wblFB"
+                  src="https://avatars.githubusercontent.com/u/1793797?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Josh Brown"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  JO
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/JoshAntBrown"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Josh Brown 🇬🇧
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/JoshAntBrown"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">JoshAntBrown</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="clsdprvym000al70f76whovr4"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="clsdprvym000al70f76whovr4"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              16
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              in 1 project
+            </span>
+            <span class="font-semibold font-display">
+              ($2,575)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/maybe-finance"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXXNMmwblGB"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/clr89x8os000ejs0f00fmkc76-1704921066094"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Maybe"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  MA
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Maybe
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->42.6K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $2,575
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/rjackson"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sXZMEuwblHB"
+                  src="https://avatars.githubusercontent.com/u/602850?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Rob Jackson"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  RO
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/rjackson"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Rob Jackson 🇬🇧
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/rjackson"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">rjackson</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="clgtz4g9m000aml0fpofbqegp"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="clgtz4g9m000aml0fpofbqegp"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              25
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              across 5 projects
+            </span>
+            <span class="font-semibold font-display">
+              ($1,649)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/cal"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXgjbqwblIB"
+                  src="https://avatars.githubusercontent.com/u/79145102?s=200&amp;v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Cal.com, Inc."
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  CA
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Cal.com, Inc.
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->35.4K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $704
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <a
+              href="http://localhost:4000/org/remotion"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXia4mwblJB"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/remotion.png?t=2023-04-02T14%3A56%3A20.474Z"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Remotion"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  RE
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Remotion
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->21.8K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $435
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
+      <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+        <div class="xl:basis-[28.5714286%]">
+          <div class="flex items-center gap-4">
+            <a
+              href="http://localhost:4000/@/Myestery"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+            >
+              <div class="relative rounded-full shrink-0 overflow-hidden w-16 h-16">
+                <img
+                  id="avatar-image-GDQe_sXkGqqwblKB"
+                  src="https://avatars.githubusercontent.com/u/49923152?v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Johnpaul Chiwetelu"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  JO
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <a
+                  href="http://localhost:4000/@/Myestery"
+                  data-phx-link="redirect"
+                  data-phx-link-state="push"
+                  class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                >
+                  Johnpaul Chiwetelu 🇳🇬
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+                <a
+                  href="https://github.com/Myestery"
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <svg
+                    class="shrink-0 h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 0C5.37017 0 0 5.50708 0 12.306C0 17.745 3.44015 22.3532 8.20626 23.9849C8.80295 24.0982 9.02394 23.7205 9.02394 23.3881C9.02394 23.0935 9.01657 22.3229 9.00921 21.2956C5.67219 22.0359 4.96501 19.6487 4.96501 19.6487C4.41989 18.2285 3.63168 17.8508 3.63168 17.8508C2.54144 17.0878 3.71271 17.1029 3.71271 17.1029C4.91344 17.1936 5.55433 18.372 5.55433 18.372C6.62247 20.2531 8.36096 19.7092 9.04604 19.3919C9.15654 18.5987 9.46593 18.0548 9.80479 17.745C7.13812 17.4353 4.33886 16.3777 4.33886 11.6638C4.33886 10.3192 4.80295 9.2238 5.57643 8.36261C5.4512 8.05288 5.03867 6.79887 5.69429 5.1067C5.69429 5.1067 6.7035 4.77432 8.99447 6.36827C9.95212 6.09632 10.9761 5.96034 12 5.95279C13.0166 5.95279 14.0479 6.09632 15.0055 6.36827C17.2965 4.77432 18.3057 5.1067 18.3057 5.1067C18.9613 6.79887 18.5488 8.05288 18.4236 8.36261C19.1897 9.2238 19.6538 10.3192 19.6538 11.6638C19.6538 16.3928 16.8471 17.4278 14.1731 17.7375C14.6004 18.1152 14.9908 18.8706 14.9908 20.0189C14.9908 21.6657 14.9761 22.9877 14.9761 23.3957C14.9761 23.728 15.1897 24.1058 15.8011 23.9849C20.5672 22.3532 24 17.745 24 12.3135C24 5.50708 18.6298 0 12 0Z">
+                    </path>
+                  </svg>
+                  <!-- </AlgoraWeb.Components.Logos.github> -->
+                  <span class="line-clamp-1">Myestery</span>
+                </a>
+                <!-- </Phoenix.Component.link> -->
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-blue-400/50 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:border-blue-400/50 focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="bounty"
+            phx-value-user_id="cly6lduqn000cl6097jiobynl"
+          >
+            <span class="tabler-diamond size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Bounty
+
+          </button>
+
+          <button
+            class="inline-flex px-4 py-2 rounded-lg border-white/50 bg-card text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium duration-75 text-sm h-9 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 disabled:opacity-75 hover:border-emerald-400/50 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:border-emerald-400/50 focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border group phx-submit-loading:opacity-75"
+            phx-click="share_opportunity"
+            phx-value-type="contract"
+            phx-value-user_id="cly6lduqn000cl6097jiobynl"
+          >
+            <span class="tabler-contract size-4 text-current mr-2 -ml-1"></span>
+            <!-- </AlgoraWeb.CoreComponents.icon> --> Contract
+
+          </button>
+        </div>
+
+        <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+          <div class="text-sm sm:text-base text-foreground font-medium">
+            Completed
+            <span class="font-semibold font-display">
+              3
+              bounties
+            </span>
+            <span class="font-semibold font-display">
+              across 3 projects
+            </span>
+            <span class="font-semibold font-display">
+              ($1,500)
+            </span>
+          </div>
+          <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+            <a
+              href="http://localhost:4000/org/golemcloud"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXr9tmwblLB"
+                  src="https://avatars.githubusercontent.com/u/133607167?s=200&amp;v=4"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Golem Cloud"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  GO
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Golem Cloud
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->738
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $1,000
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+            <a
+              href="http://localhost:4000/org/remotion"
+              data-phx-link="redirect"
+              data-phx-link-state="push"
+              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+            >
+              <div class="relative rounded-lg shrink-0 overflow-hidden bg-gradient-to-br brightness-75 saturate-0 w-10 h-10">
+                <img
+                  id="avatar-image-GDQe_sXtibGwblMB"
+                  src="https://app.algora.io/asset/storage/v1/object/public/images/org/remotion.png?t=2023-04-02T14%3A56%3A20.474Z"
+                  class="bg-muted aspect-square w-full h-full"
+                  phx-hook="AvatarImage"
+                  alt="Remotion"
+                />
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_image> -->
+                <span class="flex rounded-lg bg-muted items-center justify-center w-full h-full">
+                  RE
+                </span>
+                <!-- </AlgoraWeb.Components.UI.Avatar.avatar_fallback> -->
+
+              </div>
+              <!-- </AlgoraWeb.Components.UI.Avatar.avatar> -->
+              <div class="flex flex-col">
+                <div class="text-base font-medium text-muted-foreground">
+                  Remotion
+                </div>
+
+                <div class="flex items-center gap-2 whitespace-nowrap">
+                  <div class="text-sm text-muted-foreground font-display font-semibold">
+                    <span class="tabler-star-filled size-4 text-amber-400 mr-1"></span>
+                    <!-- </AlgoraWeb.CoreComponents.icon> -->21.8K
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    <span class="text-emerald-400 font-display font-semibold">
+                      $250
+                    </span>
+                    awarded
+                  </div>
+                </div>
+              </div>
+            </a>
+            <!-- </Phoenix.Component.link> -->
+
+          </div>
+        </div>
+      </div>
+      <!-- </AlgoraWeb.Org.DashboardLive.match_card> -->
+
     </div>
     """
   end

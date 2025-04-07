@@ -302,7 +302,6 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
           </div>
-
           <div class="lg:hidden space-y-16 px-4 sm:px-6">
             <%= for feature <- org_features() do %>
               <div>
@@ -328,7 +327,7 @@ defmodule AlgoraWeb.HomeLive do
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
             Find new collaborators, solve bounties and complete contract work
           </p>
-          <div class="grid grid-cols-3 items-center gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
+          <div class="hidden lg:grid lg:grid-cols-3 items-center lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
               <div class="flex flex-col gap-8">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
@@ -385,6 +384,21 @@ defmodule AlgoraWeb.HomeLive do
                 <% end %>
               </div>
             </div>
+          </div>
+          <div class="lg:hidden space-y-16 px-4 sm:px-6">
+            <%= for feature <- user_features() do %>
+              <div>
+                <div class="text-xl font-bold text-foreground">
+                  {feature.title}
+                </div>
+                <div class="pt-1 text-sm text-muted-foreground">
+                  {feature.description}
+                </div>
+                <div class="mt-4 aspect-[1200/630] w-full relative overflow-hidden">
+                  <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
+                </div>
+              </div>
+            <% end %>
           </div>
         </section>
 

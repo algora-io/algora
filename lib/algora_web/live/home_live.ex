@@ -79,12 +79,12 @@ defmodule AlgoraWeb.HomeLive do
       },
       %{
         title: "Automated payments",
-        description: "Set up automatic payments when PRs are merged",
+        description: "Reward on auto-pilot as PRs are merged",
         src: ~p"/images/screenshots/autopay-on-merge.png"
       },
       %{
         title: "Payment history",
-        description: "View all bounty and contract payments in one place",
+        description: "View all payments and export summaries",
         src: ~p"/images/screenshots/org-transactions.png"
       },
       # %{
@@ -237,13 +237,14 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            Everything you need to <span class="text-emerald-400">reward your contributors</span>
+          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
+            Everything you need to
+            <span class="text-emerald-400 block sm:inline">reward your contributors</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
             Build your product and team in one place
           </p>
-          <div class="hidden lg:grid lg:grid-cols-4 lg:gap-8 lg:mx-auto lg:px-8">
+          <div class="hidden lg:grid lg:grid-cols-4 items-center lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
               <div class="flex flex-col gap-8">
                 <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
@@ -270,11 +271,11 @@ defmodule AlgoraWeb.HomeLive do
                         ])
                       }
                     >
-                      <.card_content>
-                        <div class="text-xl font-bold text-foreground">
+                      <.card_content class="p-4">
+                        <div class="text-2xl font-bold text-foreground">
                           {feature.title}
                         </div>
-                        <div class="text-xs text-muted-foreground">
+                        <div class="text-sm text-muted-foreground pt-2">
                           {feature.description}
                         </div>
                       </.card_content>
@@ -302,20 +303,16 @@ defmodule AlgoraWeb.HomeLive do
             </div>
           </div>
 
-          <div class="lg:hidden space-y-8 px-4 sm:px-6">
+          <div class="lg:hidden space-y-16 px-4 sm:px-6">
             <%= for feature <- org_features() do %>
-              <div class="space-y-4">
-                <.card class="ring-1 ring-foreground/30 rounded-xl">
-                  <.card_content>
-                    <div class="text-2xl font-bold text-foreground">
-                      {feature.title}
-                    </div>
-                    <div class="text-sm text-muted-foreground">
-                      {feature.description}
-                    </div>
-                  </.card_content>
-                </.card>
-                <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/30 rounded-xl overflow-hidden">
+              <div>
+                <div class="text-xl font-bold text-foreground">
+                  {feature.title}
+                </div>
+                <div class="pt-1 text-sm text-muted-foreground">
+                  {feature.description}
+                </div>
+                <div class="mt-4 aspect-[1200/630] w-full relative overflow-hidden">
                   <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
                 </div>
               </div>
@@ -324,13 +321,14 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            For developers
+          <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
+            Everything you need to
+            <span class="text-emerald-400 block sm:inline">contribute and get rewarded</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Discover GitHub bounties, contract work and jobs
+            Find new collaborators, solve bounties and complete contract work
           </p>
-          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
+          <div class="grid grid-cols-3 items-center gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
             <div class="col-span-1">
               <div class="flex flex-col gap-8">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
@@ -357,11 +355,11 @@ defmodule AlgoraWeb.HomeLive do
                         ])
                       }
                     >
-                      <.card_content>
+                      <.card_content class="p-4">
                         <div class="text-2xl font-bold text-foreground">
                           {feature.title}
                         </div>
-                        <div class="text-sm text-muted-foreground">
+                        <div class="text-sm text-muted-foreground pt-2">
                           {feature.description}
                         </div>
                       </.card_content>

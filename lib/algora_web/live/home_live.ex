@@ -3,7 +3,6 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
-  import AlgoraWeb.Components.ModalVideo
   import Ecto.Changeset
   import Ecto.Query
 
@@ -16,6 +15,10 @@ defmodule AlgoraWeb.HomeLive do
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.Data.PlatformStats
+  alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.ContractForm
+  alias AlgoraWeb.Forms.RepoForm
+  alias AlgoraWeb.Forms.TipForm
 
   require Logger
 
@@ -48,17 +51,25 @@ defmodule AlgoraWeb.HomeLive do
       %{label: "Countries", value: format_number(get_countries_count())}
     ]
 
+    featured_devs = Accounts.list_featured_developers(country_code)
+    featured_collabs = list_featured_collabs()
+
     {:ok,
      socket
      |> assign(:page_title, "Algora - The open source Upwork for engineers")
      |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:featured_devs, Accounts.list_featured_developers(country_code))
-     |> assign(:featured_collabs, list_featured_collabs())
+     |> assign(:featured_devs, featured_devs)
+     |> assign(:featured_collabs, featured_collabs)
      |> assign(:stats, stats)
+     |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+     |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
-     |> assign(:plans2, AlgoraWeb.PricingLive.get_plans2())}
+     |> assign(:selected_developer, nil)
+     |> assign(:share_drawer_type, nil)
+     |> assign(:show_share_drawer, false)}
   end
 
   defp org_features do
@@ -102,6 +113,11 @@ defmodule AlgoraWeb.HomeLive do
         title: "Find work",
         description: "Browse open bounties and contracts",
         src: ~p"/images/screenshots/user-dashboard.png"
+      },
+      %{
+        title: "Developer profile",
+        description: "Showcase your open source contributions",
+        src: ~p"/images/screenshots/profile.png"
       },
       %{
         title: "Developer profile",
@@ -254,7 +270,7 @@ defmodule AlgoraWeb.HomeLive do
                       )
                       |> AlgoraWeb.Util.transition("data-org-feature-card", feature.src,
                         from: "ring-transparent",
-                        to: "ring-foreground/30"
+                        to: "ring-success"
                       )
                     }
                   >
@@ -263,7 +279,7 @@ defmodule AlgoraWeb.HomeLive do
                       class={
                         classes([
                           "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground/30")
+                          if(index == 0, do: "ring-success")
                         ])
                       }
                     >
@@ -317,13 +333,13 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            Match with top developers
+            ✨ Match with top OSS engineers open to work
           </h2>
 
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
           </p>
 
-          <div class="pt-12 max-w-7xl mx-auto px-6 lg:px-8">
+          <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <.contributors featured_collabs={@featured_collabs} />
           </div>
         </section>
@@ -350,7 +366,7 @@ defmodule AlgoraWeb.HomeLive do
                       )
                       |> AlgoraWeb.Util.transition("data-user-feature-card", feature.src,
                         from: "ring-transparent",
-                        to: "ring-foreground/30"
+                        to: "ring-success"
                       )
                     }
                   >
@@ -359,7 +375,7 @@ defmodule AlgoraWeb.HomeLive do
                       class={
                         classes([
                           "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground/30")
+                          if(index == 0, do: "ring-success")
                         ])
                       }
                     >
@@ -528,7 +544,7 @@ defmodule AlgoraWeb.HomeLive do
       </main>
     </div>
 
-    <.modal_video_dialog />
+    {share_drawer(assigns)}
     """
   end
 
@@ -560,6 +576,28 @@ defmodule AlgoraWeb.HomeLive do
       end
     else
       {:noreply, assign(socket, :repo_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("close_share_drawer", _params, socket) do
+    {:noreply, assign(socket, :show_share_drawer, false)}
+  end
+
+  @impl true
+  def handle_event("share_opportunity", %{"user_id" => user_id, "type" => type}, socket) do
+    collab = Enum.find(socket.assigns.featured_collabs, &(&1.user.id == user_id))
+
+    case collab do
+      nil ->
+        {:noreply, socket}
+
+      collab ->
+        {:noreply,
+         socket
+         |> assign(:selected_developer, collab.user)
+         |> assign(:share_drawer_type, type)
+         |> assign(:show_share_drawer, true)}
     end
   end
 
@@ -1099,16 +1137,20 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   defp list_featured_collabs do
-    users =
+    developers =
       case Algora.Settings.get_featured_collabs() do
         handles when is_list(handles) and handles != [] ->
-          Accounts.list_developers(handles: handles)
+          developers = Accounts.list_developers(handles: handles)
+          # Sort developers to match handles order
+          Enum.sort_by(developers, fn dev ->
+            Enum.find_index(handles, &(&1 == dev.provider_login))
+          end)
 
         _ ->
           Accounts.list_developers(limit: 5)
       end
 
-    Enum.map(users, fn user -> %{user: user, projects: Accounts.list_contributed_projects(user, limit: 2)} end)
+    Enum.map(developers, fn user -> %{user: user, projects: Accounts.list_contributed_projects(user, limit: 2)} end)
   end
 
   defp collab_card(assigns) do
@@ -1117,7 +1159,7 @@ defmodule AlgoraWeb.HomeLive do
       <div class="xl:basis-[28.5714286%]">
         <div class="flex items-center gap-4">
           <.link navigate={User.url(@collab.user)}>
-            <.avatar class="h-16 w-16 rounded-full">
+            <.avatar class="h-20 w-20 rounded-full">
               <.avatar_image src={@collab.user.avatar_url} alt={@collab.user.name} />
               <.avatar_fallback class="rounded-lg">
                 {Algora.Util.initials(@collab.user.name)}
@@ -1136,7 +1178,7 @@ defmodule AlgoraWeb.HomeLive do
             </div>
             <div
               :if={@collab.user.provider_meta}
-              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+              class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
             >
               <.link
                 :if={@collab.user.provider_login}
@@ -1157,20 +1199,29 @@ defmodule AlgoraWeb.HomeLive do
                 <span class="line-clamp-1">{@collab.user.provider_meta["twitter_handle"]}</span>
               </.link>
             </div>
+            <div class="pt-2 flex items-center gap-2">
+              <%= for tech <- @collab.user.tech_stack |> Enum.take(3) do %>
+                <.badge variant="outline">{tech}</.badge>
+              <% end %>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
         <.button
-          navigate={~p"/onboarding/org"}
+          phx-click="share_opportunity"
+          phx-value-user_id={@collab.user.id}
+          phx-value-type="bounty"
           variant="none"
           class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
         >
           <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
         </.button>
         <.button
-          navigate={~p"/onboarding/org"}
+          phx-click="share_opportunity"
+          phx-value-user_id={@collab.user.id}
+          phx-value-type="contract"
           variant="none"
           class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
         >
@@ -1206,7 +1257,7 @@ defmodule AlgoraWeb.HomeLive do
               navigate={User.url(project)}
               class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
             >
-              <.avatar class="h-10 w-10 rounded-lg saturate-0 bg-gradient-to-br brightness-75">
+              <.avatar class="h-10 w-10 rounded-lg">
                 <.avatar_image src={project.avatar_url} alt={project.name} />
                 <.avatar_fallback class="rounded-lg">
                   {Algora.Util.initials(project.name)}
@@ -1246,6 +1297,261 @@ defmodule AlgoraWeb.HomeLive do
         <.collab_card collab={collab} />
       <% end %>
     </div>
+    """
+  end
+
+  defp share_drawer_header(%{share_drawer_type: "contract"} = assigns) do
+    ~H"""
+    <.drawer_header>
+      <.drawer_title>Offer Contract</.drawer_title>
+      <.drawer_description>
+        {@selected_developer.name} will be notified and can accept or decline. You can auto-renew or cancel the contract at the end of each period.
+      </.drawer_description>
+    </.drawer_header>
+    """
+  end
+
+  defp share_drawer_header(%{share_drawer_type: "bounty"} = assigns) do
+    ~H"""
+    <.drawer_header>
+      <.drawer_title>Share Bounty</.drawer_title>
+      <.drawer_description>
+        Share a bounty opportunity with {@selected_developer.name}. They will be notified and can choose to work on it.
+      </.drawer_description>
+    </.drawer_header>
+    """
+  end
+
+  defp share_drawer_header(%{share_drawer_type: "tip"} = assigns) do
+    ~H"""
+    <.drawer_header>
+      <.drawer_title>Send Tip</.drawer_title>
+      <.drawer_description>
+        Send a tip to {@selected_developer.name} to show appreciation for their contributions.
+      </.drawer_description>
+    </.drawer_header>
+    """
+  end
+
+  defp share_drawer_content(%{share_drawer_type: "contract"} = assigns) do
+    ~H"""
+    <.form for={@contract_form} phx-submit="create_contract">
+      <.card>
+        <.card_header>
+          <.card_title>Contract Details</.card_title>
+        </.card_header>
+        <.card_content class="pt-0 flex flex-col">
+          <div class="space-y-4">
+            <.input
+              label="Hourly Rate"
+              icon="tabler-currency-dollar"
+              field={@contract_form[:hourly_rate]}
+            />
+            <.input label="Hours per Week" field={@contract_form[:hours_per_week]} />
+          </div>
+          <div class="pt-8 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Send Contract Offer <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
+          </div>
+        </.card_content>
+      </.card>
+    </.form>
+    """
+  end
+
+  defp share_drawer_content(%{share_drawer_type: "bounty"} = assigns) do
+    ~H"""
+    <.form for={@bounty_form} phx-submit="create_bounty">
+      <.card>
+        <.card_header>
+          <.card_title>Bounty Details</.card_title>
+        </.card_header>
+        <.card_content class="pt-0 flex flex-col">
+          <div class="space-y-4">
+            <.input type="hidden" name="bounty_form[visibility]" value="exclusive" />
+            <.input
+              type="hidden"
+              name="bounty_form[shared_with][]"
+              value={
+                case @selected_developer do
+                  %{handle: nil, provider_id: provider_id} -> [to_string(provider_id)]
+                  %{id: id} -> [id]
+                end
+              }
+            />
+            <.input
+              label="URL"
+              field={@bounty_form[:url]}
+              placeholder="https://github.com/owner/repo/issues/123"
+            />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+          </div>
+          <div class="pt-8 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Share Bounty <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
+          </div>
+        </.card_content>
+      </.card>
+    </.form>
+    """
+  end
+
+  defp share_drawer_content(%{share_drawer_type: "tip"} = assigns) do
+    ~H"""
+    <.form for={@tip_form} phx-submit="create_tip">
+      <.card>
+        <.card_header>
+          <.card_title>Tip Details</.card_title>
+        </.card_header>
+        <.card_content class="pt-0 flex flex-col">
+          <div class="space-y-4">
+            <input
+              type="hidden"
+              name="tip_form[github_handle]"
+              value={@selected_developer.provider_login}
+            />
+            <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+            <.input
+              label="URL"
+              field={@tip_form[:url]}
+              placeholder="https://github.com/owner/repo/issues/123"
+              helptext="We'll add a comment to the issue to notify the developer."
+            />
+          </div>
+          <div class="pt-8 ml-auto flex gap-4">
+            <.button variant="secondary" phx-click="close_share_drawer" type="button">
+              Cancel
+            </.button>
+            <.button type="submit">
+              Send Tip <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+            </.button>
+          </div>
+        </.card_content>
+      </.card>
+    </.form>
+    """
+  end
+
+  defp share_drawer_developer_info(assigns) do
+    ~H"""
+    <.card>
+      <.card_header>
+        <.card_title>Developer</.card_title>
+      </.card_header>
+      <.card_content class="pt-0">
+        <div class="flex items-start gap-4">
+          <.avatar class="h-20 w-20 rounded-full">
+            <.avatar_image src={@selected_developer.avatar_url} alt={@selected_developer.name} />
+            <.avatar_fallback class="rounded-lg">
+              {Algora.Util.initials(@selected_developer.name)}
+            </.avatar_fallback>
+          </.avatar>
+
+          <div>
+            <div class="flex items-center gap-1 text-base text-foreground">
+              <span class="font-semibold">{@selected_developer.name}</span>
+              {Algora.Misc.CountryEmojis.get(@selected_developer.country)}
+            </div>
+
+            <div
+              :if={@selected_developer.provider_meta}
+              class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+            >
+              <.link
+                :if={@selected_developer.provider_login}
+                href={"https://github.com/#{@selected_developer.provider_login}"}
+                target="_blank"
+                class="flex items-center gap-1 hover:underline"
+              >
+                <Logos.github class="h-4 w-4" />
+                <span class="whitespace-nowrap">{@selected_developer.provider_login}</span>
+              </.link>
+              <.link
+                :if={@selected_developer.provider_meta["twitter_handle"]}
+                href={"https://x.com/#{@selected_developer.provider_meta["twitter_handle"]}"}
+                target="_blank"
+                class="flex items-center gap-1 hover:underline"
+              >
+                <.icon name="tabler-brand-x" class="h-4 w-4" />
+                <span class="whitespace-nowrap">
+                  {@selected_developer.provider_meta["twitter_handle"]}
+                </span>
+              </.link>
+              <div :if={@selected_developer.provider_meta["location"]} class="flex items-center gap-1">
+                <.icon name="tabler-map-pin" class="h-4 w-4" />
+                <span class="whitespace-nowrap">
+                  {@selected_developer.provider_meta["location"]}
+                </span>
+              </div>
+              <div :if={@selected_developer.provider_meta["company"]} class="flex items-center gap-1">
+                <.icon name="tabler-building" class="h-4 w-4" />
+                <span class="whitespace-nowrap">
+                  {@selected_developer.provider_meta["company"] |> String.trim_leading("@")}
+                </span>
+              </div>
+            </div>
+
+            <div class="pt-1.5 flex flex-wrap gap-2">
+              <%= for tech <- @selected_developer.tech_stack do %>
+                <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+                  {tech}
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </.card_content>
+    </.card>
+    """
+  end
+
+  defp share_drawer(assigns) do
+    ~H"""
+    <.drawer show={@show_share_drawer} direction="bottom" on_cancel="close_share_drawer">
+      <.share_drawer_header
+        :if={@selected_developer}
+        selected_developer={@selected_developer}
+        share_drawer_type={@share_drawer_type}
+      />
+      <.drawer_content :if={@selected_developer} class="mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <.share_drawer_developer_info selected_developer={@selected_developer} />
+          <div class="relative">
+            <div class="absolute inset-0 z-10 bg-background/50" />
+            <div class="pointer-events-none">
+              <.share_drawer_content
+                :if={@selected_developer}
+                selected_developer={@selected_developer}
+                share_drawer_type={@share_drawer_type}
+                bounty_form={@bounty_form}
+                tip_form={@tip_form}
+                contract_form={@contract_form}
+              />
+            </div>
+            <.alert
+              variant="default"
+              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-auto flex flex-col items-center justify-center gap-2 text-center"
+            >
+              <.alert_title>Let's get you started</.alert_title>
+              <.alert_description>
+                Sign up to create a {@share_drawer_type} with {@selected_developer.name}.
+              </.alert_description>
+              <.button href={~p"/onboarding/org"} type="button" variant="subtle" class="mt-4">
+                Get started
+              </.button>
+            </.alert>
+          </div>
+        </div>
+      </.drawer_content>
+    </.drawer>
     """
   end
 end

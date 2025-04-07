@@ -294,7 +294,7 @@ defmodule AlgoraWeb.HomeLive do
                     alt={feature.title}
                     class={
                       classes([
-                        "w-full h-full object-contain absolute inset-0 opacity-0 transition-all rounded-xl",
+                        "w-full h-full object-contain absolute inset-0 opacity-0 transition-all",
                         if(index == 0, do: "opacity-100")
                       ])
                     }
@@ -387,7 +387,7 @@ defmodule AlgoraWeb.HomeLive do
                     alt={feature.title}
                     class={
                       classes([
-                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
+                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all",
                         if(index == 0, do: "opacity-100")
                       ])
                     }

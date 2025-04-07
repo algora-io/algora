@@ -340,7 +340,7 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative py-16 sm:py-40">
           <div class="mb-4 text-center text-3xl sm:text-6xl">🌎</div>
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            Join {@total_contributors} contributors from {@total_countries} countries
+            Join {@total_contributors} contributors<span class="block sm:inline">from {@total_countries} countries</span>
           </h2>
 
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
@@ -354,10 +354,10 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
             <span class="text-emerald-400">Get paid for open source</span>
-            and <span class="block sm:inline">freelance work</span>
+            <span class="block sm:inline">and freelance work</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Work on your own schedule, from anywhere in the world
+            Work on your own schedule, anywhere in the world
           </p>
           <div class="hidden lg:grid lg:grid-cols-4 items-center lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
@@ -1215,7 +1215,7 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </div>
 
-      <div class="flex xl:flex-col gap-2 xl:basis-[15%] xl:ml-auto transition-opacity duration-500 opacity-0 group-hover/collab:opacity-100">
+      <div class="pt-4 xl:flex-col gap-4 xl:basis-[15%] xl:ml-auto transition-opacity duration-500 hidden lg:flex lg:opacity-0 group-hover/collab:opacity-100">
         <.button
           phx-click="share_opportunity"
           phx-value-user_id={@collab.user.id}
@@ -1236,24 +1236,26 @@ defmodule AlgoraWeb.HomeLive do
         </.button>
       </div>
 
-      <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[50%] xl:border-l xl:border-border">
-        <div class="flex gap-1 text-sm sm:text-base text-foreground font-medium">
-          Completed
-          <span class="font-semibold font-display">
-            {@collab.user.transactions_count}
-            {ngettext(
-              "bounty",
-              "bounties",
-              @collab.user.transactions_count
-            )}
-          </span>
-          <span class="font-semibold font-display">
-            {ngettext(
-              "in %{count} project",
-              "across %{count} projects",
-              @collab.user.contributed_projects_count
-            )}
-          </span>
+      <div class="pt-4 xl:pt-0 xl:pl-8 xl:basis-[50%] xl:border-l xl:border-border">
+        <div class="flex items-center gap-1 text-sm sm:text-base text-foreground font-medium">
+          <div>
+            Completed
+            <span class="font-semibold font-display">
+              {@collab.user.transactions_count}
+              {ngettext(
+                "bounty",
+                "bounties",
+                @collab.user.transactions_count
+              )}
+            </span>
+            <span class="font-semibold font-display">
+              {ngettext(
+                "in %{count} project",
+                "across %{count} projects",
+                @collab.user.contributed_projects_count
+              )}
+            </span>
+          </div>
           <span class="ml-auto font-semibold text-lg font-display text-success">
             +{Money.to_string!(@collab.user.total_earned)}
           </span>

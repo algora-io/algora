@@ -1156,7 +1156,7 @@ defmodule AlgoraWeb.HomeLive do
   defp collab_card(assigns) do
     ~H"""
     <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
-      <div class="xl:basis-[28.5714286%]">
+      <div class="xl:basis-[35%]">
         <div class="flex items-center gap-4">
           <.link navigate={User.url(@collab.user)}>
             <.avatar class="h-20 w-20 rounded-full">
@@ -1208,7 +1208,7 @@ defmodule AlgoraWeb.HomeLive do
         </div>
       </div>
 
-      <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+      <div class="flex xl:flex-col gap-2 xl:basis-[15%] xl:ml-auto">
         <.button
           phx-click="share_opportunity"
           phx-value-user_id={@collab.user.id}
@@ -1229,7 +1229,7 @@ defmodule AlgoraWeb.HomeLive do
         </.button>
       </div>
 
-      <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+      <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[50%] xl:border-l xl:border-border">
         <div class="text-sm sm:text-base text-foreground font-medium">
           Completed
           <span class="font-semibold font-display">

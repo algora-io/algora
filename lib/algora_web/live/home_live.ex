@@ -76,27 +76,27 @@ defmodule AlgoraWeb.HomeLive do
     [
       %{
         title: "Bounty board",
-        description: "Post bounties, track progress, and pay when work is done",
+        description: "Create bounties for GitHub issues and track progress",
         src: ~p"/images/screenshots/org-home.png"
       },
       %{
-        title: "Match with top OSS engineers",
-        description: "Find the best open source developers for your project",
+        title: "Developer matching",
+        description: "Connect with developers who have relevant open source experience",
         src: ~p"/images/screenshots/org-matches.png"
       },
       %{
-        title: "Complete contract work",
-        description: "Share contracts with your contributors & matches",
+        title: "Contract management",
+        description: "Create and manage contracts with contributors and matches",
         src: ~p"/images/screenshots/share-contract.png"
       },
       %{
-        title: "Autopay on merge",
-        description: "Autopay on merge",
+        title: "Automated payments",
+        description: "Set up automatic payments when pull requests are merged",
         src: ~p"/images/screenshots/autopay-on-merge.png"
       },
       %{
-        title: "View your transactions",
-        description: "Track your payments and transactions in real time",
+        title: "Payment history",
+        description: "View all bounty and contract payments in one place",
         src: ~p"/images/screenshots/org-transactions.png"
       }
     ]
@@ -105,18 +105,18 @@ defmodule AlgoraWeb.HomeLive do
   defp user_features do
     [
       %{
-        title: "Discover bounties and contract work",
-        description: "Find bounties and contract work",
+        title: "Find work",
+        description: "Browse open bounties and contract opportunities",
         src: ~p"/images/screenshots/user-dashboard.png"
       },
       %{
-        title: "Showcase your skills and work",
-        description: "Profile page with your past contributions, bounties and contracts",
-        src: ~p"/images/screenshots/user-profile.png"
+        title: "Developer profile",
+        description: "Display your open source contributions and work history",
+        src: ~p"/images/screenshots/profile.png"
       },
       %{
-        title: "View your transactions",
-        description: "Track your payments and transactions in real time",
+        title: "Payment tracking",
+        description: "Monitor your earnings from bounties and contracts",
         src: ~p"/images/screenshots/user-transactions.png"
       }
     ]
@@ -135,10 +135,10 @@ defmodule AlgoraWeb.HomeLive do
       <main class="bg-black relative overflow-hidden">
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            Everything you need to collaborate and hire
+            A complete platform for open source hiring
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Create bounties, track progress, and pay when work is done
+            Post bounties, evaluate developers, and hire through contributions
           </p>
           <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
             <div class="col-span-1">

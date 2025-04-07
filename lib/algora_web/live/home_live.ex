@@ -324,6 +324,7 @@ defmodule AlgoraWeb.HomeLive do
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
             Loved by developers and companies
           </h2>
+
           <div class="pt-12 max-w-7xl mx-auto px-6 lg:px-8">
             <.contributors featured_collabs={@featured_collabs} />
           </div>
@@ -1164,18 +1165,14 @@ defmodule AlgoraWeb.HomeLive do
 
       <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
         <.button
-          phx-click="share_opportunity"
-          phx-value-user_id={@collab.user.id}
-          phx-value-type="bounty"
+          navigate={~p"/onboarding/org"}
           variant="none"
           class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
         >
           <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
         </.button>
         <.button
-          phx-click="share_opportunity"
-          phx-value-user_id={@collab.user.id}
-          phx-value-type="contract"
+          navigate={~p"/onboarding/org"}
           variant="none"
           class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
         >

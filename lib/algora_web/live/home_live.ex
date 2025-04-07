@@ -117,33 +117,23 @@ defmodule AlgoraWeb.HomeLive do
                     class="cursor-pointer"
                     phx-click={
                       %JS{}
-                      |> JS.hide(
-                        to: "[data-feature-img]:not([data-feature-img='#{feature.src}'])",
-                        transition:
-                          {"transition-opacity transform ease-in duration-200", "opacity-100",
-                           "opacity-0"}
+                      |> AlgoraWeb.Util.transition("data-feature-img", feature.src,
+                        from: "opacity-0",
+                        to: "opacity-100"
                       )
-                      |> JS.show(
-                        to: "[data-feature-img='#{feature.src}']",
-                        transition:
-                          {"transition-opacity transform ease-out duration-300", "opacity-0",
-                           "opacity-100"}
-                      )
-                      |> JS.toggle(
-                        to: "[data-feature-card]:not([data-feature-card='#{feature.src}'])",
-                        out: {"ease-out duration-300", "ring-foreground", "ring-transparent"}
-                      )
-                      |> JS.toggle(
-                        to: "[data-feature-card='#{feature.src}']",
-                        in: {"ease-out duration-300", "ring-transparent", "ring-foreground"}
+                      |> AlgoraWeb.Util.transition("data-feature-card", feature.src,
+                        from: "ring-transparent",
+                        to: "ring-foreground"
                       )
                     }
                   >
                     <.card
                       data-feature-card={feature.src}
                       class={
-                        if feature.src == @selected_org_feature.src,
-                          do: "ring-1 ring-foreground"
+                        classes([
+                          "ring-1 ring-transparent transition-all rounded-xl",
+                          if(feature.src == @selected_org_feature.src, do: "ring-foreground")
+                        ])
                       }
                     >
                       <.card_content>
@@ -160,7 +150,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground rounded-xl">
                 <%= for feature <- org_features() do %>
                   <img
                     data-feature-img={feature.src}
@@ -168,9 +158,8 @@ defmodule AlgoraWeb.HomeLive do
                     alt={feature.title}
                     class={
                       classes([
-                        "w-full h-full object-cover absolute inset-0 opacity-0 ring-1 ring-transparent rounded-xl",
-                        feature.src == @selected_org_feature.src &&
-                          "opacity-100 ring-foreground"
+                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
+                        if(feature.src == @selected_org_feature.src, do: "opacity-100")
                       ])
                     }
                   />
@@ -180,10 +169,6 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
-          <div class="hidden md:block">
-            <.pattern />
-          </div>
-
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div class="px-6 lg:px-8 lg:pr-0 xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">

@@ -3,6 +3,7 @@ defmodule AlgoraWeb.HomeLive do
   use AlgoraWeb, :live_view
   use LiveSvelte.Components
 
+  import AlgoraWeb.Components.ModalVideo
   import Ecto.Changeset
   import Ecto.Query
 
@@ -55,6 +56,9 @@ defmodule AlgoraWeb.HomeLive do
       Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
     end
 
+    org_features = org_features()
+    selected_org_feature = List.first(org_features)
+
     {:ok,
      socket
      |> assign(:page_title, "Algora - The open source Upwork for engineers")
@@ -68,43 +72,29 @@ defmodule AlgoraWeb.HomeLive do
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:pending_action, nil)
      |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
-     |> assign(:plans2, AlgoraWeb.PricingLive.get_plans2())}
+     |> assign(:plans2, AlgoraWeb.PricingLive.get_plans2())
+     |> assign(:org_features, org_features)
+     |> assign(:selected_org_feature, selected_org_feature)}
   end
 
-  attr :src, :string, required: true
-  attr :poster, :string, required: true
-  attr :title, :string, default: nil
-  attr :alt, :string, default: nil
-  attr :class, :string, default: nil
-  attr :autoplay, :boolean, default: true
-  attr :start, :integer, default: 0
-
-  defp modal_video(assigns) do
-    ~H"""
-    <div
-      class={
-        classes([
-          "group relative aspect-video w-full overflow-hidden rounded-xl lg:rounded-2xl bg-gray-800 cursor-pointer",
-          @class
-        ])
+  defp org_features do
+    [
+      %{
+        title: "Bounty board",
+        description: "Post bounties, track progress, and pay when work is done",
+        src: ~p"/images/screenshots/org-home.png"
+      },
+      %{
+        title: "Org dashboard",
+        description: "Match with developers, create bounties and contracts with your contributors",
+        src: ~p"/images/screenshots/org-dashboard.png"
+      },
+      %{
+        title: "View your transactions",
+        description: "Track your payments and transactions in real time",
+        src: ~p"/images/screenshots/user-transactions.png"
       }
-      phx-click={
-        %JS{}
-        |> JS.set_attribute({"src", @src <> "?autoplay=#{@autoplay}&start=#{@start}"},
-          to: "#video-modal-iframe"
-        )
-        |> JS.set_attribute({"title", @title}, to: "#video-modal-iframe")
-        |> show_modal("video-modal")
-      }
-    >
-      <img src={@poster} alt={@alt} class="object-cover w-full h-full" loading="lazy" />
-      <div class="absolute inset-0 flex items-center justify-center">
-        <div class="size-10 sm:size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
-          <.icon name="tabler-player-play-filled" class="size-5 sm:size-8 text-white" />
-        </div>
-      </div>
-    </div>
-    """
+    ]
   end
 
   @impl true
@@ -118,6 +108,54 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
+        <section class="pt-48 relative isolate min-h-[100svh]">
+          <div class="grid grid-cols-3 gap-4 max-w-7xl mx-auto">
+            <div class="col-span-1">
+              <div class="flex flex-col gap-4">
+                <%= for feature <- org_features() do %>
+                  <div
+                    class="cursor-pointer"
+                    phx-click={
+                      %JS{}
+                      |> JS.hide(to: "[data-feature]:not([data-feature='#{feature.src}'])")
+                      |> JS.show(to: "[data-feature='#{feature.src}']")
+                    }
+                  >
+                    <.card class={
+                      if feature.src == @selected_org_feature.src, do: "ring-1 ring-success"
+                    }>
+                      <.card_content>
+                        <div class="text-2xl font-bold text-foreground">
+                          {feature.title}
+                        </div>
+                        <div class="text-sm text-muted-foreground">
+                          {feature.description}
+                        </div>
+                      </.card_content>
+                    </.card>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <div class="aspect-[1200/630] w-full relative">
+                <%= for feature <- org_features() do %>
+                  <img
+                    data-feature={feature.src}
+                    src={feature.src}
+                    alt={feature.title}
+                    class={
+                      classes([
+                        "w-full h-full object-cover absolute inset-0 hidden",
+                        feature.src == @selected_org_feature.src && "block"
+                      ])
+                    }
+                  />
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </section>
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
           <div class="hidden md:block">
             <.pattern />
@@ -452,28 +490,7 @@ defmodule AlgoraWeb.HomeLive do
       </main>
     </div>
 
-    <.dialog
-      id="video-modal"
-      show={false}
-      class="aspect-video h-full sm:h-auto w-full lg:max-w-none p-2 sm:p-4 lg:p-[5rem]"
-      on_cancel={
-        %JS{}
-        |> JS.set_attribute({"src", ""}, to: "#video-modal-iframe")
-        |> JS.set_attribute({"title", ""}, to: "#video-modal-iframe")
-      }
-    >
-      <.dialog_content class="flex items-center justify-center">
-        <iframe
-          id="video-modal-iframe"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allowfullscreen
-          class="aspect-[9/16] sm:aspect-video w-full bg-black"
-        >
-        </iframe>
-      </.dialog_content>
-    </.dialog>
+    <.modal_video_dialog />
     """
   end
 

@@ -159,7 +159,7 @@ defmodule AlgoraWeb.HomeLive do
                       )
                       |> AlgoraWeb.Util.transition("data-org-feature-card", feature.src,
                         from: "ring-transparent",
-                        to: "ring-foreground"
+                        to: "ring-foreground/50"
                       )
                     }
                   >
@@ -168,7 +168,7 @@ defmodule AlgoraWeb.HomeLive do
                       class={
                         classes([
                           "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground")
+                          if(index == 0, do: "ring-foreground/50")
                         ])
                       }
                     >
@@ -186,7 +186,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground rounded-xl">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
                 <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
                   <img
                     data-org-feature-img={feature.src}
@@ -225,7 +225,7 @@ defmodule AlgoraWeb.HomeLive do
                       )
                       |> AlgoraWeb.Util.transition("data-user-feature-card", feature.src,
                         from: "ring-transparent",
-                        to: "ring-foreground"
+                        to: "ring-foreground/50"
                       )
                     }
                   >
@@ -234,7 +234,7 @@ defmodule AlgoraWeb.HomeLive do
                       class={
                         classes([
                           "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground")
+                          if(index == 0, do: "ring-foreground/50")
                         ])
                       }
                     >
@@ -252,7 +252,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground rounded-xl">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
                   <img
                     data-user-feature-img={feature.src}

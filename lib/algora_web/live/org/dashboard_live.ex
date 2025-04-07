@@ -1422,7 +1422,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
-              navigate={~p"/org/#{project.handle}"}
+              navigate={User.url(project)}
               class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
             >
               <.avatar class="h-10 w-10 rounded-lg saturate-0 bg-gradient-to-br brightness-75">

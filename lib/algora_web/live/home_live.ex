@@ -63,23 +63,23 @@ defmodule AlgoraWeb.HomeLive do
   defp org_features do
     [
       %{
-        title: "Reward bounties on GitHub",
-        description: "Create bounties for GitHub issues and track progress",
+        title: "GitHub bounties",
+        description: "Add USD rewards on issues and pay on-merge",
         src: ~p"/images/screenshots/bounty-to-hire-merged.png"
       },
+      # %{
+      #   title: "Match with top developers",
+      #   description: "Connect with developers who have relevant open source experience",
+      #   src: ~p"/images/screenshots/org-matches.png"
+      # },
       %{
-        title: "Match with top developers",
-        description: "Connect with developers who have relevant open source experience",
-        src: ~p"/images/screenshots/org-matches.png"
-      },
-      %{
-        title: "Contract management",
-        description: "Create and manage contracts with contributors and matches",
+        title: "Contract work",
+        description: "Collaborate flexibly, hourly or fixed rate",
         src: ~p"/images/screenshots/share-contract.png"
       },
       %{
         title: "Automated payments",
-        description: "Set up automatic payments when pull requests are merged",
+        description: "Set up automatic payments when PRs are merged",
         src: ~p"/images/screenshots/autopay-on-merge.png"
       },
       %{
@@ -87,10 +87,15 @@ defmodule AlgoraWeb.HomeLive do
         description: "View all bounty and contract payments in one place",
         src: ~p"/images/screenshots/org-transactions.png"
       },
+      # %{
+      #   title: "Pool bounties together",
+      #   description: "Pool bounties together to reward contributors",
+      #   src: ~p"/images/screenshots/pool-bounties.png"
+      # }
       %{
-        title: "Pool bounties together",
-        description: "Pool bounties together to reward contributors",
-        src: ~p"/images/screenshots/pool-bounties.png"
+        title: "Global payments",
+        description: "Compliant payments to #{Algora.PSP.ConnectCountries.count()} countries",
+        src: ~p"/images/screenshots/global-payments.png"
       }
     ]
   end
@@ -222,7 +227,7 @@ defmodule AlgoraWeb.HomeLive do
                     type="submit"
                     class="absolute right-2 top-1.5 sm:top-2 bottom-1.5 sm:bottom-2 px-2 sm:px-8 h-7 sm:h-[3rem] text-sm sm:text-xl sm:font-semibold drop-shadow-[0_1px_5px_#34d39980] rounded-lg sm:rounded-xl"
                   >
-                    Get Started
+                    Let's try this
                   </.button>
                 </div>
               </.form>
@@ -231,13 +236,13 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
             Everything you need to <span class="text-emerald-400">reward your contributors</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
             Build your product and team in one place
           </p>
-          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
+          <div class="hidden lg:grid lg:grid-cols-4 lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
               <div class="flex flex-col gap-8">
                 <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
@@ -265,10 +270,10 @@ defmodule AlgoraWeb.HomeLive do
                       }
                     >
                       <.card_content>
-                        <div class="text-2xl font-bold text-foreground">
+                        <div class="text-xl font-bold text-foreground">
                           {feature.title}
                         </div>
-                        <div class="text-sm text-muted-foreground">
+                        <div class="text-xs text-muted-foreground">
                           {feature.description}
                         </div>
                       </.card_content>
@@ -277,8 +282,8 @@ defmodule AlgoraWeb.HomeLive do
                 <% end %>
               </div>
             </div>
-            <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/30 rounded-xl">
+            <div class="col-span-3">
+              <div class="aspect-[1200/630] w-full relative">
                 <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
                   <img
                     data-org-feature-img={feature.src}
@@ -294,6 +299,26 @@ defmodule AlgoraWeb.HomeLive do
                 <% end %>
               </div>
             </div>
+          </div>
+
+          <div class="lg:hidden space-y-8 px-4 sm:px-6">
+            <%= for feature <- org_features() do %>
+              <div class="space-y-4">
+                <.card class="ring-1 ring-foreground/30 rounded-xl">
+                  <.card_content>
+                    <div class="text-2xl font-bold text-foreground">
+                      {feature.title}
+                    </div>
+                    <div class="text-sm text-muted-foreground">
+                      {feature.description}
+                    </div>
+                  </.card_content>
+                </.card>
+                <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/30 rounded-xl overflow-hidden">
+                  <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
+                </div>
+              </div>
+            <% end %>
           </div>
         </section>
 
@@ -383,7 +408,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/30 rounded-xl">
+              <div class="aspect-[1200/630] w-full relative">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
                   <img
                     data-user-feature-img={feature.src}

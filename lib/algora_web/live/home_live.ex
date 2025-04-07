@@ -102,7 +102,7 @@ defmodule AlgoraWeb.HomeLive do
       %{
         title: "Pool bounties together",
         description: "Pool bounties together to reward contributors",
-        src: ~p"/images/screenshots/org-pool-bounties.png"
+        src: ~p"/images/screenshots/pool-bounties.png"
       }
     ]
   end
@@ -138,138 +138,6 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            A complete platform for open source hiring
-          </h2>
-          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Post bounties, evaluate developers, and hire through contributions
-          </p>
-          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
-            <div class="col-span-1">
-              <div class="flex flex-col gap-8">
-                <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
-                  <div
-                    class="cursor-pointer"
-                    phx-click={
-                      %JS{}
-                      |> AlgoraWeb.Util.transition("data-org-feature-img", feature.src,
-                        from: "opacity-0",
-                        to: "opacity-100"
-                      )
-                      |> AlgoraWeb.Util.transition("data-org-feature-card", feature.src,
-                        from: "ring-transparent",
-                        to: "ring-foreground/50"
-                      )
-                    }
-                  >
-                    <.card
-                      data-org-feature-card={feature.src}
-                      class={
-                        classes([
-                          "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground/50")
-                        ])
-                      }
-                    >
-                      <.card_content>
-                        <div class="text-2xl font-bold text-foreground">
-                          {feature.title}
-                        </div>
-                        <div class="text-sm text-muted-foreground">
-                          {feature.description}
-                        </div>
-                      </.card_content>
-                    </.card>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-            <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
-                <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
-                  <img
-                    data-org-feature-img={feature.src}
-                    src={feature.src}
-                    alt={feature.title}
-                    class={
-                      classes([
-                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
-                        if(index == 0, do: "opacity-100")
-                      ])
-                    }
-                  />
-                <% end %>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section class="relative py-16 sm:py-40">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            For developers
-          </h2>
-          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Discover GitHub bounties, contract work and jobs
-          </p>
-          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
-            <div class="col-span-1">
-              <div class="flex flex-col gap-8">
-                <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
-                  <div
-                    class="cursor-pointer"
-                    phx-click={
-                      %JS{}
-                      |> AlgoraWeb.Util.transition("data-user-feature-img", feature.src,
-                        from: "opacity-0",
-                        to: "opacity-100"
-                      )
-                      |> AlgoraWeb.Util.transition("data-user-feature-card", feature.src,
-                        from: "ring-transparent",
-                        to: "ring-foreground/50"
-                      )
-                    }
-                  >
-                    <.card
-                      data-user-feature-card={feature.src}
-                      class={
-                        classes([
-                          "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground/50")
-                        ])
-                      }
-                    >
-                      <.card_content>
-                        <div class="text-2xl font-bold text-foreground">
-                          {feature.title}
-                        </div>
-                        <div class="text-sm text-muted-foreground">
-                          {feature.description}
-                        </div>
-                      </.card_content>
-                    </.card>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-            <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
-                <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
-                  <img
-                    data-user-feature-img={feature.src}
-                    src={feature.src}
-                    alt={feature.title}
-                    class={
-                      classes([
-                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
-                        if(index == 0, do: "opacity-100")
-                      ])
-                    }
-                  />
-                <% end %>
-              </div>
-            </div>
-          </div>
-        </section>
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
@@ -482,6 +350,73 @@ defmodule AlgoraWeb.HomeLive do
           </div>
         </section>
 
+        <section class="relative py-16 sm:py-40">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            A complete platform for open source hiring
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Post bounties, evaluate developers, and hire through contributions
+          </p>
+          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
+            <div class="col-span-1">
+              <div class="flex flex-col gap-8">
+                <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
+                  <div
+                    class="cursor-pointer"
+                    phx-click={
+                      %JS{}
+                      |> AlgoraWeb.Util.transition("data-org-feature-img", feature.src,
+                        from: "opacity-0",
+                        to: "opacity-100"
+                      )
+                      |> AlgoraWeb.Util.transition("data-org-feature-card", feature.src,
+                        from: "ring-transparent",
+                        to: "ring-foreground/50"
+                      )
+                    }
+                  >
+                    <.card
+                      data-org-feature-card={feature.src}
+                      class={
+                        classes([
+                          "ring-1 ring-transparent transition-all rounded-xl",
+                          if(index == 0, do: "ring-foreground/50")
+                        ])
+                      }
+                    >
+                      <.card_content>
+                        <div class="text-2xl font-bold text-foreground">
+                          {feature.title}
+                        </div>
+                        <div class="text-sm text-muted-foreground">
+                          {feature.description}
+                        </div>
+                      </.card_content>
+                    </.card>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
+                <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
+                  <img
+                    data-org-feature-img={feature.src}
+                    src={feature.src}
+                    alt={feature.title}
+                    class={
+                      classes([
+                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
+                        if(index == 0, do: "opacity-100")
+                      ])
+                    }
+                  />
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section class="relative isolate py-16 sm:py-40 z-10">
           <div class="mx-auto px-6 lg:px-8">
             <div class="relative z-10 pb-4 xl:py-16">
@@ -516,6 +451,73 @@ defmodule AlgoraWeb.HomeLive do
               <%= for plan <- @plans1 do %>
                 <AlgoraWeb.PricingLive.pricing_card1 plan={plan} plans={@plans1} />
               <% end %>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative py-16 sm:py-40">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            For developers
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Discover GitHub bounties, contract work and jobs
+          </p>
+          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
+            <div class="col-span-1">
+              <div class="flex flex-col gap-8">
+                <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
+                  <div
+                    class="cursor-pointer"
+                    phx-click={
+                      %JS{}
+                      |> AlgoraWeb.Util.transition("data-user-feature-img", feature.src,
+                        from: "opacity-0",
+                        to: "opacity-100"
+                      )
+                      |> AlgoraWeb.Util.transition("data-user-feature-card", feature.src,
+                        from: "ring-transparent",
+                        to: "ring-foreground/50"
+                      )
+                    }
+                  >
+                    <.card
+                      data-user-feature-card={feature.src}
+                      class={
+                        classes([
+                          "ring-1 ring-transparent transition-all rounded-xl",
+                          if(index == 0, do: "ring-foreground/50")
+                        ])
+                      }
+                    >
+                      <.card_content>
+                        <div class="text-2xl font-bold text-foreground">
+                          {feature.title}
+                        </div>
+                        <div class="text-sm text-muted-foreground">
+                          {feature.description}
+                        </div>
+                      </.card_content>
+                    </.card>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
+                <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
+                  <img
+                    data-user-feature-img={feature.src}
+                    src={feature.src}
+                    alt={feature.title}
+                    class={
+                      classes([
+                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
+                        if(index == 0, do: "opacity-100")
+                      ])
+                    }
+                  />
+                <% end %>
+              </div>
             </div>
           </div>
         </section>

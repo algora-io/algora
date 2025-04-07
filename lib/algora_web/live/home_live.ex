@@ -68,11 +68,6 @@ defmodule AlgoraWeb.HomeLive do
         description: "Add USD rewards on issues and pay on-merge",
         src: ~p"/images/screenshots/bounty-to-hire-merged.png"
       },
-      # %{
-      #   title: "Match with top developers",
-      #   description: "Connect with developers who have relevant open source experience",
-      #   src: ~p"/images/screenshots/org-matches.png"
-      # },
       %{
         title: "Contract work",
         description: "Collaborate flexibly, hourly or fixed rate",
@@ -95,7 +90,7 @@ defmodule AlgoraWeb.HomeLive do
       # }
       %{
         title: "Global payments",
-        description: "Compliant payments to #{Algora.PSP.ConnectCountries.count()} countries",
+        description: "Payouts, compliance, reporting, 1099s",
         src: ~p"/images/screenshots/global-payments.png"
       }
     ]
@@ -322,8 +317,11 @@ defmodule AlgoraWeb.HomeLive do
 
         <section class="relative py-16 sm:py-40">
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-2 sm:mb-4">
-            Loved by developers and companies
+            Match with top developers
           </h2>
+
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+          </p>
 
           <div class="pt-12 max-w-7xl mx-auto px-6 lg:px-8">
             <.contributors featured_collabs={@featured_collabs} />

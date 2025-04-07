@@ -212,7 +212,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
       
     <!-- Totals Cards -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <.card>
+        <.card class="flex justify-between">
           <.card_header>
             <.card_title>Lifetime Volume</.card_title>
             <.card_description>Total volume of your transactions</.card_description>
@@ -221,7 +221,7 @@ defmodule AlgoraWeb.Org.TransactionsLive do
             <span class="font-display text-2xl font-bold">{Money.to_string!(@total_volume)}</span>
           </.card_content>
         </.card>
-        <.card>
+        <.card class="flex justify-between">
           <.card_header>
             <.card_title>Total Balance</.card_title>
             <.card_description>Net balance across all transactions</.card_description>
@@ -234,9 +234,6 @@ defmodule AlgoraWeb.Org.TransactionsLive do
       
     <!-- Transactions Table -->
       <.card :if={length(@transactions) > 0}>
-        <.card_header>
-          <.card_title>Transaction History</.card_title>
-        </.card_header>
         <.card_content>
           <div class="-mx-6 overflow-x-auto">
             <div class="inline-block min-w-full py-2 align-middle">

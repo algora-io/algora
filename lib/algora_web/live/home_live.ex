@@ -85,6 +85,16 @@ defmodule AlgoraWeb.HomeLive do
         src: ~p"/images/screenshots/org-matches.png"
       },
       %{
+        title: "Complete contract work",
+        description: "Share contracts with your contributors & matches",
+        src: ~p"/images/screenshots/share-contract.png"
+      },
+      %{
+        title: "Autopay on merge",
+        description: "Autopay on merge",
+        src: ~p"/images/screenshots/autopay-on-merge.png"
+      },
+      %{
         title: "View your transactions",
         description: "Track your payments and transactions in real time",
         src: ~p"/images/screenshots/org-transactions.png"
@@ -94,6 +104,16 @@ defmodule AlgoraWeb.HomeLive do
 
   defp user_features do
     [
+      %{
+        title: "Discover bounties and contract work",
+        description: "Find bounties and contract work",
+        src: ~p"/images/screenshots/user-dashboard.png"
+      },
+      %{
+        title: "Showcase your skills and work",
+        description: "Profile page with your past contributions, bounties and contracts",
+        src: ~p"/images/screenshots/user-profile.png"
+      },
       %{
         title: "View your transactions",
         description: "Track your payments and transactions in real time",

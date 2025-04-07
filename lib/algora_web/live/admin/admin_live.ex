@@ -109,6 +109,14 @@ defmodule AlgoraWeb.Admin.AdminLive do
     """
   end
 
+  def cell(%{value: value} = assigns) when is_map(value) do
+    ~H"""
+    <pre class="flex gap-2 whitespace-pre-wrap font-mono">
+      {Jason.encode!(@value, pretty: true)}
+    </pre>
+    """
+  end
+
   def cell(%{value: {currency, amount}} = assigns) do
     ~H"""
     <div class="font-display font-medium text-base text-emerald-400 tabular-nums text-right">

@@ -65,7 +65,7 @@ defmodule AlgoraWeb.HomeLive do
       %{
         title: "Reward bounties on GitHub",
         description: "Create bounties for GitHub issues and track progress",
-        src: ~p"/images/screenshots/org-home.png"
+        src: ~p"/images/screenshots/bounty-to-hire-merged.png"
       },
       %{
         title: "Match with top developers",
@@ -251,7 +251,7 @@ defmodule AlgoraWeb.HomeLive do
                       )
                       |> AlgoraWeb.Util.transition("data-org-feature-card", feature.src,
                         from: "ring-transparent",
-                        to: "ring-foreground/50"
+                        to: "ring-foreground/30"
                       )
                     }
                   >
@@ -260,7 +260,7 @@ defmodule AlgoraWeb.HomeLive do
                       class={
                         classes([
                           "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground/50")
+                          if(index == 0, do: "ring-foreground/30")
                         ])
                       }
                     >
@@ -278,7 +278,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/30 rounded-xl">
                 <%= for {feature, index} <- org_features() |> Enum.with_index() do %>
                   <img
                     data-org-feature-img={feature.src}
@@ -286,7 +286,7 @@ defmodule AlgoraWeb.HomeLive do
                     alt={feature.title}
                     class={
                       classes([
-                        "w-full h-full object-cover absolute inset-0 opacity-0 transition-all rounded-xl",
+                        "w-full h-full object-contain absolute inset-0 opacity-0 transition-all rounded-xl",
                         if(index == 0, do: "opacity-100")
                       ])
                     }
@@ -356,7 +356,7 @@ defmodule AlgoraWeb.HomeLive do
                       )
                       |> AlgoraWeb.Util.transition("data-user-feature-card", feature.src,
                         from: "ring-transparent",
-                        to: "ring-foreground/50"
+                        to: "ring-foreground/30"
                       )
                     }
                   >
@@ -365,7 +365,7 @@ defmodule AlgoraWeb.HomeLive do
                       class={
                         classes([
                           "ring-1 ring-transparent transition-all rounded-xl",
-                          if(index == 0, do: "ring-foreground/50")
+                          if(index == 0, do: "ring-foreground/30")
                         ])
                       }
                     >
@@ -383,7 +383,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
             <div class="col-span-2">
-              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/50 rounded-xl">
+              <div class="aspect-[1200/630] w-full relative ring-1 ring-foreground/30 rounded-xl">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
                   <img
                     data-user-feature-img={feature.src}

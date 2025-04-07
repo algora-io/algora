@@ -104,17 +104,17 @@ defmodule AlgoraWeb.HomeLive do
     [
       %{
         title: "Find work",
-        description: "Browse open bounties and contract opportunities",
+        description: "Browse open bounties and contracts",
         src: ~p"/images/screenshots/user-dashboard.png"
       },
       %{
         title: "Developer profile",
-        description: "Display your open source contributions and work history",
+        description: "Showcase your open source contributions",
         src: ~p"/images/screenshots/profile.png"
       },
       %{
-        title: "Payment tracking",
-        description: "Monitor your earnings from bounties and contracts",
+        title: "Payment history",
+        description: "Monitor your earnings in real-time",
         src: ~p"/images/screenshots/user-transactions.png"
       }
     ]
@@ -327,7 +327,7 @@ defmodule AlgoraWeb.HomeLive do
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
             Find new collaborators, solve bounties and complete contract work
           </p>
-          <div class="hidden lg:grid lg:grid-cols-3 items-center lg:gap-8 lg:mx-auto lg:px-8">
+          <div class="hidden lg:grid lg:grid-cols-4 items-center lg:gap-8 lg:mx-auto lg:px-8">
             <div class="col-span-1">
               <div class="flex flex-col gap-8">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
@@ -367,7 +367,7 @@ defmodule AlgoraWeb.HomeLive do
                 <% end %>
               </div>
             </div>
-            <div class="col-span-2">
+            <div class="col-span-3">
               <div class="aspect-[1200/630] w-full relative">
                 <%= for {feature, index} <- user_features() |> Enum.with_index() do %>
                   <img

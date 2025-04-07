@@ -109,21 +109,43 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="pt-48 relative isolate min-h-[100svh]">
-          <div class="grid grid-cols-3 gap-4 max-w-7xl mx-auto">
+          <div class="grid grid-cols-3 gap-8 px-4 sm:px-6 lg:px-8 mx-auto">
             <div class="col-span-1">
-              <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-8">
                 <%= for feature <- org_features() do %>
                   <div
                     class="cursor-pointer"
                     phx-click={
                       %JS{}
-                      |> JS.hide(to: "[data-feature]:not([data-feature='#{feature.src}'])")
-                      |> JS.show(to: "[data-feature='#{feature.src}']")
+                      |> JS.hide(
+                        to: "[data-feature-img]:not([data-feature-img='#{feature.src}'])",
+                        transition:
+                          {"transition-opacity transform ease-in duration-200", "opacity-100",
+                           "opacity-0"}
+                      )
+                      |> JS.show(
+                        to: "[data-feature-img='#{feature.src}']",
+                        transition:
+                          {"transition-opacity transform ease-out duration-300", "opacity-0",
+                           "opacity-100"}
+                      )
+                      |> JS.toggle(
+                        to: "[data-feature-card]:not([data-feature-card='#{feature.src}'])",
+                        out: {"ease-out duration-300", "ring-foreground", "ring-transparent"}
+                      )
+                      |> JS.toggle(
+                        to: "[data-feature-card='#{feature.src}']",
+                        in: {"ease-out duration-300", "ring-transparent", "ring-foreground"}
+                      )
                     }
                   >
-                    <.card class={
-                      if feature.src == @selected_org_feature.src, do: "ring-1 ring-success"
-                    }>
+                    <.card
+                      data-feature-card={feature.src}
+                      class={
+                        if feature.src == @selected_org_feature.src,
+                          do: "ring-1 ring-foreground"
+                      }
+                    >
                       <.card_content>
                         <div class="text-2xl font-bold text-foreground">
                           {feature.title}
@@ -141,13 +163,14 @@ defmodule AlgoraWeb.HomeLive do
               <div class="aspect-[1200/630] w-full relative">
                 <%= for feature <- org_features() do %>
                   <img
-                    data-feature={feature.src}
+                    data-feature-img={feature.src}
                     src={feature.src}
                     alt={feature.title}
                     class={
                       classes([
-                        "w-full h-full object-cover absolute inset-0 hidden",
-                        feature.src == @selected_org_feature.src && "block"
+                        "w-full h-full object-cover absolute inset-0 opacity-0 ring-1 ring-transparent rounded-xl",
+                        feature.src == @selected_org_feature.src &&
+                          "opacity-100 ring-foreground"
                       ])
                     }
                   />

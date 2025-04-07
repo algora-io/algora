@@ -349,7 +349,7 @@ defmodule Algora.Accounts.User do
   def handle(%{provider_login: handle}), do: handle
 
   def url(%{handle: handle, type: :individual}) when is_binary(handle), do: "#{Endpoint.url()}/@/#{handle}"
-  def url(%{handle: handle, type: :organization}), do: "#{Endpoint.url()}/org/#{handle}"
+  def url(%{handle: handle, type: :organization}) when is_binary(handle), do: "#{Endpoint.url()}/org/#{handle}"
   def url(%{handle: handle}) when is_binary(handle), do: "#{Endpoint.url()}/org/#{handle}"
   def url(%{provider_login: handle}), do: "https://github.com/#{handle}"
 end

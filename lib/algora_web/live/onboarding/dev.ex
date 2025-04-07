@@ -44,8 +44,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
     def intentions_options do
       [
-        {"bounties", "Solve Bounties", "Work on open source issues and earn rewards", "tabler-diamond"},
-        {"jobs", "Find Full-time Work", "Get matched with companies hiring developers", "tabler-briefcase"},
+        {"bounties", "Solve Bounties", "Work on open source issues & earn rewards", "tabler-diamond"},
+        {"jobs", "Find Full-time Work", "Get matched with companies hiring devs", "tabler-briefcase"},
         {"contracts", "Freelance Work", "Take on flexible contract-based projects", "tabler-clock"}
       ]
     end
@@ -100,19 +100,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       <div class="flex flex-col lg:flex-row flex-1">
         <div class="flex-grow px-8 py-16">
           <div class="mx-auto max-w-3xl">
-            <div class="mb-4 flex items-center gap-4 text-lg">
-              <span class="text-muted-foreground">
-                {Enum.find_index(@steps, &(&1 == @step)) + 1} / {length(@steps)}
-              </span>
-              <h1 class="text-lg font-semibold uppercase">
-                <%= if @step == Enum.at(@steps, -1) do %>
-                  Last step
-                <% else %>
-                  Get started
-                <% end %>
-              </h1>
-            </div>
-
             <div class="mb-4">
               {main_content(assigns)}
             </div>
@@ -217,10 +204,10 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     <div class="space-y-8">
       <.form for={@info_form} phx-submit="submit_info" class="space-y-8">
         <div>
-          <h2 class="mb-2 text-4xl font-semibold">
-            What is your tech stack?
+          <h2 class="mb-2 text-3xl sm:text-4xl font-semibold">
+            What's your tech stack?
           </h2>
-          <p class="text-muted-foreground">Select the technologies you work with</p>
+          <p class="text-muted-foreground">Enter a comma-separated list</p>
 
           <.TechStack
             class="mt-4"
@@ -235,8 +222,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         </div>
 
         <div class="mt-8">
-          <h2 class="mb-2 text-4xl font-semibold">
-            What are you looking to do?
+          <h2 class="mb-2 text-3xl sm:text-4xl font-semibold">
+            What are your goals?
           </h2>
           <p class="text-muted-foreground">Select all that apply</p>
 
@@ -283,17 +270,17 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     ~H"""
     <div class="space-y-8">
       <div>
-        <h2 class="mb-2 text-4xl font-semibold">
-          Connect your GitHub account
+        <h2 class="mb-2 text-3xl sm:text-4xl font-semibold">
+          Connect your GitHub
         </h2>
         <p class="mb-6 text-muted-foreground">
-          Sign in with GitHub to join our developer community and start earning bounties.
+          Join our community and start earning bounties
         </p>
 
         <p class="text-sm text-muted-foreground/75">
           By continuing, you agree to Algora's
-          <.link href="/terms" class="text-primary hover:underline">Terms of Service</.link>
-          and <.link href="/privacy" class="text-primary hover:underline">Privacy Policy</.link>.
+          <.link href="/terms" class="text-foreground hover:underline">terms</.link>
+          and <.link href="/privacy" class="text-foreground hover:underline">privacy</.link>.
         </p>
       </div>
       <div class="flex justify-between">

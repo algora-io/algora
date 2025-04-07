@@ -106,7 +106,7 @@ defmodule AlgoraWeb.HomeLive do
       # }
       %{
         title: "Global payouts",
-        description: "Streamline payouts, compliance, reporting, 1099s",
+        description: "Streamline payouts, compliance and 1099s",
         src: ~p"/images/screenshots/global-payments.png"
       }
     ]
@@ -284,7 +284,7 @@ defmodule AlgoraWeb.HomeLive do
                       data-org-feature-card={feature.src}
                       class={
                         classes([
-                          "ring-1 ring-transparent transition-all rounded-xl",
+                          "ring-1 ring-transparent hover:ring-success transition-all rounded-xl",
                           if(index == 0, do: "ring-success")
                         ])
                       }
@@ -382,7 +382,7 @@ defmodule AlgoraWeb.HomeLive do
                       data-user-feature-card={feature.src}
                       class={
                         classes([
-                          "ring-1 ring-transparent transition-all rounded-xl",
+                          "ring-1 ring-transparent hover:ring-success transition-all rounded-xl",
                           if(index == 0, do: "ring-success")
                         ])
                       }

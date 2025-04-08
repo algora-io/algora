@@ -44,18 +44,18 @@ Algora combines:
 <table>
   <tr>
     <td align="center">
-      <img src="https://app.algora.io/og/@/mogery" alt="Homepage" width="250">
+      <img src="https://algora.io/og/mogery/profile" alt="Gergő Móricz" width="250">
     </td>
     <td align="center">
-      <img src="https://app.algora.io/og/@/neo773" alt="Homepage" width="250">
+      <img src="https://algora.io/og/neo773/profile" alt="Huzef" width="250">
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="https://app.algora.io/og/cal/home" alt="Homepage" width="250">
+      <img src="https://algora.io/og/cal/home" alt="Cal.com homepage" width="250">
     </td>
     <td align="center">
-      <img src="https://app.algora.io/og/zio/leaderboard" alt="Homepage" width="250">
+      <img src="https://algora.io/og/zio/leaderboard" alt="ZIO leaderboard" width="250">
     </td>
   </tr>
 </table>

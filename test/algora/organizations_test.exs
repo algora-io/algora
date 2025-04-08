@@ -37,7 +37,7 @@ defmodule Algora.OrganizationsTest do
       hiring: true,
       youtube_url: "https://www.youtube.com/@algora-io",
       discord_url: "https://algora.io/discord",
-      avatar_url: "https://console.algora.io/logo-512px.png",
+      avatar_url: "https://algora.io/images/logo-512px.png",
       github_url: "https://github.com/algora-io",
       bio: "Algora is a developer tool & community simplifying bounties, hiring & open source sustainability.",
       website_url: "https://algora.io",
@@ -46,7 +46,7 @@ defmodule Algora.OrganizationsTest do
       slack_url: "https://algora.io/discord",
       linkedin_url: "https://linkedin.com/company/algorapbc",
       og_title: "Algora: Open source bounties",
-      og_image_url: "https://console.algora.io/og.png"
+      og_image_url: "https://algora.io/images/og.png"
     }
   }
 
@@ -71,10 +71,10 @@ defmodule Algora.OrganizationsTest do
       assert org.tech_stack == ["Elixir", "Phoenix"]
       assert org.categories == ["open_source", "agency"]
       assert org.hiring == true
-      assert org.avatar_url == "https://console.algora.io/logo-512px.png"
+      assert org.avatar_url == "https://algora.io/images/logo-512px.png"
       assert org.youtube_url == "https://www.youtube.com/@algora-io"
       assert org.discord_url == "https://algora.io/discord"
-      assert org.avatar_url == "https://console.algora.io/logo-512px.png"
+      assert org.avatar_url == "https://algora.io/images/logo-512px.png"
       assert org.github_url == "https://github.com/algora-io"
       assert org.bio =~ "Algora is"
       assert org.website_url == "https://algora.io"
@@ -83,7 +83,7 @@ defmodule Algora.OrganizationsTest do
       assert org.slack_url == "https://algora.io/discord"
       assert org.linkedin_url == "https://linkedin.com/company/algorapbc"
       assert org.og_title == "Algora: Open source bounties"
-      assert org.og_image_url == "https://console.algora.io/og.png"
+      assert org.og_image_url == "https://algora.io/images/og.png"
       assert user.avatar_url == "https://avatars.githubusercontent.com/u/17045339?v=4"
     end
 

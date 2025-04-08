@@ -57,6 +57,9 @@ defmodule AlgoraWeb.Endpoint do
   plug Plug.Session, @session_options
   plug AlgoraWeb.Router
 
+  # Legacy tRPC endpoint
+  defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
+
   defp canonical_host(conn, _opts) do
     :algora
     |> Application.get_env(:canonical_host)

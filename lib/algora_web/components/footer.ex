@@ -231,6 +231,9 @@ defmodule AlgoraWeb.Components.Footer do
           </div>
         </div>
       </div>
+      <div class="mx-auto max-w-2xl px-6 pb-4 text-center text-[0.6rem] text-muted-foreground/50">
+        Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?
+      </div>
     </footer>
     """
   end

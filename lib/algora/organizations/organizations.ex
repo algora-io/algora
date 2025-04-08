@@ -271,12 +271,12 @@ defmodule Algora.Organizations do
       end)
     else
       {:error, error} ->
-        Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :info)
+        Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
         {:error, error}
     end
   rescue
     error ->
-      Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :info)
+      Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
       {:error, error}
   end
 end

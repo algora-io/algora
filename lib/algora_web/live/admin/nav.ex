@@ -60,7 +60,7 @@ defmodule AlgoraWeb.Admin.Nav do
       %{
         title: "User",
         items: [
-          %{href: "/admin/dashboard", tab: :dashboard, icon: "tabler-dashboard", label: "Dashboard"},
+          %{href: "/admin/dashboard/metrics?nav=algora", tab: :dashboard, icon: "tabler-dashboard", label: "Dashboard"},
           %{href: "/admin/oban", tab: :oban, icon: "tabler-clock", label: "Job Queue"}
         ]
       }

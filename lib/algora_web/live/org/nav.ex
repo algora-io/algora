@@ -146,7 +146,7 @@ defmodule AlgoraWeb.Org.Nav do
     Enum.filter(
       [
         %{
-          href: "/#{org_handle}",
+          href: "/#{org_handle}/dashboard",
           tab: :dashboard,
           icon: "tabler-sparkles",
           label: "Dashboard",

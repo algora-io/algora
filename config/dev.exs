@@ -150,7 +150,7 @@ config :algora, :local_store,
 
 config :algora,
   canonical_host: System.get_env("CANONICAL_HOST"),
-  plausible_url: System.get_env("PLAUSIBLE_URL"),
+  plausible_embed_url: System.get_env("PLAUSIBLE_EMBED_URL"),
   assets_url: System.get_env("ASSETS_URL"),
   ingest_url: System.get_env("INGEST_URL"),
   ingest_static_url: System.get_env("INGEST_STATIC_URL"),

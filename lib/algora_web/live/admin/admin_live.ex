@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:mainthing, mainthing)
      |> assign(:notes_edit_mode, false)
      |> assign(:notes_full_screen, false)
-     |> assign(:plausible_url, Application.get_env(:algora, :plausible_url))
+     |> assign(:plausible_embed_url, Application.get_env(:algora, :plausible_embed_url))
      # Start with empty query
      |> assign(:sql_query, "")
      |> assign(:query_results, nil)
@@ -372,8 +372,8 @@ defmodule AlgoraWeb.Admin.AdminLive do
           <h1 class="text-2xl font-bold">Traffic</h1>
         </div>
         <iframe
-          :if={@plausible_url}
-          src={@plausible_url}
+          :if={@plausible_embed_url}
+          src={@plausible_embed_url}
           plausible-embed=""
           loading="lazy"
           style="width: 1; min-width: 1280px; height: 2100px; margin-left: -1rem;"

@@ -37,6 +37,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:notes_edit_mode, false)
      |> assign(:notes_full_screen, false)
      |> assign(:plausible_embed_url, Application.get_env(:algora, :plausible_embed_url))
+     |> assign(:posthog_project_id, Application.get_env(:algora, :posthog_project_id))
      # Start with empty query
      |> assign(:sql_query, "")
      |> assign(:query_results, nil)
@@ -79,6 +80,16 @@ defmodule AlgoraWeb.Admin.AdminLive do
         <div class="flex justify-center">
           <img src={@value} class="h-6 w-6 rounded-full" />
         </div>
+        """
+
+      String.match?(value, ~r/^[^\s]+@[^\s]+$/) && @posthog_project_id ->
+        ~H"""
+        <.link
+          href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
+          rel="noopener"
+        >
+          {@value}
+        </.link>
         """
 
       String.length(value) == 2 ->

@@ -53,7 +53,14 @@ config :algora, AlgoraWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
-  check_origin: false,
+  check_origin:
+    (case "ALLOWED_ORIGINS"
+          |> System.get_env("")
+          |> String.split(",")
+          |> Enum.map(&String.trim/1) do
+       [] -> false
+       origins -> origins
+     end),
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "WYiQUy5kdwRSeANJjW+5ddL155PmOJ64xCQePobCN45nqhDMdGfc3NnpTy/0TtYF",
@@ -142,6 +149,7 @@ config :algora, :local_store,
   salt: System.get_env("LOCAL_STORE_SALT", "algora-local-store")
 
 config :algora,
+  canonical_host: System.get_env("CANONICAL_HOST"),
   plausible_url: System.get_env("PLAUSIBLE_URL"),
   assets_url: System.get_env("ASSETS_URL"),
   ingest_url: System.get_env("INGEST_URL"),

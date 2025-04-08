@@ -50,8 +50,23 @@ defmodule AlgoraWeb.Endpoint do
     at: "/webhooks/github",
     handler: AlgoraWeb.Webhooks.GithubController
 
+  plug(:canonical_host)
+
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
   plug AlgoraWeb.Router
+
+  defp canonical_host(conn, _opts) do
+    :algora
+    |> Application.get_env(:canonical_host)
+    |> case do
+      host when is_binary(host) ->
+        opts = PlugCanonicalHost.init(canonical_host: host)
+        PlugCanonicalHost.call(conn, opts)
+
+      _ ->
+        conn
+    end
+  end
 end

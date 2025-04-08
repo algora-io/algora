@@ -97,6 +97,14 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
     ],
+    check_origin:
+      (case "ALLOWED_ORIGINS"
+            |> System.get_env("")
+            |> String.split(",")
+            |> Enum.map(&String.trim/1) do
+         [] -> true
+         origins -> origins
+       end),
     secret_key_base: secret_key_base
 
   # ## SSL Support
@@ -152,6 +160,7 @@ if config_env() == :prod do
     salt: System.fetch_env!("LOCAL_STORE_SALT")
 
   config :algora,
+    canonical_host: System.get_env("CANONICAL_HOST"),
     plausible_url: System.get_env("PLAUSIBLE_URL"),
     assets_url: System.get_env("ASSETS_URL"),
     ingest_url: System.get_env("INGEST_URL"),

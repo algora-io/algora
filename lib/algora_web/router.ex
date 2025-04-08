@@ -99,10 +99,13 @@ defmodule AlgoraWeb.Router do
       live "/user/installations", User.InstallationsLive, :index
     end
 
+    live_session :home, on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
+      live "/", HomeLive
+    end
+
     live_session :public,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
-      live "/", HomeLive
       live "/bounties", BountiesLive, :index
       live "/bounties/:tech", BountiesLive, :index
       live "/community", CommunityLive, :index

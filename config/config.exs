@@ -21,7 +21,8 @@ config :algora,
     {"/create/org", "/onboarding/org"},
     {"/solve", "/onboarding/dev"},
     {"/onboarding/solver", "/onboarding/dev"},
-    {"/org/*path", "/*path"}
+    {"/org/*path", "/*path"},
+    {"/@/:handle", "/:handle/profile"}
   ]
 
 # Configures the endpoint

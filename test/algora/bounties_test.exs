@@ -318,7 +318,7 @@ defmodule Algora.BountiesTest do
       response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
 
       expected_response = """
-      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/bounty_owner)
 
       ### Steps to solve:
       1. **Start working**: Comment `/attempt #100` with your implementation plan
@@ -425,7 +425,7 @@ defmodule Algora.BountiesTest do
       response = Algora.Bounties.get_response_body(bounties, ticket_ref, attempts, claims)
 
       expected_response = """
-      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/bounty_owner)
       ### Steps to solve:
       1. **Start working**: Comment `/attempt #100` with your implementation plan
       2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
@@ -479,7 +479,7 @@ defmodule Algora.BountiesTest do
       response = Algora.Bounties.get_response_body(bounties, ticket_ref, [], [])
 
       expected_response = """
-      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/@/bounty_owner)
+      ## 💎 $1,000 bounty [• Bounty Owner](http://localhost:4002/bounty_owner)
       ### Steps to solve:
       1. **Start working**: Comment `/attempt #100` with your implementation plan
       2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty

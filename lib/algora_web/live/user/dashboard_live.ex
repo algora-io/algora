@@ -269,7 +269,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           <.badge
             id="og-url"
             phx-hook="CopyToClipboard"
-            data-value={url(~p"/@/#{@current_user.handle}")}
+            data-value={url(~p"/#{@current_user.handle}")}
             phx-click={
               %JS{}
               |> JS.hide(
@@ -294,7 +294,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               name="tabler-check"
               class="absolute left-1 my-auto hidden size-4 mr-2"
             />
-            <span class="pl-4">{AlgoraWeb.Endpoint.host()}{~p"/@/#{@current_user.handle}"}</span>
+            <span class="pl-4">{AlgoraWeb.Endpoint.host()}{~p"/#{@current_user.handle}"}</span>
           </.badge>
           <img
             src={~p"/og/@/#{@current_user.handle}"}

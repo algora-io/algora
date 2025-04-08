@@ -106,7 +106,6 @@ defmodule AlgoraWeb.Router do
       live "/community", CommunityLive, :index
       live "/leaderboard", LeaderboardLive, :index
       live "/projects", OrgsLive, :index
-      live "/@/:handle", User.ProfileLive, :index
       live "/claims/:group_id", ClaimLive
       live "/payment/success", Payment.SuccessLive, :index
       live "/payment/canceled", Payment.CanceledLive, :index
@@ -146,6 +145,14 @@ defmodule AlgoraWeb.Router do
         on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
         live "/issues/:number", BountyLive
         live "/pull/:number", BountyLive
+      end
+    end
+
+    scope "/:user_handle" do
+      live_session :user,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
+        live "/profile", User.ProfileLive, :index
       end
     end
 

@@ -42,9 +42,14 @@ defmodule AlgoraWeb.User.Nav do
       %{
         title: "Main",
         items: [
-          %{href: "/", tab: :dashboard, icon: "tabler-home", label: "Dashboard"},
           %{
-            href: "/@/#{socket.assigns.current_user.handle}",
+            href: "/home",
+            tab: :dashboard,
+            icon: "tabler-home",
+            label: "Dashboard"
+          },
+          %{
+            href: "/#{socket.assigns.current_user.handle}/profile",
             tab: :profile,
             icon: "tabler-user",
             label: "Profile"

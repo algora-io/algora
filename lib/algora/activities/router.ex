@@ -4,9 +4,7 @@ defmodule Algora.Activities.Router do
 
   def route(%{assoc: %Bounty{owner: user}}), do: {:ok, "/#{user.handle}/bounties"}
 
-  def route(%{assoc: %Identity{user: %{type: :individual} = user}}), do: {:ok, "/@/#{user.handle}"}
-
-  def route(%{assoc: %Identity{user: %{type: :organization} = user}}), do: {:ok, "/#{user.handle}"}
+  def route(%{assoc: %Identity{user: user}}), do: {:ok, "/#{user.handle}"}
 
   def route(_activity) do
     {:error, :not_found}

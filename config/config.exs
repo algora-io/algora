@@ -14,6 +14,7 @@ config :algora,
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec],
   redirects: [
+    {"/tv", "https://tv.algora.io"},
     {"/discord", "https://discord.gg/9RXD2nqbnG"},
     {"/sdk", "https://github.com/algora-io/sdk"},
     {"/healthcare", "https://blog.algora.io/post/healthcare"},

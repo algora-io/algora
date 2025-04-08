@@ -313,6 +313,7 @@ defmodule AlgoraWeb.HomeLive do
                     data-org-feature-img={feature.src}
                     src={feature.src}
                     alt={feature.title}
+                    loading="lazy"
                     class={
                       classes([
                         "w-full h-full object-contain absolute opacity-0 transition-all",
@@ -334,7 +335,12 @@ defmodule AlgoraWeb.HomeLive do
                   {feature.description}
                 </div>
                 <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative">
-                  <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
+                  <img
+                    src={feature.src}
+                    alt={feature.title}
+                    loading="lazy"
+                    class="w-full h-full object-contain"
+                  />
                 </div>
               </div>
             <% end %>
@@ -411,6 +417,7 @@ defmodule AlgoraWeb.HomeLive do
                     data-user-feature-img={feature.src}
                     src={feature.src}
                     alt={feature.title}
+                    loading="lazy"
                     class={
                       classes([
                         "w-full h-full object-cover absolute inset-0 opacity-0 transition-all",
@@ -432,7 +439,12 @@ defmodule AlgoraWeb.HomeLive do
                   {feature.description}
                 </div>
                 <div class="mt-4 aspect-[1200/630] rounded-xl overflow-hidden w-full relative">
-                  <img src={feature.src} alt={feature.title} class="w-full h-full object-contain" />
+                  <img
+                    src={feature.src}
+                    alt={feature.title}
+                    loading="lazy"
+                    class="w-full h-full object-contain"
+                  />
                 </div>
               </div>
             <% end %>

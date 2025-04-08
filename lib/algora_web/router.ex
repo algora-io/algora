@@ -144,17 +144,6 @@ defmodule AlgoraWeb.Router do
       live "/auth/signup", SignInLive, :signup
     end
 
-    scope "/:repo_owner/:repo_name" do
-      get "/", RepoController, :index
-
-      live_session :repo,
-        layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
-        live "/issues/:number", BountyLive
-        live "/pull/:number", BountyLive
-      end
-    end
-
     scope "/:user_handle" do
       live_session :user,
         layout: {AlgoraWeb.Layouts, :user},
@@ -188,6 +177,17 @@ defmodule AlgoraWeb.Router do
         ] do
         live "/settings", Org.SettingsLive, :edit
         live "/transactions", Org.TransactionsLive, :index
+      end
+    end
+
+    scope "/:repo_owner/:repo_name" do
+      get "/", RepoController, :index
+
+      live_session :repo,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
+        live "/issues/:number", BountyLive
+        live "/pull/:number", BountyLive
       end
     end
 

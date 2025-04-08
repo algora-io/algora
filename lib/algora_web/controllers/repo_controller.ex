@@ -9,11 +9,9 @@ defmodule AlgoraWeb.RepoController do
 
     case user do
       %{handle: handle} when is_binary(handle) ->
-        dbg("redirecting to #{~p"/#{handle}"}")
         redirect(conn, to: ~p"/#{handle}")
 
       _ ->
-        dbg("redirecting to #{~p"/go/#{repo_owner}/#{repo_name}"}")
         redirect(conn, to: ~p"/go/#{repo_owner}/#{repo_name}")
     end
   end

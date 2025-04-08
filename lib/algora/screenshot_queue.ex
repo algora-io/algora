@@ -4,8 +4,8 @@ defmodule Algora.ScreenshotQueue do
 
   require Logger
 
-  @timeout 30_000
-  @max_concurrent_tasks 3
+  @timeout 15_000
+  @max_concurrent_tasks 10
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)

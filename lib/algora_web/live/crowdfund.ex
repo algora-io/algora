@@ -252,7 +252,7 @@ defmodule AlgoraWeb.CrowdfundLive do
                 </.link>
 
                 <.link
-                  href={~p"/org/coollabsio"}
+                  href={~p"/coollabsio"}
                   rel="noopener"
                   class="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-x-4 rounded-xl bg-black p-4 sm:p-6 ring-1 ring-border transition-colors"
                 >
@@ -658,7 +658,7 @@ defmodule AlgoraWeb.CrowdfundLive do
       <div class="grid grid-cols-3 lg:grid-cols-3 items-center justify-center gap-x-5 gap-y-4 sm:gap-x-12 sm:gap-y-12">
         <.link
           class="font-bold font-display text-base sm:text-4xl whitespace-nowrap flex items-center justify-center"
-          navigate={~p"/org/browser-use"}
+          navigate={~p"/browser-use"}
         >
           <img
             class="size-4 sm:size-10 mr-2 sm:mr-4"
@@ -666,7 +666,7 @@ defmodule AlgoraWeb.CrowdfundLive do
             loading="lazy"
           /> Browser Use
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/outerbase"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/outerbase"}>
           <svg viewBox="0 0 123 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-[80%]">
             <path
               fill-rule="evenodd"
@@ -725,7 +725,7 @@ defmodule AlgoraWeb.CrowdfundLive do
             </path>
           </svg>
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/triggerdotdev"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/triggerdotdev"}>
           <img
             src={~p"/images/wordmarks/triggerdotdev.png"}
             alt="Trigger.dev"
@@ -733,7 +733,7 @@ defmodule AlgoraWeb.CrowdfundLive do
             loading="lazy"
           />
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/traceloop"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/traceloop"}>
           <img
             src={~p"/images/wordmarks/traceloop.png"}
             alt="Traceloop"
@@ -743,7 +743,7 @@ defmodule AlgoraWeb.CrowdfundLive do
         </.link>
         <.link
           class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
-          navigate={~p"/org/trieve"}
+          navigate={~p"/trieve"}
         >
           <img
             src={~p"/images/wordmarks/trieve.png"}
@@ -754,7 +754,7 @@ defmodule AlgoraWeb.CrowdfundLive do
         </.link>
         <.link
           class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
-          navigate={~p"/org/twentyhq"}
+          navigate={~p"/twentyhq"}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -769,7 +769,7 @@ defmodule AlgoraWeb.CrowdfundLive do
           </svg>
           Twenty
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/aidenybai"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/aidenybai"}>
           <img
             src={~p"/images/wordmarks/million.png"}
             alt="Million"
@@ -777,10 +777,10 @@ defmodule AlgoraWeb.CrowdfundLive do
             loading="lazy"
           />
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/moonrepo"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/moonrepo"}>
           <img src={~p"/images/wordmarks/moonrepo.svg"} alt="moon" class="w-[80%]" loading="lazy" />
         </.link>
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/dittofeed"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/dittofeed"}>
           <img
             src={~p"/images/wordmarks/dittofeed.png"}
             alt="Dittofeed"
@@ -791,7 +791,7 @@ defmodule AlgoraWeb.CrowdfundLive do
 
         <.link
           class="relative flex items-center justify-center brightness-0 invert"
-          navigate={~p"/org/onyx-dot-app"}
+          navigate={~p"/onyx-dot-app"}
         >
           <img
             src={~p"/images/wordmarks/onyx.png"}
@@ -804,13 +804,13 @@ defmodule AlgoraWeb.CrowdfundLive do
         <.link
           class="font-bold font-display text-base sm:text-4xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
           aria-label="Logo"
-          navigate={~p"/org/mendableai"}
+          navigate={~p"/mendableai"}
         >
           🔥
           Firecrawl
         </.link>
 
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/keephq"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/keephq"}>
           <img
             src={~p"/images/wordmarks/keep.png"}
             alt="Keep"
@@ -821,7 +821,7 @@ defmodule AlgoraWeb.CrowdfundLive do
 
         <.link
           class="font-bold font-display text-base sm:text-5xl whitespace-nowrap flex items-center justify-center"
-          navigate={~p"/org/windmill-labs"}
+          navigate={~p"/windmill-labs"}
         >
           <img
             src={~p"/images/wordmarks/windmill.svg"}
@@ -831,7 +831,7 @@ defmodule AlgoraWeb.CrowdfundLive do
           /> Windmill
         </.link>
 
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/panoratech"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/panoratech"}>
           <img
             src={~p"/images/wordmarks/panora.png"}
             alt="Panora"
@@ -840,7 +840,7 @@ defmodule AlgoraWeb.CrowdfundLive do
           />
         </.link>
 
-        <.link class="relative flex items-center justify-center" navigate={~p"/org/highlight"}>
+        <.link class="relative flex items-center justify-center" navigate={~p"/highlight"}>
           <img
             src={~p"/images/wordmarks/highlight.png"}
             alt="Highlight"

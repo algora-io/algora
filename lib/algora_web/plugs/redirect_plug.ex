@@ -26,7 +26,7 @@ defmodule AlgoraWeb.RedirectPlug do
     opts
     |> Keyword.put(
       :preserve_query_string,
-      Keyword.get(opts[:opts], :preserve_query_string, false)
+      Keyword.get(opts[:opts], :preserve_query_string, true)
     )
     |> Keyword.delete(:opts)
   end
@@ -43,13 +43,21 @@ defmodule AlgoraWeb.RedirectPlug do
 
   defp do_redirect(conn, opts) do
     query_string =
-      if opts[:preserve_query_string] && conn.params != %{} do
-        "?#{URI.encode_query(conn.params)}"
+      if opts[:preserve_query_string] && conn.query_string != "" do
+        "?#{conn.query_string}"
       else
         ""
       end
 
-    case opts[:to] do
+    to =
+      Enum.reduce(conn.path_params, opts[:to], fn {key, value}, acc ->
+        case value do
+          xs when is_list(xs) -> String.replace(acc, "*#{key}", Path.join(xs))
+          _ -> String.replace(acc, ":#{key}", value)
+        end
+      end)
+
+    case to do
       "http" <> _ = to -> Controller.redirect(conn, external: to <> query_string)
       to -> Controller.redirect(conn, to: to <> query_string)
     end

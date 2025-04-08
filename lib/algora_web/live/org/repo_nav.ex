@@ -82,7 +82,7 @@ defmodule AlgoraWeb.Org.RepoNav do
                   ~p"/#{data.ticket_ref.owner}/#{data.ticket_ref.repo}/issues/#{data.ticket_ref.number}"
 
                 :custom ->
-                  ~p"/org/#{socket.assigns.current_org.handle}/bounties/#{bounty.id}"
+                  ~p"/#{socket.assigns.current_org.handle}/bounties/#{bounty.id}"
               end
 
             {:cont, redirect(socket, to: to)}
@@ -141,49 +141,49 @@ defmodule AlgoraWeb.Org.RepoNav do
     Enum.filter(
       [
         %{
-          href: "/org/#{org_handle}",
+          href: "/#{org_handle}",
           tab: :dashboard,
           icon: "tabler-sparkles",
           label: "Dashboard",
           roles: [:admin, :mod]
         },
         %{
-          href: "/org/#{org_handle}/home",
+          href: "/#{org_handle}/home",
           tab: :home,
           icon: "tabler-home",
           label: "Home",
           roles: [:admin, :mod, :expert, :none]
         },
         %{
-          href: "/org/#{org_handle}/bounties",
+          href: "/#{org_handle}/bounties",
           tab: :bounties,
           icon: "tabler-diamond",
           label: "Bounties",
           roles: [:admin, :mod, :expert, :none]
         },
         %{
-          href: "/org/#{org_handle}/leaderboard",
+          href: "/#{org_handle}/leaderboard",
           tab: :leaderboard,
           icon: "tabler-trophy",
           label: "Leaderboard",
           roles: [:admin, :mod, :expert, :none]
         },
         %{
-          href: "/org/#{org_handle}/team",
+          href: "/#{org_handle}/team",
           tab: :team,
           icon: "tabler-users",
           label: "Team",
           roles: [:admin, :mod, :expert, :none]
         },
         %{
-          href: "/org/#{org_handle}/transactions",
+          href: "/#{org_handle}/transactions",
           tab: :transactions,
           icon: "tabler-credit-card",
           label: "Transactions",
           roles: [:admin]
         },
         %{
-          href: "/org/#{org_handle}/settings",
+          href: "/#{org_handle}/settings",
           tab: :settings,
           icon: "tabler-settings",
           label: "Settings",

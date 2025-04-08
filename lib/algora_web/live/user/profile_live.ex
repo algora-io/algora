@@ -9,7 +9,7 @@ defmodule AlgoraWeb.User.ProfileLive do
   alias Algora.Reviews.Review
 
   @impl true
-  def mount(%{"handle" => handle}, _session, socket) do
+  def mount(%{"user_handle" => handle}, _session, socket) do
     case Accounts.fetch_developer_by(handle: handle) do
       {:ok, user} ->
         transactions = Payments.list_received_transactions(user.id, limit: page_size())

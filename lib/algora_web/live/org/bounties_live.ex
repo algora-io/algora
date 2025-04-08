@@ -272,11 +272,11 @@ defmodule AlgoraWeb.Org.BountiesLive do
   end
 
   def handle_event("change-tab", %{"tab" => "completed"}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=completed")}
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}/bounties?status=completed")}
   end
 
   def handle_event("change-tab", %{"tab" => "open"}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}/bounties?status=open")}
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}/bounties?status=open")}
   end
 
   def handle_event("load_more", _params, socket) do

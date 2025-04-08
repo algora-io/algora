@@ -13,7 +13,7 @@ kill_signal = 'SIGTERM'
   release_command = '/app/bin/migrate'
 
 [env]
-  PHX_HOST = 'app.algora.io'
+  PHX_HOST = 'algora.io'
   PORT = '4000'
 
 [http_service]

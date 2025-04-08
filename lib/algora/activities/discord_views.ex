@@ -56,7 +56,7 @@ defmodule Algora.Activities.DiscordViews do
           author: %{
             name: tx.linked_transaction.user.name,
             icon_url: tx.linked_transaction.user.avatar_url,
-            url: "#{AlgoraWeb.Endpoint.url()}/org/#{tx.linked_transaction.user.handle}"
+            url: "#{AlgoraWeb.Endpoint.url()}/#{tx.linked_transaction.user.handle}"
           },
           footer: %{
             text: tx.user.name,
@@ -75,7 +75,7 @@ defmodule Algora.Activities.DiscordViews do
               inline: false
             }
           ],
-          url: "#{AlgoraWeb.Endpoint.url()}/org/#{tx.linked_transaction.user.handle}",
+          url: "#{AlgoraWeb.Endpoint.url()}/#{tx.linked_transaction.user.handle}",
           timestamp: tx.succeeded_at
         }
       ]

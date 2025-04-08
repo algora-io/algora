@@ -236,7 +236,7 @@ defmodule AlgoraWeb.UserAuth do
     end
   end
 
-  def signed_in_path_from_context(org_handle), do: ~p"/org/#{org_handle}"
+  def signed_in_path_from_context(org_handle), do: ~p"/#{org_handle}"
 
   def signed_in_path(%User{} = user) do
     signed_in_path_from_context(Accounts.last_context(user))

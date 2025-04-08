@@ -45,7 +45,7 @@ defmodule AlgoraWeb.OrgsLive do
           <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 xl:grid-cols-3">
             <%= for org <- @orgs do %>
               <li>
-                <.link navigate={~p"/org/#{org.handle}"}>
+                <.link navigate={~p"/#{org.handle}"}>
                   <div class="group/card from-white/[2%] via-white/[2%] to-white/[2%] bg-purple-200/[5%] relative h-full rounded-xl border border-white/10 bg-gradient-to-br hover:bg-purple-200/[7.5%] hover:border-white/15 md:gap-8">
                     <div class="pointer-events-none">
                       <div class="[mask-image:linear-gradient(black,transparent)] absolute inset-0 z-0 opacity-0 group-hover/card:opacity-100">

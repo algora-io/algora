@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
                 <li>
                   <.badge><code>/tip</code></.badge>
                   command is used by you or any other
-                  <.link navigate={~p"/org/#{@current_org.handle}/team"} class="font-semibold">
+                  <.link navigate={~p"/#{@current_org.handle}/team"} class="font-semibold">
                     {@current_org.name} admins
                   </.link>
                 </li>
@@ -287,8 +287,8 @@ defmodule AlgoraWeb.Org.SettingsLive do
   @impl true
   def handle_event("setup_payment", _params, socket) do
     %{current_org: org} = socket.assigns
-    success_url = url(~p"/org/#{org.handle}/settings")
-    cancel_url = url(~p"/org/#{org.handle}/settings")
+    success_url = url(~p"/#{org.handle}/settings")
+    cancel_url = url(~p"/#{org.handle}/settings")
 
     with {:ok, customer} <- Payments.fetch_or_create_customer(org),
          {:ok, session} <- Payments.create_stripe_setup_session(customer, success_url, cancel_url) do

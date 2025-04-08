@@ -52,10 +52,10 @@ Algora combines:
   </tr>
   <tr>
     <td align="center">
-      <img src="https://app.algora.io/og/org/cal/home" alt="Homepage" width="250">
+      <img src="https://app.algora.io/og/cal/home" alt="Homepage" width="250">
     </td>
     <td align="center">
-      <img src="https://app.algora.io/og/org/zio/leaderboard" alt="Homepage" width="250">
+      <img src="https://app.algora.io/og/zio/leaderboard" alt="Homepage" width="250">
     </td>
   </tr>
 </table>

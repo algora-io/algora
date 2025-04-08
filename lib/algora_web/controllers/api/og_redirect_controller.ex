@@ -5,10 +5,10 @@ defmodule AlgoraWeb.API.OGRedirectController do
     target_path =
       case {asset, params["status"]} do
         {"leaderboard.png", _} ->
-          "/og/org/#{org_handle}/leaderboard"
+          "/og/#{org_handle}/leaderboard"
 
         {"bounties.png", _} ->
-          "/og/org/#{org_handle}"
+          "/og/#{org_handle}"
 
         _ ->
           nil

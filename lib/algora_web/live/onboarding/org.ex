@@ -755,60 +755,60 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         You're in good company
       </h2>
       <div class="grid w-full grid-cols-2 items-center justify-center gap-x-10 gap-y-16">
-        <a class="relative flex items-center justify-center" href={~p"/org/cal"}>
+        <a class="relative flex items-center justify-center" href={~p"/cal"}>
           <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/qdrant"}>
+        <a class="relative flex items-center justify-center" href={~p"/qdrant"}>
           <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/remotion"}>
+        <a class="relative flex items-center justify-center" href={~p"/remotion"}>
           <img
             src={~p"/images/wordmarks/remotion.png"}
             alt="Remotion"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/zio"}>
+        <a class="relative flex items-center justify-center" href={~p"/zio"}>
           <img
             src={~p"/images/wordmarks/zio.png"}
             alt="ZIO"
             class="w-[10rem] col-auto brightness-0 invert"
           />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/triggerdotdev"}>
+        <a class="relative flex items-center justify-center" href={~p"/triggerdotdev"}>
           <img
             src={~p"/images/wordmarks/triggerdotdev.png"}
             alt="Trigger.dev"
             class="col-auto w-full saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/tembo"}>
+        <a class="relative flex items-center justify-center" href={~p"/tembo"}>
           <img
             src={~p"/images/wordmarks/tembo.png"}
             alt="Tembo"
             class="w-[13rem] col-auto saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/maybe-finance"}>
+        <a class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
           <img src={~p"/images/wordmarks/maybe.png"} alt="Maybe" class="col-auto w-full saturate-0" />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/golemcloud"}>
+        <a class="relative flex items-center justify-center" href={~p"/golemcloud"}>
           <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/aidenybai"}>
+        <a class="relative flex items-center justify-center" href={~p"/aidenybai"}>
           <img src={~p"/images/wordmarks/million.png"} alt="Million" class="col-auto w-44 saturate-0" />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/tailcallhq"}>
+        <a class="relative flex items-center justify-center" href={~p"/tailcallhq"}>
           <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/highlight"}>
+        <a class="relative flex items-center justify-center" href={~p"/highlight"}>
           <img
             src={~p"/images/wordmarks/highlight.png"}
             alt="Highlight"
             class="col-auto w-44 saturate-0"
           />
         </a>
-        <a class="relative flex items-center justify-center" href={~p"/org/dittofeed"}>
+        <a class="relative flex items-center justify-center" href={~p"/dittofeed"}>
           <img
             src={~p"/images/wordmarks/dittofeed.png"}
             alt="Dittofeed"

@@ -41,9 +41,7 @@ defmodule AlgoraWeb.HomeLive do
   end
 
   @impl true
-  def mount(%{"country_code" => country_code} = params, _session, socket) do
-    Gettext.put_locale(AlgoraWeb.Gettext, Algora.Util.locale_from_country_code(country_code))
-
+  def mount(params, _session, socket) do
     total_contributors = get_contributors_count()
     total_countries = get_countries_count()
 
@@ -54,27 +52,33 @@ defmodule AlgoraWeb.HomeLive do
       %{label: "Countries", value: format_number(total_countries)}
     ]
 
-    featured_devs = Accounts.list_featured_developers(country_code)
+    featured_devs = Accounts.list_featured_developers()
     featured_collabs = list_featured_collabs()
 
-    {:ok,
-     socket
-     |> assign(:page_title, "Algora - The open source Upwork for engineers")
-     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
-     |> assign(:screenshot?, not is_nil(params["screenshot"]))
-     |> assign(:featured_devs, featured_devs)
-     |> assign(:featured_collabs, featured_collabs)
-     |> assign(:stats, stats)
-     |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-     |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
-     |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-     |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
-     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
-     |> assign(:total_contributors, total_contributors)
-     |> assign(:total_countries, total_countries)
-     |> assign(:selected_developer, nil)
-     |> assign(:share_drawer_type, nil)
-     |> assign(:show_share_drawer, false)}
+    case socket.assigns[:current_user] do
+      nil ->
+        {:ok,
+         socket
+         |> assign(:page_title, "Algora - The open source Upwork for engineers")
+         |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
+         |> assign(:screenshot?, not is_nil(params["screenshot"]))
+         |> assign(:featured_devs, featured_devs)
+         |> assign(:featured_collabs, featured_collabs)
+         |> assign(:stats, stats)
+         |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+         |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+         |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+         |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
+         |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
+         |> assign(:total_contributors, total_contributors)
+         |> assign(:total_countries, total_countries)
+         |> assign(:selected_developer, nil)
+         |> assign(:share_drawer_type, nil)
+         |> assign(:show_share_drawer, false)}
+
+      user ->
+        {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
+    end
   end
 
   defp org_features do

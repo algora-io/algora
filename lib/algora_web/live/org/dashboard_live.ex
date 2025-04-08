@@ -101,7 +101,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:messages, [])
        |> assign(:show_chat, false)}
     else
-      {:ok, redirect(socket, to: ~p"/org/#{current_org.handle}/home")}
+      {:ok, redirect(socket, to: ~p"/#{current_org.handle}/home")}
     end
   end
 
@@ -759,7 +759,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {:noreply,
              socket
              |> assign(:show_share_drawer, false)
-             |> redirect(to: ~p"/org/#{socket.assigns.current_org.handle}/contracts/#{contract.id}")}
+             |> redirect(to: ~p"/#{socket.assigns.current_org.handle}/contracts/#{contract.id}")}
 
           {:error, changeset} ->
             {:noreply, put_flash(socket, :error, "Failed to create contract: #{inspect(changeset.errors)}")}
@@ -821,12 +821,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("change-tab", %{"tab" => "completed"}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}?status=completed")}
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}?status=completed")}
   end
 
   @impl true
   def handle_event("change-tab", %{"tab" => "open"}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/org/#{socket.assigns.current_org.handle}?status=open")}
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}?status=open")}
   end
 
   @impl true
@@ -1244,7 +1244,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
             <.button
               :if={@contract_for_user && @contract_for_user.status in [:active, :paid]}
-              navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
+              navigate={~p"/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
               class="bg-emerald-800/10 text-emerald-300 drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/50 focus:border-emerald-400/50"
             >
@@ -1252,7 +1252,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.button>
             <.button
               :if={@contract_for_user && @contract_for_user.status in [:draft]}
-              navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
+              navigate={~p"/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
               variant="none"
               class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#94a3b880] focus:bg-gray-800/10 focus:text-gray-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#94a3b880] border border-gray-400/50 focus:border-gray-400/50"
             >
@@ -1371,7 +1371,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.button>
         <.button
           :if={@contract_for_user && @contract_for_user.status in [:active, :paid]}
-          navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
+          navigate={~p"/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
           variant="none"
           class="bg-emerald-800/10 text-emerald-300 drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/50 focus:border-emerald-400/50"
         >
@@ -1379,7 +1379,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.button>
         <.button
           :if={@contract_for_user && @contract_for_user.status in [:draft]}
-          navigate={~p"/org/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
+          navigate={~p"/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
           variant="none"
           class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#94a3b880] focus:bg-gray-800/10 focus:text-gray-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#94a3b880] border border-gray-400/50 focus:border-gray-400/50"
         >
@@ -1588,7 +1588,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <.badge
             id="og-url"
             phx-hook="CopyToClipboard"
-            data-value={url(~p"/org/#{@current_org.handle}/home")}
+            data-value={url(~p"/#{@current_org.handle}/home")}
             phx-click={
               %JS{}
               |> JS.hide(
@@ -1614,11 +1614,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
               class="absolute left-1 my-auto hidden size-4 mr-2"
             />
             <span class="pl-4">
-              {AlgoraWeb.Endpoint.host()}{~p"/org/#{@current_org.handle}/home"}
+              {AlgoraWeb.Endpoint.host()}{~p"/#{@current_org.handle}/home"}
             </span>
           </.badge>
           <img
-            src={~p"/og/org/#{@current_org.handle}/home"}
+            src={~p"/og/#{@current_org.handle}/home"}
             alt={@current_org.name}
             loading="lazy"
             class="mt-3 w-full aspect-[1200/630] rounded-lg ring-1 ring-input bg-black"

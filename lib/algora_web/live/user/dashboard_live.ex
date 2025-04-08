@@ -528,7 +528,7 @@ defmodule AlgoraWeb.User.DashboardLive do
               </div>
             </div>
             <.button
-              navigate={~p"/org/#{@contract.client.handle}/contracts/#{@contract.id}"}
+              navigate={~p"/#{@contract.client.handle}/contracts/#{@contract.id}"}
               phx-click="view_contract"
               phx-value-org={@contract.client.handle}
               size="sm"

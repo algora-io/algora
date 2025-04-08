@@ -20,7 +20,8 @@ config :algora,
     {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},
     {"/create/org", "/onboarding/org"},
     {"/solve", "/onboarding/dev"},
-    {"/onboarding/solver", "/onboarding/dev"}
+    {"/onboarding/solver", "/onboarding/dev"},
+    {"/org/*path", "/*path"}
   ]
 
 # Configures the endpoint

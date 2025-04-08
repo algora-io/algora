@@ -73,28 +73,28 @@ defmodule AlgoraWeb.Org.HomeLive do
           title="Open Bounties"
           value={Money.to_string!(@stats.open_bounties_amount)}
           subtext={"#{@stats.open_bounties_count} bounties"}
-          navigate={~p"/org/#{@org.handle}/bounties?status=open"}
+          navigate={~p"/#{@org.handle}/bounties?status=open"}
           icon="tabler-diamond"
         />
         <.stat_card
           title="Total Awarded"
           value={Money.to_string!(@stats.total_awarded_amount)}
           subtext={"#{@stats.rewarded_bounties_count} #{ngettext("bounty", "bounties", @stats.rewarded_bounties_count)} / #{@stats.rewarded_tips_count} #{ngettext("tip", "tips", @stats.rewarded_tips_count)} / #{@stats.rewarded_contracts_count} #{ngettext("contract", "contracts", @stats.rewarded_contracts_count)}"}
-          navigate={~p"/org/#{@org.handle}/bounties?status=completed"}
+          navigate={~p"/#{@org.handle}/bounties?status=completed"}
           icon="tabler-gift"
         />
         <.stat_card
           title="Solvers"
           value={@stats.solvers_count}
           subtext={"+#{@stats.solvers_diff} from last month"}
-          navigate={~p"/org/#{@org.handle}/leaderboard"}
+          navigate={~p"/#{@org.handle}/leaderboard"}
           icon="tabler-user-code"
         />
         <.stat_card
           title="Members"
           value={@stats.members_count}
           subtext=""
-          navigate={~p"/org/#{@org.handle}/team"}
+          navigate={~p"/#{@org.handle}/team"}
           icon="tabler-users"
         />
       </div>
@@ -105,7 +105,7 @@ defmodule AlgoraWeb.Org.HomeLive do
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">Open Bounties</h2>
             <.link
-              href={~p"/org/#{@org.handle}/bounties?status=open"}
+              href={~p"/#{@org.handle}/bounties?status=open"}
               class="text-sm text-muted-foreground hover:underline"
             >
               View all
@@ -148,7 +148,7 @@ defmodule AlgoraWeb.Org.HomeLive do
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-semibold">Completed Bounties</h2>
             <.link
-              href={~p"/org/#{@org.handle}/bounties?status=completed"}
+              href={~p"/#{@org.handle}/bounties?status=completed"}
               class="text-sm text-muted-foreground hover:underline"
             >
               View all

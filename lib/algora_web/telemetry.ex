@@ -23,6 +23,23 @@ defmodule AlgoraWeb.Telemetry do
 
   def metrics do
     [
+      # Screenshot Queue Metrics
+      last_value("algora.screenshot_queue.length",
+        description: "Current length of the screenshot generation queue",
+        tags: [],
+        unit: :count
+      ),
+      last_value("algora.screenshot_queue.active_count",
+        description: "Number of currently active screenshot generation tasks",
+        tags: [],
+        unit: :count
+      ),
+      distribution("algora.screenshot_queue.generate.duration",
+        unit: {:native, :millisecond},
+        description: "The time it takes to generate a screenshot",
+        tags: [:url]
+      ),
+
       # Phoenix Metrics
       summary("phoenix.endpoint.start.system_time",
         unit: {:native, :millisecond}

@@ -12,7 +12,13 @@ defmodule Algora.ScreenshotQueue do
   end
 
   def generate_image(url, opts \\ []) do
-    GenServer.call(__MODULE__, {:generate_image, url, opts}, opts[:timeout] || @timeout)
+    start_time = System.monotonic_time()
+    result = GenServer.call(__MODULE__, {:generate_image, url, opts}, opts[:timeout] || @timeout)
+    end_time = System.monotonic_time()
+
+    :telemetry.execute([:algora, :screenshot_queue, :generate], %{duration: end_time - start_time})
+
+    result
   end
 
   @impl true
@@ -23,6 +29,8 @@ defmodule Algora.ScreenshotQueue do
   @impl true
   def handle_call({:generate_image, url, opts}, from, state) do
     active_count = map_size(state.active_tasks)
+    :telemetry.execute([:algora, :screenshot_queue], %{length: :queue.len(state.queue)})
+    :telemetry.execute([:algora, :screenshot_queue], %{active_count: active_count})
 
     if active_count < @max_concurrent_tasks do
       {_task, new_state} = start_task(url, opts, from, state)

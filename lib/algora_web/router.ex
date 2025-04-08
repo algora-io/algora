@@ -145,6 +145,8 @@ defmodule AlgoraWeb.Router do
     end
 
     scope "/:repo_owner/:repo_name" do
+      get "/", RepoController, :index
+
       live_session :repo,
         layout: {AlgoraWeb.Layouts, :user},
         on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do

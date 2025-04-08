@@ -149,7 +149,7 @@ defmodule AlgoraWeb.BountyLive do
           ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
         )
       else
-        url(~p"/org/#{socket.assigns.bounty.owner.handle}/bounties/#{socket.assigns.bounty.id}")
+        url(~p"/#{socket.assigns.bounty.owner.handle}/bounties/#{socket.assigns.bounty.id}")
       end
 
     {:ok,

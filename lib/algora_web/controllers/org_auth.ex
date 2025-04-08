@@ -31,7 +31,7 @@ defmodule AlgoraWeb.OrgAuth do
     if get_user_role(current_user, current_org) in allowed_roles do
       {:cont, socket}
     else
-      {:halt, redirect(socket, to: "/org/#{current_org.handle}")}
+      {:halt, redirect(socket, to: "/#{current_org.handle}")}
     end
   end
 end

@@ -482,7 +482,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
 
     case socket.assigns[:current_user] do
       nil ->
-        {:ok, redirect(socket, to: ~p"/auth/login?return_to=#{~p"/org/#{contract.client.handle}/contracts/#{id}"}")}
+        {:ok, redirect(socket, to: ~p"/auth/login?return_to=#{~p"/#{contract.client.handle}/contracts/#{id}"}")}
 
       current_user ->
         if current_user.id != contract.contractor_id and

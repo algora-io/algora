@@ -21,7 +21,7 @@ defmodule Algora.BotTemplates do
 
   def placeholders(:bounty_created, user) do
     %{
-      "PRIZE_POOL" => "## 💎 $1,000 bounty [• #{user.name}](#{AlgoraWeb.Endpoint.url()}/@/#{user.handle})",
+      "PRIZE_POOL" => "## 💎 $1,000 bounty [• #{user.name}](#{AlgoraWeb.Endpoint.url()}/#{user.handle})",
       "ISSUE_NUMBER" => "100",
       "REPO_FULL_NAME" => "#{user.provider_login || user.handle}/repo",
       "ATTEMPTS" => """

@@ -67,7 +67,6 @@ defmodule AlgoraWeb.Router do
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 
-    get "/", RootController, :index
     get "/set_context/:context", ContextController, :set
     get "/a/:table_prefix/:activity_id", ActivityController, :get
     get "/auth/logout", OAuthCallbackController, :sign_out
@@ -89,43 +88,6 @@ defmodule AlgoraWeb.Router do
       end
     end
 
-    scope "/:repo_owner/:repo_name" do
-      live_session :repo,
-        layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
-        live "/issues/:number", BountyLive
-        live "/pull/:number", BountyLive
-      end
-    end
-
-    scope "/org/:org_handle" do
-      live_session :org,
-        layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
-        live "/", Org.DashboardLive, :index
-        live "/home", Org.HomeLive, :index
-        live "/bounties", Org.BountiesLive, :index
-        live "/bounties/new", Org.BountiesNewLive, :index
-        live "/bounties/community", Org.BountiesNewLive, :index
-        live "/bounties/:id", BountyLive, :index
-        live "/contracts/:id", Contract.ViewLive
-        live "/team", Org.TeamLive, :index
-        live "/leaderboard", Org.LeaderboardLive, :index
-      end
-
-      live_session :org_admin,
-        layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [
-          {AlgoraWeb.UserAuth, :ensure_authenticated},
-          {AlgoraWeb.UserAuth, :current_user},
-          AlgoraWeb.Org.Nav,
-          {AlgoraWeb.OrgAuth, :ensure_admin}
-        ] do
-        live "/settings", Org.SettingsLive, :edit
-        live "/transactions", Org.TransactionsLive, :index
-      end
-    end
-
     live_session :authenticated,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_authenticated}, AlgoraWeb.User.Nav] do
@@ -138,12 +100,12 @@ defmodule AlgoraWeb.Router do
     live_session :public,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
+      live "/", HomeLive
       live "/bounties", BountiesLive, :index
       live "/bounties/:tech", BountiesLive, :index
       live "/community", CommunityLive, :index
       live "/leaderboard", LeaderboardLive, :index
       live "/projects", OrgsLive, :index
-      live "/@/:handle", User.ProfileLive, :index
       live "/claims/:group_id", ClaimLive
       live "/payment/success", Payment.SuccessLive, :index
       live "/payment/canceled", Payment.CanceledLive, :index
@@ -177,12 +139,56 @@ defmodule AlgoraWeb.Router do
       live "/auth/signup", SignInLive, :signup
     end
 
+    scope "/:repo_owner/:repo_name" do
+      live_session :repo,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.RepoNav] do
+        live "/issues/:number", BountyLive
+        live "/pull/:number", BountyLive
+      end
+    end
+
+    scope "/:user_handle" do
+      live_session :user,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
+        live "/profile", User.ProfileLive, :index
+      end
+    end
+
+    scope "/:org_handle" do
+      live_session :org,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.Org.Nav] do
+        live "/dashboard", Org.DashboardLive, :index
+        live "/home", Org.HomeLive, :index
+        live "/bounties", Org.BountiesLive, :index
+        live "/bounties/new", Org.BountiesNewLive, :index
+        live "/bounties/community", Org.BountiesNewLive, :index
+        live "/bounties/:id", BountyLive, :index
+        live "/contracts/:id", Contract.ViewLive
+        live "/team", Org.TeamLive, :index
+        live "/leaderboard", Org.LeaderboardLive, :index
+      end
+
+      live_session :org_admin,
+        layout: {AlgoraWeb.Layouts, :user},
+        on_mount: [
+          {AlgoraWeb.UserAuth, :ensure_authenticated},
+          {AlgoraWeb.UserAuth, :current_user},
+          AlgoraWeb.Org.Nav,
+          {AlgoraWeb.OrgAuth, :ensure_admin}
+        ] do
+        live "/settings", Org.SettingsLive, :edit
+        live "/transactions", Org.TransactionsLive, :index
+      end
+    end
+
     live "/0/bounties/:id", OG.BountyLive, :show
     get "/og/*path", OGImageController, :generate
 
-    live_session :wildcard,
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      live "/:country_code", HomeLive, :index
+    scope "/:handle" do
+      get "/", UserController, :index
     end
   end
 

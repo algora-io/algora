@@ -14,7 +14,7 @@ defmodule AlgoraWeb.Payment.SuccessLive do
           to =
             case Accounts.last_context(current_user) do
               "personal" -> ~p"/user/transactions"
-              org_handle -> ~p"/org/#{org_handle}/transactions"
+              org_handle -> ~p"/#{org_handle}/transactions"
             end
 
           socket

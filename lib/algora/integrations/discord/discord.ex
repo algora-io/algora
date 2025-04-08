@@ -34,7 +34,7 @@ defmodule Algora.Discord do
       ...>         icon_url: "https://example.com/avatar.png",
       ...>         url: "https://example.com/org"
       ...>       },
-      ...>       url: "https://github.com/org/repo/issues/1",
+      ...>       url: "https://github.com/repo/issues/1",
       ...>       timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
       ...>     }
       ...>   ]

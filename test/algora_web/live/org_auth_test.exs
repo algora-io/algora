@@ -19,7 +19,7 @@ defmodule AlgoraWeb.Org.SettingsLiveTest do
 
   # Helper function to test auth requirements for org routes
   defp assert_org_route_auth(conn, org, path, allowed_roles) do
-    test_path = "/org/#{org.handle}#{path}"
+    test_path = "/#{org.handle}#{path}"
 
     # Test unauthorized access
     assert {:error, {:redirect, %{to: to}}} = live(conn, test_path)
@@ -29,7 +29,7 @@ defmodule AlgoraWeb.Org.SettingsLiveTest do
     user = insert!(:user)
     conn_with_user = AlgoraWeb.UserAuth.put_current_user(conn, user)
     assert {:error, {:redirect, %{to: to}}} = live(conn_with_user, test_path)
-    assert to == "/org/#{org.handle}"
+    assert to == "/#{org.handle}"
 
     # # Test access for each role
     member = insert!(:member, user: user, org: org)
@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Org.SettingsLiveTest do
         assert {:ok, _view, _html} = live(conn_with_user, test_path)
       else
         assert {:error, {:redirect, %{to: to}}} = live(conn_with_user, test_path)
-        assert to == "/org/#{org.handle}"
+        assert to == "/#{org.handle}"
       end
     end
   end

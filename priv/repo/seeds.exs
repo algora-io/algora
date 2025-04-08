@@ -296,7 +296,7 @@ for {sender, content, inserted_at} <- messages do
   )
 end
 
-Logger.info("Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}")
+Logger.info("Contract: #{AlgoraWeb.Endpoint.url()}/#{pied_piper.handle}/contracts/#{initial_contract.id}")
 
 big_head =
   upsert!(
@@ -632,4 +632,4 @@ for {reviewer, reviewee, rating_delta, content} <- reviews do
   )
 end
 
-IO.puts("Contract: #{AlgoraWeb.Endpoint.url()}/org/#{pied_piper.handle}/contracts/#{initial_contract.id}")
+IO.puts("Contract: #{AlgoraWeb.Endpoint.url()}/#{pied_piper.handle}/contracts/#{initial_contract.id}")

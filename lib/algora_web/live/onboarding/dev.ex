@@ -168,8 +168,12 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def handle_event("tech_stack_changed", %{"tech_stack" => tech_stack}, socket) do
-    changeset = InfoForm.changeset(%InfoForm{}, %{tech_stack: tech_stack})
+    changeset = InfoForm.changeset(socket.assigns.info_form.source, %{tech_stack: tech_stack})
+    {:noreply, LocalStore.assign_cached(socket, :info_form, to_form(changeset))}
+  end
 
+  def handle_event("validate_info", %{"info_form" => params}, socket) do
+    changeset = InfoForm.changeset(socket.assigns.info_form.source, params)
     {:noreply, LocalStore.assign_cached(socket, :info_form, to_form(changeset))}
   end
 
@@ -202,7 +206,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   defp main_content(%{step: :info} = assigns) do
     ~H"""
     <div class="space-y-8">
-      <.form for={@info_form} phx-submit="submit_info" class="space-y-8">
+      <.form for={@info_form} phx-change="validate_info" phx-submit="submit_info" class="space-y-8">
         <div>
           <h2 class="mb-2 text-3xl sm:text-4xl font-semibold">
             What's your tech stack?

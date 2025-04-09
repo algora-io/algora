@@ -792,8 +792,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    current_user = socket.assigns.current_user
-
     if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
       handle =
         socket.assigns.email
@@ -813,13 +811,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
            |> assign_achievements()}
 
         user ->
-          case Repo.get_by(Member, user_id: current_user.id, org_id: socket.assigns.current_org.id) do
-            member -> member |> change(user_id: user.id) |> Repo.update()
-            nil -> {:ok, nil}
-          end
-
-          Accounts.update_settings(user, %{last_context: current_user.last_context})
-          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
+          socket = switch_from_preview(socket, user)
+          {:noreply, socket}
       end
     else
       throttle()
@@ -889,6 +882,44 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def handle_event(_event, _params, socket) do
     {:noreply, socket}
+  end
+
+  defp switch_from_preview(socket, user) do
+    current_user = socket.assigns.current_user
+
+    existing_member =
+      case socket.assigns.current_org do
+        %{last_context: "repo/" <> repo} ->
+          case String.split(repo, "/") do
+            [repo_owner, _repo_name] ->
+              Repo.one(
+                from m in Member,
+                  where: m.user_id == ^user.id,
+                  join: o in assoc(m, :org),
+                  where: o.provider_login == ^repo_owner,
+                  preload: [org: o]
+              )
+
+            _ ->
+              nil
+          end
+
+        _ ->
+          nil
+      end
+
+    if existing_member do
+      Accounts.update_settings(user, %{last_context: existing_member.org.handle})
+    else
+      case Repo.get_by(Member, user_id: current_user.id, org_id: socket.assigns.current_org.id) do
+        nil -> {:ok, nil}
+        member -> member |> change(user_id: user.id) |> Repo.update()
+      end
+
+      Accounts.update_settings(user, %{last_context: current_user.last_context})
+    end
+
+    redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))
   end
 
   defp throttle, do: :timer.sleep(1000)

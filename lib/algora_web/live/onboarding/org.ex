@@ -371,6 +371,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
             tech_stack: tech_stack,
+            hiring: get_in(preferences, [:hiring]),
             categories: get_in(preferences, [:categories]),
             website_url: get_in(metadata, [:org, :website_url]),
             twitter_url: get_in(metadata, [:org, :socials, :twitter]),

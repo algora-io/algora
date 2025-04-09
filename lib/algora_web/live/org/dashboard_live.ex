@@ -811,6 +811,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
            |> assign_achievements()}
 
         user ->
+          Accounts.update_settings(user, %{last_context: socket.assigns.current_user.last_context})
           {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
       end
     else

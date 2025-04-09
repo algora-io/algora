@@ -221,13 +221,8 @@ defmodule AlgoraWeb.HomeLive do
                     loading="lazy"
                     class="border border-border bg-muted mix-blend-overlay [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
                     style="color:transparent"
-                    src={~p"/images/screenshots/org-dashboard.png"}
+                    src={~p"/images/screenshots/org-home.png"}
                   />
-                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white/80 font-mono text-sm">
-                    <div>github.com/your/repo</div>
-                    <div class="text-lg">↓</div>
-                    <div>algora.io/your/repo</div>
-                  </div>
                 </div>
               </div>
             </div>

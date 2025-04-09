@@ -344,9 +344,12 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           </.error>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex justify-end gap-4">
+          <.button type="submit" variant="secondary">
+            Skip
+          </.button>
           <.button type="submit">
-            Next <.icon name="tabler-arrow-right" class="ml-2 size-4" />
+            Next
           </.button>
         </div>
       </.form>

@@ -23,12 +23,14 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
     "emoji-picker-element": "^1.25.0",
     "framer-motion": "^11.11.10",
     "live_svelte": "file:../deps/live_svelte",
     "phoenix": "file:../deps/phoenix",
     "phoenix_html": "file:../deps/phoenix_html",
     "phoenix_live_view": "file:../deps/phoenix_live_view",
-    "posthog-js": "^1.234.8"
+    "posthog-js": "^1.234.8",
+    "tailwind-merge": "^3.2.0"
   }
 }

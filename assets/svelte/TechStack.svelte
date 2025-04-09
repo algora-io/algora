@@ -1,5 +1,9 @@
 <script>
+  import { clsx } from "clsx";
+  import { twMerge } from "tailwind-merge";
+
   export let tech = [];
+  export let classes = "";
   export let form;
   export let live;
 
@@ -11,6 +15,10 @@
     tech.forEach((tech) => {
       techMap.set(tech.toLowerCase(), tech);
     });
+  }
+
+  function cn(...inputs) {
+    return twMerge(clsx(inputs));
   }
 
   function addTech(e) {
@@ -51,7 +59,10 @@
     bind:value={input}
     on:keydown={addTech}
     placeholder="Elixir, Phoenix, PostgreSQL, etc."
-    class="bg-background block w-full rounded-lg border-input py-[7px] px-[11px] text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6 phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5 focus:border-ring focus:ring-ring/5"
+    class={cn(
+      "bg-background block w-full rounded-lg border-input py-[7px] px-[11px] text-foreground focus:outline-none focus:ring-4 sm:text-sm sm:leading-6 phx-no-feedback:border-input phx-no-feedback:focus:border-ring phx-no-feedback:focus:ring-ring/5 focus:border-ring focus:ring-ring/5",
+      classes
+    )}
   />
 
   <input

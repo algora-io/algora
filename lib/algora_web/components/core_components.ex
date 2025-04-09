@@ -221,7 +221,7 @@ defmodule AlgoraWeb.CoreComponents do
         Bounty board
       </:subtitle>
 
-      <:link href={~p"/set_context/personal"}>
+      <:link :if={@current_user.handle} href={~p"/set_context/personal"}>
         <div class="flex items-center whitespace-nowrap">
           <div class="mr-3 relative size-10 shrink-0">
             <.avatar class="mr-3 size-10">

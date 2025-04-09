@@ -294,6 +294,8 @@ defmodule AlgoraWeb.SignInLive do
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
+      Algora.Accounts.ensure_org_context(socket.assigns.user)
+
       {:noreply,
        redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(socket.assigns.user.email, socket.assigns[:return_to]))}
     else

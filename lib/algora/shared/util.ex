@@ -196,4 +196,11 @@ defmodule Algora.Util do
 
     "https://www.gravatar.com/avatar/#{hash}?#{query}&d=identicon"
   end
+
+  def normalized_strings_match?(s1, s2) do
+    s1 = s1 |> String.downcase() |> String.trim() |> String.replace(~r/[^a-zA-Z0-9]+/, "")
+    s2 = s2 |> String.downcase() |> String.trim() |> String.replace(~r/[^a-zA-Z0-9]+/, "")
+
+    String.contains?(s1, s2) or String.contains?(s2, s1)
+  end
 end

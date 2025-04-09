@@ -1,5 +1,7 @@
 defmodule Algora.Crawler do
   @moduledoc false
+  alias Algora.Util
+
   require Logger
 
   @user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -40,9 +42,9 @@ defmodule Algora.Crawler do
 
                 # Enhance metadata with GitHub info if available
                 metadata =
-                  case get_github_info(metadata.socials[:github]) do
+                  case get_github_info(url, metadata.socials[:github]) do
                     {:ok, github_info} -> Map.merge(metadata, github_info)
-                    _ -> metadata
+                    _ -> update_in(metadata, [:socials, :github], fn _ -> nil end)
                   end
 
                 metadata
@@ -82,7 +84,7 @@ defmodule Algora.Crawler do
 
   def fetch_user_metadata(email, opts \\ []) do
     domain = get_email_domain(email)
-    gravatar_url = Algora.Util.get_gravatar_url(email, opts)
+    gravatar_url = Util.get_gravatar_url(email, opts)
 
     case fetch_site_metadata(domain) do
       {:ok, metadata} ->
@@ -401,9 +403,9 @@ defmodule Algora.Crawler do
     if not blacklisted?(domain), do: domain
   end
 
-  defp get_github_info(nil), do: {:error, :no_github_url}
+  defp get_github_info(_website_url, nil), do: {:error, :no_github_url}
 
-  defp get_github_info(github_url) do
+  defp get_github_info(website_url, github_url) do
     case extract_github_handle(github_url) do
       nil ->
         {:error, :invalid_github_url}
@@ -415,16 +417,22 @@ defmodule Algora.Crawler do
           {:ok, %Finch.Response{status: 200, body: body}} ->
             case Jason.decode(body) do
               {:ok, data} ->
-                {:ok,
-                 %{
-                   email: data["email"],
-                   avatar_url: data["avatar_url"],
-                   bio: data["bio"],
-                   handle: data["login"],
-                   website_url: data["blog"],
-                   display_name: data["name"],
-                   twitter_username: data["twitter_username"]
-                 }}
+                host = website_url |> URI.parse() |> Map.get(:host) |> String.split(".") |> Enum.at(-2)
+
+                if Util.normalized_strings_match?(data["login"], host) do
+                  {:ok,
+                   %{
+                     email: data["email"],
+                     avatar_url: data["avatar_url"],
+                     bio: data["bio"],
+                     handle: data["login"],
+                     website_url: data["blog"],
+                     display_name: data["name"],
+                     twitter_username: data["twitter_username"]
+                   }}
+                else
+                  {:error, :mismatch}
+                end
 
               _ ->
                 {:error, :json_decode_failed}

@@ -42,6 +42,7 @@ defmodule Algora.Organizations do
           existing_user ->
             existing_user
             |> User.org_registration_changeset(Map.delete(params.user, :handle))
+            |> put_change(:last_context, org_handle)
             |> Repo.update()
         end
 

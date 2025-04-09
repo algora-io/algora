@@ -6,11 +6,14 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Github
+  alias Algora.Organizations
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.LocalStore
+  alias Swoosh.Email
 
   require Logger
 
@@ -77,14 +80,18 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           limit: 10
       )
 
+    signup_form = to_form(User.signup_changeset(%User{}, %{}))
+
     {:ok,
      socket
+     |> assign(:secret_code, nil)
      |> assign(:step, Enum.at(@steps, 0))
      |> assign(:steps, @steps)
      |> assign(:total_steps, length(@steps))
      |> assign(:context, context)
      |> assign(:transactions, transactions)
-     |> assign(:info_form, InfoForm.init())}
+     |> assign(:info_form, InfoForm.init())
+     |> assign(:signup_form, signup_form)}
   end
 
   @impl true
@@ -154,6 +161,87 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
+  def handle_event("send_signup_code", %{"user" => %{"email" => email}}, socket) do
+    code = Nanoid.generate()
+
+    changeset = User.signup_changeset(%User{}, %{})
+
+    case send_signup_code_to_email(email, code) do
+      {:ok, _id} ->
+        {:noreply,
+         socket
+         |> LocalStore.assign_cached(:secret_code, code)
+         |> LocalStore.assign_cached(:email, email)
+         |> assign(:signup_form, to_form(changeset))}
+
+      {:error, _reason} ->
+        # capture_error reason
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           "We had trouble sending mail to #{email}. Please try again"
+         )}
+    end
+
+    # case Algora.Accounts.get_user_by_email(email) do
+    #   %User{} = user ->
+    #     {:noreply, socket}
+
+    #   nil ->
+    #     throttle()
+    #     {:noreply, put_flash(socket, :error, "Email address not found.")}
+    # end
+  end
+
+  @impl true
+  def handle_event("send_signup_code", %{"user" => %{"signup_code" => code}}, socket) do
+    if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
+      user_handle =
+        socket.assigns.email
+        |> String.replace(~r/[^a-zA-Z0-9]/, "-")
+        |> String.downcase()
+
+      email = socket.assigns.email
+
+      tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
+      intentions = get_field(socket.assigns.info_form.source, :intentions) || []
+
+      opts = [
+        tech_stack: tech_stack,
+        seeking_bounties: "bounties" in intentions,
+        seeking_contracts: "contracts" in intentions,
+        seeking_jobs: "jobs" in intentions
+      ]
+
+      {:ok, user} =
+        case Repo.get_by(User, email: email) do
+          nil ->
+            %User{
+              type: :individual,
+              last_context: "personal",
+              handle: Organizations.ensure_unique_handle(user_handle),
+              avatar_url: Algora.Util.get_gravatar_url(email)
+            }
+            |> User.signup_changeset(%{email: email})
+            |> User.generate_id()
+            |> change(opts)
+            |> Repo.insert()
+
+          existing_user ->
+            existing_user
+            |> change(opts)
+            |> Repo.update()
+        end
+
+      {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email, socket.assigns[:return_to]))}
+    else
+      throttle()
+      {:noreply, put_flash(socket, :error, "Invalid signup code")}
+    end
+  end
+
+  @impl true
   def handle_event("prev_step", _params, socket) do
     current_step_index = Enum.find_index(socket.assigns.steps, &(&1 == socket.assigns.step))
     prev_step = Enum.at(socket.assigns.steps, current_step_index - 1)
@@ -196,6 +284,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         {:noreply, LocalStore.assign_cached(socket, :info_form, to_form(changeset))}
     end
   end
+
+  defp throttle, do: :timer.sleep(1000)
 
   defp main_content(%{step: :info} = assigns) do
     ~H"""
@@ -254,9 +344,12 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           </.error>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex justify-end gap-4">
+          <.button type="submit" variant="secondary">
+            Skip
+          </.button>
           <.button type="submit">
-            Next <.icon name="tabler-arrow-right" class="ml-2 size-4" />
+            Next
           </.button>
         </div>
       </.form>
@@ -266,28 +359,78 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   defp main_content(%{step: :oauth} = assigns) do
     ~H"""
-    <div class="space-y-8">
-      <div>
-        <h2 class="mb-2 text-3xl sm:text-4xl font-semibold">
-          Connect your GitHub
-        </h2>
-        <p class="mb-6 text-muted-foreground">
-          Join our community and start earning bounties
-        </p>
+    <div class="max-w-sm">
+      <h2 class="mb-2 text-3xl sm:text-4xl font-semibold">
+        Complete your signup
+      </h2>
+      <p class="mb-6 text-muted-foreground">
+        Join our community and start earning bounties
+      </p>
 
-        <p class="text-sm text-muted-foreground/75">
-          By continuing, you agree to Algora's
-          <.link href="/terms" class="text-foreground hover:underline">terms</.link>
-          and <.link href="/privacy" class="text-foreground hover:underline">privacy</.link>.
-        </p>
+      <div class="mt-8">
+        <.button :if={!@secret_code} phx-click="sign_in_with_github" class="w-full py-5">
+          <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
+        </.button>
+
+        <div :if={!@secret_code} class="relative mt-6">
+          <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-muted-foreground/50"></div>
+          </div>
+          <div class="relative flex justify-center text-sm/6 font-medium">
+            <span class="bg-background px-6 text-muted-foreground">or</span>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <.simple_form
+            :if={!@secret_code}
+            for={@signup_form}
+            id="send_signup_code_form"
+            phx-submit="send_signup_code"
+          >
+            <div class="space-y-4">
+              <.input
+                field={@signup_form[:email]}
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                required
+              />
+              <.button phx-disable-with="Signing up..." class="w-full py-5" variant="secondary">
+                Continue with email
+              </.button>
+            </div>
+          </.simple_form>
+        </div>
+
+        <.simple_form
+          :if={@secret_code}
+          for={@signup_form}
+          id="send_signup_code_form"
+          phx-submit="send_signup_code"
+        >
+          <.input field={@signup_form[:signup_code]} type="text" label="Signup code" required />
+          <.button phx-disable-with="Signing up..." class="w-full py-5">
+            Submit
+          </.button>
+        </.simple_form>
       </div>
-      <div class="flex justify-between">
-        <.button phx-click="prev_step" variant="secondary">
-          Previous
-        </.button>
-        <.button phx-click="sign_in_with_github" class="inline-flex items-center">
-          <Logos.github class="mr-2 h-5 w-5" /> Sign in with GitHub
-        </.button>
+
+      <div class="mt-4 text-xs sm:text-sm text-muted-foreground w-full">
+        By continuing, you agree to our
+        <.link
+          href={AlgoraWeb.Constants.get(:terms_url)}
+          class="font-medium text-foreground/90 hover:text-foreground"
+        >
+          terms
+        </.link>
+        {" "} and
+        <.link
+          href={AlgoraWeb.Constants.get(:privacy_url)}
+          class="font-medium text-foreground/90 hover:text-foreground"
+        >
+          privacy policy.
+        </.link>
       </div>
     </div>
     """
@@ -340,5 +483,31 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       <% end %>
     <% end %>
     """
+  end
+
+  @from_name "Algora"
+  @from_email "info@algora.io"
+
+  defp send_signup_code_to_email(email, code) do
+    email =
+      Email.new()
+      |> Email.to(email)
+      |> Email.from({@from_name, @from_email})
+      |> Email.subject("Signup code for Algora")
+      |> Email.text_body("""
+      Here is your signup code for Algora!
+
+       #{code}
+
+      If you didn't request this link, you can safely ignore this email.
+
+      --------------------------------------------------------------------------------
+
+      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
+
+      © 2025 Algora PBC.
+      """)
+
+    Algora.Mailer.deliver(email)
   end
 end

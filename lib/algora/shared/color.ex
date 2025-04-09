@@ -171,30 +171,33 @@ defmodule Algora.Color do
     end
   end
 
-  def tailwind_colors do
+  def tailwind_colors(regex \\ nil) do
     colors_path = "assets/node_modules/tailwindcss/lib/public/colors.js"
 
     case File.read(colors_path) do
       {:ok, content} ->
-        content
-        |> String.split("\n")
-        |> Enum.filter(&String.contains?(&1, ":"))
-        |> Enum.reduce({%{}, nil}, fn line, {acc, current_color} ->
-          case parse_color_line(line) do
-            {color_name, :start_object} ->
-              {acc, color_name}
+        colors =
+          content
+          |> String.split("\n")
+          |> Enum.filter(&String.contains?(&1, ":"))
+          |> Enum.reduce({%{}, nil}, fn line, {acc, current_color} ->
+            case parse_color_line(line) do
+              {color_name, :start_object} ->
+                {acc, color_name}
 
-            {:shade, shade, hex} when is_binary(current_color) ->
-              {Map.put(acc, "#{current_color}-#{shade}", hex), current_color}
+              {:shade, shade, hex} when is_binary(current_color) ->
+                {Map.put(acc, "#{current_color}-#{shade}", hex), current_color}
 
-            {name, hex} ->
-              {Map.put(acc, name, hex), current_color}
+              {name, hex} ->
+                {Map.put(acc, name, hex), current_color}
 
-            nil ->
-              {acc, current_color}
-          end
-        end)
-        |> elem(0)
+              nil ->
+                {acc, current_color}
+            end
+          end)
+          |> elem(0)
+
+        Map.filter(colors, fn {key, _} -> if is_nil(regex), do: true, else: Regex.match?(regex, key) end)
 
       {:error, _} ->
         raise "Could not find Tailwind colors at #{colors_path}. Ensure tailwindcss is installed in your assets."

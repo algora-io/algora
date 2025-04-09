@@ -1,5 +1,6 @@
 defmodule Algora.Organizations do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts.User
@@ -27,7 +28,29 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
-    org_handle = ensure_unique_org_handle(params.organization.handle)
+    user = Repo.get_by(User, email: params.user.email)
+
+    org =
+      case user do
+        nil ->
+          nil
+
+        user ->
+          Repo.one(
+            from o in User,
+              join: m in assoc(o, :members),
+              join: u in assoc(m, :user),
+              where: o.handle in ^generate_unique_org_handle_candidates(params.organization.handle),
+              where: u.id == ^user.id,
+              limit: 1
+          )
+      end
+
+    org_handle =
+      case org do
+        nil -> ensure_unique_org_handle(params.organization.handle)
+        org -> org.handle
+      end
 
     Repo.transact(fn ->
       {:ok, user} =
@@ -47,14 +70,7 @@ defmodule Algora.Organizations do
         end
 
       {:ok, org} =
-        case Repo.one(
-               from o in User,
-                 join: m in assoc(o, :members),
-                 join: u in assoc(m, :user),
-                 where: o.handle in ^generate_unique_org_handle_candidates(params.organization.handle),
-                 where: u.id == ^user.id,
-                 limit: 1
-             ) do
+        case org do
           nil ->
             %User{type: :organization}
             |> Org.changeset(Map.put(params.organization, :handle, org_handle))

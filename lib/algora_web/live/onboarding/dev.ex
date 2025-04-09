@@ -229,13 +229,13 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
           <div class="mt-2 -ml-4">
             <%= for {value, label, description, icon} <- InfoForm.intentions_options() do %>
-              <label class="flex cursor-pointer items-center gap-3 rounded-lg p-4 hover:bg-muted">
+              <label class="flex cursor-pointer items-center gap-3 rounded-lg p-4 hover:bg-muted/50">
                 <.input
                   field={@info_form[:intentions]}
                   type="checkbox"
                   value={value}
                   checked={value in (get_field(@info_form.source, :intentions) || [])}
-                  class="h-10 w-10 rounded border-input bg-background text-primary focus:ring-primary focus:ring-offset-background"
+                  class="cursor-pointer h-10 w-10 rounded border-2 border-foreground/50 bg-background text-primary focus:ring-primary focus:ring-offset-background"
                   multiple
                 />
                 <div class="flex-1">

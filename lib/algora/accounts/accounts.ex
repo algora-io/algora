@@ -508,6 +508,20 @@ defmodule Algora.Accounts do
     end
   end
 
+  def ensure_org_context(%User{} = user) do
+    case get_last_context_user(user) do
+      %User{type: :organization} = ctx ->
+        {:ok, ctx}
+
+      _ ->
+        orgs = Organizations.get_user_orgs(user)
+
+        new_context = if orgs == [], do: user, else: List.first(orgs)
+
+        update_settings(user, %{last_context: new_context.handle})
+    end
+  end
+
   def default_context, do: "personal"
 
   def set_context(%User{} = user, "personal") do

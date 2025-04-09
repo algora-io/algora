@@ -10,6 +10,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties
+  alias Algora.Github
   alias Algora.Payments
   alias Algora.Payments.Account
   alias Algora.Repo
@@ -86,8 +87,10 @@ defmodule AlgoraWeb.User.DashboardLive do
 
     socket =
       socket
+      |> assign(:authorize_url, Github.authorize_url())
       |> assign(:view_mode, "compact")
       |> assign(:contracts, contracts)
+      |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
       |> assign(:has_active_account, has_active_account)
       |> assign(:settings_form, settings_form)
       |> assign(:availability_form, availability_form)
@@ -103,7 +106,26 @@ defmodule AlgoraWeb.User.DashboardLive do
     ~H"""
     <div class="flex lg:flex-row flex-col-reverse">
       <div class="flex-1 bg-background text-foreground lg:pr-96">
-        <div :if={not @has_active_account} class="p-4 sm:p-6 md:p-8">
+        <div :if={not @has_fresh_token?} class="p-4 sm:p-6 md:p-8">
+          <.section>
+            <.card>
+              <.card_header>
+                <.card_title>Connect GitHub account</.card_title>
+                <.card_description>
+                  Connect your GitHub account to personalize your experience and discover more opportunities
+                </.card_description>
+              </.card_header>
+              <.card_content>
+                <div class="flex flex-col gap-3">
+                  <.button href={@authorize_url} class="ml-auto">
+                    Connect with GitHub <.icon name="tabler-arrow-right" class="w-4 h-4 ml-2 -mr-1" />
+                  </.button>
+                </div>
+              </.card_content>
+            </.card>
+          </.section>
+        </div>
+        <div :if={@has_fresh_token? and not @has_active_account} class="p-4 sm:p-6 md:p-8">
           <.section>
             <.card>
               <.card_header>
@@ -311,6 +333,7 @@ defmodule AlgoraWeb.User.DashboardLive do
   defp assign_achievements(socket) do
     achievements = [
       {&personalize_status/1, "Personalize Algora", nil},
+      {&connect_github_status/1, "Connect Github account", socket.assigns.authorize_url},
       {&setup_stripe_status/1, "Create Stripe account", ~p"/user/transactions"},
       {&earn_first_bounty_status/1, "Earn first bounty", ~p"/bounties"},
       {&share_with_friend_status/1, "Share Algora with a friend", nil}
@@ -339,6 +362,14 @@ defmodule AlgoraWeb.User.DashboardLive do
   end
 
   defp personalize_status(_socket), do: :completed
+
+  defp connect_github_status(socket) do
+    if socket.assigns.has_fresh_token? do
+      :completed
+    else
+      :upcoming
+    end
+  end
 
   defp setup_stripe_status(socket) do
     if socket.assigns.has_active_account do

@@ -78,6 +78,7 @@ defmodule Algora.Accounts.User do
     field :og_image_url, :string
 
     field :login_token, :string, virtual: true
+    field :signup_token, :string, virtual: true
 
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
@@ -278,6 +279,10 @@ defmodule Algora.Accounts.User do
 
   def login_changeset(%User{} = user, params) do
     cast(user, params, [:email, :login_token])
+  end
+
+  def signup_changeset(%User{} = user, params) do
+    cast(user, params, [:email, :signup_token])
   end
 
   defp validate_email(changeset) do

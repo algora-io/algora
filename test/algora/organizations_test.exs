@@ -102,10 +102,12 @@ defmodule Algora.OrganizationsTest do
 
       assert {:ok, second_result} = Algora.Organizations.onboard_organization(updated_params)
 
+      assert first_result.user.last_context == first_result.org.handle
       assert first_result.user.id == second_result.user.id
       assert first_result.org.id == second_result.org.id
       assert first_result.member.id == second_result.member.id
 
+      assert second_result.user.last_context == second_result.org.handle
       assert second_result.user.display_name == "Updated User"
       assert second_result.user.tech_stack == ["Haskell"]
       assert second_result.org.display_name == "Updated Org"

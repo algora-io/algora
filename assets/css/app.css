@@ -285,7 +285,7 @@ input:-webkit-autofill:active {
     --warning-900: 22 78% 26%;
     --warning-950: 21 92% 14%;
     --border: 255 20% 18%;
-    --input: 255 20% 18%;
+    --input: 240 5% 26%;
     --ring: 161 93.5% 30.4%;
     --radius: 0.5rem;
   }

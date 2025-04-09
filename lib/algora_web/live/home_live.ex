@@ -212,7 +212,7 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate">
           <div class="relative isolate -z-10 py-[35vw] sm:py-[25vw]">
             <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-              <div class="scale-[300%] sm:scale-[150%] opacity-75">
+              <div class="relative scale-[300%] sm:scale-[150%] opacity-75">
                 <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
                   <img
                     alt="Algora dashboard"
@@ -221,8 +221,13 @@ defmodule AlgoraWeb.HomeLive do
                     loading="lazy"
                     class="border border-border bg-muted mix-blend-overlay [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
                     style="color:transparent"
-                    src={~p"/images/screenshots/org-home.png"}
+                    src={~p"/images/screenshots/org-dashboard.png"}
                   />
+                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white/80 font-mono text-sm">
+                    <div>github.com/your/repo</div>
+                    <div class="text-lg">↓</div>
+                    <div>algora.io/your/repo</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -492,8 +497,8 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate">
           <div class="relative isolate -z-10 py-[35vw] sm:py-[25vw]">
             <div class="z-20 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
-              <div class="scale-[300%] sm:scale-[150%] opacity-75">
-                <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
+              <div class="relative scale-[300%] sm:scale-[150%]">
+                <div class="opacity-50 [transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]">
                   <img
                     alt="Algora dashboard"
                     width="1200"
@@ -505,6 +510,16 @@ defmodule AlgoraWeb.HomeLive do
                   />
                 </div>
               </div>
+            </div>
+            <div class="z-20 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-foreground font-bold font-display text-2xl md:text-3xl space-y-2 md:space-y-6">
+              <div>github.com/your/repo</div>
+              <div class="flex justify-center items-center gap-4 text-emerald-400">
+                <.icon
+                  name="tabler-arrow-narrow-down animate-bounce"
+                  class="h-12 w-12 sm:h-8 sm:w-8 md:h-12 md:w-12 text-current"
+                />
+              </div>
+              <div>algora.io/your/repo</div>
             </div>
             <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
               <.glow class="absolute opacity-25 xl:opacity-75 top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" />

@@ -35,9 +35,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
 
     def changeset(form, attrs) do
-      form
-      |> cast(attrs, [:tech_stack])
-      |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
+      cast(form, attrs, [:tech_stack])
     end
   end
 
@@ -148,15 +146,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     end
 
     def changeset(form, attrs) do
-      form
-      |> cast(attrs, [:hiring, :categories])
-      |> validate_required([:hiring], message: "Please select a hiring status")
-      |> validate_required([:categories], message: "Please select at least one category")
-      |> validate_length(:categories, min: 1, message: "Please select at least one category")
-      |> validate_subset(
-        :categories,
-        Enum.map(PreferencesForm.categories_options(), &elem(&1, 1))
-      )
+      cast(form, attrs, [:hiring, :categories])
     end
   end
 
@@ -381,7 +371,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
             og_title: get_in(metadata, [:org, :og_title]),
             og_image_url: get_in(metadata, [:org, :og_image_url]),
             tech_stack: tech_stack,
-            categories: preferences.categories,
+            categories: get_in(preferences, [:categories]),
             website_url: get_in(metadata, [:org, :website_url]),
             twitter_url: get_in(metadata, [:org, :socials, :twitter]),
             github_url: get_in(metadata, [:org, :socials, :github]),
@@ -524,9 +514,12 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </.error>
         </div>
 
-        <div class="flex justify-end">
+        <div class="flex justify-end gap-4">
+          <.button type="submit" variant="secondary">
+            Skip
+          </.button>
           <.button type="submit">
-            Next <.icon name="tabler-arrow-right" class="ml-2 size-4" />
+            Next
           </.button>
         </div>
       </.form>
@@ -711,9 +704,9 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </div>
         </div>
 
-        <div class="flex justify-between">
-          <.button type="button" phx-click="prev_step" variant="secondary">
-            <.icon name="tabler-arrow-left" class="mr-2 size-4" /> Previous
+        <div class="flex justify-end gap-4">
+          <.button type="submit" variant="secondary">
+            Skip
           </.button>
           <.button type="submit">
             Meet developers <.icon name="tabler-users" class="ml-2 size-4" />

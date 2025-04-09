@@ -267,9 +267,12 @@ defmodule AlgoraWeb.CoreComponents do
         :for={ctx <- @all_contexts |> Enum.filter(&(&1.id != @current_user.id))}
         :if={@current_context.id != ctx.id}
         href={
-          if ctx.id == @current_user.id,
-            do: ~p"/set_context/personal",
-            else: ~p"/set_context/#{ctx.handle}"
+          cond do
+            ctx.id == @current_user.id -> ~p"/set_context/personal"
+            not is_nil(ctx.handle) -> ~p"/set_context/#{ctx.handle}"
+            true -> ~p"/set_context/preview?id=#{ctx.id}"
+          end
+        }
         }
       >
         <div class="flex items-center whitespace-nowrap">

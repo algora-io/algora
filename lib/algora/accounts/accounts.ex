@@ -528,6 +528,25 @@ defmodule Algora.Accounts do
     update_settings(user, %{last_context: "personal"})
   end
 
+  def set_context(%User{} = user, "preview/" <> id) do
+    context =
+      case Repo.get(User, id) do
+        nil ->
+          nil
+
+        user ->
+          case user.last_context do
+            "repo/" <> repo_full_name -> "preview/#{id}/#{repo_full_name}"
+            _ -> nil
+          end
+      end
+
+    case context do
+      nil -> {:error, :not_found}
+      context -> update_settings(user, %{last_context: context})
+    end
+  end
+
   def set_context(%User{} = user, context) do
     if context == user.handle do
       update_settings(user, %{last_context: context})

@@ -792,6 +792,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
+    current_user = socket.assigns.current_user
+
     if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
       handle =
         socket.assigns.email
@@ -811,7 +813,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
            |> assign_achievements()}
 
         user ->
-          Accounts.update_settings(user, %{last_context: socket.assigns.current_user.last_context})
+          case Repo.get_by(Member, user_id: current_user.id, org_id: socket.assigns.current_org.id) do
+            member -> member |> change(user_id: user.id) |> Repo.update()
+            nil -> {:ok, nil}
+          end
+
+          Accounts.update_settings(user, %{last_context: current_user.last_context})
           {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
       end
     else

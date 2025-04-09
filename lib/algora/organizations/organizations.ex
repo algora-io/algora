@@ -281,9 +281,16 @@ defmodule Algora.Organizations do
                  display_name: "You",
                  last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}",
                  tech_stack: repo.tech_stack
+               }),
+             {:ok, member} <-
+               Repo.insert(%Member{
+                 id: Nanoid.generate(),
+                 org_id: org.id,
+                 user_id: user.id,
+                 role: :admin
                }) do
           Algora.Admin.alert("New preview for #{repo_owner}/#{repo_name}", :info)
-          {:ok, %{org: org, user: user}}
+          {:ok, %{org: org, user: user, member: member}}
         end
       end)
     else

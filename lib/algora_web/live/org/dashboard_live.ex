@@ -821,12 +821,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("change-tab", %{"tab" => "completed"}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}?status=completed")}
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}/dashboard?status=completed")}
   end
 
   @impl true
   def handle_event("change-tab", %{"tab" => "open"}, socket) do
-    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}?status=open")}
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.current_org.handle}/dashboard?status=open")}
   end
 
   @impl true

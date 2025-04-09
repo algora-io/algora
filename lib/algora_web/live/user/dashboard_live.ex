@@ -236,7 +236,7 @@ defmodule AlgoraWeb.User.DashboardLive do
             Tech stack
           </h2>
           <.TechStack
-            classes="mt-4 border-foreground/50"
+            classes="mt-4"
             tech={get_field(@settings_form.source, :tech_stack)}
             socket={@socket}
             form="settings_form"

@@ -513,7 +513,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
           </p>
 
           <.TechStack
-            class="mt-4"
+            classes="mt-4 border-2 border-foreground/50"
             tech={get_field(@tech_stack_form.source, :tech_stack) || []}
             socket={@socket}
             form="tech_stack_form"

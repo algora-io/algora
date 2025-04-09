@@ -210,7 +210,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           <p class="text-muted-foreground">Enter a comma-separated list</p>
 
           <.TechStack
-            class="mt-4"
+            classes="mt-4 border-2 border-foreground/50"
             tech={get_field(@info_form.source, :tech_stack) || []}
             socket={@socket}
             form="info_form"

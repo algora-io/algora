@@ -144,6 +144,47 @@ defmodule AlgoraWeb.Router do
       live "/auth/signup", SignInLive, :signup
     end
 
+    live "/0/bounties/:id", OG.BountyLive, :show
+    get "/og/*path", OGImageController, :generate
+  end
+
+  scope "/api", AlgoraWeb.API do
+    pipe_through :api
+
+    # Legacy tRPC endpoints
+    scope "/trpc" do
+      pipe_through :trpc
+
+      options "/bounty.list", BountyController, :options
+      get "/bounty.list", BountyController, :index
+    end
+
+    # Legacy OG Image redirects
+    get "/og/:org_handle/:asset", OGRedirectController, :redirect_to_org_path
+
+    # Shields.io badges
+    get "/shields/:org_handle/bounties", ShieldsController, :bounties
+  end
+
+  # Other scopes may use custom stacks.
+  # scope "/api", AlgoraWeb do
+  #   pipe_through :api
+  # end
+
+  # Enable Swoosh mailbox preview in development
+  if Application.compile_env(:algora, :dev_routes) do
+    scope "/dev" do
+      pipe_through :browser
+
+      scope "/" do
+        forward "/mailbox", Plug.Swoosh.MailboxPreview
+      end
+    end
+  end
+
+  scope "/", AlgoraWeb do
+    pipe_through [:browser]
+
     scope "/:user_handle" do
       live_session :user,
         layout: {AlgoraWeb.Layouts, :user},
@@ -191,45 +232,8 @@ defmodule AlgoraWeb.Router do
       end
     end
 
-    live "/0/bounties/:id", OG.BountyLive, :show
-    get "/og/*path", OGImageController, :generate
-
     scope "/:handle" do
       get "/", UserController, :index
-    end
-  end
-
-  scope "/api", AlgoraWeb.API do
-    pipe_through :api
-
-    # Legacy tRPC endpoints
-    scope "/trpc" do
-      pipe_through :trpc
-
-      options "/bounty.list", BountyController, :options
-      get "/bounty.list", BountyController, :index
-    end
-
-    # Legacy OG Image redirects
-    get "/og/:org_handle/:asset", OGRedirectController, :redirect_to_org_path
-
-    # Shields.io badges
-    get "/shields/:org_handle/bounties", ShieldsController, :bounties
-  end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", AlgoraWeb do
-  #   pipe_through :api
-  # end
-
-  # Enable Swoosh mailbox preview in development
-  if Application.compile_env(:algora, :dev_routes) do
-    scope "/dev" do
-      pipe_through :browser
-
-      scope "/" do
-        forward "/mailbox", Plug.Swoosh.MailboxPreview
-      end
     end
   end
 end

@@ -167,4 +167,33 @@ defmodule Algora.Util do
     |> String.replace(~r/^\/[^\/]+\//, "")
     |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
   end
+
+  def get_gravatar_url(email, opts \\ []) do
+    default = Keyword.get(opts, :default, "")
+    size = Keyword.get(opts, :size, 460)
+
+    email
+    |> String.trim()
+    |> String.downcase()
+    |> remove_plus_suffix()
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
+    |> build_gravatar_url(default, size)
+  end
+
+  defp remove_plus_suffix(email) do
+    [local_part, domain] = String.split(email, "@")
+    base_local_part = local_part |> String.split("+") |> List.first()
+    base_local_part <> "@" <> domain
+  end
+
+  defp build_gravatar_url(hash, default, size) do
+    query =
+      URI.encode_query(%{
+        "d" => default,
+        "s" => Integer.to_string(size)
+      })
+
+    "https://www.gravatar.com/avatar/#{hash}?#{query}&d=identicon"
+  end
 end

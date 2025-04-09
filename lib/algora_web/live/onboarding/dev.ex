@@ -33,13 +33,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
     end
 
     def changeset(form, attrs) do
-      form
-      |> cast(attrs, [:tech_stack, :intentions])
-      |> validate_required(:tech_stack, message: "Please select at least one technology")
-      |> validate_required(:intentions, message: "Please select at least one intention")
-      |> validate_length(:tech_stack, min: 1, message: "Please enter at least one technology")
-      |> validate_length(:intentions, min: 1, message: "Please select at least one intention")
-      |> validate_subset(:intentions, Enum.map(intentions_options(), &elem(&1, 0)))
+      cast(form, attrs, [:tech_stack, :intentions])
     end
 
     def intentions_options do
@@ -128,8 +122,8 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def handle_info({:authenticated, user}, socket) do
-    tech_stack = get_field(socket.assigns.info_form.source, :tech_stack)
-    intentions = get_field(socket.assigns.info_form.source, :intentions)
+    tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
+    intentions = get_field(socket.assigns.info_form.source, :intentions) || []
 
     case user
          |> change(

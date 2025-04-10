@@ -81,6 +81,7 @@ defmodule Algora.MixProject do
       {:stripity_stripe, "~> 2.17.3"},
       {:live_svelte, "~> 0.14.1"},
       {:nimble_parsec, "~> 1.4"},
+      {:nimble_totp, "~> 1.0"},
       {:oban, "~> 2.19"},
       {:oban_web, "~> 2.11"},
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},

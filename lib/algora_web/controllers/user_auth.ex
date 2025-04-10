@@ -366,4 +366,20 @@ defmodule AlgoraWeb.UserAuth do
   end
 
   def generate_login_path(email, return_to \\ nil), do: login_path(email, generate_login_code(email), return_to)
+
+  def generate_totp do
+    secret = NimbleTOTP.secret()
+    code = NimbleTOTP.verification_code(secret, period: totp_period())
+    {secret, code}
+  end
+
+  defp totp_period, do: 300
+
+  def valid_totp?(secret, code) do
+    time = System.os_time(:second)
+
+    is_binary(code) and byte_size(code) == 6 and
+      (NimbleTOTP.valid?(secret, code, period: totp_period(), time: time) or
+         NimbleTOTP.valid?(secret, code, period: totp_period(), time: time - totp_period()))
+  end
 end

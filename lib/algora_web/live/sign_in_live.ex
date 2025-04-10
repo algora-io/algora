@@ -16,7 +16,7 @@ defmodule AlgoraWeb.SignInLive do
       <div class="relative flex flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:flex-none lg:px-20 xl:px-24 lg:border-r lg:border-border">
         <.wordmark class="h-10 w-auto absolute top-4 left-4 sm:top-8 sm:left-8" />
         <div class="mx-auto w-full max-w-sm lg:w-96 h-auto flex flex-col min-h-[426px]">
-          <div :if={!@secret_code}>
+          <div :if={!@secret}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
               <%= if @mode == :signup do %>
                 Create an account
@@ -92,7 +92,7 @@ defmodule AlgoraWeb.SignInLive do
             </div>
           </div>
 
-          <div :if={@secret_code}>
+          <div :if={@secret}>
             <h2 class="mt-8 text-3xl/9 font-bold tracking-tight text-foreground">
               Check your email
             </h2>
@@ -104,7 +104,7 @@ defmodule AlgoraWeb.SignInLive do
           <div :if={@mode == :login} class="mt-8">
             <div id="company-form" class={if @user_type == "developer", do: "hidden"}>
               <.simple_form
-                :if={!@secret_code}
+                :if={!@secret}
                 for={@form}
                 id="send_login_code_form"
                 phx-submit="send_login_code"
@@ -123,13 +123,13 @@ defmodule AlgoraWeb.SignInLive do
             </div>
 
             <div id="developer-form" class={if @user_type == "company", do: "hidden"}>
-              <.button :if={!@secret_code} href={@authorize_url} class="w-full py-5">
+              <.button :if={!@secret} href={@authorize_url} class="w-full py-5">
                 <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
               </.button>
             </div>
 
             <.simple_form
-              :if={@secret_code}
+              :if={@secret}
               for={@form}
               id="send_login_code_form"
               phx-submit="send_login_code"
@@ -141,7 +141,7 @@ defmodule AlgoraWeb.SignInLive do
             </.simple_form>
           </div>
 
-          <div :if={!@secret_code} class="mt-8 text-center text-sm text-muted-foreground">
+          <div :if={!@secret} class="mt-8 text-center text-sm text-muted-foreground">
             <%= if @mode == :signup do %>
               Already have an account?
               <.link
@@ -238,7 +238,7 @@ defmodule AlgoraWeb.SignInLive do
      socket
      |> assign(:return_to, params["return_to"])
      |> assign(:authorize_url, authorize_url)
-     |> assign(:secret_code, nil)
+     |> assign(:secret, nil)
      |> assign(:user_type, "company")
      |> assign(:mode, socket.assigns.live_action)
      |> assign_form(changeset)}
@@ -249,7 +249,7 @@ defmodule AlgoraWeb.SignInLive do
     socket =
       LocalStore.init(socket,
         key: __MODULE__,
-        ok?: &match?(%{secret_code: _, email: _}, &1),
+        ok?: &match?(%{secret: _, email: _}, &1),
         checkpoint_url: ~p"/auth/login?#{%{verify: "1", return_to: socket.assigns[:return_to]}}"
       )
 
@@ -260,7 +260,7 @@ defmodule AlgoraWeb.SignInLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
-    code = Nanoid.generate()
+    {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
     case Algora.Accounts.get_user_by_email(email) do
       %User{} = user ->
@@ -270,19 +270,14 @@ defmodule AlgoraWeb.SignInLive do
           {:ok, _id} ->
             {:noreply,
              socket
-             |> LocalStore.assign_cached(:secret_code, code)
+             |> LocalStore.assign_cached(:secret, secret)
              |> LocalStore.assign_cached(:email, email)
              |> assign(:user, user)
              |> assign_form(changeset)}
 
-          {:error, _reason} ->
-            # capture_error reason
-            {:noreply,
-             put_flash(
-               socket,
-               :error,
-               "We had trouble sending mail to #{email}. Please try again"
-             )}
+          {:error, reason} ->
+            Logger.error("Failed to send login code to #{email}: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
         end
 
       nil ->
@@ -293,7 +288,7 @@ defmodule AlgoraWeb.SignInLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
+    if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
       Algora.Accounts.ensure_org_context(socket.assigns.user)
 
       {:noreply,
@@ -325,11 +320,13 @@ defmodule AlgoraWeb.SignInLive do
       Email.new()
       |> Email.to({user.display_name, user.email})
       |> Email.from({@from_name, @from_email})
-      |> Email.subject("Login code for Algora")
+      |> Email.subject("#{code} - Algora Sign-in Verification")
       |> Email.text_body("""
-      Here is your login code for Algora!
+      Hello #{user.display_name},
 
-       #{code}
+      To complete the sign-in process; enter the 6-digit code in the original window:
+
+      #{code}
 
       If you didn't request this link, you can safely ignore this email.
 

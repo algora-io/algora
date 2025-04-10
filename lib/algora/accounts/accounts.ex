@@ -16,6 +16,7 @@ defmodule Algora.Accounts do
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
+  alias Swoosh.Email
 
   require Algora.SQL
   require Logger

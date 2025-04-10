@@ -20,15 +20,30 @@ defmodule AlgoraWeb.Org.PreviewNav do
        |> assign(:contacts, [])
        |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
     else
-      case Organizations.init_preview(repo_owner, repo_name) do
-        {:ok, %{user: user, org: _org}} ->
-          token = AlgoraWeb.UserAuth.sign_preview_code(user.id)
-          path = AlgoraWeb.UserAuth.preview_path(user.id, token, ~p"/go/#{repo_owner}/#{repo_name}")
+      preview_user =
+        case socket.assigns[:preview_user] do
+          nil ->
+            case Organizations.init_preview(repo_owner, repo_name) do
+              {:ok, %{user: user, org: _org}} -> user
+              {:error, _reason} -> nil
+            end
 
-          {:halt, redirect(socket, to: path)}
+          user ->
+            user
+        end
 
-        {:error, reason} ->
-          {:cont, put_flash(socket, :error, "Failed to initialize preview: #{inspect(reason)}")}
+      cond do
+        is_nil(preview_user) ->
+          {:cont, put_flash(socket, :error, "Failed to fetch repo")}
+
+        # this is needed to avoid redirect loop that prevents og image from being fetched
+        not connected?(socket) ->
+          {:cont, socket}
+
+        true ->
+          token = AlgoraWeb.UserAuth.sign_preview_code(preview_user.id)
+          preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, ~p"/go/#{repo_owner}/#{repo_name}")
+          {:halt, redirect(socket, to: preview_path)}
       end
     end
   end

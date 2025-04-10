@@ -639,4 +639,54 @@ defmodule Algora.Accounts do
     |> Enum.map(&String.trim_trailing(&1, ".json"))
     |> Enum.sort_by(fn tech -> Enum.find_index(tech_order, &(&1 == tech)) || 999 end)
   end
+
+  def deliver_totp_signup_email(email, code) do
+    email =
+      Email.new()
+      |> Email.to(email)
+      |> Email.from({"Algora", "info@algora.io"})
+      |> Email.subject("#{code} - Algora Sign-in Verification")
+      |> Email.text_body("""
+      Hi there,
+
+      To complete the sign-up process; enter the 6-digit code in the original window:
+
+      #{code}
+
+      If you didn't request this link, you can safely ignore this email.
+
+      --------------------------------------------------------------------------------
+
+      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
+
+      © 2025 Algora PBC.
+      """)
+
+    Algora.Mailer.deliver(email)
+  end
+
+  def deliver_totp_login_email(user, code) do
+    email =
+      Email.new()
+      |> Email.to({user.display_name, user.email})
+      |> Email.from({"Algora", "info@algora.io"})
+      |> Email.subject("#{code} - Algora Sign-in Verification")
+      |> Email.text_body("""
+      Hello #{user.display_name},
+
+      To complete the sign-in process; enter the 6-digit code in the original window:
+
+      #{code}
+
+      If you didn't request this link, you can safely ignore this email.
+
+      --------------------------------------------------------------------------------
+
+      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
+
+      © 2025 Algora PBC.
+      """)
+
+    Algora.Mailer.deliver(email)
+  end
 end

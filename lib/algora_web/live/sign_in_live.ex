@@ -2,6 +2,7 @@ defmodule AlgoraWeb.SignInLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.LocalStore
@@ -262,11 +263,11 @@ defmodule AlgoraWeb.SignInLive do
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
     {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
-    case Algora.Accounts.get_user_by_email(email) do
+    case Accounts.get_user_by_email(email) do
       %User{} = user ->
         changeset = User.login_changeset(%User{}, %{})
 
-        case send_login_code_to_user(user, code) do
+        case Accounts.deliver_totp_login_email(user, code) do
           {:ok, _id} ->
             {:noreply,
              socket
@@ -289,7 +290,7 @@ defmodule AlgoraWeb.SignInLive do
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
     if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
-      Algora.Accounts.ensure_org_context(socket.assigns.user)
+      Accounts.ensure_org_context(socket.assigns.user)
 
       {:noreply,
        redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(socket.assigns.user.email, socket.assigns[:return_to]))}
@@ -304,40 +305,12 @@ defmodule AlgoraWeb.SignInLive do
 
     case socket.assigns[:email] do
       nil -> {:noreply, socket}
-      email -> {:noreply, assign(socket, :user, Algora.Accounts.get_user_by_email(email))}
+      email -> {:noreply, assign(socket, :user, Accounts.get_user_by_email(email))}
     end
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
-  end
-
-  @from_name "Algora"
-  @from_email "info@algora.io"
-
-  defp send_login_code_to_user(user, code) do
-    email =
-      Email.new()
-      |> Email.to({user.display_name, user.email})
-      |> Email.from({@from_name, @from_email})
-      |> Email.subject("#{code} - Algora Sign-in Verification")
-      |> Email.text_body("""
-      Hello #{user.display_name},
-
-      To complete the sign-in process; enter the 6-digit code in the original window:
-
-      #{code}
-
-      If you didn't request this link, you can safely ignore this email.
-
-      --------------------------------------------------------------------------------
-
-      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
-
-      © 2025 Algora PBC.
-      """)
-
-    Algora.Mailer.deliver(email)
   end
 
   defp throttle, do: :timer.sleep(1000)

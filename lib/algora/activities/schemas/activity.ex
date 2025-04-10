@@ -9,6 +9,7 @@ defmodule Algora.Activities.Activity do
     contract_created
     contract_renewed
     identity_created
+    user_migrated
     bounty_posted
     bounty_repriced
     claim_submitted

@@ -311,14 +311,41 @@ defmodule Algora.Accounts do
   end
 
   def update_user(user, info, primary_email, emails, token) do
-    old_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
+    github_user = Repo.get_by(User, provider: "github", provider_id: to_string(info["id"]))
+    email_user = Repo.get_by(User, email: primary_email)
 
     Repo.transact(fn ->
       Repo.delete_all(from(i in Identity, where: i.provider == "github" and i.provider_id == ^to_string(info["id"])))
 
-      with true <- old_user && old_user.id != user.id,
-           {:ok, old_user} <- old_user |> change(provider: nil, provider_id: nil, provider_login: nil) |> Repo.update() do
-        migrate_user(old_user.id, user.id)
+      with true <- github_user && github_user.id != user.id,
+           {:ok, github_user} <-
+             github_user |> change(provider: nil, provider_id: nil, provider_login: nil) |> Repo.update(),
+           {:ok, _} <-
+             Repo.insert_activity(github_user, %{
+               type: :user_migrated,
+               meta: %{provider: "github", provider_id: to_string(info["id"])},
+               changes: %{from: %{provider: "github", provider_id: to_string(info["id"])}, to: %{}},
+               notify_users: []
+             }) do
+        migrate_user(github_user.id, user.id)
+      else
+        {:error, reason} ->
+          Logger.error("Failed to migrate user: #{inspect(reason)}")
+
+        _ ->
+          :ok
+      end
+
+      with true <- email_user && email_user.id != user.id,
+           {:ok, email_user} <- email_user |> change(email: nil) |> Repo.update(),
+           {:ok, _} <-
+             Repo.insert_activity(email_user, %{
+               type: :user_migrated,
+               meta: %{email: primary_email},
+               changes: %{from: %{email: primary_email}, to: %{}},
+               notify_users: []
+             }) do
+        migrate_user(email_user.id, user.id)
       else
         {:error, reason} ->
           Logger.error("Failed to migrate user: #{inspect(reason)}")

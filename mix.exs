@@ -96,6 +96,7 @@ defmodule Algora.MixProject do
       {:plug_canonical_host, "~> 2.0"},
       {:timex, "~> 3.7"},
       {:yaml_elixir, "~> 2.9"},
+      {:hammer, "~> 7.0"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

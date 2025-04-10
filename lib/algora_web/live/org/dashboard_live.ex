@@ -28,7 +28,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
-  alias Swoosh.Email
 
   require Logger
 
@@ -827,31 +826,37 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
-      handle =
-        socket.assigns.email
-        |> Organizations.generate_handle_from_email()
-        |> Organizations.ensure_unique_handle()
+    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.email, socket.assigns.secret, String.trim(code)) do
+      :ok ->
+        handle =
+          socket.assigns.email
+          |> Organizations.generate_handle_from_email()
+          |> Organizations.ensure_unique_handle()
 
-      case Repo.get_by(User, email: socket.assigns.email) do
-        nil ->
-          {:ok, user} =
-            socket.assigns.current_user
-            |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
-            |> Repo.update()
+        case Repo.get_by(User, email: socket.assigns.email) do
+          nil ->
+            {:ok, user} =
+              socket.assigns.current_user
+              |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
+              |> Repo.update()
 
-          {:noreply,
-           socket
-           |> assign(:current_user, user)
-           |> assign_achievements()}
+            {:noreply,
+             socket
+             |> assign(:current_user, user)
+             |> assign_achievements()}
 
-        user ->
-          socket = switch_from_preview(socket, user)
-          {:noreply, socket}
-      end
-    else
-      throttle()
-      {:noreply, put_flash(socket, :error, "Invalid login code")}
+          user ->
+            socket = switch_from_preview(socket, user)
+            {:noreply, socket}
+        end
+
+      {:error, :rate_limit_exceeded} ->
+        throttle()
+        {:noreply, put_flash(socket, :error, "Too many attempts. Please try again later.")}
+
+      {:error, :invalid_totp} ->
+        throttle()
+        {:noreply, put_flash(socket, :error, "Invalid login code")}
     end
   end
 

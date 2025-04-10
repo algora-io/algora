@@ -645,7 +645,7 @@ defmodule Algora.Accounts do
       Email.new()
       |> Email.to(email)
       |> Email.from({"Algora", "info@algora.io"})
-      |> Email.subject("#{code} - Algora Sign-in Verification")
+      |> Email.subject("#{code} - Algora Sign-up Verification")
       |> Email.text_body("""
       Hi there,
 

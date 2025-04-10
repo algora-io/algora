@@ -13,7 +13,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   alias Algora.Repo
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.LocalStore
-  alias Swoosh.Email
 
   require Logger
 
@@ -84,7 +83,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
     {:ok,
      socket
-     |> assign(:secret_code, nil)
+     |> assign(:secret, nil)
      |> assign(:step, Enum.at(@steps, 0))
      |> assign(:steps, @steps)
      |> assign(:total_steps, length(@steps))
@@ -162,41 +161,27 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def handle_event("send_signup_code", %{"user" => %{"email" => email}}, socket) do
-    code = Nanoid.generate()
+    {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
     changeset = User.signup_changeset(%User{}, %{})
 
-    case send_signup_code_to_email(email, code) do
+    case Algora.Accounts.deliver_totp_signup_email(email, code) do
       {:ok, _id} ->
         {:noreply,
          socket
-         |> LocalStore.assign_cached(:secret_code, code)
+         |> LocalStore.assign_cached(:secret, secret)
          |> LocalStore.assign_cached(:email, email)
          |> assign(:signup_form, to_form(changeset))}
 
-      {:error, _reason} ->
-        # capture_error reason
-        {:noreply,
-         put_flash(
-           socket,
-           :error,
-           "We had trouble sending mail to #{email}. Please try again"
-         )}
+      {:error, reason} ->
+        Logger.error("Failed to send signup code to #{email}: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "We had trouble sending mail to #{email}. Please try again")}
     end
-
-    # case Algora.Accounts.get_user_by_email(email) do
-    #   %User{} = user ->
-    #     {:noreply, socket}
-
-    #   nil ->
-    #     throttle()
-    #     {:noreply, put_flash(socket, :error, "Email address not found.")}
-    # end
   end
 
   @impl true
   def handle_event("send_signup_code", %{"user" => %{"signup_code" => code}}, socket) do
-    if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
+    if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
       user_handle =
         socket.assigns.email
         |> String.replace(~r/[^a-zA-Z0-9]/, "-")
@@ -368,11 +353,11 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       </p>
 
       <div class="mt-8">
-        <.button :if={!@secret_code} phx-click="sign_in_with_github" class="w-full py-5">
+        <.button :if={!@secret} phx-click="sign_in_with_github" class="w-full py-5">
           <Logos.github class="size-5 mr-2 -ml-1 shrink-0" /> Continue with GitHub
         </.button>
 
-        <div :if={!@secret_code} class="relative mt-6">
+        <div :if={!@secret} class="relative mt-6">
           <div class="absolute inset-0 flex items-center" aria-hidden="true">
             <div class="w-full border-t border-muted-foreground/50"></div>
           </div>
@@ -383,7 +368,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
         <div class="mt-4">
           <.simple_form
-            :if={!@secret_code}
+            :if={!@secret}
             for={@signup_form}
             id="send_signup_code_form"
             phx-submit="send_signup_code"
@@ -404,7 +389,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
         </div>
 
         <.simple_form
-          :if={@secret_code}
+          :if={@secret}
           for={@signup_form}
           id="send_signup_code_form"
           phx-submit="send_signup_code"
@@ -483,31 +468,5 @@ defmodule AlgoraWeb.Onboarding.DevLive do
       <% end %>
     <% end %>
     """
-  end
-
-  @from_name "Algora"
-  @from_email "info@algora.io"
-
-  defp send_signup_code_to_email(email, code) do
-    email =
-      Email.new()
-      |> Email.to(email)
-      |> Email.from({@from_name, @from_email})
-      |> Email.subject("Signup code for Algora")
-      |> Email.text_body("""
-      Here is your signup code for Algora!
-
-       #{code}
-
-      If you didn't request this link, you can safely ignore this email.
-
-      --------------------------------------------------------------------------------
-
-      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
-
-      © 2025 Algora PBC.
-      """)
-
-    Algora.Mailer.deliver(email)
   end
 end

@@ -24,6 +24,7 @@ defmodule AlgoraWeb.BountiesLive do
 
     {:noreply,
      socket
+     |> assign(:page_title, "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties")
      |> assign(:selected_techs, selected_techs)
      |> assign(:query_opts, query_opts)
      |> assign_bounties()}
@@ -32,6 +33,7 @@ defmodule AlgoraWeb.BountiesLive do
   def handle_params(_params, _uri, socket) do
     {:noreply,
      socket
+     |> assign(:page_title, "Bounties")
      |> assign(:selected_techs, [])
      |> assign(:query_opts, Keyword.delete(socket.assigns.query_opts, :tech_stack))
      |> assign_bounties()}

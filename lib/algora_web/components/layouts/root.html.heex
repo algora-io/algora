@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content={get_csrf_token()} />
 
-    <.live_title suffix={assigns[:page_title] && " | #{Algora.config([:title])}"}>
+    <.live_title suffix={
+      assigns[:page_title_suffix] || (assigns[:page_title] && " | #{Algora.config([:title])}")
+    }>
       {assigns[:page_title] || Algora.config([:title])}
     </.live_title>
 

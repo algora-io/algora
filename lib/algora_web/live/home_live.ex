@@ -60,6 +60,7 @@ defmodule AlgoraWeb.HomeLive do
         {:ok,
          socket
          |> assign(:page_title, "Algora - The open source Upwork for engineers")
+         |> assign(:page_title_suffix, "")
          |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
          |> assign(:screenshot?, not is_nil(params["screenshot"]))
          |> assign(:featured_devs, featured_devs)

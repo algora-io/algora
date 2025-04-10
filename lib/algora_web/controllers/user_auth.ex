@@ -341,30 +341,6 @@ defmodule AlgoraWeb.UserAuth do
   def login_path(email, token, return_to),
     do: ~p"/callbacks/email/oauth?email=#{email}&token=#{token}&return_to=#{return_to}"
 
-  def login_email(email, name, token) do
-    """
-    Hi #{name},
-
-    We have received a login attempt and generated the following verification code:
-
-    #{token}
-
-    To complete the sign-in process, please enter the code above on the page you entered your email address.
-
-    Or copy and paste this URL into your browser:
-
-    #{AlgoraWeb.Endpoint.url()}#{login_path(email, token, ~p"/onboarding/org")}
-
-    If you didn't request this link, you can safely ignore this email.
-
-    --------------------------------------------------------------------------------
-
-    For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
-
-    © 2025 Algora PBC.
-    """
-  end
-
   def generate_login_path(email, return_to \\ nil), do: login_path(email, generate_login_code(email), return_to)
 
   def generate_totp do

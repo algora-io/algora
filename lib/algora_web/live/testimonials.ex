@@ -14,8 +14,8 @@ defmodule AlgoraWeb.TestimonialsLive do
   def mount(params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Algora - The open source Upwork for engineers")
-     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
+     |> assign(:page_title, "Testimonials")
+     |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/og/testimonials")
      |> assign(:screenshot?, not is_nil(params["screenshot"]))}
   end
 

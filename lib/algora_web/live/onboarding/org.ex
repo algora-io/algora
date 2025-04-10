@@ -11,7 +11,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   alias AlgoraWeb.Components.Wordmarks
   alias AlgoraWeb.LocalStore
   alias Phoenix.LiveView.AsyncResult
-  alias Swoosh.Email
 
   require Logger
 
@@ -152,63 +151,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
 
   # === LIFECYCLE === #
 
-  def mount(
-        _params,
-        %{
-          "onboarding_email" => email,
-          "onboarding_domain" => domain,
-          "onboarding_tech_stack" => tech_stack,
-          "onboarding_token" => login_code
-        },
-        socket
-      ) do
-    if Accounts.get_user_by_email(email) do
-      # user already exists, so onboarding is complete
-      # allow user to login with token until expiry
-      {:ok, redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code))}
-    else
-      tech_stack_form =
-        %TechStackForm{}
-        |> TechStackForm.changeset(%{tech_stack: String.split(tech_stack, ",")})
-        |> to_form()
-
-      email_form =
-        %EmailForm{}
-        |> EmailForm.changeset(%{email: email, domain: domain})
-        |> to_form()
-
-      verificaiton_form =
-        %VerificationForm{}
-        |> VerificationForm.changeset(%{code: login_code})
-        |> to_form()
-
-      case AlgoraWeb.UserAuth.verify_login_code(login_code, email) do
-        {:ok, _login_token} ->
-          {:ok,
-           socket
-           |> assign(:tech_stack_form, tech_stack_form)
-           |> assign(:email_form, email_form)
-           |> assign(:verification_form, verificaiton_form)
-           |> assign(:preferences_form, PreferencesForm.init())
-           |> assign(:step, :preferences)
-           |> assign(:steps, @steps)
-           |> assign(:code_sent?, true)
-           |> assign(:code_valid?, true)
-           |> assign(:timezone, nil)
-           |> assign(:user_metadata, AsyncResult.loading())
-           |> assign_matching_devs()
-           |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
-           |> assign(:user_metadata, AsyncResult.loading())}
-
-        {:error, _invalid} ->
-          {:ok,
-           socket
-           |> put_flash(:error, "Invalid auth token")
-           |> redirect(to: "/")}
-      end
-    end
-  end
-
   def mount(_params, _session, socket) do
     {:ok,
      socket
@@ -221,6 +163,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
      |> assign(:code_sent?, false)
      |> assign(:code_valid?, nil)
      |> assign(:timezone, nil)
+     |> assign(:secret, nil)
      |> assign(:user_metadata, AsyncResult.loading())
      |> assign_matching_devs()}
   end
@@ -284,22 +227,13 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case changeset do
       %{valid?: true} = changeset ->
         email = get_field(changeset, :email)
-        domain = get_field(changeset, :domain)
-        tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
-        login_code = AlgoraWeb.UserAuth.generate_login_code(email, domain, tech_stack)
+        {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
-        name = email |> String.split("@") |> List.first() |> String.capitalize()
-
-        {:ok, _} =
-          Email.new()
-          |> Email.to({name, email})
-          |> Email.from({"Algora", "info@algora.io"})
-          |> Email.subject("Algora sign-in verification code")
-          |> Email.text_body(AlgoraWeb.UserAuth.login_email(email, name, login_code))
-          |> Algora.Mailer.deliver()
+        {:ok, _} = Accounts.deliver_totp_signup_email(email, code)
 
         {:noreply,
          socket
+         |> LocalStore.assign_cached(:secret, secret)
          |> LocalStore.assign_cached(:email_form, to_form(changeset))
          |> LocalStore.assign_cached(:code_sent?, true)
          |> assign_matching_devs()
@@ -323,102 +257,110 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
         email = get_field(socket.assigns.email_form.source, :email)
         domain = get_field(socket.assigns.email_form.source, :domain)
         tech_stack = get_field(socket.assigns.tech_stack_form.source, :tech_stack)
-        login_code = get_field(socket.assigns.verification_form.source, :code)
         preferences = changeset.changes
 
-        metadata =
-          case socket.assigns.user_metadata do
-            %AsyncResult{ok?: true, result: metadata} -> metadata
-            _ -> %{}
-          end
+        if socket.assigns.code_valid? do
+          metadata =
+            case socket.assigns.user_metadata do
+              %AsyncResult{ok?: true, result: metadata} -> metadata
+              _ -> %{}
+            end
 
-        org_name =
-          case get_in(metadata, [:org, :display_name]) do
-            nil ->
-              domain
-              |> String.split(".")
-              |> List.first()
-              |> String.capitalize()
+          org_name =
+            case get_in(metadata, [:org, :display_name]) do
+              nil ->
+                domain
+                |> String.split(".")
+                |> List.first()
+                |> String.capitalize()
 
-            name ->
-              name
-          end
+              name ->
+                name
+            end
 
-        org_handle =
-          case get_in(metadata, [:org, :handle]) do
-            nil ->
-              domain
-              |> String.split(".")
-              |> List.first()
-              |> String.downcase()
+          org_handle =
+            case get_in(metadata, [:org, :handle]) do
+              nil ->
+                domain
+                |> String.split(".")
+                |> List.first()
+                |> String.downcase()
 
-            handle ->
-              handle
-          end
+              handle ->
+                handle
+            end
 
-        user_handle = Organizations.generate_handle_from_email(email)
+          user_handle = Organizations.generate_handle_from_email(email)
 
-        org_params =
-          %{
-            display_name: org_name,
-            bio:
-              get_in(metadata, [:org, :bio]) ||
-                get_in(metadata, [:org, :og_description]) ||
-                get_in(metadata, [:org, :og_title]),
-            avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
-            handle: org_handle,
-            domain: domain,
-            og_title: get_in(metadata, [:org, :og_title]),
-            og_image_url: get_in(metadata, [:org, :og_image_url]),
-            tech_stack: tech_stack,
-            hiring: get_in(preferences, [:hiring]),
-            categories: get_in(preferences, [:categories]),
-            website_url: get_in(metadata, [:org, :website_url]),
-            twitter_url: get_in(metadata, [:org, :socials, :twitter]),
-            github_url: get_in(metadata, [:org, :socials, :github]),
-            youtube_url: get_in(metadata, [:org, :socials, :youtube]),
-            twitch_url: get_in(metadata, [:org, :socials, :twitch]),
-            discord_url: get_in(metadata, [:org, :socials, :discord]),
-            slack_url: get_in(metadata, [:org, :socials, :slack]),
-            linkedin_url: get_in(metadata, [:org, :socials, :linkedin])
-          }
+          org_params =
+            %{
+              display_name: org_name,
+              bio:
+                get_in(metadata, [:org, :bio]) ||
+                  get_in(metadata, [:org, :og_description]) ||
+                  get_in(metadata, [:org, :og_title]),
+              avatar_url: get_in(metadata, [:org, :avatar_url]) || get_in(metadata, [:org, :favicon_url]),
+              handle: org_handle,
+              domain: domain,
+              og_title: get_in(metadata, [:org, :og_title]),
+              og_image_url: get_in(metadata, [:org, :og_image_url]),
+              tech_stack: tech_stack,
+              hiring: get_in(preferences, [:hiring]),
+              categories: get_in(preferences, [:categories]),
+              website_url: get_in(metadata, [:org, :website_url]),
+              twitter_url: get_in(metadata, [:org, :socials, :twitter]),
+              github_url: get_in(metadata, [:org, :socials, :github]),
+              youtube_url: get_in(metadata, [:org, :socials, :youtube]),
+              twitch_url: get_in(metadata, [:org, :socials, :twitch]),
+              discord_url: get_in(metadata, [:org, :socials, :discord]),
+              slack_url: get_in(metadata, [:org, :socials, :slack]),
+              linkedin_url: get_in(metadata, [:org, :socials, :linkedin])
+            }
 
-        user_params =
-          %{
-            email: email,
-            display_name: user_handle,
-            avatar_url: get_in(metadata, [:avatar_url]),
-            handle: user_handle,
-            tech_stack: tech_stack,
-            timezone: socket.assigns.timezone
-          }
+          user_params =
+            %{
+              email: email,
+              display_name: user_handle,
+              avatar_url: get_in(metadata, [:avatar_url]),
+              handle: user_handle,
+              tech_stack: tech_stack,
+              timezone: socket.assigns.timezone
+            }
 
-        member_params =
-          %{
-            role: :admin
-          }
+          member_params =
+            %{
+              role: :admin
+            }
 
-        params =
-          %{
-            organization: org_params,
-            user: user_params,
-            member: member_params
-          }
+          params =
+            %{
+              organization: org_params,
+              user: user_params,
+              member: member_params
+            }
 
-        socket =
-          case Algora.Organizations.onboard_organization(params) do
-            {:ok, _} ->
-              redirect(socket, to: AlgoraWeb.UserAuth.login_path(email, login_code))
+          socket =
+            case Algora.Organizations.onboard_organization(params) do
+              {:ok, _} ->
+                redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(email))
 
-            {:error, name, changeset, _created} ->
-              Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
+              {:error, name, changeset, _created} ->
+                Logger.error("error onboarding organization: #{inspect(name)} #{inspect(changeset)}")
 
-              socket
-              |> put_flash(:error, "Something went wrong. Please try again.")
-              |> redirect(to: "/")
-          end
+                socket
+                |> put_flash(:error, "Something went wrong. Please try again.")
+                |> redirect(to: "/")
+            end
 
-        {:noreply, socket}
+          {:noreply, socket}
+        else
+          throttle()
+
+          {:noreply,
+           socket
+           |> put_flash(:error, "Invalid verification code")
+           |> LocalStore.assign_cached(:step, :email)}
+        end
 
       %{valid?: false} ->
         {:noreply, LocalStore.assign_cached(socket, :preferences_form, to_form(changeset))}
@@ -434,20 +376,20 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case changeset do
       %{valid?: true} = changeset ->
         code = get_field(changeset, :code)
-        email = get_field(socket.assigns.email_form.source, :email)
 
-        case AlgoraWeb.UserAuth.verify_login_code(code, email) do
-          {:ok, _login_token} ->
-            {:noreply,
-             socket
-             |> LocalStore.assign_cached(:verification_form, to_form(changeset))
-             |> LocalStore.assign_cached(:step, :preferences)}
+        if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
+          {:noreply,
+           socket
+           |> LocalStore.assign_cached(:verification_form, to_form(changeset))
+           |> LocalStore.assign_cached(:code_valid?, true)
+           |> LocalStore.assign_cached(:step, :preferences)}
+        else
+          throttle()
 
-          {:error, _reason} ->
-            {:noreply,
-             socket
-             |> LocalStore.assign_cached(:verification_form, to_form(changeset))
-             |> LocalStore.assign_cached(:code_valid?, false)}
+          {:noreply,
+           socket
+           |> LocalStore.assign_cached(:verification_form, to_form(changeset))
+           |> LocalStore.assign_cached(:code_valid?, false)}
         end
 
       %{valid?: false} = changeset ->
@@ -864,4 +806,6 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def handle_async(:fetch_metadata, {:exit, reason}, socket) do
     {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
+
+  defp throttle, do: :timer.sleep(1000)
 end

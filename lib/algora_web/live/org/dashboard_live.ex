@@ -548,7 +548,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                       target="_blank"
                       class="inline-flex px-10 rounded-md border-purple-500/80 bg-purple-500/50 text-foreground transition-colors whitespace-nowrap items-center justify-center font-medium drop-shadow-[0_1px_5px_#c084fc80] shadow text-lg h-12 focus-visible:outline-purple-600 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 hover:border-purple-500 hover:bg-purple-500/30 border data-[state=open]:bg-purple-500/80 data-[state=open]:outline-purple-600 phx-submit-loading:opacity-75"
                     >
-                      Contact us
+                      Learn more
                     </.link>
                   </div>
                 </div>

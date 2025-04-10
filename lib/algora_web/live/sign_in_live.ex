@@ -289,14 +289,22 @@ defmodule AlgoraWeb.SignInLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
-      Accounts.ensure_org_context(socket.assigns.user)
+    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.user.email, socket.assigns.secret, String.trim(code)) do
+      :ok ->
+        Accounts.ensure_org_context(socket.assigns.user)
 
-      {:noreply,
-       redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(socket.assigns.user.email, socket.assigns[:return_to]))}
-    else
-      throttle()
-      {:noreply, put_flash(socket, :error, "Invalid login code")}
+        {:noreply,
+         redirect(socket,
+           to: AlgoraWeb.UserAuth.generate_login_path(socket.assigns.user.email, socket.assigns[:return_to])
+         )}
+
+      {:error, :rate_limit_exceeded} ->
+        throttle()
+        {:noreply, put_flash(socket, :error, "Too many attempts. Please try again later.")}
+
+      {:error, :invalid_totp} ->
+        throttle()
+        {:noreply, put_flash(socket, :error, "Invalid login code")}
     end
   end
 

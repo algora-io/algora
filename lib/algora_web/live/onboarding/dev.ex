@@ -181,48 +181,54 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def handle_event("send_signup_code", %{"user" => %{"signup_code" => code}}, socket) do
-    if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
-      user_handle =
-        socket.assigns.email
-        |> String.replace(~r/[^a-zA-Z0-9]/, "-")
-        |> String.downcase()
+    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.email, socket.assigns.secret, String.trim(code)) do
+      :ok ->
+        user_handle =
+          socket.assigns.email
+          |> String.replace(~r/[^a-zA-Z0-9]/, "-")
+          |> String.downcase()
 
-      email = socket.assigns.email
+        email = socket.assigns.email
 
-      tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
-      intentions = get_field(socket.assigns.info_form.source, :intentions) || []
+        tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
+        intentions = get_field(socket.assigns.info_form.source, :intentions) || []
 
-      opts = [
-        tech_stack: tech_stack,
-        seeking_bounties: "bounties" in intentions,
-        seeking_contracts: "contracts" in intentions,
-        seeking_jobs: "jobs" in intentions
-      ]
+        opts = [
+          tech_stack: tech_stack,
+          seeking_bounties: "bounties" in intentions,
+          seeking_contracts: "contracts" in intentions,
+          seeking_jobs: "jobs" in intentions
+        ]
 
-      {:ok, user} =
-        case Repo.get_by(User, email: email) do
-          nil ->
-            %User{
-              type: :individual,
-              last_context: "personal",
-              handle: Organizations.ensure_unique_handle(user_handle),
-              avatar_url: Algora.Util.get_gravatar_url(email)
-            }
-            |> User.signup_changeset(%{email: email})
-            |> User.generate_id()
-            |> change(opts)
-            |> Repo.insert()
+        {:ok, user} =
+          case Repo.get_by(User, email: email) do
+            nil ->
+              %User{
+                type: :individual,
+                last_context: "personal",
+                handle: Organizations.ensure_unique_handle(user_handle),
+                avatar_url: Algora.Util.get_gravatar_url(email)
+              }
+              |> User.signup_changeset(%{email: email})
+              |> User.generate_id()
+              |> change(opts)
+              |> Repo.insert()
 
-          existing_user ->
-            existing_user
-            |> change(opts)
-            |> Repo.update()
-        end
+            existing_user ->
+              existing_user
+              |> change(opts)
+              |> Repo.update()
+          end
 
-      {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email, socket.assigns[:return_to]))}
-    else
-      throttle()
-      {:noreply, put_flash(socket, :error, "Invalid signup code")}
+        {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email, socket.assigns[:return_to]))}
+
+      {:error, :rate_limit_exceeded} ->
+        throttle()
+        {:noreply, put_flash(socket, :error, "Too many attempts. Please try again later.")}
+
+      {:error, :invalid_totp} ->
+        throttle()
+        {:noreply, put_flash(socket, :error, "Invalid signup code")}
     end
   end
 

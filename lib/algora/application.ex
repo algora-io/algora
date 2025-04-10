@@ -22,6 +22,7 @@ defmodule Algora.Application do
       Algora.Github.TokenPool,
       Algora.Github.Poller.RootSupervisor,
       Algora.ScreenshotQueue,
+      Algora.RateLimit,
       # Start to serve requests, typically the last entry
       AlgoraWeb.Endpoint,
       Algora.Stargazer,

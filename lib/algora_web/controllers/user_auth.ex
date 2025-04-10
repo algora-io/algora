@@ -382,4 +382,18 @@ defmodule AlgoraWeb.UserAuth do
       (NimbleTOTP.valid?(secret, code, period: totp_period(), time: time) or
          NimbleTOTP.valid?(secret, code, period: totp_period(), time: time - totp_period()))
   end
+
+  def verify_totp(rate_limit_key, secret, code) do
+    case Algora.RateLimit.hit("verify_totp:#{rate_limit_key}", :timer.minutes(1), 5) do
+      {:allow, _} ->
+        if valid_totp?(secret, code) do
+          :ok
+        else
+          {:error, :invalid_totp}
+        end
+
+      {:deny, _} ->
+        {:error, :rate_limit_exceeded}
+    end
+  end
 end

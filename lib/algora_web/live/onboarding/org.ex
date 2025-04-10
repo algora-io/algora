@@ -376,20 +376,23 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case changeset do
       %{valid?: true} = changeset ->
         code = get_field(changeset, :code)
+        email = get_field(socket.assigns.email_form.source, :email)
 
-        if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
-          {:noreply,
-           socket
-           |> LocalStore.assign_cached(:verification_form, to_form(changeset))
-           |> LocalStore.assign_cached(:code_valid?, true)
-           |> LocalStore.assign_cached(:step, :preferences)}
-        else
-          throttle()
+        case AlgoraWeb.UserAuth.verify_totp(email, socket.assigns.secret, String.trim(code)) do
+          :ok ->
+            {:noreply,
+             socket
+             |> LocalStore.assign_cached(:verification_form, to_form(changeset))
+             |> LocalStore.assign_cached(:code_valid?, true)
+             |> LocalStore.assign_cached(:step, :preferences)}
 
-          {:noreply,
-           socket
-           |> LocalStore.assign_cached(:verification_form, to_form(changeset))
-           |> LocalStore.assign_cached(:code_valid?, false)}
+          {:error, :rate_limit_exceeded} ->
+            throttle()
+            {:noreply, put_flash(socket, :error, "Too many attempts. Please try again later.")}
+
+          {:error, :invalid_totp} ->
+            throttle()
+            {:noreply, put_flash(socket, :error, "Invalid verification code")}
         end
 
       %{valid?: false} = changeset ->

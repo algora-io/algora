@@ -96,7 +96,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:show_share_drawer, false)
        |> assign(:share_drawer_type, nil)
        |> assign(:selected_developer, nil)
-       |> assign(:secret_code, nil)
+       |> assign(:secret, nil)
        |> assign_login_form(User.login_changeset(%User{}, %{}))
        |> assign_payable_bounties()
        |> assign_contracts()
@@ -807,15 +807,15 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"email" => email}}, socket) do
-    code = Nanoid.generate()
+    {secret, code} = AlgoraWeb.UserAuth.generate_totp()
 
     changeset = User.login_changeset(%User{}, %{})
 
-    case send_login_code_to_user(email, code) do
+    case Accounts.deliver_totp_signup_email(email, code) do
       {:ok, _id} ->
         {:noreply,
          socket
-         |> assign(:secret_code, code)
+         |> assign(:secret, secret)
          |> assign(:email, email)
          |> assign_login_form(changeset)}
 
@@ -827,7 +827,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    if Plug.Crypto.secure_compare(String.trim(code), socket.assigns.secret_code) do
+    if AlgoraWeb.UserAuth.valid_totp?(socket.assigns.secret, String.trim(code)) do
       handle =
         socket.assigns.email
         |> Organizations.generate_handle_from_email()
@@ -1021,32 +1021,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp page_size, do: 10
 
-  @from_name "Algora"
-  @from_email "info@algora.io"
-
-  defp send_login_code_to_user(email, code) do
-    email =
-      Email.new()
-      |> Email.to(email)
-      |> Email.from({@from_name, @from_email})
-      |> Email.subject("Login code for Algora")
-      |> Email.text_body("""
-      Here is your login code for Algora!
-
-       #{code}
-
-      If you didn't request this link, you can safely ignore this email.
-
-      --------------------------------------------------------------------------------
-
-      For correspondence, please email the Algora founders at ioannis@algora.io and zafer@algora.io
-
-      © 2025 Algora PBC.
-      """)
-
-    Algora.Mailer.deliver(email)
-  end
-
   defp assign_payable_bounties(socket) do
     org = socket.assigns.current_org
 
@@ -1098,7 +1072,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp achievement_todo(%{achievement: %{id: :complete_signup_status}} = assigns) do
     ~H"""
     <.simple_form
-      :if={!@secret_code}
+      :if={!@secret}
       for={@login_form}
       id="send_login_code_form"
       phx-submit="send_login_code"
@@ -1115,7 +1089,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </.button>
     </.simple_form>
     <.simple_form
-      :if={@secret_code}
+      :if={@secret}
       for={@login_form}
       id="send_login_code_form"
       phx-submit="send_login_code"
@@ -1646,7 +1620,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <.achievement_todo
                   achievement={achievement}
                   current_user={@current_user}
-                  secret_code={@secret_code}
+                  secret={@secret}
                   login_form={@login_form}
                 />
               </li>

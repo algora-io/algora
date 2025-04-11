@@ -34,23 +34,23 @@ defmodule AlgoraWeb.DocsLive do
       %{
         title: 'Contracts',
         links: [
-          %{title: 'Share on contributors table', href: ~p"/docs/contracts/share-contributors"}
+          %{title: 'Offer a contract', href: ~p"/docs/contracts/offer-contract"}
         ]
       },
       %{
         title: 'Marketplace',
         links: [
-          %{title: 'Share with Algora matches', href: ~p"/docs/marketplace/share-matches"}
+          %{title: 'Matches', href: ~p"/docs/marketplace/matches"}
         ]
       },
       %{
         title: 'Workspace',
         links: [
-          %{title: 'Share bounty board', href: ~p"/docs/workspace/bounty-board"},
-          %{title: 'View leaderboard', href: ~p"/docs/workspace/leaderboard"},
-          %{title: 'View transactions', href: ~p"/docs/workspace/transactions"},
-          %{title: 'Set up autopay', href: ~p"/docs/workspace/autopay"},
-          %{title: 'Customize bot messages', href: ~p"/docs/workspace/custom-bot-messages"}
+          %{title: 'Bounty board', href: ~p"/docs/workspace/bounty-board"},
+          %{title: 'Leaderboard', href: ~p"/docs/workspace/leaderboard"},
+          %{title: 'Transactions', href: ~p"/docs/workspace/transactions"},
+          %{title: 'Autopay on merge', href: ~p"/docs/workspace/autopay"},
+          %{title: 'Custom bot messages', href: ~p"/docs/workspace/custom-bot-messages"}
         ]
       },
       %{
@@ -59,6 +59,13 @@ defmodule AlgoraWeb.DocsLive do
           %{title: 'SDK', href: ~p"/docs/embed/sdk"},
           %{title: 'Shields', href: ~p"/docs/embed/shields"},
           %{title: 'OG images', href: ~p"/docs/embed/og-images"}
+        ]
+      },
+      %{
+        title: 'Payments',
+        links: [
+          %{title: 'Payments', href: ~p"/docs/payments/payments"},
+          %{title: 'Reporting', href: ~p"/docs/payments/reporting"}
         ]
       }
     ]

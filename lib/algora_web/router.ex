@@ -134,6 +134,7 @@ defmodule AlgoraWeb.Router do
       live "/blog", BlogLive, :index
       live "/changelog/:slug", ChangelogLive, :show
       live "/changelog", ChangelogLive, :index
+      live "/docs/*path", DocsLive, :show
       live "/case-studies/:slug", CaseStudyLive, :show
       live "/case-studies", CaseStudyLive, :index
     end

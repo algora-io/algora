@@ -14,12 +14,6 @@ defmodule AlgoraWeb.DocsLive do
         title: 'GitHub bounties',
         links: [
           %{title: 'In your own repos', href: ~p"/docs/bounties/in-your-own-repos"},
-          # dashboard with arrow to create installation
-          # installation screen
-          # /bounty $15000
-          # reward
-          ### via solutions table -> claim page
-          ### OR autopay on merge
           %{title: 'In other projects', href: ~p"/docs/bounties/in-other-projects"}
         ]
       },
@@ -30,13 +24,13 @@ defmodule AlgoraWeb.DocsLive do
           %{title: 'Custom', href: ~p"/docs/bounties/custom"}
         ]
       },
-      # %{
-      #   title: 'Tips',
-      #   links: [
-      #     %{title: 'Share on GitHub', href: ~p"/docs/tips/share-github"},
-      #     %{title: 'Share on contributors table', href: ~p"/docs/tips/share-contributors"}
-      #   ]
-      # },
+      %{
+        title: 'Tips',
+        links: [
+          %{title: 'Send a tip on GitHub', href: ~p"/docs/tips/on-github"},
+          %{title: 'Send a tip on Algora', href: ~p"/docs/tips/on-algora"}
+        ]
+      },
       # %{
       #   title: 'Contracts',
       #   links: [

@@ -10,7 +10,7 @@ You can create custom bounties on Algora for tasks that are recurring and/or not
 
 ## View your bounty
 
-Once created, you'll land on a unique page for your bounty where you can manage your bounty.
+Once created, you'll land on a unique page where you can manage your bounty.
 
 ![View custom bounty](/images/docs/view-custom-bounty.png)
 

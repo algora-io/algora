@@ -13,8 +13,8 @@ defmodule AlgoraWeb.DocsLive do
       %{
         title: 'GitHub bounties',
         links: [
-          %{title: 'In your own repos', href: ~p"/docs/bounties/in-your-own-repos"},
-          %{title: 'In other projects', href: ~p"/docs/bounties/in-other-projects"}
+          %{title: 'Create bounties in your repos', href: ~p"/docs/bounties/in-your-own-repos"},
+          %{title: 'Fund issues anywhere on GitHub', href: ~p"/docs/bounties/in-other-projects"}
         ]
       },
       %{
@@ -27,8 +27,7 @@ defmodule AlgoraWeb.DocsLive do
       %{
         title: 'Tips',
         links: [
-          %{title: 'Send a tip on GitHub', href: ~p"/docs/tips/on-github"},
-          %{title: 'Send a tip on Algora', href: ~p"/docs/tips/on-algora"}
+          %{title: 'Send a tip', href: ~p"/docs/tips/send"}
         ]
       },
       %{
@@ -56,9 +55,9 @@ defmodule AlgoraWeb.DocsLive do
       %{
         title: 'Embed',
         links: [
-          %{title: 'SDK', href: ~p"/docs/embed/sdk"},
-          %{title: 'Shields', href: ~p"/docs/embed/shields"},
-          %{title: 'OG images', href: ~p"/docs/embed/og-images"}
+          %{title: 'SDK', href: ~p"/docs/embed/sdk"}
+          # %{title: 'Shields', href: ~p"/docs/embed/shields"},
+          # %{title: 'OG images', href: ~p"/docs/embed/og-images"}
         ]
       },
       %{
@@ -126,7 +125,7 @@ defmodule AlgoraWeb.DocsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-black lg:ml-72 xl:ml-80">
+    <div class="lg:ml-72 xl:ml-80">
       <header class="bg-black fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto scrollbar-thin border-r border-gray-900/10 px-6 pt-4 pb-8 dark:border-white/10 lg:block xl:w-80">
         <div
           class="hidden fixed inset-0 z-50 lg:hidden"
@@ -341,7 +340,7 @@ defmodule AlgoraWeb.DocsLive do
       <div class="h-full relative px-4 pt-14 sm:px-6 lg:px-8">
         <main class="py-16">
           <article class="prose dark:prose-invert max-w-5xl min-h-[calc(100svh-17rem)]">
-            <div class="absolute inset-0 mx-0 max-w-none overflow-hidden">
+            <div class="bg-black absolute -z-10 inset-0 mx-0 max-w-none overflow-hidden">
               <div class="absolute left-1/2 top-0 ml-[-38rem] h-[25rem] w-[81.25rem] dark:[mask-image:linear-gradient(white,transparent)]">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#36b49f] to-[#DBFF75] opacity-40 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] dark:from-[#36b49f]/30 dark:to-[#DBFF75]/30 dark:opacity-100">
                   <svg
@@ -450,7 +449,7 @@ defmodule AlgoraWeb.DocsLive do
     </div>
     <div class="my-16 xl:max-w-none">
       <div class="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-gray-900/5 pt-10 dark:border-white/5 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="group relative flex rounded-2xl bg-card transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -528,7 +527,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-card transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -606,7 +605,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-card transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -684,7 +683,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-card transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg

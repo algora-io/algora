@@ -113,8 +113,8 @@ defmodule AlgoraWeb.DocsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="lg:ml-72 xl:ml-80">
-      <header class="fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto border-r border-gray-900/10 px-6 pt-4 pb-8 dark:border-white/10 lg:block xl:w-80">
+    <div class="bg-black lg:ml-72 xl:ml-80">
+      <header class="bg-black fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto scrollbar-thin border-r border-gray-900/10 px-6 pt-4 pb-8 dark:border-white/10 lg:block xl:w-80">
         <div class="hidden lg:flex">
           <.wordmark class="h-8 w-auto text-foreground" />
         </div>
@@ -205,8 +205,8 @@ defmodule AlgoraWeb.DocsLive do
       </header>
       <div class="h-full relative px-4 pt-14 sm:px-6 lg:px-8">
         <main class="py-16">
-          <article class="prose dark:prose-invert max-w-5xl min-h-[calc(100svh-18.80rem)]">
-            <div class="absolute inset-0 -z-10 mx-0 max-w-none overflow-hidden">
+          <article class="prose dark:prose-invert max-w-5xl min-h-[calc(100svh-17rem)]">
+            <div class="absolute inset-0 mx-0 max-w-none overflow-hidden">
               <div class="absolute left-1/2 top-0 ml-[-38rem] h-[25rem] w-[81.25rem] dark:[mask-image:linear-gradient(white,transparent)]">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#36b49f] to-[#DBFF75] opacity-40 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] dark:from-[#36b49f]/30 dark:to-[#DBFF75]/30 dark:opacity-100">
                   <svg
@@ -251,7 +251,7 @@ defmodule AlgoraWeb.DocsLive do
             <% end %>
           </article>
         </main>
-        <footer class="mx-auto max-w-2xl space-y-10 pb-16 lg:max-w-5xl">
+        <footer class="max-w-2xl space-y-10 pb-8 lg:max-w-5xl">
           <div class="flex flex-col items-center justify-between gap-5 border-t border-gray-900/5 pt-8 dark:border-white/5 sm:flex-row">
             <p class="text-xs text-gray-600 dark:text-gray-400">
               © {DateTime.utc_now().year} Algora, Public Benefit Corporation
@@ -378,30 +378,18 @@ defmodule AlgoraWeb.DocsLive do
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+              <.icon
+                name="tabler-diamond"
                 class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
-              >
-                <path d="M18.364 19.364a9 9 0 1 0 -12.728 0"></path>
-                <path d="M15.536 16.536a5 5 0 1 0 -7.072 0"></path>
-                <path d="M12 13m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
-              </svg>
+              />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
               <a href="/docs/streaming/quickstart">
-                <span class="absolute inset-0 rounded-2xl"></span>Quickstart
+                <span class="absolute inset-0 rounded-2xl"></span>Bounties
               </a>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Start livestreaming on Algora TV
+              Add USD rewards on issues and pay on-merge
             </p>
           </div>
         </div>
@@ -468,37 +456,18 @@ defmodule AlgoraWeb.DocsLive do
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+              <.icon
+                name="tabler-contract"
                 class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
-              >
-                <path d="M7.038 4.5a9 9 0 0 0 -2.495 2.47"></path>
-                <path d="M3.186 10.209a9 9 0 0 0 0 3.508"></path>
-                <path d="M4.5 16.962a9 9 0 0 0 2.47 2.495"></path>
-                <path d="M10.209 20.814a9 9 0 0 0 3.5 0"></path>
-                <path d="M16.962 19.5a9 9 0 0 0 2.495 -2.47"></path>
-                <path d="M20.814 13.791a9 9 0 0 0 0 -3.508"></path>
-                <path d="M19.5 7.038a9 9 0 0 0 -2.47 -2.495"></path>
-                <path d="M13.791 3.186a9 9 0 0 0 -3.508 -.02"></path>
-                <path d="M12 8l-2 4h4l-2 4"></path>
-                <path d="M12 21a9 9 0 0 0 0 -18"></path>
-              </svg>
+              />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="/docs/streaming/recommendations">
-                <span class="absolute inset-0 rounded-2xl"></span>Recommendations
+              <a href="#">
+                <span class="absolute inset-0 rounded-2xl"></span>Contract work
               </a>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Optimize your encoder &amp; improve your stream quality.
+              Collaborate flexibly, hourly or fixed rate
             </p>
           </div>
         </div>
@@ -565,29 +534,18 @@ defmodule AlgoraWeb.DocsLive do
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+              <.icon
+                name="tabler-user-star"
                 class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
-              >
-                <path d="M21 14l-3 -3h-7a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1h9a1 1 0 0 1 1 1v10"></path>
-                <path d="M14 15v2a1 1 0 0 1 -1 1h-7l-3 3v-10a1 1 0 0 1 1 -1h2"></path>
-              </svg>
+              />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="/docs/streaming/overlays">
-                <span class="absolute inset-0 rounded-2xl"></span>Chat overlay
+              <a href="#">
+                <span class="absolute inset-0 rounded-2xl"></span>Marketplace
               </a>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Learn how to overlay chat in your OBS scenes
+              Collaborate with Algora experts
             </p>
           </div>
         </div>
@@ -652,31 +610,18 @@ defmodule AlgoraWeb.DocsLive do
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+              <.icon
+                name="tabler-image-in-picture"
                 class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
-              >
-                <path d="M16 3h5v5"></path>
-                <path d="M8 3h-5v5"></path>
-                <path d="M21 3l-7.536 7.536a5 5 0 0 0 -1.464 3.534v6.93"></path>
-                <path d="M3 3l7.536 7.536a5 5 0 0 1 1.464 3.534v.93"></path>
-              </svg>
+              />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="/docs/streaming/multicast">
-                <span class="absolute inset-0 rounded-2xl"></span>Multistreaming
+              <a href="#">
+                <span class="absolute inset-0 rounded-2xl"></span>Embed
               </a>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Learn how to simulcast to YouTube, Twitch, Twitter &amp; more
+              Embed Algora in your website, readme, docs, etc.
             </p>
           </div>
         </div>

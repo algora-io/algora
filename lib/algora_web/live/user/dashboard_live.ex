@@ -476,7 +476,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       limit: page_size(),
       current_user: socket.assigns.current_user,
       tech_stack: socket.assigns.current_user.tech_stack,
-      amount_gt: Money.new(:USD, 200)
+      amount_gt: Money.new(:USD, 100)
     ]
 
     bounties = Bounties.list_bounties(query_opts)

@@ -59,7 +59,7 @@ defmodule AlgoraWeb.BountiesLive do
         current_user: socket.assigns[:current_user]
       ] ++
         if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 200)]
+          [amount_gt: Money.new(:USD, 100)]
         else
           [amount_gt: Money.new(:USD, 500)]
         end
@@ -92,7 +92,7 @@ defmodule AlgoraWeb.BountiesLive do
         current_user: socket.assigns[:current_user]
       ] ++
         if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 200)]
+          [amount_gt: Money.new(:USD, 100)]
         else
           [amount_gt: Money.new(:USD, 500)]
         end

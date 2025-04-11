@@ -27,6 +27,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
     {:ok,
      socket
+     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:timezone, timezone)
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
@@ -82,14 +83,19 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </div>
         """
 
-      String.match?(value, ~r/^[^\s]+@[^\s]+$/) && @posthog_project_id ->
+      # String.match?(value, ~r/^[^\s]+@[^\s]+$/) && assigns.posthog_project_id ->
+      #   ~H"""
+      #   <.link
+      #     href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
+      #     rel="noopener"
+      #   >
+      #     {@value}
+      #   </.link>
+      #   """
+
+      String.match?(value, ~r/^[^\s]+@[^\s]+$/) ->
         ~H"""
-        <.link
-          href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
-          rel="noopener"
-        >
-          {@value}
-        </.link>
+        {@value}
         """
 
       String.length(value) == 2 ->
@@ -147,6 +153,9 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8">
+      <div class="text-sm text-muted-foreground">
+        Connected from: <code class="font-mono">{@ip_address}</code>
+      </div>
       <section id="sql" class="scroll-mt-16">
         <div class="mb-4">
           <h1 class="text-2xl font-bold">SQL Query</h1>

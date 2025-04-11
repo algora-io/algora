@@ -72,7 +72,6 @@ defmodule AlgoraWeb.DocsLive do
 
   @impl true
   def mount(%{"path" => path}, _session, socket) do
-    dbg(path)
     slug = List.last(path)
     dir = Path.join("docs", Enum.drop(path, -1))
 
@@ -122,6 +121,127 @@ defmodule AlgoraWeb.DocsLive do
     ~H"""
     <div class="bg-black lg:ml-72 xl:ml-80">
       <header class="bg-black fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto scrollbar-thin border-r border-gray-900/10 px-6 pt-4 pb-8 dark:border-white/10 lg:block xl:w-80">
+        <div
+          class="hidden fixed inset-0 z-50 lg:hidden"
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="fixed inset-0 top-14 bg-gray-400/20 backdrop-blur-sm dark:bg-black/40 opacity-100">
+          </div>
+          <div id="headlessui-dialog-panel-:r1g:" data-headlessui-state="open">
+            <div
+              class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-5 px-4 transition sm:px-6 lg:z-30 lg:px-8 bg-white dark:bg-black opacity-100"
+              data-projection-id="31"
+              style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2;"
+            >
+              <div class="absolute inset-x-0 top-full h-px transition bg-gray-900/7.5 dark:bg-white/7.5">
+              </div>
+              <div class="hidden md:block"></div>
+              <div class="flex w-full items-center justify-between gap-5 lg:hidden">
+                <a aria-label="Home" href="/docs" tabindex="0">
+                  <svg viewBox="0 0 100.14 39.42" aria-hidden="true" class="h-6">
+                    <path
+                      class="fill-gray-900 dark:fill-white"
+                      d="M19.25 9v19.24H16v-2.37a9.63 9.63 0 1 1 0-14.51V9ZM16 18.63A6.32 6.32 0 1 0 9.64 25 6.32 6.32 0 0 0 16 18.63Z"
+                    >
+                    </path>
+                    <path class="fill-gray-900 dark:fill-white" d="M22.29 0h3.29v28.24h-3.29Z"></path>
+                    <path
+                      class="fill-gray-900 dark:fill-white"
+                      d="M47.6 34.27v.07a5.41 5.41 0 0 1-.69 2.52 4.78 4.78 0 0 1-1.39 1.54 5.61 5.61 0 0 1-3.25 1H34a5.21 5.21 0 0 1-3.88-1.5 6.25 6.25 0 0 1-1.53-4.2l3.29.11a2.58 2.58 0 0 0 .62 1.83 2 2 0 0 0 1.5.47h8.29c1.68 0 2-1.1 2-1.75a2 2 0 0 0-2-1.76h-8.2a5.35 5.35 0 0 1-5.52-5.51 6.07 6.07 0 0 1 1.24-3.62 9.5 9.5 0 0 1-1.31-4.86A9.62 9.62 0 0 1 38.11 9a9.72 9.72 0 0 1 5.37 1.61A5.78 5.78 0 0 1 47.53 9v3.28a2.54 2.54 0 0 0-1.72.63 9.67 9.67 0 0 1 1.86 5.7 9.79 9.79 0 0 1-5.44 8.7 10 10 0 0 1-4.16.91 9.75 9.75 0 0 1-6.07-2.1 3 3 0 0 0-.18.95 2.08 2.08 0 0 0 2.23 2.27h8.18a5.61 5.61 0 0 1 3.25 1.05 5.45 5.45 0 0 1 2.12 3.88ZM31.78 18.63a6.46 6.46 0 0 0 .84 3.15 5.88 5.88 0 0 0 1.43 1.71A6.34 6.34 0 0 0 38.11 25a6.26 6.26 0 0 0 6.32-6.32 6.27 6.27 0 0 0-2.16-4.71 6.2 6.2 0 0 0-4.16-1.61 6.35 6.35 0 0 0-6.33 6.27Z"
+                    >
+                    </path>
+                    <path
+                      class="fill-gray-900 dark:fill-white"
+                      d="M68.54 18.63A9.63 9.63 0 1 1 58.93 9a9.62 9.62 0 0 1 9.61 9.63Zm-9.61-6.32a6.32 6.32 0 1 0 6.32 6.32 6.35 6.35 0 0 0-6.32-6.32Z"
+                    >
+                    </path>
+                    <path
+                      class="fill-gray-900 dark:fill-white"
+                      d="M80.35 14.1h-3.28a1.9 1.9 0 0 0-.4-1.31 2 2 0 0 0-1.28-.48 1.83 1.83 0 0 0-2 1.57v14.36h-3.27V9h3.29v.4a5.24 5.24 0 0 1 1.9-.4 5.47 5.47 0 0 1 3.62 1.35 5 5 0 0 1 1.42 3.75Z"
+                    >
+                    </path>
+                    <path
+                      class="fill-gray-900 dark:fill-white"
+                      d="M100.14 9v19.24h-3.29v-2.37a9.63 9.63 0 1 1 0-14.51V9Zm-3.29 9.64A6.32 6.32 0 1 0 90.53 25a6.32 6.32 0 0 0 6.32-6.37Z"
+                    >
+                    </path>
+                  </svg>
+                </a>
+                <button
+                  type="button"
+                  class="flex items-center justify-center rounded-md transition hover:bg-gray-900/5 dark:hover:bg-white/5"
+                  aria-label="Toggle navigation"
+                  phx-click={JS.toggle(to: "#mobile-menu")}
+                >
+                  <svg
+                    viewBox="0 0 10 9"
+                    fill="none"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                    class="h-5 w-5 stroke-gray-900 dark:stroke-white"
+                  >
+                    <path d="m1.5 1 7 7M8.5 1l-7 7"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="flex items-center gap-5">
+                <nav class="hidden md:block">
+                  <ul role="list" class="flex items-center gap-8">
+                    <li>
+                      <a
+                        class="text-sm leading-5 text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                        href="/docs/contact"
+                      >
+                        Contact
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+                <div class="hidden md:block md:h-5 md:w-px md:bg-gray-900/10 md:dark:bg-white/15">
+                </div>
+                <div class="hidden whitespace-nowrap md:contents">
+                  <a
+                    class="inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-gray-900 py-1 px-3 text-white hover:bg-gray-700 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-1 dark:ring-inset dark:ring-emerald-400/20 dark:hover:bg-emerald-400/10 dark:hover:text-emerald-300 dark:hover:ring-emerald-300"
+                    href="https://tv.algora.io"
+                  >
+                    Start streaming
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div
+              class="fixed left-0 top-14 bottom-0 w-full overflow-y-auto bg-white px-4 pt-6 pb-4 shadow-lg shadow-gray-900/10 ring-1 ring-gray-900/7.5 dark:bg-black dark:ring-gray-800 sm:px-6 sm:pb-10 md:max-w-sm translate-x-0"
+              data-projection-id="32"
+            >
+              <nav>
+                <ul role="list">
+                  <li :for={section <- nav()} class="relative mt-6">
+                    <h2
+                      class="text-xs font-semibold text-gray-900 dark:text-white"
+                      data-projection-id="36"
+                    >
+                      {section.title}
+                    </h2>
+                    <div class="relative mt-3 pl-2">
+                      <ul role="list" class="border-l border-transparent">
+                        <li :for={link <- section.links} class="relative" data-projection-id="40">
+                          <a
+                            class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                            href={link.href}
+                          >
+                            <span class="truncate">{link.title}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
         <div class="hidden lg:flex">
           <.wordmark class="h-8 w-auto text-foreground" />
         </div>
@@ -138,6 +258,7 @@ defmodule AlgoraWeb.DocsLive do
               type="button"
               class="flex items-center justify-center rounded-md transition hover:bg-gray-900/5 dark:hover:bg-white/5"
               aria-label="Toggle navigation"
+              phx-click={JS.toggle(to: "#mobile-menu")}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

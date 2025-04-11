@@ -392,7 +392,7 @@ defmodule AlgoraWeb.Contract.ViewLive do
                         {Util.initials(message.sender.name)}
                       </.avatar_fallback>
                     </.avatar>
-                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
+                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3 break-words">
                       {message.content}
                       <div class="text-[10px] mt-1 text-muted-foreground">
                         {message.inserted_at
@@ -485,7 +485,8 @@ defmodule AlgoraWeb.Contract.ViewLive do
         {:ok, redirect(socket, to: ~p"/auth/login?return_to=#{~p"/#{contract.client.handle}/contracts/#{id}"}")}
 
       current_user ->
-        if current_user.id != contract.contractor_id and
+        if not current_user.is_admin and
+             current_user.id != contract.contractor_id and
              not (socket.assigns.all_contexts |> Enum.map(& &1.id) |> Enum.member?(contract.client_id)) do
           {:ok, raise(AlgoraWeb.NotFoundError)}
         else

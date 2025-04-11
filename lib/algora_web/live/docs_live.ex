@@ -31,18 +31,18 @@ defmodule AlgoraWeb.DocsLive do
           %{title: 'Send a tip on Algora', href: ~p"/docs/tips/on-algora"}
         ]
       },
-      # %{
-      #   title: 'Contracts',
-      #   links: [
-      #     %{title: 'Share on contributors table', href: ~p"/docs/contracts/share-contributors"}
-      #   ]
-      # },
-      # %{
-      #   title: 'Marketplace',
-      #   links: [
-      #     %{title: 'Share with Algora matches', href: ~p"/docs/marketplace/share-matches"}
-      #   ]
-      # },
+      %{
+        title: 'Contracts',
+        links: [
+          %{title: 'Share on contributors table', href: ~p"/docs/contracts/share-contributors"}
+        ]
+      },
+      %{
+        title: 'Marketplace',
+        links: [
+          %{title: 'Share with Algora matches', href: ~p"/docs/marketplace/share-matches"}
+        ]
+      },
       %{
         title: 'Workspace',
         links: [

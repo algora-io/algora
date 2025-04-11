@@ -205,7 +205,7 @@ defmodule AlgoraWeb.DocsLive do
       </header>
       <div class="h-full relative px-4 pt-14 sm:px-6 lg:px-8">
         <main class="py-16">
-          <article class="prose dark:prose-invert min-h-[calc(100svh-18.80rem)]">
+          <article class="prose dark:prose-invert max-w-5xl min-h-[calc(100svh-18.80rem)]">
             <div class="absolute inset-0 -z-10 mx-0 max-w-none overflow-hidden">
               <div class="absolute left-1/2 top-0 ml-[-38rem] h-[25rem] w-[81.25rem] dark:[mask-image:linear-gradient(white,transparent)]">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#36b49f] to-[#DBFF75] opacity-40 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] dark:from-[#36b49f]/30 dark:to-[#DBFF75]/30 dark:opacity-100">
@@ -314,7 +314,7 @@ defmodule AlgoraWeb.DocsLive do
       </a>
     </div>
     <div class="my-16 xl:max-w-none">
-      <div class="sm:min-w-[1200px] not-prose mt-4 grid grid-cols-1 gap-8 border-t border-gray-900/5 pt-10 dark:border-white/5 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-gray-900/5 pt-10 dark:border-white/5 sm:grid-cols-2 xl:grid-cols-4">
         <div class="group relative flex rounded-2xl bg-card transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">

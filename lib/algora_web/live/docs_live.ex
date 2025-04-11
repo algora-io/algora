@@ -519,9 +519,9 @@ defmodule AlgoraWeb.DocsLive do
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="/docs/streaming/quickstart">
+              <.link navigate={~p"/docs/bounties/in-your-own-repos"}>
                 <span class="absolute inset-0 rounded-2xl"></span>Bounties
-              </a>
+              </.link>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Add USD rewards on issues and pay on-merge
@@ -597,9 +597,9 @@ defmodule AlgoraWeb.DocsLive do
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="#">
+              <.link navigate={~p"/docs/contracts/offer-contract"}>
                 <span class="absolute inset-0 rounded-2xl"></span>Contract work
-              </a>
+              </.link>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Collaborate flexibly, hourly or fixed rate
@@ -675,9 +675,9 @@ defmodule AlgoraWeb.DocsLive do
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="#">
+              <.link navigate={~p"/docs/marketplace/matches"}>
                 <span class="absolute inset-0 rounded-2xl"></span>Marketplace
-              </a>
+              </.link>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Collaborate with Algora experts
@@ -751,9 +751,9 @@ defmodule AlgoraWeb.DocsLive do
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <a href="#">
+              <.link navigate={~p"/docs/embed/sdk"}>
                 <span class="absolute inset-0 rounded-2xl"></span>Embed
-              </a>
+              </.link>
             </h3>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
               Embed Algora in your website, readme, docs, etc.

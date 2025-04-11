@@ -4,6 +4,6 @@ title: "Send a tip on GitHub"
 
 # Send a tip on GitHub
 
-<img src="/images/screenshots/tip-remotion.png" alt="Send a tip on GitHub" width="666" />
+Use the `/tip $100 @username` command to send a tip to any GitHub user
 
-<img src="/images/screenshots/tip.png" alt="Send a tip on GitHub" width="666" />
+<img src="/images/screenshots/tip-remotion.png" alt="Send a tip on GitHub" width="400" />

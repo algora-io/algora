@@ -133,6 +133,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:noreply,
      socket
+     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:current_status, current_status)
      |> assign(:bounty_rows, to_bounty_rows(bounties))
      |> assign(:transaction_rows, to_transaction_rows(transactions))
@@ -826,7 +827,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.email, socket.assigns.secret, String.trim(code)) do
+    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.ip_address, socket.assigns.secret, String.trim(code)) do
       :ok ->
         handle =
           socket.assigns.email

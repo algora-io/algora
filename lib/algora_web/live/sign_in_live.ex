@@ -237,6 +237,7 @@ defmodule AlgoraWeb.SignInLive do
 
     {:ok,
      socket
+     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:return_to, params["return_to"])
      |> assign(:authorize_url, authorize_url)
      |> assign(:secret, nil)
@@ -289,7 +290,7 @@ defmodule AlgoraWeb.SignInLive do
 
   @impl true
   def handle_event("send_login_code", %{"user" => %{"login_code" => code}}, socket) do
-    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.user.email, socket.assigns.secret, String.trim(code)) do
+    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.ip_address, socket.assigns.secret, String.trim(code)) do
       :ok ->
         Accounts.ensure_org_context(socket.assigns.user)
 

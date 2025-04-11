@@ -83,6 +83,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
     {:ok,
      socket
+     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:secret, nil)
      |> assign(:step, Enum.at(@steps, 0))
      |> assign(:steps, @steps)
@@ -181,7 +182,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def handle_event("send_signup_code", %{"user" => %{"signup_code" => code}}, socket) do
-    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.email, socket.assigns.secret, String.trim(code)) do
+    case AlgoraWeb.UserAuth.verify_totp(socket.assigns.ip_address, socket.assigns.secret, String.trim(code)) do
       :ok ->
         user_handle =
           socket.assigns.email

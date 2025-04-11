@@ -154,6 +154,7 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:tech_stack_form, TechStackForm.init())
      |> assign(:email_form, EmailForm.init())
      |> assign(:verification_form, VerificationForm.init())
@@ -376,9 +377,8 @@ defmodule AlgoraWeb.Onboarding.OrgLive do
     case changeset do
       %{valid?: true} = changeset ->
         code = get_field(changeset, :code)
-        email = get_field(socket.assigns.email_form.source, :email)
 
-        case AlgoraWeb.UserAuth.verify_totp(email, socket.assigns.secret, String.trim(code)) do
+        case AlgoraWeb.UserAuth.verify_totp(socket.assigns.ip_address, socket.assigns.secret, String.trim(code)) do
           :ok ->
             {:noreply,
              socket

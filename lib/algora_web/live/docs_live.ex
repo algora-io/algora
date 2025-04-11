@@ -30,33 +30,33 @@ defmodule AlgoraWeb.DocsLive do
           %{title: 'Custom', href: ~p"/docs/bounties/custom"}
         ]
       },
+      # %{
+      #   title: 'Tips',
+      #   links: [
+      #     %{title: 'Share on GitHub', href: ~p"/docs/tips/share-github"},
+      #     %{title: 'Share on contributors table', href: ~p"/docs/tips/share-contributors"}
+      #   ]
+      # },
+      # %{
+      #   title: 'Contracts',
+      #   links: [
+      #     %{title: 'Share on contributors table', href: ~p"/docs/contracts/share-contributors"}
+      #   ]
+      # },
+      # %{
+      #   title: 'Marketplace',
+      #   links: [
+      #     %{title: 'Share with Algora matches', href: ~p"/docs/marketplace/share-matches"}
+      #   ]
+      # },
       %{
-        title: 'Tips',
+        title: 'Workspace',
         links: [
-          %{title: 'Share on GitHub', href: ~p"/docs/tips/share-github"},
-          %{title: 'Share on contributors table', href: ~p"/docs/tips/share-contributors"}
-        ]
-      },
-      %{
-        title: 'Contracts',
-        links: [
-          %{title: 'Share on contributors table', href: ~p"/docs/contracts/share-contributors"}
-        ]
-      },
-      %{
-        title: 'Marketplace',
-        links: [
-          %{title: 'Share with Algora matches', href: ~p"/docs/marketplace/share-matches"}
-        ]
-      },
-      %{
-        title: 'Org workspace',
-        links: [
-          %{title: 'Share public board', href: ~p"/docs/workspace/public-board"},
+          %{title: 'Share bounty board', href: ~p"/docs/workspace/bounty-board"},
           %{title: 'View leaderboard', href: ~p"/docs/workspace/leaderboard"},
           %{title: 'View transactions', href: ~p"/docs/workspace/transactions"},
           %{title: 'Set up autopay', href: ~p"/docs/workspace/autopay"},
-          %{title: 'Customize bot message', href: ~p"/docs/workspace/bot-message"}
+          %{title: 'Customize bot messages', href: ~p"/docs/workspace/custom-bot-messages"}
         ]
       },
       %{

@@ -8,9 +8,9 @@ Install the Algora app from your org dashboard or settings.
 
 ![Install Algora app prompt](/images/docs/install-algora-app-prompt.png)
 
-## Install the app
+## Complete installation
 
-![Install Algora app](/images/docs/install-algora-app.png)
+<img src="/images/docs/install-algora-app.png" alt="Install Algora app" width="500" />
 
 ## Create your first bounty
 

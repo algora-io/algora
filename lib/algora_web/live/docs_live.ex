@@ -67,7 +67,7 @@ defmodule AlgoraWeb.DocsLive do
   @impl true
   def mount(%{"path" => []}, _session, socket) do
     docs = Algora.Content.list_content_rec("docs")
-    {:ok, assign(socket, docs: docs, page_title: "Docs")}
+    {:ok, assign(socket, docs: docs, page_title: "Docs", path: [])}
   end
 
   @impl true
@@ -78,12 +78,14 @@ defmodule AlgoraWeb.DocsLive do
 
     case Algora.Content.load_content(dir, slug) do
       {:ok, content} ->
-        {:ok, assign(socket, content: content, page_title: content.title)}
+        {:ok, assign(socket, content: content, page_title: content.title, path: path)}
 
       {:error, _reason} ->
         {:ok, push_navigate(socket, to: ~p"/docs")}
     end
   end
+
+  defp active?(current_path, href), do: Path.join(["/docs" | current_path]) == href
 
   defp render_navigation_section(assigns) do
     ~H"""
@@ -98,7 +100,12 @@ defmodule AlgoraWeb.DocsLive do
             <li class="relative">
               <.link
                 href={link.href}
-                class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                class={
+                  classes([
+                    "flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
+                    if(active?(assigns.path, link.href), do: "border-l-2 border-emerald-400")
+                  ])
+                }
               >
                 <span class="truncate">{link.title}</span>
               </.link>

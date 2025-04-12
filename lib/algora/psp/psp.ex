@@ -172,7 +172,7 @@ defmodule Algora.PSP do
     @moduledoc false
 
     @type t :: Stripe.LoginLink.t()
-    def create(params), do: Algora.PSP.client(__MODULE__).create(params)
+    def create(id, params \\ %{}), do: Algora.PSP.client(__MODULE__).create(id, params)
   end
 
   @type balance_transaction :: Algora.PSP.BalanceTransaction.t()

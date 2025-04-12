@@ -34,6 +34,19 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
       Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
     end
 
+    total_awarded_subtext =
+      [
+        "#{stats.rewarded_bounties_count} #{ngettext("bounty", "bounties", stats.rewarded_bounties_count)}",
+        if stats.rewarded_tips_count > 0 do
+          "#{stats.rewarded_tips_count} #{ngettext("tip", "tips", stats.rewarded_tips_count)}"
+        end,
+        if stats.rewarded_contracts_count > 0 do
+          "#{stats.rewarded_contracts_count} #{ngettext("contract", "contracts", stats.rewarded_contracts_count)}"
+        end
+      ]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join(" / ")
+
     socket =
       socket
       |> assign(:org, org)
@@ -45,6 +58,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
       |> assign(:transactions, transactions)
       |> assign(:top_earners, top_earners)
       |> assign(:stats, stats)
+      |> assign(:total_awarded_subtext, total_awarded_subtext)
 
     {:ok, socket}
   end
@@ -92,7 +106,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
         <.stat_card
           title="Total Awarded"
           value={Money.to_string!(@stats.total_awarded_amount)}
-          subtext={"#{@stats.rewarded_bounties_count} #{ngettext("bounty", "bounties", @stats.rewarded_bounties_count)} / #{@stats.rewarded_tips_count} #{ngettext("tip", "tips", @stats.rewarded_tips_count)} / #{@stats.rewarded_contracts_count} #{ngettext("contract", "contracts", @stats.rewarded_contracts_count)}"}
+          subtext={@total_awarded_subtext}
           navigate={~p"/#{@org.handle}/bounties?status=completed"}
           icon="tabler-gift"
         />

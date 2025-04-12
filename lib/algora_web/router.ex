@@ -40,10 +40,6 @@ defmodule AlgoraWeb.Router do
     forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
     forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug, upstream: "https://plausible.io/js/script.js"
     forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug, upstream: "https://plausible.io/api/event"
-
-    # forward "/docs", AlgoraWeb.Plugs.RewriteDocsPlug,
-    #   upstream: "https://docs.algora.io",
-    #   response_mode: :buffer
   end
 
   scope "/admin", AlgoraWeb do
@@ -134,6 +130,7 @@ defmodule AlgoraWeb.Router do
       live "/blog", BlogLive, :index
       live "/changelog/:slug", ChangelogLive, :show
       live "/changelog", ChangelogLive, :index
+      live "/docs/*path", DocsLive, :show
       live "/case-studies/:slug", CaseStudyLive, :show
       live "/case-studies", CaseStudyLive, :index
     end

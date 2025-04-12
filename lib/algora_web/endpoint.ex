@@ -4,6 +4,8 @@ defmodule AlgoraWeb.Endpoint do
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
+  alias AlgoraWeb.Plugs.CanonicalHostPlug
+
   @session_options [
     store: :cookie,
     key: "_algora_key",
@@ -60,13 +62,18 @@ defmodule AlgoraWeb.Endpoint do
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
 
-  defp canonical_host(conn, _opts) do
+  defp canonical_host(%{host: "docs.algora.io"} = conn, _opts),
+    do: redirect_to_canonical_host(conn, Path.join(["/docs", conn.request_path]))
+
+  defp canonical_host(conn, _opts), do: redirect_to_canonical_host(conn, conn.request_path)
+
+  defp redirect_to_canonical_host(conn, path) do
     :algora
     |> Application.get_env(:canonical_host)
     |> case do
       host when is_binary(host) ->
-        opts = PlugCanonicalHost.init(canonical_host: host)
-        PlugCanonicalHost.call(conn, opts)
+        opts = CanonicalHostPlug.init(canonical_host: host, path: path)
+        CanonicalHostPlug.call(conn, opts)
 
       _ ->
         conn

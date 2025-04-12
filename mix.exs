@@ -93,7 +93,6 @@ defmodule Algora.MixProject do
       {:mdex, "~> 0.2"},
       {:reverse_proxy_plug, "~> 3.0"},
       {:cors_plug, "~> 2.0"},
-      {:plug_canonical_host, "~> 2.0"},
       {:timex, "~> 3.7"},
       {:yaml_elixir, "~> 2.9"},
       {:hammer, "~> 7.0"},

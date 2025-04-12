@@ -16,6 +16,7 @@ config :algora,
   redirects: [
     {"/tv", "https://tv.algora.io"},
     {"/discord", "https://discord.gg/9RXD2nqbnG"},
+    {"/docs/bounties/payments", "/docs/payments"},
     {"/sdk", "https://github.com/algora-io/sdk"},
     {"/healthcare", "https://blog.algora.io/post/healthcare"},
     {"/podcast", "https://www.youtube.com/@algora-io/podcasts"},

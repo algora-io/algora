@@ -268,7 +268,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
             class={["h-full", if(@notes_edit_mode, do: "hidden", else: "block")]}
           >
             <div class="h-full rounded-lg border bg-muted/40 p-4 overflow-y-auto">
-              <div class="prose prose-sm max-w-none dark:prose-invert">
+              <div class="prose prose-sm max-w-none prose-invert">
                 {raw(@notes_preview)}
               </div>
             </div>

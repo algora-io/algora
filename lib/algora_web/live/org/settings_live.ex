@@ -167,7 +167,7 @@ defmodule AlgoraWeb.Org.SettingsLive do
               <div class="flex flex-col gap-2">
                 <h3 class="font-medium text-sm">Preview</h3>
                 <div class="flex-1 rounded-lg border bg-muted/40 p-4">
-                  <div class="prose prose-sm max-w-none dark:prose-invert">
+                  <div class="prose prose-sm max-w-none prose-invert">
                     {raw(@template_preview)}
                   </div>
                 </div>

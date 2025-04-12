@@ -12,7 +12,7 @@ defmodule AlgoraWeb.Legal.PrivacyLive do
     ~H"""
     <div class="container mx-auto px-4 py-8">
       <main class="h-full overflow-auto">
-        <article class="prose mx-auto py-24 dark:prose-invert lg:prose-lg">
+        <article class="prose mx-auto py-24 prose-invert lg:prose-lg">
           <h1>
             <span>PRIVACY POLICY</span>
           </h1>

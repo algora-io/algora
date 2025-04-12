@@ -60,7 +60,14 @@ defmodule AlgoraWeb.Endpoint do
   # Legacy tRPC endpoint
   defp canonical_host(%{path_info: ["api", "trpc" | _]} = conn, _opts), do: conn
 
-  defp canonical_host(conn, _opts) do
+  defp canonical_host(%{host: "docs.algora.io"} = conn, _opts) do
+    conn = %{conn | request_path: "/docs" <> conn.request_path}
+    redirect_to_canonical_host(conn)
+  end
+
+  defp canonical_host(conn, _opts), do: redirect_to_canonical_host(conn)
+
+  defp redirect_to_canonical_host(conn) do
     :algora
     |> Application.get_env(:canonical_host)
     |> case do

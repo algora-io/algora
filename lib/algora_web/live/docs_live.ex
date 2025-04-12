@@ -96,11 +96,11 @@ defmodule AlgoraWeb.DocsLive do
   defp render_navigation_section(assigns) do
     ~H"""
     <li :for={section <- nav()} class="relative mt-6">
-      <h2 class="text-xs font-semibold text-gray-900 dark:text-white">
+      <h2 class="text-xs font-semibold text-white light:text-gray-900">
         {section.title}
       </h2>
       <div class="relative mt-3 pl-2">
-        <div class="absolute inset-y-0 left-2 w-px bg-gray-900/10 dark:bg-white/5"></div>
+        <div class="absolute inset-y-0 left-2 w-px bg-white/5 light:bg-gray-900/10"></div>
         <ul role="list" class="border-l border-transparent">
           <%= for link <- section.links do %>
             <li class="relative">
@@ -108,7 +108,7 @@ defmodule AlgoraWeb.DocsLive do
                 href={link.href}
                 class={
                   classes([
-                    "flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white",
+                    "flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-400 hover:text-white light:text-gray-600 light:hover:text-gray-900",
                     if(active?(assigns.path, link.href), do: "border-l-2 border-emerald-400")
                   ])
                 }
@@ -127,50 +127,51 @@ defmodule AlgoraWeb.DocsLive do
   def render(assigns) do
     ~H"""
     <div class="lg:ml-72 xl:ml-80">
-      <header class="bg-black fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto scrollbar-thin border-r border-gray-900/10 px-6 pt-4 pb-8 dark:border-white/10 lg:block xl:w-80">
+      <header class="bg-black fixed inset-y-0 left-0 z-40 contents w-72 overflow-y-auto scrollbar-thin border-r border-white/10 light:border-gray-900/10 px-6 pt-4 pb-8 lg:block xl:w-80">
         <div
           class="hidden fixed inset-0 z-50 lg:hidden"
           id="mobile-menu"
           role="dialog"
           aria-modal="true"
         >
-          <div class="fixed inset-0 top-14 bg-gray-400/20 backdrop-blur-sm dark:bg-black/40 opacity-100">
+          <div class="fixed inset-0 top-14 bg-black/40 light:bg-gray-400/20 backdrop-blur-sm opacity-100">
           </div>
           <div id="headlessui-dialog-panel-:r1g:" data-headlessui-state="open">
             <div
-              class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-5 px-4 transition sm:px-6 lg:z-30 lg:px-8 bg-white dark:bg-black opacity-100"
+              class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-5 px-4 transition sm:px-6 lg:z-30 lg:px-8 bg-black light:bg-white opacity-100"
               data-projection-id="31"
               style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2;"
             >
-              <div class="absolute inset-x-0 top-full h-px transition bg-gray-900/7.5 dark:bg-white/7.5">
+              <div class="absolute inset-x-0 top-full h-px transition bg-white/7.5 light:bg-gray-900/7.5">
               </div>
               <div class="hidden md:block"></div>
               <div class="flex w-full items-center justify-between gap-5 lg:hidden">
                 <a aria-label="Home" href="/docs" tabindex="0">
                   <svg viewBox="0 0 100.14 39.42" aria-hidden="true" class="h-6">
                     <path
-                      class="fill-gray-900 dark:fill-white"
+                      class="fill-white light:fill-gray-900"
                       d="M19.25 9v19.24H16v-2.37a9.63 9.63 0 1 1 0-14.51V9ZM16 18.63A6.32 6.32 0 1 0 9.64 25 6.32 6.32 0 0 0 16 18.63Z"
                     >
                     </path>
-                    <path class="fill-gray-900 dark:fill-white" d="M22.29 0h3.29v28.24h-3.29Z"></path>
+                    <path class="fill-white light:fill-gray-900" d="M22.29 0h3.29v28.24h-3.29Z">
+                    </path>
                     <path
-                      class="fill-gray-900 dark:fill-white"
+                      class="fill-white light:fill-gray-900"
                       d="M47.6 34.27v.07a5.41 5.41 0 0 1-.69 2.52 4.78 4.78 0 0 1-1.39 1.54 5.61 5.61 0 0 1-3.25 1H34a5.21 5.21 0 0 1-3.88-1.5 6.25 6.25 0 0 1-1.53-4.2l3.29.11a2.58 2.58 0 0 0 .62 1.83 2 2 0 0 0 1.5.47h8.29c1.68 0 2-1.1 2-1.75a2 2 0 0 0-2-1.76h-8.2a5.35 5.35 0 0 1-5.52-5.51 6.07 6.07 0 0 1 1.24-3.62 9.5 9.5 0 0 1-1.31-4.86A9.62 9.62 0 0 1 38.11 9a9.72 9.72 0 0 1 5.37 1.61A5.78 5.78 0 0 1 47.53 9v3.28a2.54 2.54 0 0 0-1.72.63 9.67 9.67 0 0 1 1.86 5.7 9.79 9.79 0 0 1-5.44 8.7 10 10 0 0 1-4.16.91 9.75 9.75 0 0 1-6.07-2.1 3 3 0 0 0-.18.95 2.08 2.08 0 0 0 2.23 2.27h8.18a5.61 5.61 0 0 1 3.25 1.05 5.45 5.45 0 0 1 2.12 3.88ZM31.78 18.63a6.46 6.46 0 0 0 .84 3.15 5.88 5.88 0 0 0 1.43 1.71A6.34 6.34 0 0 0 38.11 25a6.26 6.26 0 0 0 6.32-6.32 6.27 6.27 0 0 0-2.16-4.71 6.2 6.2 0 0 0-4.16-1.61 6.35 6.35 0 0 0-6.33 6.27Z"
                     >
                     </path>
                     <path
-                      class="fill-gray-900 dark:fill-white"
+                      class="fill-white light:fill-gray-900"
                       d="M68.54 18.63A9.63 9.63 0 1 1 58.93 9a9.62 9.62 0 0 1 9.61 9.63Zm-9.61-6.32a6.32 6.32 0 1 0 6.32 6.32 6.35 6.35 0 0 0-6.32-6.32Z"
                     >
                     </path>
                     <path
-                      class="fill-gray-900 dark:fill-white"
+                      class="fill-white light:fill-gray-900"
                       d="M80.35 14.1h-3.28a1.9 1.9 0 0 0-.4-1.31 2 2 0 0 0-1.28-.48 1.83 1.83 0 0 0-2 1.57v14.36h-3.27V9h3.29v.4a5.24 5.24 0 0 1 1.9-.4 5.47 5.47 0 0 1 3.62 1.35 5 5 0 0 1 1.42 3.75Z"
                     >
                     </path>
                     <path
-                      class="fill-gray-900 dark:fill-white"
+                      class="fill-white light:fill-gray-900"
                       d="M100.14 9v19.24h-3.29v-2.37a9.63 9.63 0 1 1 0-14.51V9Zm-3.29 9.64A6.32 6.32 0 1 0 90.53 25a6.32 6.32 0 0 0 6.32-6.37Z"
                     >
                     </path>
@@ -178,7 +179,7 @@ defmodule AlgoraWeb.DocsLive do
                 </a>
                 <button
                   type="button"
-                  class="flex items-center justify-center rounded-md transition hover:bg-gray-900/5 dark:hover:bg-white/5"
+                  class="flex items-center justify-center rounded-md transition hover:bg-white/5 light:hover:bg-gray-900/5"
                   aria-label="Toggle navigation"
                   phx-click={JS.toggle(to: "#mobile-menu")}
                 >
@@ -187,7 +188,7 @@ defmodule AlgoraWeb.DocsLive do
                     fill="none"
                     stroke-linecap="round"
                     aria-hidden="true"
-                    class="h-5 w-5 stroke-gray-900 dark:stroke-white"
+                    class="h-5 w-5 stroke-white light:stroke-gray-900"
                   >
                     <path d="m1.5 1 7 7M8.5 1l-7 7"></path>
                   </svg>
@@ -198,7 +199,7 @@ defmodule AlgoraWeb.DocsLive do
                   <ul role="list" class="flex items-center gap-8">
                     <li>
                       <a
-                        class="text-sm leading-5 text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                        class="text-sm leading-5 text-gray-400 hover:text-white light:text-gray-600 light:hover:text-gray-900"
                         href="/docs/contact"
                       >
                         Contact
@@ -206,27 +207,27 @@ defmodule AlgoraWeb.DocsLive do
                     </li>
                   </ul>
                 </nav>
-                <div class="hidden md:block md:h-5 md:w-px md:bg-gray-900/10 md:dark:bg-white/15">
+                <div class="hidden md:block md:h-5 md:w-px md:bg-white/15 light:md:bg-gray-900/10">
                 </div>
                 <div class="hidden whitespace-nowrap md:contents">
                   <a
-                    class="inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-gray-900 py-1 px-3 text-white hover:bg-gray-700 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-1 dark:ring-inset dark:ring-emerald-400/20 dark:hover:bg-emerald-400/10 dark:hover:text-emerald-300 dark:hover:ring-emerald-300"
-                    href="https://tv.algora.io"
+                    class="px-3 py-1 inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/20 hover:bg-emerald-400/10 hover:text-emerald-300 hover:ring-emerald-300 light:bg-gray-900 light:text-white light:hover:bg-gray-700"
+                    href="/"
                   >
-                    Start streaming
+                    Get started
                   </a>
                 </div>
               </div>
             </div>
             <div
-              class="fixed left-0 top-14 bottom-0 w-full overflow-y-auto bg-white px-4 pt-6 pb-4 shadow-lg shadow-gray-900/10 ring-1 ring-gray-900/7.5 dark:bg-black dark:ring-gray-800 sm:px-6 sm:pb-10 md:max-w-sm translate-x-0"
+              class="fixed left-0 top-14 bottom-0 w-full overflow-y-auto bg-black light:bg-white px-4 pt-6 pb-4 shadow-lg shadow-gray-800 light:shadow-gray-900/10 ring-1 ring-gray-800 light:ring-gray-900/7.5 sm:px-6 sm:pb-10 md:max-w-sm translate-x-0"
               data-projection-id="32"
             >
               <nav>
                 <ul role="list">
                   <li :for={section <- nav()} class="relative mt-6">
                     <h2
-                      class="text-xs font-semibold text-gray-900 dark:text-white"
+                      class="text-xs font-semibold text-white light:text-gray-900"
                       data-projection-id="36"
                     >
                       {section.title}
@@ -235,7 +236,7 @@ defmodule AlgoraWeb.DocsLive do
                       <ul role="list" class="border-l border-transparent">
                         <li :for={link <- section.links} class="relative" data-projection-id="40">
                           <a
-                            class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                            class="flex justify-between gap-2 py-1 pr-3 text-sm transition pl-4 text-gray-400 hover:text-white light:text-gray-600 light:hover:text-gray-900"
                             href={link.href}
                           >
                             <span class="truncate">{link.title}</span>
@@ -253,17 +254,17 @@ defmodule AlgoraWeb.DocsLive do
           <.wordmark class="h-8 w-auto text-foreground" />
         </div>
         <div
-          class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-5 px-4 transition sm:px-6 lg:z-30 lg:px-8 backdrop-blur-sm dark:backdrop-blur lg:left-72 xl:left-80 bg-white/[var(--bg-opacity-light)] dark:bg-gray-900/[var(--bg-opacity-dark)]"
+          class="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-5 px-4 transition sm:px-6 lg:z-30 lg:px-8 backdrop-blur-sm lg:left-72 xl:left-80 bg-gray-900/[var(--bg-opacity-dark)] light:bg-white/[var(--bg-opacity-light)]"
           style="--bg-opacity-light: 0.5; --bg-opacity-dark: 0.2;"
         >
-          <div class="absolute inset-x-0 top-full h-px transition bg-gray-900/7.5 dark:bg-white/7.5">
+          <div class="absolute inset-x-0 top-full h-px transition bg-white/7.5 light:bg-gray-900/7.5">
           </div>
           <div class="hidden md:block"></div>
           <div class="flex w-full items-center justify-between gap-5 lg:hidden">
             <.wordmark class="h-6 w-auto text-foreground" />
             <button
               type="button"
-              class="flex items-center justify-center rounded-md transition hover:bg-gray-900/5 dark:hover:bg-white/5"
+              class="flex items-center justify-center rounded-md transition hover:bg-white/5 light:hover:bg-gray-900/5"
               aria-label="Toggle navigation"
               phx-click={JS.toggle(to: "#mobile-menu")}
             >
@@ -277,7 +278,7 @@ defmodule AlgoraWeb.DocsLive do
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                class="h-5 w-5 stroke-gray-900 dark:stroke-white"
+                class="h-5 w-5 stroke-white light:stroke-gray-900"
               >
                 <path d="M4 8l16 0"></path>
                 <path d="M4 16l16 0"></path>
@@ -289,7 +290,7 @@ defmodule AlgoraWeb.DocsLive do
               <ul role="list" class="flex items-center gap-8">
                 <li>
                   <a
-                    class="text-sm leading-5 text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                    class="text-sm leading-5 text-gray-400 hover:text-white light:text-gray-600 light:hover:text-gray-900"
                     href="/docs/contact"
                   >
                     Contact
@@ -297,10 +298,10 @@ defmodule AlgoraWeb.DocsLive do
                 </li>
               </ul>
             </nav>
-            <div class="hidden md:block md:h-5 md:w-px md:bg-gray-900/10 md:dark:bg-white/15"></div>
+            <div class="hidden md:block md:h-5 md:w-px md:bg-white/15 light:md:bg-gray-900/10"></div>
             <div class="hidden whitespace-nowrap md:contents">
               <a
-                class="inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-gray-900 py-1 px-3 text-white hover:bg-gray-700 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-1 dark:ring-inset dark:ring-emerald-400/20 dark:hover:bg-emerald-400/10 dark:hover:text-emerald-300 dark:hover:ring-emerald-300"
+                class="px-3 py-1 inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/20 hover:bg-emerald-400/10 hover:text-emerald-300 hover:ring-emerald-300 light:bg-gray-900 light:text-white light:hover:bg-gray-700"
                 href="/"
               >
                 Get started
@@ -312,7 +313,7 @@ defmodule AlgoraWeb.DocsLive do
           <ul role="list">
             <li class="md:hidden">
               <a
-                class="block py-1 text-sm text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                class="block py-1 text-sm text-gray-400 hover:text-white light:text-gray-600 light:hover:text-gray-900"
                 href="https://docs.algora.io"
               >
                 Documentation
@@ -320,7 +321,7 @@ defmodule AlgoraWeb.DocsLive do
             </li>
             <li class="md:hidden">
               <a
-                class="block py-1 text-sm text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                class="block py-1 text-sm text-gray-400 hover:text-white light:text-gray-600 light:hover:text-gray-900"
                 href="mailto:info@algora.io"
               >
                 Contact
@@ -329,7 +330,7 @@ defmodule AlgoraWeb.DocsLive do
             {render_navigation_section(assigns)}
             <li class="sticky bottom-0 z-10 mt-6 md:hidden">
               <a
-                class="inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-gray-900 py-1 px-3 text-white hover:bg-gray-700 dark:bg-emerald-500 dark:text-white dark:hover:bg-emerald-400 w-full"
+                class="px-3 py-1 inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/20 hover:bg-emerald-400/10 hover:text-emerald-300 hover:ring-emerald-300 light:bg-gray-900 light:text-white light:hover:bg-gray-700"
                 href="/"
               >
                 Get started
@@ -340,13 +341,13 @@ defmodule AlgoraWeb.DocsLive do
       </header>
       <div class="h-full relative px-4 pt-14 sm:px-6 lg:px-8">
         <main class="py-16">
-          <article class="prose dark:prose-invert max-w-5xl min-h-[calc(100svh-17rem)]">
+          <article class="prose prose-invert light:prose max-w-5xl min-h-[calc(100svh-17rem)]">
             <div class="bg-black absolute -z-10 inset-0 mx-0 max-w-none overflow-hidden">
-              <div class="absolute left-1/2 top-0 ml-[-38rem] h-[25rem] w-[81.25rem] dark:[mask-image:linear-gradient(white,transparent)]">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#36b49f] to-[#DBFF75] opacity-40 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] dark:from-[#36b49f]/30 dark:to-[#DBFF75]/30 dark:opacity-100">
+              <div class="absolute [mask-image:linear-gradient(white,transparent)] h-[25rem] left-1/2 ml-[-38rem] top-0 w-[81.25rem]">
+                <div class="absolute inset-0 bg-gradient-to-r light:from-[#36b49f] light:to-[#DBFF75] light:opacity-40 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] from-[#36b49f]/30 to-[#DBFF75]/30 opacity-100">
                   <svg
                     aria-hidden="true"
-                    class="absolute inset-x-0 inset-y-[-50%] h-[200%] w-full skew-y-[-18deg] fill-black/40 stroke-black/50 mix-blend-overlay dark:fill-white/2.5 dark:stroke-white/5"
+                    class="absolute inset-x-0 inset-y-[-50%] h-[200%] w-full skew-y-[-18deg] light:fill-black/40 light:stroke-black/50 mix-blend-overlay fill-white/2.5 stroke-white/5"
                   >
                     <defs>
                       <pattern
@@ -369,14 +370,6 @@ defmodule AlgoraWeb.DocsLive do
                     </svg>
                   </svg>
                 </div>
-                <svg
-                  viewBox="0 0 1113 440"
-                  aria-hidden="true"
-                  class="absolute top-0 left-1/2 ml-[-19rem] w-[69.5625rem] fill-white blur-[26px] dark:hidden"
-                >
-                  <path d="M.016 439.5s-9.5-300 434-300S882.516 20 882.516 20V0h230.004v439.5H.016Z">
-                  </path>
-                </svg>
               </div>
             </div>
             <%= if assigns[:content] do %>
@@ -387,8 +380,8 @@ defmodule AlgoraWeb.DocsLive do
           </article>
         </main>
         <footer class="max-w-2xl space-y-10 pb-8 lg:max-w-5xl">
-          <div class="flex flex-col items-center justify-between gap-5 border-t border-gray-900/5 pt-8 dark:border-white/5 sm:flex-row">
-            <p class="text-xs text-gray-600 dark:text-gray-400">
+          <div class="flex flex-col items-center justify-between gap-5 border-t border-white/5 light:border-gray-900/5 pt-8 sm:flex-row">
+            <p class="text-xs text-gray-400 light:text-gray-600">
               © {DateTime.utc_now().year} Algora, Public Benefit Corporation
             </p>
             <div class="flex gap-4">
@@ -398,11 +391,15 @@ defmodule AlgoraWeb.DocsLive do
                 rel="noopener"
                 target="_blank"
               >
-                <span class="sr-only">Follow us on Twitter</span><svg
+                <span class="sr-only">Follow us on Twitter</span>
+                <svg
                   viewBox="0 0 20 20"
                   aria-hidden="true"
-                  class="h-5 w-5 fill-gray-700 transition group-hover:fill-gray-900 dark:group-hover:fill-gray-500"
-                ><path d="M16.712 6.652c.01.146.01.29.01.436 0 4.449-3.267 9.579-9.242 9.579v-.003a8.963 8.963 0 0 1-4.98-1.509 6.379 6.379 0 0 0 4.807-1.396c-1.39-.027-2.608-.966-3.035-2.337.487.097.99.077 1.467-.059-1.514-.316-2.606-1.696-2.606-3.3v-.041c.45.26.956.404 1.475.42C3.18 7.454 2.74 5.486 3.602 3.947c1.65 2.104 4.083 3.382 6.695 3.517a3.446 3.446 0 0 1 .94-3.217 3.172 3.172 0 0 1 4.596.148 6.38 6.38 0 0 0 2.063-.817 3.357 3.357 0 0 1-1.428 1.861 6.283 6.283 0 0 0 1.865-.53 6.735 6.735 0 0 1-1.62 1.744Z"></path></svg>
+                  class="h-5 w-5 fill-gray-400 group-hover:fill-gray-500 light:fill-gray-700 light:group-hover:fill-gray-900"
+                >
+                  <path d="M16.712 6.652c.01.146.01.29.01.436 0 4.449-3.267 9.579-9.242 9.579v-.003a8.963 8.963 0 0 1-4.98-1.509 6.379 6.379 0 0 0 4.807-1.396c-1.39-.027-2.608-.966-3.035-2.337.487.097.99.077 1.467-.059-1.514-.316-2.606-1.696-2.606-3.3v-.041c.45.26.956.404 1.475.42C3.18 7.454 2.74 5.486 3.602 3.947c1.65 2.104 4.083 3.382 6.695 3.517a3.446 3.446 0 0 1 .94-3.217 3.172 3.172 0 0 1 4.596.148 6.38 6.38 0 0 0 2.063-.817 3.357 3.357 0 0 1-1.428 1.861 6.283 6.283 0 0 0 1.865-.53 6.735 6.735 0 0 1-1.62 1.744Z">
+                  </path>
+                </svg>
               </.link>
               <.link
                 class="group"
@@ -413,7 +410,7 @@ defmodule AlgoraWeb.DocsLive do
                 <span class="sr-only">Join our Discord server</span><svg
                   viewBox="0 0 20 20"
                   aria-hidden="true"
-                  class="h-5 w-5 fill-gray-700 transition group-hover:fill-gray-900 dark:group-hover:fill-gray-500"
+                  class="h-5 w-5 fill-gray-400 group-hover:fill-gray-500 light:fill-gray-700 light:group-hover:fill-gray-900"
                 ><path d="M16.238 4.515a14.842 14.842 0 0 0-3.664-1.136.055.055 0 0 0-.059.027 10.35 10.35 0 0 0-.456.938 13.702 13.702 0 0 0-4.115 0 9.479 9.479 0 0 0-.464-.938.058.058 0 0 0-.058-.027c-1.266.218-2.497.6-3.664 1.136a.052.052 0 0 0-.024.02C1.4 8.023.76 11.424 1.074 14.782a.062.062 0 0 0 .024.042 14.923 14.923 0 0 0 4.494 2.272.058.058 0 0 0 .064-.02c.346-.473.654-.972.92-1.496a.057.057 0 0 0-.032-.08 9.83 9.83 0 0 1-1.404-.669.058.058 0 0 1-.029-.046.058.058 0 0 1 .023-.05c.094-.07.189-.144.279-.218a.056.056 0 0 1 .058-.008c2.946 1.345 6.135 1.345 9.046 0a.056.056 0 0 1 .059.007c.09.074.184.149.28.22a.058.058 0 0 1 .023.049.059.059 0 0 1-.028.046 9.224 9.224 0 0 1-1.405.669.058.058 0 0 0-.033.033.056.056 0 0 0 .002.047c.27.523.58 1.022.92 1.495a.056.056 0 0 0 .062.021 14.878 14.878 0 0 0 4.502-2.272.055.055 0 0 0 .016-.018.056.056 0 0 0 .008-.023c.375-3.883-.63-7.256-2.662-10.246a.046.046 0 0 0-.023-.021Zm-9.223 8.221c-.887 0-1.618-.814-1.618-1.814s.717-1.814 1.618-1.814c.908 0 1.632.821 1.618 1.814 0 1-.717 1.814-1.618 1.814Zm5.981 0c-.887 0-1.618-.814-1.618-1.814s.717-1.814 1.618-1.814c.908 0 1.632.821 1.618 1.814 0 1-.71 1.814-1.618 1.814Z"></path></svg>
               </.link>
             </div>
@@ -432,7 +429,7 @@ defmodule AlgoraWeb.DocsLive do
     </p>
     <div class="not-prose mb-16 mt-6 flex gap-3">
       <a
-        class="inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition rounded-full bg-gray-900 py-1 px-3 text-white hover:bg-gray-700 dark:bg-emerald-400/10 dark:text-emerald-400 dark:ring-1 dark:ring-inset dark:ring-emerald-400/20 dark:hover:bg-emerald-400/10 dark:hover:text-emerald-300 dark:hover:ring-emerald-300"
+        class="px-3 py-1 inline-flex gap-0.5 items-center justify-center overflow-hidden text-sm font-medium transition rounded-full bg-emerald-400/10 text-emerald-400 ring-1 ring-inset ring-emerald-400/20 hover:bg-emerald-400/10 hover:text-emerald-300 hover:ring-emerald-300 light:bg-gray-900 light:text-white light:hover:bg-gray-700"
         href="/"
       >
         Get started<svg
@@ -449,13 +446,13 @@ defmodule AlgoraWeb.DocsLive do
       </a>
     </div>
     <div class="my-16 xl:max-w-none">
-      <div class="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-gray-900/5 pt-10 dark:border-white/5 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+      <div class="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-white/5 light:border-gray-900/5 pt-10 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/[0.02] stroke-black/5 dark:fill-white/1 dark:stroke-white/2.5"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/1 stroke-white/2.5 light:fill-black/[0.02] light:stroke-black/5"
               >
                 <defs>
                   <pattern
@@ -477,7 +474,7 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
             <div
-              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#D7EDEA] to-[#F4FBDF] opacity-0 transition duration-300 group-hover:opacity-100 dark:from-[#202D2E] dark:to-[#303428]"
+              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#202D2E] to-[#303428] opacity-0 transition duration-300 group-hover:opacity-100 light:from-[#D7EDEA] light:to-[#F4FBDF]"
               style="mask-image: radial-gradient(180px at 0px 0px, white, transparent);"
             >
             </div>
@@ -487,7 +484,7 @@ defmodule AlgoraWeb.DocsLive do
             >
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/50 stroke-black/70 dark:fill-white/2.5 dark:stroke-white/10"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/2.5 stroke-white/10 light:fill-black/50 light:stroke-black/70"
               >
                 <defs>
                   <pattern
@@ -509,31 +506,31 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
           </div>
-          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/7.5 group-hover:ring-gray-900/10 dark:ring-white/10 dark:group-hover:ring-white/20">
+          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20 light:ring-gray-900/7.5 light:group-hover:ring-gray-900/10">
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-diamond"
-                class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
+                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
               />
             </div>
-            <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <.link navigate={~p"/docs/bounties/in-your-own-repos"}>
+            <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
+              <.link navigate="/docs/bounties/in-your-own-repos">
                 <span class="absolute inset-0 rounded-2xl"></span>Bounties
               </.link>
             </h3>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-400 light:text-gray-600">
               Add USD rewards on issues and pay on-merge
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/[0.02] stroke-black/5 dark:fill-white/1 dark:stroke-white/2.5"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/1 stroke-white/2.5 light:fill-black/[0.02] light:stroke-black/5"
               >
                 <defs>
                   <pattern
@@ -555,7 +552,7 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
             <div
-              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#D7EDEA] to-[#F4FBDF] opacity-0 transition duration-300 group-hover:opacity-100 dark:from-[#202D2E] dark:to-[#303428]"
+              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#202D2E] to-[#303428] opacity-0 transition duration-300 group-hover:opacity-100 light:from-[#D7EDEA] light:to-[#F4FBDF]"
               style="mask-image: radial-gradient(180px at 0px 0px, white, transparent);"
             >
             </div>
@@ -565,7 +562,7 @@ defmodule AlgoraWeb.DocsLive do
             >
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/50 stroke-black/70 dark:fill-white/2.5 dark:stroke-white/10"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/2.5 stroke-white/10 light:fill-black/50 light:stroke-black/70"
               >
                 <defs>
                   <pattern
@@ -587,31 +584,31 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
           </div>
-          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/7.5 group-hover:ring-gray-900/10 dark:ring-white/10 dark:group-hover:ring-white/20">
+          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20 light:ring-gray-900/7.5 light:group-hover:ring-gray-900/10">
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-contract"
-                class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
+                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
               />
             </div>
-            <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <.link navigate={~p"/docs/contracts/offer-contract"}>
+            <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
+              <.link navigate="/docs/contracts/offer-contract">
                 <span class="absolute inset-0 rounded-2xl"></span>Contract work
               </.link>
             </h3>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-400 light:text-gray-600">
               Collaborate flexibly, hourly or fixed rate
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/[0.02] stroke-black/5 dark:fill-white/1 dark:stroke-white/2.5"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/1 stroke-white/2.5 light:fill-black/[0.02] light:stroke-black/5"
               >
                 <defs>
                   <pattern
@@ -633,7 +630,7 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
             <div
-              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#D7EDEA] to-[#F4FBDF] opacity-0 transition duration-300 group-hover:opacity-100 dark:from-[#202D2E] dark:to-[#303428]"
+              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#202D2E] to-[#303428] opacity-0 transition duration-300 group-hover:opacity-100 light:from-[#D7EDEA] light:to-[#F4FBDF]"
               style="mask-image: radial-gradient(180px at 230.333px 51.1111px, white, transparent);"
             >
             </div>
@@ -643,7 +640,7 @@ defmodule AlgoraWeb.DocsLive do
             >
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/50 stroke-black/70 dark:fill-white/2.5 dark:stroke-white/10"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/2.5 stroke-white/10 light:fill-black/50 light:stroke-black/70"
               >
                 <defs>
                   <pattern
@@ -665,31 +662,31 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
           </div>
-          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/7.5 group-hover:ring-gray-900/10 dark:ring-white/10 dark:group-hover:ring-white/20">
+          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20 light:ring-gray-900/7.5 light:group-hover:ring-gray-900/10">
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-user-star"
-                class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
+                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
               />
             </div>
-            <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <.link navigate={~p"/docs/marketplace/matches"}>
+            <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
+              <.link navigate="/docs/marketplace/matches">
                 <span class="absolute inset-0 rounded-2xl"></span>Marketplace
               </.link>
             </h3>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-400 light:text-gray-600">
               Collaborate with Algora experts
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-background transition-shadow hover:shadow-md hover:shadow-gray-900/5 dark:bg-white/2.5 dark:hover:shadow-black/5">
+        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/[0.02] stroke-black/5 dark:fill-white/1 dark:stroke-white/2.5"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/1 stroke-white/2.5 light:fill-black/[0.02] light:stroke-black/5"
               >
                 <defs>
                   <pattern
@@ -710,7 +707,7 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
             <div
-              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#D7EDEA] to-[#F4FBDF] opacity-0 transition duration-300 group-hover:opacity-100 dark:from-[#202D2E] dark:to-[#303428]"
+              class="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#202D2E] to-[#303428] opacity-0 transition duration-300 group-hover:opacity-100 light:from-[#D7EDEA] light:to-[#F4FBDF]"
               style="mask-image: radial-gradient(180px at 208.333px 143.111px, white, transparent);"
             >
             </div>
@@ -720,7 +717,7 @@ defmodule AlgoraWeb.DocsLive do
             >
               <svg
                 aria-hidden="true"
-                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-black/50 stroke-black/70 dark:fill-white/2.5 dark:stroke-white/10"
+                class="absolute inset-x-0 inset-y-[-30%] h-[160%] w-full skew-y-[-18deg] fill-white/2.5 stroke-white/10 light:fill-black/50 light:stroke-black/70"
               >
                 <defs>
                   <pattern
@@ -741,21 +738,21 @@ defmodule AlgoraWeb.DocsLive do
               </svg>
             </div>
           </div>
-          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/7.5 group-hover:ring-gray-900/10 dark:ring-white/10 dark:group-hover:ring-white/20">
+          <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/20 light:ring-gray-900/7.5 light:group-hover:ring-gray-900/10">
           </div>
           <div class="relative rounded-2xl px-4 pt-16 pb-4">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/5 ring-1 ring-gray-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-gray-900/25 dark:bg-white/7.5 dark:ring-white/15 dark:group-hover:bg-emerald-300/10 dark:group-hover:ring-emerald-400">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-image-in-picture"
-                class="h-5 w-5 fill-gray-700/10 stroke-gray-700 transition-colors duration-300 group-hover:stroke-gray-900 dark:fill-white/10 dark:stroke-gray-400 dark:group-hover:fill-emerald-300/10 dark:group-hover:stroke-emerald-400"
+                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
               />
             </div>
-            <h3 class="mt-4 text-sm font-semibold leading-7 text-gray-900 dark:text-white">
-              <.link navigate={~p"/docs/embed/sdk"}>
+            <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
+              <.link navigate="/docs/embed/sdk">
                 <span class="absolute inset-0 rounded-2xl"></span>Embed
               </.link>
             </h3>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-gray-400 light:text-gray-600">
               Embed Algora in your website, readme, docs, etc.
             </p>
           </div>

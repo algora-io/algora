@@ -64,7 +64,7 @@ defmodule AlgoraWeb.DocsLive do
       %{
         title: "Payments",
         links: [
-          %{title: "Payments", href: ~p"/docs/payments/payments"},
+          %{title: "Payments", href: ~p"/docs/payments"},
           %{title: "Reporting", href: ~p"/docs/payments/reporting"}
         ]
       }

@@ -16,7 +16,7 @@ defmodule AlgoraWeb.Constants do
       github_repo_url: "https://github.com/algora-io/console",
       github_repo_api_url: "https://api.github.com/repos/algora-io/console",
       docs_url: ~p"/docs",
-      docs_supported_countries_url: ~p"/docs/payments/payments",
+      docs_supported_countries_url: ~p"/docs/payments",
       demo_url: "https://www.youtube.com/watch?v=Ts5GhlEROrs",
       sdk_url: ~p"/sdk",
       privacy_url: ~p"/legal/privacy",

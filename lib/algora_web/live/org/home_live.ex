@@ -24,6 +24,19 @@ defmodule AlgoraWeb.Org.HomeLive do
     stats = Bounties.fetch_stats(org_id: org.id, current_user: socket.assigns[:current_user])
     transactions = Payments.list_hosted_transactions(org.id, limit: page_size())
 
+    total_awarded_subtext =
+      [
+        "#{stats.rewarded_bounties_count} #{ngettext("bounty", "bounties", stats.rewarded_bounties_count)}",
+        if stats.rewarded_tips_count > 0 do
+          "#{stats.rewarded_tips_count} #{ngettext("tip", "tips", stats.rewarded_tips_count)}"
+        end,
+        if stats.rewarded_contracts_count > 0 do
+          "#{stats.rewarded_contracts_count} #{ngettext("contract", "contracts", stats.rewarded_contracts_count)}"
+        end
+      ]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join(" / ")
+
     socket =
       socket
       |> assign(:org, org)
@@ -32,6 +45,7 @@ defmodule AlgoraWeb.Org.HomeLive do
       |> assign(:transactions, transactions)
       |> assign(:top_earners, top_earners)
       |> assign(:stats, stats)
+      |> assign(:total_awarded_subtext, total_awarded_subtext)
 
     {:ok, socket}
   end
@@ -79,7 +93,7 @@ defmodule AlgoraWeb.Org.HomeLive do
         <.stat_card
           title="Total Awarded"
           value={Money.to_string!(@stats.total_awarded_amount)}
-          subtext={"#{@stats.rewarded_bounties_count} #{ngettext("bounty", "bounties", @stats.rewarded_bounties_count)} / #{@stats.rewarded_tips_count} #{ngettext("tip", "tips", @stats.rewarded_tips_count)} / #{@stats.rewarded_contracts_count} #{ngettext("contract", "contracts", @stats.rewarded_contracts_count)}"}
+          subtext={@total_awarded_subtext}
           navigate={~p"/#{@org.handle}/bounties?status=completed"}
           icon="tabler-gift"
         />

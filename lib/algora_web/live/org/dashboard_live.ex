@@ -47,7 +47,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp list_contributors(_current_org), do: []
 
   @impl true
-  def mount(_params, _session, %{assigns: %{current_user: nil, live_action: :preview}} = socket) do
+  def mount(_params, _session, %{assigns: %{live_action: :preview, current_org: nil}} = socket) do
     {:ok, socket}
   end
 
@@ -110,7 +110,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def handle_params(_params, _uri, %{assigns: %{current_user: nil, live_action: :preview}} = socket) do
+  def handle_params(_params, _uri, %{assigns: %{live_action: :preview, current_org: nil}} = socket) do
     {:noreply, socket}
   end
 

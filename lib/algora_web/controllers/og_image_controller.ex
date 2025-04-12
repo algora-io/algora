@@ -7,7 +7,12 @@ defmodule AlgoraWeb.OGImageController do
 
   @opts [type: "png", width: 1200, height: 630, scale_factor: 1]
 
-  defp max_age, do: Algora.config([AlgoraWeb.OGImageController, :max_age])
+  defp max_age(path) do
+    case path do
+      ["go" | _] -> 2_147_483_648
+      _ -> Algora.config([AlgoraWeb.OGImageController, :max_age])
+    end
+  end
 
   def generate(conn, %{"path" => path}) do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
@@ -15,11 +20,12 @@ defmodule AlgoraWeb.OGImageController do
 
     case :get |> Finch.build(url) |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body, headers: headers}} when status in 200..299 ->
-        if should_regenerate?(headers) do
+        if should_regenerate?(path, headers) do
           case take_and_upload_screenshot(path) do
             {:ok, body} ->
               conn
               |> put_resp_content_type("image/png")
+              |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
               |> send_resp(200, body)
 
             {:error, reason} ->
@@ -28,6 +34,7 @@ defmodule AlgoraWeb.OGImageController do
         else
           conn
           |> put_resp_content_type("image/png")
+          |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
           |> send_resp(200, body)
         end
 
@@ -36,6 +43,7 @@ defmodule AlgoraWeb.OGImageController do
           {:ok, body} ->
             conn
             |> put_resp_content_type("image/png")
+            |> put_resp_header("cache-control", "public, max-age=#{max_age(path)}")
             |> send_resp(200, body)
 
           {:error, reason} ->
@@ -44,12 +52,12 @@ defmodule AlgoraWeb.OGImageController do
     end
   end
 
-  defp should_regenerate?(headers) do
+  defp should_regenerate?(path, headers) do
     case List.keyfind(headers, "last-modified", 0) do
       {_, last_modified} ->
         case DateTime.from_iso8601(convert_to_iso8601(last_modified)) do
           {:ok, modified_at, _} ->
-            DateTime.diff(DateTime.utc_now(), modified_at, :second) > max_age()
+            DateTime.diff(DateTime.utc_now(), modified_at, :second) > max_age(path)
 
           _error ->
             true
@@ -86,7 +94,7 @@ defmodule AlgoraWeb.OGImageController do
             Task.start(fn ->
               Algora.S3.upload(body, object_path,
                 content_type: "image/png",
-                cache_control: "public, max-age=#{max_age()}"
+                cache_control: "public, max-age=#{max_age(path)}"
               )
 
               File.rm(filepath)

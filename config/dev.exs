@@ -157,4 +157,4 @@ config :algora,
   ingest_static_url: System.get_env("INGEST_STATIC_URL"),
   ingest_token: System.get_env("INGEST_TOKEN")
 
-config :algora, AlgoraWeb.OGImageController, max_age: 0
+config :algora, AlgoraWeb.OGImageController, max_age: 600

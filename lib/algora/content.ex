@@ -5,7 +5,7 @@ defmodule Algora.Content do
 
   alias Algora.Markdown
 
-  defstruct [:slug, :title, :date, :tags, :authors, :content]
+  defstruct [:slug, :title, :date, :tags, :authors, :content, :path]
 
   defp base_path, do: Path.join([:code.priv_dir(:algora), "content"])
 
@@ -36,6 +36,57 @@ defmodule Algora.Content do
       content
     end)
     |> Enum.sort_by(& &1.date, :desc)
+  end
+
+  def list_content_rec(directory) do
+    list_content_rec_helper([base_path(), directory], directory)
+  end
+
+  defp list_content_rec_helper(path, root_dir) do
+    case File.ls(Path.join(path)) do
+      {:ok, entries} ->
+        entries
+        |> Enum.reduce(%{files: [], dirs: %{}}, fn entry, acc ->
+          full_path = Path.join(path ++ [entry])
+
+          cond do
+            File.dir?(full_path) ->
+              nested_content = list_content_rec_helper(path ++ [entry], root_dir)
+              put_in(acc, [:dirs, entry], nested_content)
+
+            String.ends_with?(entry, ".md") ->
+              # Get the path relative to base_path
+              relative_path =
+                full_path
+                |> Path.relative_to(base_path())
+                |> Path.rootname(".md")
+
+              path_segments =
+                relative_path
+                |> Path.split()
+                |> Enum.drop(1)
+
+              directory = Path.dirname(relative_path)
+              slug = Path.basename(relative_path)
+
+              case load_content(directory, slug) do
+                {:ok, content} ->
+                  content_with_path = Map.put(content, :path, path_segments)
+                  Map.update!(acc, :files, &[content_with_path | &1])
+
+                _ ->
+                  acc
+              end
+
+            true ->
+              acc
+          end
+        end)
+        |> Map.update!(:files, &Enum.sort_by(&1, fn file -> file.date end, :desc))
+
+      {:error, _} ->
+        %{files: [], dirs: %{}}
+    end
   end
 
   def format_date(date_string) when is_binary(date_string) do

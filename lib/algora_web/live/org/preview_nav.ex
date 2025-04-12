@@ -10,15 +10,17 @@ defmodule AlgoraWeb.Org.PreviewNav do
   def on_mount(:default, %{"repo_owner" => repo_owner, "repo_name" => repo_name}, _session, socket) do
     current_context = socket.assigns[:current_context]
 
+    socket =
+      socket
+      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+      |> assign(:current_org, current_context)
+      |> assign(:current_user_role, :admin)
+      |> assign(:nav, nav_items(repo_owner, repo_name))
+      |> assign(:contacts, [])
+      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
+
     if current_context && current_context.last_context == "repo/#{repo_owner}/#{repo_name}" do
-      {:cont,
-       socket
-       |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
-       |> assign(:current_org, current_context)
-       |> assign(:current_user_role, :admin)
-       |> assign(:nav, nav_items(repo_owner, repo_name))
-       |> assign(:contacts, [])
-       |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+      {:cont, socket}
     else
       preview_user =
         case socket.assigns[:preview_user] do

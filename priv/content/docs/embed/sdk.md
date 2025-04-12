@@ -61,7 +61,7 @@ Alternatively, you can use the CDN bundle by adding these tags to your HTML:
 ## Quickstart
 
 <details>
-  <summary><h3>Bounty board (HTML & CSS)</h3></summary>
+  <summary class="list-none cursor-pointer flex items-center gap-1"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg><div class="font-semibold text-lg text-foreground">HTML & CSS</div></summary>
 
 Add these tags to the `<head>` of your HTML:
 
@@ -108,7 +108,7 @@ Customize the styling as you like:
 </details>
 
 <details>
-  <summary><h3>Bounty board (React & Tailwind)</h3></summary>
+  <summary class="mt-4 list-none cursor-pointer flex items-center gap-1"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg><div class="font-semibold text-lg text-foreground">React & Tailwind</div></summary>
 
 ```tsx
 import { useEffect, useState } from "react";
@@ -227,7 +227,7 @@ function Callout() {
 </details>
 
 <details>
-  <summary><h3>Bounty board (React & CSS)</h3></summary>
+  <summary class="mt-4 list-none cursor-pointer flex items-center gap-1"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg><div class="font-semibold text-lg text-foreground">React & CSS</div></summary>
 
 ```tsx
 import { algora, type AlgoraOutput } from "@algora/sdk";
@@ -541,234 +541,3 @@ const BountyCardSkeleton = () => (
   background-color: hsl(var(--gray-700));
 }
 ```
-
-</details>
-
-<details>
-  <summary><h3>Leaderboard (React & Tailwind)</h3></summary>
-
-```tsx
-import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { IconBrandTwitter, IconMapPin } from "@tabler/icons-react";
-import { algora, type AlgoraOutput } from "@algora/sdk";
-
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { capitalize, range } from "~/utils/util";
-
-// TODO: Use your own Algora handle
-const org = "acme";
-
-type RemoteData<T> =
-  | { _tag: "loading" }
-  | { _tag: "failure"; error: Error }
-  | { _tag: "success"; data: T };
-
-type Entry = AlgoraOutput["org"]["getLeaderboard"][number];
-
-const usdFormatter = Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
-export function Leaderboard() {
-  const [leaderboard, setLeaderboard] = useState<RemoteData<Entry[]>>({
-    _tag: "loading",
-  });
-
-  const [rewardType, setRewardType] = useState<Entry["reward_type"]>();
-
-  const rewardTypes = useMemo(
-    () =>
-      leaderboard._tag === "success"
-        ? [...new Set(leaderboard.data.map((x) => x.reward_type))]
-        : undefined,
-    [leaderboard]
-  );
-
-  useEffect(() => {
-    const ac = new AbortController();
-
-    algora.org.getLeaderboard
-      .query({ org }, { signal: ac.signal })
-      .then((data) => {
-        setLeaderboard({ _tag: "success", data });
-        setRewardType(data.at(0)?.reward_type);
-      })
-      .catch((error) => setLeaderboard({ _tag: "failure", error }));
-
-    return () => ac.abort();
-  }, []);
-
-  return (
-    <div className="space-y-2">
-      <Tabs
-        value={rewardType}
-        onValueChange={setRewardType as (_: string) => void}
-      >
-        {rewardTypes && (
-          <TabsList
-            className="grid w-full gap-1 bg-white/5 text-white/50"
-            style={{
-              gridTemplateColumns: `repeat(${rewardTypes.length}, minmax(0, 1fr))`,
-            }}
-          >
-            {rewardTypes.map((t) => (
-              <TabsTrigger
-                key={t}
-                className="hover:bg-purple-600/50 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-                value={t}
-              >
-                {capitalize(t)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        )}
-      </Tabs>
-      <ul className="w-full divide-y-2 divide-gray-400/50 overflow-hidden rounded-lg border-2 border-gray-400/50 text-left text-sm text-gray-500 dark:divide-white/10 dark:border-white/10 dark:text-gray-400">
-        {leaderboard._tag === "loading" &&
-          range(10).map((i) => (
-            <LeaderboardEntrySkeleton key={i} isFirst={i === 0} />
-          ))}
-
-        {leaderboard._tag === "success" &&
-          leaderboard.data
-            .filter((entry) => entry.reward_type === rewardType)
-            .map((entry, i) => (
-              <li key={entry.uid}>
-                <LeaderboardEntry entry={entry} isFirst={i === 0} />
-              </li>
-            ))}
-      </ul>
-    </div>
-  );
-}
-
-function LeaderboardEntry({
-  entry,
-  isFirst,
-}: {
-  entry: Entry;
-  isFirst: boolean;
-}) {
-  const { user, stats, reward_type } = entry;
-  return (
-    <div className="group/card relative flex h-full flex-col justify-center gap-4 rounded-none bg-white px-6 py-8 transition-colors dark:bg-white/[2%] dark:bg-gradient-to-br dark:from-white/[2%] dark:via-white/[2%] dark:to-white/[2%] md:flex-row md:justify-between md:gap-4 md:px-12">
-      <div className="flex w-full items-center gap-3 text-gray-900 dark:text-white">
-        <Link
-          href={`https://github.com/${user.login}`}
-          rel="noopener noreferrer"
-          target="_blank"
-          className="relative mr-3 h-16 w-16 shrink-0"
-        >
-          <Image
-            className="rounded-full"
-            src={user.avatar_url}
-            alt={user.login}
-            fill
-          />
-          {isFirst && (
-            <div className="absolute bottom-12 left-0 right-0">
-              <div className="relative mx-auto h-12 w-12">
-                <Image
-                  className="rounded-full"
-                  src="https://algora.io/emojis/crown.png"
-                  alt="Crown"
-                  fill
-                />
-              </div>
-            </div>
-          )}
-        </Link>
-        <div className="w-full shrink truncate md:max-w-[10rem] lg:max-w-sm xl:max-w-xl">
-          <Link
-            href={`https://github.com/${user.login}`}
-            rel="noopener noreferrer"
-            target="_blank"
-            className="flex flex-col truncate"
-          >
-            <div className="truncate text-base font-semibold">
-              {user.name ?? user.login}
-            </div>
-            <div className="truncate font-medium text-gray-400 dark:text-gray-400">
-              @{user.login}
-            </div>
-          </Link>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-normal text-gray-500 dark:text-gray-300">
-            {user.location && (
-              <div className="flex items-center gap-1">
-                <IconMapPin className="h-4 w-4" aria-hidden="true" />
-                <span>{user.location}</span>
-              </div>
-            )}
-            {user.twitter_username && (
-              <Link
-                href={`https://twitter.com/${user.twitter_username}`}
-                rel="noopener noreferrer"
-                target="_blank"
-                className="flex items-center gap-1"
-              >
-                <IconBrandTwitter className="h-4 w-4" aria-hidden="true" />
-                <span>{user.twitter_username}</span>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-      <dl className="grid w-full max-w-md grid-cols-3 gap-8 whitespace-nowrap">
-        <div className="flex flex-col text-left md:text-center">
-          <dt className="order-2 text-sm font-medium leading-6 text-gray-500 dark:text-gray-400">
-            Bount{stats.num_completed_bounties === 1 ? "y" : "ies"}{" "}
-            <span className="hidden sm:inline-block">Completed</span>
-          </dt>
-          <dd className="order-1 font-mono text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {stats.num_completed_bounties}
-          </dd>
-        </div>
-        <div className="col-span-2 flex flex-col text-left md:text-center">
-          <dt className="order-2 text-sm font-medium leading-6 text-gray-500 dark:text-gray-400">
-            Total {reward_type === "cash" ? "Earnings" : "Points"}
-          </dt>
-          <dd className="order-1 font-mono text-4xl font-bold tracking-tight text-green-500 dark:text-green-400">
-            {reward_type === "cash"
-              ? usdFormatter.format(stats.total_earnings / 100)
-              : stats.total_earnings}
-          </dd>
-        </div>
-      </dl>
-    </div>
-  );
-}
-
-function LeaderboardEntrySkeleton(props: { isFirst: boolean }) {
-  return (
-    <div className="h-[212px] w-full animate-pulse bg-white px-6 py-8 dark:bg-gray-900 md:h-[132px] md:px-12">
-      <div className="flex items-center gap-3">
-        <div className="relative mr-3 h-16 w-16 shrink-0 ">
-          <div className="h-full w-full rounded-full bg-gray-200 dark:bg-gray-800" />
-          {props.isFirst && (
-            <div className="absolute bottom-12 left-0 right-0">
-              <div className="relative mx-auto -mb-[2px] h-12 w-12">
-                <Image
-                  className="rounded-full"
-                  src="https://algora.io/emojis/crown.png"
-                  alt="Crown"
-                  fill
-                />
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col space-y-2">
-          <div className="h-6 w-36 rounded-md bg-gray-200 dark:bg-gray-800" />
-          <div className="h-4 w-20 rounded-md bg-gray-200 dark:bg-gray-800" />
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-</details>

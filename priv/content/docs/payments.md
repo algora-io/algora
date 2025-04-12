@@ -10,7 +10,7 @@ Algora partners with Stripe to help you pay collaborators around the world fast 
 Payment methods include debit/credit card, ACH & SEPA Direct Debit.
 Contributors receive payouts typically 1-3 business days after a payment is completed.
 
-## Supported countries/regions
+<h2 id="supported-countries-regions" class="scroll-mt-16">Supported countries/regions</h2>
 
 Through Stripe Connect, Algora offers the most comprehensive country coverage available.
 

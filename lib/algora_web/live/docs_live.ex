@@ -447,7 +447,7 @@ defmodule AlgoraWeb.DocsLive do
     </div>
     <div class="my-16 xl:max-w-none">
       <div class="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-white/5 light:border-gray-900/5 pt-10 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -512,7 +512,7 @@ defmodule AlgoraWeb.DocsLive do
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-diamond"
-                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
+                class="h-5 w-5 fill-white/10 text-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:text-emerald-400 light:fill-gray-700/10 light:text-gray-700 light:group-hover:text-gray-900"
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
@@ -525,7 +525,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -590,7 +590,7 @@ defmodule AlgoraWeb.DocsLive do
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-contract"
-                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
+                class="h-5 w-5 fill-white/10 text-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:text-emerald-400 light:fill-gray-700/10 light:text-gray-700 light:group-hover:text-gray-900"
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
@@ -603,7 +603,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -668,7 +668,7 @@ defmodule AlgoraWeb.DocsLive do
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-user-star"
-                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
+                class="h-5 w-5 fill-white/10 text-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:text-emerald-400 light:fill-gray-700/10 light:text-gray-700 light:group-hover:text-gray-900"
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">
@@ -681,7 +681,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-white/2.5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -744,7 +744,7 @@ defmodule AlgoraWeb.DocsLive do
             <div class="flex h-7 w-7 items-center justify-center rounded-full bg-white/7.5 ring-1 ring-white/15 backdrop-blur-[2px] transition duration-300 group-hover:bg-emerald-300/10 group-hover:ring-emerald-400 light:bg-gray-900/5 light:ring-gray-900/25 light:group-hover:bg-white/50 light:group-hover:ring-gray-900/25">
               <.icon
                 name="tabler-image-in-picture"
-                class="h-5 w-5 fill-white/10 stroke-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:stroke-emerald-400 light:fill-gray-700/10 light:stroke-gray-700 light:group-hover:stroke-gray-900"
+                class="h-5 w-5 fill-white/10 text-gray-400 transition-colors duration-300 group-hover:fill-emerald-300/10 group-hover:text-emerald-400 light:fill-gray-700/10 light:text-gray-700 light:group-hover:text-gray-900"
               />
             </div>
             <h3 class="mt-4 text-sm font-semibold leading-7 text-white light:text-gray-900">

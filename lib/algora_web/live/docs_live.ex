@@ -58,7 +58,7 @@ defmodule AlgoraWeb.DocsLive do
         links: [
           %{title: "SDK", href: "/docs/embed/sdk"},
           %{title: "Shields", href: "/docs/embed/shields"},
-          %{title: "OG images", href: "/docs/embed/og-images"}
+          %{title: "Socials", href: "/docs/embed/socials"}
         ]
       },
       %{

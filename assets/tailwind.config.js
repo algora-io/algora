@@ -14,7 +14,7 @@ module.exports = {
     "../lib/*_web.ex",
     "../lib/*_web/**/*.*ex",
     "./svelte/**/*.svelte",
-    "./priv/content/**/*.md",
+    "../priv/content/**/*.md",
   ],
   theme: {
     container: {

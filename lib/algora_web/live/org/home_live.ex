@@ -41,6 +41,7 @@ defmodule AlgoraWeb.Org.HomeLive do
       socket
       |> assign(:org, org)
       |> assign(:page_title, org.name)
+      |> assign(:page_description, "#{org.name} OSS bounty board - contribute and earn when your PRs are merged")
       |> assign(:open_bounties, open_bounties)
       |> assign(:transactions, transactions)
       |> assign(:top_earners, top_earners)

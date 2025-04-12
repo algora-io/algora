@@ -352,7 +352,7 @@ defmodule AlgoraWeb.ClaimLive do
               </div>
             </.card_header>
             <.card_content>
-              <div class="prose dark:prose-invert">
+              <div class="prose prose-invert">
                 {Phoenix.HTML.raw(@source_body_html)}
               </div>
             </.card_content>

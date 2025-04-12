@@ -61,7 +61,7 @@ defmodule AlgoraWeb.BlogLive do
             <% end %>
           </div>
         <% else %>
-          <article class="prose dark:prose-invert max-w-none">
+          <article class="prose prose-invert max-w-none">
             <header class="mb-8 not-prose">
               <h1 class="text-5xl font-display font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-emerald-300">
                 {@content.title}

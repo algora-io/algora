@@ -481,7 +481,7 @@ defmodule AlgoraWeb.BountyLive do
               </.card_title>
             </.card_header>
             <.card_content>
-              <div class="prose dark:prose-invert">
+              <div class="prose prose-invert">
                 {Phoenix.HTML.raw(@ticket_body_html)}
               </div>
             </.card_content>

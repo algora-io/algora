@@ -447,7 +447,7 @@ defmodule AlgoraWeb.DocsLive do
     </div>
     <div class="my-16 xl:max-w-none">
       <div class="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-white/5 light:border-gray-900/5 pt-10 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/[2.5%] light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -525,7 +525,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/[2.5%] light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -603,7 +603,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/[2.5%] light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg
@@ -681,7 +681,7 @@ defmodule AlgoraWeb.DocsLive do
             </p>
           </div>
         </div>
-        <div class="group relative flex rounded-2xl bg-white/5 light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
+        <div class="group relative flex rounded-2xl bg-white/[2.5%] light:bg-background transition-shadow hover:shadow-md hover:shadow-black/5 light:hover:shadow-gray-900/5">
           <div class="pointer-events-none">
             <div class="absolute inset-0 rounded-2xl transition duration-300 [mask-image:linear-gradient(white,transparent)] group-hover:opacity-50">
               <svg

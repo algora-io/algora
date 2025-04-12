@@ -387,7 +387,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "payment-methods",
         question: "What payment methods do you support?",
         answer:
-          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
+          ~s(We support payments via Stripe for funding bounties. Contributors can receive payments directly to their bank accounts in <a href="https://algora.io/docs/payments#supported-countries-regions" class="text-success hover:underline">#{ConnectCountries.count()} countries/regions</a> worldwide.)
       },
       %FaqItem{
         id: "payment-process",
@@ -429,7 +429,7 @@ defmodule AlgoraWeb.PricingLive do
         id: "supported-countries",
         question: "Which countries are supported for contributors?",
         answer:
-          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="https://docs.algora.io/bounties/payments#supported-countries-regions" class="text-success hover:underline">full list of supported countries</a>.)
+          ~s(We support contributors from #{ConnectCountries.count()} countries/regions worldwide. You can receive payments regardless of your location as long as you have a bank account in one of our supported countries. See the <a href="https://algora.io/docs/payments#supported-countries-regions" class="text-success hover:underline">full list of supported countries</a>.)
       }
     ]
   end
@@ -608,7 +608,7 @@ defmodule AlgoraWeb.PricingLive do
             <p class="mt-2 text-sm/6 text-gray-400">
               Receive payments directly to your bank account from all around the world
               <.link
-                href="https://docs.algora.io/bounties/payments#supported-countries-regions"
+                href="https://algora.io/docs/payments#supported-countries-regions"
                 class="font-medium text-foreground"
               >
                 ({ConnectCountries.count()} countries/regions supported)

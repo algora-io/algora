@@ -54,6 +54,7 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
       |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
       |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
       |> assign(:page_title, org.name)
+      |> assign(:page_description, "#{org.name} OSS bounty board - fund GitHub issues and prioritize development")
       |> assign(:open_bounties, open_bounties)
       |> assign(:transactions, transactions)
       |> assign(:top_earners, top_earners)

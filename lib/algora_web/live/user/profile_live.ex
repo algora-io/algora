@@ -18,6 +18,7 @@ defmodule AlgoraWeb.User.ProfileLive do
          socket
          |> assign(:user, user)
          |> assign(:page_title, "#{user.name}")
+         |> assign(:page_description, "Open source contributions and bounty history of #{user.name}")
          |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
          |> assign(:transactions, to_transaction_rows(transactions))
          |> assign(:has_more_transactions, length(transactions) >= page_size())}

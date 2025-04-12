@@ -5,66 +5,66 @@ defmodule AlgoraWeb.DocsLive do
   defp nav do
     [
       %{
-        title: 'Overview',
+        title: "Overview",
         links: [
-          %{title: 'Introduction', href: ~p"/docs"}
+          %{title: "Introduction", href: ~p"/docs"}
         ]
       },
       %{
-        title: 'GitHub bounties',
+        title: "GitHub bounties",
         links: [
-          %{title: 'Create bounties in your repos', href: ~p"/docs/bounties/in-your-own-repos"},
-          %{title: 'Fund issues anywhere on GitHub', href: ~p"/docs/bounties/in-other-projects"}
+          %{title: "Create bounties in your repos", href: ~p"/docs/bounties/in-your-own-repos"},
+          %{title: "Fund issues anywhere on GitHub", href: ~p"/docs/bounties/in-other-projects"}
         ]
       },
       %{
-        title: 'Algora bounties',
+        title: "Algora bounties",
         links: [
-          %{title: 'Exclusive', href: ~p"/docs/bounties/exclusive"},
-          %{title: 'Custom', href: ~p"/docs/bounties/custom"}
+          %{title: "Exclusive", href: ~p"/docs/bounties/exclusive"},
+          %{title: "Custom", href: ~p"/docs/bounties/custom"}
         ]
       },
       %{
-        title: 'Tips',
+        title: "Tips",
         links: [
-          %{title: 'Send a tip', href: ~p"/docs/tips/send"}
+          %{title: "Send a tip", href: ~p"/docs/tips/send"}
         ]
       },
       %{
-        title: 'Contracts',
+        title: "Contracts",
         links: [
-          %{title: 'Offer a contract', href: ~p"/docs/contracts/offer-contract"}
+          %{title: "Offer a contract", href: ~p"/docs/contracts/offer-contract"}
         ]
       },
       %{
-        title: 'Marketplace',
+        title: "Marketplace",
         links: [
-          %{title: 'Matches', href: ~p"/docs/marketplace/matches"}
+          %{title: "Matches", href: ~p"/docs/marketplace/matches"}
         ]
       },
       %{
-        title: 'Workspace',
+        title: "Workspace",
         links: [
-          %{title: 'Bounty board', href: ~p"/docs/workspace/bounty-board"},
-          %{title: 'Leaderboard', href: ~p"/docs/workspace/leaderboard"},
-          %{title: 'Transactions', href: ~p"/docs/workspace/transactions"},
-          %{title: 'Autopay on merge', href: ~p"/docs/workspace/autopay"},
-          %{title: 'Custom bot messages', href: ~p"/docs/workspace/custom-bot-messages"}
+          %{title: "Bounty board", href: ~p"/docs/workspace/bounty-board"},
+          %{title: "Leaderboard", href: ~p"/docs/workspace/leaderboard"},
+          %{title: "Transactions", href: ~p"/docs/workspace/transactions"},
+          %{title: "Autopay on merge", href: ~p"/docs/workspace/autopay"},
+          %{title: "Custom bot messages", href: ~p"/docs/workspace/custom-bot-messages"}
         ]
       },
       %{
-        title: 'Embed',
+        title: "Embed",
         links: [
-          %{title: 'SDK', href: ~p"/docs/embed/sdk"}
-          # %{title: 'Shields', href: ~p"/docs/embed/shields"},
-          # %{title: 'OG images', href: ~p"/docs/embed/og-images"}
+          %{title: "SDK", href: ~p"/docs/embed/sdk"}
+          # %{title: "Shields", href: ~p"/docs/embed/shields"},
+          # %{title: "OG images", href: ~p"/docs/embed/og-images"}
         ]
       },
       %{
-        title: 'Payments',
+        title: "Payments",
         links: [
-          %{title: 'Payments', href: ~p"/docs/payments/payments"},
-          %{title: 'Reporting', href: ~p"/docs/payments/reporting"}
+          %{title: "Payments", href: ~p"/docs/payments/payments"},
+          %{title: "Reporting", href: ~p"/docs/payments/reporting"}
         ]
       }
     ]

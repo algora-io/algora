@@ -9,6 +9,8 @@ defmodule AlgoraWeb.User.TransactionsLive do
   alias Algora.Payments
   alias Algora.Util
 
+  require Logger
+
   defmodule PayoutAccountForm do
     @moduledoc false
     use Ecto.Schema
@@ -136,7 +138,9 @@ defmodule AlgoraWeb.User.TransactionsLive do
       #  Algora.Signal.send_error(error, %StripeAccountDeleteError{})
       #  {:noreply, put_flash(socket, :error, "Failed to delete payout account")}
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        Logger.error("Failed to delete payout account: #{inspect(reason)}")
+
         {:noreply,
          socket
          |> assign(:show_delete_confirmation, false)
@@ -471,7 +475,6 @@ defmodule AlgoraWeb.User.TransactionsLive do
       :if={@show_delete_confirmation}
       id="delete-confirmation-dialog"
       show={@show_delete_confirmation}
-      on_cancel={JS.patch(~p"/user/transactions", [])}
     >
       <.dialog_content>
         <.dialog_header>

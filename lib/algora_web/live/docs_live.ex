@@ -379,7 +379,7 @@ defmodule AlgoraWeb.DocsLive do
             <% end %>
           </article>
         </main>
-        <footer class="max-w-2xl space-y-10 pb-8 lg:max-w-5xl">
+        <footer class="max-w-2xl space-y-10 pb-8 lg:max-w-none">
           <div class="flex flex-col items-center justify-between gap-5 border-t border-white/5 light:border-gray-900/5 pt-8 sm:flex-row">
             <p class="text-xs text-gray-400 light:text-gray-600">
               © {DateTime.utc_now().year} Algora, Public Benefit Corporation

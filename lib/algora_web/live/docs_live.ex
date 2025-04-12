@@ -7,65 +7,65 @@ defmodule AlgoraWeb.DocsLive do
       %{
         title: "Overview",
         links: [
-          %{title: "Introduction", href: ~p"/docs"},
-          %{title: "Slash commands", href: ~p"/docs/commands"}
+          %{title: "Introduction", href: "/docs"},
+          %{title: "Slash commands", href: "/docs/commands"}
         ]
       },
       %{
         title: "GitHub bounties",
         links: [
-          %{title: "Create bounties in your repos", href: ~p"/docs/bounties/in-your-own-repos"},
-          %{title: "Fund issues anywhere on GitHub", href: ~p"/docs/bounties/in-other-projects"}
+          %{title: "Create bounties in your repos", href: "/docs/bounties/in-your-own-repos"},
+          %{title: "Fund issues anywhere on GitHub", href: "/docs/bounties/in-other-projects"}
         ]
       },
       %{
         title: "Algora bounties",
         links: [
-          %{title: "Exclusive", href: ~p"/docs/bounties/exclusive"},
-          %{title: "Custom", href: ~p"/docs/bounties/custom"}
+          %{title: "Exclusive", href: "/docs/bounties/exclusive"},
+          %{title: "Custom", href: "/docs/bounties/custom"}
         ]
       },
       %{
         title: "Tips",
         links: [
-          %{title: "Send a tip", href: ~p"/docs/tips/send"}
+          %{title: "Send a tip", href: "/docs/tips/send"}
         ]
       },
       %{
         title: "Contracts",
         links: [
-          %{title: "Offer a contract", href: ~p"/docs/contracts/offer-contract"}
+          %{title: "Offer a contract", href: "/docs/contracts/offer-contract"}
         ]
       },
       %{
         title: "Marketplace",
         links: [
-          %{title: "Matches", href: ~p"/docs/marketplace/matches"}
+          %{title: "Matches", href: "/docs/marketplace/matches"}
         ]
       },
       %{
         title: "Workspace",
         links: [
-          %{title: "Bounty board", href: ~p"/docs/workspace/bounty-board"},
-          %{title: "Leaderboard", href: ~p"/docs/workspace/leaderboard"},
-          %{title: "Transactions", href: ~p"/docs/workspace/transactions"},
-          %{title: "Autopay on merge", href: ~p"/docs/workspace/autopay"},
-          %{title: "Custom bot messages", href: ~p"/docs/workspace/custom-bot-messages"}
+          %{title: "Bounty board", href: "/docs/workspace/bounty-board"},
+          %{title: "Leaderboard", href: "/docs/workspace/leaderboard"},
+          %{title: "Transactions", href: "/docs/workspace/transactions"},
+          %{title: "Autopay on merge", href: "/docs/workspace/autopay"},
+          %{title: "Custom bot messages", href: "/docs/workspace/custom-bot-messages"}
         ]
       },
       %{
         title: "Embed",
         links: [
-          %{title: "SDK", href: ~p"/docs/embed/sdk"}
-          # %{title: "Shields", href: ~p"/docs/embed/shields"},
-          # %{title: "OG images", href: ~p"/docs/embed/og-images"}
+          %{title: "SDK", href: "/docs/embed/sdk"}
+          # %{title: "Shields", href: "/docs/embed/shields"},
+          # %{title: "OG images", href: "/docs/embed/og-images"}
         ]
       },
       %{
         title: "Payments",
         links: [
-          %{title: "Payments", href: ~p"/docs/payments"},
-          %{title: "Reporting", href: ~p"/docs/payments/reporting"}
+          %{title: "Payments", href: "/docs/payments"},
+          %{title: "Reporting", href: "/docs/payments/reporting"}
         ]
       }
     ]

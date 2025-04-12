@@ -1,8 +1,8 @@
 ---
-title: "Customize bot message"
+title: "Custom bot messages"
 ---
 
-# Customize bot messages
+# Custom bot messages
 
 You can customize the bot messages as you wish!
 

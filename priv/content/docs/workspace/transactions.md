@@ -1,8 +1,8 @@
 ---
-title: "View transactions"
+title: "Transactions"
 ---
 
-# View transactions
+# Transactions
 
 View all payments and export summaries
 

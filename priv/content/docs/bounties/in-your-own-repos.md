@@ -1,8 +1,8 @@
 ---
-title: "Create bounties in your GitHub repos"
+title: "Create bounties in your repos"
 ---
 
-# Create bounties in your GitHub repos
+# Create bounties in your repos
 
 Install the Algora app from your org dashboard or settings.
 

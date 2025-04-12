@@ -4,7 +4,7 @@ title: "SDK"
 
 # Algora Typescript SDK
 
-![npm (scoped)](https://img.shields.io/npm/v/@algora/sdk)
+[![npm (scoped)](https://img.shields.io/npm/v/@algora/sdk)](https://www.npmjs.com/package/@algora/sdk)
 
 ## Showcase
 

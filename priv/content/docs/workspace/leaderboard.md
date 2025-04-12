@@ -1,5 +1,5 @@
 ---
-title: "View leaderboard"
+title: "Leaderboard"
 ---
 
 # Leaderboard

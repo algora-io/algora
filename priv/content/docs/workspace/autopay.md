@@ -1,8 +1,8 @@
 ---
-title: "Set up autopay"
+title: "Autopay on merge"
 ---
 
-# Set up autopay
+# Autopay on merge
 
 Navigate to your settings and save a payment method with Stripe to automatically pay out bounties when they are merged.
 

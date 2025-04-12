@@ -1,8 +1,8 @@
 ---
-title: "Bounties in other GitHub projects"
+title: "Fund issues anywhere on GitHub"
 ---
 
-# Create a bounty in another GitHub project
+# Fund issues anywhere on GitHub
 
 First connect your GitHub account to Algora.
 

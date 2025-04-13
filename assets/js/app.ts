@@ -663,17 +663,24 @@ let routeUpdated = () => {
   // Focus.focusMain();
 };
 
+let topBarScheduled = undefined;
+
 // Show progress bar on live navigation and form submits
 topbar.config({
   barColors: { 0: "rgba(5, 150, 105, 1)" },
   shadowColor: "rgba(0, 0, 0, .3)",
 });
 window.addEventListener("phx:page-loading-start", (info) => {
-  if (!window.location.search.includes("screenshot")) {
-    topbar.show(300);
+  if (topBarScheduled || window.location.search.includes("screenshot")) {
+    return;
   }
+  topBarScheduled = setTimeout(() => topbar.show(), 500);
 });
-window.addEventListener("phx:page-loading-stop", (info) => topbar.hide());
+window.addEventListener("phx:page-loading-stop", (info) => {
+  clearTimeout(topBarScheduled);
+  topBarScheduled = undefined;
+  topbar.hide();
+});
 
 // Accessible routing
 window.addEventListener("phx:page-loading-stop", routeUpdated);

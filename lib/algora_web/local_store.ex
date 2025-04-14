@@ -88,7 +88,7 @@ defmodule AlgoraWeb.LocalStore do
 
   defp restore_from_token(%__MODULE__{} = store, token) do
     case Phoenix.Token.decrypt(AlgoraWeb.Endpoint, salt(store), token, max_age: ttl()) do
-      {:ok, data} -> {:ok, Plug.Crypto.non_executable_binary_to_term(data, [:safe])}
+      {:ok, data} -> {:ok, :erlang.binary_to_term(data, [:safe])}
       {:error, reason} -> {:error, "Failed to restore previous state. Reason: #{inspect(reason)}."}
     end
   end

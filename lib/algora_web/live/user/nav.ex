@@ -15,6 +15,15 @@ defmodule AlgoraWeb.User.Nav do
      |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
   end
 
+  def on_mount(:viewer, params, _session, socket) do
+    {:cont,
+     socket
+     |> assign(:screenshot?, not is_nil(params["screenshot"]))
+     |> assign(:contacts, [])
+     |> assign_nav_items(:viewer)
+     |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+  end
+
   defp handle_active_tab_params(_params, _url, socket) do
     active_tab =
       case {socket.view, socket.assigns.live_action} do
@@ -33,11 +42,11 @@ defmodule AlgoraWeb.User.Nav do
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def assign_nav_items(%{assigns: %{current_user: nil}} = socket) do
-    socket
-  end
+  def assign_nav_items(socket, mode \\ :default)
 
-  def assign_nav_items(socket) do
+  def assign_nav_items(%{assigns: %{current_user: nil}} = socket, _mode), do: socket
+
+  def assign_nav_items(socket, :default) do
     nav = [
       %{
         title: "Main",
@@ -69,5 +78,33 @@ defmodule AlgoraWeb.User.Nav do
     ]
 
     assign(socket, :nav, nav)
+  end
+
+  def assign_nav_items(socket, :viewer) do
+    if socket.assigns.current_user == socket.assigns[:current_context] do
+      assign_nav_items(socket, :default)
+    else
+      nav = [
+        %{
+          title: "Main",
+          items: [
+            %{
+              href: "/",
+              tab: :dashboard,
+              icon: "tabler-home",
+              label: "Dashboard"
+            },
+            %{
+              href: "/#{socket.assigns.current_user.handle}/profile",
+              tab: :profile,
+              icon: "tabler-user",
+              label: "Profile"
+            }
+          ]
+        }
+      ]
+
+      assign(socket, :nav, nav)
+    end
   end
 end

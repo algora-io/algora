@@ -185,7 +185,7 @@ defmodule AlgoraWeb.Router do
     scope "/:user_handle" do
       live_session :user,
         layout: {AlgoraWeb.Layouts, :user},
-        on_mount: [{AlgoraWeb.UserAuth, :current_user}, AlgoraWeb.User.Nav] do
+        on_mount: [{AlgoraWeb.UserAuth, :current_user}, {AlgoraWeb.User.Nav, :viewer}] do
         live "/profile", User.ProfileLive, :index
       end
     end

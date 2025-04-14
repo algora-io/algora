@@ -132,6 +132,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
 
+    socket =
+      if params["action"] == "create_contract" do
+        assign(socket, :main_contract_form_open?, true)
+      else
+        socket
+      end
+
     {:noreply,
      socket
      |> assign(:current_status, current_status)
@@ -1126,7 +1133,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp achievement_todo(%{achievement: %{id: :connect_github_status}} = assigns) do
     ~H"""
     <.button :if={!@current_user.provider_login} href={Github.authorize_url()} class="ml-auto gap-2">
-      <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Connect GitHub
+      <Logos.github class="w-4 h-4 -ml-1" /> Connect GitHub
     </.button>
     """
   end
@@ -1134,7 +1141,18 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp achievement_todo(%{achievement: %{id: :install_app_status}} = assigns) do
     ~H"""
     <.button phx-click="install_app" class="ml-auto gap-2">
-      <Logos.github class="w-4 h-4 mr-2 -ml-1" /> Install GitHub App
+      <Logos.github class="w-4 h-4 -ml-1" /> Install GitHub App
+    </.button>
+    """
+  end
+
+  defp achievement_todo(%{achievement: %{id: :create_contract_status}} = assigns) do
+    ~H"""
+    <.button
+      patch={~p"/#{@current_org.handle}/dashboard?action=create_contract"}
+      class="ml-auto gap-2"
+    >
+      <.icon name="tabler-user-dollar" class="w-4 h-4 -ml-1" /> Create a contract
     </.button>
     """
   end
@@ -1154,7 +1172,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
       {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
-      {&create_contract_status/1, "Contract a developer", nil},
+      {&create_contract_status/1, "Contract a developer",
+       [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"]},
       {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 
@@ -1625,6 +1644,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <.achievement_todo
                   achievement={achievement}
                   current_user={@current_user}
+                  current_org={@current_org}
                   secret={@secret}
                   login_form={@login_form}
                 />

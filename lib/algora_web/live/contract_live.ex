@@ -308,9 +308,14 @@ defmodule AlgoraWeb.ContractLive do
             </.card_content>
           </.card>
           <.card :if={length(@transactions) > 0}>
-            <.card_content>
-              <div class="-mx-6 overflow-x-auto">
-                <div class="inline-block min-w-full py-2 align-middle">
+            <.card_header>
+              <.card_title>
+                Timeline
+              </.card_title>
+            </.card_header>
+            <.card_content class="pt-0">
+              <div class="-mx-6 -mt-3.5 overflow-x-auto">
+                <div class="inline-block min-w-full align-middle">
                   <table class="min-w-full divide-y divide-border">
                     <thead>
                       <tr>
@@ -327,7 +332,14 @@ defmodule AlgoraWeb.ContractLive do
                       <%= for transaction <- @transactions do %>
                         <tr class="hover:bg-muted/50">
                           <td class="whitespace-nowrap px-6 py-4 text-sm">
-                            {Util.timestamp(transaction.inserted_at, @timezone)}
+                            <div :if={@timezone}>
+                              {Util.timestamp(transaction.inserted_at, @timezone)}
+                            </div>
+                            <div
+                              :if={!@timezone}
+                              class="h-[24px] w-[132px] bg-muted animate-pulse rounded-lg"
+                            >
+                            </div>
                           </td>
                           <td class="whitespace-nowrap px-6 py-4 text-sm">
                             {description(transaction)}

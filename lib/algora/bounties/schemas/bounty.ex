@@ -68,6 +68,8 @@ defmodule Algora.Bounties.Bounty do
     Algora.Util.path_from_url(url)
   end
 
+  def path(_bounty), do: nil
+
   def full_path(%{repository: %{name: name, owner: %{login: login}}, ticket: %{number: number}}) do
     "#{login}/#{name}##{number}"
   end

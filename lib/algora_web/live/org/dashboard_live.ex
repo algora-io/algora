@@ -79,6 +79,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
+       |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
        |> assign(:admins_last_active, admins_last_active)
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
@@ -133,7 +134,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:noreply,
      socket
-     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:current_status, current_status)
      |> assign(:bounty_rows, to_bounty_rows(bounties))
      |> assign(:transaction_rows, to_transaction_rows(transactions))

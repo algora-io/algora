@@ -138,7 +138,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                                 {ticket.repository.name}#{ticket.number}
                               </.link>
                               <.link
-                                :if={!ticket.repository}
+                                :if={!ticket.repository && ticket.url}
                                 href={ticket.url}
                                 class="hover:underline"
                               >

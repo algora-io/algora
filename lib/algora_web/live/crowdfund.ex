@@ -177,6 +177,11 @@ defmodule AlgoraWeb.CrowdfundLive do
                     <div class="text-sm text-muted-foreground">No credit card required</div>
                   </div>
                 </.form>
+                <div class="lg:col-span-3 text-sm text-muted-foreground">
+                  <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
+                  <code class="px-1 py-0.5 text-success">/bounty $1000</code>
+                  on GitHub issues and PRs (requires GitHub auth)
+                </div>
               </div>
               <div class="pt-20 sm:pt-40 grid grid-cols-1 gap-16">
                 <.link

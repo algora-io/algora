@@ -290,7 +290,7 @@ defmodule AlgoraWeb.ContractLive do
               </div>
             </.card_content>
           </.card>
-          <.card>
+          <.card :if={@ticket_body_html}>
             <.card_header>
               <.card_title>
                 Description
@@ -360,7 +360,7 @@ defmodule AlgoraWeb.ContractLive do
                         {Util.initials(message.sender.name)}
                       </.avatar_fallback>
                     </.avatar>
-                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
+                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3 break-words">
                       {message.content}
                       <div class="text-[10px] mt-1 text-muted-foreground">
                         {message.inserted_at

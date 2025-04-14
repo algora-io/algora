@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
 
   embedded_schema do
     field :amount, USD
+    field :hourly_rate, USD
     field :hours_per_week, :integer
     field :type, Ecto.Enum, values: [:fixed, :hourly], default: :fixed
     field :title, :string
@@ -26,17 +27,23 @@ defmodule AlgoraWeb.Forms.ContractForm do
 
   def changeset(form, attrs) do
     form
-    |> cast(attrs, [:amount, :hours_per_week, :type, :title, :description, :contractor_handle])
+    |> cast(attrs, [:amount, :hourly_rate, :hours_per_week, :type, :title, :description, :contractor_handle])
     |> validate_required([:contractor_handle])
     |> validate_type_fields()
-    |> Validations.validate_money_positive(:amount)
     |> Validations.validate_github_handle(:contractor_handle, :contractor)
   end
 
   defp validate_type_fields(changeset) do
     case get_field(changeset, :type) do
-      :hourly -> validate_required(changeset, [:amount, :hours_per_week])
-      _ -> validate_required(changeset, [:amount])
+      :hourly ->
+        changeset
+        |> validate_required([:hourly_rate, :hours_per_week])
+        |> Validations.validate_money_positive(:hourly_rate)
+
+      _ ->
+        changeset
+        |> validate_required([:amount])
+        |> Validations.validate_money_positive(:amount)
     end
   end
 
@@ -92,7 +99,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
         </div>
         <div data-tab="hourly" class="hidden">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <.input label="Hourly rate" icon="tabler-currency-dollar" field={@form[:amount]} />
+            <.input label="Hourly rate" icon="tabler-currency-dollar" field={@form[:hourly_rate]} />
             <.input label="Hours per week" field={@form[:hours_per_week]} />
           </div>
         </div>

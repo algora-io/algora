@@ -124,12 +124,18 @@ defmodule AlgoraWeb.Org.Nav do
 
     case apply_action(changeset, :save) do
       {:ok, data} ->
+        amount =
+          case data.type do
+            :fixed -> data.amount
+            :hourly -> data.hourly_rate
+          end
+
         bounty_res =
           Bounties.create_bounty(
             %{
               creator: socket.assigns.current_user,
               owner: socket.assigns.current_org,
-              amount: data.amount,
+              amount: amount,
               title: data.title,
               description: data.description
             },
@@ -148,6 +154,7 @@ defmodule AlgoraWeb.Org.Nav do
         end
 
       {:error, changeset} ->
+        Logger.error("Failed to create bounty: #{inspect(changeset)}")
         {:cont, assign(socket, :main_bounty_form, to_form(changeset))}
     end
   end

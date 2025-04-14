@@ -51,38 +51,40 @@ defmodule AlgoraWeb.Forms.ContractForm do
       <div class="space-y-4">
         <.input label="Title" field={@form[:title]} />
         <.input label="Description (optional)" field={@form[:description]} type="textarea" />
-        <label class="block text-sm font-semibold leading-6 text-foreground mb-2">
-          Payment
-        </label>
-        <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="main-contract-form-tabs">
-          <%= for {label, value} <- type_options() do %>
-            <label class={[
-              "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
-              "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
-              "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-            ]}>
-              <.input
-                id={"main-contract-form-type-#{value}"}
-                type="radio"
-                field={@form[:type]}
-                checked={@form[:type].value == value}
-                value={value}
-                class="sr-only"
-                phx-click={
-                  %JS{}
-                  |> JS.hide(to: "#main-contract-form [data-tab]:not([data-tab=#{value}])")
-                  |> JS.show(to: "#main-contract-form [data-tab=#{value}]")
-                }
-              />
-              <span class="flex flex-1 items-center justify-between">
-                <span class="text-sm font-medium">{label}</span>
-                <.icon
-                  name="tabler-check"
-                  class="invisible size-5 text-primary group-has-[:checked]:visible"
+        <div>
+          <label class="block text-sm font-semibold leading-6 text-foreground mb-2">
+            Payment
+          </label>
+          <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="main-contract-form-tabs">
+            <%= for {label, value} <- type_options() do %>
+              <label class={[
+                "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+              ]}>
+                <.input
+                  id={"main-contract-form-type-#{value}"}
+                  type="radio"
+                  field={@form[:type]}
+                  checked={@form[:type].value == value}
+                  value={value}
+                  class="sr-only"
+                  phx-click={
+                    %JS{}
+                    |> JS.hide(to: "#main-contract-form [data-tab]:not([data-tab=#{value}])")
+                    |> JS.show(to: "#main-contract-form [data-tab=#{value}]")
+                  }
                 />
-              </span>
-            </label>
-          <% end %>
+                <span class="flex flex-1 items-center justify-between">
+                  <span class="text-sm font-medium">{label}</span>
+                  <.icon
+                    name="tabler-check"
+                    class="invisible size-5 text-primary group-has-[:checked]:visible"
+                  />
+                </span>
+              </label>
+            <% end %>
+          </div>
         </div>
 
         <div data-tab="fixed">

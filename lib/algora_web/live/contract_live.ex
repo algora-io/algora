@@ -259,18 +259,30 @@ defmodule AlgoraWeb.ContractLive do
                   </div>
                   <div>
                     <h1 class="text-2xl font-semibold">
-                      Contract with {@contractor.name}
+                      {@bounty.ticket.title}
                     </h1>
-                    <p class="text-sm text-muted-foreground">
-                      Started {Calendar.strftime(@bounty.inserted_at, "%b %d, %Y")}
-                    </p>
+                    <div class="text-sm text-muted-foreground space-x-2">
+                      <span>Created {Calendar.strftime(@bounty.inserted_at, "%b %d, %Y")}</span>
+                      <span
+                        :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
+                        class="space-x-2"
+                      >
+                        <span>&bull;</span>
+                        <span>
+                          <.icon name="tabler-clock" class="h-4 w-4" />
+                          {@bounty.hours_per_week} hours per week
+                        </span>
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div class="flex flex-col gap-4">
                   <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
-                    {Money.to_string!(@bounty.amount)}
-                    <span :if={@bounty.hours_per_week && @bounty.hours_per_week > 0} class="text-base">
+                    {Money.to_string!(@bounty.amount)}<span
+                      :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
+                      class="text-base"
+                    >
                       /wk
                     </span>
                   </div>
@@ -287,7 +299,7 @@ defmodule AlgoraWeb.ContractLive do
                 Description
               </.card_title>
             </.card_header>
-            <.card_content>
+            <.card_content class="pt-0">
               <div class="prose prose-invert">
                 {Phoenix.HTML.raw(@ticket_body_html)}
               </div>
@@ -306,13 +318,16 @@ defmodule AlgoraWeb.ContractLive do
                   {Util.initials(@contractor.name)}
                 </.avatar_fallback>
               </.avatar>
-              <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
-              </div>
+              <%!-- <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
+              </div> --%>
             </div>
             <div>
               <h2 class="text-lg font-semibold">{@contractor.name}</h2>
-              <p class="text-xs text-muted-foreground">
-                <%!-- Active {Util.time_ago(@contractor.last_active_at)} --%>
+              <p :if={@contractor.last_active_at} class="text-xs text-muted-foreground">
+                Active {Util.time_ago(@contractor.last_active_at)}
+              </p>
+              <p :if={!@contractor.last_active_at} class="text-xs text-muted-foreground">
+                Offline
               </p>
             </div>
           </div>

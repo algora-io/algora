@@ -4,6 +4,10 @@ defmodule AlgoraWeb.Components.Achievement do
 
   import AlgoraWeb.CoreComponents
 
+  def link_attrs(path) when is_binary(path), do: [navigate: path]
+  def link_attrs(opts) when is_list(opts), do: opts
+  def link_attrs(_opts), do: []
+
   def achievement(%{achievement: %{status: :completed}} = assigns) do
     ~H"""
     <div class="group flex items-center gap-3">
@@ -19,7 +23,7 @@ defmodule AlgoraWeb.Components.Achievement do
 
   def achievement(%{achievement: %{status: :upcoming}} = assigns) do
     ~H"""
-    <.maybe_link navigate={@achievement.path}>
+    <.maybe_link {link_attrs(@achievement.path)}>
       <div class={
         classes([
           "group flex items-center gap-3",
@@ -50,7 +54,7 @@ defmodule AlgoraWeb.Components.Achievement do
 
   def achievement(%{achievement: %{status: :current}} = assigns) do
     ~H"""
-    <.maybe_link navigate={@achievement.path}>
+    <.maybe_link {link_attrs(@achievement.path)}>
       <div
         class={[
           "group flex items-start",

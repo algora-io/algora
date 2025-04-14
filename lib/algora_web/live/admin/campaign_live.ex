@@ -40,17 +40,11 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   end
 
   @impl true
-  def handle_params(params, _uri, socket) do
-    socket =
-      LocalStore.init(socket,
-        key: __MODULE__,
-        ok?: &match?(%{form: _}, &1),
-        checkpoint_url: ~p"/admin/campaign?#{%{checkpoint: "1"}}"
-      )
-
-    socket = if params["checkpoint"] == "1", do: LocalStore.subscribe(socket), else: socket
-
-    {:noreply, socket}
+  def handle_params(_params, _uri, socket) do
+    {:noreply,
+     socket
+     |> LocalStore.init(key: __MODULE__, ok?: &match?(%{form: _}, &1), checkpoint_url: ~p"/admin/campaign")
+     |> LocalStore.subscribe()}
   end
 
   @impl true

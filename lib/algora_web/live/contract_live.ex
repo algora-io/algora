@@ -1,0 +1,547 @@
+defmodule AlgoraWeb.ContractLive do
+  @moduledoc false
+  use AlgoraWeb, :live_view
+
+  import Ecto.Changeset
+  import Ecto.Query
+
+  alias Algora.Admin
+  alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.LineItem
+  alias Algora.Chat
+  alias Algora.Organizations.Member
+  alias Algora.Repo
+  alias Algora.Util
+  alias Algora.Workspace
+
+  require Logger
+
+  defp tip_options, do: [{"None", 0}, {"10%", 10}, {"20%", 20}, {"50%", 50}]
+
+  defmodule RewardBountyForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :amount, Algora.Types.USD
+      field :tip_percentage, :decimal
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:amount, :tip_percentage])
+      |> validate_required([:amount])
+      |> validate_number(:tip_percentage, greater_than_or_equal_to: 0)
+      |> Algora.Validations.validate_money_positive(:amount)
+    end
+  end
+
+  @impl true
+  def mount(%{"id" => bounty_id}, _session, socket) do
+    bounty =
+      Bounty
+      |> Repo.get!(bounty_id)
+      |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
+
+    {host, ticket_ref} =
+      if bounty.ticket.repository do
+        {bounty.ticket.repository.user,
+         %{
+           owner: bounty.ticket.repository.user.provider_login,
+           repo: bounty.ticket.repository.name,
+           number: bounty.ticket.number
+         }}
+      else
+        {bounty.owner, nil}
+      end
+
+    socket
+    |> assign(:bounty, bounty)
+    |> assign(:ticket_ref, ticket_ref)
+    |> assign(:host, host)
+    |> on_mount(bounty)
+  end
+
+  @impl true
+  def mount(%{"repo_owner" => repo_owner, "repo_name" => repo_name, "number" => number}, _session, socket) do
+    number = String.to_integer(number)
+
+    ticket_ref = %{owner: repo_owner, repo: repo_name, number: number}
+
+    bounty =
+      from(b in Bounty,
+        join: t in assoc(b, :ticket),
+        join: r in assoc(t, :repository),
+        join: u in assoc(r, :user),
+        where: u.provider == "github",
+        where: u.provider_login == ^repo_owner,
+        where: r.name == ^repo_name,
+        where: t.number == ^number,
+        order_by: fragment("CASE WHEN ? = ? THEN 0 ELSE 1 END", u.id, ^socket.assigns.current_org.id),
+        limit: 1
+      )
+      |> Repo.one()
+      |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
+
+    socket
+    |> assign(:bounty, bounty)
+    |> assign(:ticket_ref, ticket_ref)
+    |> assign(:host, bounty.ticket.repository.user)
+    |> on_mount(bounty)
+  end
+
+  defp on_mount(socket, bounty) do
+    debits = Enum.filter(bounty.transactions, &(&1.type == :debit and &1.status == :succeeded))
+
+    total_paid =
+      debits
+      |> Enum.map(& &1.net_amount)
+      |> Enum.reduce(Money.zero(:USD, no_fraction_if_integer: true), &Money.add!(&1, &2))
+
+    ticket_body_html = Algora.Markdown.render(bounty.ticket.description)
+
+    reward_changeset =
+      RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0})
+
+    {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
+    messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
+    participants = thread.id |> Chat.list_participants() |> Repo.preload(:user)
+
+    if connected?(socket) do
+      Chat.subscribe(thread.id)
+    end
+
+    share_url =
+      if socket.assigns.ticket_ref do
+        url(
+          ~p"/#{socket.assigns.ticket_ref.owner}/#{socket.assigns.ticket_ref.repo}/issues/#{socket.assigns.ticket_ref.number}"
+        )
+      else
+        url(~p"/#{socket.assigns.bounty.owner.handle}/bounties/#{socket.assigns.bounty.id}")
+      end
+
+    {:ok,
+     socket
+     |> assign(:can_create_bounty, Member.can_create_bounty?(socket.assigns.current_user_role))
+     |> assign(:share_url, share_url)
+     |> assign(:page_title, bounty.ticket.title)
+     |> assign(:ticket, bounty.ticket)
+     |> assign(:total_paid, total_paid)
+     |> assign(:ticket_body_html, ticket_body_html)
+     |> assign(:show_reward_modal, false)
+     |> assign(:selected_context, nil)
+     |> assign(:line_items, [])
+     |> assign(:thread, thread)
+     |> assign(:messages, messages)
+     |> assign(:participants, participants)
+     |> assign(:reward_form, to_form(reward_changeset))
+     |> assign_contractor(bounty.shared_with)
+     |> assign_line_items()}
+  end
+
+  @impl true
+  def handle_params(_params, _url, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_params(_params, _url, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(%Chat.MessageCreated{message: message, participant: participant}, socket) do
+    socket =
+      if message.id in Enum.map(socket.assigns.messages, & &1.id),
+        do: socket,
+        else: Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))
+
+    socket =
+      if participant.id in Enum.map(socket.assigns.participants, & &1.id),
+        do: socket,
+        else: Phoenix.Component.update(socket, :participants, &(&1 ++ [participant]))
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("send_message", %{"message" => content}, socket) do
+    {:ok, message} =
+      Chat.send_message(
+        socket.assigns.thread.id,
+        socket.assigns.current_user.id,
+        content
+      )
+
+    message = Repo.preload(message, :sender)
+
+    {:noreply,
+     socket
+     |> Phoenix.Component.update(:messages, &(&1 ++ [message]))
+     |> push_event("clear-input", %{selector: "#message-input"})}
+  end
+
+  @impl true
+  def handle_event("reward", _params, socket) do
+    {:noreply, assign(socket, :show_reward_modal, true)}
+  end
+
+  @impl true
+  def handle_event("close_drawer", _params, socket) do
+    {:noreply, close_drawers(socket)}
+  end
+
+  @impl true
+  def handle_event("validate_reward", %{"reward_bounty_form" => params}, socket) do
+    {:noreply,
+     socket
+     |> assign(:reward_form, to_form(RewardBountyForm.changeset(%RewardBountyForm{}, params)))
+     |> assign_line_items()}
+  end
+
+  @impl true
+  def handle_event("assign_line_items", %{"reward_bounty_form" => params}, socket) do
+    {:noreply, assign_line_items(socket)}
+  end
+
+  @impl true
+  def handle_event("pay_with_stripe", %{"reward_bounty_form" => params}, socket) do
+    changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
+
+    case apply_action(changeset, :save) do
+      {:ok, _data} ->
+        case reward_bounty(socket, socket.assigns.bounty, changeset) do
+          {:ok, session_url} ->
+            {:noreply, redirect(socket, external: session_url)}
+
+          {:error, reason} ->
+            Logger.error("Failed to create payment session: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :reward_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event(_event, _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div class={classes(["xl:flex p-4", if(!@current_user, do: "pb-16 xl:pb-24")])}>
+      <.scroll_area class="xl:h-[calc(100svh-96px)] flex-1 pr-6">
+        <div class="space-y-4">
+          <.card>
+            <.card_content>
+              <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="flex -space-x-2">
+                    <.avatar class="h-12 w-12 ring-2 ring-background">
+                      <.avatar_image src={@bounty.owner.avatar_url} />
+                      <.avatar_fallback>
+                        {Util.initials(@bounty.owner.name)}
+                      </.avatar_fallback>
+                    </.avatar>
+                    <.avatar class="h-12 w-12 ring-2 ring-background">
+                      <.avatar_image src={@contractor.avatar_url} />
+                      <.avatar_fallback>
+                        {Util.initials(@contractor.name)}
+                      </.avatar_fallback>
+                    </.avatar>
+                  </div>
+                  <div>
+                    <h1 class="text-2xl font-semibold">
+                      Contract with {@contractor.name}
+                    </h1>
+                    <p class="text-sm text-muted-foreground">
+                      Started {Calendar.strftime(@bounty.inserted_at, "%b %d, %Y")}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                  <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
+                    {Money.to_string!(@bounty.amount)}
+                    <span :if={@bounty.hours_per_week && @bounty.hours_per_week > 0} class="text-base">
+                      /wk
+                    </span>
+                  </div>
+                  <.button :if={@can_create_bounty} phx-click="reward">
+                    Reward
+                  </.button>
+                </div>
+              </div>
+            </.card_content>
+          </.card>
+          <.card>
+            <.card_header>
+              <.card_title>
+                Description
+              </.card_title>
+            </.card_header>
+            <.card_content>
+              <div class="prose prose-invert">
+                {Phoenix.HTML.raw(@ticket_body_html)}
+              </div>
+            </.card_content>
+          </.card>
+        </div>
+      </.scroll_area>
+
+      <div class="h-[calc(100svh-96px)] xl:w-[400px] flex xl:flex-none flex-col border rounded-xl">
+        <div class="flex flex-none items-center justify-between border-b border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <.avatar>
+                <.avatar_image src={@contractor.avatar_url} alt="Developer avatar" />
+                <.avatar_fallback>
+                  {Util.initials(@contractor.name)}
+                </.avatar_fallback>
+              </.avatar>
+              <div class="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-background bg-success">
+              </div>
+            </div>
+            <div>
+              <h2 class="text-lg font-semibold">{@contractor.name}</h2>
+              <p class="text-xs text-muted-foreground">
+                <%!-- Active {Util.time_ago(@contractor.last_active_at)} --%>
+              </p>
+            </div>
+          </div>
+        </div>
+        <.scroll_area
+          class="flex h-full flex-1 flex-col-reverse gap-6 p-4"
+          id="messages-container"
+          phx-hook="ScrollToBottom"
+        >
+          <div class="space-y-6">
+            <%= for {date, messages} <- @messages
+                |> Enum.group_by(fn msg ->
+                  case Date.diff(Date.utc_today(), DateTime.to_date(msg.inserted_at)) do
+                    0 -> "Today"
+                    1 -> "Yesterday"
+                    n when n <= 7 -> Calendar.strftime(msg.inserted_at, "%A")
+                    _ -> Calendar.strftime(msg.inserted_at, "%b %d")
+                  end
+                end)
+                |> Enum.sort_by(fn {_, msgs} -> hd(msgs).inserted_at end, Date) do %>
+              <div class="flex items-center justify-center">
+                <div class="rounded-full bg-background px-2 py-1 text-xs text-muted-foreground">
+                  {date}
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-6">
+                <%= for message <- Enum.sort_by(messages, & &1.inserted_at, Date) do %>
+                  <div class="group flex gap-3">
+                    <.avatar class="h-8 w-8">
+                      <.avatar_image src={message.sender.avatar_url} />
+                      <.avatar_fallback>
+                        {Util.initials(message.sender.name)}
+                      </.avatar_fallback>
+                    </.avatar>
+                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3">
+                      {message.content}
+                      <div class="text-[10px] mt-1 text-muted-foreground">
+                        {message.inserted_at
+                        |> DateTime.to_time()
+                        |> Time.to_string()
+                        |> String.slice(0..4)}
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </.scroll_area>
+
+        <div class="mt-auto flex-none border-t border-border bg-card/50 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <form phx-submit="send_message" class="flex items-center gap-2">
+            <div class="relative flex-1">
+              <.input
+                id="message-input"
+                type="text"
+                name="message"
+                value=""
+                placeholder="Type a message..."
+                autocomplete="off"
+                class="flex-1 pr-24"
+                phx-hook="ClearInput"
+              />
+              <div class="absolute top-1/2 right-2 flex -translate-y-1/2 gap-1">
+                <.button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  phx-hook="EmojiPicker"
+                  id="emoji-trigger"
+                >
+                  <.icon name="tabler-mood-smile" class="h-4 w-4" />
+                </.button>
+              </div>
+            </div>
+            <.button type="submit" size="icon">
+              <.icon name="tabler-send" class="h-4 w-4" />
+            </.button>
+          </form>
+          <!-- Add the emoji picker element (hidden by default) -->
+          <div id="emoji-picker-container" class="bottom-[80px] absolute right-4 hidden">
+            <emoji-picker></emoji-picker>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <.drawer_title>Reward Bounty</.drawer_title>
+        <.drawer_description>
+          You can pay the full bounty now or start with a partial amount - it's up to you!
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.form for={@reward_form} phx-change="validate_reward" phx-submit="pay_with_stripe">
+          <div class="flex flex-col gap-8">
+            <div class="grid grid-cols-2 gap-8">
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Details</.card_title>
+                </.card_header>
+                <.card_content>
+                  <div class="space-y-4">
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@reward_form[:amount]}
+                    />
+
+                    <div>
+                      <.label>Tip</.label>
+                      <div class="mt-2">
+                        <.radio_group
+                          class="grid grid-cols-4 gap-4"
+                          field={@reward_form[:tip_percentage]}
+                          options={tip_options()}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </.card_content>
+              </.card>
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Summary</.card_title>
+                </.card_header>
+                <.card_content>
+                  <dl class="space-y-4">
+                    <%= for line_item <- @line_items do %>
+                      <div class="flex justify-between">
+                        <dt class="flex items-center gap-4">
+                          <%= if line_item.image do %>
+                            <.avatar>
+                              <.avatar_image src={line_item.image} />
+                              <.avatar_fallback>
+                                {Util.initials(line_item.title)}
+                              </.avatar_fallback>
+                            </.avatar>
+                          <% else %>
+                            <div class="w-10" />
+                          <% end %>
+                          <div>
+                            <div class="font-medium">{line_item.title}</div>
+                            <div class="text-muted-foreground text-sm">{line_item.description}</div>
+                          </div>
+                        </dt>
+                        <dd class="font-display font-semibold tabular-nums">
+                          {Money.to_string!(line_item.amount)}
+                        </dd>
+                      </div>
+                    <% end %>
+                    <div class="h-px bg-border" />
+                    <div class="flex justify-between">
+                      <dt class="flex items-center gap-4">
+                        <div class="w-10" />
+                        <div class="font-medium">Total due</div>
+                      </dt>
+                      <dd class="font-display font-semibold tabular-nums">
+                        {LineItem.gross_amount(@line_items)}
+                      </dd>
+                    </div>
+                  </dl>
+                </.card_content>
+              </.card>
+            </div>
+            <div class="ml-auto flex gap-4">
+              <.button variant="secondary" phx-click="close_drawer" type="button">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Pay with Stripe <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
+    """
+  end
+
+  defp assign_line_items(socket) do
+    line_items =
+      Bounties.generate_line_items(
+        %{
+          owner: socket.assigns.bounty.owner,
+          amount: calculate_final_amount(socket.assigns.reward_form.source)
+        },
+        ticket_ref: socket.assigns.ticket_ref,
+        recipient: socket.assigns.contractor
+      )
+
+    assign(socket, :line_items, line_items)
+  end
+
+  defp reward_bounty(socket, bounty, changeset) do
+    final_amount = calculate_final_amount(changeset)
+
+    Bounties.reward_bounty(
+      %{owner: bounty.owner, amount: final_amount, bounty_id: bounty.id, claims: []},
+      ticket_ref: socket.assigns.ticket_ref,
+      recipient: socket.assigns.contractor
+    )
+  end
+
+  defp calculate_final_amount(data_or_changeset) do
+    tip_percentage = get_field(data_or_changeset, :tip_percentage) || Decimal.new(0)
+    amount = get_field(data_or_changeset, :amount) || Money.zero(:USD, no_fraction_if_integer: true)
+
+    multiplier = tip_percentage |> Decimal.div(100) |> Decimal.add(1)
+    Money.mult!(amount, multiplier)
+  end
+
+  defp close_drawers(socket) do
+    assign(socket, :show_reward_modal, false)
+  end
+
+  defp assign_contractor(socket, shared_with) do
+    contractor =
+      shared_with
+      |> Enum.flat_map(fn provider_id ->
+        case Workspace.ensure_user_by_provider_id(Admin.token!(), provider_id) do
+          {:ok, user} -> [user]
+          _ -> []
+        end
+      end)
+      |> List.first()
+
+    assign(socket, :contractor, contractor)
+  end
+end

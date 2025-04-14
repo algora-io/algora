@@ -36,4 +36,6 @@ defmodule Algora.Organizations.Member do
   end
 
   def can_create_bounty?(role), do: role in [:admin, :mod]
+
+  def can_create_contract?(role), do: role in [:admin, :mod]
 end

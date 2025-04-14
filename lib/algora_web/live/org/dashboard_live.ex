@@ -1543,15 +1543,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <p class="text-sm text-muted-foreground">
                 <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
                 <code class="px-1 py-0.5 text-success">/bounty $100</code>
-                on GitHub issues
-                <button
-                  :if={@installations == []}
-                  type="button"
-                  phx-click="install_app"
-                  class="hover:underline"
-                >
-                  (requires the Algora app)
-                </button>
+                on GitHub issues (requires GitHub auth)
               </p>
               <div class="flex justify-end gap-4">
                 <.button>Submit</.button>
@@ -1592,15 +1584,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <p class="text-sm text-muted-foreground">
                 <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
                 <code class="px-1 py-0.5 text-success">/tip $100 @handle</code>
-                on GitHub issues and PRs
-                <button
-                  :if={@installations == []}
-                  type="button"
-                  phx-click="install_app"
-                  class="hover:underline"
-                >
-                  (requires the Algora app)
-                </button>
+                on GitHub issues and PRs (requires GitHub auth)
               </p>
               <div class="flex justify-end gap-4">
                 <.button>Submit</.button>

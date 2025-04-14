@@ -21,6 +21,13 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def refresh_bounty(url) do
+    with %{owner: owner, repo: repo, number: number} <- parse_ticket_url(url),
+         {:ok, ticket} <- Workspace.ensure_ticket(token_for(owner), owner, repo, number) do
+      Bounties.try_refresh_bounty_response(token_for(owner), %{owner: owner, repo: repo, number: number}, ticket)
+    end
+  end
+
   def create_tip_intent(recipient, amount, ticket_ref) do
     with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(ticket_ref.owner) do
       Bounties.build_tip_intent(

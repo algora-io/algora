@@ -146,7 +146,7 @@ defmodule AlgoraWeb.Org.Nav do
 
         case bounty_res do
           {:ok, bounty} ->
-            {:cont, redirect(socket, to: ~p"/#{socket.assigns.current_org.handle}/contract/#{bounty.id}")}
+            {:cont, redirect(socket, to: ~p"/#{socket.assigns.current_org.handle}/contracts/#{bounty.id}")}
 
           {:error, reason} ->
             Logger.error("Failed to create bounty: #{inspect(reason)}")

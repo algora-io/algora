@@ -135,35 +135,6 @@
         </ul>
       <% end %>
     </nav>
-    <%= if main_bounty_form = Map.get(assigns, :main_bounty_form) do %>
-      <div class="mt-auto mx-auto">
-        <.button
-          phx-click="open_main_bounty_form"
-          class="h-9 w-9 rounded-md flex items-center justify-center relative"
-        >
-          <.icon name="tabler-diamond" class="h-6 w-6 shrink-0" />
-          <.icon
-            name="tabler-plus"
-            class="h-[0.8rem] w-[0.8rem] shrink-0 absolute bottom-[0.2rem] right-[0.2rem]"
-          />
-        </.button>
-        <.drawer
-          show={@main_bounty_form_open?}
-          direction="right"
-          on_cancel="close_main_bounty_form"
-        >
-          <.drawer_header>
-            <.drawer_title>Create new bounty</.drawer_title>
-            <.drawer_description>
-              Create and fund a bounty for an issue
-            </.drawer_description>
-          </.drawer_header>
-          <.drawer_content class="mt-4">
-            <AlgoraWeb.Forms.BountyForm.bounty_form form={main_bounty_form} />
-          </.drawer_content>
-        </.drawer>
-      </div>
-    <% end %>
   </div>
 
   <div class="lg:pl-16">
@@ -237,6 +208,60 @@
           </div>
         </.link>
         <%= if @current_user do %>
+          <%= if main_contract_form = Map.get(assigns, :main_contract_form) do %>
+            <div>
+              <.button
+                phx-click="open_main_contract_form"
+                class="h-9 w-9 rounded-md flex items-center justify-center relative"
+              >
+                <.icon name="tabler-user-dollar" class="h-6 w-6 shrink-0" />
+              </.button>
+              <.drawer
+                show={@main_contract_form_open?}
+                direction="right"
+                on_cancel="close_main_contract_form"
+              >
+                <.drawer_header>
+                  <.drawer_title>Create new contract</.drawer_title>
+                  <.drawer_description>
+                    Engage a developer for ongoing work
+                  </.drawer_description>
+                </.drawer_header>
+                <.drawer_content class="mt-4">
+                  <AlgoraWeb.Forms.ContractForm.contract_form form={main_contract_form} />
+                </.drawer_content>
+              </.drawer>
+            </div>
+          <% end %>
+          <%= if main_bounty_form = Map.get(assigns, :main_bounty_form) do %>
+            <div>
+              <.button
+                phx-click="open_main_bounty_form"
+                class="h-9 w-9 rounded-md flex items-center justify-center relative"
+              >
+                <.icon name="tabler-diamond" class="h-6 w-6 shrink-0" />
+                <.icon
+                  name="tabler-plus"
+                  class="h-[0.8rem] w-[0.8rem] shrink-0 absolute bottom-[0.2rem] right-[0.2rem]"
+                />
+              </.button>
+              <.drawer
+                show={@main_bounty_form_open?}
+                direction="right"
+                on_cancel="close_main_bounty_form"
+              >
+                <.drawer_header>
+                  <.drawer_title>Create new bounty</.drawer_title>
+                  <.drawer_description>
+                    Create and fund a bounty for an issue
+                  </.drawer_description>
+                </.drawer_header>
+                <.drawer_content class="mt-4">
+                  <AlgoraWeb.Forms.BountyForm.bounty_form form={main_bounty_form} />
+                </.drawer_content>
+              </.drawer>
+            </div>
+          <% end %>
           <%!-- {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
             id: "activity-timeline",
             session: %{},

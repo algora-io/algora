@@ -23,6 +23,7 @@ config :algora,
     {"/create/org", "/onboarding/org"},
     {"/solve", "/onboarding/dev"},
     {"/onboarding/solver", "/onboarding/dev"},
+    {"/:org/contract/:id", "/:org/contracts/:id"},
     {"/org/*path", "/*path"},
     {"/@/:handle", "/:handle/profile"}
   ]

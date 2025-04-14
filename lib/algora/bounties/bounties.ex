@@ -51,7 +51,8 @@ defmodule Algora.Bounties do
           amount: Money.t(),
           ticket: Ticket.t(),
           visibility: Bounty.visibility(),
-          shared_with: [String.t()]
+          shared_with: [String.t()],
+          hours_per_week: integer() | nil
         }) ::
           {:ok, Bounty.t()} | {:error, atom()}
   defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket} = params) do
@@ -62,7 +63,8 @@ defmodule Algora.Bounties do
         owner_id: owner.id,
         creator_id: creator.id,
         visibility: params[:visibility] || owner.bounty_mode,
-        shared_with: params[:shared_with] || []
+        shared_with: params[:shared_with] || [],
+        hours_per_week: params[:hours_per_week]
       })
 
     changeset
@@ -109,7 +111,8 @@ defmodule Algora.Bounties do
             command_id: integer(),
             command_source: :ticket | :comment,
             visibility: Bounty.visibility() | nil,
-            shared_with: [String.t()] | nil
+            shared_with: [String.t()] | nil,
+            hours_per_week: integer() | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -140,7 +143,8 @@ defmodule Algora.Bounties do
                     amount: amount,
                     ticket: ticket,
                     visibility: opts[:visibility],
-                    shared_with: shared_with
+                    shared_with: shared_with,
+                    hours_per_week: opts[:hours_per_week]
                   })
 
                 :set ->
@@ -190,7 +194,8 @@ defmodule Algora.Bounties do
           opts :: [
             strategy: strategy(),
             visibility: Bounty.visibility() | nil,
-            shared_with: [String.t()] | nil
+            shared_with: [String.t()] | nil,
+            hours_per_week: integer() | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -209,7 +214,8 @@ defmodule Algora.Bounties do
                amount: amount,
                ticket: ticket,
                visibility: opts[:visibility],
-               shared_with: shared_with
+               shared_with: shared_with,
+               hours_per_week: opts[:hours_per_week]
              }),
            {:ok, _job} <- notify_bounty(%{owner: owner, bounty: bounty}) do
         broadcast()
@@ -862,6 +868,7 @@ defmodule Algora.Bounties do
              initialize_charge(%{
                id: Nanoid.generate(),
                user_id: owner.id,
+               bounty_id: opts[:bounty_id],
                gross_amount: gross_amount,
                net_amount: amount,
                total_fee: Money.sub!(gross_amount, amount),
@@ -961,16 +968,18 @@ defmodule Algora.Bounties do
     end)
   end
 
-  defp initialize_charge(%{
-         id: id,
-         user_id: user_id,
-         gross_amount: gross_amount,
-         net_amount: net_amount,
-         total_fee: total_fee,
-         line_items: line_items,
-         group_id: group_id,
-         idempotency_key: idempotency_key
-       }) do
+  defp initialize_charge(
+         %{
+           id: id,
+           user_id: user_id,
+           gross_amount: gross_amount,
+           net_amount: net_amount,
+           total_fee: total_fee,
+           line_items: line_items,
+           group_id: group_id,
+           idempotency_key: idempotency_key
+         } = params
+       ) do
     %Transaction{}
     |> change(%{
       id: id,
@@ -978,6 +987,7 @@ defmodule Algora.Bounties do
       type: :charge,
       status: :initialized,
       user_id: user_id,
+      bounty_id: params[:bounty_id],
       gross_amount: gross_amount,
       net_amount: net_amount,
       total_fee: total_fee,

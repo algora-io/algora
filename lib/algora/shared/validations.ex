@@ -40,6 +40,33 @@ defmodule Algora.Validations do
     end
   end
 
+  def validate_github_handle(changeset, field, embed_field \\ nil) do
+    case get_change(changeset, field) do
+      handle when not is_nil(handle) ->
+        # Check if user is already embedded with matching provider_login
+        existing_user = embed_field && get_field(changeset, embed_field)
+
+        if existing_user && existing_user.provider_login == handle do
+          changeset
+        else
+          case Algora.Workspace.ensure_user(Algora.Admin.token!(), handle) do
+            {:ok, user} ->
+              if embed_field do
+                put_embed(changeset, embed_field, user)
+              else
+                changeset
+              end
+
+            {:error, error, _, _, _, _} ->
+              add_error(changeset, field, error)
+          end
+        end
+
+      _ ->
+        changeset
+    end
+  end
+
   def validate_date_in_future(changeset, field) do
     validate_change(changeset, field, fn _, date ->
       if date && Date.before?(date, DateTime.utc_now()) do

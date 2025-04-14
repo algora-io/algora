@@ -79,6 +79,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
+       |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
        |> assign(:admins_last_active, admins_last_active)
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
        |> assign(:installations, installations)
@@ -133,7 +134,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:noreply,
      socket
-     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:current_status, current_status)
      |> assign(:bounty_rows, to_bounty_rows(bounties))
      |> assign(:transaction_rows, to_transaction_rows(transactions))
@@ -748,6 +748,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:pending_action, {event, unsigned_params})
        |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
     end
+  end
+
+  @impl true
+  def handle_event("share_opportunity", %{"user_id" => user_id, "type" => "contract"}, socket) do
+    developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
+
+    {:noreply,
+     socket
+     |> assign(:main_contract_form_open?, true)
+     |> assign(
+       :main_contract_form,
+       %ContractForm{}
+       |> ContractForm.changeset(%{contractor_handle: developer.provider_login})
+       |> to_form()
+     )}
   end
 
   @impl true

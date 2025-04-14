@@ -285,7 +285,7 @@ defmodule AlgoraWeb.ContractLive do
                       :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
                       class="text-base"
                     >
-                      /wk
+                      /hr
                     </span>
                   </div>
                   <.button :if={@can_create_bounty} phx-click="reward">

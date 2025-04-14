@@ -192,7 +192,10 @@ defmodule AlgoraWeb.Org.HomeLive do
                           {ticket.title}
                         </.link>
 
-                        <div class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
+                        <div
+                          :if={ticket.repository || ticket.url}
+                          class="flex shrink-0 items-center gap-1 whitespace-nowrap text-sm text-muted-foreground"
+                        >
                           <.icon name="tabler-chevron-right" class="h-4 w-4" />
                           <.link
                             href={

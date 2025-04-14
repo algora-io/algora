@@ -15,6 +15,7 @@ defmodule Algora.Bounties.Bounty do
     field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :community
     field :shared_with, {:array, :string}, null: false, default: []
     field :deadline, :utc_datetime_usec
+    field :hours_per_week, :integer
 
     belongs_to :ticket, Algora.Workspace.Ticket
     belongs_to :owner, User
@@ -33,7 +34,7 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility, :shared_with])
+    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility, :shared_with, :hours_per_week])
     |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
     |> foreign_key_constraint(:ticket)
@@ -66,6 +67,8 @@ defmodule Algora.Bounties.Bounty do
   def path(%{ticket: %{provider: "github", url: url}}) do
     Algora.Util.path_from_url(url)
   end
+
+  def path(_bounty), do: nil
 
   def full_path(%{repository: %{name: name, owner: %{login: login}}, ticket: %{number: number}}) do
     "#{login}/#{name}##{number}"

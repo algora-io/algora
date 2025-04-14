@@ -6,10 +6,12 @@ defmodule AlgoraWeb.Org.Nav do
   import Ecto.Changeset
   import Phoenix.LiveView
 
+  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Organizations
   alias Algora.Organizations.Member
   alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.OrgAuth
 
   require Logger
@@ -26,11 +28,18 @@ defmodule AlgoraWeb.Org.Nav do
           to_form(BountyForm.changeset(%BountyForm{}, %{}))
         end
 
+      main_contract_form =
+        if Member.can_create_contract?(current_user_role) do
+          to_form(ContractForm.changeset(%ContractForm{}, %{}))
+        end
+
       {:cont,
        socket
        |> assign(:screenshot?, not is_nil(params["screenshot"]))
        |> assign(:main_bounty_form, main_bounty_form)
        |> assign(:main_bounty_form_open?, false)
+       |> assign(:main_contract_form, main_contract_form)
+       |> assign(:main_contract_form_open?, false)
        |> assign(:current_org, current_org)
        |> assign(:current_user_role, current_user_role)
        |> assign(:nav, nav_items(current_org.handle, current_user_role))
@@ -105,12 +114,65 @@ defmodule AlgoraWeb.Org.Nav do
     end
   end
 
+  defp handle_event("validate_contract_main", %{"contract_form" => params}, socket) do
+    changeset = ContractForm.changeset(%ContractForm{}, params)
+    {:cont, assign(socket, :main_contract_form, to_form(changeset))}
+  end
+
+  defp handle_event("create_contract_main", %{"contract_form" => params}, socket) do
+    changeset = ContractForm.changeset(%ContractForm{}, params)
+
+    case apply_action(changeset, :save) do
+      {:ok, data} ->
+        amount =
+          case data.type do
+            :fixed -> data.amount
+            :hourly -> data.hourly_rate
+          end
+
+        bounty_res =
+          Bounties.create_bounty(
+            %{
+              creator: socket.assigns.current_user,
+              owner: socket.assigns.current_org,
+              amount: amount,
+              title: data.title,
+              description: data.description
+            },
+            hours_per_week: data.hours_per_week,
+            shared_with: [data.contractor.provider_id],
+            visibility: :exclusive
+          )
+
+        case bounty_res do
+          {:ok, bounty} ->
+            {:cont, redirect(socket, to: ~p"/#{socket.assigns.current_org.handle}/contracts/#{bounty.id}")}
+
+          {:error, reason} ->
+            Logger.error("Failed to create bounty: #{inspect(reason)}")
+            {:cont, put_flash(socket, :error, "Something went wrong")}
+        end
+
+      {:error, changeset} ->
+        Logger.error("Failed to create bounty: #{inspect(changeset)}")
+        {:cont, assign(socket, :main_bounty_form, to_form(changeset))}
+    end
+  end
+
   defp handle_event("open_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, true)}
   end
 
   defp handle_event("close_main_bounty_form", _params, socket) do
     {:cont, assign(socket, :main_bounty_form_open?, false)}
+  end
+
+  defp handle_event("open_main_contract_form", _params, socket) do
+    {:cont, assign(socket, :main_contract_form_open?, true)}
+  end
+
+  defp handle_event("close_main_contract_form", _params, socket) do
+    {:cont, assign(socket, :main_contract_form_open?, false)}
   end
 
   defp handle_event(_event, _params, socket) do

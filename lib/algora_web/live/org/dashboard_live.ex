@@ -751,6 +751,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
+  def handle_event("share_opportunity", %{"user_id" => user_id, "type" => "contract"}, socket) do
+    developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
+
+    {:noreply,
+     socket
+     |> assign(:main_contract_form_open?, true)
+     |> assign(
+       :main_contract_form,
+       %ContractForm{}
+       |> ContractForm.changeset(%{contractor_handle: developer.provider_login})
+       |> to_form()
+     )}
+  end
+
+  @impl true
   def handle_event("share_opportunity", %{"user_id" => user_id, "type" => type}, socket) do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
 

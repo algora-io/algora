@@ -267,11 +267,8 @@ defmodule AlgoraWeb.ContractLive do
                         :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
                         class="space-x-2"
                       >
-                        <span>&bull;</span>
-                        <span>
-                          <.icon name="tabler-clock" class="h-4 w-4" />
-                          {@bounty.hours_per_week} hours per week
-                        </span>
+                        <.icon name="tabler-clock" class="h-4 w-4" />
+                        {@bounty.hours_per_week} hours per week
                       </span>
                     </div>
                   </div>
@@ -287,7 +284,7 @@ defmodule AlgoraWeb.ContractLive do
                     </span>
                   </div>
                   <.button :if={@can_create_bounty} phx-click="reward">
-                    Reward
+                    Pay
                   </.button>
                 </div>
               </div>
@@ -418,7 +415,7 @@ defmodule AlgoraWeb.ContractLive do
 
     <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
       <.drawer_header>
-        <.drawer_title>Reward Contract</.drawer_title>
+        <.drawer_title>Pay Contract</.drawer_title>
         <.drawer_description>
           You can pay any amount at any time.
         </.drawer_description>

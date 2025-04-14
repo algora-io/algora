@@ -25,7 +25,7 @@ defmodule Algora.Util do
   def base64_to_term!(base64) do
     base64
     |> Base.decode64!()
-    |> :erlang.binary_to_term()
+    |> Plug.Crypto.non_executable_binary_to_term([:safe])
   end
 
   def format_number_compact(number) when is_struct(number, Decimal) do

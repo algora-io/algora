@@ -74,7 +74,7 @@ defmodule Algora.Github.Client do
       case File.read(cache_path) do
         {:ok, content} ->
           content
-          |> :erlang.binary_to_term()
+          |> Plug.Crypto.non_executable_binary_to_term([:safe])
           |> maybe_retry()
 
         {:error, _} ->

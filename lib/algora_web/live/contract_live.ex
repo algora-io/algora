@@ -11,6 +11,7 @@ defmodule AlgoraWeb.ContractLive do
   alias Algora.Bounties.LineItem
   alias Algora.Chat
   alias Algora.Organizations.Member
+  alias Algora.Payments
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
@@ -47,6 +48,8 @@ defmodule AlgoraWeb.ContractLive do
       |> Repo.get!(bounty_id)
       |> Repo.preload([:owner, :creator, :transactions, ticket: [repository: [:user]]])
 
+    timezone = if(params = get_connect_params(socket), do: params["timezone"])
+
     {host, ticket_ref} =
       if bounty.ticket.repository do
         {bounty.ticket.repository.user,
@@ -63,6 +66,7 @@ defmodule AlgoraWeb.ContractLive do
     |> assign(:bounty, bounty)
     |> assign(:ticket_ref, ticket_ref)
     |> assign(:host, host)
+    |> assign(:timezone, timezone)
     |> on_mount(bounty)
   end
 
@@ -140,6 +144,7 @@ defmodule AlgoraWeb.ContractLive do
      |> assign(:participants, participants)
      |> assign(:reward_form, to_form(reward_changeset))
      |> assign_contractor(bounty.shared_with)
+     |> assign_transactions()
      |> assign_line_items()}
   end
 
@@ -299,6 +304,51 @@ defmodule AlgoraWeb.ContractLive do
             <.card_content class="pt-0">
               <div class="prose prose-invert">
                 {Phoenix.HTML.raw(@ticket_body_html)}
+              </div>
+            </.card_content>
+          </.card>
+          <.card :if={length(@transactions) > 0}>
+            <.card_content>
+              <div class="-mx-6 overflow-x-auto">
+                <div class="inline-block min-w-full py-2 align-middle">
+                  <table class="min-w-full divide-y divide-border">
+                    <thead>
+                      <tr>
+                        <th scope="col" class="px-6 py-3.5 text-left text-sm font-semibold">Date</th>
+                        <th scope="col" class="px-6 py-3.5 text-left text-sm font-semibold">
+                          Description
+                        </th>
+                        <th scope="col" class="px-6 py-3.5 text-right text-sm font-semibold">
+                          Amount
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                      <%= for transaction <- @transactions do %>
+                        <tr class="hover:bg-muted/50">
+                          <td class="whitespace-nowrap px-6 py-4 text-sm">
+                            {Util.timestamp(transaction.inserted_at, @timezone)}
+                          </td>
+                          <td class="whitespace-nowrap px-6 py-4 text-sm">
+                            {description(transaction)}
+                          </td>
+                          <td class="font-display whitespace-nowrap px-6 py-4 text-right font-medium tabular-nums">
+                            <%= case transaction_direction(transaction.type) do %>
+                              <% :plus -> %>
+                                <span class="text-emerald-400">
+                                  {Money.to_string!(transaction.net_amount)}
+                                </span>
+                              <% :minus -> %>
+                                <span class="text-foreground">
+                                  {Money.to_string!(transaction.net_amount)}
+                                </span>
+                            <% end %>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </.card_content>
           </.card>
@@ -556,4 +606,58 @@ defmodule AlgoraWeb.ContractLive do
 
     assign(socket, :contractor, contractor)
   end
+
+  defp assign_transactions(socket) do
+    transactions =
+      Payments.list_transactions(
+        user_id: socket.assigns.bounty.owner.id,
+        status: :succeeded,
+        bounty_id: socket.assigns.bounty.id
+      )
+
+    balance = calculate_balance(transactions)
+    volume = calculate_volume(transactions)
+
+    socket
+    |> assign(:transactions, transactions)
+    |> assign(:total_balance, balance)
+    |> assign(:total_volume, volume)
+  end
+
+  defp calculate_balance(transactions) do
+    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+      case transaction.type do
+        type when type in [:charge, :deposit, :credit] ->
+          Money.add!(acc, transaction.net_amount)
+
+        type when type in [:debit, :withdrawal, :transfer] ->
+          Money.sub!(acc, transaction.net_amount)
+
+        _ ->
+          acc
+      end
+    end)
+  end
+
+  defp calculate_volume(transactions) do
+    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+      case transaction.type do
+        type when type in [:charge, :credit] -> Money.add!(acc, transaction.net_amount)
+        _ -> acc
+      end
+    end)
+  end
+
+  defp transaction_direction(type) do
+    case type do
+      t when t in [:charge, :credit, :deposit] -> :minus
+      t when t in [:debit, :withdrawal, :transfer] -> :plus
+    end
+  end
+
+  defp description(%{type: :charge}), do: "Escrowed"
+
+  defp description(%{type: :debit}), do: "Released"
+
+  defp description(%{type: _type}), do: nil
 end

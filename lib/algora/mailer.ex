@@ -39,10 +39,10 @@ defmodule Algora.Mailer do
         </xml><![endif]-->
       </head>
       <body style="margin: 0; padding: 0; min-width: 100%; background-color: #ffffff;">
-        <div style="background-color: #ffffff; box-sizing: border-box; display: block; Margin: 20px auto; padding: 0;">
+        <div style="background-color: #ffffff; box-sizing: border-box; display: block; padding: 0;">
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr>
-              <td style="font-family:sans-serif; font-size: 16px; padding: 20px 30px;">
+              <td style="font-family:sans-serif; font-size: 16px;">
                 #{html_sections(template_params)}
               </td>
             </tr>

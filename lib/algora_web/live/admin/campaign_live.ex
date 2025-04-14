@@ -237,7 +237,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     email =
       Email.new()
       |> Email.to(to)
-      |> Email.from({"Algora", "info@algora.io"})
+      |> Email.from({"Ioannis R. Florokapis", "ioannis@algora.io"})
       |> Email.subject(subject)
       |> Email.text_body(Mailer.text_template(template_params))
       |> Email.html_body(Mailer.html_template(template_params))

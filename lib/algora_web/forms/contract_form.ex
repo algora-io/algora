@@ -49,6 +49,11 @@ defmodule AlgoraWeb.Forms.ContractForm do
       phx-change="validate_contract_main"
     >
       <div class="space-y-4">
+        <.input label="Title" field={@form[:title]} />
+        <.input label="Description (optional)" field={@form[:description]} type="textarea" />
+        <label class="block text-sm font-semibold leading-6 text-foreground mb-2">
+          Payment
+        </label>
         <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="main-contract-form-tabs">
           <%= for {label, value} <- type_options() do %>
             <label class={[
@@ -80,17 +85,14 @@ defmodule AlgoraWeb.Forms.ContractForm do
           <% end %>
         </div>
 
-        <.input label="Title" field={@form[:title]} placeholder="Brief description of the contract" />
-        <.input
-          label="Description (optional)"
-          field={@form[:description]}
-          type="textarea"
-          placeholder="Requirements and acceptance criteria"
-        />
-        <.input label="Amount" icon="tabler-currency-dollar" field={@form[:amount]} />
-
+        <div data-tab="fixed">
+          <.input label="Amount" icon="tabler-currency-dollar" field={@form[:amount]} />
+        </div>
         <div data-tab="hourly" class="hidden">
-          <.input label="Hours per week" field={@form[:hours_per_week]} />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <.input label="Hourly rate" icon="tabler-currency-dollar" field={@form[:amount]} />
+            <.input label="Hours per week" field={@form[:hours_per_week]} />
+          </div>
         </div>
 
         <div class="relative">

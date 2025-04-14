@@ -418,9 +418,9 @@ defmodule AlgoraWeb.ContractLive do
 
     <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
       <.drawer_header>
-        <.drawer_title>Reward Bounty</.drawer_title>
+        <.drawer_title>Reward Contract</.drawer_title>
         <.drawer_description>
-          You can pay the full bounty now or start with a partial amount - it's up to you!
+          You can pay any amount at any time.
         </.drawer_description>
       </.drawer_header>
       <.drawer_content class="mt-4">
@@ -431,7 +431,7 @@ defmodule AlgoraWeb.ContractLive do
                 <.card_header>
                   <.card_title>Payment Details</.card_title>
                 </.card_header>
-                <.card_content>
+                <.card_content class="pt-0">
                   <div class="space-y-4">
                     <.input
                       label="Amount"
@@ -456,7 +456,7 @@ defmodule AlgoraWeb.ContractLive do
                 <.card_header>
                   <.card_title>Payment Summary</.card_title>
                 </.card_header>
-                <.card_content>
+                <.card_content class="pt-0">
                   <dl class="space-y-4">
                     <%= for line_item <- @line_items do %>
                       <div class="flex justify-between">

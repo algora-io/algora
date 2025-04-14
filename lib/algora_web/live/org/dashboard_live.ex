@@ -1173,7 +1173,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       {&create_bounty_status/1, "Create a bounty", nil},
       {&reward_bounty_status/1, "Reward a bounty", nil},
       {&create_contract_status/1, "Contract a developer",
-       [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"]},
+       if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
       {&share_with_friend_status/1, "Share Algora with a friend", nil}
     ]
 

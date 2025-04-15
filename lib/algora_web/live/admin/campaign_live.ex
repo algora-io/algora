@@ -47,7 +47,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   def handle_params(_params, _uri, socket) do
     {:noreply,
      socket
-     |> LocalStore.init(key: __MODULE__, ok?: &match?(%{form: _}, &1), checkpoint_url: ~p"/admin/campaign")
+     |> LocalStore.init(key: __MODULE__, ttl: :infinity)
      |> LocalStore.subscribe()}
   end
 

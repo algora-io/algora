@@ -56,7 +56,8 @@ config :algora, Oban,
     transfers: 1,
     activity_notifier: 1,
     activity_mailer: 1,
-    activity_discord: 10
+    activity_discord: 10,
+    campaign_emails: 1
   ]
 
 # Configures the mailer

@@ -5,7 +5,9 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   import Ecto.Changeset
 
+  alias Algora.Activities.Jobs.SendCampaignEmail
   alias Algora.Mailer
+  alias Algora.Repo
   alias AlgoraWeb.LocalStore
   alias Swoosh.Email
 
@@ -68,22 +70,48 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     recipient = Enum.find(socket.assigns.csv_data, fn row -> row["email"] == email end)
     subject = get_change(socket.assigns.form.source, :subject)
 
-    case deliver_email(
-           %{
-             name: recipient["name"],
-             email: recipient["email"],
-             repo_owner: recipient["repo_owner"],
-             repo_name: recipient["repo_name"]
-           },
-           subject,
-           markdown: socket.assigns.preview,
-           img: "#{recipient["repo_owner"]}.png"
-         ) do
+    case deliver_email(recipient, subject, markdown: socket.assigns.preview, img: "#{recipient["repo_owner"]}.png") do
       {:ok, _} ->
         {:noreply, put_flash(socket, :info, "Email sent successfully")}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to send email")}
+    end
+  end
+
+  @impl true
+  def handle_event("send_all", _params, socket) do
+    subject = get_change(socket.assigns.form.source, :subject)
+    template = get_change(socket.assigns.form.source, :template)
+
+    result =
+      Repo.transact(fn _ ->
+        socket.assigns.csv_data
+        |> Enum.map(fn recipient ->
+          template_params = [markdown: render_preview(template, recipient), img: "#{recipient["repo_owner"]}.png"]
+
+          %{
+            id: "2025-04-oss",
+            subject: subject,
+            recipient_email: recipient["email"],
+            recipient: Algora.Util.term_to_base64(recipient),
+            template_params: Algora.Util.term_to_base64(template_params)
+          }
+        end)
+        |> Enum.reduce_while(:ok, fn args, acc ->
+          case args |> SendCampaignEmail.new() |> Oban.insert() do
+            {:ok, _} -> {:cont, acc}
+            {:error, _} -> {:halt, :error}
+          end
+        end)
+      end)
+
+    case result do
+      {:ok, _} ->
+        {:noreply, put_flash(socket, :info, "Enqueued #{length(socket.assigns.csv_data)} emails for sending")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to enqueue emails")}
     end
   end
 
@@ -143,6 +171,11 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
           <div>
             <div class="-mx-4 overflow-x-auto">
+              <div class="flex justify-end mb-4">
+                <.button type="button" phx-click="send_all">
+                  Send to {length(@csv_data)} Recipients
+                </.button>
+              </div>
               <.table id="csv-data" rows={@csv_data}>
                 <:col :let={row} :for={key <- Map.keys(List.first(@csv_data) || %{})} label={key}>
                   {row[key]}
@@ -206,22 +239,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end
   end
 
-  @type recipient :: %{
-          name: String.t(),
-          email: String.t(),
-          repo_owner: String.t(),
-          repo_name: String.t()
-        }
-
-  @spec deliver_email(recipient(), subject :: String.t(), template_params :: Keyword.t()) :: :ok
+  @spec deliver_email(recipient :: map(), subject :: String.t(), template_params :: Keyword.t()) :: :ok
   def deliver_email(recipient, subject, template_params) do
     case :get
-         |> Finch.build("https://algora.io/og/go/#{recipient.repo_owner}/#{recipient.repo_name}")
+         |> Finch.build("https://algora.io/og/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}")
          |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body}} when status in 200..299 ->
-        deliver(recipient.email, subject, template_params, [
+        deliver(recipient["email"], subject, template_params, [
           Swoosh.Attachment.new({:data, body},
-            filename: "#{recipient.repo_owner}.png",
+            filename: "#{recipient["repo_owner"]}.png",
             content_type: "image/png",
             type: :inline
           )

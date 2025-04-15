@@ -62,14 +62,23 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
   def cell(%{value: value} = assigns) when is_binary(value) do
     cond do
-      String.starts_with?(value, "https://github.com") ->
+      String.starts_with?(value, "https://github.com/") ->
         ~H"""
-        <.link href={@value} rel="noopener" class="flex justify-center">
-          <.icon name="github" class="h-4 w-4" />
-        </.link>
+        <div class="flex items-center gap-2 text-sm">
+          <.link
+            href={@value}
+            rel="noopener"
+            target="_blank"
+            class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted-foreground/40"
+          >
+            <.icon name="github" class="h-4 w-4" />
+          </.link>
+          {@value |> String.replace("https://github.com/", "")}
+        </div>
         """
 
-      String.starts_with?(value, "https://avatars.githubusercontent.com") or
+      String.starts_with?(value, "https://algora-console.fly.storage.tigris.dev") or
+        String.starts_with?(value, "https://avatars.githubusercontent.com") or
         String.starts_with?(value, "https://app.algora.io/asset") or
         String.starts_with?(value, "https://console.algora.io/asset") or
         String.starts_with?(value, "https://algora.io/asset") or
@@ -85,7 +94,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
       String.match?(value, ~r/^[^\s]+@[^\s]+$/) && assigns.posthog_project_id ->
         ~H"""
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 text-sm">
           <.link
             href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
             rel="noopener"
@@ -142,7 +151,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def cell(%{value: {currency, amount}} = assigns) do
     ~H"""
     <div class="font-display font-medium text-base text-emerald-400 tabular-nums text-right">
-      {Money.new!(currency, amount, no_fraction_if_integer: true)}
+      {Money.new!(currency, amount)}
     </div>
     """
   end

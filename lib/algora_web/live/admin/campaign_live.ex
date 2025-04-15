@@ -212,7 +212,8 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end
   end
 
-  @spec enqueue_emails(recipients :: list(), subject :: String.t(), template :: String.t()) :: :ok
+  @spec enqueue_emails(recipients :: list(), subject :: String.t(), template :: String.t()) ::
+          {:ok, term} | {:error, term}
   def enqueue_emails(recipients, subject, template) do
     Repo.transact(fn _ ->
       recipients
@@ -236,7 +237,8 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end)
   end
 
-  @spec deliver_email(recipient :: map(), subject :: String.t(), template_params :: Keyword.t()) :: :ok
+  @spec deliver_email(recipient :: map(), subject :: String.t(), template_params :: Keyword.t()) ::
+          {:ok, term} | {:error, term}
   def deliver_email(recipient, subject, template_params) do
     case :get
          |> Finch.build("https://algora.io/og/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}")

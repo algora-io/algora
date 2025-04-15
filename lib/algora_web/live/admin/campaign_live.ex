@@ -218,7 +218,13 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     Repo.transact(fn _ ->
       recipients
       |> Enum.map(fn recipient ->
-        template_params = [markdown: render_preview(template, recipient), img: "#{recipient["repo_owner"]}.png"]
+        template_params = [
+          markdown: render_preview(template, recipient),
+          cta: %{
+            href: "#{AlgoraWeb.Endpoint.url()}/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}",
+            src: "cid:#{recipient["repo_owner"]}.png"
+          }
+        ]
 
         %{
           id: "2025-04-oss",

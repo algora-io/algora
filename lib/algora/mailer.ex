@@ -55,12 +55,9 @@ defmodule Algora.Mailer do
 
   def text_template(template_params) do
     """
-
     ==============================
 
     #{text_sections(template_params)}
-
-    Algora - https://algora.io/
 
     ==============================
     """
@@ -68,8 +65,16 @@ defmodule Algora.Mailer do
 
   defp text_sections(template_params) do
     template_params
-    |> Keyword.values()
-    |> Enum.join("\n\n")
+    |> Enum.map(fn {type, value} -> text_section(type, value) end)
+    |> Enum.intersperse("\n\n")
+  end
+
+  defp text_section(:cta, %{href: href}) do
+    ~s|#{href}|
+  end
+
+  defp text_section(_, value) do
+    value
   end
 
   defp html_sections(template_params) do
@@ -96,13 +101,19 @@ defmodule Algora.Mailer do
       html_section_by_type(type, value) <> ~s|</p>|
   end
 
+  defp html_section_by_type(:cta, %{href: href, src: src}) do
+    ~s|<a href="#{href}" style="word-break: break-all; word-wrap: break-word;">| <>
+      ~s|<img src="#{src}" style="width: 100%; height: auto;">| <>
+      ~s|</a>|
+  end
+
   defp html_section_by_type(:url, value) do
-    ~s|<a href="#{value}" style="word-break: break-all; word-wrap: break-word; color: #727cf5;">| <>
+    ~s|<a href="#{value}" style="word-break: break-all; word-wrap: break-word;">| <>
       value <> ~s|</a>|
   end
 
   defp html_section_by_type(:img, value) do
-    ~s|<img src="cid:#{value}" style="width: 100%; height: auto;">|
+    ~s|<img src="#{value}" style="width: 100%; height: auto;">|
   end
 
   defp html_section_by_type(_, text) do

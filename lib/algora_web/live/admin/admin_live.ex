@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   alias Algora.Admin.Mainthings.Mainthing
   alias Algora.Analytics
   alias Algora.Markdown
+  alias AlgoraWeb.LocalStore
 
   @impl true
   def mount(_params, _session, socket) do
@@ -53,7 +54,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-8 p-8">
+    <div class="space-y-8 p-8" phx-hook="LocalStateStore" id="admin-page" data-storage="localStorage">
       <div class="text-sm text-muted-foreground">
         Connected from: <code class="font-mono">{@ip_address}</code>
       </div>
@@ -311,6 +312,21 @@ defmodule AlgoraWeb.Admin.AdminLive do
   end
 
   @impl true
+  def handle_params(_params, _uri, socket) do
+    {:noreply,
+     socket
+     |> LocalStore.init(key: __MODULE__, ttl: :infinity)
+     |> LocalStore.subscribe()}
+  end
+
+  @impl true
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
+
+    {:noreply, assign(socket, :query_results, execute_sql_query(socket.assigns.sql_query))}
+  end
+
+  @impl true
   def handle_event("select_period", %{"period" => period}, socket) do
     {:ok, analytics} = Analytics.get_company_analytics(period)
     funnel_data = Analytics.get_funnel_data(period)
@@ -372,13 +388,17 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
   @impl true
   def handle_event("validate_query", %{"query" => query}, socket) do
-    {:noreply, assign(socket, :sql_query, query)}
+    {:noreply, LocalStore.assign_cached(socket, :sql_query, query)}
   end
 
   @impl true
   def handle_event("execute_query", %{"query" => query}, socket) do
     results = execute_sql_query(query)
-    {:noreply, socket |> assign(:sql_query, query) |> assign(:query_results, results)}
+
+    {:noreply,
+     socket
+     |> LocalStore.assign_cached(:sql_query, query)
+     |> assign(:query_results, results)}
   end
 
   @impl true
@@ -393,7 +413,12 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def handle_event("load_query", %{"name" => name}, socket) do
     queries = get_saved_queries()
     query = Map.get(queries, name)
-    {:noreply, assign(socket, sql_query: query, new_query_name: name)}
+
+    {:noreply,
+     socket
+     |> LocalStore.assign_cached(:sql_query, query)
+     |> LocalStore.assign_cached(:new_query_name, name)
+     |> assign(:query_results, execute_sql_query(query))}
   end
 
   @impl true

@@ -107,7 +107,7 @@ defmodule AlgoraWeb.Components.Footer do
                     class="text-base font-medium leading-6 text-gray-400 hover:text-white"
                     href={Constants.get(:docs_url)}
                   >
-                    Documentation
+                    Docs
                   </a>
                 </li>
                 <li>

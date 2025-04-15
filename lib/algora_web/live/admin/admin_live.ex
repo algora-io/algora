@@ -10,6 +10,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   alias Algora.Analytics
   alias Algora.Markdown
 
+  @impl true
   def mount(_params, _session, socket) do
     {:ok, analytics} = Analytics.get_company_analytics()
     funnel_data = Analytics.get_funnel_data()
@@ -49,121 +50,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> start_async(:get_activities, fn -> Activities.all() end)}
   end
 
-  def cell(%{value: %NaiveDateTime{} = value} = assigns) do
-    ~H"""
-    <span :if={@timezone} class="tabular-nums whitespace-nowrap text-sm">
-      {Calendar.strftime(
-        DateTime.from_naive!(value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
-        "%Y/%m/%d, %H:%M:%S"
-      )}
-    </span>
-    """
-  end
-
-  def cell(%{value: value} = assigns) when is_binary(value) do
-    cond do
-      String.starts_with?(value, "https://github.com/") ->
-        ~H"""
-        <div class="flex items-center gap-2 text-sm">
-          <.link
-            href={@value}
-            rel="noopener"
-            target="_blank"
-            class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted-foreground/40"
-          >
-            <.icon name="github" class="h-4 w-4" />
-          </.link>
-          {@value |> String.replace("https://github.com/", "")}
-        </div>
-        """
-
-      String.starts_with?(value, "https://algora-console.fly.storage.tigris.dev") or
-        String.starts_with?(value, "https://avatars.githubusercontent.com") or
-        String.starts_with?(value, "https://app.algora.io/asset") or
-        String.starts_with?(value, "https://console.algora.io/asset") or
-        String.starts_with?(value, "https://algora.io/asset") or
-        String.starts_with?(value, "https://www.gravatar.com") or
-        String.starts_with?(value, "https://media.licdn.com") or
-        String.starts_with?(value, "https://pbs.twimg.com") or
-          String.starts_with?(value, "https://gravatar.com") ->
-        ~H"""
-        <div class="flex justify-center">
-          <img src={@value} class="h-6 w-6 rounded-full" />
-        </div>
-        """
-
-      String.match?(value, ~r/^[^\s]+@[^\s]+$/) && assigns.posthog_project_id ->
-        ~H"""
-        <div class="flex items-center gap-2 text-sm">
-          <.link
-            href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
-            rel="noopener"
-            target="_blank"
-            class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted-foreground/40"
-          >
-            <.icon name="tabler-video" class="h-4 w-4" />
-          </.link>
-          {@value}
-        </div>
-        """
-
-      String.match?(value, ~r/^[^\s]+@[^\s]+$/) ->
-        ~H"""
-        {@value}
-        """
-
-      String.length(value) == 2 ->
-        country_emoji = Algora.Misc.CountryEmojis.get(value)
-
-        ~H"""
-        <div class="flex justify-center">
-          {if country_emoji, do: country_emoji, else: @value}
-        </div>
-        """
-
-      true ->
-        ~H"""
-        <span class="text-sm">
-          {@value}
-        </span>
-        """
-    end
-  end
-
-  def cell(%{value: value} = assigns) when is_list(value) do
-    ~H"""
-    <div class="flex gap-2 whitespace-nowrap">
-      <%= for item <- @value do %>
-        <.badge>{item}</.badge>
-      <% end %>
-    </div>
-    """
-  end
-
-  def cell(%{value: value} = assigns) when is_map(value) do
-    ~H"""
-    <pre class="flex gap-2 whitespace-pre-wrap font-mono">
-      {Jason.encode!(@value, pretty: true)}
-    </pre>
-    """
-  end
-
-  def cell(%{value: {currency, amount}} = assigns) do
-    ~H"""
-    <div class="font-display font-medium text-base text-emerald-400 tabular-nums text-right">
-      {Money.new!(currency, amount)}
-    </div>
-    """
-  end
-
-  def cell(assigns) do
-    ~H"""
-    <span class="text-sm">
-      {@value}
-    </span>
-    """
-  end
-
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8">
@@ -423,10 +310,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
     """
   end
 
-  def status_color(:active), do: "success"
-  def status_color(:pending), do: "warning"
-  def status_color(_), do: "secondary"
-
+  @impl true
   def handle_event("select_period", %{"period" => period}, socket) do
     {:ok, analytics} = Analytics.get_company_analytics(period)
     funnel_data = Analytics.get_funnel_data(period)
@@ -438,6 +322,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:selected_period, period)}
   end
 
+  @impl true
   def handle_event("validate_notes", %{"mainthing" => %{"content" => content}}, socket) do
     changeset =
       %Mainthing{}
@@ -450,6 +335,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:notes_preview, Markdown.render_unsafe(content))}
   end
 
+  @impl true
   def handle_event("save_notes", %{"mainthing" => params}, socket) do
     case_result =
       case socket.assigns.mainthing do
@@ -474,23 +360,28 @@ defmodule AlgoraWeb.Admin.AdminLive do
     end
   end
 
+  @impl true
   def handle_event("notes-toggle", _, socket) do
     {:noreply, assign(socket, :notes_edit_mode, !socket.assigns.notes_edit_mode)}
   end
 
+  @impl true
   def handle_event("notes-fullscreen-toggle", _, socket) do
     {:noreply, assign(socket, :notes_full_screen, !socket.assigns.notes_full_screen)}
   end
 
+  @impl true
   def handle_event("validate_query", %{"query" => query}, socket) do
     {:noreply, assign(socket, :sql_query, query)}
   end
 
+  @impl true
   def handle_event("execute_query", %{"query" => query}, socket) do
     results = execute_sql_query(query)
     {:noreply, socket |> assign(:sql_query, query) |> assign(:query_results, results)}
   end
 
+  @impl true
   def handle_event("save_query", %{"query_name" => name}, socket) when byte_size(name) > 0 do
     save_query(name, socket.assigns.sql_query)
     saved_queries = get_saved_queries()
@@ -498,19 +389,141 @@ defmodule AlgoraWeb.Admin.AdminLive do
     {:noreply, assign(socket, :saved_queries, saved_queries)}
   end
 
+  @impl true
   def handle_event("load_query", %{"name" => name}, socket) do
     queries = get_saved_queries()
     query = Map.get(queries, name)
     {:noreply, assign(socket, sql_query: query, new_query_name: name)}
   end
 
+  @impl true
   def handle_info(%Activities.Activity{} = activity, socket) do
     {:noreply, stream_insert(socket, :activities, activity, at: 0)}
   end
 
+  @impl true
   def handle_async(:get_activities, {:ok, fetched}, socket) do
     {:noreply, stream(socket, :activities, fetched)}
   end
+
+  defp cell(%{value: %NaiveDateTime{} = value} = assigns) do
+    ~H"""
+    <span :if={@timezone} class="tabular-nums whitespace-nowrap text-sm">
+      {Calendar.strftime(
+        DateTime.from_naive!(value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
+        "%Y/%m/%d, %H:%M:%S"
+      )}
+    </span>
+    """
+  end
+
+  defp cell(%{value: value} = assigns) when is_binary(value) do
+    cond do
+      String.starts_with?(value, "https://github.com/") ->
+        ~H"""
+        <div class="flex items-center gap-2 text-sm">
+          <.link
+            href={@value}
+            rel="noopener"
+            target="_blank"
+            class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted-foreground/40"
+          >
+            <.icon name="github" class="h-4 w-4" />
+          </.link>
+          {@value |> String.replace("https://github.com/", "")}
+        </div>
+        """
+
+      String.starts_with?(value, "https://algora-console.fly.storage.tigris.dev") or
+        String.starts_with?(value, "https://avatars.githubusercontent.com") or
+        String.starts_with?(value, "https://app.algora.io/asset") or
+        String.starts_with?(value, "https://console.algora.io/asset") or
+        String.starts_with?(value, "https://algora.io/asset") or
+        String.starts_with?(value, "https://www.gravatar.com") or
+        String.starts_with?(value, "https://media.licdn.com") or
+        String.starts_with?(value, "https://pbs.twimg.com") or
+          String.starts_with?(value, "https://gravatar.com") ->
+        ~H"""
+        <div class="flex justify-center">
+          <img src={@value} class="h-6 w-6 rounded-full" />
+        </div>
+        """
+
+      String.match?(value, ~r/^[^\s]+@[^\s]+$/) && assigns.posthog_project_id ->
+        ~H"""
+        <div class="flex items-center gap-2 text-sm">
+          <.link
+            href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
+            rel="noopener"
+            target="_blank"
+            class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted-foreground/40"
+          >
+            <.icon name="tabler-video" class="h-4 w-4" />
+          </.link>
+          {@value}
+        </div>
+        """
+
+      String.match?(value, ~r/^[^\s]+@[^\s]+$/) ->
+        ~H"""
+        {@value}
+        """
+
+      String.length(value) == 2 ->
+        country_emoji = Algora.Misc.CountryEmojis.get(value)
+
+        ~H"""
+        <div class="flex justify-center">
+          {if country_emoji, do: country_emoji, else: @value}
+        </div>
+        """
+
+      true ->
+        ~H"""
+        <span class="text-sm">
+          {@value}
+        </span>
+        """
+    end
+  end
+
+  defp cell(%{value: value} = assigns) when is_list(value) do
+    ~H"""
+    <div class="flex gap-2 whitespace-nowrap">
+      <%= for item <- @value do %>
+        <.badge>{item}</.badge>
+      <% end %>
+    </div>
+    """
+  end
+
+  defp cell(%{value: value} = assigns) when is_map(value) do
+    ~H"""
+    <pre class="flex gap-2 whitespace-pre-wrap font-mono">
+      {Jason.encode!(@value, pretty: true)}
+    </pre>
+    """
+  end
+
+  defp cell(%{value: {currency, amount}} = assigns) do
+    ~H"""
+    <div class="font-display font-medium text-base text-emerald-400 tabular-nums text-right">
+      {Money.new!(currency, amount)}
+    </div>
+    """
+  end
+
+  defp cell(assigns) do
+    ~H"""
+    <span class="text-sm">
+      {@value}
+    </span>
+    """
+  end
+
+  defp status_color(:active), do: "success"
+  defp status_color(:pending), do: "warning"
+  defp status_color(_), do: "secondary"
 
   defp execute_sql_query(query) do
     output =

@@ -130,12 +130,6 @@ config :phoenix_live_view, :debug_heex_annotations, true
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
-# config :algora, Algora.Mailer,
-#   adapter: Swoosh.Adapters.Sendgrid,
-#   api_key: System.get_env("SENDGRID_API_KEY")
-
-# config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Algora.Finch
-
 # Path to install SaladUI components
 config :salad_ui, components_path: Path.join(File.cwd!(), "lib/algora_web/components/ui")
 

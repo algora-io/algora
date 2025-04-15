@@ -12,6 +12,8 @@
     <br/>
     <a href="https://algora.io">Website</a>
     ·
+    <a href="https://algora.io/docs">Docs</a>
+    ·
     <a href="https://algora.io/discord">Discord</a>
     ·
     <a href="https://twitter.com/algoraio">Twitter</a>

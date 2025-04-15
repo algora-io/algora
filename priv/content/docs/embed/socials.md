@@ -12,7 +12,7 @@ Share your Algora pages on X, Discord, LinkedIn, Bluesky, Reddit, etc.
 
 <a href="https://algora.io/cal/home">
   <img
-    src="https://algora.io/og/cal/home"
+    src="/images/screenshots/og-bounty-board.png"
     alt="Bounty Issues"
     class="w-[666px] aspect-[1200/630] bg-card rounded-xl"
   />
@@ -24,7 +24,7 @@ Share your Algora pages on X, Discord, LinkedIn, Bluesky, Reddit, etc.
 
 <a href="https://algora.io/neo773/profile">
 <img
-    src="https://algora.io/og/neo773/profile"
+    src="/images/screenshots/og-profile.png"
     alt="Bounty Issues"
     class="w-[666px] aspect-[1200/630] bg-card rounded-xl"
   />
@@ -36,7 +36,7 @@ Share your Algora pages on X, Discord, LinkedIn, Bluesky, Reddit, etc.
 
 <a href="https://algora.io/coollabsio/bounties/new">
   <img
-    src="https://algora.io/og/coollabsio/bounties/new"
+    src="/images/screenshots/og-crowdfund.png"
     alt="Bounty Issues"
     class="w-[666px] aspect-[1200/630] bg-card rounded-xl"
   />

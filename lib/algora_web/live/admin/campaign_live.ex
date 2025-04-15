@@ -152,7 +152,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
                 </.button>
               </div>
               <.table id="csv-data" rows={@csv_data}>
-                <:col :let={row} :for={key <- Map.keys(List.first(@csv_data) || %{})} label={key}>
+                <:col :let={row} :for={key <- @csv_columns} label={key}>
                   {row[key]}
                 </:col>
                 <:action :let={row}>
@@ -219,9 +219,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
         end
       end)
 
+    csv_columns =
+      csv_data
+      |> Enum.flat_map(&Map.keys/1)
+      |> Enum.uniq()
+
     socket
     |> assign(:repo_cache, updated_cache)
     |> assign(:csv_data, csv_data)
+    |> assign(:csv_columns, csv_columns)
   end
 
   defp assign_csv_data(socket, data) do
@@ -242,18 +248,16 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   end
 
   defp assign_preview(socket) do
-    case apply_action(socket.assigns.form.source, :save) do
-      {:ok, data} ->
-        socket = assign_csv_data(socket, data.csv)
+    {socket, template} =
+      case apply_action(socket.assigns.form.source, :save) do
+        {:ok, data} ->
+          {assign_csv_data(socket, data.csv), data.template}
 
-        preview =
-          if length(socket.assigns.csv_data) > 0, do: render_preview(data.template, List.first(socket.assigns.csv_data))
+        {:error, _changeset} ->
+          {assign_csv_data(socket, ""), nil}
+      end
 
-        assign(socket, :preview, preview)
-
-      {:error, _changeset} ->
-        socket |> assign(:preview, nil) |> assign(:csv_data, [])
-    end
+    assign(socket, :preview, render_preview(template, List.first(socket.assigns.csv_data)))
   end
 
   @spec enqueue_emails(recipients :: list(), subject :: String.t(), template :: String.t()) ::

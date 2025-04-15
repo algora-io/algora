@@ -135,6 +135,17 @@
         </ul>
       <% end %>
     </nav>
+    <ul role="list" class="mt-auto flex flex-col items-center space-y-1">
+      <li>
+        <.link
+          navigate={~p"/docs"}
+          class="group flex gap-x-3 rounded-md p-3 text-sm/6 font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
+        >
+          <.icon name="tabler-help" class="h-6 w-6 shrink-0" />
+          <span class="sr-only">Help</span>
+        </.link>
+      </li>
+    </ul>
   </div>
 
   <div class="lg:pl-16">
@@ -209,15 +220,6 @@
         </.link>
         <%= if @current_user do %>
           <div class="flex items-center gap-x-4">
-            <div>
-              <.button
-                variant="secondary"
-                navigate={~p"/docs"}
-                class="h-9 w-9 rounded-md flex items-center justify-center relative"
-              >
-                <.icon name="tabler-help" class="h-6 w-6 shrink-0" />
-              </.button>
-            </div>
             <%= if main_contract_form = Map.get(assigns, :main_contract_form) do %>
               <div>
                 <.button

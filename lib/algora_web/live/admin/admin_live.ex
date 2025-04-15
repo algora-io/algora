@@ -83,15 +83,20 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </div>
         """
 
-      # String.match?(value, ~r/^[^\s]+@[^\s]+$/) && assigns.posthog_project_id ->
-      #   ~H"""
-      #   <.link
-      #     href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
-      #     rel="noopener"
-      #   >
-      #     {@value}
-      #   </.link>
-      #   """
+      String.match?(value, ~r/^[^\s]+@[^\s]+$/) && assigns.posthog_project_id ->
+        ~H"""
+        <div class="flex items-center gap-2">
+          <.link
+            href={"https://us.posthog.com/project/#{@posthog_project_id}/person/#{@value}#activeTab=sessionRecordings"}
+            rel="noopener"
+            target="_blank"
+            class="h-8 w-8 rounded-lg bg-muted flex items-center justify-center hover:bg-muted-foreground/40"
+          >
+            <.icon name="tabler-video" class="h-4 w-4" />
+          </.link>
+          {@value}
+        </div>
+        """
 
       String.match?(value, ~r/^[^\s]+@[^\s]+$/) ->
         ~H"""
@@ -206,7 +211,13 @@ defmodule AlgoraWeb.Admin.AdminLive do
                   <%= for row <- results.rows do %>
                     <tr class="border-b border-border">
                       <%= for value <- row do %>
-                        <td class="p-4"><.cell value={value} timezone={@timezone} /></td>
+                        <td class="p-4">
+                          <.cell
+                            value={value}
+                            timezone={@timezone}
+                            posthog_project_id={@posthog_project_id}
+                          />
+                        </td>
                       <% end %>
                     </tr>
                   <% end %>

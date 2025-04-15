@@ -169,13 +169,6 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     """
   end
 
-  defp parse_csv(csv) do
-    csv
-    |> String.split("\n")
-    |> Enum.map(&String.split(&1, ","))
-    |> Enum.reject(&Enum.empty?/1)
-  end
-
   defp render_preview(template, data) when is_map(data) do
     Enum.reduce(data, template, fn {key, value}, acc ->
       String.replace(acc, "%{#{key}}", value)
@@ -233,18 +226,14 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   defp assign_csv_data(socket, data) do
     csv_data =
-      case data |> String.trim() |> parse_csv() do
-        [header | rows] ->
-          keys = Enum.map(header, &String.trim/1)
-
-          Enum.map(rows, fn row ->
-            keys
-            |> Enum.zip(Enum.map(row, &String.trim/1))
-            |> Map.new()
-          end)
-
-        _ ->
+      case String.trim(data) do
+        "" ->
           []
+
+        csv_string ->
+          [csv_string]
+          |> CSV.decode!(headers: true)
+          |> Enum.to_list()
       end
 
     socket

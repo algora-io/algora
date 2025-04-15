@@ -98,6 +98,7 @@ defmodule Algora.MixProject do
       {:hammer, "~> 7.0"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:cmark, "~> 0.10"},
+      {:csv, "~> 3.2"},
       # ex_aws
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},

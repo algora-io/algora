@@ -532,23 +532,29 @@ const Hooks = {
     },
   },
   LocalStateStore: {
+    getStorage() {
+      const storage = this.el.getAttribute("data-storage");
+      return storage === "localStorage" ? localStorage : sessionStorage;
+    },
+
     mounted() {
+      this.storage = this.getStorage();
       this.handleEvent("store", (obj) => this.store(obj));
       this.handleEvent("clear", (obj) => this.clear(obj));
       this.handleEvent("restore", (obj) => this.restore(obj));
     },
 
     store(obj) {
-      sessionStorage.setItem(obj.key, obj.data);
+      this.storage.setItem(obj.key, obj.data);
     },
 
     restore(obj) {
-      const data = sessionStorage.getItem(obj.key);
+      const data = this.storage.getItem(obj.key);
       this.pushEvent(obj.event, data);
     },
 
     clear(obj) {
-      sessionStorage.removeItem(obj.key);
+      this.storage.removeItem(obj.key);
     },
   },
   CtrlEnterSubmit: {

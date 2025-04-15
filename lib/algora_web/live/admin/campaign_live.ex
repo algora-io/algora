@@ -90,7 +90,12 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="bg-background" phx-hook="LocalStateStore" id="campaign-page">
+    <div
+      class="bg-background"
+      phx-hook="LocalStateStore"
+      id="campaign-page"
+      data-storage="localStorage"
+    >
       <div class="max-w-7xl mx-auto py-8 space-y-8">
         <.header>
           Campaign Manager

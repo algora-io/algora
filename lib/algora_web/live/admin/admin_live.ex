@@ -99,13 +99,13 @@ defmodule AlgoraWeb.Admin.AdminLive do
               <table class="w-full">
                 <thead>
                   <tr class="border-b border-border">
-                    <%= for column <- Enum.map(results.columns, &String.to_atom/1) do %>
+                    <%= for column <- Enum.map(results.columns || [], &String.to_atom/1) do %>
                       <th class="p-4 text-left font-mono">{column}</th>
                     <% end %>
                   </tr>
                 </thead>
                 <tbody>
-                  <%= for row <- results.rows do %>
+                  <%= for row <- (results.rows || []) do %>
                     <tr class="border-b border-border">
                       <%= for value <- row do %>
                         <td class="p-4">

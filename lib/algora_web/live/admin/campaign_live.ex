@@ -67,48 +67,21 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   @impl true
   def handle_event("send_email", %{"email" => email}, socket) do
-    recipient = Enum.find(socket.assigns.csv_data, fn row -> row["email"] == email end)
-    subject = get_change(socket.assigns.form.source, :subject)
-
-    case deliver_email(recipient, subject, markdown: socket.assigns.preview, img: "#{recipient["repo_owner"]}.png") do
-      {:ok, _} ->
-        {:noreply, put_flash(socket, :info, "Email sent successfully")}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to send email")}
-    end
+    socket.assigns.csv_data |> Enum.filter(fn row -> row["email"] == email end) |> handle_send(socket)
   end
 
   @impl true
   def handle_event("send_all", _params, socket) do
+    handle_send(socket.assigns.csv_data, socket)
+  end
+
+  defp handle_send(recipients, socket) do
     subject = get_change(socket.assigns.form.source, :subject)
     template = get_change(socket.assigns.form.source, :template)
 
-    result =
-      Repo.transact(fn _ ->
-        socket.assigns.csv_data
-        |> Enum.map(fn recipient ->
-          template_params = [markdown: render_preview(template, recipient), img: "#{recipient["repo_owner"]}.png"]
-
-          %{
-            id: "2025-04-oss",
-            subject: subject,
-            recipient_email: recipient["email"],
-            recipient: Algora.Util.term_to_base64(recipient),
-            template_params: Algora.Util.term_to_base64(template_params)
-          }
-        end)
-        |> Enum.reduce_while(:ok, fn args, acc ->
-          case args |> SendCampaignEmail.new() |> Oban.insert() do
-            {:ok, _} -> {:cont, acc}
-            {:error, _} -> {:halt, :error}
-          end
-        end)
-      end)
-
-    case result do
+    case enqueue_emails(recipients, subject, template) do
       {:ok, _} ->
-        {:noreply, put_flash(socket, :info, "Enqueued #{length(socket.assigns.csv_data)} emails for sending")}
+        {:noreply, put_flash(socket, :info, "Enqueued #{length(recipients)} emails for sending")}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to enqueue emails")}
@@ -237,6 +210,30 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       {:error, _changeset} ->
         socket |> assign(:preview, nil) |> assign(:csv_data, [])
     end
+  end
+
+  @spec enqueue_emails(recipients :: list(), subject :: String.t(), template :: String.t()) :: :ok
+  def enqueue_emails(recipients, subject, template) do
+    Repo.transact(fn _ ->
+      recipients
+      |> Enum.map(fn recipient ->
+        template_params = [markdown: render_preview(template, recipient), img: "#{recipient["repo_owner"]}.png"]
+
+        %{
+          id: "2025-04-oss",
+          subject: subject,
+          recipient_email: recipient["email"],
+          recipient: Algora.Util.term_to_base64(recipient),
+          template_params: Algora.Util.term_to_base64(template_params)
+        }
+      end)
+      |> Enum.reduce_while(:ok, fn args, acc ->
+        case args |> SendCampaignEmail.new() |> Oban.insert() do
+          {:ok, _} -> {:cont, acc}
+          {:error, _} -> {:halt, :error}
+        end
+      end)
+    end)
   end
 
   @spec deliver_email(recipient :: map(), subject :: String.t(), template_params :: Keyword.t()) :: :ok

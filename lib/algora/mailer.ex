@@ -69,8 +69,8 @@ defmodule Algora.Mailer do
     |> Enum.intersperse("\n\n")
   end
 
-  defp text_section(:cta, %{href: href}) do
-    ~s|#{href}|
+  defp text_section(:cta, %{href: href, src: src}) do
+    ~s|#{href}\n\n#{src}|
   end
 
   defp text_section(_, value) do

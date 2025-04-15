@@ -4,14 +4,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   use AlgoraWeb, :live_view
 
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Algora.Activities.Jobs.SendCampaignEmail
   alias Algora.Mailer
   alias Algora.Repo
+  alias Algora.Workspace.Repository
   alias AlgoraWeb.LocalStore
   alias Swoosh.Email
 
-  # Add embedded schema
   defmodule Campaign do
     @moduledoc false
     use Ecto.Schema
@@ -38,6 +39,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
      socket
      |> assign(:page_title, "Campaign")
      |> assign(:form, to_form(Campaign.changeset(%Campaign{})))
+     |> assign(:repo_cache, %{})
      |> assign_preview()}
   end
 
@@ -182,30 +184,83 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   defp render_preview(_template, _data), do: nil
 
+  defp assign_repo_names(socket) do
+    new_handles =
+      socket.assigns.csv_data
+      |> Enum.map(& &1["org_handle"])
+      |> Enum.reject(&is_nil/1)
+      |> Enum.reject(&Map.has_key?(socket.assigns.repo_cache, &1))
+      |> Enum.uniq()
+
+    new_cache =
+      Map.new(new_handles, fn org_handle ->
+        repo =
+          Repo.one(
+            from r in Repository,
+              join: u in assoc(r, :user),
+              where: u.handle == ^org_handle,
+              order_by: [desc: fragment("(?->>'stargazers_count')::integer", r.provider_meta)],
+              select: %{
+                repo_owner: u.provider_login,
+                repo_name: r.name
+              },
+              limit: 1
+          )
+
+        {org_handle, repo}
+      end)
+
+    updated_cache = Map.merge(socket.assigns.repo_cache, new_cache)
+
+    csv_data =
+      Enum.map(socket.assigns.csv_data, fn row ->
+        case row["org_handle"] do
+          nil ->
+            row
+
+          org_handle ->
+            case Map.get(updated_cache, org_handle) do
+              nil -> row
+              repo -> Map.merge(row, %{"repo_owner" => repo.repo_owner, "repo_name" => repo.repo_name})
+            end
+        end
+      end)
+
+    socket
+    |> assign(:repo_cache, updated_cache)
+    |> assign(:csv_data, csv_data)
+  end
+
+  defp assign_csv_data(socket, data) do
+    csv_data =
+      case data |> String.trim() |> parse_csv() do
+        [header | rows] ->
+          keys = Enum.map(header, &String.trim/1)
+
+          Enum.map(rows, fn row ->
+            keys
+            |> Enum.zip(Enum.map(row, &String.trim/1))
+            |> Map.new()
+          end)
+
+        _ ->
+          []
+      end
+
+    socket
+    |> assign(:csv_data, csv_data)
+    |> assign_repo_names()
+  end
+
   defp assign_preview(socket) do
     case apply_action(socket.assigns.form.source, :save) do
       {:ok, data} ->
-        csv_data =
-          case data.csv |> String.trim() |> parse_csv() do
-            [header | rows] ->
-              keys = Enum.map(header, &String.trim/1)
-
-              Enum.map(rows, fn row ->
-                keys
-                |> Enum.zip(Enum.map(row, &String.trim/1))
-                |> Map.new()
-              end)
-
-            _ ->
-              []
-          end
+        socket = assign_csv_data(socket, data.csv)
 
         preview =
-          if length(csv_data) > 0 do
-            render_preview(data.template, List.first(csv_data))
-          end
+          if length(socket.assigns.csv_data) > 0, do: render_preview(data.template, List.first(socket.assigns.csv_data))
 
-        socket |> assign(:preview, preview) |> assign(:csv_data, csv_data)
+        assign(socket, :preview, preview)
 
       {:error, _changeset} ->
         socket |> assign(:preview, nil) |> assign(:csv_data, [])

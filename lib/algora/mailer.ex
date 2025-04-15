@@ -4,8 +4,6 @@ defmodule Algora.Mailer do
 
   require Logger
 
-  @logo_url "https://algora.io/images/logo-192px.png"
-
   def deliver_with_logging(mail) do
     case deliver(mail) do
       {:ok, _} ->

@@ -65,24 +65,42 @@ defmodule Algora.ScreenshotQueue do
   defp start_task(url, opts, from, state) do
     task =
       Task.async(fn ->
-        try do
-          puppeteer_path = Path.join([:code.priv_dir(:algora), "puppeteer", "puppeteer-img.js"])
-
-          case System.cmd("node", [puppeteer_path] ++ build_opts(url, opts)) do
-            {_, 127} -> {:error, :invalid_exec_path}
-            {cmd_response, _} -> {:ok, cmd_response}
-          end
-        rescue
-          e in ErlangError ->
-            %ErlangError{original: error} = e
-
-            case error do
-              :enoent -> {:error, :invalid_exec_path}
-            end
-        end
+        try_generate_image(url, opts, 3)
       end)
 
     {task, %{state | active_tasks: Map.put(state.active_tasks, task.ref, from)}}
+  end
+
+  defp try_generate_image(url, opts, attempts_left) when attempts_left > 0 do
+    puppeteer_path = Path.join([:code.priv_dir(:algora), "puppeteer", "puppeteer-img.js"])
+
+    case System.cmd("node", [puppeteer_path] ++ build_opts(url, opts)) do
+      {_, 127} ->
+        {:error, :invalid_exec_path}
+
+      {cmd_response, 0} ->
+        {:ok, cmd_response}
+
+      _ ->
+        Logger.warning("Puppeteer command failed, attempts left: #{attempts_left - 1}")
+        try_generate_image(url, opts, attempts_left - 1)
+    end
+  rescue
+    e in ErlangError ->
+      %ErlangError{original: error} = e
+
+      case error do
+        :enoent ->
+          {:error, :invalid_exec_path}
+
+        _ ->
+          Logger.warning("Puppeteer command failed with #{inspect(error)}, attempts left: #{attempts_left - 1}")
+          try_generate_image(url, opts, attempts_left - 1)
+      end
+  end
+
+  defp try_generate_image(_url, _opts, 0) do
+    {:error, :max_retries_exceeded}
   end
 
   defp build_opts(url, options) do

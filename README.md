@@ -44,20 +44,62 @@ Algora combines:
 | **Algora community experts** | get work done and grow your team                  |
 
 <table>
+
+  <!-- Dashboards -->
   <tr>
     <td align="center">
-      <img src="https://algora.io/og/mogery/profile" alt="Gergő Móricz" width="250">
+      <img src="https://algora.io/images/screenshots/user-dashboard.png" alt="User Dashboard" width="1000">
     </td>
     <td align="center">
-      <img src="https://algora.io/og/neo773/profile" alt="Huzef" width="250">
+      <img src="https://algora.io/images/screenshots/org-dashboard.png" alt="Organization Dashboard" width="1000">
     </td>
   </tr>
+
+  <!-- Payments & Transactions -->
   <tr>
     <td align="center">
-      <img src="https://algora.io/og/cal/home" alt="Cal.com homepage" width="250">
+      <img src="https://algora.io/images/screenshots/global-payments.png" alt="Global Payments" width="1000">
     </td>
     <td align="center">
-      <img src="https://algora.io/og/zio/leaderboard" alt="ZIO leaderboard" width="250">
+      <img src="https://algora.io/images/docs/dashboard-pending-payments.png" alt="Pending Payments" width="1000">
+    </td>
+  </tr>
+
+  <!-- Embeds -->
+  <tr>
+   <td align="center">
+      <img src="https://algora.io/images/screenshots/og-bounty-board.png" alt="Bounty Board" width="1000">
+    </td>
+    <td align="center">
+      <img src="https://algora.io/images/screenshots/og-crowdfund.png" alt="Crowdfund" width="1000">
+    </td>
+  </tr>
+    <tr>
+    <td align="center">
+      <img src="https://algora.io/images/screenshots/og-profile.png" alt="User Profile" width="1000">
+    </td>
+    <td align="center">
+      <img src="https://algora.io/images/screenshots/embed-profile.png" alt="Embed Profile" width="1000">
+    </td>
+  </tr>
+
+  <!-- Bounty Creation & Management -->
+  <tr>
+    <td align="center">
+      <img src="https://algora.io/images/docs/create-custom-bounty.png" alt="Create Custom Bounty" width="1000">
+    </td>
+    <td align="center">
+      <img src="https://algora.io/images/docs/view-custom-bounty.png" alt="View Custom Bounty" width="1000">
+    </td>
+  </tr>
+
+  <!-- Tips -->
+  <tr>
+    <td align="center">
+      <img src="https://algora.io/images/docs/create-tip-on-algora-1.png" alt="Create Tip Step 1" width="1000">
+    </td>
+    <td align="center">
+      <img src="https://algora.io/images/docs/create-tip-on-algora-2.png" alt="Create Tip Step 2" width="1000">
     </td>
   </tr>
 </table>

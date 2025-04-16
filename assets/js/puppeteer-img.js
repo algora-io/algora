@@ -90,7 +90,6 @@ function _validateInteger(value) {
     ? options.type
     : "png";
   screenshotOptions.path = options.path || `./image.${screenshotOptions.type}`;
-
   const clipParams = {
     x: options.x,
     y: options.y,
@@ -118,8 +117,6 @@ function _validateInteger(value) {
     await page.goto(options.url, { waitUntil: "networkidle2" });
     await page.focus("body");
     await page.screenshot(screenshotOptions);
-    process.stdout.write(screenshotOptions.path);
-
     await page.close();
   } catch (e) {
     process.stderr.write(e.message);

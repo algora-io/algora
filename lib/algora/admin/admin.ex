@@ -334,7 +334,7 @@ defmodule Algora.Admin do
 
   def alert(message, severity \\ :error)
 
-  def alert(message, :error) do
+  def alert(message, :critical = severity) do
     Logger.error(message)
 
     email_job =
@@ -347,7 +347,9 @@ defmodule Algora.Admin do
 
     discord_job =
       SendDiscord.changeset(%{
-        payload: %{embeds: [%{color: color(:error), title: "Error", description: message, timestamp: DateTime.utc_now()}]}
+        payload: %{
+          embeds: [%{color: color(severity), title: "Error", description: message, timestamp: DateTime.utc_now()}]
+        }
       })
 
     Oban.insert_all([email_job, discord_job])
@@ -370,6 +372,7 @@ defmodule Algora.Admin do
     |> Oban.insert()
   end
 
+  def color(:critical), do: 0xEF4444
   def color(:error), do: 0xEF4444
   def color(:debug), do: 0x64748B
   def color(:info), do: 0xF59E0B

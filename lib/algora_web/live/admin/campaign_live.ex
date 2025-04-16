@@ -143,7 +143,9 @@ defmodule AlgoraWeb.Admin.CampaignLive do
                   </div>
                   <div class="flex gap-1">
                     <dt class="font-bold">Preheader:</dt>
-                    <dd class="line-clamp-1">{get_change(@form.source, :preheader)}</dd>
+                    <dd class="line-clamp-1">
+                      {render_preview(get_change(@form.source, :preheader), List.first(@csv_data))}
+                    </dd>
                   </div>
                   <div class="flex gap-1">
                     <dt class="font-bold">From:</dt>
@@ -316,7 +318,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
           template_params: Algora.Util.term_to_base64(template_params),
           from_name: from_name,
           from_email: from_email,
-          preheader: preheader
+          preheader: render_preview(preheader, recipient)
         }
       end)
       |> Enum.with_index()

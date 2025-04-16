@@ -74,10 +74,13 @@ defmodule AlgoraWeb.Org.PreviewNav do
       else
         token = AlgoraWeb.UserAuth.sign_preview_code(preview_user.id)
 
+        search_params =
+          Map.reject(%{email: params["email"], screenshot: params["screenshot"]}, fn {_k, v} -> is_nil(v) end)
+
         return_to =
-          if params["email"] || params["screenshot"],
-            do: ~p"/go/#{repo_owner}/#{repo_name}?#{%{email: params["email"], screenshot: params["screenshot"]}}",
-            else: ~p"/go/#{repo_owner}/#{repo_name}"
+          if search_params == %{},
+            do: ~p"/go/#{repo_owner}/#{repo_name}",
+            else: ~p"/go/#{repo_owner}/#{repo_name}?#{search_params}"
 
         preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, return_to)
 

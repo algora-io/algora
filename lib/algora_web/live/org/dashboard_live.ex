@@ -1149,6 +1149,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp achievement_todo(%{achievement: %{id: :create_contract_status}} = assigns) do
     ~H"""
     <.button
+      :if={@current_org.handle}
       patch={~p"/#{@current_org.handle}/dashboard?action=create_contract"}
       class="ml-auto gap-2"
     >

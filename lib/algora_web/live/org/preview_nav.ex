@@ -7,7 +7,7 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
   alias Algora.Organizations
 
-  def on_mount(:default, %{"repo_owner" => repo_owner, "repo_name" => repo_name}, _session, socket) do
+  def on_mount(:default, %{"repo_owner" => repo_owner, "repo_name" => repo_name} = params, _session, socket) do
     current_context = socket.assigns[:current_context]
 
     socket =
@@ -44,7 +44,14 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
         true ->
           token = AlgoraWeb.UserAuth.sign_preview_code(preview_user.id)
-          preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, ~p"/go/#{repo_owner}/#{repo_name}")
+
+          return_to =
+            if params["email"],
+              do: ~p"/go/#{repo_owner}/#{repo_name}?email=#{params["email"]}",
+              else: ~p"/go/#{repo_owner}/#{repo_name}"
+
+          preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, return_to)
+
           {:halt, redirect(socket, to: preview_path)}
       end
     end

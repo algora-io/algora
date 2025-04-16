@@ -152,6 +152,15 @@ defmodule AlgoraWeb.Org.DashboardLive do
         socket
       end
 
+    # Create login changeset with email from params if present
+    socket =
+      if email = params["email"] do
+        login_changeset = User.login_changeset(%User{}, %{email: email})
+        assign_login_form(socket, login_changeset)
+      else
+        socket
+      end
+
     {:noreply,
      socket
      |> assign(:current_status, current_status)

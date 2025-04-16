@@ -114,29 +114,25 @@ defmodule AlgoraWeb.Admin.CampaignLive do
         </.header>
 
         <.form for={@form} phx-change="preview" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-6">
-              <div class="grid grid-cols-2 gap-4">
-                <.input type="text" field={@form[:from_name]} label="From Name" />
-                <.input type="email" field={@form[:from_email]} label="From Email" />
-              </div>
-              <.input type="text" field={@form[:subject]} label="Subject" />
-              <.input
-                type="text"
-                field={@form[:preheader]}
-                label="Preheader"
-                helptext="A short summary that appears after the subject line in email clients"
-              />
-
-              <.input
-                type="textarea"
-                field={@form[:template]}
-                label="Email Template"
-                helptext="Use %{variable_name} for template variables"
-                rows={20}
-              />
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+              <.input type="text" field={@form[:from_name]} label="From Name" />
+              <.input type="email" field={@form[:from_email]} label="From Email" />
             </div>
+            <div class="grid grid-cols-2 gap-4">
+              <.input type="text" field={@form[:subject]} label="Subject" />
+              <.input type="text" field={@form[:preheader]} label="Preheader" />
+            </div>
+          </div>
 
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <.input
+              type="textarea"
+              field={@form[:template]}
+              label="Email Template"
+              helptext="Use %{variable_name} for template variables"
+              rows={20}
+            />
             <div class="space-y-2">
               <.label>Preview</.label>
               <div class="prose max-w-none">

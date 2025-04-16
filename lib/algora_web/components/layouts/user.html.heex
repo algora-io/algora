@@ -117,15 +117,12 @@
                 title={Algora.Accounts.User.handle(contact)}
               >
                 <div class="relative inline-block">
-                  <div class="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
-                    <img
-                      alt={Algora.Accounts.User.handle(contact)}
-                      loading="lazy"
-                      decoding="async"
-                      src={contact.avatar_url}
-                      class="h-full w-full object-cover"
-                    />
-                  </div>
+                  <.avatar>
+                    <.avatar_image src={contact.avatar_url} />
+                    <.avatar_fallback>
+                      {Algora.Util.initials(Algora.Accounts.User.handle(contact))}
+                    </.avatar_fallback>
+                  </.avatar>
                   <span class="absolute right-0 bottom-0 block h-2 w-2 rounded-full bg-green-400 ring-2 ring-white dark:ring-gray-950">
                   </span>
                 </div>

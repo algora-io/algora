@@ -115,7 +115,7 @@ defmodule Algora.ScreenshotQueue do
     options
     |> Keyword.take([:type, :path, :width, :height, :scale_factor])
     |> Enum.reduce([url], fn {key, value}, result ->
-      result ++ [String.replace("--#{key}=#{value}", "_", "-")]
+      result ++ ["--#{key}=#{value}"]
     end)
   end
 end

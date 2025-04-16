@@ -282,8 +282,9 @@ defmodule AlgoraWeb.Admin.CampaignLive do
           template_params: Algora.Util.term_to_base64(template_params)
         }
       end)
-      |> Enum.reduce_while(:ok, fn args, acc ->
-        case args |> SendCampaignEmail.new() |> Oban.insert() do
+      |> Enum.with_index()
+      |> Enum.reduce_while(:ok, fn {args, index}, acc ->
+        case args |> SendCampaignEmail.new(schedule_in: 5 * index) |> Oban.insert() do
           {:ok, _} -> {:cont, acc}
           {:error, _} -> {:halt, :error}
         end

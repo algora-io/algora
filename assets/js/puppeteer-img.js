@@ -106,44 +106,45 @@ function _validateInteger(value) {
     }
   }
 
-  puppeteer
-    .launch({
-      devtools: false,
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--single-process"],
-      ignoreHTTPSErrors: true,
-    })
-    .then(async function (browser) {
-      const MAX_WAITING_TIME_ACCESS_URL = 5000;
+  const browser = await puppeteer.launch({
+    devtools: false,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--single-process"],
+    ignoreHTTPSErrors: true,
+  });
 
-      const page = await browser.newPage();
-      await page.setViewport(viewportOptions);
-      await page.goto(options.url, { waitUntil: "networkidle2" });
+  try {
+    const page = await browser.newPage();
+    await page.setViewport(viewportOptions);
+    await page.goto(options.url, { waitUntil: "networkidle2" });
 
-      if (new URL(options.url).pathname.startsWith("/go/")) {
-        console.log("Waiting for response");
-        let responseEventOccurred = false;
-        const responseHandler = (_event) => (responseEventOccurred = true);
+    if (new URL(options.url).pathname.startsWith("/go/")) {
+      console.log("Waiting for response");
+      let responseEventOccurred = false;
+      const responseHandler = (_event) => (responseEventOccurred = true);
 
-        const responseWatcher = new Promise(function (resolve, _reject) {
-          setTimeout(() => {
-            if (!responseEventOccurred) {
-              resolve();
-            } else {
-              setTimeout(() => resolve(), MAX_WAITING_TIME_ACCESS_URL);
-            }
-          }, 500);
-        });
+      const responseWatcher = new Promise(function (resolve, _reject) {
+        setTimeout(() => {
+          if (!responseEventOccurred) {
+            resolve();
+          } else {
+            setTimeout(() => resolve(), 5000);
+          }
+        }, 500);
+      });
 
-        page.on("response", responseHandler);
+      page.on("response", responseHandler);
 
-        await Promise.race([responseWatcher, page.waitForNavigation()]);
-      }
+      await Promise.race([responseWatcher, page.waitForNavigation()]);
+    }
 
-      await page.focus("body");
-      await page.screenshot(screenshotOptions);
+    await page.focus("body");
+    await page.screenshot(screenshotOptions);
+    process.stdout.write(screenshotOptions.path);
 
-      await page.close();
-      await browser.close();
-      process.stdout.write(screenshotOptions.path);
-    });
+    await page.close();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await browser.close();
+  }
 })();

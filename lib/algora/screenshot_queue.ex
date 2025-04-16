@@ -74,15 +74,18 @@ defmodule Algora.ScreenshotQueue do
   defp try_generate_image(url, opts, attempts_left) when attempts_left > 0 do
     puppeteer_path = Path.join([:code.priv_dir(:algora), "puppeteer", "puppeteer-img.js"])
 
-    case System.cmd("node", [puppeteer_path] ++ build_opts(url, opts)) do
-      {_, 127} ->
-        {:error, :invalid_exec_path}
+    Logger.info("Running puppeteer command: #{Enum.join([puppeteer_path] ++ build_opts(url, opts), " ")}")
 
+    case System.cmd("node", [puppeteer_path] ++ build_opts(url, opts)) do
       {cmd_response, 0} ->
         {:ok, cmd_response}
 
-      _ ->
-        Logger.warning("Puppeteer command failed, attempts left: #{attempts_left - 1}")
+      {_, 127} = res ->
+        Logger.warning("Puppeteer command failed with #{inspect(res)}")
+        {:error, :invalid_exec_path}
+
+      res ->
+        Logger.warning("Puppeteer command failed with #{inspect(res)}, attempts left: #{attempts_left - 1}")
         try_generate_image(url, opts, attempts_left - 1)
     end
   rescue
@@ -91,12 +94,17 @@ defmodule Algora.ScreenshotQueue do
 
       case error do
         :enoent ->
+          Logger.warning("Puppeteer command failed with :enoent")
           {:error, :invalid_exec_path}
 
         _ ->
           Logger.warning("Puppeteer command failed with #{inspect(error)}, attempts left: #{attempts_left - 1}")
           try_generate_image(url, opts, attempts_left - 1)
       end
+
+    error ->
+      Logger.warning("Puppeteer command failed with #{inspect(error)}, attempts left: #{attempts_left - 1}")
+      try_generate_image(url, opts, attempts_left - 1)
   end
 
   defp try_generate_image(_url, _opts, 0) do

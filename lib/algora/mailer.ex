@@ -22,7 +22,7 @@ defmodule Algora.Mailer do
     end
   end
 
-  def html_template(template_params) do
+  def html_template(template_params, opts \\ []) do
     """
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -37,6 +37,9 @@ defmodule Algora.Mailer do
         </xml><![endif]-->
       </head>
       <body style="margin: 0; padding: 0; min-width: 100%; background-color: #ffffff;">
+        <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;">
+          #{opts[:preheader]}
+        </div>
         <div style="background-color: #ffffff; box-sizing: border-box; display: block; padding: 0;">
           <table cellpadding="0" cellspacing="0" width="100%">
             <tr>

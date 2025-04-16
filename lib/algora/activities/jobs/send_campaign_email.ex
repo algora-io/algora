@@ -17,7 +17,8 @@ defmodule Algora.Activities.Jobs.SendCampaignEmail do
           "recipient" => encoded_recipient,
           "template_params" => encoded_template_params,
           "from_name" => from_name,
-          "from_email" => from_email
+          "from_email" => from_email,
+          "preheader" => preheader
         }
       }) do
     recipient = Algora.Util.base64_to_term!(encoded_recipient)
@@ -29,7 +30,7 @@ defmodule Algora.Activities.Jobs.SendCampaignEmail do
          {:ok, _owner} <- Workspace.ensure_user(token, recipient["repo_owner"]),
          {:ok, _contributors} <- Workspace.ensure_contributors(token, repo),
          {:ok, _languages} <- Workspace.ensure_repo_tech_stack(token, repo) do
-      CampaignLive.deliver_email(recipient, subject, template_params, from)
+      CampaignLive.deliver_email(recipient, subject, template_params, from, preheader: preheader)
     end
   end
 end

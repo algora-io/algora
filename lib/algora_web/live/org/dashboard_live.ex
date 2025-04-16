@@ -46,6 +46,18 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp list_contributors(_current_org), do: []
 
+  defp get_previewed_user(%{last_context: "repo/" <> repo} = _current_org) do
+    case String.split(repo, "/") do
+      [repo_owner, _repo_name] ->
+        Repo.one(from u in User, where: u.provider_login == ^repo_owner and not is_nil(u.handle))
+
+      _ ->
+        nil
+    end
+  end
+
+  defp get_previewed_user(_current_org), do: nil
+
   @impl true
   def mount(_params, _session, %{assigns: %{live_action: :preview, current_org: nil}} = socket) do
     {:ok, socket}
@@ -85,6 +97,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:installations, installations)
        |> assign(:experts, experts)
        |> assign(:contributors, contributors)
+       |> assign(:previewed_user, get_previewed_user(current_org))
        |> assign(:matches, matches)
        |> assign(:developers, developers)
        |> assign(:has_more_bounties, false)
@@ -1122,9 +1135,54 @@ defmodule AlgoraWeb.Org.DashboardLive do
       id="send_login_code_form"
       phx-submit="send_login_code"
     >
-      <.input field={@login_form[:login_code]} type="text" label="Login code" required />
+      <.input
+        field={@login_form[:login_code]}
+        type="text"
+        label="Login code"
+        placeholder="123456"
+        required
+      />
       <.button phx-disable-with="Signing in..." class="w-full py-5">
-        Submit
+        ✨ Get in ✨
+      </.button>
+    </.simple_form>
+    """
+  end
+
+  defp achievement_todo(%{achievement: %{id: :complete_signin_status}} = assigns) do
+    ~H"""
+    <.simple_form
+      :if={!@secret}
+      for={@login_form}
+      id="send_login_code_form"
+      phx-submit="send_login_code"
+    >
+      <.input
+        field={@login_form[:email]}
+        type="email"
+        label="Email"
+        placeholder="you@example.com"
+        required
+      />
+      <.button phx-disable-with="Signing in..." class="w-full py-5">
+        Sign in
+      </.button>
+    </.simple_form>
+    <.simple_form
+      :if={@secret}
+      for={@login_form}
+      id="send_login_code_form"
+      phx-submit="send_login_code"
+    >
+      <.input
+        field={@login_form[:login_code]}
+        type="text"
+        label="Login code"
+        placeholder="123456"
+        required
+      />
+      <.button phx-disable-with="Signing in..." class="w-full py-5">
+        ✨ Get in ✨
       </.button>
     </.simple_form>
     """
@@ -1166,17 +1224,29 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp assign_achievements(socket) do
     current_org = socket.assigns.current_org
 
-    status_fns = [
-      {&personalize_status/1, "Personalize Algora", nil},
-      {&complete_signup_status/1, "Complete signup", nil},
-      {&connect_github_status/1, "Connect GitHub", nil},
-      {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
-      {&create_bounty_status/1, "Create a bounty", nil},
-      {&reward_bounty_status/1, "Reward a bounty", nil},
-      {&create_contract_status/1, "Contract a developer",
-       if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
-      {&share_with_friend_status/1, "Share Algora with a friend", nil}
-    ]
+    status_fns =
+      case socket.assigns.previewed_user do
+        nil ->
+          [
+            {&personalize_status/1, "Personalize Algora", nil},
+            {&complete_signup_status/1, "Complete signup", nil},
+            {&connect_github_status/1, "Connect GitHub", nil},
+            {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
+            {&create_bounty_status/1, "Create a bounty", nil},
+            {&reward_bounty_status/1, "Reward a bounty", nil},
+            {&create_contract_status/1, "Contract a developer",
+             if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
+            {&share_with_friend_status/1, "Share Algora with a friend", nil}
+          ]
+
+        _ ->
+          [
+            {&complete_signin_status/1, "Sign in to your account", nil},
+            {&create_contract_status/1, "Contract a developer",
+             if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
+            {&share_with_friend_status/1, "Share Algora with a friend", nil}
+          ]
+      end
 
     {achievements, _} =
       Enum.reduce_while(status_fns, {[], false}, fn {status_fn, name, path}, {acc, found_current} ->
@@ -1203,6 +1273,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp personalize_status(_socket), do: :completed
 
   defp complete_signup_status(socket) do
+    case socket.assigns.current_user do
+      %User{handle: handle} when is_binary(handle) -> :completed
+      _ -> :upcoming
+    end
+  end
+
+  defp complete_signin_status(socket) do
     case socket.assigns.current_user do
       %User{handle: handle} when is_binary(handle) -> :completed
       _ -> :upcoming
@@ -1636,7 +1713,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:flex lg:flex-col">
       <div :if={length(@achievements) > 1} class="pb-12">
-        <h2 class="text-xl font-semibold leading-none tracking-tight">Getting started</h2>
+        <h2 class="text-xl font-semibold leading-none tracking-tight">
+          <%= if @previewed_user do %>
+            Get back in
+          <% else %>
+            Getting started
+          <% end %>
+        </h2>
         <nav class="pt-6">
           <ol role="list" class="space-y-6">
             <%= for achievement <- @achievements do %>

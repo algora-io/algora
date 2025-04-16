@@ -21,15 +21,19 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       field :subject, :string
       field :template, :string
       field :csv, :string
+      field :from_name, :string
+      field :from_email, :string
     end
 
     def changeset(campaign, attrs \\ %{}) do
       campaign
-      |> cast(attrs, [:subject, :template, :csv])
-      |> validate_required([:subject, :template, :csv])
+      |> cast(attrs, [:subject, :template, :csv, :from_name, :from_email])
+      |> validate_required([:subject, :template, :csv, :from_name, :from_email])
       |> validate_length(:subject, min: 1)
       |> validate_length(:template, min: 1)
       |> validate_length(:csv, min: 1)
+      |> validate_length(:from_name, min: 1)
+      |> validate_format(:from_email, ~r/^[^\s]+@[^\s]+$/, message: "must be a valid email address")
     end
   end
 
@@ -80,8 +84,10 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   defp handle_send(recipients, socket) do
     subject = get_change(socket.assigns.form.source, :subject)
     template = get_change(socket.assigns.form.source, :template)
+    from_name = get_change(socket.assigns.form.source, :from_name)
+    from_email = get_change(socket.assigns.form.source, :from_email)
 
-    case enqueue_emails(recipients, subject, template) do
+    case enqueue_emails(recipients, subject, template, from_name, from_email) do
       {:ok, _} ->
         {:noreply, put_flash(socket, :info, "Enqueued #{length(recipients)} emails for sending")}
 
@@ -108,6 +114,10 @@ defmodule AlgoraWeb.Admin.CampaignLive do
         <.form for={@form} phx-change="preview" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-6">
+              <div class="grid grid-cols-2 gap-4">
+                <.input type="text" field={@form[:from_name]} label="From Name" />
+                <.input type="email" field={@form[:from_email]} label="From Email" />
+              </div>
               <.input type="text" field={@form[:subject]} label="Subject" />
 
               <.input
@@ -126,6 +136,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
                   <div class="flex gap-1">
                     <dt class="font-bold">Subject:</dt>
                     <dd>{get_change(@form.source, :subject)}</dd>
+                  </div>
+                  <div class="flex gap-1">
+                    <dt class="font-bold">From:</dt>
+                    <dd>
+                      {get_change(@form.source, :from_name)} &lt;{get_change(
+                        @form.source,
+                        :from_email
+                      )}&gt;
+                    </dd>
                   </div>
                 </dl>
                 <div class="-mt-4">
@@ -260,9 +279,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     assign(socket, :preview, render_preview(template, List.first(socket.assigns.csv_data)))
   end
 
-  @spec enqueue_emails(recipients :: list(), subject :: String.t(), template :: String.t()) ::
+  @spec enqueue_emails(
+          recipients :: list(),
+          subject :: String.t(),
+          template :: String.t(),
+          from_name :: String.t(),
+          from_email :: String.t()
+        ) ::
           {:ok, term} | {:error, term}
-  def enqueue_emails(recipients, subject, template) do
+  def enqueue_emails(recipients, subject, template, from_name, from_email) do
     Repo.transact(fn _ ->
       recipients
       |> Enum.map(fn recipient ->
@@ -279,7 +304,9 @@ defmodule AlgoraWeb.Admin.CampaignLive do
           subject: subject,
           recipient_email: recipient["email"],
           recipient: Algora.Util.term_to_base64(recipient),
-          template_params: Algora.Util.term_to_base64(template_params)
+          template_params: Algora.Util.term_to_base64(template_params),
+          from_name: from_name,
+          from_email: from_email
         }
       end)
       |> Enum.with_index()
@@ -292,14 +319,19 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end)
   end
 
-  @spec deliver_email(recipient :: map(), subject :: String.t(), template_params :: Keyword.t()) ::
+  @spec deliver_email(
+          recipient :: map(),
+          subject :: String.t(),
+          template_params :: Keyword.t(),
+          from :: {String.t(), String.t()}
+        ) ::
           {:ok, term} | {:error, term}
-  def deliver_email(recipient, subject, template_params) do
+  def deliver_email(recipient, subject, template_params, from) do
     case :get
          |> Finch.build("https://algora.io/og/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}")
          |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body}} when status in 200..299 ->
-        deliver(recipient["email"], subject, template_params, [
+        deliver(recipient["email"], subject, template_params, from, [
           Swoosh.Attachment.new({:data, body},
             filename: "#{recipient["repo_owner"]}.png",
             content_type: "image/png",
@@ -312,11 +344,11 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end
   end
 
-  defp deliver(to, subject, template_params, attachments) do
+  defp deliver(to, subject, template_params, from, attachments) do
     email =
       Email.new()
       |> Email.to(to)
-      |> Email.from({"Ioannis R. Florokapis", "ioannis@algora.io"})
+      |> Email.from(from)
       |> Email.subject(subject)
       |> Email.text_body(Mailer.text_template(template_params))
       |> Email.html_body(Mailer.html_template(template_params))

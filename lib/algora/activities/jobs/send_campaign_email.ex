@@ -15,19 +15,21 @@ defmodule Algora.Activities.Jobs.SendCampaignEmail do
           "recipient_email" => _recipient_email,
           "subject" => subject,
           "recipient" => encoded_recipient,
-          "template_params" => encoded_template_params
+          "template_params" => encoded_template_params,
+          "from_name" => from_name,
+          "from_email" => from_email
         }
       }) do
     recipient = Algora.Util.base64_to_term!(encoded_recipient)
     template_params = Algora.Util.base64_to_term!(encoded_template_params)
-
+    from = {from_name, from_email}
     token = Algora.Admin.token!()
 
     with {:ok, repo} <- Workspace.ensure_repository(token, recipient["repo_owner"], recipient["repo_name"]),
          {:ok, _owner} <- Workspace.ensure_user(token, recipient["repo_owner"]),
          {:ok, _contributors} <- Workspace.ensure_contributors(token, repo),
          {:ok, _languages} <- Workspace.ensure_repo_tech_stack(token, repo) do
-      CampaignLive.deliver_email(recipient, subject, template_params)
+      CampaignLive.deliver_email(recipient, subject, template_params, from)
     end
   end
 end

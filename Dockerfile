@@ -77,11 +77,14 @@ RUN mix release
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
 
+# Copy the puppeteer cache from the node stage
+COPY --from=node_stage --chown=nobody:root /app/puppeteer /app/puppeteer
+
+COPY --from=node_stage /usr/local/bin /usr/local/bin
+
 RUN apt-get update -y && \
   apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
-
-COPY --from=node_stage /usr/local/bin /usr/local/bin
 
 RUN apt-get update -y && apt-get install -y ca-certificates fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
 
@@ -100,9 +103,6 @@ ENV MIX_ENV="prod"
 
 # Copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/algora ./
-
-# Copy the puppeteer cache from the node stage
-COPY --from=node_stage --chown=nobody:root /app/puppeteer ./puppeteer
 
 USER nobody
 

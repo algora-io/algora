@@ -347,7 +347,7 @@ defmodule Algora.Admin do
 
     discord_job =
       SendDiscord.changeset(%{
-        payload: %{embeds: [%{color: 0xEF4444, title: "Error", description: message, timestamp: DateTime.utc_now()}]}
+        payload: %{embeds: [%{color: color(:error), title: "Error", description: message, timestamp: DateTime.utc_now()}]}
       })
 
     Oban.insert_all([email_job, discord_job])
@@ -358,7 +358,7 @@ defmodule Algora.Admin do
       payload: %{
         embeds: [
           %{
-            color: 0xF59E0B,
+            color: color(severity),
             title: severity |> to_string() |> String.capitalize(),
             description: message,
             timestamp: DateTime.utc_now()
@@ -369,6 +369,11 @@ defmodule Algora.Admin do
     |> SendDiscord.changeset()
     |> Oban.insert()
   end
+
+  def color(:error), do: 0xEF4444
+  def color(:debug), do: 0x64748B
+  def color(:info), do: 0xF59E0B
+  def color(_), do: 0xF59E0B
 
   def token!, do: System.fetch_env!("ADMIN_GITHUB_TOKEN")
   def token, do: System.get_env("ADMIN_GITHUB_TOKEN")

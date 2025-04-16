@@ -289,7 +289,6 @@ defmodule Algora.Organizations do
                  user_id: user.id,
                  role: :admin
                }) do
-          Algora.Admin.alert("New preview for #{repo_owner}/#{repo_name}", :info)
           {:ok, %{org: org, user: user, member: member}}
         end
       end)

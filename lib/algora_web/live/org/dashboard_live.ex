@@ -1245,6 +1245,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {&reward_bounty_status/1, "Reward a bounty", nil},
             {&create_contract_status/1, "Contract a developer",
              if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
+            {&embed_algora_status/1, "Embed Algora", "/docs/embed/sdk"},
             {&share_with_friend_status/1, "Share Algora with a friend", nil}
           ]
 
@@ -1253,6 +1254,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {&complete_signin_status/1, "Sign in to your account", nil},
             {&create_contract_status/1, "Contract a developer",
              if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
+            {&embed_algora_status/1, "Embed Algora", "/docs/embed/sdk"},
             {&share_with_friend_status/1, "Share Algora with a friend", nil}
           ]
       end
@@ -1330,6 +1332,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
+  defp embed_algora_status(_socket), do: :upcoming
   defp share_with_friend_status(_socket), do: :upcoming
 
   defp developer_card(assigns) do

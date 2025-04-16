@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
     # checking if the socket is connected to avoid redirect loop that prevents og image from being fetched
     if (current_context && current_context.last_context == "repo/#{repo_owner}/#{repo_name}") ||
-         not connected?(socket) do
+         (not connected?(socket) && is_nil(params["screenshot"])) do
       {:cont, socket}
     else
       preview_user =
@@ -48,8 +48,8 @@ defmodule AlgoraWeb.Org.PreviewNav do
         token = AlgoraWeb.UserAuth.sign_preview_code(preview_user.id)
 
         return_to =
-          if params["email"],
-            do: ~p"/go/#{repo_owner}/#{repo_name}?email=#{params["email"]}",
+          if params["email"] || params["screenshot"],
+            do: ~p"/go/#{repo_owner}/#{repo_name}?#{%{email: params["email"], screenshot: params["screenshot"]}}",
             else: ~p"/go/#{repo_owner}/#{repo_name}"
 
         preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, return_to)

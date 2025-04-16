@@ -1805,7 +1805,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               class="relative z-0 inline-block size-6 rounded-full ring-2 ring-background"
             />
           </div>
-          <button phx-click="start_chat" class="hover:underline">
+          <button phx-click="start_chat" class="hover:underline whitespace-nowrap">
             Chat with founders
           </button>
         </div>

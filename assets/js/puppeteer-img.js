@@ -66,7 +66,7 @@ function parseArgs() {
 function _validateInteger(value) {
   const parsed = parseInt(value);
   if (value && !parsed) {
-    console.error("Number values must be valid integer");
+    process.stderr.write("Number values must be valid integer");
     return null;
   }
   return parsed;
@@ -78,7 +78,7 @@ function _validateInteger(value) {
   let viewportOptions = {};
 
   if (!options.url) {
-    console.error("URL required");
+    process.stderr.write("URL required");
     return;
   }
 
@@ -118,7 +118,6 @@ function _validateInteger(value) {
     await page.goto(options.url, { waitUntil: "networkidle2" });
 
     if (new URL(options.url).pathname.startsWith("/go/")) {
-      console.log("Waiting for response");
       let responseEventOccurred = false;
       const responseHandler = (_event) => (responseEventOccurred = true);
 
@@ -127,7 +126,7 @@ function _validateInteger(value) {
           if (!responseEventOccurred) {
             resolve();
           } else {
-            setTimeout(() => resolve(), 5000);
+            setTimeout(() => resolve(), 15000);
           }
         }, 500);
       });
@@ -143,7 +142,7 @@ function _validateInteger(value) {
 
     await page.close();
   } catch (e) {
-    console.error(e);
+    process.stderr.write(e.message);
   } finally {
     await browser.close();
   }

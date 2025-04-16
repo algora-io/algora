@@ -75,7 +75,7 @@ defmodule Algora.BountiesTest do
                  %{
                    owner: owner,
                    amount: ~M[4000]usd,
-                   bounty_id: bounty.id,
+                   bounty: bounty,
                    claims: claims
                  },
                  installation_id: installation.id
@@ -193,7 +193,7 @@ defmodule Algora.BountiesTest do
                Bounties.create_invoice(
                  %{owner: owner, amount: amount, idempotency_key: "bounty-#{bounty.id}"},
                  ticket_ref: ticket_ref,
-                 bounty_id: bounty.id,
+                 bounty: bounty,
                  claims: [claim]
                )
 

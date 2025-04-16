@@ -576,6 +576,7 @@ defmodule AlgoraWeb.ContractLive do
           owner: socket.assigns.bounty.owner,
           amount: calculate_final_amount(socket.assigns.reward_form.source)
         },
+        bounty: socket.assigns.bounty,
         ticket_ref: socket.assigns.ticket_ref,
         recipient: socket.assigns.contractor
       )
@@ -587,7 +588,7 @@ defmodule AlgoraWeb.ContractLive do
     final_amount = calculate_final_amount(changeset)
 
     Bounties.reward_bounty(
-      %{owner: bounty.owner, amount: final_amount, bounty_id: bounty.id, claims: []},
+      %{owner: bounty.owner, amount: final_amount, bounty: bounty, claims: []},
       ticket_ref: socket.assigns.ticket_ref,
       recipient: socket.assigns.contractor
     )

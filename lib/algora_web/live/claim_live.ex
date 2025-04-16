@@ -254,12 +254,15 @@ defmodule AlgoraWeb.ClaimLive do
   end
 
   defp assign_line_items(socket) do
+    bounty = Enum.find(socket.assigns.available_bounties, &(&1.owner_id == socket.assigns.selected_context.id))
+
     line_items =
       Bounties.generate_line_items(
         %{
           owner: socket.assigns.selected_context,
           amount: calculate_final_amount(socket.assigns.reward_bounty_form.source)
         },
+        bounty: bounty,
         ticket_ref: ticket_ref(socket),
         claims: socket.assigns.claims
       )
@@ -299,7 +302,7 @@ defmodule AlgoraWeb.ClaimLive do
       %{
         owner: socket.assigns.selected_context,
         amount: final_amount,
-        bounty_id: bounty.id,
+        bounty: bounty,
         claims: socket.assigns.claims
       },
       ticket_ref: ticket_ref(socket)

@@ -216,7 +216,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                        repo: payload["repository"]["name"],
                        number: payload["pull_request"]["number"]
                      },
-                     bounty_id: autopayable_bounty.id,
+                     bounty: autopayable_bounty,
                      claims: claims
                    ),
                  {:ok, _invoice} <-

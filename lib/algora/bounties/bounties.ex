@@ -766,17 +766,17 @@ defmodule Algora.Bounties do
           %{
             owner: User.t(),
             amount: Money.t(),
-            bounty_id: String.t(),
+            bounty: Bounty.t(),
             claims: [Claim.t()]
           },
           opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
         ) ::
           {:ok, String.t()} | {:error, atom()}
-  def reward_bounty(%{owner: owner, amount: amount, bounty_id: bounty_id, claims: claims}, opts \\ []) do
+  def reward_bounty(%{owner: owner, amount: amount, bounty: bounty, claims: claims}, opts \\ []) do
     create_payment_session(
       %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
       ticket_ref: opts[:ticket_ref],
-      bounty_id: bounty_id,
+      bounty: bounty,
       claims: claims,
       recipient: opts[:recipient]
     )
@@ -785,6 +785,7 @@ defmodule Algora.Bounties do
   @spec generate_line_items(
           %{owner: User.t(), amount: Money.t()},
           opts :: [
+            bounty: Bounty.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             claims: [Claim.t()],
             recipient: User.t()
@@ -792,13 +793,20 @@ defmodule Algora.Bounties do
         ) ::
           [LineItem.t()]
   def generate_line_items(%{owner: owner, amount: amount}, opts \\ []) do
+    bounty = opts[:bounty]
     ticket_ref = opts[:ticket_ref]
     recipient = opts[:recipient]
     claims = opts[:claims] || []
 
     description = if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
-    platform_fee_pct = Decimal.div(owner.fee_pct, 100)
+    platform_fee_pct =
+      if bounty && Date.before?(bounty.inserted_at, ~D[2025-04-16]) do
+        Decimal.div(owner.fee_pct_prev, 100)
+      else
+        Decimal.div(owner.fee_pct, 100)
+      end
+
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
     payouts =
@@ -845,7 +853,7 @@ defmodule Algora.Bounties do
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             tip_id: String.t(),
-            bounty_id: String.t(),
+            bounty: Bounty.t(),
             claims: [Claim.t()],
             recipient: User.t()
           ]
@@ -858,17 +866,20 @@ defmodule Algora.Bounties do
       generate_line_items(%{owner: owner, amount: amount},
         ticket_ref: opts[:ticket_ref],
         recipient: opts[:recipient],
-        claims: opts[:claims]
+        claims: opts[:claims],
+        bounty: opts[:bounty]
       )
 
     gross_amount = LineItem.gross_amount(line_items)
+
+    bounty_id = if bounty = opts[:bounty], do: bounty.id
 
     Repo.transact(fn ->
       with {:ok, _charge} <-
              initialize_charge(%{
                id: Nanoid.generate(),
                user_id: owner.id,
-               bounty_id: opts[:bounty_id],
+               bounty_id: bounty_id,
                gross_amount: gross_amount,
                net_amount: amount,
                total_fee: Money.sub!(gross_amount, amount),
@@ -881,7 +892,7 @@ defmodule Algora.Bounties do
                claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
                recipient_id: if(opts[:recipient], do: opts[:recipient].id),
-               bounty_id: opts[:bounty_id],
+               bounty_id: bounty_id,
                claim_id: nil,
                amount: amount,
                creator_id: owner.id,
@@ -902,7 +913,7 @@ defmodule Algora.Bounties do
           opts :: [
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             tip_id: String.t(),
-            bounty_id: String.t(),
+            bounty: Bounty.t(),
             claims: [Claim.t()],
             recipient: User.t()
           ]
@@ -915,10 +926,13 @@ defmodule Algora.Bounties do
       generate_line_items(%{owner: owner, amount: amount},
         ticket_ref: opts[:ticket_ref],
         recipient: opts[:recipient],
-        claims: opts[:claims]
+        claims: opts[:claims],
+        bounty: opts[:bounty]
       )
 
     gross_amount = LineItem.gross_amount(line_items)
+
+    bounty_id = if bounty = opts[:bounty], do: bounty.id
 
     Repo.transact(fn ->
       with {:ok, _charge} <-
@@ -937,7 +951,7 @@ defmodule Algora.Bounties do
                claims: opts[:claims] || [],
                tip_id: opts[:tip_id],
                recipient_id: if(opts[:recipient], do: opts[:recipient].id),
-               bounty_id: opts[:bounty_id],
+               bounty_id: bounty_id,
                claim_id: nil,
                amount: amount,
                creator_id: owner.id,

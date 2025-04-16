@@ -331,49 +331,38 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end)
   end
 
-  @spec deliver_email(
-          recipient :: map(),
-          subject :: String.t(),
-          template_params :: Keyword.t(),
-          from :: {String.t(), String.t()},
-          opts :: Keyword.t()
-        ) ::
-          {:ok, term} | {:error, term}
-  def deliver_email(recipient, subject, template_params, from, opts \\ []) do
+  def deliver_email(opts) do
+    recipient = opts[:recipient]
+
     case :get
          |> Finch.build("https://algora.io/og/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}")
          |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body}} when status in 200..299 ->
-        deliver(
-          recipient["email"],
-          subject,
-          template_params,
-          from,
-          [
-            Swoosh.Attachment.new({:data, body},
-              filename: "#{recipient["repo_owner"]}.png",
-              content_type: "image/png",
-              type: :inline
-            )
-          ],
-          opts
-        )
+        opts
+        |> Keyword.put(:attachments, [
+          Swoosh.Attachment.new({:data, body},
+            filename: "#{recipient["repo_owner"]}.png",
+            content_type: "image/png",
+            type: :inline
+          )
+        ])
+        |> deliver()
 
       {:error, reason} ->
         raise reason
     end
   end
 
-  defp deliver(to, subject, template_params, from, attachments, opts \\ []) do
+  defp deliver(opts) do
     email =
       Email.new()
-      |> Email.to(to)
-      |> Email.from(from)
-      |> Email.subject(subject)
-      |> Email.text_body(Mailer.text_template(template_params))
-      |> Email.html_body(Mailer.html_template(template_params, preheader: opts[:preheader]))
+      |> Email.to(opts[:recipient]["email"])
+      |> Email.from(opts[:from])
+      |> Email.subject(opts[:subject])
+      |> Email.text_body(Mailer.text_template(opts[:template_params]))
+      |> Email.html_body(Mailer.html_template(opts[:template_params], preheader: opts[:preheader]))
 
-    email = Enum.reduce(attachments, email, fn attachment, acc -> Email.attachment(acc, attachment) end)
+    email = Enum.reduce(opts[:attachments], email, fn attachment, acc -> Email.attachment(acc, attachment) end)
 
     Mailer.deliver_with_logging(email)
   end

@@ -1794,9 +1794,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
           />
         </div>
       <% end %>
-      <div class="pt-12 pb-16 mt-auto -mr-12 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-6 text-sm">
-        <div class="flex items-center gap-2">
-          <div class="flex -space-x-2">
+      <div class="pt-12 pb-16 mt-auto -mr-12 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-6 text-sm whitespace-nowrap">
+        <div class="-ml-3 flex items-center gap-2">
+          <div class="flex -space-x-2 shrink-0">
             <img
               src="https://github.com/ioannisflo.png"
               alt="Ioannis Florokapis"
@@ -1808,7 +1808,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               class="relative z-0 inline-block size-6 rounded-full ring-2 ring-background"
             />
           </div>
-          <button phx-click="start_chat" class="hover:underline whitespace-nowrap">
+          <button phx-click="start_chat" class="hover:underline">
             Chat with founders
           </button>
         </div>

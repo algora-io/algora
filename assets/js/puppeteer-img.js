@@ -116,26 +116,6 @@ function _validateInteger(value) {
     const page = await browser.newPage();
     await page.setViewport(viewportOptions);
     await page.goto(options.url, { waitUntil: "networkidle2" });
-
-    if (new URL(options.url).pathname.startsWith("/go/")) {
-      let responseEventOccurred = false;
-      const responseHandler = (_event) => (responseEventOccurred = true);
-
-      const responseWatcher = new Promise(function (resolve, _reject) {
-        setTimeout(() => {
-          if (!responseEventOccurred) {
-            resolve();
-          } else {
-            setTimeout(() => resolve(), 15000);
-          }
-        }, 500);
-      });
-
-      page.on("response", responseHandler);
-
-      await Promise.race([responseWatcher, page.waitForNavigation()]);
-    }
-
     await page.focus("body");
     await page.screenshot(screenshotOptions);
     process.stdout.write(screenshotOptions.path);

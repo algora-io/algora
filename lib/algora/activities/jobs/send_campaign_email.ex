@@ -9,33 +9,50 @@ defmodule Algora.Activities.Jobs.SendCampaignEmail do
   alias AlgoraWeb.Admin.CampaignLive
 
   @impl Oban.Worker
-  def perform(%Oban.Job{
-        args: %{
-          "id" => _id,
-          "recipient_email" => _recipient_email,
-          "subject" => subject,
-          "recipient" => encoded_recipient,
-          "template_params" => encoded_template_params,
-          "from_name" => from_name,
-          "from_email" => from_email,
-          "preheader" => preheader
-        }
-      }) do
-    recipient = Algora.Util.base64_to_term!(encoded_recipient)
-    template_params = Algora.Util.base64_to_term!(encoded_template_params)
+  def perform(%Oban.Job{args: %{"recipient" => encoded_recipient} = args}) do
+    args
+    |> Map.put("recipient", Algora.Util.base64_to_term!(encoded_recipient))
+    |> deliver_email()
+  end
+
+  defp deliver_email(%{
+         "subject" => subject,
+         "recipient" => %{"repo_owner" => repo_owner, "repo_name" => repo_name} = recipient,
+         "template" => template,
+         "from_name" => from_name,
+         "from_email" => from_email,
+         "preheader" => preheader
+       }) do
     token = Algora.Admin.token!()
 
-    with {:ok, repo} <- Workspace.ensure_repository(token, recipient["repo_owner"], recipient["repo_name"]),
-         {:ok, _owner} <- Workspace.ensure_user(token, recipient["repo_owner"]),
+    with {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
+         {:ok, _owner} <- Workspace.ensure_user(token, repo_owner),
          {:ok, _contributors} <- Workspace.ensure_contributors(token, repo),
          {:ok, _languages} <- Workspace.ensure_repo_tech_stack(token, repo) do
       CampaignLive.deliver_email(
         recipient: recipient,
         subject: subject,
-        template_params: template_params,
+        template: template,
         from: {from_name, from_email},
         preheader: preheader
       )
     end
+  end
+
+  defp deliver_email(%{
+         "subject" => subject,
+         "recipient" => recipient,
+         "template" => template,
+         "from_name" => from_name,
+         "from_email" => from_email,
+         "preheader" => preheader
+       }) do
+    CampaignLive.deliver_email(
+      recipient: recipient,
+      subject: subject,
+      template: template,
+      from: {from_name, from_email},
+      preheader: preheader
+    )
   end
 end

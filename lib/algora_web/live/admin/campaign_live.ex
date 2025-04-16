@@ -7,6 +7,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   import Ecto.Query
 
   alias Algora.Activities.Jobs.SendCampaignEmail
+  alias Algora.Admin
   alias Algora.Mailer
   alias Algora.Repo
   alias Algora.Workspace.Repository
@@ -302,20 +303,12 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     Repo.transact(fn _ ->
       recipients
       |> Enum.map(fn recipient ->
-        template_params = [
-          markdown: render_preview(template, recipient),
-          cta: %{
-            href: "#{AlgoraWeb.Endpoint.url()}/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}",
-            src: "cid:#{recipient["repo_owner"]}.png"
-          }
-        ]
-
         %{
           id: "2025-04-oss",
           subject: subject,
           recipient_email: recipient["email"],
           recipient: Algora.Util.term_to_base64(recipient),
-          template_params: Algora.Util.term_to_base64(template_params),
+          template: template,
           from_name: from_name,
           from_email: from_email,
           preheader: render_preview(preheader, recipient)
@@ -332,38 +325,44 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   end
 
   def deliver_email(opts) do
-    recipient = opts[:recipient]
-
-    case :get
-         |> Finch.build("https://algora.io/og/go/#{recipient["repo_owner"]}/#{recipient["repo_name"]}")
-         |> Finch.request(Algora.Finch) do
-      {:ok, %Finch.Response{status: status, body: body}} when status in 200..299 ->
-        opts
-        |> Keyword.put(:attachments, [
-          Swoosh.Attachment.new({:data, body},
-            filename: "#{recipient["repo_owner"]}.png",
-            content_type: "image/png",
-            type: :inline
-          )
-        ])
-        |> deliver()
+    case opts[:template] |> render_preview(opts[:recipient]) |> extract_attachments() do
+      {:ok, {preview, attachments}} ->
+        Email.new()
+        |> Email.to(opts[:recipient]["email"])
+        |> Email.from(opts[:from])
+        |> Email.subject(opts[:subject])
+        |> Email.text_body(Mailer.text_template(markdown: preview))
+        |> Email.html_body(Mailer.html_template([markdown: preview], preheader: opts[:preheader]))
+        |> then(&Enum.reduce(attachments, &1, fn attachment, acc -> Email.attachment(acc, attachment) end))
+        |> Mailer.deliver_with_logging()
 
       {:error, reason} ->
-        raise reason
+        Admin.alert("Failed to deliver email: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 
-  defp deliver(opts) do
-    email =
-      Email.new()
-      |> Email.to(opts[:recipient]["email"])
-      |> Email.from(opts[:from])
-      |> Email.subject(opts[:subject])
-      |> Email.text_body(Mailer.text_template(opts[:template_params]))
-      |> Email.html_body(Mailer.html_template(opts[:template_params], preheader: opts[:preheader]))
+  defp extract_attachments(preview) do
+    image_regex = ~r/!\[(.*?)\]\((.*?)\)/
 
-    email = Enum.reduce(opts[:attachments], email, fn attachment, acc -> Email.attachment(acc, attachment) end)
+    image_regex
+    |> Regex.scan(preview)
+    |> Enum.reduce_while({:ok, {preview, []}}, fn [full_match, alt, src], {:ok, {current_preview, current_attachments}} ->
+      case :get |> Finch.build(src) |> Finch.request(Algora.Finch) do
+        {:ok, %Finch.Response{status: status, body: body}} when status in 200..299 ->
+          attachment =
+            Swoosh.Attachment.new({:data, body}, filename: "#{alt}.png", content_type: "image/png", type: :inline)
 
-    Mailer.deliver_with_logging(email)
+          new_preview = String.replace(current_preview, full_match, "![#{alt}](cid:#{alt}.png)")
+          {:cont, {:ok, {new_preview, [attachment | current_attachments]}}}
+
+        {:error, reason} ->
+          {:halt, {:error, reason}}
+      end
+    end)
+    |> case do
+      {:ok, {preview, attachments}} -> {:ok, {preview, Enum.reverse(attachments)}}
+      {:error, reason} -> {:error, reason}
+    end
   end
 end

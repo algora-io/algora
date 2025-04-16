@@ -46,8 +46,6 @@ defmodule AlgoraWeb.Util do
   end
 
   def get_ip(socket) do
-    Logger.warning(Phoenix.LiveView.get_connect_info(socket, :x_headers))
-
     socket
     |> Phoenix.LiveView.get_connect_info(:x_headers)
     |> Enum.filter(fn {header, _value} -> header == "x-forwarded-for" end)

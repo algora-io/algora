@@ -560,7 +560,7 @@ defmodule AlgoraWeb.HomeLive do
                 Get started
               </.button>
               <.button
-                class="pointer-events-none opacity-75"
+                class={if !Algora.Stargazer.count(), do: "pointer-events-none opacity-75"}
                 href={AlgoraWeb.Constants.get(:github_repo_url)}
                 variant="secondary"
               >

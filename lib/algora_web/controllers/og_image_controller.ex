@@ -14,13 +14,13 @@ defmodule AlgoraWeb.OGImageController do
     end
   end
 
-  def generate(conn, %{"path" => path}) do
+  def generate(conn, %{"path" => path} = params) do
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
     url = Path.join(Algora.S3.bucket_url(), object_path)
 
     case :get |> Finch.build(url) |> Finch.request(Algora.Finch) do
       {:ok, %Finch.Response{status: status, body: body, headers: headers}} when status in 200..299 ->
-        if should_regenerate?(path, headers) do
+        if should_regenerate?(params, headers) do
           case take_and_upload_screenshot(path) do
             {:ok, body} ->
               conn
@@ -52,7 +52,9 @@ defmodule AlgoraWeb.OGImageController do
     end
   end
 
-  defp should_regenerate?(path, headers) do
+  defp should_regenerate?(params, _headers) when is_map_key(params, "refresh"), do: true
+
+  defp should_regenerate?(%{"path" => path}, headers) do
     case List.keyfind(headers, "last-modified", 0) do
       {_, last_modified} ->
         case DateTime.from_iso8601(convert_to_iso8601(last_modified)) do

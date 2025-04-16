@@ -113,9 +113,32 @@ function _validateInteger(value) {
       ignoreHTTPSErrors: true,
     })
     .then(async function (browser) {
+      const MAX_WAITING_TIME_ACCESS_URL = 5000;
+
       const page = await browser.newPage();
       await page.setViewport(viewportOptions);
-      await page.goto(options.url, { waitUntil: ["networkidle2"] });
+      await page.goto(options.url, { waitUntil: "networkidle2" });
+
+      if (new URL(options.url).pathname.startsWith("/go/")) {
+        console.log("Waiting for response");
+        let responseEventOccurred = false;
+        const responseHandler = (_event) => (responseEventOccurred = true);
+
+        const responseWatcher = new Promise(function (resolve, _reject) {
+          setTimeout(() => {
+            if (!responseEventOccurred) {
+              resolve();
+            } else {
+              setTimeout(() => resolve(), MAX_WAITING_TIME_ACCESS_URL);
+            }
+          }, 500);
+        });
+
+        page.on("response", responseHandler);
+
+        await Promise.race([responseWatcher, page.waitForNavigation()]);
+      }
+
       await page.focus("body");
       await page.screenshot(screenshotOptions);
 

@@ -39,15 +39,14 @@ defmodule AlgoraWeb.OGImageController do
     case res do
       :regenerate ->
         case Organizations.init_preview(repo_owner, repo_name) do
-          {:ok, %{user: user, org: _org}} ->
-            token = AlgoraWeb.UserAuth.sign_preview_code(user.id)
+          {:ok, %{user: user, org: org}} ->
+            token =
+              Phoenix.Token.encrypt(AlgoraWeb.Endpoint, Algora.config([:local_store, :salt]), %{
+                user_id: user.id,
+                org_id: org.id
+              })
 
-            preview_path =
-              user.id
-              |> AlgoraWeb.UserAuth.preview_path(token, ~p"/go/#{repo_owner}/#{repo_name}")
-              |> String.split("/")
-
-            case take_and_upload_screenshot(preview_path, path) do
+            case take_and_upload_screenshot(path, "?token=#{token}") do
               {:ok, body} ->
                 conn
                 |> put_resp_content_type("image/png")
@@ -134,21 +133,25 @@ defmodule AlgoraWeb.OGImageController do
     conn |> put_status(:not_found) |> text("Not found")
   end
 
-  def take_and_upload_screenshot(path, object_path \\ nil) do
+  def take_and_upload_screenshot(path, params \\ "") do
     clean_path = Enum.map(path, &(&1 |> String.split("?", parts: 2) |> List.first()))
     dir = Path.join([System.tmp_dir!(), "og"] ++ clean_path)
     File.mkdir_p!(dir)
     filepath = Path.join(dir, "og.png")
-    url = Path.join([AlgoraWeb.Endpoint.url() | path]) <> "?screenshot"
 
-    object_path =
-      case object_path do
-        nil -> Path.join(["og"] ++ path ++ ["og.png"])
-        path -> Path.join(["og"] ++ path ++ ["og.png"])
+    params =
+      if params == "" do
+        "?screenshot"
+      else
+        params
       end
 
+    url = Path.join([AlgoraWeb.Endpoint.url() | path]) <> params
+
+    object_path = Path.join(["og"] ++ path ++ ["og.png"])
+
     case ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath)) do
-      {:ok, _path} ->
+      {:ok, _log} ->
         case File.read(filepath) do
           {:ok, body} ->
             Task.start(fn ->

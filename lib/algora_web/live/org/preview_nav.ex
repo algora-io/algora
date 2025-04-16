@@ -5,7 +5,34 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
   import Phoenix.LiveView
 
+  alias Algora.Accounts
   alias Algora.Organizations
+
+  require Logger
+
+  def on_mount(:default, %{"repo_owner" => repo_owner, "repo_name" => repo_name, "token" => token}, _session, socket) do
+    case Phoenix.Token.decrypt(AlgoraWeb.Endpoint, Algora.config([:local_store, :salt]), token) do
+      {:ok, %{user_id: user_id, org_id: org_id}} ->
+        user = Accounts.get_user!(user_id)
+        org = Accounts.get_user!(org_id)
+
+        {:cont,
+         socket
+         |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+         |> assign(:current_org, org)
+         |> assign(:current_user, user)
+         |> assign(:current_context, org)
+         |> assign(:all_contexts, [org])
+         |> assign(:current_user_role, :admin)
+         |> assign(:nav, nav_items(repo_owner, repo_name))
+         |> assign(:contacts, [])
+         |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+
+      {:error, reason} ->
+        Logger.error("Failed to restore preview state for #{repo_owner}/#{repo_name}: #{inspect(reason)}")
+        raise AlgoraWeb.NotFoundError
+    end
+  end
 
   def on_mount(:default, %{"repo_owner" => repo_owner, "repo_name" => repo_name} = params, _session, socket) do
     current_context = socket.assigns[:current_context]

@@ -939,6 +939,7 @@ defmodule Algora.Bounties do
              initialize_charge(%{
                id: Nanoid.generate(),
                user_id: owner.id,
+               bounty_id: bounty_id,
                gross_amount: gross_amount,
                net_amount: amount,
                total_fee: Money.sub!(gross_amount, amount),

@@ -19,7 +19,9 @@ defmodule AlgoraWeb.Org.PreviewNav do
       |> assign(:contacts, [])
       |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
 
-    if current_context && current_context.last_context == "repo/#{repo_owner}/#{repo_name}" do
+    # checking if the socket is connected to avoid redirect loop that prevents og image from being fetched
+    if (current_context && current_context.last_context == "repo/#{repo_owner}/#{repo_name}") ||
+         not connected?(socket) do
       {:cont, socket}
     else
       preview_user =
@@ -40,25 +42,19 @@ defmodule AlgoraWeb.Org.PreviewNav do
             user
         end
 
-      cond do
-        is_nil(preview_user) ->
-          {:cont, put_flash(socket, :error, "Failed to fetch repo")}
+      if is_nil(preview_user) do
+        {:cont, put_flash(socket, :error, "Failed to fetch repo")}
+      else
+        token = AlgoraWeb.UserAuth.sign_preview_code(preview_user.id)
 
-        # this is needed to avoid redirect loop that prevents og image from being fetched
-        not connected?(socket) ->
-          {:cont, socket}
+        return_to =
+          if params["email"],
+            do: ~p"/go/#{repo_owner}/#{repo_name}?email=#{params["email"]}",
+            else: ~p"/go/#{repo_owner}/#{repo_name}"
 
-        true ->
-          token = AlgoraWeb.UserAuth.sign_preview_code(preview_user.id)
+        preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, return_to)
 
-          return_to =
-            if params["email"],
-              do: ~p"/go/#{repo_owner}/#{repo_name}?email=#{params["email"]}",
-              else: ~p"/go/#{repo_owner}/#{repo_name}"
-
-          preview_path = AlgoraWeb.UserAuth.preview_path(preview_user.id, token, return_to)
-
-          {:halt, redirect(socket, to: preview_path)}
+        {:halt, redirect(socket, to: preview_path)}
       end
     end
   end

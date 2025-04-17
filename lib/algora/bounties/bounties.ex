@@ -805,7 +805,9 @@ defmodule Algora.Bounties do
       bounty: bounty,
       claims: claims,
       recipient: opts[:recipient],
-      capture_method: :manual
+      capture_method: :manual,
+      success_url: opts[:success_url],
+      cancel_url: opts[:cancel_url]
     )
   end
 
@@ -883,7 +885,9 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             claims: [Claim.t()],
             recipient: User.t(),
-            capture_method: :automatic | :automatic_async | :manual
+            capture_method: :automatic | :automatic_async | :manual,
+            success_url: String.t(),
+            cancel_url: String.t()
           ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
@@ -903,11 +907,12 @@ defmodule Algora.Bounties do
       metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
     }
 
-    payment_intent_data =
+    {payment_intent_data, session_opts} =
       if capture_method = opts[:capture_method] do
-        Map.put(payment_intent_data, :capture_method, capture_method)
+        {Map.put(payment_intent_data, :capture_method, capture_method),
+         [success_url: opts[:success_url], cancel_url: opts[:cancel_url]]}
       else
-        payment_intent_data
+        {payment_intent_data, []}
       end
 
     gross_amount = LineItem.gross_amount(line_items)
@@ -939,7 +944,12 @@ defmodule Algora.Bounties do
                group_id: tx_group_id
              }),
            {:ok, session} <-
-             Payments.create_stripe_session(owner, Enum.map(line_items, &LineItem.to_stripe/1), payment_intent_data) do
+             Payments.create_stripe_session(
+               owner,
+               Enum.map(line_items, &LineItem.to_stripe/1),
+               payment_intent_data,
+               session_opts
+             ) do
         {:ok, session.url}
       end
     end)

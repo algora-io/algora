@@ -251,14 +251,34 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
-  def handle_event("release_funds", %{"payment_intent_id" => payment_intent_id}, socket) do
-    case Algora.PSP.PaymentIntent.capture(payment_intent_id) do
-      {:ok, payment_intent} ->
-        dbg(payment_intent)
-        {:noreply, put_flash(socket, :info, "Funds released!")}
+  def handle_event("release_funds", %{"tx_id" => tx_id}, socket) do
+    with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == tx_id)),
+         {:ok, charge} <- Algora.PSP.Charge.retrieve(tx.provider_charge_id),
+         {:ok, _} <- Algora.Payments.process_charge("charge.succeeded", charge, tx.group_id) do
+      {:noreply, socket}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to release funds: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
 
+      _ ->
+        Logger.error("Failed to release funds: transaction not found")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
+  end
+
+  @impl true
+  def handle_event("accept_contract", %{"tx_id" => tx_id}, socket) do
+    with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == tx_id)),
+         {:ok, _payment_intent} <- Algora.PSP.PaymentIntent.capture(tx.provider_payment_intent_id) do
+      {:noreply, put_flash(socket, :info, "Contract accepted!")}
+    else
       {:error, reason} ->
         Logger.error("Failed to capture payment intent: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+
+      _ ->
+        Logger.error("Failed to release funds: transaction not found")
         {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
@@ -308,6 +328,15 @@ defmodule AlgoraWeb.ContractLive do
                     </div>
                   </div>
                 </div>
+                <%= if transaction = Enum.find(@transactions, fn tx -> tx.type == :charge and tx.status == :requires_capture end) do %>
+                  <.button
+                    phx-click="accept_contract"
+                    phx-disable-with="Accepting..."
+                    phx-value-tx_id={transaction.id}
+                  >
+                    Accept contract
+                  </.button>
+                <% end %>
               </div>
             </.card_content>
           </.card>
@@ -407,29 +436,22 @@ defmodule AlgoraWeb.ContractLive do
                               {description(transaction)}
                               <.button
                                 :if={
-                                  transaction.type == :charge and
-                                    transaction.status == :requires_capture
+                                  transaction.type == :debit and
+                                    transaction.status == :requires_release
                                 }
                                 size="sm"
                                 phx-click="release_funds"
                                 phx-disable-with="Releasing..."
-                                phx-value-payment_intent_id={transaction.provider_payment_intent_id}
+                                phx-value-tx_id={transaction.id}
                               >
                                 Release funds
                               </.button>
                             </div>
                           </td>
                           <td class="font-display whitespace-nowrap px-6 py-4 text-right font-medium tabular-nums">
-                            <%= case transaction_direction(transaction.type) do %>
-                              <% :plus -> %>
-                                <span class="text-emerald-400">
-                                  {Money.to_string!(transaction.net_amount)}
-                                </span>
-                              <% :minus -> %>
-                                <span class="text-foreground">
-                                  {Money.to_string!(transaction.net_amount)}
-                                </span>
-                            <% end %>
+                            <span class={transaction_color(transaction)}>
+                              {Money.to_string!(transaction.net_amount)}
+                            </span>
                           </td>
                         </tr>
                       <% end %>
@@ -674,7 +696,9 @@ defmodule AlgoraWeb.ContractLive do
     Bounties.authorize_payment(
       %{owner: bounty.owner, amount: bounty.amount, bounty: bounty, claims: []},
       ticket_ref: socket.assigns.ticket_ref,
-      recipient: socket.assigns.contractor
+      recipient: socket.assigns.contractor,
+      success_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}"),
+      cancel_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}")
     )
   end
 
@@ -708,11 +732,11 @@ defmodule AlgoraWeb.ContractLive do
     transactions =
       [
         user_id: socket.assigns.bounty.owner.id,
-        status: [:succeeded, :requires_capture],
+        status: [:succeeded, :requires_capture, :requires_release],
         bounty_id: socket.assigns.bounty.id
       ]
       |> Payments.list_transactions()
-      |> Enum.filter(&(&1.type == :charge or &1.status == :succeeded))
+      |> Enum.filter(&(&1.type == :charge or &1.status in [:succeeded, :requires_release]))
 
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)
@@ -751,10 +775,12 @@ defmodule AlgoraWeb.ContractLive do
     end)
   end
 
-  defp transaction_direction(type) do
+  defp transaction_color(%{type: :debit, status: :requires_release}), do: "text-emerald-400/50"
+
+  defp transaction_color(%{type: type}) do
     case type do
-      t when t in [:charge, :credit, :deposit] -> :minus
-      t when t in [:debit, :withdrawal, :transfer] -> :plus
+      t when t in [:charge, :credit, :deposit] -> "text-foreground"
+      t when t in [:debit, :withdrawal, :transfer] -> "text-emerald-400"
     end
   end
 
@@ -762,7 +788,9 @@ defmodule AlgoraWeb.ContractLive do
 
   defp description(%{type: :charge, status: :succeeded}), do: "Escrowed"
 
-  defp description(%{type: :debit}), do: "Released"
+  defp description(%{type: :debit, status: :requires_release}), do: "Ready to release"
+
+  defp description(%{type: :debit, status: :succeeded}), do: "Released"
 
   defp description(%{type: _type}), do: nil
 end

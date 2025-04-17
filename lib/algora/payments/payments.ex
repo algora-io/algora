@@ -5,6 +5,11 @@ defmodule Algora.Payments do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
+  alias Algora.Bounties.Tip
+  alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
@@ -31,18 +36,19 @@ defmodule Algora.Payments do
   @spec create_stripe_session(
           user :: User.t(),
           line_items :: [PSP.Session.line_item_data()],
-          payment_intent_data :: PSP.Session.payment_intent_data()
+          payment_intent_data :: PSP.Session.payment_intent_data(),
+          opts :: Keyword.t()
         ) ::
           {:ok, PSP.session()} | {:error, PSP.error()}
-  def create_stripe_session(user, line_items, payment_intent_data) do
+  def create_stripe_session(user, line_items, payment_intent_data, opts \\ []) do
     with {:ok, customer} <- fetch_or_create_customer(user) do
       opts = %{
         mode: "payment",
         customer: customer.provider_id,
         billing_address_collection: "required",
         line_items: line_items,
-        success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
-        cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
+        success_url: opts[:success_url] || "#{AlgoraWeb.Endpoint.url()}/payment/success",
+        cancel_url: opts[:cancel_url] || "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
         payment_intent_data: payment_intent_data
       }
 
@@ -543,5 +549,141 @@ defmodule Algora.Payments do
 
         {:error, error}
     end
+  end
+
+  def process_charge(%Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{}}}, group_id)
+      when not is_binary(group_id) do
+    {:error, :invalid_group_id}
+  end
+
+  def process_charge(
+        "charge.succeeded",
+        %Stripe.Charge{id: charge_id, captured: false, payment_intent: payment_intent_id},
+        group_id
+      ) do
+    Repo.transact(fn ->
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type == :charge),
+        set: [
+          status: :requires_capture,
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
+      broadcast()
+      {:ok, nil}
+    end)
+  end
+
+  def process_charge(
+        "charge.captured",
+        %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
+        group_id
+      ) do
+    Repo.transact(fn ->
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type == :charge),
+        set: [
+          status: :succeeded,
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type != :charge),
+        set: [
+          status: :requires_release,
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
+      broadcast()
+      {:ok, nil}
+    end)
+  end
+
+  def process_charge(
+        "charge.succeeded",
+        %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
+        group_id
+      ) do
+    Repo.transact(fn ->
+      {_, txs} =
+        Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
+          set: [
+            status: :succeeded,
+            succeeded_at: DateTime.utc_now(),
+            provider: "stripe",
+            provider_id: charge_id,
+            provider_charge_id: charge_id,
+            provider_payment_intent_id: payment_intent_id
+          ]
+        )
+
+      bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+      Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
+      Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
+      Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
+      # TODO: add and use a new "paid" status for claims
+      Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
+
+      activities_result =
+        txs
+        |> Enum.filter(&(&1.type == :credit))
+        |> Enum.reduce_while(:ok, fn tx, :ok ->
+          case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
+            {:ok, _} -> {:cont, :ok}
+            error -> {:halt, error}
+          end
+        end)
+
+      jobs_result =
+        txs
+        |> Enum.filter(&(&1.type == :credit))
+        |> Enum.reduce_while(:ok, fn credit, :ok ->
+          case fetch_active_account(credit.user_id) do
+            {:ok, _account} ->
+              case %{credit_id: credit.id}
+                   |> Jobs.ExecutePendingTransfer.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
+
+            {:error, :no_active_account} ->
+              case %{credit_id: credit.id}
+                   |> Bounties.Jobs.PromptPayoutConnect.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
+          end
+        end)
+
+      with txs when txs != [] <- txs,
+           :ok <- activities_result,
+           :ok <- jobs_result do
+        broadcast()
+        {:ok, nil}
+      else
+        {:error, reason} ->
+          Logger.error("Failed to update transactions: #{inspect(reason)}")
+          {:error, :failed_to_update_transactions}
+
+        error ->
+          Logger.error("Failed to update transactions: #{inspect(error)}")
+          {:error, :failed_to_update_transactions}
+      end
+    end)
   end
 end

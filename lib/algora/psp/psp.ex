@@ -130,6 +130,7 @@ defmodule Algora.PSP do
 
     @type t :: Stripe.PaymentIntent.t()
     def create(params), do: Algora.PSP.client(__MODULE__).create(params)
+    def capture(id, params \\ %{}), do: Algora.PSP.client(__MODULE__).capture(id, params)
   end
 
   @type setup_intent :: Algora.PSP.SetupIntent.t()

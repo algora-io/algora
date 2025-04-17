@@ -117,6 +117,7 @@ defmodule AlgoraWeb.ContractLive do
 
     if connected?(socket) do
       Chat.subscribe(thread.id)
+      Payments.subscribe()
     end
 
     share_url =
@@ -171,6 +172,10 @@ defmodule AlgoraWeb.ContractLive do
         else: Phoenix.Component.update(socket, :participants, &(&1 ++ [participant]))
 
     {:noreply, socket}
+  end
+
+  def handle_info(:payments_updated, socket) do
+    {:noreply, assign_transactions(socket)}
   end
 
   @impl true
@@ -241,6 +246,19 @@ defmodule AlgoraWeb.ContractLive do
 
       {:error, reason} ->
         Logger.error("Failed to create payment session: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
+  end
+
+  @impl true
+  def handle_event("release_funds", %{"payment_intent_id" => payment_intent_id}, socket) do
+    case Algora.PSP.PaymentIntent.capture(payment_intent_id) do
+      {:ok, payment_intent} ->
+        dbg(payment_intent)
+        {:noreply, put_flash(socket, :info, "Funds released!")}
+
+      {:error, reason} ->
+        Logger.error("Failed to capture payment intent: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
@@ -385,7 +403,21 @@ defmodule AlgoraWeb.ContractLive do
                             </div>
                           </td>
                           <td class="whitespace-nowrap px-6 py-4 text-sm">
-                            {description(transaction)}
+                            <div class="flex flex-col items-start gap-2">
+                              {description(transaction)}
+                              <.button
+                                :if={
+                                  transaction.type == :charge and
+                                    transaction.status == :requires_capture
+                                }
+                                size="sm"
+                                phx-click="release_funds"
+                                phx-disable-with="Releasing..."
+                                phx-value-payment_intent_id={transaction.provider_payment_intent_id}
+                              >
+                                Release funds
+                              </.button>
+                            </div>
                           </td>
                           <td class="font-display whitespace-nowrap px-6 py-4 text-right font-medium tabular-nums">
                             <%= case transaction_direction(transaction.type) do %>

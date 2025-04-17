@@ -49,17 +49,16 @@ defmodule AlgoraWeb.Webhooks.StripeController do
 
   defp process_event(
          %Stripe.Event{
-           type: "charge.succeeded",
+           type: type,
            data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
          } = event
        )
-       when is_binary(group_id) do
+       when type in ["charge.succeeded", "charge.captured"] and is_binary(group_id) do
     process_charge_succeeded(event, group_id)
   end
 
-  defp process_event(
-         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{invoice: invoice_id}}} = event
-       ) do
+  defp process_event(%Stripe.Event{type: type, data: %{object: %Stripe.Charge{invoice: invoice_id}}} = event)
+       when type in ["charge.succeeded", "charge.captured"] do
     with {:ok, invoice} <- Algora.PSP.Invoice.retrieve(invoice_id),
          %{"version" => @metadata_version, "group_id" => group_id} <- invoice.metadata do
       process_charge_succeeded(event, group_id)
@@ -129,10 +128,13 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   defp process_charge_succeeded(
-         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{id: charge_id, captured: captured}}},
+         %Stripe.Event{
+           type: type,
+           data: %{object: %Stripe.Charge{id: charge_id, captured: captured, payment_intent: payment_intent_id}}
+         },
          group_id
        )
-       when is_binary(group_id) do
+       when type in ["charge.succeeded", "charge.captured"] and is_binary(group_id) do
     Repo.transact(fn ->
       status = if captured, do: :succeeded, else: :requires_capture
       succeeded_at = if captured, do: DateTime.utc_now()
@@ -144,7 +146,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
             succeeded_at: succeeded_at,
             provider: "stripe",
             provider_id: charge_id,
-            provider_charge_id: charge_id
+            provider_charge_id: charge_id,
+            provider_payment_intent_id: payment_intent_id
           ]
         )
 

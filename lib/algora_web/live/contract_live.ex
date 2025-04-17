@@ -674,11 +674,13 @@ defmodule AlgoraWeb.ContractLive do
 
   defp assign_transactions(socket) do
     transactions =
-      Payments.list_transactions(
+      [
         user_id: socket.assigns.bounty.owner.id,
-        status: :succeeded,
+        status: [:succeeded, :requires_capture],
         bounty_id: socket.assigns.bounty.id
-      )
+      ]
+      |> Payments.list_transactions()
+      |> Enum.filter(&(&1.type == :charge or &1.status == :succeeded))
 
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)
@@ -690,7 +692,9 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   defp calculate_balance(transactions) do
-    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+    transactions
+    |> Enum.filter(&(&1.status == :succeeded))
+    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :deposit, :credit] ->
           Money.add!(acc, transaction.net_amount)
@@ -705,7 +709,9 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   defp calculate_volume(transactions) do
-    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+    transactions
+    |> Enum.filter(&(&1.status == :succeeded))
+    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :credit] -> Money.add!(acc, transaction.net_amount)
         _ -> acc
@@ -720,7 +726,9 @@ defmodule AlgoraWeb.ContractLive do
     end
   end
 
-  defp description(%{type: :charge}), do: "Escrowed"
+  defp description(%{type: :charge, status: :requires_capture}), do: "Authorized"
+
+  defp description(%{type: :charge, status: :succeeded}), do: "Escrowed"
 
   defp description(%{type: :debit}), do: "Released"
 

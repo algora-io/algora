@@ -129,9 +129,6 @@ defmodule AlgoraWeb.Org.Nav do
             :hourly -> Money.mult!(data.hourly_rate, data.hours_per_week)
           end
 
-        dbg(data.hourly_rate)
-        dbg(data.hours_per_week)
-
         bounty_res =
           Bounties.create_bounty(
             %{

@@ -129,77 +129,87 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   defp process_charge_succeeded(
-         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{id: charge_id}}},
+         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{id: charge_id, captured: captured}}},
          group_id
        )
        when is_binary(group_id) do
     Repo.transact(fn ->
+      status = if captured, do: :succeeded, else: :requires_capture
+      succeeded_at = if captured, do: DateTime.utc_now()
+
       {_, txs} =
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
-          set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
+          set: [
+            status: status,
+            succeeded_at: succeeded_at,
+            provider: "stripe",
+            provider_id: charge_id,
+            provider_charge_id: charge_id
+          ]
         )
 
-      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id),
-        set: [provider: "stripe", provider_id: charge_id]
-      )
+      if status == :succeeded do
+        bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+        tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+        contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+        claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
-      bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+        Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
+        Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
+        Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
+        # TODO: add and use a new "paid" status for claims
+        Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
 
-      Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
-      Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
-      Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
-      # TODO: add and use a new "paid" status for claims
-      Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
+        activities_result =
+          txs
+          |> Enum.filter(&(&1.type == :credit))
+          |> Enum.reduce_while(:ok, fn tx, :ok ->
+            case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
+              {:ok, _} -> {:cont, :ok}
+              error -> {:halt, error}
+            end
+          end)
 
-      activities_result =
-        txs
-        |> Enum.filter(&(&1.type == :credit))
-        |> Enum.reduce_while(:ok, fn tx, :ok ->
-          case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
-            {:ok, _} -> {:cont, :ok}
-            error -> {:halt, error}
-          end
-        end)
+        jobs_result =
+          txs
+          |> Enum.filter(&(&1.type == :credit))
+          |> Enum.reduce_while(:ok, fn credit, :ok ->
+            case Payments.fetch_active_account(credit.user_id) do
+              {:ok, _account} ->
+                case %{credit_id: credit.id}
+                     |> Payments.Jobs.ExecutePendingTransfer.new()
+                     |> Oban.insert() do
+                  {:ok, _job} -> {:cont, :ok}
+                  error -> {:halt, error}
+                end
 
-      jobs_result =
-        txs
-        |> Enum.filter(&(&1.type == :credit))
-        |> Enum.reduce_while(:ok, fn credit, :ok ->
-          case Payments.fetch_active_account(credit.user_id) do
-            {:ok, _account} ->
-              case %{credit_id: credit.id}
-                   |> Payments.Jobs.ExecutePendingTransfer.new()
-                   |> Oban.insert() do
-                {:ok, _job} -> {:cont, :ok}
-                error -> {:halt, error}
-              end
+              {:error, :no_active_account} ->
+                case %{credit_id: credit.id}
+                     |> Bounties.Jobs.PromptPayoutConnect.new()
+                     |> Oban.insert() do
+                  {:ok, _job} -> {:cont, :ok}
+                  error -> {:halt, error}
+                end
+            end
+          end)
 
-            {:error, :no_active_account} ->
-              case %{credit_id: credit.id}
-                   |> Bounties.Jobs.PromptPayoutConnect.new()
-                   |> Oban.insert() do
-                {:ok, _job} -> {:cont, :ok}
-                error -> {:halt, error}
-              end
-          end
-        end)
+        with txs when txs != [] <- txs,
+             :ok <- activities_result,
+             :ok <- jobs_result do
+          Payments.broadcast()
+          {:ok, nil}
+        else
+          {:error, reason} ->
+            Logger.error("Failed to update transactions: #{inspect(reason)}")
+            {:error, :failed_to_update_transactions}
 
-      with txs when txs != [] <- txs,
-           :ok <- activities_result,
-           :ok <- jobs_result do
+          _error ->
+            Logger.error("Failed to update transactions")
+            {:error, :failed_to_update_transactions}
+        end
+      else
         Payments.broadcast()
         {:ok, nil}
-      else
-        {:error, reason} ->
-          Logger.error("Failed to update transactions: #{inspect(reason)}")
-          {:error, :failed_to_update_transactions}
-
-        _error ->
-          Logger.error("Failed to update transactions")
-          {:error, :failed_to_update_transactions}
       end
     end)
   end

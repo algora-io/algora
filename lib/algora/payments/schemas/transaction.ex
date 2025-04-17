@@ -7,7 +7,7 @@ defmodule Algora.Payments.Transaction do
   alias Algora.Types.Money
 
   @transaction_types [:charge, :transfer, :reversal, :debit, :credit, :deposit, :withdrawal]
-  @transaction_statuses [:initialized, :processing, :succeeded, :failed, :canceled]
+  @transaction_statuses [:initialized, :processing, :requires_capture, :succeeded, :failed, :canceled]
 
   @derive {Inspect, except: [:provider_meta]}
   typed_schema "transactions" do

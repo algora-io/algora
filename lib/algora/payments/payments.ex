@@ -157,8 +157,13 @@ defmodule Algora.Payments do
   end
 
   def list_transactions(criteria \\ []) do
-    Transaction
-    |> where([t], ^Enum.to_list(criteria))
+    criteria
+    |> Enum.reduce(Transaction, fn {key, value}, query ->
+      case value do
+        v when is_list(v) -> where(query, [t], field(t, ^key) in ^v)
+        v -> where(query, [t], field(t, ^key) == ^v)
+      end
+    end)
     |> preload(linked_transaction: :user)
     |> order_by([t], desc: t.inserted_at)
     |> Repo.all()

@@ -17,7 +17,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias Algora.Github
   alias Algora.Organizations
   alias Algora.Organizations.Member
-  alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
@@ -339,7 +338,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.section
           :if={@matches != []}
           title="Algora Matches"
-          subtitle="Developers that match your tech stack and requirements"
+          subtitle="Top 1% Algora developers in your tech stack available to hire now"
         >
           <div class="relative w-full flex flex-col gap-4">
             <%= for match <- @matches do %>
@@ -1315,8 +1314,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
-      <div class="xl:basis-[28.5714286%]">
+    <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 xl:gap-4 2xl:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
+      <div class="xl:basis-[35%] truncate">
         <div class="flex items-center gap-4">
           <.link navigate={User.url(@match.user)}>
             <.avatar class="h-16 w-16 rounded-full">
@@ -1331,7 +1330,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <div class="flex items-center gap-4 text-foreground">
               <.link
                 navigate={User.url(@match.user)}
-                class="text-lg sm:text-xl font-semibold hover:underline truncate"
+                class="text-base sm:text-lg font-semibold hover:underline"
               >
                 {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
               </.link>
@@ -1379,7 +1378,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
       </div>
 
-      <div class="flex xl:flex-col gap-2 xl:basis-[14.2857143%] xl:ml-auto">
+      <div class="flex xl:flex-col gap-2 xl:basis-[5%] xl:ml-auto">
         <.button
           phx-click="share_opportunity"
           phx-value-user_id={@match.user.id}
@@ -1389,7 +1388,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.button>
       </div>
 
-      <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
+      <div class="pt-2 xl:pt-0 xl:pl-4 2xl:pl-8 xl:basis-[60%] xl:border-l xl:border-border">
         <div class="text-sm sm:text-base text-foreground font-medium">
           Completed
           <span class="font-semibold font-display text-emerald-400">
@@ -1408,11 +1407,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
               @match.user.contributed_projects_count
             )}
           </span>
-          <span class="font-semibold font-display">
-            ({Money.to_string!(@match.user.total_earned)})
-          </span>
         </div>
-        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-8">
+        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-4 2xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
               navigate={User.url(project)}

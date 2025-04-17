@@ -101,7 +101,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:matches, matches)
        |> assign(:developers, developers)
        |> assign(:has_more_bounties, false)
-       |> assign(:has_more_transactions, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
@@ -131,7 +130,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def handle_params(params, _uri, socket) do
     current_org = socket.assigns.current_org
-    current_status = get_current_status(params)
 
     stats = Bounties.fetch_stats(org_id: current_org.id, current_user: socket.assigns[:current_user])
 
@@ -142,8 +140,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
         status: :open,
         current_user: socket.assigns[:current_user]
       )
-
-    transactions = Payments.list_hosted_transactions(current_org.id, limit: page_size())
 
     socket =
       if params["action"] == "create_contract" do
@@ -163,11 +159,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:noreply,
      socket
-     |> assign(:current_status, current_status)
      |> assign(:bounty_rows, to_bounty_rows(bounties))
-     |> assign(:transaction_rows, to_transaction_rows(transactions))
      |> assign(:has_more_bounties, length(bounties) >= page_size())
-     |> assign(:has_more_transactions, length(transactions) >= page_size())
      |> assign(:stats, stats)}
   end
 
@@ -392,54 +385,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   on GitHub issues.
                 </p>
               </div>
-              <div :if={length(@bounty_rows) + length(@transaction_rows) > 0} class="pb-4 md:pb-0">
-                <!-- Tab buttons for Open and Completed bounties -->
-                <div dir="ltr" data-orientation="horizontal">
-                  <div
-                    role="tablist"
-                    aria-orientation="horizontal"
-                    class="-ml-1 grid h-full w-full grid-cols-2 items-center justify-center gap-1 rounded-lg p-1 bg-muted/40 text-card-foreground"
-                    tabindex="0"
-                    data-orientation="horizontal"
-                    style="outline: none;"
-                  >
-                    <.button
-                      type="button"
-                      role="tab"
-                      aria-selected={@current_status == :open}
-                      variant={if @current_status == :open, do: "default", else: "ghost"}
-                      phx-click="change-tab"
-                      phx-value-tab="open"
-                    >
-                      <div class="relative flex items-center gap-2.5 text-sm md:text-base">
-                        <div class="truncate">Open</div>
-                        <span class={"min-w-[1ch] font-mono #{if @current_status == :open, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
-                          {@stats.open_bounties_count}
-                        </span>
-                      </div>
-                    </.button>
-
-                    <.button
-                      type="button"
-                      role="tab"
-                      aria-selected={@current_status == :paid}
-                      variant={if @current_status == :paid, do: "default", else: "ghost"}
-                      phx-click="change-tab"
-                      phx-value-tab="completed"
-                    >
-                      <div class="relative flex items-center gap-2.5 text-sm md:text-base">
-                        <div class="truncate">Completed</div>
-                        <span class={"min-w-[1ch] font-mono #{if @current_status == :paid, do: "text-emerald-200", else: "text-gray-400 group-hover:text-emerald-200"}"}>
-                          {@stats.rewarded_bounties_count + @stats.rewarded_tips_count}
-                        </span>
-                      </div>
-                    </.button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
-          <div :if={@current_status == :open} class="relative">
+          <div class="relative">
             <%= if Enum.empty?(@bounty_rows) do %>
               <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
                 <.card_header>
@@ -482,68 +430,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <div class="animate-pulse text-muted-foreground">
                     <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
                   </div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-          <div :if={@current_status == :paid} class="relative">
-            <%= if Enum.empty?(@bounty_rows) do %>
-              <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                <.card_header>
-                  <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                    <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <.card_title>No completed bounties yet</.card_title>
-                  <.card_description>
-                    Completed bounties will appear here once completed
-                  </.card_description>
-                </.card_header>
-              </.card>
-            <% else %>
-              <%= for %{transaction: transaction, recipient: recipient, ticket: ticket} <- @transaction_rows do %>
-                <div class="mb-4 rounded-lg border border-border bg-card p-4">
-                  <div class="flex gap-4">
-                    <div class="flex-1">
-                      <div class="mb-2 font-mono text-2xl font-extrabold text-success">
-                        {Money.to_string!(transaction.net_amount)}
-                      </div>
-                      <div :if={ticket.repository} class="mb-1 text-sm text-muted-foreground">
-                        {ticket.repository.user.provider_login}/{ticket.repository.name}#{ticket.number}
-                      </div>
-                      <div class="font-medium">
-                        {ticket.title}
-                      </div>
-                      <div class="mt-1 text-xs text-muted-foreground">
-                        {Algora.Util.time_ago(transaction.succeeded_at)}
-                      </div>
-                    </div>
-
-                    <div class="flex w-32 flex-col items-center border-l border-border pl-4">
-                      <h3 class="mb-3 text-xs font-medium uppercase text-muted-foreground">
-                        Awarded to
-                      </h3>
-                      <img
-                        src={recipient.avatar_url}
-                        class="mb-2 h-16 w-16 rounded-full"
-                        alt={recipient.name}
-                      />
-                      <div class="text-center text-sm font-medium">
-                        {recipient.name}
-                        <div>
-                          {Algora.Misc.CountryEmojis.get(recipient.country)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-              <div
-                :if={@has_more_transactions}
-                class="flex justify-center mt-4"
-                data-load-more-indicator
-              >
-                <div class="animate-pulse text-gray-400">
-                  <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
                 </div>
               </div>
             <% end %>
@@ -917,11 +803,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_event("load_more", _params, socket) do
-    {:noreply,
-     case socket.assigns.current_status do
-       :open -> assign_more_bounties(socket)
-       :paid -> assign_more_transactions(socket)
-     end}
+    {:noreply, assign_more_bounties(socket)}
   end
 
   @impl true
@@ -1015,8 +897,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp to_bounty_rows(bounties), do: bounties
 
-  defp to_transaction_rows(transactions), do: transactions
-
   defp assign_more_bounties(socket) do
     %{bounty_rows: rows, current_org: current_org} = socket.assigns
 
@@ -1031,7 +911,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       Bounties.list_bounties(
         owner_id: current_org.id,
         limit: page_size(),
-        status: socket.assigns.current_status,
+        status: :open,
         before: cursor,
         current_user: socket.assigns[:current_user]
       )
@@ -1039,34 +919,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
     socket
     |> assign(:bounty_rows, rows ++ to_bounty_rows(more_bounties))
     |> assign(:has_more_bounties, length(more_bounties) >= page_size())
-  end
-
-  defp assign_more_transactions(socket) do
-    %{transaction_rows: rows, current_org: current_org} = socket.assigns
-
-    last_transaction = List.last(rows).transaction
-
-    more_transactions =
-      Payments.list_hosted_transactions(
-        current_org.id,
-        limit: page_size(),
-        before: %{
-          succeeded_at: last_transaction.succeeded_at,
-          id: last_transaction.id
-        }
-      )
-
-    socket
-    |> assign(:transaction_rows, rows ++ to_transaction_rows(more_transactions))
-    |> assign(:has_more_transactions, length(more_transactions) >= page_size())
-  end
-
-  defp get_current_status(params) do
-    case params["status"] do
-      "open" -> :open
-      "completed" -> :paid
-      _ -> :open
-    end
   end
 
   defp page_size, do: 10

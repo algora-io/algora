@@ -263,7 +263,7 @@ defmodule Algora.Organizations do
     with {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
          {:ok, owner} <- Workspace.ensure_user(token, repo_owner),
          {:ok, _contributors} <- Workspace.ensure_contributors(token, repo),
-         {:ok, _languages} <- Workspace.ensure_repo_tech_stack(token, repo) do
+         {:ok, tech_stack} <- Workspace.ensure_repo_tech_stack(token, repo) do
       Repo.transact(fn _ ->
         with {:ok, org} <-
                Repo.insert(%User{
@@ -272,7 +272,7 @@ defmodule Algora.Organizations do
                  display_name: owner.name,
                  avatar_url: owner.avatar_url,
                  last_context: "repo/#{repo_owner}/#{repo_name}",
-                 tech_stack: repo.tech_stack
+                 tech_stack: tech_stack
                }),
              {:ok, user} <-
                Repo.insert(%User{
@@ -280,7 +280,7 @@ defmodule Algora.Organizations do
                  id: Nanoid.generate(),
                  display_name: "You",
                  last_context: "preview/#{org.id}/#{repo_owner}/#{repo_name}",
-                 tech_stack: repo.tech_stack
+                 tech_stack: tech_stack
                }),
              {:ok, member} <-
                Repo.insert(%Member{

@@ -233,10 +233,16 @@
                   <.drawer_header>
                     <.drawer_title>Create new contract</.drawer_title>
                     <.drawer_description>
-                      Engage a developer for ongoing work
+                      <div>Engage a developer for ongoing work</div>
+                      <div class="mt-2 flex items-center gap-1">
+                        <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
+                        <span>
+                          Weekly contributions, PR review, internship, contract-to-hire
+                        </span>
+                      </div>
                     </.drawer_description>
                   </.drawer_header>
-                  <.drawer_content class="mt-4">
+                  <.drawer_content>
                     <AlgoraWeb.Forms.ContractForm.contract_form form={main_contract_form} />
                   </.drawer_content>
                 </.drawer>
@@ -262,10 +268,16 @@
                   <.drawer_header>
                     <.drawer_title>Create new bounty</.drawer_title>
                     <.drawer_description>
-                      Create and fund a bounty for an issue
+                      <div>Create and fund a bounty for an issue</div>
+                      <div class="mt-2 flex items-center gap-1">
+                        <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
+                        <span>
+                          New feature, integration, bug fix, CLI, mobile app, MCP, video
+                        </span>
+                      </div>
                     </.drawer_description>
                   </.drawer_header>
-                  <.drawer_content class="mt-4">
+                  <.drawer_content>
                     <AlgoraWeb.Forms.BountyForm.bounty_form form={main_bounty_form} />
                   </.drawer_content>
                 </.drawer>

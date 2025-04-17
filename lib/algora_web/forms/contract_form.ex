@@ -124,9 +124,12 @@ defmodule AlgoraWeb.Forms.ContractForm do
           Cancel
         </.button>
         <.button type="submit">
-          Share Contract <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+          Draft contract <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
         </.button>
       </div>
+      <p class="pt-4 text-sm text-muted-foreground">
+        You can edit the contract after it's created
+      </p>
     </.form>
     """
   end

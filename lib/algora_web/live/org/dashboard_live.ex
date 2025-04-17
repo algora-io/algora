@@ -669,6 +669,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def handle_event("share_opportunity", %{"user_id" => user_id, "type" => "contract"}, socket) do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
+    match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
+
+    amount =
+      if hourly_rate = match[:hourly_rate] do
+        Money.mult!(hourly_rate, developer.hours_per_week || 30)
+      end
 
     {:noreply,
      socket
@@ -676,7 +682,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
      |> assign(
        :main_contract_form,
        %ContractForm{}
-       |> ContractForm.changeset(%{contractor_handle: developer.provider_login})
+       |> ContractForm.changeset(%{
+         contractor_handle: developer.provider_login,
+         amount: amount,
+         title: "#{socket.assigns.current_org.name} OSS Development",
+         description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
+       })
        |> to_form()
      )}
   end
@@ -1768,7 +1779,15 @@ defmodule AlgoraWeb.Org.DashboardLive do
     <.drawer_header>
       <.drawer_title>Share Bounty</.drawer_title>
       <.drawer_description>
-        Share a bounty opportunity with {@selected_developer.name}. They will be notified and can choose to work on it.
+        <div>
+          Share a bounty opportunity with {@selected_developer.name}. They will be notified and can choose to work on it.
+        </div>
+        <div class="mt-2 flex items-center gap-1">
+          <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
+          <span>
+            New feature, integration, bug fix, CLI, mobile app, MCP, video
+          </span>
+        </div>
       </.drawer_description>
     </.drawer_header>
     """

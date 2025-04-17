@@ -1381,35 +1381,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <.button
           phx-click="share_opportunity"
           phx-value-user_id={@match.user.id}
-          phx-value-type="bounty"
-          variant="none"
-          class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
-        >
-          <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
-        </.button>
-        <.button
-          :if={@contract_for_user && @contract_for_user.status in [:active, :paid]}
-          navigate={~p"/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
-          variant="none"
-          class="bg-emerald-800/10 text-emerald-300 drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/50 focus:border-emerald-400/50"
-        >
-          <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
-        </.button>
-        <.button
-          :if={@contract_for_user && @contract_for_user.status in [:draft]}
-          navigate={~p"/#{@current_org.handle}/contracts/#{@contract_for_user.id}"}
-          variant="none"
-          class="bg-gray-800/10 text-gray-400 drop-shadow-[0_1px_5px_#94a3b880] focus:bg-gray-800/10 focus:text-gray-400 focus:outline-none focus:drop-shadow-[0_1px_5px_#94a3b880] border border-gray-400/50 focus:border-gray-400/50"
-        >
-          <.icon name="tabler-clock" class="size-4 text-current mr-2 -ml-1" /> Contract
-        </.button>
-        <.button
-          :if={!@contract_for_user}
-          phx-click="share_opportunity"
-          phx-value-user_id={@match.user.id}
           phx-value-type="contract"
-          variant="none"
-          class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
         >
           <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
         </.button>
@@ -1418,7 +1390,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <div class="pt-2 xl:pt-0 xl:pl-8 xl:basis-[57.1428571%] xl:border-l xl:border-border">
         <div class="text-sm sm:text-base text-foreground font-medium">
           Completed
-          <span class="font-semibold font-display">
+          <span class="font-semibold font-display text-emerald-400">
             {@match.user.transactions_count}
             {ngettext(
               "bounty",
@@ -1426,10 +1398,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
               @match.user.transactions_count
             )}
           </span>
-          <span class="font-semibold font-display">
+          across
+          <span class="font-semibold font-display text-emerald-400">
             {ngettext(
-              "in %{count} project",
-              "across %{count} projects",
+              "%{count} project",
+              "%{count} projects",
               @match.user.contributed_projects_count
             )}
           </span>
@@ -1461,7 +1434,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     )}
                   </div>
                   <div class="text-sm text-muted-foreground">
-                    <span class="text-emerald-400 font-display font-semibold">
+                    <span class="text-foreground font-display font-semibold">
                       {total_earned}
                     </span>
                     awarded

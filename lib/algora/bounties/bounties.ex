@@ -788,6 +788,27 @@ defmodule Algora.Bounties do
     )
   end
 
+  @spec authorize_payment(
+          %{
+            owner: User.t(),
+            amount: Money.t(),
+            bounty: Bounty.t(),
+            claims: [Claim.t()]
+          },
+          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
+        ) ::
+          {:ok, String.t()} | {:error, atom()}
+  def authorize_payment(%{owner: owner, amount: amount, bounty: bounty, claims: claims}, opts \\ []) do
+    create_payment_session(
+      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
+      ticket_ref: opts[:ticket_ref],
+      bounty: bounty,
+      claims: claims,
+      recipient: opts[:recipient],
+      capture_method: :manual
+    )
+  end
+
   @spec generate_line_items(
           %{owner: User.t(), amount: Money.t()},
           opts :: [
@@ -861,7 +882,8 @@ defmodule Algora.Bounties do
             tip_id: String.t(),
             bounty: Bounty.t(),
             claims: [Claim.t()],
-            recipient: User.t()
+            recipient: User.t(),
+            capture_method: :automatic | :automatic_async | :manual
           ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
@@ -875,6 +897,18 @@ defmodule Algora.Bounties do
         claims: opts[:claims],
         bounty: opts[:bounty]
       )
+
+    payment_intent_data = %{
+      description: description,
+      metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
+    }
+
+    payment_intent_data =
+      if capture_method = opts[:capture_method] do
+        Map.put(payment_intent_data, :capture_method, capture_method)
+      else
+        payment_intent_data
+      end
 
     gross_amount = LineItem.gross_amount(line_items)
 
@@ -905,10 +939,7 @@ defmodule Algora.Bounties do
                group_id: tx_group_id
              }),
            {:ok, session} <-
-             Payments.create_stripe_session(owner, Enum.map(line_items, &LineItem.to_stripe/1), %{
-               description: description,
-               metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
-             }) do
+             Payments.create_stripe_session(owner, Enum.map(line_items, &LineItem.to_stripe/1), payment_intent_data) do
         {:ok, session.url}
       end
     end)

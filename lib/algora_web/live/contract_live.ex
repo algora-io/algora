@@ -18,7 +18,7 @@ defmodule AlgoraWeb.ContractLive do
 
   require Logger
 
-  defp tip_options, do: [{"None", 0}, {"10%", 10}, {"20%", 20}, {"50%", 50}]
+  # defp tip_options, do: [{"None", 0}, {"10%", 10}, {"20%", 20}, {"50%", 50}]
 
   defmodule RewardBountyForm do
     @moduledoc false
@@ -109,7 +109,7 @@ defmodule AlgoraWeb.ContractLive do
     ticket_body_html = Algora.Markdown.render(bounty.ticket.description)
 
     reward_changeset =
-      RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0})
+      RewardBountyForm.changeset(%RewardBountyForm{}, %{amount: bounty.amount})
 
     {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
@@ -230,6 +230,18 @@ defmodule AlgoraWeb.ContractLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, :reward_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("authorize_with_stripe", _params, socket) do
+    case authorize_payment(socket, socket.assigns.bounty) do
+      {:ok, session_url} ->
+        {:noreply, redirect(socket, external: session_url)}
+
+      {:error, reason} ->
+        Logger.error("Failed to create payment session: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 
@@ -508,13 +520,13 @@ defmodule AlgoraWeb.ContractLive do
 
     <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
       <.drawer_header>
-        <.drawer_title>Pay Contract</.drawer_title>
+        <.drawer_title>Authorize payment</.drawer_title>
         <.drawer_description>
-          You can pay any amount at any time.
+          You will be charged once {@contractor.name} accepts the contract.
         </.drawer_description>
       </.drawer_header>
       <.drawer_content class="mt-4">
-        <.form for={@reward_form} phx-change="validate_reward" phx-submit="pay_with_stripe">
+        <.form for={@reward_form} phx-change="validate_reward" phx-submit="authorize_with_stripe">
           <div class="flex flex-col gap-8">
             <div class="grid grid-cols-2 gap-8">
               <.card>
@@ -527,9 +539,10 @@ defmodule AlgoraWeb.ContractLive do
                       label="Amount"
                       icon="tabler-currency-dollar"
                       field={@reward_form[:amount]}
+                      disabled
                     />
 
-                    <div>
+                    <%!-- <div>
                       <.label>Tip</.label>
                       <div class="mt-2">
                         <.radio_group
@@ -538,7 +551,7 @@ defmodule AlgoraWeb.ContractLive do
                           options={tip_options()}
                         />
                       </div>
-                    </div>
+                    </div> --%>
                   </div>
                 </.card_content>
               </.card>
@@ -590,7 +603,7 @@ defmodule AlgoraWeb.ContractLive do
                 Cancel
               </.button>
               <.button type="submit">
-                Pay with Stripe <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+                Authorize with Stripe <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
               </.button>
             </div>
           </div>
@@ -620,6 +633,14 @@ defmodule AlgoraWeb.ContractLive do
 
     Bounties.reward_bounty(
       %{owner: bounty.owner, amount: final_amount, bounty: bounty, claims: []},
+      ticket_ref: socket.assigns.ticket_ref,
+      recipient: socket.assigns.contractor
+    )
+  end
+
+  defp authorize_payment(socket, bounty) do
+    Bounties.authorize_payment(
+      %{owner: bounty.owner, amount: bounty.amount, bounty: bounty, claims: []},
       ticket_ref: socket.assigns.ticket_ref,
       recipient: socket.assigns.contractor
     )

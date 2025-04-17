@@ -36,16 +36,24 @@ defmodule Algora.Payments do
           {:ok, PSP.session()} | {:error, PSP.error()}
   def create_stripe_session(user, line_items, payment_intent_data) do
     with {:ok, customer} <- fetch_or_create_customer(user) do
-      PSP.Session.create(%{
+      opts = %{
         mode: "payment",
         customer: customer.provider_id,
         billing_address_collection: "required",
         line_items: line_items,
-        invoice_creation: %{enabled: true},
         success_url: "#{AlgoraWeb.Endpoint.url()}/payment/success",
         cancel_url: "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
         payment_intent_data: payment_intent_data
-      })
+      }
+
+      opts =
+        if payment_intent_data[:capture_method] == :manual do
+          opts
+        else
+          Map.put(opts, :invoice_creation, %{enabled: true})
+        end
+
+      PSP.Session.create(opts)
     end
   end
 

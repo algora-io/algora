@@ -72,6 +72,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
       end
 
+      previewed_user = get_previewed_user(current_org)
+
       _experts = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
       experts = []
 
@@ -79,7 +81,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       contributors = list_contributors(current_org)
 
-      matches = Algora.Settings.get_org_matches(current_org)
+      matches = Algora.Settings.get_org_matches(previewed_user || current_org)
 
       admins_last_active = Algora.Admin.admins_last_active()
 
@@ -97,7 +99,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:installations, installations)
        |> assign(:experts, experts)
        |> assign(:contributors, contributors)
-       |> assign(:previewed_user, get_previewed_user(current_org))
+       |> assign(:previewed_user, previewed_user)
        |> assign(:matches, matches)
        |> assign(:developers, developers)
        |> assign(:has_more_bounties, false)

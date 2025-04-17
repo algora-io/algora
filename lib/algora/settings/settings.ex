@@ -61,6 +61,14 @@ defmodule Algora.Settings do
     set("featured_collabs", %{"handles" => handles})
   end
 
+  def set_user_profile(handle, profile) do
+    set("user_profile:#{handle}", profile)
+  end
+
+  def get_user_profile(handle) do
+    get("user_profile:#{handle}")
+  end
+
   def get_org_matches(org) do
     case get("org_matches:#{org.handle}") do
       %{"matches" => matches} when is_list(matches) ->
@@ -72,18 +80,18 @@ defmodule Algora.Settings do
         Enum.flat_map(matches, fn match ->
           if user = Map.get(user_map, match["handle"]) do
             # TODO: N+1
+            profile = get_user_profile(user.handle)
             projects = Accounts.list_contributed_projects(user, limit: 2)
+            avatar_url = profile["avatar_url"] || user.avatar_url
+            hourly_rate = match["hourly_rate"] || profile["hourly_rate"]
 
             [
               %{
-                user: user,
+                user: %{user | avatar_url: avatar_url},
                 projects: projects,
                 badge_variant: match["badge_variant"],
                 badge_text: match["badge_text"],
-                hourly_rate:
-                  if match["hourly_rate"] do
-                    Money.new(:USD, match["hourly_rate"], no_fraction_if_integer: true)
-                  end
+                hourly_rate: if(hourly_rate, do: Money.new(:USD, hourly_rate, no_fraction_if_integer: true))
               }
             ]
           else

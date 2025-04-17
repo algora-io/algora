@@ -50,6 +50,17 @@ defmodule Algora.Admin do
     end
   end
 
+  def remove_comment(url, id) do
+    %{owner: owner, repo: repo, number: _number} = parse_ticket_url(url)
+
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
+         {:ok, token} <- Github.get_installation_token(installation_id),
+         {:error, %Jason.DecodeError{data: ""}} <-
+           Github.Client.fetch(token, "/repos/#{owner}/#{repo}/issues/comments/#{id}", "DELETE") do
+      :ok
+    end
+  end
+
   def backfill_labels(org_handle, opts \\ []) do
     with org when not is_nil(org) <- Repo.get_by(User, handle: org_handle),
          installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(org.provider_login),

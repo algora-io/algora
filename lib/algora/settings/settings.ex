@@ -72,39 +72,58 @@ defmodule Algora.Settings do
   def get_org_matches(org) do
     case get("org_matches:#{org.handle}") do
       %{"matches" => matches} when is_list(matches) ->
-        user_map =
-          [handles: Enum.map(matches, & &1["handle"])]
-          |> Accounts.list_developers()
-          |> Map.new(fn user -> {user.handle, user} end)
-
-        Enum.flat_map(matches, fn match ->
-          if user = Map.get(user_map, match["handle"]) do
-            # TODO: N+1
-            profile = get_user_profile(user.handle)
-            projects = Accounts.list_contributed_projects(user, limit: 2)
-            avatar_url = profile["avatar_url"] || user.avatar_url
-            hourly_rate = match["hourly_rate"] || profile["hourly_rate"]
-
-            [
-              %{
-                user: %{user | avatar_url: avatar_url},
-                projects: projects,
-                badge_variant: match["badge_variant"],
-                badge_text: match["badge_text"],
-                hourly_rate: if(hourly_rate, do: Money.new(:USD, hourly_rate, no_fraction_if_integer: true))
-              }
-            ]
-          else
-            []
-          end
-        end)
+        load_matches(matches)
 
       _ ->
-        []
+        if tech_stack = List.first(org.tech_stack) do
+          get_tech_matches(tech_stack)
+        else
+          []
+        end
     end
   end
 
   def set_org_matches(org_handle, matches) when is_binary(org_handle) and is_list(matches) do
     set("org_matches:#{org_handle}", %{"matches" => matches})
+  end
+
+  def get_tech_matches(tech) do
+    case get("tech_matches:#{String.downcase(tech)}") do
+      %{"matches" => matches} when is_list(matches) -> load_matches(matches)
+      _ -> []
+    end
+  end
+
+  def set_tech_matches(tech, matches) when is_binary(tech) and is_list(matches) do
+    set("tech_matches:#{String.downcase(tech)}", %{"matches" => matches})
+  end
+
+  def load_matches(matches) do
+    user_map =
+      [handles: Enum.map(matches, & &1["handle"])]
+      |> Accounts.list_developers()
+      |> Map.new(fn user -> {user.handle, user} end)
+
+    Enum.flat_map(matches, fn match ->
+      if user = Map.get(user_map, match["handle"]) do
+        # TODO: N+1
+        profile = get_user_profile(user.handle)
+        projects = Accounts.list_contributed_projects(user, limit: 2)
+        avatar_url = profile["avatar_url"] || user.avatar_url
+        hourly_rate = match["hourly_rate"] || profile["hourly_rate"]
+
+        [
+          %{
+            user: %{user | avatar_url: avatar_url},
+            projects: projects,
+            badge_variant: match["badge_variant"],
+            badge_text: match["badge_text"],
+            hourly_rate: if(hourly_rate, do: Money.new(:USD, hourly_rate, no_fraction_if_integer: true))
+          }
+        ]
+      else
+        []
+      end
+    end)
   end
 end

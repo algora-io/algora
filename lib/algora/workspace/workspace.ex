@@ -529,6 +529,8 @@ defmodule Algora.Workspace do
         join: ro in assoc(r, :user),
         where: ro.provider_login == ^repo_owner,
         join: u in assoc(c, :user),
+        where: u.type != :bot,
+        where: not like(u.provider_login, "%-bot"),
         select_merge: %{user: u},
         order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
       )
@@ -543,6 +545,8 @@ defmodule Algora.Workspace do
         join: ro in assoc(r, :user),
         where: ro.provider_login == ^repo_owner,
         join: u in assoc(c, :user),
+        where: u.type != :bot,
+        where: not like(u.provider_login, "%-bot"),
         distinct: [c.user_id],
         select_merge: %{user: u},
         order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id],

@@ -278,20 +278,6 @@ defmodule AlgoraWeb.ContractLive do
                     </div>
                   </div>
                 </div>
-
-                <div class="flex flex-col gap-4">
-                  <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
-                    {Money.to_string!(@bounty.amount)}<span
-                      :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
-                      class="text-base"
-                    >
-                      /hr
-                    </span>
-                  </div>
-                  <.button :if={@can_create_bounty} phx-click="reward">
-                    Pay
-                  </.button>
-                </div>
               </div>
             </.card_content>
           </.card>
@@ -304,6 +290,51 @@ defmodule AlgoraWeb.ContractLive do
             <.card_content class="pt-0">
               <div class="prose prose-invert">
                 {Phoenix.HTML.raw(@ticket_body_html)}
+              </div>
+            </.card_content>
+          </.card>
+          <.card :if={length(@transactions) == 0}>
+            <.card_header>
+              <.card_title>
+                Finalize offer
+              </.card_title>
+            </.card_header>
+            <.card_content class="pt-0">
+              <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
+                <ul class="space-y-2">
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-circle-number-1" class="size-8 text-success-400" />
+                    Authorize the payment to share the contract offer with {@contractor.name}
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-circle-number-2" class="size-8 text-success-400" />
+                    When {@contractor.name} accepts, you will be charged {Money.to_string!(
+                      @bounty.amount
+                    )} into escrow
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <.icon name="tabler-circle-number-3" class="size-8 text-success-400" />
+                    At the end of the week, release or withhold the funds based on {@contractor.name}'s performance
+                  </li>
+                </ul>
+
+                <dl class="-mt-12 space-y-4">
+                  <dd class="font-display tabular-nums text-5xl text-success-400 font-bold">
+                    {Money.to_string!(Money.mult!(@bounty.amount, Decimal.new("1.13")))}
+                  </dd>
+                  <div class="flex justify-between">
+                    <dt class="text-foreground">
+                      Total amount for <span class="font-semibold">{@bounty.hours_per_week}</span>
+                      hours
+                      <div class="text-xs text-muted-foreground">
+                        (includes all platform and payment processing fees)
+                      </div>
+                    </dt>
+                  </div>
+                  <.button :if={@can_create_bounty} phx-click="reward">
+                    Authorize
+                  </.button>
+                </dl>
               </div>
             </.card_content>
           </.card>

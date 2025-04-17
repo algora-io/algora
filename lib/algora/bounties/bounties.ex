@@ -52,7 +52,8 @@ defmodule Algora.Bounties do
           ticket: Ticket.t(),
           visibility: Bounty.visibility(),
           shared_with: [String.t()],
-          hours_per_week: integer() | nil
+          hours_per_week: integer() | nil,
+          hourly_rate: Money.t() | nil
         }) ::
           {:ok, Bounty.t()} | {:error, atom()}
   defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket} = params) do
@@ -64,7 +65,8 @@ defmodule Algora.Bounties do
         creator_id: creator.id,
         visibility: params[:visibility] || owner.bounty_mode,
         shared_with: params[:shared_with] || [],
-        hours_per_week: params[:hours_per_week]
+        hours_per_week: params[:hours_per_week],
+        hourly_rate: params[:hourly_rate]
       })
 
     changeset
@@ -112,6 +114,7 @@ defmodule Algora.Bounties do
             command_source: :ticket | :comment,
             visibility: Bounty.visibility() | nil,
             shared_with: [String.t()] | nil,
+            hourly_rate: Money.t() | nil,
             hours_per_week: integer() | nil
           ]
         ) ::
@@ -144,6 +147,7 @@ defmodule Algora.Bounties do
                     ticket: ticket,
                     visibility: opts[:visibility],
                     shared_with: shared_with,
+                    hourly_rate: opts[:hourly_rate],
                     hours_per_week: opts[:hours_per_week]
                   })
 
@@ -195,7 +199,8 @@ defmodule Algora.Bounties do
             strategy: strategy(),
             visibility: Bounty.visibility() | nil,
             shared_with: [String.t()] | nil,
-            hours_per_week: integer() | nil
+            hours_per_week: integer() | nil,
+            hourly_rate: Money.t() | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -215,7 +220,8 @@ defmodule Algora.Bounties do
                ticket: ticket,
                visibility: opts[:visibility],
                shared_with: shared_with,
-               hours_per_week: opts[:hours_per_week]
+               hours_per_week: opts[:hours_per_week],
+               hourly_rate: opts[:hourly_rate]
              }),
            {:ok, _job} <- notify_bounty(%{owner: owner, bounty: bounty}) do
         broadcast()

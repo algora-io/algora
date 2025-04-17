@@ -17,6 +17,10 @@ defmodule Algora.Types.USD do
     end
   end
 
+  def cast(money) when is_struct(money, Money) do
+    {:ok, money}
+  end
+
   def cast(_), do: :error
 
   @impl true

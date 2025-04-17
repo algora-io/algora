@@ -632,24 +632,31 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def handle_event("share_opportunity", %{"user_id" => user_id, "type" => "contract"}, socket) do
+  def handle_event(
+        "share_opportunity",
+        %{"user_id" => user_id, "type" => "contract", "marketplace" => marketplace?},
+        socket
+      ) do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
     match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
+    hourly_rate = match[:hourly_rate]
 
-    amount =
-      if hourly_rate = match[:hourly_rate] do
-        Money.mult!(hourly_rate, developer.hours_per_week || 30)
-      end
+    hours_per_week = developer.hours_per_week || 30
 
     {:noreply,
      socket
      |> assign(:main_contract_form_open?, true)
      |> assign(
        :main_contract_form,
-       %ContractForm{}
+       %ContractForm{
+         marketplace?: marketplace? == "true",
+         contractor: match.user || developer
+       }
        |> ContractForm.changeset(%{
+         amount: if(hourly_rate, do: Money.mult!(hourly_rate, hours_per_week)),
+         hourly_rate: hourly_rate,
          contractor_handle: developer.provider_login,
-         amount: amount,
+         hours_per_week: hours_per_week,
          title: "#{socket.assigns.current_org.name} OSS Development",
          description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
        })
@@ -1256,6 +1263,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-click="share_opportunity"
               phx-value-user_id={@user.id}
               phx-value-type="contract"
+              phx-value-marketplace="false"
               variant="none"
               class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
@@ -1357,6 +1365,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           phx-click="share_opportunity"
           phx-value-user_id={@match.user.id}
           phx-value-type="contract"
+          phx-value-marketplace="true"
         >
           <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
         </.button>

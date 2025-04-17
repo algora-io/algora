@@ -198,9 +198,14 @@ defmodule AlgoraWeb.Forms.ContractForm do
           <dl class="space-y-4">
             <div class="flex justify-between">
               <dt class="text-foreground">
-                Total amount for
+                Total payment for
                 <span class="font-semibold">{get_change(@form.source, :hours_per_week)}</span>
                 hours
+                <%= if contractor = get_field(@form.source, :contractor) do %>
+                  <span class="text-xs text-muted-foreground">
+                    ({contractor.name}'s availability)
+                  </span>
+                <% end %>
                 <div class="text-xs text-muted-foreground">
                   (includes all platform and payment processing fees)
                 </div>
@@ -220,9 +225,6 @@ defmodule AlgoraWeb.Forms.ContractForm do
           Draft contract <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
         </.button>
       </div>
-      <p class="pt-4 text-sm text-muted-foreground">
-        You can edit the contract after it's created
-      </p>
     </.form>
     """
   end

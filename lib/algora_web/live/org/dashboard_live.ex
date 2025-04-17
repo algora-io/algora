@@ -1964,7 +1964,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <.drawer_content :if={@selected_developer} class="mt-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <.share_drawer_developer_info selected_developer={@selected_developer} />
-          <%= if incomplete?(@achievements, :connect_github_status) do %>
+          <%= if @live_action == :preview or incomplete?(@achievements, :connect_github_status) do %>
             <div class="relative">
               <div class="absolute inset-0 z-10 bg-background/50" />
               <div class="pointer-events-none">

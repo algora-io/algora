@@ -6,6 +6,7 @@ defmodule Algora.Workspace do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Github
+  alias Algora.Organizations.Member
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace.CommandResponse
@@ -531,6 +532,9 @@ defmodule Algora.Workspace do
         join: u in assoc(c, :user),
         where: u.type != :bot,
         where: not ilike(u.provider_login, "%bot"),
+        left_join: m in Member,
+        on: m.user_id == u.id and m.org_id == r.user_id,
+        where: is_nil(m.id),
         select_merge: %{user: u},
         order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id]
       )
@@ -547,6 +551,9 @@ defmodule Algora.Workspace do
         join: u in assoc(c, :user),
         where: u.type != :bot,
         where: not ilike(u.provider_login, "%bot"),
+        left_join: m in Member,
+        on: m.user_id == u.id and m.org_id == r.user_id,
+        where: is_nil(m.id),
         distinct: [c.user_id],
         select_merge: %{user: u},
         order_by: [desc: c.contributions, asc: c.inserted_at, asc: c.id],

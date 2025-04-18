@@ -1228,7 +1228,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="bounty"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
+              class="group bg-blue-900/10 text-blue-300 transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-blue-400/40 hover:border-blue-400/50 focus:border-blue-400/50"
             >
               <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
             </.button>
@@ -1237,7 +1237,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="tip"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-800/10 hover:text-red-300 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-800/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
+              class="group bg-red-900/10 text-red-300 transition-colors duration-75 hover:bg-red-800/10 hover:text-red-300 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-800/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-red-400/40 hover:border-red-400/50 focus:border-red-400/50"
             >
               <.icon name="tabler-heart" class="size-4 text-current mr-2 -ml-1" /> Tip
             </.button>
@@ -1265,7 +1265,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-type="contract"
               phx-value-marketplace="false"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
@@ -1366,6 +1366,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
           phx-value-user_id={@match.user.id}
           phx-value-type="contract"
           phx-value-marketplace="true"
+          variant="none"
+          class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50"
         >
           <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
         </.button>

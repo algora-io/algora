@@ -17,6 +17,9 @@ defmodule AlgoraWeb.Admin.AdminLive do
     funnel_data = Analytics.get_funnel_data()
     :ok = Activities.subscribe()
 
+    # Get user metrics for the last 30 days
+    user_metrics = Analytics.Metrics.get_user_metrics(30, :daily)
+
     mainthing = Mainthings.get_latest()
 
     notes_changeset =
@@ -33,7 +36,8 @@ defmodule AlgoraWeb.Admin.AdminLive do
      |> assign(:timezone, timezone)
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
-     |> assign(:selected_period, "30d")
+     |> assign(:user_metrics, user_metrics)
+     |> assign(:selected_period, :daily)
      |> assign(:notes_form, to_form(notes_changeset))
      |> assign(:notes_preview, (mainthing && Markdown.render_unsafe(mainthing.content)) || "")
      |> assign(:mainthing, mainthing)
@@ -216,6 +220,20 @@ defmodule AlgoraWeb.Admin.AdminLive do
         </div>
       </section>
 
+      <section id="user-metrics" class="scroll-mt-16">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold">User Activity</h1>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <%= for {date, metrics} <- Enum.take(@user_metrics, 1) do %>
+            <.stat_card title="Organization Signups" value={metrics.org_signups} subtitle="Last 24h" />
+            <.stat_card title="Organization Returns" value={metrics.org_returns} subtitle="Last 24h" />
+            <.stat_card title="Developer Signups" value={metrics.dev_signups} subtitle="Last 24h" />
+            <.stat_card title="Developer Returns" value={metrics.dev_returns} subtitle="Last 24h" />
+          <% end %>
+        </div>
+      </section>
+
       <section id="customers" class="scroll-mt-16">
         <div class="mb-4">
           <h1 class="text-2xl font-bold">Customers</h1>
@@ -328,8 +346,8 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
   @impl true
   def handle_event("select_period", %{"period" => period}, socket) do
-    {:ok, analytics} = Analytics.get_company_analytics(period)
-    funnel_data = Analytics.get_funnel_data(period)
+    {:ok, analytics} = Analytics.get_company_analytics()
+    funnel_data = Analytics.get_funnel_data()
 
     {:noreply,
      socket

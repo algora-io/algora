@@ -57,71 +57,73 @@ defmodule AlgoraWeb.Forms.ContractForm do
       phx-change="validate_contract_main"
     >
       <div class="space-y-4">
-        <%= if contractor = get_field(@form.source, :contractor) do %>
-          <.card>
-            <.card_content>
-              <div class="flex items-center gap-4">
-                <.avatar class="h-16 w-16 rounded-full">
-                  <.avatar_image src={contractor.avatar_url} alt={contractor.name} />
-                  <.avatar_fallback class="rounded-lg">
-                    {Algora.Util.initials(contractor.name)}
-                  </.avatar_fallback>
-                </.avatar>
+        <%= if get_field(@form.source, :marketplace?) do %>
+          <%= if contractor = get_field(@form.source, :contractor) do %>
+            <.card>
+              <.card_content>
+                <div class="flex items-center gap-4">
+                  <.avatar class="h-16 w-16 rounded-full">
+                    <.avatar_image src={contractor.avatar_url} alt={contractor.name} />
+                    <.avatar_fallback class="rounded-lg">
+                      {Algora.Util.initials(contractor.name)}
+                    </.avatar_fallback>
+                  </.avatar>
 
-                <div>
-                  <div class="flex items-center gap-1 text-base text-foreground">
-                    <span class="font-semibold">{contractor.name}</span>
-                    {Algora.Misc.CountryEmojis.get(contractor.country)}
-                  </div>
-
-                  <div
-                    :if={contractor.provider_meta}
-                    class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
-                  >
-                    <.link
-                      :if={contractor.provider_login}
-                      href={"https://github.com/#{contractor.provider_login}"}
-                      target="_blank"
-                      class="flex items-center gap-1 hover:underline"
-                    >
-                      <.icon name="github" class="h-4 w-4" />
-                      <span class="whitespace-nowrap">{contractor.provider_login}</span>
-                    </.link>
-                    <.link
-                      :if={contractor.provider_meta["twitter_handle"]}
-                      href={"https://x.com/#{contractor.provider_meta["twitter_handle"]}"}
-                      target="_blank"
-                      class="flex items-center gap-1 hover:underline"
-                    >
-                      <.icon name="tabler-brand-x" class="h-4 w-4" />
-                      <span class="whitespace-nowrap">
-                        {contractor.provider_meta["twitter_handle"]}
-                      </span>
-                    </.link>
-                    <div :if={contractor.provider_meta["location"]} class="flex items-center gap-1">
-                      <.icon name="tabler-map-pin" class="h-4 w-4" />
-                      <span class="whitespace-nowrap">
-                        {contractor.provider_meta["location"]}
-                      </span>
+                  <div>
+                    <div class="flex items-center gap-1 text-base text-foreground">
+                      <span class="font-semibold">{contractor.name}</span>
+                      {Algora.Misc.CountryEmojis.get(contractor.country)}
                     </div>
-                    <div :if={contractor.provider_meta["company"]} class="flex items-center gap-1">
-                      <.icon name="tabler-building" class="h-4 w-4" />
-                      <span class="whitespace-nowrap">
-                        {contractor.provider_meta["company"] |> String.trim_leading("@")}
-                      </span>
+
+                    <div
+                      :if={contractor.provider_meta}
+                      class="pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                    >
+                      <.link
+                        :if={contractor.provider_login}
+                        href={"https://github.com/#{contractor.provider_login}"}
+                        target="_blank"
+                        class="flex items-center gap-1 hover:underline"
+                      >
+                        <.icon name="github" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">{contractor.provider_login}</span>
+                      </.link>
+                      <.link
+                        :if={contractor.provider_meta["twitter_handle"]}
+                        href={"https://x.com/#{contractor.provider_meta["twitter_handle"]}"}
+                        target="_blank"
+                        class="flex items-center gap-1 hover:underline"
+                      >
+                        <.icon name="tabler-brand-x" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">
+                          {contractor.provider_meta["twitter_handle"]}
+                        </span>
+                      </.link>
+                      <div :if={contractor.provider_meta["location"]} class="flex items-center gap-1">
+                        <.icon name="tabler-map-pin" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">
+                          {contractor.provider_meta["location"]}
+                        </span>
+                      </div>
+                      <div :if={contractor.provider_meta["company"]} class="flex items-center gap-1">
+                        <.icon name="tabler-building" class="h-4 w-4" />
+                        <span class="whitespace-nowrap">
+                          {contractor.provider_meta["company"] |> String.trim_leading("@")}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="pt-6 flex flex-wrap gap-2 line-clamp-1">
-                <%= for tech <- contractor.tech_stack do %>
-                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
-                    {tech}
-                  </div>
-                <% end %>
-              </div>
-            </.card_content>
-          </.card>
+                <div class="pt-6 flex flex-wrap gap-2 line-clamp-1">
+                  <%= for tech <- contractor.tech_stack do %>
+                    <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+                      {tech}
+                    </div>
+                  <% end %>
+                </div>
+              </.card_content>
+            </.card>
+          <% end %>
         <% end %>
 
         <.input label="Title" field={@form[:title]} />

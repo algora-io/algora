@@ -795,7 +795,12 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             claims: [Claim.t()]
           },
-          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            recipient: User.t(),
+            success_url: String.t(),
+            cancel_url: String.t()
+          ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def authorize_payment(%{owner: owner, amount: amount, bounty: bounty, claims: claims}, opts \\ []) do

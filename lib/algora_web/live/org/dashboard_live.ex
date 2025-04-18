@@ -650,7 +650,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        :main_contract_form,
        %ContractForm{
          marketplace?: marketplace? == "true",
-         contractor: match.user || developer
+         contractor: match[:user] || developer
        }
        |> ContractForm.changeset(%{
          amount: if(hourly_rate, do: Money.mult!(hourly_rate, hours_per_week)),

@@ -345,6 +345,25 @@ defmodule Algora.Admin do
 
   def alert(message, severity \\ :error)
 
+  def alert(message, :error = severity) do
+    Logger.error(message)
+
+    %{
+      payload: %{
+        embeds: [
+          %{
+            color: color(severity),
+            title: severity |> to_string() |> String.capitalize(),
+            description: message,
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+    |> SendDiscord.changeset()
+    |> Oban.insert()
+  end
+
   def alert(message, :critical = severity) do
     Logger.error(message)
 

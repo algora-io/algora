@@ -99,7 +99,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   defp process_event(%Stripe.Event{type: type} = event)
-       when type in ["charge.succeeded", "transfer.created", "checkout.session.completed"] do
+       when type in ["charge.succeeded", "charge.captured", "transfer.created", "checkout.session.completed"] do
     Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
     :ok
   end

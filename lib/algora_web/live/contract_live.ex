@@ -329,13 +329,25 @@ defmodule AlgoraWeb.ContractLive do
                   </div>
                 </div>
                 <%= if transaction = Enum.find(@transactions, fn tx -> tx.type == :charge and tx.status == :requires_capture end) do %>
-                  <.button
-                    phx-click="accept_contract"
-                    phx-disable-with="Accepting..."
-                    phx-value-tx_id={transaction.id}
-                  >
-                    Accept contract
-                  </.button>
+                  <%= if @current_user && @current_user.id == @contractor.id do %>
+                    <.button
+                      phx-click="accept_contract"
+                      phx-disable-with="Accepting..."
+                      phx-value-tx_id={transaction.id}
+                    >
+                      Accept contract
+                    </.button>
+                  <% else %>
+                    <.badge variant="warning" class="mb-auto">
+                      Offer sent
+                    </.badge>
+                  <% end %>
+                <% end %>
+
+                <%= if _transaction = Enum.find(@transactions, fn tx -> tx.type == :debit end) do %>
+                  <.badge variant="success" class="mb-auto">
+                    Active
+                  </.badge>
                 <% end %>
               </div>
             </.card_content>
@@ -352,7 +364,7 @@ defmodule AlgoraWeb.ContractLive do
               </div>
             </.card_content>
           </.card>
-          <.card :if={length(@transactions) == 0}>
+          <.card :if={length(@transactions) == 0 and @can_create_bounty}>
             <.card_header>
               <.card_title>
                 Finalize offer
@@ -392,7 +404,7 @@ defmodule AlgoraWeb.ContractLive do
                       </div>
                     </dt>
                   </div>
-                  <.button :if={@can_create_bounty} phx-click="reward">
+                  <.button phx-click="reward">
                     Authorize
                   </.button>
                 </dl>
@@ -422,7 +434,10 @@ defmodule AlgoraWeb.ContractLive do
                     </thead>
                     <tbody class="divide-y divide-border">
                       <%= for transaction <- @transactions do %>
-                        <tr class="hover:bg-muted/50">
+                        <tr
+                          :if={@can_create_bounty or transaction.status != :requires_release}
+                          class="hover:bg-muted/50"
+                        >
                           <td class="whitespace-nowrap px-6 py-4 text-sm">
                             <div :if={@timezone}>
                               {Util.timestamp(transaction.inserted_at, @timezone)}

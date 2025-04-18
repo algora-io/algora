@@ -68,6 +68,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         type: "charge.succeeded",
         data: %{
           object: %Stripe.Charge{
+            captured: true,
             metadata: Map.put(metadata, "group_id", group_id)
           }
         }
@@ -129,6 +130,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         type: "charge.succeeded",
         data: %{
           object: %Stripe.Charge{
+            captured: true,
             metadata: Map.put(metadata, "group_id", group_id)
           }
         }
@@ -170,6 +172,7 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
         type: "charge.succeeded",
         data: %{
           object: %Stripe.Charge{
+            captured: true,
             metadata: Map.put(metadata, "group_id", group_id)
           }
         }

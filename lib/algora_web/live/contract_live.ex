@@ -361,18 +361,20 @@ defmodule AlgoraWeb.ContractLive do
             <.card_content class="pt-0">
               <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
                 <ul class="space-y-2">
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-circle-number-1" class="size-8 text-success-400" />
+                  <li class="flex items-center">
+                    <.icon name="tabler-circle-number-1 mr-2" class="size-8 text-success-400" />
                     Authorize the payment to share the contract offer with {@contractor.name}
                   </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-circle-number-2" class="size-8 text-success-400" />
-                    When {@contractor.name} accepts, you will be charged {Money.to_string!(
-                      @bounty.amount
-                    )} into escrow
+                  <li class="flex items-center">
+                    <.icon name="tabler-circle-number-2 mr-2" class="size-8 text-success-400" />
+                    When {@contractor.name} accepts, you will be charged
+                    <span class="font-semibold font-display px-1">
+                      {Money.to_string!(Money.mult!(@bounty.amount, Decimal.new("1.13")))}
+                    </span>
+                    into escrow
                   </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-circle-number-3" class="size-8 text-success-400" />
+                  <li class="flex items-center">
+                    <.icon name="tabler-circle-number-3 mr-2" class="size-8 text-success-400" />
                     At the end of the week, release or withhold the funds based on {@contractor.name}'s performance
                   </li>
                 </ul>

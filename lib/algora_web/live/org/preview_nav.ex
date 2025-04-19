@@ -7,6 +7,8 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
   alias Algora.Accounts
   alias Algora.Organizations
+  alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.ContractForm
 
   require Logger
 
@@ -18,7 +20,10 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
         {:cont,
          socket
-         |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+         |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+         |> assign(:main_bounty_form_open?, false)
+         |> assign(:main_contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+         |> assign(:main_contract_form_open?, false)
          |> assign(:current_org, org)
          |> assign(:current_user, user)
          |> assign(:current_context, org)
@@ -39,7 +44,10 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
     socket =
       socket
-      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+      |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+      |> assign(:main_bounty_form_open?, false)
+      |> assign(:main_contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+      |> assign(:main_contract_form_open?, false)
       |> assign(:current_org, current_context)
       |> assign(:current_user_role, :admin)
       |> assign(:nav, nav_items(repo_owner, repo_name))

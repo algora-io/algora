@@ -6,7 +6,6 @@ defmodule AlgoraWeb.SignInLive do
   alias Algora.Accounts.User
   alias AlgoraWeb.Components.Logos
   alias AlgoraWeb.LocalStore
-  alias Swoosh.Email
 
   require Logger
 

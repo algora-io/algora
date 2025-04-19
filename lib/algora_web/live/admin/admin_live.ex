@@ -225,7 +225,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
           <h1 class="text-2xl font-bold">User Activity</h1>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <%= for {date, metrics} <- Enum.take(@user_metrics, 1) do %>
+          <%= for {_date, metrics} <- Enum.take(@user_metrics, 1) do %>
             <.stat_card title="Organization Signups" value={metrics.org_signups} subtitle="Last 24h" />
             <.stat_card title="Organization Returns" value={metrics.org_returns} subtitle="Last 24h" />
             <.stat_card title="Developer Signups" value={metrics.dev_signups} subtitle="Last 24h" />

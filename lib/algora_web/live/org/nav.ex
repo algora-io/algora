@@ -6,7 +6,6 @@ defmodule AlgoraWeb.Org.Nav do
   import Ecto.Changeset
   import Phoenix.LiveView
 
-  alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Organizations
   alias Algora.Organizations.Member

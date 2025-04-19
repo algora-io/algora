@@ -273,7 +273,6 @@ defmodule AlgoraWeb.CoreComponents do
             true -> ~p"/set_context/preview?id=#{ctx.id}"
           end
         }
-        }
       >
         <div class="flex items-center whitespace-nowrap">
           <.avatar class="mr-3 size-10">

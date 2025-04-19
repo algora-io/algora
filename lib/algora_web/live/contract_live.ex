@@ -209,7 +209,7 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
-  def handle_event("assign_line_items", %{"reward_bounty_form" => params}, socket) do
+  def handle_event("assign_line_items", %{"reward_bounty_form" => _params}, socket) do
     {:noreply, assign_line_items(socket)}
   end
 

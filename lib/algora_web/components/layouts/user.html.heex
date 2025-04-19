@@ -257,27 +257,6 @@
                 >
                   <.icon name="tabler-user-dollar" class="h-6 w-6 shrink-0" />
                 </.button>
-                <.drawer
-                  show={@main_contract_form_open?}
-                  direction="right"
-                  on_cancel="close_main_contract_form"
-                >
-                  <.drawer_header>
-                    <.drawer_title>Create new contract</.drawer_title>
-                    <.drawer_description>
-                      <div>Engage a developer for ongoing work</div>
-                      <div class="mt-2 flex items-center gap-1">
-                        <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
-                        <span>
-                          Weekly contributions, PR review, internship, contract-to-hire
-                        </span>
-                      </div>
-                    </.drawer_description>
-                  </.drawer_header>
-                  <.drawer_content>
-                    <AlgoraWeb.Forms.ContractForm.contract_form form={main_contract_form} />
-                  </.drawer_content>
-                </.drawer>
               </div>
             <% end %>
             <%= if main_bounty_form = Map.get(assigns, :main_bounty_form) do %>
@@ -292,27 +271,6 @@
                     class="h-[0.8rem] w-[0.8rem] shrink-0 absolute bottom-[0.2rem] right-[0.2rem]"
                   />
                 </.button>
-                <.drawer
-                  show={@main_bounty_form_open?}
-                  direction="right"
-                  on_cancel="close_main_bounty_form"
-                >
-                  <.drawer_header>
-                    <.drawer_title>Create new bounty</.drawer_title>
-                    <.drawer_description>
-                      <div>Create and fund a bounty for an issue</div>
-                      <div class="mt-2 flex items-center gap-1">
-                        <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
-                        <span>
-                          New feature, integration, bug fix, CLI, mobile app, MCP, video
-                        </span>
-                      </div>
-                    </.drawer_description>
-                  </.drawer_header>
-                  <.drawer_content>
-                    <AlgoraWeb.Forms.BountyForm.bounty_form form={main_bounty_form} />
-                  </.drawer_content>
-                </.drawer>
               </div>
             <% end %>
             <%!-- {live_render(@socket, AlgoraWeb.Activity.UserNavTimelineLive,
@@ -344,6 +302,51 @@
     </div>
   </div>
 </div>
+
+<%= if @current_user do %>
+  <%= if main_contract_form = Map.get(assigns, :main_contract_form) do %>
+    <.drawer
+      show={@main_contract_form_open?}
+      direction="right"
+      on_cancel="close_main_contract_form"
+    >
+      <.drawer_header>
+        <.drawer_title>Create new contract</.drawer_title>
+        <.drawer_description>
+          <div>Engage a developer for ongoing work</div>
+          <div class="mt-2 flex items-center gap-1">
+            <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
+            <span>
+              Weekly contributions, PR review, internship, contract-to-hire
+            </span>
+          </div>
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content>
+        <AlgoraWeb.Forms.ContractForm.contract_form form={main_contract_form} />
+      </.drawer_content>
+    </.drawer>
+  <% end %>
+  <%= if main_bounty_form = Map.get(assigns, :main_bounty_form) do %>
+    <.drawer show={@main_bounty_form_open?} direction="right" on_cancel="close_main_bounty_form">
+      <.drawer_header>
+        <.drawer_title>Create new bounty</.drawer_title>
+        <.drawer_description>
+          <div>Create and fund a bounty for an issue</div>
+          <div class="mt-2 flex items-center gap-1">
+            <.icon name="tabler-bulb" class="h-5 w-5 shrink-0" />
+            <span>
+              New feature, integration, bug fix, CLI, mobile app, MCP, video
+            </span>
+          </div>
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content>
+        <AlgoraWeb.Forms.BountyForm.bounty_form form={main_bounty_form} />
+      </.drawer_content>
+    </.drawer>
+  <% end %>
+<% end %>
 
 <div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-16">
   <.flash_group flash={@flash} />

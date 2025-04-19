@@ -116,28 +116,6 @@ defmodule Algora.Analytics.Metrics do
     end
   end
 
-  def generate_periods(n_periods, interval) do
-    now = DateTime.utc_now()
-    interval_str = interval_to_string(interval)
-
-    0..(n_periods - 1)
-    |> Enum.map(fn offset ->
-      case interval do
-        :daily -> DateTime.add(now, -offset, :day)
-        :weekly -> DateTime.add(now, -offset * 7, :day)
-        :monthly -> DateTime.add(now, -offset * 30, :day)
-      end
-    end)
-    |> Enum.map(&DateTime.truncate(&1, :second))
-    # Truncate to the start of the period to match the SQL date_trunc
-    |> Enum.map(fn dt ->
-      dt
-      |> DateTime.to_naive()
-      |> NaiveDateTime.beginning_of_period(String.to_atom(interval_str))
-      |> DateTime.from_naive!("Etc/UTC")
-    end)
-  end
-
   defp interval_to_string(:daily), do: "day"
   defp interval_to_string(:weekly), do: "week"
   defp interval_to_string(:monthly), do: "month"

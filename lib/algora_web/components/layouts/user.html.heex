@@ -249,7 +249,7 @@
         </.link>
         <%= if @current_user do %>
           <div class="flex items-center gap-x-4">
-            <%= if main_contract_form = Map.get(assigns, :main_contract_form) do %>
+            <%= if Map.get(assigns, :main_contract_form) do %>
               <div>
                 <.button
                   phx-click="open_main_contract_form"
@@ -259,7 +259,7 @@
                 </.button>
               </div>
             <% end %>
-            <%= if main_bounty_form = Map.get(assigns, :main_bounty_form) do %>
+            <%= if Map.get(assigns, :main_bounty_form) do %>
               <div>
                 <.button
                   phx-click="open_main_bounty_form"

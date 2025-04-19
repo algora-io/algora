@@ -126,4 +126,15 @@ defmodule Algora.Settings do
       end
     end)
   end
+
+  def get_blocked_users do
+    case get("blocked_users") do
+      %{"handles" => handles} when is_list(handles) -> handles
+      _ -> []
+    end
+  end
+
+  def set_blocked_users(handles) when is_list(handles) do
+    set("blocked_users", %{"handles" => handles})
+  end
 end

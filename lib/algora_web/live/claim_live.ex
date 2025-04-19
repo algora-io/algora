@@ -541,12 +541,12 @@ defmodule AlgoraWeb.ClaimLive do
           phx-submit="pay_with_stripe"
         >
           <div class="flex flex-col gap-8">
-            <div class="grid grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <.card>
                 <.card_header>
                   <.card_title>Payment Details</.card_title>
                 </.card_header>
-                <.card_content>
+                <.card_content class="pt-0">
                   <div class="space-y-4">
                     <%= if Enum.empty?(@available_bounties) do %>
                     <% end %>
@@ -586,7 +586,7 @@ defmodule AlgoraWeb.ClaimLive do
                       <.label>Tip</.label>
                       <div class="mt-2">
                         <.radio_group
-                          class="grid grid-cols-4 gap-4"
+                          class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4"
                           field={@reward_bounty_form[:tip_percentage]}
                           options={tip_options()}
                         />
@@ -599,7 +599,7 @@ defmodule AlgoraWeb.ClaimLive do
                 <.card_header>
                   <.card_title>Payment Summary</.card_title>
                 </.card_header>
-                <.card_content>
+                <.card_content class="pt-0">
                   <dl class="space-y-4">
                     <%= for line_item <- @line_items do %>
                       <div class="flex justify-between">

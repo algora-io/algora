@@ -38,7 +38,7 @@ defmodule AlgoraWeb.Components.UI.RadioGroup do
               checked={to_string(@field.value) == to_string(value)}
             />
           </div>
-          <span class="flex flex-1 items-center justify-between">
+          <span class="flex flex-1 gap-1 items-center justify-between">
             <span class="text-sm font-medium">{label}</span>
             <.icon
               name="tabler-check"

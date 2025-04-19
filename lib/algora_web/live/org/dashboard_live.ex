@@ -1181,7 +1181,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
               <div
                 :if={@user.provider_meta}
-                class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm max-w-[250px] 2xl:max-w-none truncate"
               >
                 <.link
                   :if={@user.provider_login}

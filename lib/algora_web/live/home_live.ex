@@ -1195,7 +1195,7 @@ defmodule AlgoraWeb.HomeLive do
         <div class="flex items-center gap-4">
           <.link navigate={User.url(@collab.user)}>
             <.avatar class="h-20 w-20 rounded-full">
-              <.avatar_image src={@collab.user.avatar_url} alt={@collab.user.name} />
+              <.avatar_image src={@collab.user.avatar_url} alt={@collab.user.name} loading="lazy" />
               <.avatar_fallback class="rounded-lg">
                 {Algora.Util.initials(@collab.user.name)}
               </.avatar_fallback>
@@ -1295,7 +1295,7 @@ defmodule AlgoraWeb.HomeLive do
               class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
             >
               <.avatar class="h-10 w-10 rounded-lg saturate-0">
-                <.avatar_image src={project.avatar_url} alt={project.name} />
+                <.avatar_image src={project.avatar_url} alt={project.name} loading="lazy" />
                 <.avatar_fallback class="rounded-lg">
                   {Algora.Util.initials(project.name)}
                 </.avatar_fallback>

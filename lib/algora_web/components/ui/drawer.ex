@@ -42,10 +42,10 @@ defmodule AlgoraWeb.Components.UI.Drawer do
     <div
       class={
         classes([
-          "fixed z-50 transform border bg-background transition-transform duration-300 ease-in-out",
+          "fixed z-50 transform bg-background transition-transform duration-300 ease-in-out max-h-[100svh] overflow-y-auto scrollbar-thin",
           case @direction do
-            "bottom" -> "inset-x-0 bottom-0 rounded-t-xl"
-            "right" -> "inset-y-0 right-0 h-full max-w-lg w-full"
+            "bottom" -> "inset-x-0 bottom-0 border-t rounded-t-xl"
+            "right" -> "inset-y-0 right-0 border-l h-full max-w-lg w-full"
           end,
           case @direction do
             "bottom" -> if(@show, do: "translate-y-0", else: "translate-y-full")
@@ -114,7 +114,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   def drawer_content(assigns) do
     ~H"""
-    <div class={classes(["overflow-y-auto scrollbar-thin px-1 -mx-1", @class])} {@rest}>
+    <div class={classes(["px-1 -mx-1", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

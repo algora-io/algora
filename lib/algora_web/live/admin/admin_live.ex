@@ -449,11 +449,11 @@ defmodule AlgoraWeb.Admin.AdminLive do
     {:noreply, stream(socket, :activities, fetched)}
   end
 
-  defp cell(%{value: %NaiveDateTime{} = value} = assigns) do
+  defp cell(%{value: %NaiveDateTime{}} = assigns) do
     ~H"""
     <span :if={@timezone} class="tabular-nums whitespace-nowrap text-sm">
       {Calendar.strftime(
-        DateTime.from_naive!(value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
+        DateTime.from_naive!(@value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
         "%Y/%m/%d, %H:%M:%S"
       )}
     </span>
@@ -512,12 +512,12 @@ defmodule AlgoraWeb.Admin.AdminLive do
         {@value}
         """
 
-      String.length(value) == 2 ->
-        country_emoji = Algora.Misc.CountryEmojis.get(value)
+      String.match?(value, ~r/^[A-Z]{2}$/) ->
+        assigns = assign(assigns, :flag, Algora.Misc.CountryEmojis.get(value))
 
         ~H"""
         <div class="flex justify-center">
-          {if country_emoji, do: country_emoji, else: @value}
+          {if @flag, do: @flag, else: @value}
         </div>
         """
 
@@ -549,9 +549,11 @@ defmodule AlgoraWeb.Admin.AdminLive do
   end
 
   defp cell(%{value: {currency, amount}} = assigns) do
+    assigns = assign(assigns, :money, Money.new!(currency, amount))
+
     ~H"""
     <div class="font-display font-medium text-base text-emerald-400 tabular-nums text-right">
-      {Money.new!(currency, amount)}
+      {@money}
     </div>
     """
   end

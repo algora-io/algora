@@ -377,6 +377,11 @@ defmodule Algora.Accounts do
     )
 
     Repo.update_all(
+      from(m in Member, where: m.user_id == ^old_user_id),
+      set: [user_id: new_user_id]
+    )
+
+    Repo.update_all(
       from(c in Contributor, where: c.user_id == ^old_user_id),
       set: [user_id: new_user_id]
     )

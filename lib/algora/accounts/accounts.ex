@@ -286,15 +286,15 @@ defmodule Algora.Accounts do
   Registers a user from their GitHub information.
   """
   def register_github_user(current_user, primary_email, info, emails, token) do
-    query =
-      from(u in User,
-        where: u.email == ^primary_email or (u.provider == "github" and u.provider_id == ^to_string(info["id"]))
+    matching_users =
+      Repo.all(
+        from u in User,
+          where: u.email == ^primary_email or (u.provider == "github" and u.provider_id == ^to_string(info["id"]))
       )
 
     primary_user =
-      case {current_user, Repo.all(query)} do
+      case {current_user, matching_users} do
         {current_user, _} when not is_nil(current_user) -> current_user
-        {_, []} -> nil
         {_, [user]} -> user
         {_, users} -> Enum.find(users, &(&1.provider == "github" and &1.provider_id == to_string(info["id"])))
       end

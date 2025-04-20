@@ -121,7 +121,7 @@ To get a local copy up and running, follow these steps.
 1. Clone the repo and go to the project folder
 
    ```sh
-   git clone https://github.com/algora-io/console.git; cd console
+   git clone https://github.com/algora-io/algora.git; cd algora
    ```
 
 2. Install Elixir and Erlang/OTP

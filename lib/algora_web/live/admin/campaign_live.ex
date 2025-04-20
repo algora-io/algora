@@ -252,7 +252,12 @@ defmodule AlgoraWeb.Admin.CampaignLive do
               limit: 1
           )
 
-        {org_handle, repo}
+        if repo && repo.tech_stack != [] do
+          matches = Algora.Settings.get_tech_matches(List.first(repo.tech_stack))
+          {org_handle, {repo, matches}}
+        else
+          {org_handle, nil}
+        end
       end)
 
     updated_cache = Map.merge(socket.assigns.repo_cache, new_cache)
@@ -268,11 +273,12 @@ defmodule AlgoraWeb.Admin.CampaignLive do
               nil ->
                 row
 
-              repo ->
+              {repo, matches} ->
                 Map.merge(row, %{
                   "repo_owner" => repo.repo_owner,
                   "repo_name" => repo.repo_name,
-                  "tech_stack" => repo.tech_stack
+                  "tech_stack" => repo.tech_stack,
+                  "matches" => Enum.map(matches, & &1.user.handle)
                 })
             end
         end

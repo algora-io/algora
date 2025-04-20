@@ -32,6 +32,7 @@ defmodule Algora.Application do
     children =
       case Application.get_env(:algora, :cloudflare_tunnel) do
         nil -> children
+        "" -> children
         tunnel -> children ++ [{Algora.Tunnel, tunnel}]
       end
 

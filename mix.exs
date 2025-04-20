@@ -129,7 +129,7 @@ defmodule Algora.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "test.reset": ["cmd MIX_ENV=test mix do ecto.drop, ecto.create, ecto.migrate"],
       "assets.setup": ["tailwind.install --if-missing"],
-      "assets.build": ["tailwind algora", "cmd --cd assets pnpm install"],
+      "assets.build": ["cmd --cd assets pnpm install", "tailwind algora"],
       "assets.deploy": [
         "tailwind algora --minify",
         "cmd --cd assets node build.js --deploy",

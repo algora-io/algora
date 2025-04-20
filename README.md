@@ -166,6 +166,24 @@ We also recommend using [direnv](https://github.com/direnv/direnv) to load envir
 
 Some features of Algora rely on external services. If you're not planning on using these features, feel free to skip setting them up.
 
+#### Tunnel
+
+To receive webhooks from GitHub or Stripe on your local machine, you'll need a way to expose your local server to the internet. The easiest way to get up and running is to use a tool like [ngrok](https://ngrok.com/) or [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
+
+Here's how you can setup a re-usable named tunnel on your own domain name so you have a consistent URL:
+
+```sh
+cloudflared tunnel login
+cloudflared tunnel create local
+cloudflared tunnel route dns local http://local.yourdomain.com
+```
+
+Once you have setup your tunnel, add it to your `.env` file and run `direnv allow .env`.
+
+```env
+CLOUDFLARE_TUNNEL="local"
+```
+
 #### GitHub
 
 [Register new GitHub app](https://github.com/settings/apps/new) and set
@@ -182,7 +200,7 @@ Some features of Algora rely on external services. If you're not planning on usi
   - Read account email address
 - Events: issues, pull requests, issue comment, pull request review, pull request review comment
 
-Once you have obtained your client ID and secret, add them to your `.env` file and run `direnv allow .env`
+Once you have obtained your client ID and secret, add them to your `.env` file.
 
 ```env
 GITHUB_CLIENT_ID=""

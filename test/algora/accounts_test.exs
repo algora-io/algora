@@ -54,6 +54,21 @@ defmodule Algora.AccountsTest do
       assert identity.provider_token == token
     end
 
+    test "updates existing user when user is authed", %{
+      github_info: github_info,
+      emails: emails,
+      token: token,
+      primary_email: primary_email
+    } do
+      existing_user = insert!(:user, email: "old@example.com", display_name: "Existing User")
+
+      {:ok, updated_user} = Accounts.register_github_user(existing_user, primary_email, github_info, emails, token)
+
+      assert updated_user.id == existing_user.id
+      assert updated_user.email == "old@example.com"
+      assert updated_user.provider_login == "testuser"
+    end
+
     test "updates existing user when matching by GitHub ID", %{
       github_info: github_info,
       emails: emails,

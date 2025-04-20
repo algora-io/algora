@@ -293,10 +293,10 @@ defmodule Algora.Accounts do
 
     primary_user =
       case {current_user, Repo.all(query)} do
+        {current_user, _} when not is_nil(current_user) -> current_user
         {_, []} -> nil
         {_, [user]} -> user
-        {nil, users} -> Enum.find(users, &(&1.provider == "github" and &1.provider_id == to_string(info["id"])))
-        {user, users} -> Enum.find(users, &(&1.id == user.id))
+        {_, users} -> Enum.find(users, &(&1.provider == "github" and &1.provider_id == to_string(info["id"])))
       end
 
     case primary_user do

@@ -413,6 +413,47 @@ defmodule Algora.Accounts do
     params |> User.org_registration_changeset() |> Repo.insert()
   end
 
+  def auto_join_orgs(user) do
+    domain = user.email |> String.split("@") |> List.last()
+
+    orgs =
+      Repo.all(
+        from o in User,
+          left_join: m in Member,
+          on: m.org_id == o.id and m.user_id == ^user.id,
+          where: o.domain == ^domain and is_nil(m.id)
+      )
+
+    Enum.each(orgs, fn org ->
+      case Organizations.create_member(org, user, :mod) do
+        {:ok, _member} ->
+          Algora.Admin.alert("#{user.email} joined #{org.name}", :info)
+
+        {:error, _reason} ->
+          Algora.Admin.alert("#{user.email} failed to join #{org.name}", :error)
+      end
+    end)
+
+    if org = List.first(orgs) do
+      update_settings(user, %{last_context: org.handle})
+    end
+
+    orgs
+  end
+
+  def get_or_register_user(email) do
+    res =
+      case get_user_by_email(email) do
+        nil -> register_org(%{email: email})
+        user -> {:ok, user}
+      end
+
+    with {:ok, user} <- res do
+      auto_join_orgs(user)
+      res
+    end
+  end
+
   # def get_user_by_provider_email(provider, email) when provider in [:github] do
   #   query =
   #     from(u in User,

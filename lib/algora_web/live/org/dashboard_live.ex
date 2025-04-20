@@ -783,10 +783,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
               |> Ecto.Changeset.change(handle: handle, email: socket.assigns.email)
               |> Repo.update()
 
-            {:noreply,
-             socket
-             |> assign(:current_user, user)
-             |> assign_achievements()}
+            autojoined? =
+              user
+              |> Accounts.auto_join_orgs()
+              |> Enum.any?(&(&1.id == socket.assigns.previewed_user.id))
+
+            socket =
+              if autojoined? do
+                switch_from_preview(socket, user)
+              else
+                socket
+                |> assign(:current_user, user)
+                |> assign_achievements()
+              end
+
+            {:noreply, socket}
 
           user ->
             socket = switch_from_preview(socket, user)

@@ -61,7 +61,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
 
   def new(conn, %{"provider" => "email", "email" => email, "token" => token} = params) do
     with {:ok, _login_token} <- AlgoraWeb.UserAuth.verify_login_code(token, email),
-         {:ok, user} <- get_or_register_user(email) do
+         {:ok, user} <- Accounts.get_or_register_user(email) do
       conn =
         if params["return_to"] do
           put_session(conn, :user_return_to, String.trim_leading(params["return_to"], AlgoraWeb.Endpoint.url()))
@@ -89,12 +89,5 @@ defmodule AlgoraWeb.OAuthCallbackController do
 
   def sign_out(conn, _) do
     AlgoraWeb.UserAuth.log_out_user(conn)
-  end
-
-  defp get_or_register_user(email) do
-    case Accounts.get_user_by_email(email) do
-      nil -> Accounts.register_org(%{email: email})
-      user -> {:ok, user}
-    end
   end
 end

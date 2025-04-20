@@ -5,6 +5,7 @@ defmodule Algora.AccountsTest do
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
   alias Algora.Organizations
+  alias Algora.Organizations.Member
   alias Algora.Repo
   alias Algora.Workspace.Repository
 
@@ -161,6 +162,29 @@ defmodule Algora.AccountsTest do
       {:ok, user} = Accounts.register_github_user(nil, primary_email, github_info, emails, token)
 
       assert not is_nil(user.name)
+    end
+  end
+
+  describe "get_or_register_user/1" do
+    test "auto-joins all orgs with matching domain" do
+      org1 = insert(:organization, domain: "example.com")
+      org2 = insert(:organization, domain: "example.com")
+
+      {:ok, user} = Accounts.get_or_register_user("test@example.com")
+
+      member1 = Repo.get_by(Member, user_id: user.id, org_id: org1.id)
+      member2 = Repo.get_by(Member, user_id: user.id, org_id: org2.id)
+
+      assert not is_nil(member1)
+      assert not is_nil(member2)
+    end
+
+    test "does not auto-join org with non-matching domain" do
+      org = insert(:organization, domain: "example.com")
+      {:ok, user} = Accounts.get_or_register_user("test@subdomain.example.com")
+
+      member = Repo.get_by(Member, user_id: user.id, org_id: org.id)
+      assert is_nil(member)
     end
   end
 

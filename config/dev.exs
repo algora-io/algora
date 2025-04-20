@@ -58,7 +58,7 @@ config :algora, AlgoraWeb.Endpoint,
           |> System.get_env("")
           |> String.split(",")
           |> Enum.map(&String.trim/1) do
-       [] -> false
+       [""] -> false
        origins -> origins
      end),
   code_reloader: true,

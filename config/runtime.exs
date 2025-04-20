@@ -102,7 +102,7 @@ if config_env() == :prod do
             |> System.get_env("")
             |> String.split(",")
             |> Enum.map(&String.trim/1) do
-         [] -> true
+         [""] -> true
          origins -> origins
        end),
     secret_key_base: secret_key_base

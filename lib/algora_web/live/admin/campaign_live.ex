@@ -183,7 +183,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
               </div>
               <.table id="csv-data" rows={@csv_data}>
                 <:col :let={row} :for={key <- @csv_columns} label={key}>
-                  {row[key]}
+                  <.cell value={row[key]} />
                 </:col>
                 <:action :let={row}>
                   <.button type="button" phx-click="send_email" phx-value-email={row["email"]}>
@@ -199,9 +199,30 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     """
   end
 
+  defp cell(%{value: value} = assigns) when is_list(value) do
+    ~H"""
+    <div class="flex gap-2 whitespace-nowrap">
+      <%= for item <- @value do %>
+        <.badge>{item}</.badge>
+      <% end %>
+    </div>
+    """
+  end
+
+  defp cell(assigns) do
+    ~H"""
+    <span class="text-sm">
+      {@value}
+    </span>
+    """
+  end
+
   defp render_preview(template, data) when is_map(data) do
     Enum.reduce(data, template, fn {key, value}, acc ->
-      String.replace(acc, "%{#{key}}", value)
+      case value do
+        value when is_list(value) -> acc
+        _ -> String.replace(acc, "%{#{key}}", value)
+      end
     end)
   end
 
@@ -225,7 +246,8 @@ defmodule AlgoraWeb.Admin.CampaignLive do
               order_by: [desc: fragment("(?->>'stargazers_count')::integer", r.provider_meta)],
               select: %{
                 repo_owner: u.provider_login,
-                repo_name: r.name
+                repo_name: r.name,
+                tech_stack: r.tech_stack
               },
               limit: 1
           )
@@ -243,8 +265,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
           org_handle ->
             case Map.get(updated_cache, org_handle) do
-              nil -> row
-              repo -> Map.merge(row, %{"repo_owner" => repo.repo_owner, "repo_name" => repo.repo_name})
+              nil ->
+                row
+
+              repo ->
+                Map.merge(row, %{
+                  "repo_owner" => repo.repo_owner,
+                  "repo_name" => repo.repo_name,
+                  "tech_stack" => repo.tech_stack
+                })
             end
         end
       end)

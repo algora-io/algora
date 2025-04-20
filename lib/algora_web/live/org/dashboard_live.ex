@@ -45,17 +45,17 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp list_contributors(_current_org), do: []
 
-  defp get_previewed_user(%{last_context: "repo/" <> repo} = _current_org) do
+  defp get_previewed_user(%{last_context: "repo/" <> repo} = current_org) do
     case String.split(repo, "/") do
       [repo_owner, _repo_name] ->
         Repo.one(from u in User, where: u.provider_login == ^repo_owner and not is_nil(u.handle))
 
       _ ->
-        nil
+        current_org
     end
   end
 
-  defp get_previewed_user(_current_org), do: nil
+  defp get_previewed_user(current_org), do: current_org
 
   @impl true
   def mount(_params, _session, %{assigns: %{live_action: :preview, current_org: nil}} = socket) do
@@ -76,11 +76,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
       _experts = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
       experts = []
 
-      installations = Workspace.list_installations_by(connected_user_id: current_org.id, provider: "github")
+      installations = Workspace.list_installations_by(connected_user_id: previewed_user.id, provider: "github")
 
       contributors = list_contributors(current_org)
 
-      matches = Algora.Settings.get_org_matches(previewed_user || current_org)
+      matches = Algora.Settings.get_org_matches(previewed_user)
 
       admins_last_active = Algora.Admin.admins_last_active()
 
@@ -1094,32 +1094,35 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp assign_achievements(socket) do
+    previewed_user = socket.assigns.previewed_user
     current_org = socket.assigns.current_org
 
     status_fns =
-      case socket.assigns.previewed_user do
-        nil ->
-          [
-            {&personalize_status/1, "Personalize Algora", nil},
-            {&complete_signup_status/1, "Complete signup", nil},
-            {&connect_github_status/1, "Connect GitHub", nil},
-            {&install_app_status/1, "Install Algora in #{current_org.name}", nil},
-            {&create_bounty_status/1, "Create a bounty", nil},
-            {&reward_bounty_status/1, "Reward a bounty", nil},
-            {&create_contract_status/1, "Contract a developer",
-             if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
-            {&embed_algora_status/1, "Embed Algora", "/docs/embed/sdk"},
-            {&share_with_friend_status/1, "Share Algora with a friend", nil}
-          ]
-
-        _ ->
-          [
-            {&complete_signin_status/1, "Sign in to your account", nil},
-            {&create_contract_status/1, "Contract a developer",
-             if(current_org.handle, do: [patch: ~p"/#{current_org.handle}/dashboard?action=create_contract"])},
-            {&embed_algora_status/1, "Embed Algora", "/docs/embed/sdk"},
-            {&share_with_friend_status/1, "Share Algora with a friend", nil}
-          ]
+      if previewed_user == current_org do
+        [
+          {&personalize_status/1, "Personalize Algora", nil},
+          {&complete_signup_status/1, "Complete signup", nil},
+          {&connect_github_status/1, "Connect GitHub", nil},
+          {&install_app_status/1, "Install Algora in #{previewed_user.name}", nil},
+          {&create_bounty_status/1, "Create a bounty", nil},
+          {&reward_bounty_status/1, "Reward a bounty", nil},
+          {&create_contract_status/1, "Contract a developer",
+           if(previewed_user.handle, do: [patch: ~p"/#{previewed_user.handle}/dashboard?action=create_contract"])},
+          {&embed_algora_status/1, "Embed Algora", "/docs/embed/sdk"},
+          {&share_with_friend_status/1, "Share Algora with a friend", nil}
+        ]
+      else
+        [
+          {&complete_signin_status/1, "Sign in to your account", nil},
+          {&connect_github_status/1, "Connect GitHub", nil},
+          {&install_app_status/1, "Install Algora in #{previewed_user.name}", nil},
+          {&create_bounty_status/1, "Create a bounty", nil},
+          {&reward_bounty_status/1, "Reward a bounty", nil},
+          {&create_contract_status/1, "Contract a developer",
+           if(previewed_user.handle, do: [patch: ~p"/#{previewed_user.handle}/dashboard?action=create_contract"])},
+          {&embed_algora_status/1, "Embed Algora", "/docs/embed/sdk"},
+          {&share_with_friend_status/1, "Share Algora with a friend", nil}
+        ]
       end
 
     {achievements, _} =
@@ -1175,14 +1178,14 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp create_bounty_status(socket) do
-    case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, limit: 1) do
+    case Bounties.list_bounties(owner_id: socket.assigns.previewed_user.id, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
   end
 
   defp reward_bounty_status(socket) do
-    case Bounties.list_bounties(owner_id: socket.assigns.current_org.id, status: :paid, limit: 1) do
+    case Bounties.list_bounties(owner_id: socket.assigns.previewed_user.id, status: :paid, limit: 1) do
       [] -> :upcoming
       _ -> :completed
     end
@@ -1559,7 +1562,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:flex lg:flex-col">
       <div :if={length(@achievements) > 1} class="pb-12">
         <h2 class="text-xl font-semibold leading-none tracking-tight">
-          <%= if @previewed_user do %>
+          <%= if @previewed_user != @current_org do %>
             Get back in
           <% else %>
             Getting started

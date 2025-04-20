@@ -8,7 +8,8 @@ defmodule AlgoraWeb.DocsLive do
         title: "Overview",
         links: [
           %{title: "Introduction", href: "/docs"},
-          %{title: "Slash commands", href: "/docs/commands"}
+          %{title: "Slash commands", href: "/docs/commands"},
+          %{title: "Best practices", href: "/docs/best-practices"}
         ]
       },
       %{

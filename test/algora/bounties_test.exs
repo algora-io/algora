@@ -431,6 +431,12 @@ defmodule Algora.BountiesTest do
       2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
       3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://algora.io/docs/payments#supported-countries-regions)
 
+      ### ❗ Important guidelines:
+      - To claim a bounty, you need to **provide a short demo video** of your changes in your pull request
+      - If anything is unclear, **ask for clarification** before starting as this will help avoid potential rework
+      - Low quality AI PRs will not receive review and will be closed
+      - Do not ask to be assigned unless you've contributed before
+
       Thank you for contributing to repo_owner/test_repo!
 
       | Attempt | Started (UTC) | Solution | Actions |
@@ -484,6 +490,12 @@ defmodule Algora.BountiesTest do
       1. **Start working**: Comment `/attempt #100` with your implementation plan
       2. **Submit work**: Create a pull request including `/claim #100` in the PR body to claim the bounty
       3. **Receive payment**: 100% of the bounty is received 2-5 days post-reward. [Make sure you are eligible for payouts](https://algora.io/docs/payments#supported-countries-regions)
+
+      ### ❗ Important guidelines:
+      - To claim a bounty, you need to **provide a short demo video** of your changes in your pull request
+      - If anything is unclear, **ask for clarification** before starting as this will help avoid potential rework
+      - Low quality AI PRs will not receive review and will be closed
+      - Do not ask to be assigned unless you've contributed before
 
       Thank you for contributing to repo_owner/test_repo!
       """

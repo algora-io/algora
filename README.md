@@ -130,19 +130,7 @@ To get a local copy up and running, follow these steps.
    asdf install
    ```
 
-3. Fetch dependencies
-
-   ```sh
-   mix deps.get
-   ```
-
-4. Initialize your `.env` file
-
-   ```sh
-   cp .env.example .env
-   ```
-
-5. Create your database
+3. Create a new PostgreSQL user
 
    ```sh
    sudo -u postgres psql
@@ -153,35 +141,30 @@ To get a local copy up and running, follow these steps.
    ALTER USER algora WITH CREATEDB;
    ```
 
-6. Paste your connection string into your `.env` file
-
-   ```env
-   DATABASE_URL="postgresql://algora:password@localhost:5432/console"
-   ```
-
-7. Allow direnv to load the `.env` file
+4. Initialize and load `.env`
 
    ```sh
+   cp .env.example .env
    direnv allow .env
    ```
 
-8. Run migrations and seed your database
+5. Install and setup dependencies
 
    ```sh
-   mix ecto.setup
+   mix setup
    ```
 
-9. Start your development server
+6. Start your development server
 
    ```sh
    iex -S mix phx.server
    ```
 
-10. (Optional) Watch for file changes and auto reload IEx shell in a separate terminal
+7. (Optional) Watch for file changes and auto reload IEx shell in a separate terminal
 
-    ```sh
-    find lib/ | entr mix compile
-    ```
+   ```sh
+   find lib/ | entr mix compile
+   ```
 
 ### Setting up external services
 

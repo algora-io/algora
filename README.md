@@ -112,16 +112,18 @@ To get a local copy up and running, follow these steps.
 
 ### Prerequisites
 
-- PostgreSQL
-- [asdf](https://github.com/asdf-vm/asdf) (optional) - install Elixir and Erlang/OTP
-- [direnv](https://github.com/direnv/direnv) (optional) - load environment variables
+The easiest way to get up and running is to [install](https://docs.docker.com/get-docker/) and use Docker for running Postgres.
+
+Make sure Docker, Elixir, Erlang and Node.js are all installed on your development machine. The [.tool-versions](https://github.com/algora-io/algora/blob/main/.tool-versions) file is available to use with [asdf](https://github.com/asdf-vm/asdf) or similar tools.
+
+We also recommend using [direnv](https://github.com/direnv/direnv) to load environment variables and [entr](https://github.com/eradman/entr) to watch for file changes.
 
 ### Setting up the project
 
 1. Clone the repo and go to the project folder
 
    ```sh
-   git clone https://github.com/algora-io/algora.git; cd algora
+   git clone git@github.com:algora-io/algora.git && cd algora
    ```
 
 2. Install Elixir and Erlang/OTP
@@ -130,40 +132,34 @@ To get a local copy up and running, follow these steps.
    asdf install
    ```
 
-3. Create a new PostgreSQL user
+3. Initialize and load `.env`
 
    ```sh
-   sudo -u postgres psql
+   cp .env.example .env && direnv allow .env
    ```
 
-   ```sql
-   CREATE USER algora WITH PASSWORD 'password';
-   ALTER USER algora WITH CREATEDB;
-   ```
-
-4. Initialize and load `.env`
+4. Start a container with latest postgres
 
    ```sh
-   cp .env.example .env
-   direnv allow .env
+   make postgres
    ```
 
 5. Install and setup dependencies
 
    ```sh
-   mix setup
+   make install
    ```
 
-6. Start your development server
+6. Start the web server inside IEx
 
    ```sh
-   iex -S mix phx.server
+   make server
    ```
 
 7. (Optional) Watch for file changes and auto reload IEx shell in a separate terminal
 
    ```sh
-   find lib/ | entr mix compile
+   make watch
    ```
 
 ### Setting up external services

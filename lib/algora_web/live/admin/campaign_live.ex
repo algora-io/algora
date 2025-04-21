@@ -247,7 +247,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
               select: %{
                 repo_owner: u.provider_login,
                 repo_name: r.name,
-                tech_stack: r.tech_stack
+                tech_stack: fragment("COALESCE(?, ?)", u.tech_stack, r.tech_stack)
               },
               limit: 1
           )

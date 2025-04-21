@@ -335,6 +335,28 @@ defmodule AlgoraWeb.Org.DashboardLive do
           </div>
         </.section>
 
+        <div
+          :if={length(@achievements) > 1}
+          class="lg:hidden border ring-1 ring-transparent rounded-xl overflow-hidden"
+        >
+          <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+            <div class="p-4 sm:p-6">
+              <.getting_started
+                achievements={
+                  if incomplete?(@achievements, :complete_signin_status),
+                    do: @achievements |> Enum.take(1),
+                    else: @achievements
+                }
+                current_user={@current_user}
+                current_org={@current_org}
+                secret={@secret}
+                login_form={@login_form}
+                previewed_user={@previewed_user}
+              />
+            </div>
+          </div>
+        </div>
+
         <.section
           :if={@matches != []}
           title="Algora Matches"
@@ -517,7 +539,16 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
       </div>
     </div>
-    {sidebar(assigns)}
+    <.sidebar
+      achievements={@achievements}
+      current_user={@current_user}
+      current_org={@current_org}
+      secret={@secret}
+      login_form={@login_form}
+      previewed_user={@previewed_user}
+      show_chat={@show_chat}
+      messages={@messages}
+    />
     {share_drawer(assigns)}
     """
   end
@@ -996,12 +1027,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp achievement_todo(%{achievement: %{id: :complete_signup_status}} = assigns) do
     ~H"""
-    <.simple_form
-      :if={!@secret}
-      for={@login_form}
-      id="send_login_code_form"
-      phx-submit="send_login_code"
-    >
+    <.simple_form :if={!@secret} for={@login_form} phx-submit="send_login_code">
       <.input
         field={@login_form[:email]}
         type="email"
@@ -1013,12 +1039,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Sign up
       </.button>
     </.simple_form>
-    <.simple_form
-      :if={@secret}
-      for={@login_form}
-      id="send_login_code_form"
-      phx-submit="send_login_code"
-    >
+    <.simple_form :if={@secret} for={@login_form} phx-submit="send_login_code">
       <.input
         field={@login_form[:login_code]}
         type="text"
@@ -1035,12 +1056,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp achievement_todo(%{achievement: %{id: :complete_signin_status}} = assigns) do
     ~H"""
-    <.simple_form
-      :if={!@secret}
-      for={@login_form}
-      id="send_login_code_form"
-      phx-submit="send_login_code"
-    >
+    <.simple_form :if={!@secret} for={@login_form} phx-submit="send_login_code">
       <.input
         field={@login_form[:email]}
         type="email"
@@ -1052,12 +1068,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         Sign in
       </.button>
     </.simple_form>
-    <.simple_form
-      :if={@secret}
-      for={@login_form}
-      id="send_login_code_form"
-      phx-submit="send_login_code"
-    >
+    <.simple_form :if={@secret} for={@login_form} phx-submit="send_login_code">
       <.input
         field={@login_form[:login_code]}
         type="text"
@@ -1557,34 +1568,49 @@ defmodule AlgoraWeb.Org.DashboardLive do
     """
   end
 
+  defp getting_started(assigns) do
+    ~H"""
+    <div class={assigns[:class]}>
+      <h2 class="text-xl font-semibold leading-none tracking-tight">
+        <%= if @previewed_user != @current_org and incomplete?(@achievements, :complete_signin_status) do %>
+          Get back in
+        <% else %>
+          Getting started
+        <% end %>
+      </h2>
+      <nav class="pt-6">
+        <ol role="list" class="space-y-6">
+          <%= for achievement <- @achievements do %>
+            <li class="space-y-6">
+              <.achievement achievement={achievement} />
+              <.achievement_todo
+                achievement={achievement}
+                current_user={@current_user}
+                current_org={@current_org}
+                secret={@secret}
+                login_form={@login_form}
+              />
+            </li>
+          <% end %>
+        </ol>
+      </nav>
+    </div>
+    """
+  end
+
   defp sidebar(assigns) do
     ~H"""
     <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:flex lg:flex-col">
-      <div :if={length(@achievements) > 1} class="pb-12">
-        <h2 class="text-xl font-semibold leading-none tracking-tight">
-          <%= if @previewed_user != @current_org do %>
-            Get back in
-          <% else %>
-            Getting started
-          <% end %>
-        </h2>
-        <nav class="pt-6">
-          <ol role="list" class="space-y-6">
-            <%= for achievement <- @achievements do %>
-              <li class="space-y-6">
-                <.achievement achievement={achievement} />
-                <.achievement_todo
-                  achievement={achievement}
-                  current_user={@current_user}
-                  current_org={@current_org}
-                  secret={@secret}
-                  login_form={@login_form}
-                />
-              </li>
-            <% end %>
-          </ol>
-        </nav>
-      </div>
+      <.getting_started
+        :if={length(@achievements) > 1}
+        class="pb-12"
+        achievements={@achievements}
+        current_user={@current_user}
+        current_org={@current_org}
+        secret={@secret}
+        login_form={@login_form}
+        previewed_user={@previewed_user}
+      />
       <%= if @current_org.handle do %>
         <div :if={not incomplete?(@achievements, :create_bounty_status)}>
           <div class="flex items-center justify-between">

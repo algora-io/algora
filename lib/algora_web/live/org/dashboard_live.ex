@@ -48,7 +48,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp get_previewed_user(%{last_context: "repo/" <> repo} = current_org) do
     case String.split(repo, "/") do
       [repo_owner, _repo_name] ->
-        Repo.one(from u in User, where: u.provider_login == ^repo_owner and not is_nil(u.handle))
+        Repo.one(from u in User, where: u.provider_login == ^repo_owner and not is_nil(u.handle)) || current_org
 
       _ ->
         current_org

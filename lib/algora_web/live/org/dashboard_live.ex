@@ -1630,7 +1630,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           />
         </div>
       <% end %>
-      <div class="pt-12 pb-16 mt-auto -mr-12 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-6 text-sm whitespace-nowrap">
+      <div class="pb-16 mt-auto -mr-12 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-6 text-sm whitespace-nowrap">
         <div class="-ml-3 flex items-center gap-2">
           <div class="flex -space-x-2 shrink-0">
             <img

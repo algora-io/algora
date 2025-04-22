@@ -13,12 +13,13 @@ defmodule AlgoraWeb.ContractLive do
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Repo
+  alias Algora.Types.USD
   alias Algora.Util
   alias Algora.Workspace
 
   require Logger
 
-  # defp tip_options, do: [{"None", 0}, {"10%", 10}, {"20%", 20}, {"50%", 50}]
+  defp tip_options, do: [{"None", 0}, {"10%", 10}, {"20%", 20}, {"50%", 50}]
 
   defmodule RewardBountyForm do
     @moduledoc false
@@ -28,7 +29,7 @@ defmodule AlgoraWeb.ContractLive do
 
     @primary_key false
     embedded_schema do
-      field :amount, Algora.Types.USD
+      field :amount, USD
       field :tip_percentage, :decimal
     end
 
@@ -108,8 +109,7 @@ defmodule AlgoraWeb.ContractLive do
 
     ticket_body_html = Algora.Markdown.render(bounty.ticket.description)
 
-    reward_changeset =
-      RewardBountyForm.changeset(%RewardBountyForm{}, %{amount: bounty.amount})
+    reward_changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{amount: bounty.amount, tip_percentage: 0})
 
     {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
@@ -138,6 +138,7 @@ defmodule AlgoraWeb.ContractLive do
      |> assign(:total_paid, total_paid)
      |> assign(:ticket_body_html, ticket_body_html)
      |> assign(:show_reward_modal, false)
+     |> assign(:show_authorize_modal, false)
      |> assign(:selected_context, nil)
      |> assign(:line_items, [])
      |> assign(:thread, thread)
@@ -146,7 +147,7 @@ defmodule AlgoraWeb.ContractLive do
      |> assign(:reward_form, to_form(reward_changeset))
      |> assign_contractor(bounty.shared_with)
      |> assign_transactions()
-     |> assign_line_items()}
+     |> assign_line_items(reward_changeset)}
   end
 
   @impl true
@@ -201,21 +202,23 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
+  def handle_event("authorize", _params, socket) do
+    {:noreply, assign(socket, :show_authorize_modal, true)}
+  end
+
+  @impl true
   def handle_event("close_drawer", _params, socket) do
     {:noreply, close_drawers(socket)}
   end
 
   @impl true
   def handle_event("validate_reward", %{"reward_bounty_form" => params}, socket) do
+    changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
+
     {:noreply,
      socket
-     |> assign(:reward_form, to_form(RewardBountyForm.changeset(%RewardBountyForm{}, params)))
-     |> assign_line_items()}
-  end
-
-  @impl true
-  def handle_event("assign_line_items", %{"reward_bounty_form" => _params}, socket) do
-    {:noreply, assign_line_items(socket)}
+     |> assign(:reward_form, to_form(changeset))
+     |> assign_line_items(changeset)}
   end
 
   @impl true
@@ -345,9 +348,11 @@ defmodule AlgoraWeb.ContractLive do
                 <% end %>
 
                 <%= if _transaction = Enum.find(@transactions, fn tx -> tx.type == :debit end) do %>
-                  <.badge variant="success" class="mb-auto">
-                    Active
-                  </.badge>
+                  <div class="flex flex-col gap-4 items-end">
+                    <.badge variant="success" class="mb-auto">
+                      Active
+                    </.badge>
+                  </div>
                 <% end %>
               </div>
             </.card_content>
@@ -404,7 +409,7 @@ defmodule AlgoraWeb.ContractLive do
                       </div>
                     </dt>
                   </div>
-                  <.button phx-click="reward">
+                  <.button phx-click="authorize">
                     Authorize
                   </.button>
                 </dl>
@@ -414,7 +419,16 @@ defmodule AlgoraWeb.ContractLive do
           <.card :if={length(@transactions) > 0}>
             <.card_header>
               <.card_title>
-                Timeline
+                <div class="flex justify-between gap-4">
+                  Timeline
+                  <%= if @can_create_bounty do %>
+                    <%= if _transaction = Enum.find(@transactions, fn tx -> tx.type == :debit and tx.status == :succeeded end) do %>
+                      <.button phx-click="reward">
+                        Make payment
+                      </.button>
+                    <% end %>
+                  <% end %>
+                </div>
               </.card_title>
             </.card_header>
             <.card_content class="pt-0">
@@ -589,7 +603,7 @@ defmodule AlgoraWeb.ContractLive do
       </div>
     </div>
 
-    <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
+    <.drawer :if={@current_user} show={@show_authorize_modal} on_cancel="close_drawer">
       <.drawer_header>
         <.drawer_title>Authorize payment</.drawer_title>
         <.drawer_description>
@@ -612,17 +626,6 @@ defmodule AlgoraWeb.ContractLive do
                       field={@reward_form[:amount]}
                       disabled
                     />
-
-                    <%!-- <div>
-                      <.label>Tip</.label>
-                      <div class="mt-2">
-                        <.radio_group
-                          class="grid grid-cols-4 gap-4"
-                          field={@reward_form[:tip_percentage]}
-                          options={tip_options()}
-                        />
-                      </div>
-                    </div> --%>
                   </div>
                 </.card_content>
               </.card>
@@ -681,15 +684,106 @@ defmodule AlgoraWeb.ContractLive do
         </.form>
       </.drawer_content>
     </.drawer>
+    <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <.drawer_title>Pay contract</.drawer_title>
+        <.drawer_description>
+          You can pay any amount at any time.
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.form for={@reward_form} phx-change="validate_reward" phx-submit="pay_with_stripe">
+          <div class="flex flex-col gap-8">
+            <div class="grid grid-cols-2 gap-8">
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Details</.card_title>
+                </.card_header>
+                <.card_content class="pt-0">
+                  <div class="space-y-4">
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@reward_form[:amount]}
+                    />
+
+                    <div>
+                      <.label>Tip</.label>
+                      <div class="mt-2">
+                        <.radio_group
+                          class="grid grid-cols-4 gap-4"
+                          field={@reward_form[:tip_percentage]}
+                          options={tip_options()}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </.card_content>
+              </.card>
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Summary</.card_title>
+                </.card_header>
+                <.card_content class="pt-0">
+                  <dl class="space-y-4">
+                    <%= for line_item <- @line_items do %>
+                      <div class="flex justify-between">
+                        <dt class="flex items-center gap-4">
+                          <%= if line_item.image do %>
+                            <.avatar>
+                              <.avatar_image src={line_item.image} />
+                              <.avatar_fallback>
+                                {Util.initials(line_item.title)}
+                              </.avatar_fallback>
+                            </.avatar>
+                          <% else %>
+                            <div class="w-10" />
+                          <% end %>
+                          <div>
+                            <div class="font-medium">{line_item.title}</div>
+                            <div class="text-muted-foreground text-sm">{line_item.description}</div>
+                          </div>
+                        </dt>
+                        <dd class="font-display font-semibold tabular-nums">
+                          {Money.to_string!(line_item.amount)}
+                        </dd>
+                      </div>
+                    <% end %>
+                    <div class="h-px bg-border" />
+                    <div class="flex justify-between">
+                      <dt class="flex items-center gap-4">
+                        <div class="w-10" />
+                        <div class="font-medium">Total due</div>
+                      </dt>
+                      <dd class="font-display font-semibold tabular-nums">
+                        {LineItem.gross_amount(@line_items)}
+                      </dd>
+                    </div>
+                  </dl>
+                </.card_content>
+              </.card>
+            </div>
+            <div class="ml-auto flex gap-4">
+              <.button variant="secondary" phx-click="close_drawer" type="button">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Pay with Stripe <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     """
   end
 
-  defp assign_line_items(socket) do
+  defp assign_line_items(socket, changeset) do
     line_items =
       Bounties.generate_line_items(
         %{
           owner: socket.assigns.bounty.owner,
-          amount: calculate_final_amount(socket.assigns.reward_form.source)
+          amount: calculate_final_amount(changeset)
         },
         bounty: socket.assigns.bounty,
         ticket_ref: socket.assigns.ticket_ref,
@@ -728,7 +822,9 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   defp close_drawers(socket) do
-    assign(socket, :show_reward_modal, false)
+    socket
+    |> assign(:show_reward_modal, false)
+    |> assign(:show_authorize_modal, false)
   end
 
   defp assign_contractor(socket, shared_with) do

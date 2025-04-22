@@ -57,36 +57,33 @@ defmodule AlgoraWeb.HomeLive do
     featured_collabs = list_featured_collabs()
 
     transactions =
-      Repo.all(
-        from tx in Transaction,
-          where: tx.type == :credit,
-          where: not is_nil(tx.succeeded_at),
-          where:
-            fragment(
-              "? >= ('USD', 500)::money_with_currency",
-              tx.net_amount
-            ),
-          join: u in assoc(tx, :user),
-          left_join: b in assoc(tx, :bounty),
-          left_join: tip in assoc(tx, :tip),
-          join: t in Ticket,
-          on: t.id == b.ticket_id or t.id == tip.ticket_id,
-          join: r in assoc(t, :repository),
-          join: o in assoc(r, :user),
-          join: ltx in assoc(tx, :linked_transaction),
-          join: ltx_user in assoc(ltx, :user),
-          select: %{
-            succeeded_at: tx.succeeded_at,
-            net_amount: tx.net_amount,
-            bounty_id: b.id,
-            tip_id: tip.id,
-            user: u,
-            ticket: %{t | repository: %{r | user: o}},
-            linked_transaction: %{ltx | user: ltx_user}
-          },
-          order_by: [desc: tx.succeeded_at],
-          limit: 5
+      from(tx in Transaction,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        where: tx.succeeded_at > ago(1, "week"),
+        join: u in assoc(tx, :user),
+        left_join: b in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == b.ticket_id or t.id == tip.ticket_id,
+        join: r in assoc(t, :repository),
+        join: o in assoc(r, :user),
+        join: ltx in assoc(tx, :linked_transaction),
+        join: ltx_user in assoc(ltx, :user),
+        select: %{
+          succeeded_at: tx.succeeded_at,
+          net_amount: tx.net_amount,
+          bounty_id: b.id,
+          tip_id: tip.id,
+          user: u,
+          ticket: %{t | repository: %{r | user: o}},
+          linked_transaction: %{ltx | user: ltx_user}
+        },
+        order_by: [desc: tx.net_amount],
+        limit: 5
       )
+      |> Repo.all()
+      |> Enum.sort_by(& &1.succeeded_at, {:desc, DateTime})
 
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->

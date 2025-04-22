@@ -3,19 +3,103 @@ defmodule AlgoraWeb.Admin.AdminLive do
   use AlgoraWeb, :live_view
 
   import AlgoraWeb.Components.Activity
+  import Ecto.Query
 
+  alias Algora.Accounts.User
   alias Algora.Activities
   alias Algora.Admin.Mainthings
   alias Algora.Admin.Mainthings.Mainthing
   alias Algora.Analytics
   alias Algora.Markdown
+  alias Algora.Payments.Transaction
+  alias Algora.Repo
+  alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.LocalStore
+
+  defp get_total_paid_out do
+    subtotal =
+      Repo.one(
+        from(t in Transaction,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
+          select: sum(t.net_amount)
+        )
+      ) || Money.new(0, :USD)
+
+    subtotal |> Money.add!(PlatformStats.get().extra_paid_out) |> Money.round(currency_digits: 0)
+  end
+
+  defp get_completed_bounties_count do
+    bounties_subtotal =
+      Repo.one(
+        from(t in Transaction,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
+          where: not is_nil(t.bounty_id),
+          select: count(fragment("DISTINCT (?, ?)", t.bounty_id, t.user_id))
+        )
+      ) || 0
+
+    tips_subtotal =
+      Repo.one(
+        from(t in Transaction,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
+          where: not is_nil(t.tip_id),
+          select: count(fragment("DISTINCT (?, ?)", t.tip_id, t.user_id))
+        )
+      ) || 0
+
+    bounties_subtotal + tips_subtotal + PlatformStats.get().extra_completed_bounties
+  end
+
+  defp get_contributors_count do
+    subtotal =
+      Repo.one(
+        from(t in Transaction,
+          where: t.type == :credit,
+          where: t.status == :succeeded,
+          where: not is_nil(t.linked_transaction_id),
+          select: count(fragment("DISTINCT ?", t.user_id))
+        )
+      ) || 0
+
+    subtotal + PlatformStats.get().extra_contributors
+  end
+
+  defp get_countries_count do
+    Repo.one(
+      from(u in User,
+        join: t in Transaction,
+        on: t.user_id == u.id,
+        where: t.type == :credit,
+        where: t.status == :succeeded,
+        where: not is_nil(t.linked_transaction_id),
+        where: not is_nil(u.country) and u.country != "",
+        select: count(fragment("DISTINCT ?", u.country))
+      )
+    ) || 0
+  end
+
+  defp format_money(money), do: money |> Money.round(currency_digits: 0) |> Money.to_string!(no_fraction_if_integer: true)
+
+  defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok, analytics} = Analytics.get_company_analytics()
     funnel_data = Analytics.get_funnel_data()
     :ok = Activities.subscribe()
+
+    platform_metrics = [
+      %{label: "Paid Out", value: format_money(get_total_paid_out())},
+      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())},
+      %{label: "Contributors", value: format_number(get_contributors_count())},
+      %{label: "Countries", value: format_number(get_countries_count())}
+    ]
 
     # Get user metrics for the last 30 days
     user_metrics = Analytics.Metrics.get_user_metrics(30, :daily)
@@ -32,11 +116,11 @@ defmodule AlgoraWeb.Admin.AdminLive do
 
     {:ok,
      socket
-     |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
      |> assign(:timezone, timezone)
      |> assign(:analytics, analytics)
      |> assign(:funnel_data, funnel_data)
      |> assign(:user_metrics, user_metrics)
+     |> assign(:platform_metrics, platform_metrics)
      |> assign(:selected_period, :daily)
      |> assign(:notes_form, to_form(notes_changeset))
      |> assign(:notes_preview, (mainthing && Markdown.render_unsafe(mainthing.content)) || "")
@@ -59,9 +143,23 @@ defmodule AlgoraWeb.Admin.AdminLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-8 p-8" phx-hook="LocalStateStore" id="admin-page" data-storage="localStorage">
-      <div class="text-sm text-muted-foreground">
-        Connected from: <code class="font-mono">{@ip_address}</code>
-      </div>
+      <section id="user-metrics" class="scroll-mt-16 space-y-4">
+        <h1 class="text-2xl font-bold">Metrics</h1>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <%= for metric <- @platform_metrics do %>
+            <.stat_card title={metric.label} value={metric.value} />
+          <% end %>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <%= for {_date, metrics} <- Enum.take(@user_metrics, 1) do %>
+            <.stat_card title="Organization Signups" value={metrics.org_signups} subtitle="Last 24h" />
+            <.stat_card title="Organization Returns" value={metrics.org_returns} subtitle="Last 24h" />
+            <.stat_card title="Developer Signups" value={metrics.dev_signups} subtitle="Last 24h" />
+            <.stat_card title="Developer Returns" value={metrics.dev_returns} subtitle="Last 24h" />
+          <% end %>
+        </div>
+      </section>
+
       <section id="sql" class="scroll-mt-16">
         <div class="mb-4">
           <h1 class="text-2xl font-bold">SQL Query</h1>
@@ -217,20 +315,6 @@ defmodule AlgoraWeb.Admin.AdminLive do
             change={@analytics.success_rate_change}
             trend={@analytics.success_rate_trend}
           />
-        </div>
-      </section>
-
-      <section id="user-metrics" class="scroll-mt-16">
-        <div class="mb-4">
-          <h1 class="text-2xl font-bold">User Activity</h1>
-        </div>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <%= for {_date, metrics} <- Enum.take(@user_metrics, 1) do %>
-            <.stat_card title="Organization Signups" value={metrics.org_signups} subtitle="Last 24h" />
-            <.stat_card title="Organization Returns" value={metrics.org_returns} subtitle="Last 24h" />
-            <.stat_card title="Developer Signups" value={metrics.dev_signups} subtitle="Last 24h" />
-            <.stat_card title="Developer Returns" value={metrics.dev_returns} subtitle="Last 24h" />
-          <% end %>
         </div>
       </section>
 

@@ -320,7 +320,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title={"#{header_prefix(@previewed_user)} Contributors"}
           subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
-          <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
+          <div class="relative w-full overflow-auto max-h-[250px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %Contributor{user: user} <- @contributors do %>
@@ -344,9 +344,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.getting_started
                 id="getting_started_main"
                 achievements={
-                  if incomplete?(@achievements, :complete_signin_status),
-                    do: @achievements |> Enum.take(1),
-                    else: @achievements
+                  if incomplete?(@achievements, :complete_signin_status) or
+                       incomplete?(@achievements, :complete_signup_status),
+                     do: @achievements |> Enum.take(1),
+                     else: @achievements
                 }
                 current_user={@current_user}
                 current_org={@current_org}
@@ -1297,86 +1298,107 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp match_card(assigns) do
     ~H"""
     <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 xl:gap-4 2xl:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
-      <div class="xl:basis-[35%] truncate">
-        <div class="flex items-center gap-4">
-          <.link navigate={User.url(@match.user)}>
-            <.avatar class="h-16 w-16 rounded-full">
-              <.avatar_image src={@match.user.avatar_url} alt={@match.user.name} />
-              <.avatar_fallback class="rounded-lg">
-                {Algora.Util.initials(@match.user.name)}
-              </.avatar_fallback>
-            </.avatar>
-          </.link>
+      <div class="xl:basis-[45%] w-full truncate">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <.link navigate={User.url(@match.user)}>
+              <.avatar class="h-16 w-16 rounded-full">
+                <.avatar_image src={@match.user.avatar_url} alt={@match.user.name} />
+                <.avatar_fallback class="rounded-lg">
+                  {Algora.Util.initials(@match.user.name)}
+                </.avatar_fallback>
+              </.avatar>
+            </.link>
 
-          <div>
-            <div class="flex items-center gap-4 text-foreground">
-              <.link
-                navigate={User.url(@match.user)}
-                class="text-base sm:text-lg font-semibold hover:underline"
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <.link
+                  navigate={User.url(@match.user)}
+                  class="text-base sm:text-lg font-semibold hover:underline"
+                >
+                  {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
+                </.link>
+                <.badge
+                  :if={@match.badge_text}
+                  variant={@match.badge_variant}
+                  size="lg"
+                  class="shrink-0 absolute top-0 left-0"
+                >
+                  {@match.badge_text}
+                </.badge>
+              </div>
+              <div
+                :if={@match.user.provider_meta}
+                class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
               >
-                {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
-              </.link>
-              <.badge
-                :if={@match.badge_text}
-                variant={@match.badge_variant}
-                size="lg"
-                class="shrink-0 absolute top-0 left-0"
+                <.link
+                  :if={@match.user.provider_login}
+                  href={"https://github.com/#{@match.user.provider_login}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <Logos.github class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@match.user.provider_login}</span>
+                </.link>
+                <.link
+                  :if={@match.user.provider_meta["twitter_handle"]}
+                  href={"https://x.com/#{@match.user.provider_meta["twitter_handle"]}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
+                </.link>
+              </div>
+              <%!-- <div
+                :if={@match[:hourly_rate]}
+                class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
               >
-                {@match.badge_text}
-              </.badge>
-            </div>
-            <div
-              :if={@match.user.provider_meta}
-              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
-            >
-              <.link
-                :if={@match.user.provider_login}
-                href={"https://github.com/#{@match.user.provider_login}"}
-                target="_blank"
-                class="flex items-center gap-1 hover:underline"
-              >
-                <Logos.github class="shrink-0 h-4 w-4" />
-                <span class="line-clamp-1">{@match.user.provider_login}</span>
-              </.link>
-              <.link
-                :if={@match.user.provider_meta["twitter_handle"]}
-                href={"https://x.com/#{@match.user.provider_meta["twitter_handle"]}"}
-                target="_blank"
-                class="flex items-center gap-1 hover:underline"
-              >
-                <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
-                <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
-              </.link>
-            </div>
-            <div
-              :if={@match[:hourly_rate]}
-              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
-            >
-              <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
-                {@match[:hourly_rate]
-                |> Money.mult!(@match.user.hours_per_week || 30)
-                |> Money.mult!(Decimal.new("1.13"))
-                |> Money.to_string!()}/wk
-              </span>
+                <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
+                  {@match[:hourly_rate]
+                  |> Money.mult!(@match.user.hours_per_week || 30)
+                  |> Money.mult!(Decimal.new("1.13"))
+                  |> Money.to_string!()}/wk
+                </span>
+              </div> --%>
             </div>
           </div>
+          <.button
+            phx-click="share_opportunity"
+            phx-value-user_id={@match.user.id}
+            phx-value-type="contract"
+            phx-value-marketplace="true"
+            variant="none"
+            class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50"
+          >
+            <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
+          </.button>
         </div>
+        <dl :if={@match[:hourly_rate]} class="pt-4">
+          <div class="flex justify-between">
+            <dt class="text-foreground">
+              Total payment for <span class="font-semibold">{@match.user.hours_per_week || 30}</span>
+              hours
+              <span class="text-xs text-muted-foreground">
+                ({@match.user.name}'s availability)
+              </span>
+              <div class="text-xs text-muted-foreground">
+                (includes all platform and payment processing fees)
+              </div>
+            </dt>
+            <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
+              {Money.to_string!(
+                Money.mult!(
+                  @match[:hourly_rate] |> Money.mult!(@match.user.hours_per_week || 30),
+                  Decimal.new("1.13")
+                )
+              )}
+            </dd>
+          </div>
+        </dl>
       </div>
 
-      <div class="flex xl:flex-col gap-2 xl:basis-[5%] xl:ml-auto">
-        <.button
-          phx-click="share_opportunity"
-          phx-value-user_id={@match.user.id}
-          phx-value-type="contract"
-          phx-value-marketplace="true"
-          variant="none"
-          class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50"
-        >
-          <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
-        </.button>
-      </div>
-
-      <div class="pt-2 xl:pt-0 xl:pl-4 2xl:pl-8 xl:basis-[60%] xl:border-l xl:border-border">
+      <div class="pt-2 xl:pt-0 xl:pl-4 2xl:pl-8 xl:basis-[55%] xl:border-l xl:border-border">
         <div class="text-sm sm:text-base text-foreground font-medium">
           Completed
           <span class="font-semibold font-display text-emerald-400">
@@ -1538,7 +1560,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
         :if={length(@achievements) > 1}
         id="getting_started_sidebar"
         class="pb-12"
-        achievements={@achievements}
+        achievements={
+          if incomplete?(@achievements, :complete_signin_status) or
+               incomplete?(@achievements, :complete_signup_status),
+             do: @achievements |> Enum.take(1),
+             else: @achievements
+        }
         current_user={@current_user}
         current_org={@current_org}
         secret={@secret}

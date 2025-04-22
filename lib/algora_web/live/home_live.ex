@@ -89,7 +89,10 @@ defmodule AlgoraWeb.HomeLive do
       )
 
     case socket.assigns[:current_user] do
-      nil ->
+      %{handle: handle} = user when is_binary(handle) ->
+        {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
+
+      _ ->
         {:ok,
          socket
          |> assign(:page_title, "Algora - The open source Upwork for engineers")
@@ -110,9 +113,6 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:share_drawer_type, nil)
          |> assign(:show_share_drawer, false)
          |> assign(:transactions, transactions)}
-
-      user ->
-        {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
     end
   end
 

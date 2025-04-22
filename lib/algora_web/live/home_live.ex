@@ -11,6 +11,7 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
+  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Components.Logos
@@ -66,15 +67,21 @@ defmodule AlgoraWeb.HomeLive do
               tx.net_amount
             ),
           join: u in assoc(tx, :user),
-          join: b in assoc(tx, :bounty),
-          join: t in assoc(b, :ticket),
+          left_join: b in assoc(tx, :bounty),
+          left_join: tip in assoc(tx, :tip),
+          join: t in Ticket,
+          on: t.id == b.ticket_id or t.id == tip.ticket_id,
           join: r in assoc(t, :repository),
           join: o in assoc(r, :user),
           join: ltx in assoc(tx, :linked_transaction),
           join: ltx_user in assoc(ltx, :user),
-          select_merge: %{
+          select: %{
+            succeeded_at: tx.succeeded_at,
+            net_amount: tx.net_amount,
+            bounty_id: b.id,
+            tip_id: tip.id,
             user: u,
-            bounty: %{b | ticket: %{t | repository: %{r | user: o}}},
+            ticket: %{t | repository: %{r | user: o}},
             linked_transaction: %{ltx | user: ltx_user}
           },
           order_by: [desc: tx.succeeded_at],
@@ -1675,7 +1682,7 @@ defmodule AlgoraWeb.HomeLive do
           <div class="relative -ml-[2.75rem]">
             <span
               :if={index != length(@transactions) - 1}
-              class="absolute left-2 top-6 -ml-px h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
+              class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
               aria-hidden="true"
             >
             </span>
@@ -1683,20 +1690,20 @@ defmodule AlgoraWeb.HomeLive do
               rel="noopener"
               target="_blank"
               class="w-full group inline-flex"
-              href={transaction.bounty.ticket.url}
+              href={transaction.ticket.url}
             >
               <div class="w-full relative flex space-x-3">
                 <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                   <div class="w-full flex items-center gap-3">
                     <div class="flex -space-x-1 ring-8 ring-[#050505]">
-                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 ring-white bg-gray-950 ring-[#050505]">
+                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-[#050505]">
                         <img
                           class="aspect-square h-full w-full"
                           alt={transaction.user.name}
                           src={transaction.user.avatar_url}
                         />
                       </span>
-                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 ring-white bg-gray-950 ring-[#050505]">
+                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-[#050505]">
                         <img
                           class="aspect-square h-full w-full"
                           alt={transaction.linked_transaction.user.name}
@@ -1717,7 +1724,11 @@ defmodule AlgoraWeb.HomeLive do
                         <span class="font-bold font-display text-success-400 group-hover:text-success-300 transition-colors">
                           {Money.to_string!(transaction.net_amount)}
                         </span>
-                        bounty
+                        <%= if transaction.bounty_id do %>
+                          bounty
+                        <% else %>
+                          tip
+                        <% end %>
                       </p>
                       <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
                         <time datetime={transaction.succeeded_at}>

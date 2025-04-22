@@ -639,12 +639,14 @@ defmodule AlgoraWeb.Webhooks.GithubController do
     end)
   end
 
-  defp get_tip_recipient(%Webhook{payload: payload, author: author}, {:tip, args}) do
+  defp get_tip_recipient(%Webhook{payload: payload, author: author} = webhook, {:tip, args}) do
+    ticket = get_github_ticket(webhook)
+
     res =
       case args[:recipient] do
         nil ->
           with {:ok, token} <- Github.get_installation_token(payload["installation"]["id"]),
-               {:ok, user} <- Workspace.ensure_user(token, payload["issue"]["user"]["login"]) do
+               {:ok, user} <- Workspace.ensure_user(token, ticket["user"]["login"]) do
             {:ok, user.provider_login}
           end
 

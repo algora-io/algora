@@ -194,7 +194,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
-      <div class="container mx-auto max-w-7xl space-y-8 lg:space-y-16 p-8">
+      <div class="container mx-auto max-w-7xl space-y-8 lg:space-y-16 p-4 sm:p-6 lg:p-8">
         <.section :if={@payable_bounties != %{}}>
           <.card>
             <.card_header>
@@ -1254,7 +1254,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
-            <.dropdown_menu>
+            <%!-- <.dropdown_menu>
               <.dropdown_menu_trigger>
                 <.button variant="ghost" size="icon">
                   <.icon name="tabler-dots" class="h-4 w-4" />
@@ -1271,7 +1271,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   Remove
                 </.dropdown_menu_item>
               </.dropdown_menu_content>
-            </.dropdown_menu>
+            </.dropdown_menu> --%>
           </div>
         </div>
       </td>

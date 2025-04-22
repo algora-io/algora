@@ -99,17 +99,17 @@ defmodule AlgoraWeb.Org.PreviewNav do
     {:cont, assign(socket, :active_tab, active_tab)}
   end
 
-  def nav_items(repo_owner, repo_name) do
+  def nav_items(_repo_owner, _repo_name) do
     [
       %{
         title: "Overview",
         items: [
-          %{
-            href: "/go/#{repo_owner}/#{repo_name}",
-            tab: :dashboard,
-            icon: "tabler-sparkles",
-            label: "Dashboard"
-          }
+          %{href: "/", tab: :home, icon: "tabler-home", label: "Home"},
+          %{href: ~p"/bounties", tab: :bounties, icon: "tabler-briefcase", label: "Bounties", class: "lg:hidden"},
+          %{href: ~p"/testimonials", tab: :testimonials, icon: "tabler-quote", label: "Testimonials", class: "lg:hidden"},
+          %{href: ~p"/crowdfund", tab: :crowdfund, icon: "tabler-heart", label: "Crowdfund", class: "lg:hidden"},
+          %{href: ~p"/docs", tab: :docs, icon: "tabler-book", label: "Docs", class: "lg:hidden"},
+          %{href: ~p"/pricing", tab: :pricing, icon: "tabler-credit-card", label: "Pricing", class: "lg:hidden"}
         ]
       }
     ]

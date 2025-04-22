@@ -49,8 +49,8 @@
           <div class="flex h-16 shrink-0 items-center">
             <.wordmark class="h-8 w-auto text-white" />
           </div>
-          <nav class="flex flex-1 flex-col">
-            <ul role="list" class="-mx-2 flex-1 space-y-1">
+          <nav class="flex flex-1 flex-col divide-y divide-border">
+            <ul role="list" class="-mx-2 space-y-1 pb-6">
               <%= for item <- @nav |> List.first() |> Map.get(:items) do %>
                 <li>
                   <.link
@@ -70,6 +70,37 @@
                 </li>
               <% end %>
             </ul>
+
+            <div class="py-6 space-y-4">
+              <.button
+                :if={Algora.Stargazer.count()}
+                class="group w-full flex items-center"
+                target="_blank"
+                rel="noopener"
+                variant="secondary"
+                href={AlgoraWeb.Constants.get(:github_repo_url)}
+              >
+                <.icon
+                  name="github"
+                  class="mr-2 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
+                />
+                <span class="mr-1">Star</span>
+                <span class="font-semibold text-foreground/80 group-hover:text-foreground">
+                  {Algora.Stargazer.count()}
+                </span>
+              </.button>
+              <.button :if={!@current_user.handle} navigate={~p"/auth/signup"} class="w-full">
+                Sign up
+              </.button>
+              <.button
+                :if={!@current_user.handle}
+                navigate={~p"/auth/login"}
+                class="w-full"
+                variant="secondary"
+              >
+                Sign in
+              </.button>
+            </div>
           </nav>
         </div>
       </div>
@@ -94,7 +125,8 @@
                   if(@active_tab == item.tab,
                     do: "bg-gray-800 text-white",
                     else: "text-gray-400 hover:bg-gray-800 hover:text-white"
-                  )
+                  ),
+                  item[:class]
                 ]}
               >
                 <.icon name={item.icon} class="h-6 w-6 shrink-0" />
@@ -200,7 +232,7 @@
       <div class="ml-auto flex items-center gap-x-6">
         <.link
           :if={Algora.Stargazer.count()}
-          class="group w-fit outline-none"
+          class="group w-fit outline-none hidden lg:flex"
           target="_blank"
           rel="noopener"
           href={AlgoraWeb.Constants.get(:github_repo_url)}

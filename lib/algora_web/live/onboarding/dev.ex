@@ -441,7 +441,7 @@ defmodule AlgoraWeb.Onboarding.DevLive do
           <div class="flex gap-4">
             <div class="flex-1">
               <div class="mb-2 font-mono text-2xl font-extrabold text-success">
-                {Money.to_string!(transaction.bounty.amount)}
+                {Money.to_string!(transaction.net_amount)}
               </div>
               <div class="mb-1 text-sm text-muted-foreground">
                 {transaction.bounty.ticket.repository.user.provider_login}/{transaction.bounty.ticket.repository.name}#{transaction.bounty.ticket.number}

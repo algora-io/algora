@@ -369,13 +369,18 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   end
 
   defp execute_command(%Webhook{event_action: event_action, payload: payload} = webhook, {:tip, args})
-       when event_action in ["issue_comment.created", "issue_comment.edited"] do
+       when event_action in [
+              "issue_comment.created",
+              "issue_comment.edited",
+              "pull_request_review.submitted",
+              "pull_request_review_comment.created"
+            ] do
     amount = args[:amount]
 
     ticket_ref = %{
       owner: payload["repository"]["owner"]["login"],
       repo: payload["repository"]["name"],
-      number: payload["issue"]["number"]
+      number: get_github_ticket(webhook)["number"]
     }
 
     with {:ok, role} <- authorize_user(webhook),
@@ -710,6 +715,8 @@ defmodule AlgoraWeb.Webhooks.GithubController do
       "issues" -> payload["issue"]
       "issue_comment" -> payload["issue"]
       "pull_request" -> payload["pull_request"]
+      "pull_request_review" -> payload["pull_request"]
+      "pull_request_review_comment" -> payload["pull_request"]
       _ -> nil
     end
   end

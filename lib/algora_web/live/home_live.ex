@@ -55,6 +55,32 @@ defmodule AlgoraWeb.HomeLive do
     featured_devs = Accounts.list_featured_developers()
     featured_collabs = list_featured_collabs()
 
+    transactions =
+      Repo.all(
+        from tx in Transaction,
+          where: tx.type == :credit,
+          where: not is_nil(tx.succeeded_at),
+          where:
+            fragment(
+              "? >= ('USD', 500)::money_with_currency",
+              tx.net_amount
+            ),
+          join: u in assoc(tx, :user),
+          join: b in assoc(tx, :bounty),
+          join: t in assoc(b, :ticket),
+          join: r in assoc(t, :repository),
+          join: o in assoc(r, :user),
+          join: ltx in assoc(tx, :linked_transaction),
+          join: ltx_user in assoc(ltx, :user),
+          select_merge: %{
+            user: u,
+            bounty: %{b | ticket: %{t | repository: %{r | user: o}}},
+            linked_transaction: %{ltx | user: ltx_user}
+          },
+          order_by: [desc: tx.succeeded_at],
+          limit: 5
+      )
+
     case socket.assigns[:current_user] do
       nil ->
         {:ok,
@@ -75,7 +101,8 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:total_countries, total_countries)
          |> assign(:selected_developer, nil)
          |> assign(:share_drawer_type, nil)
-         |> assign(:show_share_drawer, false)}
+         |> assign(:show_share_drawer, false)
+         |> assign(:transactions, transactions)}
 
       user ->
         {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
@@ -156,8 +183,14 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
           <.pattern />
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
-            <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-              <div class="px-6 lg:px-8 lg:pr-0 xl:pb-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl">
+            <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none">
+              <div class={
+                classes([
+                  "px-6 lg:px-8 lg:pr-0 xl:py-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-3xl 2xl:max-w-3xl",
+                  @screenshot? && "pt-24"
+                ])
+              }>
+                <.wordmark :if={@screenshot?} class="h-8 mb-6" />
                 <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
                   The open source Upwork for engineers
                 </h1>
@@ -165,7 +198,7 @@ defmodule AlgoraWeb.HomeLive do
                   Discover GitHub bounties, contract work and jobs.<br class="hidden sm:block" />
                   Hire the top 1% open source developers.
                 </p>
-                <div class="mt-6 sm:mt-10 flex gap-4">
+                <div :if={!@screenshot?} class="mt-6 sm:mt-10 flex gap-4">
                   <.button
                     navigate={~p"/onboarding/org"}
                     class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
@@ -179,6 +212,9 @@ defmodule AlgoraWeb.HomeLive do
                   >
                     Developers
                   </.button>
+                </div>
+                <div class="flex flex-col gap-4 pt-6 sm:pt-10">
+                  <.events transactions={@transactions} />
                 </div>
               </div>
               <!-- Featured devs -->
@@ -1628,6 +1664,75 @@ defmodule AlgoraWeb.HomeLive do
       >
       </div>
     </div>
+    """
+  end
+
+  defp events(assigns) do
+    ~H"""
+    <ul class="w-full pl-10 relative space-y-8">
+      <li :for={{transaction, index} <- @transactions |> Enum.with_index()} class="relative">
+        <div>
+          <div class="relative -ml-[2.75rem]">
+            <span
+              :if={index != length(@transactions) - 1}
+              class="absolute left-2 top-6 -ml-px h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
+              aria-hidden="true"
+            >
+            </span>
+            <.link
+              rel="noopener"
+              target="_blank"
+              class="w-full group inline-flex"
+              href={transaction.bounty.ticket.url}
+            >
+              <div class="w-full relative flex space-x-3">
+                <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                  <div class="w-full flex items-center gap-3">
+                    <div class="flex -space-x-1 ring-8 ring-[#050505]">
+                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 ring-white bg-gray-950 ring-[#050505]">
+                        <img
+                          class="aspect-square h-full w-full"
+                          alt={transaction.user.name}
+                          src={transaction.user.avatar_url}
+                        />
+                      </span>
+                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 ring-white bg-gray-950 ring-[#050505]">
+                        <img
+                          class="aspect-square h-full w-full"
+                          alt={transaction.linked_transaction.user.name}
+                          src={transaction.linked_transaction.user.avatar_url}
+                        />
+                      </span>
+                    </div>
+                    <div class="w-full z-10 flex gap-3 items-start xl:items-end">
+                      <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-base">
+                        <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                          {transaction.linked_transaction.user.name}
+                        </span>
+                        awarded
+                        <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                          {transaction.user.name}
+                        </span>
+                        a
+                        <span class="font-bold font-display text-success-400 group-hover:text-success-300 transition-colors">
+                          {Money.to_string!(transaction.net_amount)}
+                        </span>
+                        bounty
+                      </p>
+                      <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
+                        <time datetime={transaction.succeeded_at}>
+                          {Algora.Util.time_ago(transaction.succeeded_at)}
+                        </time>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </.link>
+          </div>
+        </div>
+      </li>
+    </ul>
     """
   end
 end

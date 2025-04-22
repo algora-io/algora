@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
     if Member.can_create_bounty?(socket.assigns.current_user_role) do
@@ -92,6 +92,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
+       |> assign(:page_title, "#{header_prefix(current_org)}")
+       |> assign(
+         :page_description,
+         "Share bounties, tips or contracts with #{header_prefix(current_org)} contributors and Algora matches"
+       )
+       |> assign(:screenshot?, not is_nil(params["screenshot"]))
        |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
        |> assign(:admins_last_active, admins_last_active)
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
@@ -365,20 +371,20 @@ defmodule AlgoraWeb.Org.DashboardLive do
           subtitle="Top 1% Algora developers in your tech stack available to hire now"
         >
           <div class="relative w-full flex flex-col gap-4">
-            <div class="lg:pb-2 lg:pt-4 flex flex-col lg:flex-row gap-4 lg:gap-8">
-              <h3 class="text-xl font-semibold whitespace-nowrap">How it works</h3>
-              <ul class="lg:mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm font-medium">
-                <li class="flex items-start">
+            <div class="lg:pb-2 lg:pt-4 flex flex-col lg:flex-row gap-4 lg:gap-4">
+              <h3 class="text-lg font-semibold whitespace-nowrap">How it works</h3>
+              <ul class="xl:mx-auto flex flex-col md:flex-row gap-2 md:gap-4 2xl:gap-6 text-xs font-medium">
+                <li class="flex items-center">
                   <.icon name="tabler-circle-number-1 mr-2" class="size-6 text-success-400 shrink-0" />
-                  Authorize payment to offer contract
+                  Authorize payment to send offer
                 </li>
-                <li class="flex items-start">
+                <li class="flex items-center">
                   <.icon name="tabler-circle-number-2 mr-2" class="size-6 text-success-400 shrink-0" />
                   Escrowed when developer accepts
                 </li>
-                <li class="flex items-start">
+                <li class="flex items-center">
                   <.icon name="tabler-circle-number-3 mr-2" class="size-6 text-success-400 shrink-0" />
-                  Release or withhold escrow end of week
+                  Release/withhold escrow end of week
                 </li>
               </ul>
             </div>

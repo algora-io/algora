@@ -579,4 +579,19 @@ defmodule Algora.Workspace do
         :error
     end
   end
+
+  def remove_amount_label(token, owner, repo, number, amount) do
+    label = "$#{amount |> Money.to_decimal() |> Util.format_number_compact()}"
+
+    case Github.remove_label(token, owner, repo, label) do
+      # TODO: properly parse DELETE responses in Github.Client
+      {:error, %Jason.DecodeError{data: ""}} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.error("Failed to remove label #{label} from #{owner}/#{repo}##{number}: #{inspect(reason)}")
+
+        :error
+    end
+  end
 end

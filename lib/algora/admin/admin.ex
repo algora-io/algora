@@ -41,6 +41,15 @@ defmodule Algora.Admin do
     end
   end
 
+  def remove_label(url, amount) do
+    %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
+
+    with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
+         {:ok, token} <- Github.get_installation_token(installation_id) do
+      Workspace.remove_amount_label(token, owner, repo, number, Money.parse(amount))
+    end
+  end
+
   def add_label(url, amount) do
     %{owner: owner, repo: repo, number: number} = parse_ticket_url(url)
 
@@ -55,6 +64,7 @@ defmodule Algora.Admin do
 
     with installation_id when not is_nil(installation_id) <- Workspace.get_installation_id_by_owner(owner),
          {:ok, token} <- Github.get_installation_token(installation_id),
+         # TODO: properly parse DELETE responses in Github.Client
          {:error, %Jason.DecodeError{data: ""}} <-
            Github.Client.fetch(token, "/repos/#{owner}/#{repo}/issues/comments/#{id}", "DELETE") do
       :ok

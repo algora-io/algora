@@ -282,4 +282,9 @@ defmodule Algora.Github.Client do
   def get_label(access_token, owner, repo, label) do
     fetch(access_token, "/repos/#{owner}/#{repo}/labels/#{label}")
   end
+
+  @impl true
+  def remove_label(access_token, owner, repo, label) do
+    fetch(access_token, "/repos/#{owner}/#{repo}/labels/#{label}", "DELETE")
+  end
 end

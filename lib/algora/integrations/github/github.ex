@@ -150,4 +150,7 @@ defmodule Algora.Github do
 
   @impl true
   def get_label(token, owner, repo, label), do: client().get_label(token, owner, repo, label)
+
+  @impl true
+  def remove_label(token, owner, repo, label), do: client().remove_label(token, owner, repo, label)
 end

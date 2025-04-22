@@ -205,13 +205,6 @@ defmodule Algora.Github.Poller.Search do
 
         blocked? = comment["author"]["login"] in Algora.Settings.get_blocked_users()
 
-        if blocked? do
-          Admin.alert(
-            "Skipping slash command from blocked user #{comment["author"]["login"]}. URL: #{comment["url"]}",
-            :debug
-          )
-        end
-
         not is_nil(installation_token) or bot? or already_processed? or blocked?
       end)
       |> Enum.flat_map(fn comment ->

@@ -1353,7 +1353,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
               class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
             >
               <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
-                {Money.to_string!(@match[:hourly_rate])}/hr
+                {@match[:hourly_rate]
+                |> Money.mult!(@match.user.hours_per_week || 30)
+                |> Money.mult!(Decimal.new("1.13"))
+                |> Money.to_string!()}/wk
               </span>
             </div>
           </div>

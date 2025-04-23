@@ -1385,17 +1385,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
                 </.link>
               </div>
-              <%!-- <div
-                :if={@match[:hourly_rate]}
-                class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
-              >
-                <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
-                  {@match[:hourly_rate]
-                  |> Money.mult!(@match.user.hours_per_week || 30)
-                  |> Money.mult!(Decimal.new("1.13"))
-                  |> Money.to_string!()}/wk
-                </span>
-              </div> --%>
             </div>
           </div>
         </div>
@@ -1477,13 +1466,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 <div class="flex flex-col items-center gap-1 font-semibold">
                   <span>Offer contract</span>
                   <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                    {Money.to_string!(
-                      Money.mult!(
-                        @match[:hourly_rate] |> Money.mult!(@match.user.hours_per_week || 30),
-                        Decimal.new("1.13")
-                      ),
-                      no_fraction_if_integer: false
-                    )} / week
+                    {@match[:hourly_rate]
+                    |> Money.mult!(@match.user.hours_per_week || 30)
+                    |> Bounties.calculate_contract_amount()
+                    |> Money.to_string!(no_fraction_if_integer: false)} / week
                   </dd>
                 </div>
               </.button>

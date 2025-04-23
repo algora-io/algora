@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
   import Ecto.Changeset
 
   alias Algora.Accounts.User
+  alias Algora.Bounties
   alias Algora.Types.USD
   alias Algora.Validations
 
@@ -224,7 +225,9 @@ defmodule AlgoraWeb.Forms.ContractForm do
                 </div>
               </dt>
               <dd class="font-display font-semibold tabular-nums text-lg">
-                {Money.to_string!(Money.mult!(get_change(@form.source, :amount), Decimal.new("1.13")))}
+                {Money.to_string!(
+                  Bounties.calculate_contract_amount(get_change(@form.source, :amount))
+                )}
               </dd>
             </div>
           </dl>

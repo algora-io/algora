@@ -132,7 +132,11 @@ defmodule AlgoraWeb.Org.Nav do
         bounty_res =
           Bounties.create_bounty(
             %{
-              amount: amount,
+              amount:
+                case data.contract_type do
+                  :marketplace -> Bounties.calculate_contract_amount(amount)
+                  :bring_your_own -> amount
+                end,
               creator: socket.assigns.current_user,
               owner: socket.assigns.current_org,
               title: data.title,

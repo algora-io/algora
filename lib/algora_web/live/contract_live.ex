@@ -392,7 +392,9 @@ defmodule AlgoraWeb.ContractLive do
                     <.icon name="tabler-circle-number-2 mr-2" class="size-8 text-success-400" />
                     When {@contractor.name} accepts, you will be charged
                     <span class="font-semibold font-display px-1">
-                      {Money.to_string!(Money.mult!(@bounty.amount, Decimal.new("1.13")))}
+                      {Money.to_string!(
+                        Bounties.final_contract_amount(@bounty.contract_type, @bounty.amount)
+                      )}
                     </span>
                     into escrow
                   </li>
@@ -404,7 +406,9 @@ defmodule AlgoraWeb.ContractLive do
 
                 <dl class="-mt-12 space-y-4">
                   <dd class="font-display tabular-nums text-5xl text-success-400 font-bold">
-                    {Money.to_string!(Money.mult!(@bounty.amount, Decimal.new("1.13")))}
+                    {Money.to_string!(
+                      Bounties.final_contract_amount(@bounty.contract_type, @bounty.amount)
+                    )}
                   </dd>
                   <div class="flex justify-between">
                     <dt class="text-foreground">

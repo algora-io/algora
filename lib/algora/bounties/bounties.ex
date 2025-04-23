@@ -860,7 +860,7 @@ defmodule Algora.Bounties do
       %{contract_type: :marketplace} ->
         [
           %LineItem{
-            amount: Money.mult!(amount, Decimal.add(1, Decimal.add(platform_fee_pct, transaction_fee_pct))),
+            amount: amount,
             title: "Contract payment - @#{recipient.provider_login}",
             description: "(includes all platform and payment processing fees)",
             image: recipient.avatar_url,
@@ -905,6 +905,12 @@ defmodule Algora.Bounties do
           ]
     end
   end
+
+  def calculate_contract_amount(amount), do: Money.mult!(amount, Decimal.new("1.13"))
+
+  def final_contract_amount(:marketplace, amount), do: amount
+
+  def final_contract_amount(:bring_your_own, amount), do: calculate_contract_amount(amount)
 
   @spec create_payment_session(
           %{owner: User.t(), amount: Money.t(), description: String.t()},
@@ -1088,7 +1094,6 @@ defmodule Algora.Bounties do
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
-    |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:user_id)
     |> unique_constraint([:idempotency_key])
     |> Repo.insert()

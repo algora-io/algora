@@ -637,16 +637,16 @@ defmodule Algora.Payments do
         |> Repo.all()
         |> Map.new(&{&1.id, &1})
 
-      {issue_bounty_ids, contract_bounty_ids} =
+      {auto_bounty_ids, manual_bounty_ids} =
         Enum.split_with(bounty_ids, fn id ->
           bounty = bounties[id]
-          bounty && bounty.ticket.repository_id
+          bounty && bounty.contract_type != :marketplace
         end)
 
       tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
-      Repo.update_all(from(b in Bounty, where: b.id in ^issue_bounty_ids), set: [status: :paid])
+      Repo.update_all(from(b in Bounty, where: b.id in ^auto_bounty_ids), set: [status: :paid])
       Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
       # TODO: add and use a new "paid" status for claims
       Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
@@ -655,16 +655,16 @@ defmodule Algora.Payments do
         Enum.filter(txs, fn tx ->
           bounty = bounties[tx.bounty_id]
 
-          contract? = tx.bounty_id in contract_bounty_ids
+          manual? = tx.bounty_id in manual_bounty_ids
 
-          if contract? do
+          if tx.type == :credit and manual? do
             Admin.alert(
               "Contract payment received. URL: #{AlgoraWeb.Endpoint.url()}/#{bounty.owner.handle}/contracts/#{bounty.id}",
               :info
             )
           end
 
-          tx.type != :credit or not contract?
+          tx.type != :credit or not manual?
         end)
 
       Repo.update_all(

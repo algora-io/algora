@@ -200,7 +200,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
-      <div class="container mx-auto max-w-7xl space-y-8 lg:space-y-16 p-4 sm:p-6 lg:p-8">
+      <div class="container mx-auto max-w-7xl space-y-8 xl:space-y-16 p-4 sm:p-6 lg:p-8">
         <.section :if={@payable_bounties != %{}}>
           <.card>
             <.card_header>
@@ -371,7 +371,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           subtitle="Top 1% Algora developers in your tech stack available to hire now"
         >
           <div class="relative w-full flex flex-col gap-4">
-            <div class="lg:pb-2 lg:pt-4 flex flex-col lg:flex-row gap-4 lg:gap-4">
+            <div :if={!@screenshot?} class="lg:pb-2 lg:pt-4 flex flex-col lg:flex-row gap-4 lg:gap-4">
               <h3 class="text-lg font-semibold whitespace-nowrap">How it works</h3>
               <ul class="xl:mx-auto flex flex-col md:flex-row gap-2 md:gap-4 2xl:gap-6 text-xs font-medium">
                 <li class="flex items-center">
@@ -1320,8 +1320,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 xl:gap-4 2xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-6">
-      <div class="xl:basis-[51%] w-full truncate">
+    <div class="relative flex flex-col lg:flex-row xl:items-center lg:justify-between gap-4 sm:gap-8 lg:gap-4 xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-4 pt-8">
+      <div class="lg:basis-[52%] w-full truncate">
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-4">
             <.link navigate={User.url(@match.user)}>
@@ -1406,7 +1406,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             )}
           </span>
         </div>
-        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-4 2xl:gap-8">
+        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap gap-4 lg:gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
               navigate={User.url(project)}
@@ -1442,8 +1442,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
       </div>
 
-      <div class="pt-2 xl:pt-0 xl:pl-4 2xl:pl-6 xl:basis-[49%] w-full xl:border-l xl:border-border">
-        <dl :if={@match[:hourly_rate]} class="pt-4">
+      <div class="pt-2 lg:pt-0 lg:pl-4 xl:pl-6 lg:basis-[48%] w-full lg:border-l lg:border-border">
+        <dl :if={@match[:hourly_rate]} class="pt-4 lg:pt-0">
           <div class="flex flex-col-reverse 3xl:flex-row justify-between items-center gap-2">
             <dt class="text-foreground text-center">
               Total payment for <span class="font-semibold">{@match.user.hours_per_week || 30}</span>

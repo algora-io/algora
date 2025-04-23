@@ -828,8 +828,7 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             claims: [Claim.t()],
-            recipient: User.t(),
-            contract_type: Bounty.contract_type()
+            recipient: User.t()
           ]
         ) ::
           [LineItem.t()]
@@ -850,8 +849,8 @@ defmodule Algora.Bounties do
 
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
-    case opts[:contract_type] do
-      :marketplace ->
+    case opts[:bounty] do
+      %{contract_type: :marketplace} ->
         [
           %LineItem{
             amount: Money.mult!(amount, Decimal.add(1, Decimal.add(platform_fee_pct, transaction_fee_pct))),

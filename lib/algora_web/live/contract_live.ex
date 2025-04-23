@@ -354,6 +354,12 @@ defmodule AlgoraWeb.ContractLive do
                     </.badge>
                   </div>
                 <% end %>
+
+                <%= if @can_create_bounty && @transactions == [] do %>
+                  <.button phx-click="reward">
+                    Make payment
+                  </.button>
+                <% end %>
               </div>
             </.card_content>
           </.card>

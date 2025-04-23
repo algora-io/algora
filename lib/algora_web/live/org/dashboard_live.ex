@@ -1426,38 +1426,28 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp create_bounty(assigns) do
     ~H"""
     <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-      <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-        <div class="p-4 sm:p-6">
-          <div class="text-2xl font-semibold text-foreground">
-            Fund any issue<br class="block sm:hidden" />
-            <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-              in seconds
-            </span>
-          </div>
-          <div class="pt-1 text-base font-medium text-muted-foreground">
-            Help improve the OSS you love and rely on
-          </div>
-          <.simple_form for={@bounty_form} phx-submit="create_bounty">
-            <div class="flex flex-col gap-6 pt-6">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <.input
-                  label="Issue URL"
-                  field={@bounty_form[:url]}
-                  placeholder="https://github.com/swift-lang/swift/issues/1337"
-                />
-                <.input label="Amount" icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
-              </div>
-              <p class="text-sm text-muted-foreground">
-                <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
-                <code class="px-1 py-0.5 text-success">/bounty $100</code>
-                on GitHub issues (requires GitHub auth)
-              </p>
-              <div class="flex justify-end gap-4">
-                <.button>Submit</.button>
-              </div>
-            </div>
-          </.simple_form>
+      <div class="bg-card/75 flex flex-col h-full p-4 sm:p-6 md:p-8 rounded-xl border-l-4 border-emerald-400">
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <h3 class="text-foreground">Fund any issue</h3>
+          <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">in seconds</span>
         </div>
+        <div class="mt-1 text-sm font-medium text-muted-foreground">
+          Help improve the OSS you love and rely on
+        </div>
+        <.simple_form for={@bounty_form} phx-submit="create_bounty" class="pt-2 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-[3fr,1fr] gap-3">
+            <.input field={@bounty_form[:url]} placeholder="https://github.com/owner/repo/issues/123" />
+            <.input icon="tabler-currency-dollar" field={@bounty_form[:amount]} />
+          </div>
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-xs text-muted-foreground">
+              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> ...or just comment
+              <code class="px-1 py-0.5 text-success">/bounty $100</code>
+              on GitHub issues (requires GitHub auth)
+            </p>
+            <.button size="sm">Submit</.button>
+          </div>
+        </.simple_form>
       </div>
     </div>
     """
@@ -1466,39 +1456,29 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp create_tip(assigns) do
     ~H"""
     <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-      <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-        <div class="p-4 sm:p-6">
-          <div class="text-2xl font-semibold text-foreground">
-            Tip any developer<br class="block sm:hidden" />
-            <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-              instantly
-            </span>
-          </div>
-          <div class="pt-1 text-base font-medium text-muted-foreground">
-            Thank OSS maintainers and contributors on GitHub
-          </div>
-          <.simple_form for={@tip_form} phx-submit="create_tip">
-            <div class="flex flex-col gap-6 pt-6">
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-6">
-                <.input
-                  label="Contribution URL"
-                  field={@tip_form[:url]}
-                  placeholder="https://github.com/owner/repo/pull/123"
-                />
-                <.input label="GitHub handle" field={@tip_form[:github_handle]} placeholder="jsmith" />
-                <.input label="Amount" icon="tabler-currency-dollar" field={@tip_form[:amount]} />
-              </div>
-              <p class="text-sm text-muted-foreground">
-                <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> Comment
-                <code class="px-1 py-0.5 text-success">/tip $100 @handle</code>
-                on GitHub issues and PRs (requires GitHub auth)
-              </p>
-              <div class="flex justify-end gap-4">
-                <.button>Submit</.button>
-              </div>
-            </div>
-          </.simple_form>
+      <div class="bg-card/75 flex flex-col h-full p-4 sm:p-6 md:p-8 rounded-xl border-l-4 border-emerald-400">
+        <div class="flex items-center gap-2 text-lg font-semibold">
+          <h3 class="text-foreground">Tip any developer</h3>
+          <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">instantly</span>
         </div>
+        <div class="mt-1 text-sm font-medium text-muted-foreground">
+          Thank OSS maintainers and contributors on GitHub
+        </div>
+        <.simple_form for={@tip_form} phx-submit="create_tip" class="pt-2 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-[2fr,1fr,1fr] gap-3">
+            <.input field={@tip_form[:url]} placeholder="https://github.com/owner/repo/pull/123" />
+            <.input field={@tip_form[:github_handle]} placeholder="jsmith" />
+            <.input icon="tabler-currency-dollar" field={@tip_form[:amount]} />
+          </div>
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-xs text-muted-foreground">
+              <.icon name="tabler-sparkles" class="size-4 text-current mr-1" /> ...or just comment
+              <code class="px-1 py-0.5 text-success">/tip $100</code>
+              on GitHub issues (requires GitHub auth)
+            </p>
+            <.button size="sm">Submit</.button>
+          </div>
+        </.simple_form>
       </div>
     </div>
     """

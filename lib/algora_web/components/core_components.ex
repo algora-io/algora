@@ -733,7 +733,7 @@ defmodule AlgoraWeb.CoreComponents do
       end
 
     assigns
-    |> assign(field: nil, id: "#{assigns.id || field.id}-#{Algora.Util.random_string()}")
+    |> assign(field: nil, id: assigns.id || field.id)
     |> assign(:errors, Enum.map(errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> value end)

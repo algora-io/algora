@@ -396,6 +396,8 @@ defmodule Algora.Admin do
   end
 
   def alert(message, severity) do
+    Logger.info(message)
+
     %{
       payload: %{
         embeds: [

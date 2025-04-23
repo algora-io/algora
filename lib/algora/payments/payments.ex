@@ -618,7 +618,6 @@ defmodule Algora.Payments do
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
           set: [
             status: :processing,
-            succeeded_at: DateTime.utc_now(),
             provider: "stripe",
             provider_id: charge_id,
             provider_charge_id: charge_id,
@@ -670,14 +669,7 @@ defmodule Algora.Payments do
 
       Repo.update_all(
         from(t in Transaction, where: t.group_id == ^group_id and t.id in ^Enum.map(auto_txs, & &1.id), select: t),
-        set: [
-          status: :succeeded,
-          succeeded_at: DateTime.utc_now(),
-          provider: "stripe",
-          provider_id: charge_id,
-          provider_charge_id: charge_id,
-          provider_payment_intent_id: payment_intent_id
-        ]
+        set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
       )
 
       activities_result =

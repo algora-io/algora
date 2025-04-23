@@ -10,9 +10,13 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   alias Algora.Admin
   alias Algora.Mailer
   alias Algora.Repo
+  alias Algora.Settings
+  alias Algora.Workspace
   alias Algora.Workspace.Repository
   alias AlgoraWeb.LocalStore
   alias Swoosh.Email
+
+  require Logger
 
   defmodule Campaign do
     @moduledoc false
@@ -182,7 +186,11 @@ defmodule AlgoraWeb.Admin.CampaignLive do
                 </.button>
               </div>
               <.table id="csv-data" rows={@csv_data}>
-                <:col :let={row} :for={key <- @csv_columns} label={key}>
+                <:col
+                  :let={row}
+                  :for={key <- @csv_columns |> Enum.filter(&(&1 != "repo_url"))}
+                  label={key}
+                >
                   <.cell value={row[key]} />
                 </:col>
                 <:action :let={row}>
@@ -231,8 +239,8 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   defp assign_repo_names(socket) do
     new_handles =
       socket.assigns.csv_data
+      |> Enum.filter(&(&1["repo_url"] == "" and &1["org_handle"] != ""))
       |> Enum.map(& &1["org_handle"])
-      |> Enum.reject(&is_nil/1)
       |> Enum.reject(&Map.has_key?(socket.assigns.repo_cache, &1))
       |> Enum.uniq()
 
@@ -253,7 +261,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
           )
 
         if repo && repo.tech_stack != [] do
-          matches = Algora.Settings.get_tech_matches(List.first(repo.tech_stack))
+          matches = Settings.get_tech_matches(List.first(repo.tech_stack))
           {org_handle, {repo, matches}}
         else
           {org_handle, nil}
@@ -264,11 +272,30 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
     csv_data =
       Enum.map(socket.assigns.csv_data, fn row ->
-        case row["org_handle"] do
-          nil ->
-            row
+        cond do
+          is_binary(row["repo_url"]) and row["repo_url"] != "" ->
+            repo_url = row["repo_url"]
+            [owner, name] = repo_url |> String.split("/") |> Enum.take(-2)
 
-          org_handle ->
+            token = Admin.token!()
+
+            with {:ok, repository} <- Workspace.ensure_repository(token, owner, name),
+                 {:ok, tech_stack} <- Workspace.ensure_repo_tech_stack(token, repository) do
+              matches = if tech_stack == [], do: [], else: Settings.get_tech_matches(List.first(tech_stack))
+
+              Map.merge(row, %{
+                "repo_owner" => repository.user.provider_login,
+                "repo_name" => repository.name,
+                "tech_stack" => repository.tech_stack,
+                "matches" => Enum.map(matches, & &1.user.handle)
+              })
+            else
+              error ->
+                Logger.error("Failed to fetch repository #{owner}/#{name}: #{inspect(error)}")
+                row
+            end
+
+          org_handle = row["org_handle"] ->
             case Map.get(updated_cache, org_handle) do
               nil ->
                 row
@@ -281,6 +308,9 @@ defmodule AlgoraWeb.Admin.CampaignLive do
                   "matches" => Enum.map(matches, & &1.user.handle)
                 })
             end
+
+          true ->
+            row
         end
       end)
 

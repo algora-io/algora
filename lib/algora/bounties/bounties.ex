@@ -828,7 +828,8 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
             claims: [Claim.t()],
-            recipient: User.t()
+            recipient: User.t(),
+            contract_type: Bounty.contract_type()
           ]
         ) ::
           [LineItem.t()]
@@ -841,7 +842,7 @@ defmodule Algora.Bounties do
     description = if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
     platform_fee_pct =
-      if bounty && Date.before?(bounty.inserted_at, ~D[2025-04-16]) do
+      if bounty && Date.before?(bounty.inserted_at, ~D[2025-04-16]) && is_nil(bounty.contract_type) do
         Decimal.div(owner.fee_pct_prev, 100)
       else
         Decimal.div(owner.fee_pct, 100)
@@ -849,43 +850,54 @@ defmodule Algora.Bounties do
 
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
-    payouts =
-      if recipient do
+    case opts[:contract_type] do
+      :marketplace ->
         [
           %LineItem{
-            amount: amount,
-            title: "Payment to @#{recipient.provider_login}",
-            description: description,
+            amount: Money.mult!(amount, Decimal.add(1, Decimal.add(platform_fee_pct, transaction_fee_pct))),
+            title: "Contract payment - @#{recipient.provider_login}",
+            description: "(includes all platform and payment processing fees)",
             image: recipient.avatar_url,
             type: :payout
           }
         ]
-      else
-        Enum.map(claims, fn claim ->
-          %LineItem{
-            # TODO: ensure shares are normalized
-            amount: Money.mult!(amount, claim.group_share),
-            title: "Payment to @#{claim.user.provider_login}",
-            description: description,
-            image: claim.user.avatar_url,
-            type: :payout
-          }
-        end)
-      end
 
-    payouts ++
-      [
-        %LineItem{
-          amount: Money.mult!(amount, platform_fee_pct),
-          title: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})",
-          type: :fee
-        },
-        %LineItem{
-          amount: Money.mult!(amount, transaction_fee_pct),
-          title: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})",
-          type: :fee
-        }
-      ]
+      _ ->
+        if recipient do
+          [
+            %LineItem{
+              amount: amount,
+              title: "Payment to @#{recipient.provider_login}",
+              description: description,
+              image: recipient.avatar_url,
+              type: :payout
+            }
+          ]
+        else
+          Enum.map(claims, fn claim ->
+            %LineItem{
+              # TODO: ensure shares are normalized
+              amount: Money.mult!(amount, claim.group_share),
+              title: "Payment to @#{claim.user.provider_login}",
+              description: description,
+              image: claim.user.avatar_url,
+              type: :payout
+            }
+          end)
+        end ++
+          [
+            %LineItem{
+              amount: Money.mult!(amount, platform_fee_pct),
+              title: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})",
+              type: :fee
+            },
+            %LineItem{
+              amount: Money.mult!(amount, transaction_fee_pct),
+              title: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})",
+              type: :fee
+            }
+          ]
+    end
   end
 
   @spec create_payment_session(

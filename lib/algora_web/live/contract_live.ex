@@ -793,7 +793,8 @@ defmodule AlgoraWeb.ContractLive do
         },
         bounty: socket.assigns.bounty,
         ticket_ref: socket.assigns.ticket_ref,
-        recipient: socket.assigns.contractor
+        recipient: socket.assigns.contractor,
+        contract_type: socket.assigns.bounty.contract_type
       )
 
     assign(socket, :line_items, line_items)

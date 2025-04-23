@@ -342,6 +342,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
             <div class="p-4 sm:p-6">
               <.getting_started
+                id="getting_started_main"
                 achievements={
                   if incomplete?(@achievements, :complete_signin_status),
                     do: @achievements |> Enum.take(1),
@@ -960,6 +961,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <.simple_form :if={!@secret} for={@login_form} phx-submit="send_login_code">
       <.input
+        id={@id <> "_user_email"}
         field={@login_form[:email]}
         type="email"
         label="Email"
@@ -972,6 +974,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     </.simple_form>
     <.simple_form :if={@secret} for={@login_form} phx-submit="send_login_code">
       <.input
+        id={@id <> "_user_login_code"}
         field={@login_form[:login_code]}
         type="text"
         label="Login code"
@@ -989,6 +992,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <.simple_form :if={!@secret} for={@login_form} phx-submit="send_login_code">
       <.input
+        id={@id <> "_user_email"}
         field={@login_form[:email]}
         type="email"
         label="Email"
@@ -1001,6 +1005,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     </.simple_form>
     <.simple_form :if={@secret} for={@login_form} phx-submit="send_login_code">
       <.input
+        id={@id <> "_user_login_code"}
         field={@login_form[:login_code]}
         type="text"
         label="Login code"
@@ -1515,6 +1520,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <li class="space-y-6">
               <.achievement achievement={achievement} />
               <.achievement_todo
+                id={@id}
                 achievement={achievement}
                 current_user={@current_user}
                 current_org={@current_org}
@@ -1534,6 +1540,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     <aside class="scrollbar-thin fixed top-16 right-0 bottom-0 hidden w-96 h-full overflow-y-auto border-l border-border bg-background p-4 pt-6 sm:p-6 md:p-8 lg:flex lg:flex-col">
       <.getting_started
         :if={length(@achievements) > 1}
+        id="getting_started_sidebar"
         class="pb-12"
         achievements={@achievements}
         current_user={@current_user}

@@ -300,7 +300,9 @@ defmodule AlgoraWeb.CoreComponents do
           <div class="mr-3 flex size-10 items-center justify-center bg-accent rounded-full">
             <.icon name="tabler-logout" class="size-6" />
           </div>
-          <div class="font-semibold">Logout</div>
+          <div class="font-semibold">
+            {if is_nil(@current_user.handle), do: "Exit preview", else: "Logout"}
+          </div>
         </div>
       </:link>
     </.dropdown>

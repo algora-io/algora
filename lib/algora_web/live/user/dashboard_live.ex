@@ -46,7 +46,6 @@ defmodule AlgoraWeb.User.DashboardLive do
     def changeset(form, attrs) do
       form
       |> cast(attrs, [:hourly_rate_min, :hours_per_week])
-      |> validate_required([:hourly_rate_min, :hours_per_week])
       |> validate_number(:hourly_rate_min, greater_than: 0)
       |> validate_number(:hours_per_week, greater_than: 0, less_than_or_equal_to: 40)
     end

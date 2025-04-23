@@ -317,7 +317,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </.section>
         <.section
           :if={@contributors != []}
-          title={"#{header_prefix(@current_org)} Contributors"}
+          title={"#{header_prefix(@previewed_user)} Contributors"}
           subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
           <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
@@ -399,7 +399,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             <div class="flex flex-wrap items-start justify-between gap-4 lg:flex-nowrap">
               <div>
                 <h2 class="text-2xl font-bold dark:text-white">
-                  {header_prefix(@current_org)} Bounties
+                  {header_prefix(@previewed_user)} Bounties
                 </h2>
                 <p class="text-sm dark:text-gray-300">
                   Create new bounties by commenting
@@ -461,7 +461,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         </div>
 
         <.section
-          title={"#{header_prefix(@current_org)} Ecosystem"}
+          title={"#{header_prefix(@previewed_user)} Ecosystem"}
           subtitle="Help maintain and grow your ecosystem by creating bounties and tips in your dependencies"
         >
           <div class="pt-8 flex flex-col gap-8">
@@ -2015,9 +2015,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
     """
   end
 
-  defp header_prefix(current_org) do
-    case current_org.type do
-      :organization -> current_org.name
+  defp header_prefix(user) do
+    case user.type do
+      :organization -> user.name
       _ -> "Your"
     end
   end

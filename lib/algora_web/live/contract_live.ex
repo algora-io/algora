@@ -805,7 +805,9 @@ defmodule AlgoraWeb.ContractLive do
     Bounties.reward_bounty(
       %{owner: bounty.owner, amount: final_amount, bounty: bounty, claims: []},
       ticket_ref: socket.assigns.ticket_ref,
-      recipient: socket.assigns.contractor
+      recipient: socket.assigns.contractor,
+      success_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}"),
+      cancel_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}")
     )
   end
 

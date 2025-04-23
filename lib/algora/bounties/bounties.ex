@@ -781,7 +781,12 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             claims: [Claim.t()]
           },
-          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            recipient: User.t(),
+            success_url: String.t(),
+            cancel_url: String.t()
+          ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty: bounty, claims: claims}, opts \\ []) do
@@ -790,7 +795,9 @@ defmodule Algora.Bounties do
       ticket_ref: opts[:ticket_ref],
       bounty: bounty,
       claims: claims,
-      recipient: opts[:recipient]
+      recipient: opts[:recipient],
+      success_url: opts[:success_url],
+      cancel_url: opts[:cancel_url]
     )
   end
 

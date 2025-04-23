@@ -410,7 +410,7 @@ defmodule AlgoraWeb.User.DashboardLive do
 
   @impl true
   def handle_event("save_availability", %{"availability_form" => params}, socket) do
-    case AvailabilityForm.changeset(%AvailabilityForm{}, params) do
+    case %AvailabilityForm{} |> AvailabilityForm.changeset(params) |> Map.put(:action, :insert) do
       %{valid?: true} ->
         case socket.assigns.current_user |> User.settings_changeset(params) |> Repo.update() do
           {:ok, user} ->

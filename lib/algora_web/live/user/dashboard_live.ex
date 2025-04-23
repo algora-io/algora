@@ -209,13 +209,31 @@ defmodule AlgoraWeb.User.DashboardLive do
         >
           <.input
             field={@availability_form[:hourly_rate_min]}
-            label="Hourly Rate (USD)"
+            label="Hourly rate (USD)"
             icon="tabler-currency-dollar"
+            icon_class={
+              if !@current_user.hourly_rate_min,
+                do: "text-success-400 animate-[wiggle_2s_ease-in-out_infinite]"
+            }
+            class={
+              if !@current_user.hourly_rate_min,
+                do:
+                  "ring-1 ring-success-400 border-success-400 focus:border-success-400 focus:ring-success-400"
+            }
           />
           <.input
             field={@availability_form[:hours_per_week]}
-            label="Hours per Week"
+            label="Hours per week"
             icon="tabler-clock"
+            icon_class={
+              if !@current_user.hours_per_week,
+                do: "text-success-400 animate-[wiggle_2s_ease-in-out_infinite]"
+            }
+            class={
+              if !@current_user.hours_per_week,
+                do:
+                  "ring-1 ring-success-400 border-success-400 focus:border-success-400 focus:ring-success-400"
+            }
           />
           <.button :if={@availability_form.source.changes != %{}} type="submit" class="lg:col-span-2">
             Save
@@ -223,11 +241,11 @@ defmodule AlgoraWeb.User.DashboardLive do
         </.form>
         <!-- Tech Stack Section -->
         <div class="mt-4">
-          <h2 class="mb-2 text-xl font-semibold">
+          <label class="block text-sm font-semibold leading-6 text-foreground mb-2">
             Tech stack
-          </h2>
+          </label>
           <.TechStack
-            classes="mt-4"
+            classes="-mt-2"
             tech={get_field(@settings_form.source, :tech_stack)}
             socket={@socket}
             form="settings_form"

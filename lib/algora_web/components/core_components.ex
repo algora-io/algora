@@ -703,6 +703,7 @@ defmodule AlgoraWeb.CoreComponents do
   attr :label, :string, default: nil
   attr :helptext, :string, default: nil
   attr :icon, :string, default: nil
+  attr :icon_class, :string, default: nil
   attr :value, :any
   attr :class, :string, default: nil
 
@@ -838,7 +839,7 @@ defmodule AlgoraWeb.CoreComponents do
       <p :if={@helptext} class="-mt-2 mb-2 text-sm text-muted-foreground">{@helptext}</p>
       <div class="relative">
         <div :if={@icon} class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          <.icon name={@icon} class="h-5 w-5 text-muted-foreground" />
+          <.icon name={@icon} class={classes(["h-5 w-5 text-muted-foreground", @icon_class])} />
         </div>
         <input
           type={@type}

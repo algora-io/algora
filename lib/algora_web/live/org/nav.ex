@@ -141,7 +141,8 @@ defmodule AlgoraWeb.Org.Nav do
             hourly_rate: data.hourly_rate,
             hours_per_week: data.hours_per_week,
             shared_with: [data.contractor.provider_id],
-            visibility: :exclusive
+            visibility: :exclusive,
+            contract_type: data.contract_type
           )
 
         case bounty_res do

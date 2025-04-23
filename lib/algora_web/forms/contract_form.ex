@@ -13,7 +13,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
     field :amount, USD
     field :hourly_rate, USD
     field :hours_per_week, :integer
-    field :marketplace?, :boolean, default: false
+    field :contract_type, Ecto.Enum, values: [:bring_your_own, :marketplace], default: :bring_your_own
     field :type, Ecto.Enum, values: [:fixed, :hourly], default: :fixed
     field :title, :string
     field :description, :string
@@ -28,7 +28,16 @@ defmodule AlgoraWeb.Forms.ContractForm do
 
   def changeset(form, attrs) do
     form
-    |> cast(attrs, [:amount, :hourly_rate, :hours_per_week, :type, :title, :description, :contractor_handle])
+    |> cast(attrs, [
+      :amount,
+      :hourly_rate,
+      :hours_per_week,
+      :type,
+      :title,
+      :description,
+      :contractor_handle,
+      :contract_type
+    ])
     |> validate_required([:contractor_handle])
     |> validate_type_fields()
     |> Validations.validate_github_handle(:contractor_handle, :contractor)
@@ -57,7 +66,9 @@ defmodule AlgoraWeb.Forms.ContractForm do
       phx-change="validate_contract_main"
     >
       <div class="space-y-4">
-        <%= if get_field(@form.source, :marketplace?) do %>
+        <.input type="hidden" field={@form[:contract_type]} />
+
+        <%= if get_field(@form.source, :contract_type) == :marketplace do %>
           <%= if contractor = get_field(@form.source, :contractor) do %>
             <.card>
               <.card_content>
@@ -129,7 +140,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
         <.input label="Title" field={@form[:title]} />
         <.input label="Description (optional)" field={@form[:description]} type="textarea" />
 
-        <%= if not get_field(@form.source, :marketplace?) do %>
+        <%= if get_field(@form.source, :contract_type) == :bring_your_own do %>
           <div>
             <label class="block text-sm font-semibold leading-6 text-foreground mb-2">
               Payment
@@ -191,7 +202,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
           </div>
         <% end %>
 
-        <%= if get_field(@form.source, :marketplace?) do %>
+        <%= if get_field(@form.source, :contract_type) == :marketplace do %>
           <.input type="hidden" field={@form[:amount]} />
           <.input type="hidden" field={@form[:hourly_rate]} />
           <.input type="hidden" field={@form[:hours_per_week]} />

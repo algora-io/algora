@@ -7,6 +7,7 @@ defmodule Algora.Bounties.Bounty do
   alias Algora.Types.Money
 
   @type visibility :: :community | :exclusive | :public
+  @type contract_type :: :bring_your_own | :marketplace
 
   typed_schema "bounties" do
     field :amount, Money
@@ -14,6 +15,7 @@ defmodule Algora.Bounties.Bounty do
     field :number, :integer, default: 0
     field :autopay_disabled, :boolean, default: false
     field :visibility, Ecto.Enum, values: [:community, :exclusive, :public], null: false, default: :community
+    field :contract_type, Ecto.Enum, values: [:bring_your_own, :marketplace]
     field :shared_with, {:array, :string}, null: false, default: []
     field :deadline, :utc_datetime_usec
     field :hours_per_week, :integer
@@ -36,7 +38,17 @@ defmodule Algora.Bounties.Bounty do
 
   def changeset(bounty, attrs) do
     bounty
-    |> cast(attrs, [:amount, :ticket_id, :owner_id, :creator_id, :visibility, :shared_with, :hours_per_week, :hourly_rate])
+    |> cast(attrs, [
+      :amount,
+      :ticket_id,
+      :owner_id,
+      :creator_id,
+      :visibility,
+      :shared_with,
+      :hours_per_week,
+      :hourly_rate,
+      :contract_type
+    ])
     |> validate_required([:amount, :ticket_id, :owner_id, :creator_id])
     |> generate_id()
     |> foreign_key_constraint(:ticket)

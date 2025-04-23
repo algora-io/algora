@@ -333,6 +333,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <.developer_card
                     user={user}
                     contract_for_user={contract_for_user(@contracts, user)}
+                    contract_type={
+                      if(Enum.find(@matches, &(&1.user.id == user.id)),
+                        do: "marketplace",
+                        else: "bring_your_own"
+                      )
+                    }
                     current_org={@current_org}
                   />
                 <% end %>
@@ -410,6 +416,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <.developer_card
                     user={user}
                     contract_for_user={contract_for_user(@contracts, user)}
+                    contract_type={
+                      if(Enum.find(@matches, &(&1.user.id == user.id)),
+                        do: "marketplace",
+                        else: "bring_your_own"
+                      )
+                    }
                     current_org={@current_org}
                   />
                 <% end %>
@@ -658,7 +670,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def handle_event(
         "share_opportunity",
-        %{"user_id" => user_id, "type" => "contract", "marketplace" => marketplace?},
+        %{"user_id" => user_id, "type" => "contract", "contract_type" => contract_type},
         socket
       ) do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
@@ -673,7 +685,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
      |> assign(
        :main_contract_form,
        %ContractForm{
-         marketplace?: marketplace? == "true",
+         contract_type: String.to_existing_atom(contract_type),
          contractor: match[:user] || developer
        }
        |> ContractForm.changeset(%{
@@ -1287,7 +1299,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-click="share_opportunity"
               phx-value-user_id={@user.id}
               phx-value-type="contract"
-              phx-value-marketplace="false"
+              phx-value-contract_type={@contract_type}
               variant="none"
               class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
@@ -1457,7 +1469,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 phx-click="share_opportunity"
                 phx-value-user_id={@match.user.id}
                 phx-value-type="contract"
-                phx-value-marketplace="true"
+                phx-value-contract_type="marketplace"
                 variant="none"
                 class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-full py-4"
                 size="xl"

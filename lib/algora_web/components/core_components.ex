@@ -889,7 +889,6 @@ defmodule AlgoraWeb.CoreComponents do
   def error(assigns) do
     ~H"""
     <p class="mt-3 flex gap-3 text-sm leading-6 text-destructive">
-      <.icon name="tabler-exclamation-circle" class="mt-0.5 h-5 w-5 flex-none" />
       {render_slot(@inner_block)}
     </p>
     """

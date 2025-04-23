@@ -464,7 +464,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title={"#{header_prefix(@previewed_user)} Ecosystem"}
           subtitle="Help maintain and grow your ecosystem by creating bounties and tips in your dependencies"
         >
-          <div class="pt-8 flex flex-col gap-8">
+          <div class="flex flex-col gap-4">
             {create_bounty(assigns)}
             {create_tip(assigns)}
           </div>
@@ -1427,7 +1427,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
       <div class="bg-card/75 flex flex-col h-full p-4 sm:p-6 md:p-8 rounded-xl border-l-4 border-emerald-400">
-        <div class="flex items-center gap-2 text-lg font-semibold">
+        <div class="flex items-center gap-2 text-xl font-semibold">
           <h3 class="text-foreground">Fund any issue</h3>
           <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">in seconds</span>
         </div>
@@ -1457,7 +1457,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     ~H"""
     <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
       <div class="bg-card/75 flex flex-col h-full p-4 sm:p-6 md:p-8 rounded-xl border-l-4 border-emerald-400">
-        <div class="flex items-center gap-2 text-lg font-semibold">
+        <div class="flex items-center gap-2 text-xl font-semibold">
           <h3 class="text-foreground">Tip any developer</h3>
           <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">instantly</span>
         </div>

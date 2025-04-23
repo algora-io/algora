@@ -5,11 +5,11 @@ defmodule Algora.Payments do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Admin
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Tip
-  alias Algora.Contracts.Contract
   alias Algora.MoneyUtils
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
@@ -617,7 +617,7 @@ defmodule Algora.Payments do
       {_, txs} =
         Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
           set: [
-            status: :succeeded,
+            status: :processing,
             succeeded_at: DateTime.utc_now(),
             provider: "stripe",
             provider_id: charge_id,
@@ -627,18 +627,61 @@ defmodule Algora.Payments do
         )
 
       bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+      bounties =
+        from(b in Bounty,
+          where: b.id in ^bounty_ids,
+          join: u in assoc(b, :owner),
+          join: t in assoc(b, :ticket),
+          select: %{b | ticket: t, owner: u}
+        )
+        |> Repo.all()
+        |> Map.new(&{&1.id, &1})
+
+      {issue_bounty_ids, contract_bounty_ids} =
+        Enum.split_with(bounty_ids, fn id ->
+          bounty = bounties[id]
+          bounty && bounty.ticket.repository_id
+        end)
+
       tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
-      Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
+      Repo.update_all(from(b in Bounty, where: b.id in ^issue_bounty_ids), set: [status: :paid])
       Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
-      Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
       # TODO: add and use a new "paid" status for claims
       Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
 
+      auto_txs =
+        Enum.filter(txs, fn tx ->
+          bounty = bounties[tx.bounty_id]
+
+          contract? = tx.bounty_id in contract_bounty_ids
+
+          if contract? do
+            Admin.alert(
+              "Contract payment received. URL: #{AlgoraWeb.Endpoint.url()}/#{bounty.owner.handle}/contracts/#{bounty.id}",
+              :info
+            )
+          end
+
+          tx.type != :credit or not contract?
+        end)
+
+      Repo.update_all(
+        from(t in Transaction, where: t.group_id == ^group_id and t.id in ^Enum.map(auto_txs, & &1.id), select: t),
+        set: [
+          status: :succeeded,
+          succeeded_at: DateTime.utc_now(),
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
       activities_result =
-        txs
+        auto_txs
         |> Enum.filter(&(&1.type == :credit))
         |> Enum.reduce_while(:ok, fn tx, :ok ->
           case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
@@ -648,7 +691,7 @@ defmodule Algora.Payments do
         end)
 
       jobs_result =
-        txs
+        auto_txs
         |> Enum.filter(&(&1.type == :credit))
         |> Enum.reduce_while(:ok, fn credit, :ok ->
           case fetch_active_account(credit.user_id) do

@@ -371,7 +371,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       recipients
       |> Enum.map(fn recipient ->
         %{
-          id: "2025-04-oss",
+          id: Algora.Settings.get("email_campaign")["value"],
           subject: subject,
           recipient_email: recipient["email"],
           recipient: Algora.Util.term_to_base64(recipient),

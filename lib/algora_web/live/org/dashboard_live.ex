@@ -136,13 +136,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    current_org = socket.assigns.current_org
+    %{current_org: current_org, previewed_user: previewed_user} = socket.assigns
 
     stats = Bounties.fetch_stats(org_id: current_org.id, current_user: socket.assigns[:current_user])
 
     bounties =
       Bounties.list_bounties(
-        owner_id: current_org.id,
+        owner_id: previewed_user.id,
         limit: page_size(),
         status: :open,
         current_user: socket.assigns[:current_user]
@@ -505,8 +505,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
             {create_tip(assigns)}
           </div>
         </.section>
-
-        <.extras :if={is_nil(@current_context.handle)} />
       </div>
     </div>
     <.sidebar

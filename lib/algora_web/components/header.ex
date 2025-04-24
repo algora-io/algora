@@ -8,6 +8,7 @@ defmodule AlgoraWeb.Components.Header do
   defp nav_links do
     [
       %{name: "Bounties", path: ~p"/bounties"},
+      %{name: "Jobs", path: ~p"/jobs"},
       %{name: "Testimonials", path: ~p"/testimonials"},
       %{name: "Crowdfund", path: ~p"/crowdfund"},
       %{name: "Docs", path: ~p"/docs"},
@@ -19,7 +20,7 @@ defmodule AlgoraWeb.Components.Header do
     ~H"""
     <header class="absolute inset-x-0 top-0 z-50">
       <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
-        <div class="flex lg:flex-1">
+        <div class="flex">
           <.wordmark class="h-8 w-auto text-foreground" />
         </div>
         <!-- Mobile menu button -->
@@ -34,18 +35,19 @@ defmodule AlgoraWeb.Components.Header do
           </button>
         </div>
         <!-- Desktop nav -->
-        <div class="hidden lg:flex lg:gap-x-12">
+        <div class="hidden lg:flex gap-4 mx-auto">
           <%= for link <- nav_links() do %>
-            <.link
+            <.button
               navigate={link.path}
-              class="text-sm/6 font-medium text-foreground/80 hover:text-foreground"
+              variant="ghost"
+              class="font-semibold text-foreground/80 hover:text-foreground"
             >
               {link.name}
-            </.link>
+            </.button>
           <% end %>
         </div>
 
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-2">
+        <div class="hidden lg:flex lg:justify-end gap-2">
           <.link
             :if={Algora.Stargazer.count()}
             class="group w-fit outline-none items-center hidden lg:flex"
@@ -59,8 +61,10 @@ defmodule AlgoraWeb.Components.Header do
                   name="github"
                   class="mr-0.5 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
                 />
-                <span class="hidden xl:block">Star</span>
-                <span class="font-semibold text-foreground/80 group-hover:text-foreground">
+                <span class="hidden xl:block text-foreground/80 group-hover:text-foreground">
+                  Star
+                </span>
+                <span class="font-semibold text-foreground/90 group-hover:text-foreground">
                   {Algora.Stargazer.count()}
                 </span>
               </div>
@@ -81,7 +85,7 @@ defmodule AlgoraWeb.Components.Header do
       <!-- Mobile menu -->
       <div id="mobile-menu" class="lg:hidden hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 z-50"></div>
-        <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border">
+        <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-border scrollbar-thin">
           <!-- Mobile menu content -->
           <div class="flex items-center justify-between">
             <.wordmark class="h-8 w-auto text-foreground" />

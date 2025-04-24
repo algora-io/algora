@@ -71,7 +71,7 @@ defmodule AlgoraWeb.JobsLive do
           <% else %>
             <div class="grid gap-12">
               <%= for {user, jobs} <- @jobs_by_user do %>
-                <.card class="flex flex-col gap-6 p-6">
+                <.card class="flex flex-col p-6">
                   <div class="flex items-center gap-4">
                     <.avatar class="h-12 w-12">
                       <.avatar_image src={user.avatar_url} />
@@ -89,10 +89,10 @@ defmodule AlgoraWeb.JobsLive do
                     </div>
                   </div>
 
-                  <div class="grid gap-4">
+                  <div class="pt-8 grid gap-8">
                     <%= for job <- jobs do %>
                       <div class="flex justify-between gap-4">
-                        <div class="flex flex-col gap-2">
+                        <div>
                           <div>
                             <.link
                               href={job.url}
@@ -102,10 +102,10 @@ defmodule AlgoraWeb.JobsLive do
                               {job.title}
                             </.link>
                           </div>
-                          <div class="text-sm text-muted-foreground">
+                          <div :if={job.description} class="pt-1 text-sm text-muted-foreground">
                             {job.description}
                           </div>
-                          <div class="flex flex-wrap gap-2">
+                          <div class="pt-2 flex flex-wrap gap-2">
                             <%= for tech <- job.tech_stack do %>
                               <.badge variant="outline">{tech}</.badge>
                             <% end %>
@@ -163,7 +163,12 @@ defmodule AlgoraWeb.JobsLive do
 
                   <div class="flex justify-between">
                     <div>
-                      <div :if={@user_metadata.ok?} class="flex items-center gap-4">
+                      <div
+                        :if={
+                          @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
+                        }
+                        class="flex items-center gap-4"
+                      >
                         <img
                           :if={get_in(@user_metadata.result, [:org, :favicon_url])}
                           src={get_in(@user_metadata.result, [:org, :favicon_url])}
@@ -204,14 +209,10 @@ defmodule AlgoraWeb.JobsLive do
   end
 
   def handle_event("email_changed", %{"value" => email}, socket) do
-    if socket.assigns.user_metadata.ok? do
-      {:noreply, socket}
-    else
-      {:noreply,
-       socket
-       |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
-       |> assign(:user_metadata, AsyncResult.loading())}
-    end
+    {:noreply,
+     socket
+     |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
+     |> assign(:user_metadata, AsyncResult.loading())}
   end
 
   @impl true

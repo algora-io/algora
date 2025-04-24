@@ -15,7 +15,7 @@ defmodule Algora.Jobs.JobPosting do
     field :status, Ecto.Enum, values: [:initialized, :processing, :active, :expired], null: false, default: :initialized
     field :expires_at, :utc_datetime_usec
 
-    belongs_to :user, User
+    belongs_to :user, User, null: false
 
     timestamps()
   end

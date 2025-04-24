@@ -13,7 +13,7 @@ defmodule Algora.Repo.Migrations.CreateJobPostings do
       add :email, :string, null: false
       add :status, :string, null: false, default: "initialized"
       add :expires_at, :utc_datetime_usec
-      add :user_id, references(:users, type: :string, on_delete: :restrict)
+      add :user_id, references(:users, type: :string, on_delete: :restrict), null: false
 
       timestamps()
     end

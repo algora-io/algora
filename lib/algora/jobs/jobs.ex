@@ -6,6 +6,7 @@ defmodule Algora.Jobs do
 
   alias Algora.Accounts
   alias Algora.Bounties.LineItem
+  alias Algora.Jobs.JobApplication
   alias Algora.Jobs.JobPosting
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -91,5 +92,19 @@ defmodule Algora.Jobs do
         {:ok, session.url}
       end
     end)
+  end
+
+  def create_application(job_id, user) do
+    %JobApplication{}
+    |> JobApplication.changeset(%{job_id: job_id, user_id: user.id})
+    |> Repo.insert()
+  end
+
+  def list_user_applications(user) do
+    JobApplication
+    |> where([a], a.user_id == ^user.id)
+    |> select([a], a.job_id)
+    |> Repo.all()
+    |> MapSet.new()
   end
 end

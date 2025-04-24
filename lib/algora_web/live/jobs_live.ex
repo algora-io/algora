@@ -2,6 +2,7 @@ defmodule AlgoraWeb.JobsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
   alias Algora.Jobs
   alias Algora.Jobs.JobPosting
 
@@ -16,7 +17,8 @@ defmodule AlgoraWeb.JobsLive do
      socket
      |> assign(:page_title, "Jobs")
      |> assign(:jobs, jobs)
-     |> assign(:form, to_form(changeset))}
+     |> assign(:form, to_form(changeset))
+     |> assign_user_applications()}
   end
 
   @impl true
@@ -64,6 +66,15 @@ defmodule AlgoraWeb.JobsLive do
                       </div>
                     </div>
                   </div>
+                  <%= if MapSet.member?(@user_applications, job.id) do %>
+                    <.button disabled class="opacity-50">
+                      <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
+                    </.button>
+                  <% else %>
+                    <.button phx-click="apply_job" phx-value-job-id={job.id}>
+                      <.icon name="github" class="h-4 w-4 mr-2" /> Apply with GitHub
+                    </.button>
+                  <% end %>
                 </div>
                 <div class="text-sm text-muted-foreground">
                   {job.description}
@@ -141,5 +152,35 @@ defmodule AlgoraWeb.JobsLive do
         Logger.error("Failed to create job posting: #{inspect(changeset)}")
         {:noreply, assign(socket, :form, to_form(changeset))}
     end
+  end
+
+  @impl true
+  def handle_event("apply_job", %{"job-id" => job_id}, socket) do
+    if socket.assigns[:current_user] do
+      if Accounts.has_fresh_token?(socket.assigns.current_user) do
+        case Jobs.create_application(job_id, socket.assigns.current_user) do
+          {:ok, _application} ->
+            {:noreply, assign_user_applications(socket)}
+
+          {:error, _changeset} ->
+            {:noreply, put_flash(socket, :error, "Failed to submit application. Please try again.")}
+        end
+      else
+        {:noreply, redirect(socket, external: Algora.Github.authorize_url())}
+      end
+    else
+      {:noreply, redirect(socket, external: Algora.Github.authorize_url())}
+    end
+  end
+
+  defp assign_user_applications(socket) do
+    user_applications =
+      if socket.assigns[:current_user] do
+        Jobs.list_user_applications(socket.assigns.current_user)
+      else
+        MapSet.new()
+      end
+
+    assign(socket, :user_applications, user_applications)
   end
 end

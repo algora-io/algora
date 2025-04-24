@@ -9,6 +9,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Tip
   alias Algora.Contracts.Contract
+  alias Algora.Jobs.JobPosting
   alias Algora.Payments
   alias Algora.Payments.Customer
   alias Algora.Payments.Transaction
@@ -147,12 +148,20 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
       claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      job_ids = txs |> Enum.map(& &1.job_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
 
       Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
       Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
       Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
       # TODO: add and use a new "paid" status for claims
       Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
+
+      {_, job_postings} =
+        Repo.update_all(from(j in JobPosting, where: j.id in ^job_ids, select: j), set: [status: :processing])
+
+      for job <- job_postings do
+        Algora.Admin.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :info)
+      end
 
       activities_result =
         txs

@@ -595,7 +595,7 @@ defmodule AlgoraWeb.CoreComponents do
             </div>
           </div>
         <% body -> %>
-          <p class="text-[0.8125rem] flex items-center gap-3 font-semibold">
+          <p class="pr-4 text-[0.8125rem] flex items-center gap-3 font-semibold">
             <.icon :if={@kind == :info} name="tabler-circle-check" class="h-6 w-6 text-success" />
             <.icon
               :if={@kind == :warning}

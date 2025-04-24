@@ -214,10 +214,16 @@ defmodule AlgoraWeb.JobsLive do
             {:noreply, put_flash(socket, :error, "Failed to submit application. Please try again.")}
         end
       else
-        {:noreply, redirect(socket, external: Algora.Github.authorize_url())}
+        {:noreply,
+         socket
+         |> push_event("store-session", %{user_return_to: "/jobs"})
+         |> redirect(external: Algora.Github.authorize_url())}
       end
     else
-      {:noreply, redirect(socket, external: Algora.Github.authorize_url())}
+      {:noreply,
+       socket
+       |> push_event("store-session", %{user_return_to: "/jobs"})
+       |> redirect(external: Algora.Github.authorize_url())}
     end
   end
 

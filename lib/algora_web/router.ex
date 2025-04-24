@@ -145,6 +145,8 @@ defmodule AlgoraWeb.Router do
 
     live "/0/bounties/:id", OG.BountyLive, :show
     get "/og/*path", OGImageController, :generate
+
+    post "/store-session", StoreSessionController, :create
   end
 
   scope "/api", AlgoraWeb.API do

@@ -1236,11 +1236,12 @@ defmodule AlgoraWeb.CoreComponents do
   attr :title, :string, default: nil
   attr :subtitle, :string, default: nil
   attr :link, :string, default: nil
+  attr :class, :string, default: nil
   slot :inner_block
 
   def section(assigns) do
     ~H"""
-    <div class="relative h-full">
+    <div class={classes(["relative h-full", @class])}>
       <div :if={@title} class="flex items-end justify-between pb-2">
         <div class="flex flex-col space-y-1.5">
           <h2 class="text-2xl font-semibold leading-none tracking-tight">{@title}</h2>

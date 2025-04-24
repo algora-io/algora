@@ -2,9 +2,12 @@ defmodule AlgoraWeb.JobsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import Ecto.Changeset
+
   alias Algora.Accounts
   alias Algora.Jobs
   alias Algora.Jobs.JobPosting
+  alias Phoenix.LiveView.AsyncResult
 
   require Logger
 
@@ -18,6 +21,7 @@ defmodule AlgoraWeb.JobsLive do
      |> assign(:page_title, "Jobs")
      |> assign(:jobs, jobs)
      |> assign(:form, to_form(changeset))
+     |> assign(:user_metadata, AsyncResult.loading())
      |> assign_user_applications()}
   end
 
@@ -103,20 +107,43 @@ defmodule AlgoraWeb.JobsLive do
               <div class="pt-1 text-base font-medium text-muted-foreground">
                 Reach thousands of developers looking for their next opportunity versed in your tech stack
               </div>
-              <.simple_form for={@form} phx-submit="create_job" class="mt-4 space-y-6">
+              <.simple_form
+                for={@form}
+                phx-change="validate_job"
+                phx-submit="create_job"
+                class="mt-4 space-y-6"
+              >
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <.input
                     field={@form[:email]}
                     label="Email"
                     data-domain-target
                     phx-hook="DeriveDomain"
+                    phx-blur="email_changed"
                   />
                   <.input field={@form[:company_name]} label="Company Name" />
                   <.input field={@form[:company_url]} label="Company Website" data-domain-source />
                   <.input field={@form[:url]} label="Job Posting URL" />
                 </div>
 
-                <div class="flex justify-end">
+                <div class="flex justify-between">
+                  <div>
+                    <div :if={@user_metadata.ok?} class="flex items-center gap-4">
+                      <img
+                        :if={get_in(@user_metadata.result, [:org, :favicon_url])}
+                        src={get_in(@user_metadata.result, [:org, :favicon_url])}
+                        class="h-12 w-12 rounded-full"
+                      />
+                      <div>
+                        <div class="text-lg text-foreground font-bold font-display">
+                          {get_change(@form.source, :company_name)}
+                        </div>
+                        <div class="text-sm text-muted-foreground">
+                          {get_change(@form.source, :company_url)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <.button class="flex items-center gap-2" phx-disable-with="Processing...">
                     Post Job
                   </.button>
@@ -138,6 +165,22 @@ defmodule AlgoraWeb.JobsLive do
   @impl true
   def handle_params(_params, _uri, socket) do
     {:noreply, socket}
+  end
+
+  def handle_event("email_changed", %{"value" => email}, socket) do
+    if socket.assigns.user_metadata.ok? do
+      {:noreply, socket}
+    else
+      {:noreply,
+       socket
+       |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
+       |> assign(:user_metadata, AsyncResult.loading())}
+    end
+  end
+
+  @impl true
+  def handle_event("validate_job", %{"job_posting" => params}, socket) do
+    {:noreply, assign(socket, :form, to_form(JobPosting.changeset(socket.assigns.form.source, params)))}
   end
 
   @impl true
@@ -176,6 +219,16 @@ defmodule AlgoraWeb.JobsLive do
     else
       {:noreply, redirect(socket, external: Algora.Github.authorize_url())}
     end
+  end
+
+  @impl true
+  def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
+    {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+  end
+
+  @impl true
+  def handle_async(:fetch_metadata, {:exit, reason}, socket) do
+    {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 
   defp assign_user_applications(socket) do

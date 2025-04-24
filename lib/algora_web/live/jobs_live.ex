@@ -258,20 +258,18 @@ defmodule AlgoraWeb.JobsLive do
 
   @impl true
   def handle_event("create_job", %{"job_posting" => params}, socket) do
-    case Jobs.create_job_posting(params) do
-      {:ok, job} ->
-        case Jobs.create_payment_session(job) do
-          {:ok, url} ->
-            {:noreply, redirect(socket, external: url)}
-
-          {:error, reason} ->
-            Logger.error("Failed to create payment session: #{inspect(reason)}")
-            {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
-        end
-
-      {:error, changeset} ->
-        Logger.error("Failed to create job posting: #{inspect(changeset)}")
+    with {:ok, user} <-
+           Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
+         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting(),
+         {:ok, url} <- Jobs.create_payment_session(job) do
+      {:noreply, redirect(socket, external: url)}
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}
+
+      {:error, reason} ->
+        Logger.error("Failed to create job posting: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
     end
   end
 

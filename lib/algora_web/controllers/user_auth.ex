@@ -165,6 +165,8 @@ defmodule AlgoraWeb.UserAuth do
         user
         |> Ecto.Changeset.change(last_active_at: DateTime.utc_now())
         |> Algora.Repo.update()
+
+        Algora.Repo.insert_activity(user, %{type: :user_online, notify_users: []})
       end)
     end
 

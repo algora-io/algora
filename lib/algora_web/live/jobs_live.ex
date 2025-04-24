@@ -91,8 +91,8 @@ defmodule AlgoraWeb.JobsLive do
 
                   <div class="grid gap-4">
                     <%= for job <- jobs do %>
-                      <div class="flex flex-col gap-2">
-                        <div class="flex items-start justify-between gap-4">
+                      <div class="flex justify-between gap-4">
+                        <div class="flex flex-col gap-2">
                           <div>
                             <.link
                               href={job.url}
@@ -102,24 +102,24 @@ defmodule AlgoraWeb.JobsLive do
                               {job.title}
                             </.link>
                           </div>
-                          <%= if MapSet.member?(@user_applications, job.id) do %>
-                            <.button disabled class="opacity-50">
-                              <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
-                            </.button>
-                          <% else %>
-                            <.button phx-click="apply_job" phx-value-job-id={job.id}>
-                              <.icon name="github" class="h-4 w-4 mr-2" /> Apply with GitHub
-                            </.button>
-                          <% end %>
+                          <div class="text-sm text-muted-foreground">
+                            {job.description}
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                            <%= for tech <- job.tech_stack do %>
+                              <.badge variant="outline">{tech}</.badge>
+                            <% end %>
+                          </div>
                         </div>
-                        <div class="text-sm text-muted-foreground">
-                          {job.description}
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                          <%= for tech <- job.tech_stack do %>
-                            <.badge variant="outline">{tech}</.badge>
-                          <% end %>
-                        </div>
+                        <%= if MapSet.member?(@user_applications, job.id) do %>
+                          <.button disabled class="opacity-50">
+                            <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
+                          </.button>
+                        <% else %>
+                          <.button phx-click="apply_job" phx-value-job-id={job.id}>
+                            <.icon name="github" class="h-4 w-4 mr-2" /> Apply with GitHub
+                          </.button>
+                        <% end %>
                       </div>
                     <% end %>
                   </div>

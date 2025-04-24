@@ -13,13 +13,14 @@ defmodule AlgoraWeb.JobsLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    jobs = Jobs.list_jobs()
+    # Group jobs by user
+    jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
     changeset = JobPosting.changeset(%JobPosting{}, %{})
 
     {:ok,
      socket
      |> assign(:page_title, "Jobs")
-     |> assign(:jobs, jobs)
+     |> assign(:jobs_by_user, jobs_by_user)
      |> assign(:form, to_form(changeset))
      |> assign(:user_metadata, AsyncResult.loading())
      |> assign_user_applications()}
@@ -30,7 +31,7 @@ defmodule AlgoraWeb.JobsLive do
     ~H"""
     <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
       <.section title="Jobs" subtitle="Open positions at top companies">
-        <%= if Enum.empty?(@jobs) do %>
+        <%= if Enum.empty?(@jobs_by_user) do %>
           <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
             <.card_header>
               <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -43,49 +44,58 @@ defmodule AlgoraWeb.JobsLive do
             </.card_header>
           </.card>
         <% else %>
-          <div class="grid gap-4">
-            <%= for job <- @jobs do %>
-              <.card class="flex flex-col gap-4 p-6">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="flex gap-4">
-                    <.avatar class="h-12 w-12">
-                      <.avatar_image src={job.user.avatar_url} />
-                      <.avatar_fallback>
-                        {Algora.Util.initials(job.user.name)}
-                      </.avatar_fallback>
-                    </.avatar>
-                    <div>
-                      <.link
-                        href={job.url}
-                        class="text-lg font-semibold hover:underline"
-                        target="_blank"
-                      >
-                        {job.title}
-                      </.link>
-                      <div class="text-sm text-muted-foreground">
-                        {job.company_name} •
-                        <.link href={job.company_url} rel="noopener" target="_blank">
-                          {job.company_url |> String.replace("https://", "")}
-                        </.link>
-                      </div>
+          <div class="grid gap-12">
+            <%= for {user, jobs} <- @jobs_by_user do %>
+              <.card class="flex flex-col gap-6 p-6">
+                <div class="flex items-center gap-4">
+                  <.avatar class="h-12 w-12">
+                    <.avatar_image src={user.avatar_url} />
+                    <.avatar_fallback>
+                      {Algora.Util.initials(user.name)}
+                    </.avatar_fallback>
+                  </.avatar>
+                  <div>
+                    <div class="text-lg font-semibold">
+                      {user.name}
+                    </div>
+                    <div class="text-sm text-muted-foreground">
+                      {user.bio}
                     </div>
                   </div>
-                  <%= if MapSet.member?(@user_applications, job.id) do %>
-                    <.button disabled class="opacity-50">
-                      <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
-                    </.button>
-                  <% else %>
-                    <.button phx-click="apply_job" phx-value-job-id={job.id}>
-                      <.icon name="github" class="h-4 w-4 mr-2" /> Apply with GitHub
-                    </.button>
-                  <% end %>
                 </div>
-                <div class="text-sm text-muted-foreground">
-                  {job.description}
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  <%= for tech <- job.tech_stack do %>
-                    <.badge variant="outline">{tech}</.badge>
+
+                <div class="grid gap-4">
+                  <%= for job <- jobs do %>
+                    <div class="flex flex-col gap-2">
+                      <div class="flex items-start justify-between gap-4">
+                        <div>
+                          <.link
+                            href={job.url}
+                            class="text-lg font-semibold hover:underline"
+                            target="_blank"
+                          >
+                            {job.title}
+                          </.link>
+                        </div>
+                        <%= if MapSet.member?(@user_applications, job.id) do %>
+                          <.button disabled class="opacity-50">
+                            <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
+                          </.button>
+                        <% else %>
+                          <.button phx-click="apply_job" phx-value-job-id={job.id}>
+                            <.icon name="github" class="h-4 w-4 mr-2" /> Apply with GitHub
+                          </.button>
+                        <% end %>
+                      </div>
+                      <div class="text-sm text-muted-foreground">
+                        {job.description}
+                      </div>
+                      <div class="flex flex-wrap gap-2">
+                        <%= for tech <- job.tech_stack do %>
+                          <.badge variant="outline">{tech}</.badge>
+                        <% end %>
+                      </div>
+                    </div>
                   <% end %>
                 </div>
               </.card>

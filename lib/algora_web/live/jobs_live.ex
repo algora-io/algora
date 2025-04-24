@@ -103,16 +103,21 @@ defmodule AlgoraWeb.JobsLive do
               <div class="pt-1 text-base font-medium text-muted-foreground">
                 Reach thousands of developers looking for their next opportunity versed in your tech stack
               </div>
-              <.simple_form for={@form} phx-submit="create_job" class="mt-4 space-y-4">
+              <.simple_form for={@form} phx-submit="create_job" class="mt-4 space-y-6">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <.input field={@form[:email]} label="Email" />
+                  <.input
+                    field={@form[:email]}
+                    label="Email"
+                    data-domain-target
+                    phx-hook="DeriveDomain"
+                  />
                   <.input field={@form[:company_name]} label="Company Name" />
-                  <.input field={@form[:company_url]} label="Company Website" />
+                  <.input field={@form[:company_url]} label="Company Website" data-domain-source />
                   <.input field={@form[:url]} label="Job Posting URL" />
                 </div>
 
                 <div class="flex justify-end">
-                  <.button size="lg" class="flex items-center gap-2" phx-disable-with="Processing...">
+                  <.button class="flex items-center gap-2" phx-disable-with="Processing...">
                     Post Job
                   </.button>
                 </div>

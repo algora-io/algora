@@ -51,7 +51,7 @@ defmodule AlgoraWeb.JobsLive do
             Jobs
           </h2>
           <p class="font-medium text-base text-muted-foreground">
-            Open positions at top companies
+            Open positions at top open source companies
           </p>
         </div>
 

@@ -156,9 +156,9 @@ defmodule AlgoraWeb.JobsLive do
                       phx-hook="DeriveDomain"
                       phx-blur="email_changed"
                     />
-                    <.input field={@form[:company_name]} label="Company Name" />
-                    <.input field={@form[:company_url]} label="Company Website" data-domain-source />
                     <.input field={@form[:url]} label="Job Posting URL" />
+                    <.input field={@form[:company_url]} label="Company URL" data-domain-source />
+                    <.input field={@form[:company_name]} label="Company Name" />
                   </div>
 
                   <div class="flex justify-between">
@@ -266,6 +266,17 @@ defmodule AlgoraWeb.JobsLive do
 
   @impl true
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
+    socket =
+      case get_change(socket.assigns.form.source, :company_name) do
+        nil ->
+          assign(socket,
+            form: to_form(change(socket.assigns.form.source, company_name: get_in(metadata, [:org, :og_title])))
+          )
+
+        _company_name ->
+          socket
+      end
+
     {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
   end
 

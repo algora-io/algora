@@ -8,10 +8,10 @@ defmodule Algora.Jobs.JobPosting do
     field :title, :string
     field :description, :string
     field :tech_stack, {:array, :string}, default: []
-    field :url, :string, null: false
-    field :company_name, :string, null: false
-    field :company_url, :string, null: false
-    field :email, :string, null: false
+    field :url, :string
+    field :company_name, :string
+    field :company_url, :string
+    field :email, :string
     field :status, Ecto.Enum, values: [:initialized, :processing, :active, :expired], null: false, default: :initialized
     field :expires_at, :utc_datetime_usec
 

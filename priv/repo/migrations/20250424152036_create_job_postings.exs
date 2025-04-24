@@ -7,10 +7,10 @@ defmodule Algora.Repo.Migrations.CreateJobPostings do
       add :title, :string
       add :description, :text
       add :tech_stack, {:array, :string}, default: []
-      add :url, :string, null: false
-      add :company_name, :string, null: false
-      add :company_url, :string, null: false
-      add :email, :string, null: false
+      add :url, :string
+      add :company_name, :string
+      add :company_url, :string
+      add :email, :string
       add :status, :string, null: false, default: "initialized"
       add :expires_at, :utc_datetime_usec
       add :user_id, references(:users, type: :string, on_delete: :restrict), null: false

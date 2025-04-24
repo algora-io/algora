@@ -96,40 +96,42 @@ defmodule AlgoraWeb.Org.BountiesNewLive do
         </div>
       </div>
 
-      <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-        <.stat_card
-          title="Open Bounties"
-          value={Money.to_string!(@stats.open_bounties_amount)}
-          subtext={"#{@stats.open_bounties_count} bounties"}
-          navigate={~p"/#{@org.handle}/bounties?status=open"}
-          icon="tabler-diamond"
-        />
-        <.stat_card
-          title="Total Awarded"
-          value={Money.to_string!(@stats.total_awarded_amount)}
-          subtext={@total_awarded_subtext}
-          navigate={~p"/#{@org.handle}/bounties?status=completed"}
-          icon="tabler-gift"
-        />
-        <.stat_card
-          title="Solvers"
-          value={@stats.solvers_count}
-          subtext={"+#{@stats.solvers_diff} from last month"}
-          navigate={~p"/#{@org.handle}/leaderboard"}
-          icon="tabler-user-code"
-        />
-        <.stat_card
-          title="Members"
-          value={@stats.members_count}
-          subtext=""
-          navigate={~p"/#{@org.handle}/team"}
-          icon="tabler-users"
-        />
-      </div>
+      <div class="mt-6 flex flex-col-reverse md:flex-col gap-6">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+          <.stat_card
+            title="Open Bounties"
+            value={Money.to_string!(@stats.open_bounties_amount)}
+            subtext={"#{@stats.open_bounties_count} bounties"}
+            navigate={~p"/#{@org.handle}/bounties?status=open"}
+            icon="tabler-diamond"
+          />
+          <.stat_card
+            title="Total Awarded"
+            value={Money.to_string!(@stats.total_awarded_amount)}
+            subtext={@total_awarded_subtext}
+            navigate={~p"/#{@org.handle}/bounties?status=completed"}
+            icon="tabler-gift"
+          />
+          <.stat_card
+            title="Solvers"
+            value={@stats.solvers_count}
+            subtext={"+#{@stats.solvers_diff} from last month"}
+            navigate={~p"/#{@org.handle}/leaderboard"}
+            icon="tabler-user-code"
+          />
+          <.stat_card
+            title="Members"
+            value={@stats.members_count}
+            subtext=""
+            navigate={~p"/#{@org.handle}/team"}
+            icon="tabler-users"
+          />
+        </div>
 
-      <.section>
-        {create_bounty(assigns)}
-      </.section>
+        <.section>
+          {create_bounty(assigns)}
+        </.section>
+      </div>
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Bounties Section -->

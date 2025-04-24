@@ -6,11 +6,13 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   import Ecto.Changeset
   import Ecto.Query
 
+  alias Algora.Accounts
   alias Algora.Activities.Jobs.SendCampaignEmail
   alias Algora.Admin
   alias Algora.Mailer
   alias Algora.Repo
   alias Algora.Settings
+  alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Repository
   alias AlgoraWeb.LocalStore
@@ -45,11 +47,15 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    timezone = if(params = get_connect_params(socket), do: params["timezone"])
+
     {:ok,
      socket
+     |> assign(:timezone, timezone)
      |> assign(:page_title, "Campaign")
      |> assign(:form, to_form(Campaign.changeset(%Campaign{})))
      |> assign(:repo_cache, %{})
+     |> assign(:user_cache, %{})
      |> assign_preview()}
   end
 
@@ -191,7 +197,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
                   :for={key <- @csv_columns |> Enum.filter(&(&1 != "repo_url"))}
                   label={key}
                 >
-                  <.cell value={row[key]} />
+                  <.cell value={row[key]} timezone={@timezone} />
                 </:col>
                 <:action :let={row}>
                   <.button type="button" phx-click="send_email" phx-value-email={row["email"]}>
@@ -217,6 +223,17 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     """
   end
 
+  defp cell(%{value: %DateTime{}} = assigns) do
+    ~H"""
+    <span :if={@timezone} class="tabular-nums whitespace-nowrap text-sm">
+      {Calendar.strftime(
+        DateTime.from_naive!(@value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
+        "%Y/%m/%d, %H:%M:%S"
+      )}
+    </span>
+    """
+  end
+
   defp cell(assigns) do
     ~H"""
     <span class="text-sm">
@@ -229,7 +246,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     Enum.reduce(data, template, fn {key, value}, acc ->
       case value do
         value when is_list(value) -> acc
-        _ -> String.replace(acc, "%{#{key}}", value)
+        _ -> String.replace(acc, "%{#{key}}", to_string(value))
       end
     end)
   end
@@ -248,6 +265,39 @@ defmodule AlgoraWeb.Admin.CampaignLive do
   end
 
   defp repo_key(_row), do: nil
+
+  defp assign_timestamps(socket) do
+    new_keys =
+      socket.assigns.csv_data
+      |> Enum.map(&Map.get(&1, "email"))
+      |> Enum.uniq()
+
+    new_cache =
+      Map.new(new_keys, fn key ->
+        user = Accounts.get_user_by_email(key)
+
+        if user do
+          {key, Util.next_occurrence_of_time(user.last_active_at || user.inserted_at)}
+        else
+          {key, Util.next_occurrence_of_time(Util.random_datetime())}
+        end
+      end)
+
+    updated_cache = Map.merge(socket.assigns.user_cache, new_cache)
+
+    csv_data =
+      Enum.map(socket.assigns.csv_data, fn row -> Map.put(row, "timestamp", Map.get(updated_cache, row["email"])) end)
+
+    csv_columns =
+      csv_data
+      |> Enum.flat_map(&Map.keys/1)
+      |> Enum.uniq()
+
+    socket
+    |> assign(:repo_cache, updated_cache)
+    |> assign(:csv_data, csv_data)
+    |> assign(:csv_columns, csv_columns)
+  end
 
   defp assign_repo_names(socket) do
     new_keys =
@@ -342,6 +392,7 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     socket
     |> assign(:csv_data, csv_data)
     |> assign_repo_names()
+    |> assign_timestamps()
   end
 
   defp assign_preview(socket) do
@@ -374,16 +425,16 @@ defmodule AlgoraWeb.Admin.CampaignLive do
           id: Algora.Settings.get("email_campaign")["value"],
           subject: subject,
           recipient_email: recipient["email"],
-          recipient: Algora.Util.term_to_base64(recipient),
+          recipient: Util.term_to_base64(recipient),
           template: template,
           from_name: from_name,
           from_email: from_email,
-          preheader: render_preview(preheader, recipient)
+          preheader: render_preview(preheader, recipient),
+          scheduled_at: recipient["timestamp"]
         }
       end)
-      |> Enum.with_index()
-      |> Enum.reduce_while(:ok, fn {args, index}, acc ->
-        case args |> SendCampaignEmail.new(schedule_in: 5 * index) |> Oban.insert() do
+      |> Enum.reduce_while(:ok, fn args, acc ->
+        case args |> SendCampaignEmail.new(scheduled_at: args[:scheduled_at]) |> Oban.insert() do
           {:ok, _} -> {:cont, acc}
           {:error, _} -> {:halt, :error}
         end

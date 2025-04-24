@@ -40,6 +40,7 @@ defmodule Algora.Payments.Transaction do
     belongs_to :claim, Algora.Bounties.Claim
     belongs_to :bounty, Algora.Bounties.Bounty
     belongs_to :tip, Algora.Bounties.Tip
+    belongs_to :job, Algora.Jobs.JobPosting
     belongs_to :linked_transaction, Algora.Payments.Transaction
 
     has_many :activities, {"transaction_activities", Activity}, foreign_key: :assoc_id

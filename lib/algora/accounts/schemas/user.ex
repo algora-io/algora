@@ -114,10 +114,10 @@ defmodule Algora.Accounts.User do
 
   def org_registration_changeset(params) do
     %User{}
-    |> cast(params, [:email])
+    |> cast(params, [:email, :display_name, :type])
     |> generate_id()
     |> validate_required([:email])
-    |> validate_email()
+    |> validate_unique_email()
   end
 
   @doc """
@@ -161,7 +161,7 @@ defmodule Algora.Accounts.User do
       |> generate_id()
       |> validate_required([:email, :handle])
       |> validate_handle()
-      |> validate_email()
+      |> validate_unique_email()
       |> unique_constraint(:email)
       |> unique_constraint(:handle)
       |> put_assoc(:identities, [identity_changeset])
@@ -219,7 +219,7 @@ defmodule Algora.Accounts.User do
       |> generate_id()
       |> validate_required([:email, :handle])
       |> validate_handle()
-      |> validate_email()
+      |> validate_unique_email()
       |> unique_constraint(:email)
       |> unique_constraint(:handle)
     else
@@ -249,7 +249,7 @@ defmodule Algora.Accounts.User do
     ])
     |> generate_id()
     |> validate_required([:type, :handle, :email])
-    |> validate_email()
+    |> validate_unique_email()
     |> unique_constraint(:handle)
     |> unique_constraint(:email)
   end
@@ -286,11 +286,16 @@ defmodule Algora.Accounts.User do
     cast(user, params, [:email, :signup_token])
   end
 
-  defp validate_email(changeset) do
+  def validate_email(changeset) do
     changeset
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
+  end
+
+  def validate_unique_email(changeset) do
+    changeset
+    |> validate_email()
     |> unsafe_validate_unique(:email, Algora.Repo)
     |> unique_constraint(:email)
   end

@@ -766,4 +766,22 @@ window.addEventListener("phx:open_popup", (e: CustomEvent) => {
   }
 });
 
+// Add event listener for storing session values
+window.addEventListener("phx:store-session", (event) => {
+  const token = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
+
+  console.log(event.detail);
+
+  fetch("/store-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify(event.detail),
+  });
+});
+
 export default Hooks;

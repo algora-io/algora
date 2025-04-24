@@ -236,82 +236,84 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   defp render_preview(_template, _data), do: nil
 
+  defp repo_key(%{"repo_url" => repo_url}) when repo_url != "" do
+    case repo_url |> String.split("/") |> Enum.take(-2) do
+      [owner, name] -> {owner, name}
+      _ -> nil
+    end
+  end
+
+  defp repo_key(%{"org_handle" => org_handle}) when org_handle != "" do
+    org_handle
+  end
+
+  defp repo_key(_row), do: nil
+
   defp assign_repo_names(socket) do
-    new_handles =
+    new_keys =
       socket.assigns.csv_data
-      |> Enum.filter(&(&1["repo_url"] == "" and &1["org_handle"] != ""))
-      |> Enum.map(& &1["org_handle"])
+      |> Enum.map(&repo_key/1)
+      |> Enum.reject(&is_nil/1)
       |> Enum.reject(&Map.has_key?(socket.assigns.repo_cache, &1))
       |> Enum.uniq()
 
     new_cache =
-      Map.new(new_handles, fn org_handle ->
+      Map.new(new_keys, fn key ->
+        filter =
+          case key do
+            {owner, name} ->
+              token = Admin.token()
+
+              with {:ok, repository} <- Workspace.ensure_repository(token, owner, name),
+                   {:ok, _tech_stack} <- Workspace.ensure_repo_tech_stack(token, repository) do
+                dynamic([r, _u], r.id == ^repository.id)
+              else
+                _ -> false
+              end
+
+            org_handle ->
+              dynamic([r, u], u.handle == ^org_handle)
+          end
+
         repo =
           Repo.one(
             from r in Repository,
               join: u in assoc(r, :user),
-              where: u.handle == ^org_handle,
+              where: ^filter,
               order_by: [desc: fragment("(?->>'stargazers_count')::integer", r.provider_meta)],
               select: %{
                 repo_owner: u.provider_login,
                 repo_name: r.name,
-                tech_stack: fragment("COALESCE(?, ?)", u.tech_stack, r.tech_stack)
+                tech_stack: fragment("COALESCE(NULLIF(?, '{}'), ?)", u.tech_stack, r.tech_stack)
               },
               limit: 1
           )
 
         if repo && repo.tech_stack != [] do
           matches = Settings.get_tech_matches(List.first(repo.tech_stack))
-          {org_handle, {repo, matches}}
+          {key, {repo, matches}}
         else
-          {org_handle, nil}
+          {key, nil}
         end
       end)
 
     updated_cache = Map.merge(socket.assigns.repo_cache, new_cache)
 
     csv_data =
-      Enum.map(socket.assigns.csv_data, fn row ->
-        cond do
-          is_binary(row["repo_url"]) and row["repo_url"] != "" ->
-            repo_url = row["repo_url"]
-            [owner, name] = repo_url |> String.split("/") |> Enum.take(-2)
-
-            token = Admin.token!()
-
-            with {:ok, repository} <- Workspace.ensure_repository(token, owner, name),
-                 {:ok, tech_stack} <- Workspace.ensure_repo_tech_stack(token, repository) do
-              matches = if tech_stack == [], do: [], else: Settings.get_tech_matches(List.first(tech_stack))
-
+      Enum.map(socket.assigns.csv_data, fn
+        row ->
+          case Map.get(updated_cache, repo_key(row)) do
+            {repo, matches} ->
               Map.merge(row, %{
-                "repo_owner" => repository.user.provider_login,
-                "repo_name" => repository.name,
-                "tech_stack" => repository.tech_stack,
+                "repo_owner" => repo.repo_owner,
+                "repo_name" => repo.repo_name,
+                "tech_stack" => repo.tech_stack,
                 "matches" => Enum.map(matches, & &1.user.handle)
               })
-            else
-              error ->
-                Logger.error("Failed to fetch repository #{owner}/#{name}: #{inspect(error)}")
-                row
-            end
 
-          org_handle = row["org_handle"] ->
-            case Map.get(updated_cache, org_handle) do
-              nil ->
-                row
-
-              {repo, matches} ->
-                Map.merge(row, %{
-                  "repo_owner" => repo.repo_owner,
-                  "repo_name" => repo.repo_name,
-                  "tech_stack" => repo.tech_stack,
-                  "matches" => Enum.map(matches, & &1.user.handle)
-                })
-            end
-
-          true ->
-            row
-        end
+            _ ->
+              row
+          end
       end)
 
     csv_columns =

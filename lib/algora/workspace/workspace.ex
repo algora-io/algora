@@ -461,6 +461,10 @@ defmodule Algora.Workspace do
     end
   end
 
+  def ensure_repo_tech_stack(_token, %{tech_stack: tech_stack}) when tech_stack != [] do
+    {:ok, tech_stack}
+  end
+
   def ensure_repo_tech_stack(token, repository) do
     with {:ok, languages} <- Github.list_repository_languages(token, repository.user.provider_login, repository.name) do
       top_languages =

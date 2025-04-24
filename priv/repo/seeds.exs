@@ -495,3 +495,30 @@ for {repo_name, issues} <- repos do
     end
   end
 end
+
+job_postings = [
+  %{
+    title: "Senior Backend Engineer",
+    description: "Help us scale our middle-out compression platform",
+    tech_stack: ["Python", "C++", "Rust"],
+    url: "https://piedpiper.com/careers/backend-engineer",
+    company_name: "Pied Piper",
+    company_url: "https://piedpiper.com",
+    email: "jobs@piedpiper.com",
+    user_id: pied_piper.id
+  },
+  %{
+    title: "Frontend Developer",
+    description: "Build beautiful interfaces for our compression platform",
+    tech_stack: ["JavaScript", "React", "TypeScript"],
+    url: "https://piedpiper.com/careers/frontend-developer",
+    company_name: "Pied Piper",
+    company_url: "https://piedpiper.com",
+    email: "jobs@piedpiper.com",
+    user_id: pied_piper.id
+  }
+]
+
+for job_attrs <- job_postings do
+  insert!(:job_posting, Map.put(job_attrs, :status, :active))
+end

@@ -410,7 +410,7 @@ defmodule Algora.Accounts do
   end
 
   def register_org(params) do
-    params |> User.org_registration_changeset() |> Repo.insert()
+    params |> User.org_registration_changeset() |> Repo.insert(returning: true)
   end
 
   def auto_join_orgs(user) do
@@ -441,10 +441,10 @@ defmodule Algora.Accounts do
     orgs
   end
 
-  def get_or_register_user(email) do
+  def get_or_register_user(email, attr \\ %{}) do
     res =
       case get_user_by_email(email) do
-        nil -> register_org(%{email: email})
+        nil -> attr |> Map.put(:email, email) |> register_org()
         user -> {:ok, user}
       end
 

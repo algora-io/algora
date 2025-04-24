@@ -299,6 +299,21 @@ defmodule Algora.Factory do
     }
   end
 
+  def job_posting_factory do
+    %Algora.Jobs.JobPosting{
+      id: Nanoid.generate(),
+      title: "Senior Software Engineer",
+      description: "Join our team to build the next generation of compression technology",
+      tech_stack: ["Python", "C++", "Rust"],
+      url: "https://piedpiper.com/careers/senior-engineer",
+      company_name: "Pied Piper",
+      company_url: "https://piedpiper.com",
+      email: "jobs@piedpiper.com",
+      status: :active,
+      expires_at: days_from_now(30)
+    }
+  end
+
   # Convenience API
   def insert!(factory_name, attributes \\ [])
 

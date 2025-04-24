@@ -205,7 +205,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   defp alert(%Stripe.Event{} = event, :ok) do
-    Algora.Admin.alert("Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=true", :info)
+    Algora.Admin.alert("Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=true", :debug)
   end
 
   defp alert(%Stripe.Event{} = event, {:error, error}) do

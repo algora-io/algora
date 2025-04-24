@@ -229,7 +229,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                    ) do
               Algora.Admin.alert(
                 "Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).",
-                :info
+                :debug
               )
 
               :ok
@@ -460,7 +460,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                  Invoice.pay(invoice, %{payment_method: customer.default_payment_method.provider_id, off_session: true}) do
             Algora.Admin.alert(
               "Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).",
-              :info
+              :debug
             )
 
             {:ok, tip}

@@ -73,18 +73,31 @@ defmodule AlgoraWeb.JobsLive do
               <%= for {user, jobs} <- @jobs_by_user do %>
                 <.card class="flex flex-col p-6">
                   <div class="flex items-center gap-4">
-                    <.avatar class="h-12 w-12">
+                    <.avatar class="h-16 w-16">
                       <.avatar_image src={user.avatar_url} />
                       <.avatar_fallback>
                         {Algora.Util.initials(user.name)}
                       </.avatar_fallback>
                     </.avatar>
                     <div>
-                      <div class="text-lg font-semibold">
+                      <div class="text-lg text-foreground font-bold font-display">
                         {user.name}
                       </div>
-                      <div class="text-sm text-muted-foreground">
+                      <div class="text-sm text-muted-foreground line-clamp-1">
                         {user.bio}
+                      </div>
+                      <div class="flex gap-2 items-center">
+                        <%= for {platform, icon} <- social_icons(),
+                      url = social_link(user, platform),
+                      not is_nil(url) do %>
+                          <.link
+                            href={url}
+                            target="_blank"
+                            class="text-muted-foreground hover:text-foreground"
+                          >
+                            <.icon name={icon} class="size-4" />
+                          </.link>
+                        <% end %>
                       </div>
                     </div>
                   </div>
@@ -161,25 +174,48 @@ defmodule AlgoraWeb.JobsLive do
                     <.input field={@form[:company_name]} label="Company Name" />
                   </div>
 
-                  <div class="flex justify-between">
+                  <div class="flex justify-between gap-4">
                     <div>
                       <div
                         :if={
                           @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
                         }
-                        class="flex items-center gap-4"
+                        class="flex items-center gap-3"
                       >
-                        <img
-                          :if={get_in(@user_metadata.result, [:org, :favicon_url])}
-                          src={get_in(@user_metadata.result, [:org, :favicon_url])}
-                          class="h-12 w-12 rounded-full"
-                        />
+                        <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
+                          <img src={logo} class="h-16 w-16 rounded-2xl" />
+                        <% end %>
                         <div>
                           <div class="text-lg text-foreground font-bold font-display">
                             {get_change(@form.source, :company_name)}
                           </div>
-                          <div class="text-sm text-muted-foreground">
-                            {get_change(@form.source, :company_url)}
+                          <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
+                            <div class="text-sm text-muted-foreground line-clamp-1">
+                              {description}
+                            </div>
+                          <% end %>
+                          <div class="flex gap-2 items-center">
+                            <%= if url = get_change(@form.source, :company_url) do %>
+                              <.link
+                                href={url}
+                                target="_blank"
+                                class="text-muted-foreground hover:text-foreground"
+                              >
+                                <.icon name="tabler-world" class="size-4" />
+                              </.link>
+                            <% end %>
+
+                            <%= for {platform, icon} <- social_icons(),
+                      url = get_in(@user_metadata.result, [:org, :socials, platform]),
+                      not is_nil(url) do %>
+                              <.link
+                                href={url}
+                                target="_blank"
+                                class="text-muted-foreground hover:text-foreground"
+                              >
+                                <.icon name={icon} class="size-4" />
+                              </.link>
+                            <% end %>
                           </div>
                         </div>
                       </div>
@@ -266,18 +302,10 @@ defmodule AlgoraWeb.JobsLive do
 
   @impl true
   def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    socket =
-      case get_change(socket.assigns.form.source, :company_name) do
-        nil ->
-          assign(socket,
-            form: to_form(change(socket.assigns.form.source, company_name: get_in(metadata, [:org, :og_title])))
-          )
-
-        _company_name ->
-          socket
-      end
-
-    {:noreply, assign(socket, :user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))}
+    {:noreply,
+     socket
+     |> assign(:user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))
+     |> assign(:form, to_form(change(socket.assigns.form.source, company_name: get_in(metadata, [:org, :og_title]))))}
   end
 
   @impl true
@@ -295,4 +323,20 @@ defmodule AlgoraWeb.JobsLive do
 
     assign(socket, :user_applications, user_applications)
   end
+
+  defp social_icons do
+    %{
+      website: "tabler-world",
+      github: "github",
+      twitter: "tabler-brand-x",
+      youtube: "tabler-brand-youtube",
+      twitch: "tabler-brand-twitch",
+      discord: "tabler-brand-discord",
+      slack: "tabler-brand-slack",
+      linkedin: "tabler-brand-linkedin"
+    }
+  end
+
+  defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
+  defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
 end

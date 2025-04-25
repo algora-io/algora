@@ -34,33 +34,31 @@ defmodule AlgoraWeb.Components.UserCard do
           <span class="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full sm:h-24 sm:w-24">
             <img class="aspect-square h-full w-full" alt={@name} src={@avatar_url} />
           </span>
-          <div class="flex flex-col items-center gap-2 pt-2 text-center">
-            <div>
-              <span class="block text-lg font-semibold text-white sm:text-xl">
-                {@name}
-              </span>
+          <div class="w-full flex flex-col items-center gap-2 pt-2 text-center">
+            <span class="block text-lg font-semibold text-white sm:text-xl">
+              {@name}
+            </span>
 
-              <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1 text-xs text-gray-300 sm:text-sm">
-                <div :if={@twitter_handle} class="flex items-center gap-1">
-                  <.icon name="tabler-brand-twitter" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@twitter_handle}</span>
-                </div>
-                <div :if={@location} class="flex items-center gap-1">
-                  <.icon name="tabler-map-pin" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@location}</span>
-                </div>
-                <div :if={@company} class="flex items-center gap-1">
-                  <.icon name="tabler-building" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">
-                    {@company |> String.trim_leading("@")}
-                  </span>
-                </div>
+            <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1 text-xs text-gray-300 sm:text-sm">
+              <div :if={@twitter_handle} class="flex items-center gap-1">
+                <.icon name="tabler-brand-twitter" class="shrink-0 h-4 w-4" />
+                <span class="line-clamp-1 text-left">{@twitter_handle}</span>
               </div>
-
-              <span class="line-clamp-3 pt-2 text-xs text-gray-300 sm:text-sm">
-                {@bio}
-              </span>
+              <div :if={@location} class="flex items-center gap-1">
+                <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
+                <span class="line-clamp-1 text-left">{@location}</span>
+              </div>
+              <div :if={@company} class="flex items-center gap-1">
+                <.icon name="tabler-building" class="shrink-0 h-4 w-4" />
+                <span class="line-clamp-1 text-left">
+                  {@company |> String.trim_leading("@")}
+                </span>
+              </div>
             </div>
+
+            <span class="line-clamp-3 pt-2 text-xs text-gray-300 sm:text-sm">
+              {@bio}
+            </span>
           </div>
         </div>
       </div>

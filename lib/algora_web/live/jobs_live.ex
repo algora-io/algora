@@ -72,7 +72,7 @@ defmodule AlgoraWeb.JobsLive do
             <div class="grid gap-12">
               <%= for {user, jobs} <- @jobs_by_user do %>
                 <.card class="flex flex-col p-6">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-start md:items-center gap-4">
                     <.avatar class="h-16 w-16">
                       <.avatar_image src={user.avatar_url} />
                       <.avatar_fallback>
@@ -83,7 +83,7 @@ defmodule AlgoraWeb.JobsLive do
                       <div class="text-lg text-foreground font-bold font-display">
                         {user.name}
                       </div>
-                      <div class="text-sm text-muted-foreground line-clamp-1">
+                      <div class="text-sm text-muted-foreground line-clamp-2 md:line-clamp-1">
                         {user.bio}
                       </div>
                       <div class="flex gap-2 items-center">
@@ -104,7 +104,7 @@ defmodule AlgoraWeb.JobsLive do
 
                   <div class="pt-8 grid gap-8">
                     <%= for job <- jobs do %>
-                      <div class="flex justify-between gap-4">
+                      <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div>
                           <div>
                             <.link

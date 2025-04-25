@@ -447,7 +447,6 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       {:ok, {preview, attachments}} ->
         Email.new()
         |> Email.to(opts[:recipient]["email"])
-        |> Email.bcc(opts[:from])
         |> Email.from(opts[:from])
         |> Email.subject(opts[:subject])
         |> Email.text_body(Mailer.text_template(markdown: preview))

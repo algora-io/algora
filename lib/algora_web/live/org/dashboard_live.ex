@@ -63,7 +63,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     %{current_org: current_org} = socket.assigns
 
     if Member.can_create_bounty?(socket.assigns.current_user_role) do
@@ -92,6 +92,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
+       |> assign(:page_title, "#{header_prefix(current_org)}")
+       |> assign(
+         :page_description,
+         "Share bounties, tips or contracts with #{header_prefix(current_org)} contributors and Algora matches"
+       )
+       |> assign(:screenshot?, not is_nil(params["screenshot"]))
        |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
        |> assign(:admins_last_active, admins_last_active)
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
@@ -130,13 +136,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    current_org = socket.assigns.current_org
+    %{current_org: current_org, previewed_user: previewed_user} = socket.assigns
 
     stats = Bounties.fetch_stats(org_id: current_org.id, current_user: socket.assigns[:current_user])
 
     bounties =
       Bounties.list_bounties(
-        owner_id: current_org.id,
+        owner_id: previewed_user.id,
         limit: page_size(),
         status: :open,
         current_user: socket.assigns[:current_user]
@@ -194,7 +200,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   def render(assigns) do
     ~H"""
     <div class="lg:pr-96">
-      <div class="container mx-auto max-w-7xl space-y-8 lg:space-y-16 p-4 sm:p-6 lg:p-8">
+      <div class="container mx-auto max-w-7xl space-y-8 xl:space-y-16 p-4 sm:p-6 lg:p-8">
         <.section :if={@payable_bounties != %{}}>
           <.card>
             <.card_header>
@@ -320,13 +326,19 @@ defmodule AlgoraWeb.Org.DashboardLive do
           title={"#{header_prefix(@previewed_user)} Contributors"}
           subtitle="Share bounties, tips or contract opportunities with your top contributors"
         >
-          <div class="relative w-full overflow-auto max-h-[400px] scrollbar-thin">
+          <div class="relative w-full overflow-auto max-h-[250px] scrollbar-thin">
             <table class="w-full caption-bottom text-sm">
               <tbody>
                 <%= for %Contributor{user: user} <- @contributors do %>
                   <.developer_card
                     user={user}
                     contract_for_user={contract_for_user(@contracts, user)}
+                    contract_type={
+                      if(Enum.find(@matches, &(&1.user.id == user.id)),
+                        do: "marketplace",
+                        else: "bring_your_own"
+                      )
+                    }
                     current_org={@current_org}
                   />
                 <% end %>
@@ -344,9 +356,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.getting_started
                 id="getting_started_main"
                 achievements={
-                  if incomplete?(@achievements, :complete_signin_status),
-                    do: @achievements |> Enum.take(1),
-                    else: @achievements
+                  if incomplete?(@achievements, :complete_signin_status) or
+                       incomplete?(@achievements, :complete_signup_status),
+                     do: @achievements |> Enum.take(1),
+                     else: @achievements
                 }
                 current_user={@current_user}
                 current_org={@current_org}
@@ -364,6 +377,23 @@ defmodule AlgoraWeb.Org.DashboardLive do
           subtitle="Top 1% Algora developers in your tech stack available to hire now"
         >
           <div class="relative w-full flex flex-col gap-4">
+            <div :if={!@screenshot?} class="lg:pb-2 lg:pt-4 flex flex-col lg:flex-row gap-4 lg:gap-4">
+              <h3 class="text-lg font-semibold whitespace-nowrap">How it works</h3>
+              <ul class="xl:mx-auto flex flex-col md:flex-row gap-2 md:gap-4 2xl:gap-6 text-xs font-medium">
+                <li class="flex items-center">
+                  <.icon name="tabler-circle-number-1 mr-2" class="size-6 text-success-400 shrink-0" />
+                  Authorize payment to send offer
+                </li>
+                <li class="flex items-center">
+                  <.icon name="tabler-circle-number-2 mr-2" class="size-6 text-success-400 shrink-0" />
+                  Escrowed when developer accepts
+                </li>
+                <li class="flex items-center">
+                  <.icon name="tabler-circle-number-3 mr-2" class="size-6 text-success-400 shrink-0" />
+                  Release/withhold escrow end of week
+                </li>
+              </ul>
+            </div>
             <%= for match <- @matches do %>
               <.match_card
                 match={match}
@@ -386,6 +416,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
                   <.developer_card
                     user={user}
                     contract_for_user={contract_for_user(@contracts, user)}
+                    contract_type={
+                      if(Enum.find(@matches, &(&1.user.id == user.id)),
+                        do: "marketplace",
+                        else: "bring_your_own"
+                      )
+                    }
                     current_org={@current_org}
                   />
                 <% end %>
@@ -630,24 +666,31 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def handle_event("share_opportunity", %{"user_id" => user_id, "type" => "contract"}, socket) do
+  def handle_event(
+        "share_opportunity",
+        %{"user_id" => user_id, "type" => "contract", "contract_type" => contract_type},
+        socket
+      ) do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
     match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
+    hourly_rate = match[:hourly_rate]
 
-    amount =
-      if hourly_rate = match[:hourly_rate] do
-        Money.mult!(hourly_rate, developer.hours_per_week || 30)
-      end
+    hours_per_week = developer.hours_per_week || 30
 
     {:noreply,
      socket
      |> assign(:main_contract_form_open?, true)
      |> assign(
        :main_contract_form,
-       %ContractForm{}
+       %ContractForm{
+         contract_type: String.to_existing_atom(contract_type),
+         contractor: match[:user] || developer
+       }
        |> ContractForm.changeset(%{
+         amount: if(hourly_rate, do: Money.mult!(hourly_rate, hours_per_week)),
+         hourly_rate: hourly_rate,
          contractor_handle: developer.provider_login,
-         amount: amount,
+         hours_per_week: hours_per_week,
          title: "#{socket.assigns.current_org.name} OSS Development",
          description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
        })
@@ -1172,7 +1215,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
               <div
                 :if={@user.provider_meta}
-                class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm max-w-[250px] 2xl:max-w-none truncate"
               >
                 <.link
                   :if={@user.provider_login}
@@ -1219,7 +1262,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="bounty"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-white/50 hover:border-blue-400/50 focus:border-blue-400/50"
+              class="group bg-blue-900/10 text-blue-300 transition-colors duration-75 hover:bg-blue-800/10 hover:text-blue-300 hover:drop-shadow-[0_1px_5px_#60a5fa80] focus:bg-blue-800/10 focus:text-blue-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#60a5fa80] border border-blue-400/40 hover:border-blue-400/50 focus:border-blue-400/50"
             >
               <.icon name="tabler-diamond" class="size-4 text-current mr-2 -ml-1" /> Bounty
             </.button>
@@ -1228,7 +1271,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-value-user_id={@user.id}
               phx-value-type="tip"
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-red-800/10 hover:text-red-300 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-800/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-white/50 hover:border-red-400/50 focus:border-red-400/50"
+              class="group bg-red-900/10 text-red-300 transition-colors duration-75 hover:bg-red-800/10 hover:text-red-300 hover:drop-shadow-[0_1px_5px_#f8717180] focus:bg-red-800/10 focus:text-red-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#f8717180] border border-red-400/40 hover:border-red-400/50 focus:border-red-400/50"
             >
               <.icon name="tabler-heart" class="size-4 text-current mr-2 -ml-1" /> Tip
             </.button>
@@ -1254,8 +1297,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
               phx-click="share_opportunity"
               phx-value-user_id={@user.id}
               phx-value-type="contract"
+              phx-value-contract_type={@contract_type}
               variant="none"
-              class="group bg-card text-foreground transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-white/50 hover:border-emerald-400/50 focus:border-emerald-400/50"
+              class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50"
             >
               <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
             </.button>
@@ -1286,84 +1330,65 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 sm:gap-8 xl:gap-4 2xl:gap-8 border bg-card rounded-xl text-card-foreground shadow p-6">
-      <div class="xl:basis-[35%] truncate">
-        <div class="flex items-center gap-4">
-          <.link navigate={User.url(@match.user)}>
-            <.avatar class="h-16 w-16 rounded-full">
-              <.avatar_image src={@match.user.avatar_url} alt={@match.user.name} />
-              <.avatar_fallback class="rounded-lg">
-                {Algora.Util.initials(@match.user.name)}
-              </.avatar_fallback>
-            </.avatar>
-          </.link>
+    <div class="relative flex flex-col lg:flex-row xl:items-center lg:justify-between gap-4 sm:gap-8 lg:gap-4 xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-4 pt-8">
+      <div class="lg:basis-[52%] w-full truncate">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <.link navigate={User.url(@match.user)}>
+              <.avatar class="h-16 w-16 rounded-full">
+                <.avatar_image src={@match.user.avatar_url} alt={@match.user.name} />
+                <.avatar_fallback class="rounded-lg">
+                  {Algora.Util.initials(@match.user.name)}
+                </.avatar_fallback>
+              </.avatar>
+            </.link>
 
-          <div>
-            <div class="flex items-center gap-4 text-foreground">
-              <.link
-                navigate={User.url(@match.user)}
-                class="text-base sm:text-lg font-semibold hover:underline"
+            <div>
+              <div class="flex items-center gap-4 text-foreground">
+                <.link
+                  navigate={User.url(@match.user)}
+                  class="text-base sm:text-lg font-semibold hover:underline"
+                >
+                  {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
+                </.link>
+                <.badge
+                  :if={@match.badge_text}
+                  variant={@match.badge_variant}
+                  size="lg"
+                  class="shrink-0 absolute top-0 left-0"
+                >
+                  {@match.badge_text}
+                </.badge>
+              </div>
+              <div
+                :if={@match.user.provider_meta}
+                class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
               >
-                {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
-              </.link>
-              <.badge
-                :if={@match.badge_text}
-                variant={@match.badge_variant}
-                size="lg"
-                class="shrink-0 absolute top-0 left-0"
-              >
-                {@match.badge_text}
-              </.badge>
-            </div>
-            <div
-              :if={@match.user.provider_meta}
-              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
-            >
-              <.link
-                :if={@match.user.provider_login}
-                href={"https://github.com/#{@match.user.provider_login}"}
-                target="_blank"
-                class="flex items-center gap-1 hover:underline"
-              >
-                <Logos.github class="shrink-0 h-4 w-4" />
-                <span class="line-clamp-1">{@match.user.provider_login}</span>
-              </.link>
-              <.link
-                :if={@match.user.provider_meta["twitter_handle"]}
-                href={"https://x.com/#{@match.user.provider_meta["twitter_handle"]}"}
-                target="_blank"
-                class="flex items-center gap-1 hover:underline"
-              >
-                <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
-                <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
-              </.link>
-            </div>
-            <div
-              :if={@match[:hourly_rate]}
-              class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground sm:text-sm"
-            >
-              <span class="font-semibold font-display text-base sm:text-lg text-emerald-400">
-                {Money.to_string!(@match[:hourly_rate])}/hr
-              </span>
+                <.link
+                  :if={@match.user.provider_login}
+                  href={"https://github.com/#{@match.user.provider_login}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <Logos.github class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@match.user.provider_login}</span>
+                </.link>
+                <.link
+                  :if={@match.user.provider_meta["twitter_handle"]}
+                  href={"https://x.com/#{@match.user.provider_meta["twitter_handle"]}"}
+                  target="_blank"
+                  class="flex items-center gap-1 hover:underline"
+                >
+                  <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
+                </.link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="flex xl:flex-col gap-2 xl:basis-[5%] xl:ml-auto">
-        <.button
-          phx-click="share_opportunity"
-          phx-value-user_id={@match.user.id}
-          phx-value-type="contract"
-        >
-          <.icon name="tabler-contract" class="size-4 text-current mr-2 -ml-1" /> Contract
-        </.button>
-      </div>
-
-      <div class="pt-2 xl:pt-0 xl:pl-4 2xl:pl-8 xl:basis-[60%] xl:border-l xl:border-border">
-        <div class="text-sm sm:text-base text-foreground font-medium">
+        <div class="pt-4 text-sm sm:text-base text-muted-foreground font-medium">
           Completed
-          <span class="font-semibold font-display text-emerald-400">
+          <span class="font-semibold font-display text-foreground/80">
             {@match.user.transactions_count}
             {ngettext(
               "bounty",
@@ -1372,7 +1397,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             )}
           </span>
           across
-          <span class="font-semibold font-display text-emerald-400">
+          <span class="font-semibold font-display text-foreground/80">
             {ngettext(
               "%{count} project",
               "%{count} projects",
@@ -1380,7 +1405,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             )}
           </span>
         </div>
-        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap 2xl:flex-nowrap gap-4 xl:gap-4 2xl:gap-8">
+        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap gap-4 lg:gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
               navigate={User.url(project)}
@@ -1393,7 +1418,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </.avatar_fallback>
               </.avatar>
               <div class="flex flex-col">
-                <div class="text-base font-medium text-muted-foreground">
+                <div class="text-base font-medium text-foreground/80">
                   {project.name}
                 </div>
 
@@ -1404,7 +1429,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     )}
                   </div>
                   <div class="text-sm text-muted-foreground">
-                    <span class="text-foreground font-display font-semibold">
+                    <span class="text-foreground/80 font-display font-semibold">
                       {total_earned}
                     </span>
                     awarded
@@ -1414,6 +1439,41 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.link>
           <% end %>
         </div>
+      </div>
+
+      <div class="pt-2 lg:pt-0 lg:pl-4 xl:pl-6 lg:basis-[48%] w-full lg:border-l lg:border-border">
+        <dl :if={@match[:hourly_rate]} class="pt-4 lg:pt-0">
+          <div class="flex flex-col-reverse 3xl:flex-row justify-between items-center gap-2">
+            <dt class="text-foreground text-center">
+              Total payment for <span class="font-semibold">{@match.user.hours_per_week || 30}</span>
+              hours
+              <div class="text-[12px] text-muted-foreground">
+                (includes all platform and payment processing fees)
+              </div>
+            </dt>
+            <div class="flex flex-col items-center gap-2">
+              <.button
+                phx-click="share_opportunity"
+                phx-value-user_id={@match.user.id}
+                phx-value-type="contract"
+                phx-value-contract_type="marketplace"
+                variant="none"
+                class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-full py-4"
+                size="xl"
+              >
+                <div class="flex flex-col items-center gap-1 font-semibold">
+                  <span>Offer contract</span>
+                  <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
+                    {@match[:hourly_rate]
+                    |> Money.mult!(@match.user.hours_per_week || 30)
+                    |> Bounties.calculate_contract_amount()
+                    |> Money.to_string!(no_fraction_if_integer: false)} / week
+                  </dd>
+                </div>
+              </.button>
+            </div>
+          </div>
+        </dl>
       </div>
     </div>
     """
@@ -1522,7 +1582,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
         :if={length(@achievements) > 1}
         id="getting_started_sidebar"
         class="pb-12"
-        achievements={@achievements}
+        achievements={
+          if incomplete?(@achievements, :complete_signin_status) or
+               incomplete?(@achievements, :complete_signup_status),
+             do: @achievements |> Enum.take(1),
+             else: @achievements
+        }
         current_user={@current_user}
         current_org={@current_org}
         secret={@secret}
@@ -1953,7 +2018,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       <.drawer_content :if={@selected_developer} class="mt-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <.share_drawer_developer_info selected_developer={@selected_developer} />
-          <%= if incomplete?(@achievements, :connect_github_status) do %>
+          <%= if @live_action == :preview or incomplete?(@achievements, :connect_github_status) do %>
             <div class="relative">
               <div class="absolute inset-0 z-10 bg-background/50" />
               <div class="pointer-events-none">

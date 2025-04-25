@@ -126,21 +126,27 @@ defmodule AlgoraWeb.Org.Nav do
         amount =
           case data.type do
             :fixed -> data.amount
-            :hourly -> data.hourly_rate
+            :hourly -> Money.mult!(data.hourly_rate, data.hours_per_week)
           end
 
         bounty_res =
           Bounties.create_bounty(
             %{
+              amount:
+                case data.contract_type do
+                  :marketplace -> Bounties.calculate_contract_amount(amount)
+                  :bring_your_own -> amount
+                end,
               creator: socket.assigns.current_user,
               owner: socket.assigns.current_org,
-              amount: amount,
               title: data.title,
               description: data.description
             },
+            hourly_rate: data.hourly_rate,
             hours_per_week: data.hours_per_week,
             shared_with: [data.contractor.provider_id],
-            visibility: :exclusive
+            visibility: :exclusive,
+            contract_type: data.contract_type
           )
 
         case bounty_res do

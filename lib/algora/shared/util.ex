@@ -203,4 +203,41 @@ defmodule Algora.Util do
 
     String.contains?(s1, s2) or String.contains?(s2, s1)
   end
+
+  def next_occurrence_of_time(datetime) do
+    now = DateTime.utc_now()
+
+    if DateTime.after?(datetime, now) do
+      datetime
+    else
+      %{hour: hour, minute: minute, second: second, microsecond: microsecond} = datetime
+
+      now
+      |> DateTime.truncate(:second)
+      |> Map.put(:hour, hour)
+      |> Map.put(:minute, minute)
+      |> Map.put(:second, second)
+      |> Map.put(:microsecond, microsecond)
+      |> then(fn target_time ->
+        if DateTime.after?(target_time, now) do
+          target_time
+        else
+          DateTime.add(target_time, 24 * 60 * 60, :second)
+        end
+      end)
+    end
+  end
+
+  def random_datetime(opts \\ []) do
+    now = DateTime.utc_now()
+    from = Keyword.get(opts, :from, DateTime.add(now, -365, :day))
+    to = Keyword.get(opts, :to, now)
+
+    from_unix = DateTime.to_unix(from)
+    to_unix = DateTime.to_unix(to)
+
+    from_unix..to_unix
+    |> Enum.random()
+    |> DateTime.from_unix!()
+  end
 end

@@ -52,7 +52,9 @@ defmodule Algora.Bounties do
           ticket: Ticket.t(),
           visibility: Bounty.visibility(),
           shared_with: [String.t()],
-          hours_per_week: integer() | nil
+          hours_per_week: integer() | nil,
+          hourly_rate: Money.t() | nil,
+          contract_type: Bounty.contract_type() | nil
         }) ::
           {:ok, Bounty.t()} | {:error, atom()}
   defp do_create_bounty(%{creator: creator, owner: owner, amount: amount, ticket: ticket} = params) do
@@ -64,7 +66,9 @@ defmodule Algora.Bounties do
         creator_id: creator.id,
         visibility: params[:visibility] || owner.bounty_mode,
         shared_with: params[:shared_with] || [],
-        hours_per_week: params[:hours_per_week]
+        hours_per_week: params[:hours_per_week],
+        hourly_rate: params[:hourly_rate],
+        contract_type: params[:contract_type]
       })
 
     changeset
@@ -112,7 +116,9 @@ defmodule Algora.Bounties do
             command_source: :ticket | :comment,
             visibility: Bounty.visibility() | nil,
             shared_with: [String.t()] | nil,
-            hours_per_week: integer() | nil
+            hourly_rate: Money.t() | nil,
+            hours_per_week: integer() | nil,
+            contract_type: Bounty.contract_type() | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -144,7 +150,9 @@ defmodule Algora.Bounties do
                     ticket: ticket,
                     visibility: opts[:visibility],
                     shared_with: shared_with,
-                    hours_per_week: opts[:hours_per_week]
+                    hourly_rate: opts[:hourly_rate],
+                    hours_per_week: opts[:hours_per_week],
+                    contract_type: opts[:contract_type]
                   })
 
                 :set ->
@@ -195,7 +203,9 @@ defmodule Algora.Bounties do
             strategy: strategy(),
             visibility: Bounty.visibility() | nil,
             shared_with: [String.t()] | nil,
-            hours_per_week: integer() | nil
+            hours_per_week: integer() | nil,
+            hourly_rate: Money.t() | nil,
+            contract_type: Bounty.contract_type() | nil
           ]
         ) ::
           {:ok, Bounty.t()} | {:error, atom()}
@@ -215,7 +225,9 @@ defmodule Algora.Bounties do
                ticket: ticket,
                visibility: opts[:visibility],
                shared_with: shared_with,
-               hours_per_week: opts[:hours_per_week]
+               hours_per_week: opts[:hours_per_week],
+               hourly_rate: opts[:hourly_rate],
+               contract_type: opts[:contract_type]
              }),
            {:ok, _job} <- notify_bounty(%{owner: owner, bounty: bounty}) do
         broadcast()
@@ -769,7 +781,12 @@ defmodule Algora.Bounties do
             bounty: Bounty.t(),
             claims: [Claim.t()]
           },
-          opts :: [ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()}, recipient: User.t()]
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            recipient: User.t(),
+            success_url: String.t(),
+            cancel_url: String.t()
+          ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
   def reward_bounty(%{owner: owner, amount: amount, bounty: bounty, claims: claims}, opts \\ []) do
@@ -778,7 +795,37 @@ defmodule Algora.Bounties do
       ticket_ref: opts[:ticket_ref],
       bounty: bounty,
       claims: claims,
-      recipient: opts[:recipient]
+      recipient: opts[:recipient],
+      success_url: opts[:success_url],
+      cancel_url: opts[:cancel_url]
+    )
+  end
+
+  @spec authorize_payment(
+          %{
+            owner: User.t(),
+            amount: Money.t(),
+            bounty: Bounty.t(),
+            claims: [Claim.t()]
+          },
+          opts :: [
+            ticket_ref: %{owner: String.t(), repo: String.t(), number: integer()},
+            recipient: User.t(),
+            success_url: String.t(),
+            cancel_url: String.t()
+          ]
+        ) ::
+          {:ok, String.t()} | {:error, atom()}
+  def authorize_payment(%{owner: owner, amount: amount, bounty: bounty, claims: claims}, opts \\ []) do
+    create_payment_session(
+      %{owner: owner, amount: amount, description: "Bounty payment for OSS contributions"},
+      ticket_ref: opts[:ticket_ref],
+      bounty: bounty,
+      claims: claims,
+      recipient: opts[:recipient],
+      capture_method: :manual,
+      success_url: opts[:success_url],
+      cancel_url: opts[:cancel_url]
     )
   end
 
@@ -801,7 +848,7 @@ defmodule Algora.Bounties do
     description = if(ticket_ref, do: "#{ticket_ref[:repo]}##{ticket_ref[:number]}")
 
     platform_fee_pct =
-      if bounty && Date.before?(bounty.inserted_at, ~D[2025-04-16]) do
+      if bounty && Date.before?(bounty.inserted_at, ~D[2025-04-16]) && is_nil(bounty.contract_type) do
         Decimal.div(owner.fee_pct_prev, 100)
       else
         Decimal.div(owner.fee_pct, 100)
@@ -809,44 +856,61 @@ defmodule Algora.Bounties do
 
     transaction_fee_pct = Payments.get_transaction_fee_pct()
 
-    payouts =
-      if recipient do
+    case opts[:bounty] do
+      %{contract_type: :marketplace} ->
         [
           %LineItem{
             amount: amount,
-            title: "Payment to @#{recipient.provider_login}",
-            description: description,
+            title: "Contract payment - @#{recipient.provider_login}",
+            description: "(includes all platform and payment processing fees)",
             image: recipient.avatar_url,
             type: :payout
           }
         ]
-      else
-        Enum.map(claims, fn claim ->
-          %LineItem{
-            # TODO: ensure shares are normalized
-            amount: Money.mult!(amount, claim.group_share),
-            title: "Payment to @#{claim.user.provider_login}",
-            description: description,
-            image: claim.user.avatar_url,
-            type: :payout
-          }
-        end)
-      end
 
-    payouts ++
-      [
-        %LineItem{
-          amount: Money.mult!(amount, platform_fee_pct),
-          title: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})",
-          type: :fee
-        },
-        %LineItem{
-          amount: Money.mult!(amount, transaction_fee_pct),
-          title: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})",
-          type: :fee
-        }
-      ]
+      _ ->
+        if recipient do
+          [
+            %LineItem{
+              amount: amount,
+              title: "Payment to @#{recipient.provider_login}",
+              description: description,
+              image: recipient.avatar_url,
+              type: :payout
+            }
+          ]
+        else
+          Enum.map(claims, fn claim ->
+            %LineItem{
+              # TODO: ensure shares are normalized
+              amount: Money.mult!(amount, claim.group_share),
+              title: "Payment to @#{claim.user.provider_login}",
+              description: description,
+              image: claim.user.avatar_url,
+              type: :payout
+            }
+          end)
+        end ++
+          [
+            %LineItem{
+              amount: Money.mult!(amount, platform_fee_pct),
+              title: "Algora platform fee (#{Util.format_pct(platform_fee_pct)})",
+              type: :fee
+            },
+            %LineItem{
+              amount: Money.mult!(amount, transaction_fee_pct),
+              title: "Transaction fee (#{Util.format_pct(transaction_fee_pct)})",
+              type: :fee
+            }
+          ]
+    end
   end
+
+  def calculate_contract_amount(amount), do: Money.mult!(amount, Decimal.new("1.13"))
+
+  def final_contract_amount(:marketplace, amount), do: amount
+
+  def final_contract_amount(:bring_your_own, amount), do: calculate_contract_amount(amount)
 
   @spec create_payment_session(
           %{owner: User.t(), amount: Money.t(), description: String.t()},
@@ -855,7 +919,10 @@ defmodule Algora.Bounties do
             tip_id: String.t(),
             bounty: Bounty.t(),
             claims: [Claim.t()],
-            recipient: User.t()
+            recipient: User.t(),
+            capture_method: :automatic | :automatic_async | :manual,
+            success_url: String.t(),
+            cancel_url: String.t()
           ]
         ) ::
           {:ok, String.t()} | {:error, atom()}
@@ -869,6 +936,19 @@ defmodule Algora.Bounties do
         claims: opts[:claims],
         bounty: opts[:bounty]
       )
+
+    payment_intent_data = %{
+      description: description,
+      metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
+    }
+
+    {payment_intent_data, session_opts} =
+      if capture_method = opts[:capture_method] do
+        {Map.put(payment_intent_data, :capture_method, capture_method),
+         [success_url: opts[:success_url], cancel_url: opts[:cancel_url]]}
+      else
+        {payment_intent_data, []}
+      end
 
     gross_amount = LineItem.gross_amount(line_items)
 
@@ -899,10 +979,12 @@ defmodule Algora.Bounties do
                group_id: tx_group_id
              }),
            {:ok, session} <-
-             Payments.create_stripe_session(owner, Enum.map(line_items, &LineItem.to_stripe/1), %{
-               description: description,
-               metadata: %{"version" => Payments.metadata_version(), "group_id" => tx_group_id}
-             }) do
+             Payments.create_stripe_session(
+               owner,
+               Enum.map(line_items, &LineItem.to_stripe/1),
+               payment_intent_data,
+               session_opts
+             ) do
         {:ok, session.url}
       end
     end)
@@ -1012,7 +1094,6 @@ defmodule Algora.Bounties do
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
-    |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:user_id)
     |> unique_constraint([:idempotency_key])
     |> Repo.insert()

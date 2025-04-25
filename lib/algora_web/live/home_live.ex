@@ -186,7 +186,7 @@ defmodule AlgoraWeb.HomeLive do
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
           <.pattern />
-          <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-20">
+          <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-24">
             <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none">
               <div class={
                 classes([

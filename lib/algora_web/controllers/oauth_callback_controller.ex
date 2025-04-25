@@ -38,7 +38,11 @@ defmodule AlgoraWeb.OAuthCallbackController do
 
         :redirect ->
           conn = AlgoraWeb.UserAuth.put_current_user(conn, user)
-          AlgoraWeb.Util.redirect_safe(conn, data[:return_to] || AlgoraWeb.UserAuth.signed_in_path(conn))
+
+          AlgoraWeb.Util.redirect_safe(
+            conn,
+            data[:return_to] || get_session(conn, :user_return_to) || AlgoraWeb.UserAuth.signed_in_path(conn)
+          )
       end
     else
       {:error, reason} ->

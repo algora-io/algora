@@ -13,6 +13,7 @@ defmodule AlgoraWeb.ContractLive do
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Repo
+  alias Algora.Types.USD
   alias Algora.Util
   alias Algora.Workspace
 
@@ -28,7 +29,7 @@ defmodule AlgoraWeb.ContractLive do
 
     @primary_key false
     embedded_schema do
-      field :amount, Algora.Types.USD
+      field :amount, USD
       field :tip_percentage, :decimal
     end
 
@@ -108,8 +109,7 @@ defmodule AlgoraWeb.ContractLive do
 
     ticket_body_html = Algora.Markdown.render(bounty.ticket.description)
 
-    reward_changeset =
-      RewardBountyForm.changeset(%RewardBountyForm{}, %{tip_percentage: 0})
+    reward_changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{amount: bounty.amount, tip_percentage: 0})
 
     {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
@@ -117,6 +117,7 @@ defmodule AlgoraWeb.ContractLive do
 
     if connected?(socket) do
       Chat.subscribe(thread.id)
+      Payments.subscribe()
     end
 
     share_url =
@@ -137,6 +138,7 @@ defmodule AlgoraWeb.ContractLive do
      |> assign(:total_paid, total_paid)
      |> assign(:ticket_body_html, ticket_body_html)
      |> assign(:show_reward_modal, false)
+     |> assign(:show_authorize_modal, false)
      |> assign(:selected_context, nil)
      |> assign(:line_items, [])
      |> assign(:thread, thread)
@@ -145,7 +147,7 @@ defmodule AlgoraWeb.ContractLive do
      |> assign(:reward_form, to_form(reward_changeset))
      |> assign_contractor(bounty.shared_with)
      |> assign_transactions()
-     |> assign_line_items()}
+     |> assign_line_items(reward_changeset)}
   end
 
   @impl true
@@ -173,6 +175,10 @@ defmodule AlgoraWeb.ContractLive do
     {:noreply, socket}
   end
 
+  def handle_info(:payments_updated, socket) do
+    {:noreply, assign_transactions(socket)}
+  end
+
   @impl true
   def handle_event("send_message", %{"message" => content}, socket) do
     {:ok, message} =
@@ -196,21 +202,23 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
+  def handle_event("authorize", _params, socket) do
+    {:noreply, assign(socket, :show_authorize_modal, true)}
+  end
+
+  @impl true
   def handle_event("close_drawer", _params, socket) do
     {:noreply, close_drawers(socket)}
   end
 
   @impl true
   def handle_event("validate_reward", %{"reward_bounty_form" => params}, socket) do
+    changeset = RewardBountyForm.changeset(%RewardBountyForm{}, params)
+
     {:noreply,
      socket
-     |> assign(:reward_form, to_form(RewardBountyForm.changeset(%RewardBountyForm{}, params)))
-     |> assign_line_items()}
-  end
-
-  @impl true
-  def handle_event("assign_line_items", %{"reward_bounty_form" => _params}, socket) do
-    {:noreply, assign_line_items(socket)}
+     |> assign(:reward_form, to_form(changeset))
+     |> assign_line_items(changeset)}
   end
 
   @impl true
@@ -230,6 +238,51 @@ defmodule AlgoraWeb.ContractLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, :reward_form, to_form(changeset))}
+    end
+  end
+
+  @impl true
+  def handle_event("authorize_with_stripe", _params, socket) do
+    case authorize_payment(socket, socket.assigns.bounty) do
+      {:ok, session_url} ->
+        {:noreply, redirect(socket, external: session_url)}
+
+      {:error, reason} ->
+        Logger.error("Failed to create payment session: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
+  end
+
+  @impl true
+  def handle_event("release_funds", %{"tx_id" => tx_id}, socket) do
+    with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == tx_id)),
+         {:ok, charge} <- Algora.PSP.Charge.retrieve(tx.provider_charge_id),
+         {:ok, _} <- Algora.Payments.process_charge("charge.succeeded", charge, tx.group_id) do
+      {:noreply, socket}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to release funds: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+
+      _ ->
+        Logger.error("Failed to release funds: transaction not found")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+    end
+  end
+
+  @impl true
+  def handle_event("accept_contract", %{"tx_id" => tx_id}, socket) do
+    with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == tx_id)),
+         {:ok, _payment_intent} <- Algora.PSP.PaymentIntent.capture(tx.provider_payment_intent_id) do
+      {:noreply, put_flash(socket, :info, "Contract accepted!")}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to capture payment intent: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
+
+      _ ->
+        Logger.error("Failed to release funds: transaction not found")
+        {:noreply, put_flash(socket, :error, "Something went wrong")}
     end
   end
 
@@ -278,20 +331,35 @@ defmodule AlgoraWeb.ContractLive do
                     </div>
                   </div>
                 </div>
-
-                <div class="flex flex-col gap-4">
-                  <div class="font-display tabular-nums text-5xl text-success-400 font-bold">
-                    {Money.to_string!(@bounty.amount)}<span
-                      :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
-                      class="text-base"
+                <%= if transaction = Enum.find(@transactions, fn tx -> tx.type == :charge and tx.status == :requires_capture end) do %>
+                  <%= if @current_user && @current_user.id == @contractor.id do %>
+                    <.button
+                      phx-click="accept_contract"
+                      phx-disable-with="Accepting..."
+                      phx-value-tx_id={transaction.id}
                     >
-                      /hr
-                    </span>
+                      Accept contract
+                    </.button>
+                  <% else %>
+                    <.badge variant="warning" class="mb-auto">
+                      Offer sent
+                    </.badge>
+                  <% end %>
+                <% end %>
+
+                <%= if _transaction = Enum.find(@transactions, fn tx -> tx.type == :debit end) do %>
+                  <div class="flex flex-col gap-4 items-end">
+                    <.badge variant="success" class="mb-auto">
+                      Active
+                    </.badge>
                   </div>
-                  <.button :if={@can_create_bounty} phx-click="reward">
-                    Pay
+                <% end %>
+
+                <%= if @can_create_bounty && @transactions == [] do %>
+                  <.button phx-click="reward">
+                    Make payment
                   </.button>
-                </div>
+                <% end %>
               </div>
             </.card_content>
           </.card>
@@ -307,10 +375,70 @@ defmodule AlgoraWeb.ContractLive do
               </div>
             </.card_content>
           </.card>
+          <.card :if={length(@transactions) == 0 and @can_create_bounty}>
+            <.card_header>
+              <.card_title>
+                Finalize offer
+              </.card_title>
+            </.card_header>
+            <.card_content class="pt-0">
+              <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
+                <ul class="space-y-2">
+                  <li class="flex items-center">
+                    <.icon name="tabler-circle-number-1 mr-2" class="size-8 text-success-400" />
+                    Authorize the payment to share the contract offer with {@contractor.name}
+                  </li>
+                  <li class="flex items-center">
+                    <.icon name="tabler-circle-number-2 mr-2" class="size-8 text-success-400" />
+                    When {@contractor.name} accepts, you will be charged
+                    <span class="font-semibold font-display px-1">
+                      {Money.to_string!(
+                        Bounties.final_contract_amount(@bounty.contract_type, @bounty.amount)
+                      )}
+                    </span>
+                    into escrow
+                  </li>
+                  <li class="flex items-center">
+                    <.icon name="tabler-circle-number-3 mr-2" class="size-8 text-success-400" />
+                    At the end of the week, release or withhold the funds based on {@contractor.name}'s performance
+                  </li>
+                </ul>
+
+                <dl class="-mt-12 space-y-4">
+                  <dd class="font-display tabular-nums text-5xl text-success-400 font-bold">
+                    {Money.to_string!(
+                      Bounties.final_contract_amount(@bounty.contract_type, @bounty.amount)
+                    )}
+                  </dd>
+                  <div class="flex justify-between">
+                    <dt class="text-foreground">
+                      Total amount for <span class="font-semibold">{@bounty.hours_per_week}</span>
+                      hours
+                      <div class="text-xs text-muted-foreground">
+                        (includes all platform and payment processing fees)
+                      </div>
+                    </dt>
+                  </div>
+                  <.button phx-click="authorize">
+                    Authorize
+                  </.button>
+                </dl>
+              </div>
+            </.card_content>
+          </.card>
           <.card :if={length(@transactions) > 0}>
             <.card_header>
               <.card_title>
-                Timeline
+                <div class="flex justify-between gap-4">
+                  Timeline
+                  <%= if @can_create_bounty do %>
+                    <%= if _transaction = Enum.find(@transactions, fn tx -> tx.type == :debit and tx.status == :succeeded end) do %>
+                      <.button phx-click="reward">
+                        Make payment
+                      </.button>
+                    <% end %>
+                  <% end %>
+                </div>
               </.card_title>
             </.card_header>
             <.card_content class="pt-0">
@@ -330,7 +458,10 @@ defmodule AlgoraWeb.ContractLive do
                     </thead>
                     <tbody class="divide-y divide-border">
                       <%= for transaction <- @transactions do %>
-                        <tr class="hover:bg-muted/50">
+                        <tr
+                          :if={@can_create_bounty or transaction.status != :requires_release}
+                          class="hover:bg-muted/50"
+                        >
                           <td class="whitespace-nowrap px-6 py-4 text-sm">
                             <div :if={@timezone}>
                               {Util.timestamp(transaction.inserted_at, @timezone)}
@@ -342,19 +473,26 @@ defmodule AlgoraWeb.ContractLive do
                             </div>
                           </td>
                           <td class="whitespace-nowrap px-6 py-4 text-sm">
-                            {description(transaction)}
+                            <div class="flex flex-col items-start gap-2">
+                              {description(transaction)}
+                              <.button
+                                :if={
+                                  transaction.type == :debit and
+                                    transaction.status == :requires_release
+                                }
+                                size="sm"
+                                phx-click="release_funds"
+                                phx-disable-with="Releasing..."
+                                phx-value-tx_id={transaction.id}
+                              >
+                                Release funds
+                              </.button>
+                            </div>
                           </td>
                           <td class="font-display whitespace-nowrap px-6 py-4 text-right font-medium tabular-nums">
-                            <%= case transaction_direction(transaction.type) do %>
-                              <% :plus -> %>
-                                <span class="text-emerald-400">
-                                  {Money.to_string!(transaction.net_amount)}
-                                </span>
-                              <% :minus -> %>
-                                <span class="text-foreground">
-                                  {Money.to_string!(transaction.net_amount)}
-                                </span>
-                            <% end %>
+                            <span class={transaction_color(transaction)}>
+                              {Money.to_string!(transaction.net_amount)}
+                            </span>
                           </td>
                         </tr>
                       <% end %>
@@ -475,9 +613,90 @@ defmodule AlgoraWeb.ContractLive do
       </div>
     </div>
 
+    <.drawer :if={@current_user} show={@show_authorize_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <.drawer_title>Authorize payment</.drawer_title>
+        <.drawer_description>
+          You will be charged once {@contractor.name} accepts the contract.
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.form for={@reward_form} phx-change="validate_reward" phx-submit="authorize_with_stripe">
+          <div class="flex flex-col gap-8">
+            <div class="grid grid-cols-2 gap-8">
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Details</.card_title>
+                </.card_header>
+                <.card_content class="pt-0">
+                  <div class="space-y-4">
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@reward_form[:amount]}
+                      disabled
+                    />
+                  </div>
+                </.card_content>
+              </.card>
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Summary</.card_title>
+                </.card_header>
+                <.card_content class="pt-0">
+                  <dl class="space-y-4">
+                    <%= for line_item <- @line_items do %>
+                      <div class="flex justify-between">
+                        <dt class="flex items-center gap-4">
+                          <%= if line_item.image do %>
+                            <.avatar>
+                              <.avatar_image src={line_item.image} />
+                              <.avatar_fallback>
+                                {Util.initials(line_item.title)}
+                              </.avatar_fallback>
+                            </.avatar>
+                          <% else %>
+                            <div class="w-10" />
+                          <% end %>
+                          <div>
+                            <div class="font-medium">{line_item.title}</div>
+                            <div class="text-muted-foreground text-sm">{line_item.description}</div>
+                          </div>
+                        </dt>
+                        <dd class="font-display font-semibold tabular-nums">
+                          {Money.to_string!(line_item.amount)}
+                        </dd>
+                      </div>
+                    <% end %>
+                    <div class="h-px bg-border" />
+                    <div class="flex justify-between">
+                      <dt class="flex items-center gap-4">
+                        <div class="w-10" />
+                        <div class="font-medium">Total due</div>
+                      </dt>
+                      <dd class="font-display font-semibold tabular-nums">
+                        {LineItem.gross_amount(@line_items)}
+                      </dd>
+                    </div>
+                  </dl>
+                </.card_content>
+              </.card>
+            </div>
+            <div class="ml-auto flex gap-4">
+              <.button variant="secondary" phx-click="close_drawer" type="button">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Authorize with Stripe <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     <.drawer :if={@current_user} show={@show_reward_modal} on_cancel="close_drawer">
       <.drawer_header>
-        <.drawer_title>Pay Contract</.drawer_title>
+        <.drawer_title>Pay contract</.drawer_title>
         <.drawer_description>
           You can pay any amount at any time.
         </.drawer_description>
@@ -569,12 +788,12 @@ defmodule AlgoraWeb.ContractLive do
     """
   end
 
-  defp assign_line_items(socket) do
+  defp assign_line_items(socket, changeset) do
     line_items =
       Bounties.generate_line_items(
         %{
           owner: socket.assigns.bounty.owner,
-          amount: calculate_final_amount(socket.assigns.reward_form.source)
+          amount: calculate_final_amount(changeset)
         },
         bounty: socket.assigns.bounty,
         ticket_ref: socket.assigns.ticket_ref,
@@ -590,7 +809,19 @@ defmodule AlgoraWeb.ContractLive do
     Bounties.reward_bounty(
       %{owner: bounty.owner, amount: final_amount, bounty: bounty, claims: []},
       ticket_ref: socket.assigns.ticket_ref,
-      recipient: socket.assigns.contractor
+      recipient: socket.assigns.contractor,
+      success_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}"),
+      cancel_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}")
+    )
+  end
+
+  defp authorize_payment(socket, bounty) do
+    Bounties.authorize_payment(
+      %{owner: bounty.owner, amount: bounty.amount, bounty: bounty, claims: []},
+      ticket_ref: socket.assigns.ticket_ref,
+      recipient: socket.assigns.contractor,
+      success_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}"),
+      cancel_url: url(~p"/#{bounty.owner.handle}/contracts/#{bounty.id}")
     )
   end
 
@@ -603,7 +834,9 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   defp close_drawers(socket) do
-    assign(socket, :show_reward_modal, false)
+    socket
+    |> assign(:show_reward_modal, false)
+    |> assign(:show_authorize_modal, false)
   end
 
   defp assign_contractor(socket, shared_with) do
@@ -622,11 +855,13 @@ defmodule AlgoraWeb.ContractLive do
 
   defp assign_transactions(socket) do
     transactions =
-      Payments.list_transactions(
+      [
         user_id: socket.assigns.bounty.owner.id,
-        status: :succeeded,
+        status: [:succeeded, :requires_capture, :requires_release],
         bounty_id: socket.assigns.bounty.id
-      )
+      ]
+      |> Payments.list_transactions()
+      |> Enum.filter(&(&1.type == :charge or &1.status in [:succeeded, :requires_release]))
 
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)
@@ -638,7 +873,9 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   defp calculate_balance(transactions) do
-    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+    transactions
+    |> Enum.filter(&(&1.status == :succeeded))
+    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :deposit, :credit] ->
           Money.add!(acc, transaction.net_amount)
@@ -653,7 +890,9 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   defp calculate_volume(transactions) do
-    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+    transactions
+    |> Enum.filter(&(&1.status == :succeeded))
+    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :credit] -> Money.add!(acc, transaction.net_amount)
         _ -> acc
@@ -661,16 +900,22 @@ defmodule AlgoraWeb.ContractLive do
     end)
   end
 
-  defp transaction_direction(type) do
+  defp transaction_color(%{type: :debit, status: :requires_release}), do: "text-emerald-400/50"
+
+  defp transaction_color(%{type: type}) do
     case type do
-      t when t in [:charge, :credit, :deposit] -> :minus
-      t when t in [:debit, :withdrawal, :transfer] -> :plus
+      t when t in [:charge, :credit, :deposit] -> "text-foreground"
+      t when t in [:debit, :withdrawal, :transfer] -> "text-emerald-400"
     end
   end
 
-  defp description(%{type: :charge}), do: "Escrowed"
+  defp description(%{type: :charge, status: :requires_capture}), do: "Authorized"
 
-  defp description(%{type: :debit}), do: "Released"
+  defp description(%{type: :charge, status: :succeeded}), do: "Escrowed"
+
+  defp description(%{type: :debit, status: :requires_release}), do: "Ready to release"
+
+  defp description(%{type: :debit, status: :succeeded}), do: "Released"
 
   defp description(%{type: _type}), do: nil
 end

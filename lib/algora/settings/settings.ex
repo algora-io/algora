@@ -70,16 +70,20 @@ defmodule Algora.Settings do
   end
 
   def get_org_matches(org) do
-    case get("org_matches:#{org.handle}") do
-      %{"matches" => matches} when is_list(matches) ->
-        load_matches(matches)
+    if get_user_profile(org.handle) do
+      []
+    else
+      case get("org_matches:#{org.handle}") do
+        %{"matches" => matches} when is_list(matches) ->
+          load_matches(matches)
 
-      _ ->
-        if tech_stack = List.first(org.tech_stack) do
-          get_tech_matches(tech_stack)
-        else
-          []
-        end
+        _ ->
+          if tech_stack = List.first(org.tech_stack) do
+            get_tech_matches(tech_stack)
+          else
+            []
+          end
+      end
     end
   end
 

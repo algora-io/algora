@@ -9,13 +9,13 @@ defmodule AlgoraWeb.Components.Banner do
 
   def banner(assigns) do
     ~H"""
-    <div class="group flex items-center gap-x-6 bg-emerald-600 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
+    <div class="group flex items-center gap-x-6 bg-emerald-600 px-6 py-1.5 sm:px-3.5 sm:before:flex-1 whitespace-nowrap">
       <p class="text-sm/6 text-foreground">
         <.link
           href={Constants.get(:github_repo_url)}
           rel="noopener"
           target="_blank"
-          class="font-medium"
+          class="font-semibold"
         >
           <strong class="font-semibold">🎉 Algora is now open source!</strong><svg
             viewBox="0 0 2 2"

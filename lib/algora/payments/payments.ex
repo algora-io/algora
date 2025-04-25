@@ -5,6 +5,12 @@ defmodule Algora.Payments do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.Admin
+  alias Algora.Bounties
+  alias Algora.Bounties.Bounty
+  alias Algora.Bounties.Claim
+  alias Algora.Bounties.Tip
+  alias Algora.Jobs.JobPosting
   alias Algora.MoneyUtils
   alias Algora.Payments.Account
   alias Algora.Payments.Customer
@@ -40,16 +46,24 @@ defmodule Algora.Payments do
           {:ok, PSP.session()} | {:error, PSP.error()}
   def create_stripe_session(user, line_items, payment_intent_data, opts \\ []) do
     with {:ok, customer} <- fetch_or_create_customer(user) do
-      PSP.Session.create(%{
+      opts = %{
         mode: "payment",
         customer: customer.provider_id,
         billing_address_collection: "required",
         line_items: line_items,
-        invoice_creation: %{enabled: true},
         success_url: opts[:success_url] || "#{AlgoraWeb.Endpoint.url()}/payment/success",
         cancel_url: opts[:cancel_url] || "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
         payment_intent_data: payment_intent_data
-      })
+      }
+
+      opts =
+        if payment_intent_data[:capture_method] == :manual do
+          opts
+        else
+          Map.put(opts, :invoice_creation, %{enabled: true})
+        end
+
+      PSP.Session.create(opts)
     end
   end
 
@@ -153,8 +167,13 @@ defmodule Algora.Payments do
   end
 
   def list_transactions(criteria \\ []) do
-    Transaction
-    |> where([t], ^Enum.to_list(criteria))
+    criteria
+    |> Enum.reduce(Transaction, fn {key, value}, query ->
+      case value do
+        v when is_list(v) -> where(query, [t], field(t, ^key) in ^v)
+        v -> where(query, [t], field(t, ^key) == ^v)
+      end
+    end)
     |> preload(linked_transaction: :user)
     |> order_by([t], desc: t.inserted_at)
     |> Repo.all()
@@ -534,5 +553,184 @@ defmodule Algora.Payments do
 
         {:error, error}
     end
+  end
+
+  def process_charge(%Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{}}}, group_id)
+      when not is_binary(group_id) do
+    {:error, :invalid_group_id}
+  end
+
+  def process_charge(
+        "charge.succeeded",
+        %Stripe.Charge{id: charge_id, captured: false, payment_intent: payment_intent_id},
+        group_id
+      ) do
+    Repo.transact(fn ->
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type == :charge),
+        set: [
+          status: :requires_capture,
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
+      broadcast()
+      {:ok, nil}
+    end)
+  end
+
+  def process_charge(
+        "charge.captured",
+        %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
+        group_id
+      ) do
+    Repo.transact(fn ->
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type == :charge),
+        set: [
+          status: :succeeded,
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
+      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, where: t.type != :charge),
+        set: [
+          status: :requires_release,
+          provider: "stripe",
+          provider_id: charge_id,
+          provider_charge_id: charge_id,
+          provider_payment_intent_id: payment_intent_id
+        ]
+      )
+
+      broadcast()
+      {:ok, nil}
+    end)
+  end
+
+  def process_charge(
+        "charge.succeeded",
+        %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
+        group_id
+      ) do
+    Repo.transact(fn ->
+      {_, txs} =
+        Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
+          set: [
+            status: :processing,
+            provider: "stripe",
+            provider_id: charge_id,
+            provider_charge_id: charge_id,
+            provider_payment_intent_id: payment_intent_id
+          ]
+        )
+
+      bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+      bounties =
+        from(b in Bounty,
+          where: b.id in ^bounty_ids,
+          join: u in assoc(b, :owner),
+          join: t in assoc(b, :ticket),
+          select: %{b | ticket: t, owner: u}
+        )
+        |> Repo.all()
+        |> Map.new(&{&1.id, &1})
+
+      {auto_bounty_ids, manual_bounty_ids} =
+        Enum.split_with(bounty_ids, fn id ->
+          bounty = bounties[id]
+          bounty && bounty.contract_type != :marketplace
+        end)
+
+      tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+      job_ids = txs |> Enum.map(& &1.job_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+      Repo.update_all(from(b in Bounty, where: b.id in ^auto_bounty_ids), set: [status: :paid])
+      Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
+      # TODO: add and use a new "paid" status for claims
+      Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
+
+      {_, job_postings} =
+        Repo.update_all(from(j in JobPosting, where: j.id in ^job_ids, select: j), set: [status: :processing])
+
+      for job <- job_postings do
+        Algora.Admin.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :info)
+      end
+
+      auto_txs =
+        Enum.filter(txs, fn tx ->
+          bounty = bounties[tx.bounty_id]
+
+          manual? = tx.bounty_id in manual_bounty_ids
+
+          if tx.type == :credit and manual? do
+            Admin.alert(
+              "Contract payment received. URL: #{AlgoraWeb.Endpoint.url()}/#{bounty.owner.handle}/contracts/#{bounty.id}",
+              :info
+            )
+          end
+
+          tx.type != :credit or not manual?
+        end)
+
+      Repo.update_all(
+        from(t in Transaction, where: t.group_id == ^group_id and t.id in ^Enum.map(auto_txs, & &1.id), select: t),
+        set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
+      )
+
+      activities_result =
+        auto_txs
+        |> Enum.filter(&(&1.type == :credit))
+        |> Enum.reduce_while(:ok, fn tx, :ok ->
+          case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
+            {:ok, _} -> {:cont, :ok}
+            error -> {:halt, error}
+          end
+        end)
+
+      jobs_result =
+        auto_txs
+        |> Enum.filter(&(&1.type == :credit))
+        |> Enum.reduce_while(:ok, fn credit, :ok ->
+          case fetch_active_account(credit.user_id) do
+            {:ok, _account} ->
+              case %{credit_id: credit.id}
+                   |> Jobs.ExecutePendingTransfer.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
+
+            {:error, :no_active_account} ->
+              case %{credit_id: credit.id}
+                   |> Bounties.Jobs.PromptPayoutConnect.new()
+                   |> Oban.insert() do
+                {:ok, _job} -> {:cont, :ok}
+                error -> {:halt, error}
+              end
+          end
+        end)
+
+      with txs when txs != [] <- txs,
+           :ok <- activities_result,
+           :ok <- jobs_result do
+        broadcast()
+        {:ok, nil}
+      else
+        {:error, reason} ->
+          Logger.error("Failed to update transactions: #{inspect(reason)}")
+          {:error, :failed_to_update_transactions}
+
+        error ->
+          Logger.error("Failed to update transactions: #{inspect(error)}")
+          {:error, :failed_to_update_transactions}
+      end
+    end)
   end
 end

@@ -7,6 +7,8 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
   alias Algora.Accounts
   alias Algora.Organizations
+  alias AlgoraWeb.Forms.BountyForm
+  alias AlgoraWeb.Forms.ContractForm
 
   require Logger
 
@@ -18,7 +20,10 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
         {:cont,
          socket
-         |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+         |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+         |> assign(:main_bounty_form_open?, false)
+         |> assign(:main_contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+         |> assign(:main_contract_form_open?, false)
          |> assign(:current_org, org)
          |> assign(:current_user, user)
          |> assign(:current_context, org)
@@ -26,7 +31,8 @@ defmodule AlgoraWeb.Org.PreviewNav do
          |> assign(:current_user_role, :admin)
          |> assign(:nav, nav_items(repo_owner, repo_name))
          |> assign(:contacts, [])
-         |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)}
+         |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
+         |> attach_hook(:handle_event, :handle_event, &handle_event/3)}
 
       {:error, reason} ->
         Logger.error("Failed to restore preview state for #{repo_owner}/#{repo_name}: #{inspect(reason)}")
@@ -39,12 +45,16 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
     socket =
       socket
-      |> assign(:new_bounty_form, to_form(%{"github_issue_url" => "", "amount" => ""}))
+      |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+      |> assign(:main_bounty_form_open?, false)
+      |> assign(:main_contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+      |> assign(:main_contract_form_open?, false)
       |> assign(:current_org, current_context)
       |> assign(:current_user_role, :admin)
       |> assign(:nav, nav_items(repo_owner, repo_name))
       |> assign(:contacts, [])
       |> attach_hook(:active_tab, :handle_params, &handle_active_tab_params/3)
+      |> attach_hook(:handle_event, :handle_event, &handle_event/3)
 
     # checking if the socket is connected to avoid redirect loop that prevents og image from being fetched
     if (current_context && current_context.last_context == "repo/#{repo_owner}/#{repo_name}") ||
@@ -87,6 +97,34 @@ defmodule AlgoraWeb.Org.PreviewNav do
         {:halt, redirect(socket, to: preview_path)}
       end
     end
+  end
+
+  defp handle_event("create_contract_main", %{"contract_form" => _params}, socket) do
+    {:cont, put_flash(socket, :warning, "Please sign in to create your contract")}
+  end
+
+  defp handle_event("create_bounty_main", %{"bounty_form" => _params}, socket) do
+    {:cont, put_flash(socket, :warning, "Please sign in to create your bounty")}
+  end
+
+  defp handle_event("open_main_bounty_form", _params, socket) do
+    {:cont, assign(socket, :main_bounty_form_open?, true)}
+  end
+
+  defp handle_event("close_main_bounty_form", _params, socket) do
+    {:cont, assign(socket, :main_bounty_form_open?, false)}
+  end
+
+  defp handle_event("open_main_contract_form", _params, socket) do
+    {:cont, assign(socket, :main_contract_form_open?, true)}
+  end
+
+  defp handle_event("close_main_contract_form", _params, socket) do
+    {:cont, assign(socket, :main_contract_form_open?, false)}
+  end
+
+  defp handle_event(_event, _params, socket) do
+    {:cont, socket}
   end
 
   defp handle_active_tab_params(_params, _url, socket) do

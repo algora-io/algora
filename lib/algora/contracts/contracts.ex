@@ -188,7 +188,6 @@ defmodule Algora.Contracts do
     })
     |> Algora.Validations.validate_positive(:gross_amount)
     |> Algora.Validations.validate_positive(:net_amount)
-    |> Algora.Validations.validate_positive(:total_fee)
     |> foreign_key_constraint(:original_contract_id)
     |> foreign_key_constraint(:contract_id)
     |> foreign_key_constraint(:timesheet_id)

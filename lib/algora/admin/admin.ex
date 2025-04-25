@@ -12,6 +12,7 @@ defmodule Algora.Admin do
   alias Algora.Github
   alias Algora.Parser
   alias Algora.Payments
+  alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Util
   alias Algora.Workspace
@@ -20,6 +21,48 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Ticket
 
   require Logger
+
+  def release_payment(tx_id) do
+    Repo.transact(fn ->
+      {_, [tx]} =
+        Repo.update_all(from(t in Transaction, where: t.id == ^tx_id, select: t),
+          set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
+        )
+
+      Repo.update_all(from(b in Bounty, where: b.id == ^tx.bounty_id), set: [status: :paid])
+
+      activities_result = Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]})
+
+      jobs_result =
+        case Payments.fetch_active_account(tx.user_id) do
+          {:ok, _account} ->
+            %{credit_id: tx.id}
+            |> Payments.Jobs.ExecutePendingTransfer.new()
+            |> Oban.insert()
+
+          {:error, :no_active_account} ->
+            Logger.warning("No active account for user #{tx.user_id}")
+
+            %{credit_id: tx.id}
+            |> Bounties.Jobs.PromptPayoutConnect.new()
+            |> Oban.insert()
+        end
+
+      with {:ok, _} <- activities_result,
+           {:ok, _} <- jobs_result do
+        Payments.broadcast()
+        {:ok, nil}
+      else
+        {:error, reason} ->
+          Logger.error("Failed to update transactions: #{inspect(reason)}")
+          {:error, :failed_to_update_transactions}
+
+        error ->
+          Logger.error("Failed to update transactions: #{inspect(error)}")
+          {:error, :failed_to_update_transactions}
+      end
+    end)
+  end
 
   def refresh_bounty(url) do
     with %{owner: owner, repo: repo, number: number} <- parse_ticket_url(url),
@@ -396,6 +439,8 @@ defmodule Algora.Admin do
   end
 
   def alert(message, severity) do
+    Logger.info(message)
+
     %{
       payload: %{
         embeds: [

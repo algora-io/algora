@@ -143,11 +143,10 @@ defmodule AlgoraWeb.OGImageController do
       if params == "" do
         "?screenshot"
       else
-        params
+        params <> "&screenshot"
       end
 
     url = Path.join([AlgoraWeb.Endpoint.url() | path]) <> params
-
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
 
     case ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath)) do

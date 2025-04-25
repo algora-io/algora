@@ -137,11 +137,13 @@ defmodule AlgoraWeb.Org.TransactionsLive do
 
   defp assign_transactions(socket) do
     transactions =
-      Payments.list_transactions(
+      [
         user_id: socket.assigns.current_org.id,
         # TODO: also list transactions that are "processing"
-        status: :succeeded
-      )
+        status: [:succeeded, :requires_capture]
+      ]
+      |> Payments.list_transactions()
+      |> Enum.filter(&(&1.type == :charge or &1.status == :succeeded))
 
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)
@@ -153,7 +155,9 @@ defmodule AlgoraWeb.Org.TransactionsLive do
   end
 
   defp calculate_balance(transactions) do
-    Enum.reduce(transactions, Money.new!(0, :USD), fn transaction, acc ->
+    transactions
+    |> Enum.filter(&(&1.status == :succeeded))
+    |> Enum.reduce(Money.new!(0, :USD), fn transaction, acc ->
       case transaction.type do
         type when type in [:charge, :deposit, :credit] ->
           Money.add!(acc, transaction.net_amount)
@@ -483,6 +487,8 @@ defmodule AlgoraWeb.Org.TransactionsLive do
       t when t in [:debit, :withdrawal, :transfer] -> :minus
     end
   end
+
+  defp description(%{type: :charge, status: :requires_capture}), do: "Authorization"
 
   defp description(%{type: type, tip_id: tip_id}) when type in [:debit, :credit] and not is_nil(tip_id), do: "Tip payment"
 

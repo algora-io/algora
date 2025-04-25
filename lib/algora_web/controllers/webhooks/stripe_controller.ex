@@ -2,14 +2,8 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   @behaviour Stripe.WebhookHandler
 
   import Ecto.Changeset
-  import Ecto.Query
 
   alias Algora.Bounties
-  alias Algora.Bounties.Bounty
-  alias Algora.Bounties.Claim
-  alias Algora.Bounties.Tip
-  alias Algora.Contracts.Contract
-  alias Algora.Jobs.JobPosting
   alias Algora.Payments
   alias Algora.Payments.Customer
   alias Algora.Payments.Transaction
@@ -48,22 +42,19 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       {:error, error}
   end
 
-  defp process_event(
-         %Stripe.Event{
-           type: "charge.succeeded",
-           data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}}}
-         } = event
-       )
-       when is_binary(group_id) do
-    process_charge_succeeded(event, group_id)
+  defp process_event(%Stripe.Event{
+         type: type,
+         data: %{object: %Stripe.Charge{metadata: %{"version" => @metadata_version, "group_id" => group_id}} = charge}
+       })
+       when type in ["charge.succeeded", "charge.captured"] and is_binary(group_id) do
+    Payments.process_charge(type, charge, group_id)
   end
 
-  defp process_event(
-         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{invoice: invoice_id}}} = event
-       ) do
+  defp process_event(%Stripe.Event{type: type, data: %{object: %Stripe.Charge{invoice: invoice_id} = charge}})
+       when type in ["charge.succeeded", "charge.captured"] do
     with {:ok, invoice} <- Algora.PSP.Invoice.retrieve(invoice_id),
          %{"version" => @metadata_version, "group_id" => group_id} <- invoice.metadata do
-      process_charge_succeeded(event, group_id)
+      Payments.process_charge(type, charge, group_id)
     end
   end
 
@@ -108,7 +99,7 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   defp process_event(%Stripe.Event{type: type} = event)
-       when type in ["charge.succeeded", "transfer.created", "checkout.session.completed"] do
+       when type in ["charge.succeeded", "charge.captured", "transfer.created", "checkout.session.completed"] do
     Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
     :ok
   end
@@ -127,90 +118,6 @@ defmodule AlgoraWeb.Webhooks.StripeController do
       })
       |> Repo.update()
     end
-  end
-
-  defp process_charge_succeeded(
-         %Stripe.Event{type: "charge.succeeded", data: %{object: %Stripe.Charge{id: charge_id}}},
-         group_id
-       )
-       when is_binary(group_id) do
-    Repo.transact(fn ->
-      {_, txs} =
-        Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id, select: t),
-          set: [status: :succeeded, succeeded_at: DateTime.utc_now()]
-        )
-
-      Repo.update_all(from(t in Transaction, where: t.group_id == ^group_id),
-        set: [provider: "stripe", provider_id: charge_id]
-      )
-
-      bounty_ids = txs |> Enum.map(& &1.bounty_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      tip_ids = txs |> Enum.map(& &1.tip_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      contract_ids = txs |> Enum.map(& &1.contract_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      claim_ids = txs |> Enum.map(& &1.claim_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-      job_ids = txs |> Enum.map(& &1.job_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
-
-      Repo.update_all(from(b in Bounty, where: b.id in ^bounty_ids), set: [status: :paid])
-      Repo.update_all(from(t in Tip, where: t.id in ^tip_ids), set: [status: :paid])
-      Repo.update_all(from(c in Contract, where: c.id in ^contract_ids), set: [status: :paid])
-      # TODO: add and use a new "paid" status for claims
-      Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
-
-      {_, job_postings} =
-        Repo.update_all(from(j in JobPosting, where: j.id in ^job_ids, select: j), set: [status: :processing])
-
-      for job <- job_postings do
-        Algora.Admin.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :info)
-      end
-
-      activities_result =
-        txs
-        |> Enum.filter(&(&1.type == :credit))
-        |> Enum.reduce_while(:ok, fn tx, :ok ->
-          case Repo.insert_activity(tx, %{type: :transaction_succeeded, notify_users: [tx.user_id]}) do
-            {:ok, _} -> {:cont, :ok}
-            error -> {:halt, error}
-          end
-        end)
-
-      jobs_result =
-        txs
-        |> Enum.filter(&(&1.type == :credit))
-        |> Enum.reduce_while(:ok, fn credit, :ok ->
-          case Payments.fetch_active_account(credit.user_id) do
-            {:ok, _account} ->
-              case %{credit_id: credit.id}
-                   |> Payments.Jobs.ExecutePendingTransfer.new()
-                   |> Oban.insert() do
-                {:ok, _job} -> {:cont, :ok}
-                error -> {:halt, error}
-              end
-
-            {:error, :no_active_account} ->
-              case %{credit_id: credit.id}
-                   |> Bounties.Jobs.PromptPayoutConnect.new()
-                   |> Oban.insert() do
-                {:ok, _job} -> {:cont, :ok}
-                error -> {:halt, error}
-              end
-          end
-        end)
-
-      with txs when txs != [] <- txs,
-           :ok <- activities_result,
-           :ok <- jobs_result do
-        Payments.broadcast()
-        {:ok, nil}
-      else
-        {:error, reason} ->
-          Logger.error("Failed to update transactions: #{inspect(reason)}")
-          {:error, :failed_to_update_transactions}
-
-        _error ->
-          Logger.error("Failed to update transactions")
-          {:error, :failed_to_update_transactions}
-      end
-    end)
   end
 
   defp alert(%Stripe.Event{} = event, :ok) do

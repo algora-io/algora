@@ -264,6 +264,7 @@ defmodule AlgoraWeb.JobsLive do
            Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
          {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting(),
          {:ok, url} <- Jobs.create_payment_session(job) do
+      Algora.Admin.alert("Job posting initialized: #{job.company_name}", :info)
       {:noreply, redirect(socket, external: url)}
     else
       {:error, %Ecto.Changeset{} = changeset} ->

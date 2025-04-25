@@ -85,8 +85,9 @@
                   class="mr-2 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
                 />
                 <span class="mr-1">Star</span>
-                <span class="font-semibold text-foreground/80 group-hover:text-foreground">
+                <span class="font-semibold text-amber-300 flex items-center gap-1">
                   {Algora.Stargazer.count()}
+                  <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                 </span>
               </.button>
               <.button :if={!@current_user.handle} navigate={~p"/auth/signup"} class="w-full">
@@ -241,8 +242,9 @@
             <div class="flex w-full items-center justify-center gap-x-1">
               <AlgoraWeb.Components.Logos.github class="mr-0.5 h-5 shrink-0 justify-start text-gray-300 transition" />
               <span class="hidden sm:block">Star</span>
-              <span class="font-semibold text-gray-300">
+              <span class="font-semibold text-amber-300 flex items-center gap-1">
                 {Algora.Stargazer.count()}
+                <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
               </span>
             </div>
           </div>

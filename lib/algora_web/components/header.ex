@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Components.Header do
     <header class="absolute inset-x-0 top-0 z-50">
       <AlgoraWeb.Components.Banner.banner />
       <nav
-        class="-mt-4 mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+        class="-mt-3 mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
         aria-label="Global"
       >
         <div class="flex">
@@ -68,8 +68,9 @@ defmodule AlgoraWeb.Components.Header do
                 <span class="hidden xl:block text-foreground/80 group-hover:text-foreground">
                   Star
                 </span>
-                <span class="font-semibold text-foreground/90 group-hover:text-foreground">
+                <span class="font-semibold text-amber-300 flex items-center gap-1">
                   {Algora.Stargazer.count()}
+                  <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                 </span>
               </div>
             </div>
@@ -129,8 +130,9 @@ defmodule AlgoraWeb.Components.Header do
                     class="mr-2 h-5 shrink-0 justify-start text-foreground/80 group-hover:text-foreground transition"
                   />
                   <span class="mr-1">Star</span>
-                  <span class="font-semibold text-foreground/80 group-hover:text-foreground">
+                  <span class="font-semibold text-amber-300 flex items-center gap-1">
                     {Algora.Stargazer.count()}
+                    <.icon name="tabler-star-filled" class="h-3 w-3 shrink-0" />
                   </span>
                 </.button>
                 <.button navigate={~p"/auth/signup"} class="w-full">

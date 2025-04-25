@@ -167,7 +167,8 @@ defmodule AlgoraWeb.JobsLive do
                       label="Email"
                       data-domain-target
                       phx-hook="DeriveDomain"
-                      phx-blur="email_changed"
+                      phx-change="email_changed"
+                      phx-debounce="300"
                     />
                     <.input field={@form[:url]} label="Job Posting URL" />
                     <.input field={@form[:company_url]} label="Company URL" data-domain-source />
@@ -197,7 +198,7 @@ defmodule AlgoraWeb.JobsLive do
                           <div class="flex gap-2 items-center">
                             <%= if url = get_change(@form.source, :company_url) do %>
                               <.link
-                                href={url}
+                                href={"https://" <> url}
                                 target="_blank"
                                 class="text-muted-foreground hover:text-foreground"
                               >
@@ -244,11 +245,12 @@ defmodule AlgoraWeb.JobsLive do
     {:noreply, socket}
   end
 
-  def handle_event("email_changed", %{"value" => email}, socket) do
-    {:noreply,
-     socket
-     |> start_async(:fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)
-     |> assign(:user_metadata, AsyncResult.loading())}
+  def handle_event("email_changed", %{"job_posting" => %{"email" => email}}, socket) do
+    if String.match?(email, ~r/^[^\s]+@[^\s]+$/i) do
+      {:noreply, start_async(socket, :fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)}
+    else
+      {:noreply, socket}
+    end
   end
 
   @impl true

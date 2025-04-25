@@ -99,11 +99,13 @@ defmodule Algora.Analytics.Metrics do
     # Merge metrics
     periods = Repo.all(periods_query)
 
-    Enum.map(periods, fn %{period_start: date} ->
+    periods
+    |> Enum.map(fn %{period_start: date} ->
       signup_metrics = Map.get(signups, date, %{org_signups: 0, dev_signups: 0})
       return_metrics = Map.get(returns, date, %{org_returns: 0, dev_returns: 0})
       {date, Map.merge(signup_metrics, return_metrics)}
     end)
+    |> Enum.sort_by(&elem(&1, 0), {:desc, DateTime})
   end
 
   def period_start_date(n_periods, interval) do

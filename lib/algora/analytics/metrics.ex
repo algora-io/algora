@@ -50,7 +50,6 @@ defmodule Algora.Analytics.Metrics do
         where: not is_nil(u.handle),
         select: %{
           inserted_at: fragment("date_trunc(?, ?)", ^interval_str, u.inserted_at),
-          last_active_at: fragment("date_trunc(?, ?)", ^interval_str, u.last_active_at),
           is_org:
             fragment(
               """
@@ -78,17 +77,52 @@ defmodule Algora.Analytics.Metrics do
           }
         }
 
-    # Get returns per period
+    # Get returns per period using user_activities
     returns =
-      from q in subquery(base_query),
+      from u in User,
+        inner_join: ua in "user_activities",
+        on: ua.assoc_id == u.id and ua.type == "user_online",
+        where: not is_nil(u.handle),
         right_join: p in subquery(periods_query),
-        on: q.last_active_at == p.period_start,
+        on: fragment("date_trunc(?, ?)", ^interval_str, ua.inserted_at) == p.period_start,
         group_by: p.period_start,
         select: {
           p.period_start,
           %{
-            org_returns: coalesce(count(fragment("CASE WHEN ? IS TRUE THEN 1 END", q.is_org)), 0),
-            dev_returns: coalesce(count(fragment("CASE WHEN ? IS NOT TRUE THEN 1 END", q.is_org)), 0)
+            org_returns:
+              coalesce(
+                count(
+                  fragment(
+                    """
+                    DISTINCT CASE WHEN EXISTS (
+                      SELECT 1 FROM members m
+                      INNER JOIN users o ON m.org_id = o.id
+                      WHERE m.user_id = ? AND o.id != m.user_id
+                    ) THEN ? END
+                    """,
+                    u.id,
+                    u.id
+                  )
+                ),
+                0
+              ),
+            dev_returns:
+              coalesce(
+                count(
+                  fragment(
+                    """
+                    DISTINCT CASE WHEN NOT EXISTS (
+                      SELECT 1 FROM members m
+                      INNER JOIN users o ON m.org_id = o.id
+                      WHERE m.user_id = ? AND o.id != m.user_id
+                    ) THEN ? END
+                    """,
+                    u.id,
+                    u.id
+                  )
+                ),
+                0
+              )
           }
         }
 
@@ -99,11 +133,13 @@ defmodule Algora.Analytics.Metrics do
     # Merge metrics
     periods = Repo.all(periods_query)
 
-    Enum.map(periods, fn %{period_start: date} ->
+    periods
+    |> Enum.map(fn %{period_start: date} ->
       signup_metrics = Map.get(signups, date, %{org_signups: 0, dev_signups: 0})
       return_metrics = Map.get(returns, date, %{org_returns: 0, dev_returns: 0})
       {date, Map.merge(signup_metrics, return_metrics)}
     end)
+    |> Enum.sort_by(&elem(&1, 0), {:desc, DateTime})
   end
 
   def period_start_date(n_periods, interval) do

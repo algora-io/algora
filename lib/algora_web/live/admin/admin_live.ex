@@ -150,12 +150,28 @@ defmodule AlgoraWeb.Admin.AdminLive do
             <.stat_card title={metric.label} value={metric.value} />
           <% end %>
         </div>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <%= for {_date, metrics} <- Enum.take(@user_metrics, 1) do %>
-            <.stat_card title="Organization Signups" value={metrics.org_signups} subtitle="Last 24h" />
-            <.stat_card title="Organization Returns" value={metrics.org_returns} subtitle="Last 24h" />
-            <.stat_card title="Developer Signups" value={metrics.dev_signups} subtitle="Last 24h" />
-            <.stat_card title="Developer Returns" value={metrics.dev_returns} subtitle="Last 24h" />
+        <div :if={@timezone} class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <%= for {date, metrics} <- Enum.take(@user_metrics, 1) do %>
+            <.stat_card
+              title="Organization Signups"
+              value={metrics.org_signups}
+              subtext={format_date(date, @timezone)}
+            />
+            <.stat_card
+              title="Organization Returns"
+              value={metrics.org_returns}
+              subtext={format_date(date, @timezone)}
+            />
+            <.stat_card
+              title="Developer Signups"
+              value={metrics.dev_signups}
+              subtext={format_date(date, @timezone)}
+            />
+            <.stat_card
+              title="Developer Returns"
+              value={metrics.dev_returns}
+              subtext={format_date(date, @timezone)}
+            />
           <% end %>
         </div>
       </section>
@@ -536,10 +552,7 @@ defmodule AlgoraWeb.Admin.AdminLive do
   defp cell(%{value: %NaiveDateTime{}} = assigns) do
     ~H"""
     <span :if={@timezone} class="tabular-nums whitespace-nowrap text-sm">
-      {Calendar.strftime(
-        DateTime.from_naive!(@value, "Etc/UTC") |> DateTime.shift_zone!(@timezone),
-        "%Y/%m/%d, %H:%M:%S"
-      )}
+      {format_date(@value, @timezone)}
     </span>
     """
   end
@@ -680,5 +693,12 @@ defmodule AlgoraWeb.Admin.AdminLive do
     queries = get_saved_queries()
     updated_queries = Map.put(queries, name, query)
     Algora.Settings.set("saved_queries", updated_queries)
+  end
+
+  defp format_date(date, timezone) do
+    date
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.shift_zone!(timezone)
+    |> Calendar.strftime("%Y/%m/%d, %H:%M:%S")
   end
 end

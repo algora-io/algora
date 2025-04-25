@@ -18,7 +18,12 @@ defmodule AlgoraWeb.Components.Header do
   def header(assigns) do
     ~H"""
     <header class="absolute inset-x-0 top-0 z-50">
-      <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
+      <AlgoraWeb.Components.Banner.banner />
+
+      <nav
+        class="-mt-4 mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+        aria-label="Global"
+      >
         <div class="flex lg:flex-1">
           <.wordmark class="h-8 w-auto text-foreground" />
         </div>

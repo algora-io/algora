@@ -348,7 +348,7 @@
   <% end %>
 <% end %>
 
-<div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-16">
+<div :if={!@current_user && !assigns[:screenshot?]} class="relative pt-24">
   <.flash_group flash={@flash} />
   <AlgoraWeb.Components.Header.header />
   {@inner_content}

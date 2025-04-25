@@ -1188,7 +1188,7 @@ defmodule Algora.Bounties do
         from([b, r: r] in query, where: b.owner_id == ^owner_id or r.user_id == ^owner_id)
 
       {:owner_handle, owner_handle}, query ->
-        from([b, o: o] in query, where: o.handle == ^owner_handle)
+        from([b, o: o, ro: ro] in query, where: o.handle == ^owner_handle or ro.handle == ^owner_handle)
 
       {:status, status}, query ->
         query = where(query, [b], b.status == ^status)
@@ -1224,7 +1224,7 @@ defmodule Algora.Bounties do
               end
 
             query =
-              case criteria[:owner_id] do
+              case criteria[:owner_id] || criteria[:owner_handle] do
                 nil ->
                   where(query, [b, o: o], (b.visibility == :public and o.featured == true) or b.visibility == :exclusive)
 

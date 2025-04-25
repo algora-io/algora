@@ -25,7 +25,7 @@
 
 </p>
 
-Algora exists to reduce the friction in hiring, collaborating and paying open source developers.
+Algora exists to reduce the friction in hiring and collaborating with open source developers.
 
 Algora combines:
 
@@ -104,17 +104,36 @@ Algora combines:
   </tr>
 </table>
 
+<!-- ROADMAP -->
+
+## Roadmap & community requests
+
+- Profile enhancements
+  - Highlighting top non-bounty open source contributions
+  - Embeddable profile for GitHub and personal websites
+  - One-click bounty and contract sharing
+- Hiring platform features
+  - Job posting and application management
+  - Developer ranking system using our ELO algorithm based on OSS contributions
+  - Technical interview tools with bounties and contract work
+  - Customizable career page embeds for seamless integration
+- New payment/payout options
+  - Alipay, Wise, crypto etc.
+- New workflow integrations
+  - GitLab, Linear, Plane, Cursor etc.
+- New clients
+  - Mobile, desktop, CLI
+- Crowdfunding enhancements
+
 <!-- GETTING STARTED -->
 
 ## Getting Started
-
-To get a local copy up and running, follow these steps.
 
 ### Prerequisites
 
 The easiest way to get up and running is to [install](https://docs.docker.com/get-docker/) and use Docker for running Postgres.
 
-Make sure Docker, Elixir, Erlang and Node.js are all installed on your development machine. The [.tool-versions](https://github.com/algora-io/algora/blob/main/.tool-versions) file is available to use with [asdf](https://github.com/asdf-vm/asdf) or similar tools.
+Make sure Docker, Elixir, Erlang and Node.js are all installed on your development machine. You can install Elixir and Erlang/OTP by running [`asdf install`](https://github.com/asdf-vm/asdf) from the project root.
 
 We also recommend using [direnv](https://github.com/direnv/direnv) to load environment variables and [entr](https://github.com/eradman/entr) to watch for file changes.
 
@@ -126,37 +145,31 @@ We also recommend using [direnv](https://github.com/direnv/direnv) to load envir
    git clone git@github.com:algora-io/algora.git && cd algora
    ```
 
-2. Install Elixir and Erlang/OTP
-
-   ```sh
-   asdf install
-   ```
-
-3. Initialize and load `.env`
+2. Initialize and load `.env`
 
    ```sh
    cp .env.example .env && direnv allow .env
    ```
 
-4. Start a container with latest postgres
+3. Start a container with latest postgres
 
    ```sh
    make postgres
    ```
 
-5. Install and setup dependencies
+4. Install and setup dependencies
 
    ```sh
    make install
    ```
 
-6. Start the web server inside IEx
+5. Start the web server inside IEx
 
    ```sh
    make server
    ```
 
-7. (Optional) Watch for file changes and auto reload IEx shell in a separate terminal
+6. (Optional) Watch for file changes and auto reload IEx shell in a separate terminal
 
    ```sh
    make watch
@@ -165,24 +178,6 @@ We also recommend using [direnv](https://github.com/direnv/direnv) to load envir
 ### Setting up external services
 
 Some features of Algora rely on external services. If you're not planning on using these features, feel free to skip setting them up.
-
-#### Tunnel
-
-To receive webhooks from GitHub or Stripe on your local machine, you'll need a way to expose your local server to the internet. The easiest way to get up and running is to use a tool like [ngrok](https://ngrok.com/) or [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
-
-Here's how you can setup a re-usable named tunnel on your own domain name so you have a consistent URL:
-
-```sh
-cloudflared tunnel login
-cloudflared tunnel create local
-cloudflared tunnel route dns local http://local.yourdomain.com
-```
-
-Once you have setup your tunnel, add it to your `.env` file and run `direnv allow .env`.
-
-```env
-CLOUDFLARE_TUNNEL="local"
-```
 
 #### GitHub
 
@@ -200,7 +195,7 @@ CLOUDFLARE_TUNNEL="local"
   - Read account email address
 - Events: issues, pull requests, issue comment, pull request review, pull request review comment
 
-Once you have obtained your client ID and secret, add them to your `.env` file.
+Once you have obtained your client ID and secret, add them to your `.env` file and run `direnv allow .env`.
 
 ```env
 GITHUB_CLIENT_ID=""
@@ -232,3 +227,23 @@ AWS_ACCESS_KEY_ID=""
 AWS_SECRET_ACCESS_KEY=""
 BUCKET_NAME=""
 ```
+
+#### Tunnel
+
+To receive webhooks from GitHub or Stripe on your local machine, you'll need a way to expose your local server to the internet. The easiest way is to use a service like [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or [ngrok](https://ngrok.com/).
+
+If you'd like to utilize our Cloudflare Tunnel [GenServer](https://github.com/algora-io/algora/blob/main/lib/algora/integrations/tunnel.ex) to automatically run a tunnel when you start the app, you'll need to set up a named tunnel on your own domain:
+
+```sh
+cloudflared tunnel login
+cloudflared tunnel create local
+cloudflared tunnel route dns local http://local.yourdomain.com
+```
+
+And then add it to your `.env` file:
+
+```env
+CLOUDFLARE_TUNNEL="local"
+```
+
+If you're using another service, make sure to start the tunnel manually in another terminal.

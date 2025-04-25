@@ -110,7 +110,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                   <%= for %{transaction: transaction, ticket: ticket, project: project} <- @transactions do %>
                     <tr class="border-b transition-colors hover:bg-muted/10">
                       <td class="p-4 align-middle">
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-start gap-4">
                           <.link navigate={User.url(project)}>
                             <span class="relative flex h-14 w-14 shrink-0 overflow-hidden rounded-xl">
                               <img
@@ -161,6 +161,11 @@ defmodule AlgoraWeb.User.ProfileLive do
                                 </div>
                               </div>
                             </.maybe_link>
+                            <div :if={ticket.repository && ticket.repository.tech_stack}>
+                              <%= for tech <- ticket.repository.tech_stack do %>
+                                <.badge>{tech}</.badge>
+                              <% end %>
+                            </div>
                           </div>
                         </div>
                       </td>

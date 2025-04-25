@@ -175,7 +175,7 @@ defmodule AlgoraWeb.JobsLive do
                     <.input field={@form[:company_name]} label="Company Name" />
                   </div>
 
-                  <div class="flex justify-between gap-4">
+                  <div class="flex flex-col-reverse md:flex-row md:justify-between gap-4">
                     <div>
                       <div
                         :if={
@@ -187,7 +187,7 @@ defmodule AlgoraWeb.JobsLive do
                           <img src={logo} class="h-16 w-16 rounded-2xl" />
                         <% end %>
                         <div>
-                          <div class="text-lg text-foreground font-bold font-display">
+                          <div class="text-lg text-foreground font-bold font-display line-clamp-1">
                             {get_change(@form.source, :company_name)}
                           </div>
                           <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>

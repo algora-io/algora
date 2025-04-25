@@ -42,16 +42,16 @@ defmodule AlgoraWeb.Components.UserCard do
 
               <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1 text-xs text-gray-300 sm:text-sm">
                 <div :if={@twitter_handle} class="flex items-center gap-1">
-                  <.icon name="tabler-brand-twitter" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@twitter_handle}</span>
+                  <.icon name="tabler-brand-twitter" class="h-4 w-4 flex-none" />
+                  <span class="whitespace-nowrap text-wrap">{@twitter_handle}</span>
                 </div>
                 <div :if={@location} class="flex items-center gap-1">
-                  <.icon name="tabler-map-pin" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">{@location}</span>
+                  <.icon name="tabler-map-pin" class="h-4 w-4 flex-none" />
+                  <span class="whitespace-nowrap text-wrap">{@location}</span>
                 </div>
                 <div :if={@company} class="flex items-center gap-1">
-                  <.icon name="tabler-building" class="h-4 w-4" />
-                  <span class="whitespace-nowrap">
+                  <.icon name="tabler-building" class="h-4 w-4 flex-none" />
+                  <span class="whitespace-nowrap text-wrap">
                     {@company |> String.trim_leading("@")}
                   </span>
                 </div>

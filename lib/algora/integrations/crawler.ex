@@ -349,27 +349,10 @@ defmodule Algora.Crawler do
             get_href_or_nil(elements)
         end
 
-      case url do
-        nil -> nil
-        url -> follow_redirect(make_absolute_url(url, base_url))
+      if url do
+        make_absolute_url(url, base_url)
       end
     end)
-  end
-
-  defp follow_redirect(url) do
-    request = Finch.build(:head, url, @headers)
-
-    case Finch.request(request, Algora.Finch) do
-      {:ok, %Finch.Response{status: status, headers: headers}}
-      when status in [301, 302, 303, 307, 308] ->
-        case List.keyfind(headers, "location", 0) do
-          {_, location} -> location
-          nil -> url
-        end
-
-      _ ->
-        url
-    end
   end
 
   defp handle_twitter_url([]), do: nil

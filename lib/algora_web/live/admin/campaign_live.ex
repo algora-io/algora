@@ -20,6 +20,9 @@ defmodule AlgoraWeb.Admin.CampaignLive do
 
   require Logger
 
+  @repo_cache_table :campaign_repo_cache
+  @user_cache_table :campaign_user_cache
+
   defmodule Campaign do
     @moduledoc false
     use Ecto.Schema
@@ -45,6 +48,11 @@ defmodule AlgoraWeb.Admin.CampaignLive do
     end
   end
 
+  def start_link do
+    :ets.new(@repo_cache_table, [:named_table, :set, :public])
+    :ets.new(@user_cache_table, [:named_table, :set, :public])
+  end
+
   @impl true
   def mount(_params, _session, socket) do
     timezone = if(params = get_connect_params(socket), do: params["timezone"])
@@ -54,8 +62,6 @@ defmodule AlgoraWeb.Admin.CampaignLive do
      |> assign(:timezone, timezone)
      |> assign(:page_title, "Campaign")
      |> assign(:form, to_form(Campaign.changeset(%Campaign{})))
-     |> assign(:repo_cache, %{})
-     |> assign(:user_cache, %{})
      |> assign_preview()}
   end
 
@@ -271,22 +277,26 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       socket.assigns.csv_data
       |> Enum.map(&Map.get(&1, "email"))
       |> Enum.uniq()
+      |> Enum.reject(fn key -> :ets.lookup(@user_cache_table, key) != [] end)
 
-    new_cache =
-      Map.new(new_keys, fn key ->
-        user = Accounts.get_user_by_email(key)
+    Enum.each(new_keys, fn key ->
+      user = Accounts.get_user_by_email(key)
 
+      timestamp =
         if user do
-          {key, Util.next_occurrence_of_time(user.last_active_at || user.inserted_at)}
+          Util.next_occurrence_of_time(user.last_active_at || user.inserted_at)
         else
-          {key, Util.next_occurrence_of_time(Util.random_datetime())}
+          Util.next_occurrence_of_time(Util.random_datetime())
         end
-      end)
 
-    updated_cache = Map.merge(socket.assigns.user_cache, new_cache)
+      :ets.insert(@user_cache_table, {key, timestamp})
+    end)
 
     csv_data =
-      Enum.map(socket.assigns.csv_data, fn row -> Map.put(row, "timestamp", Map.get(updated_cache, row["email"])) end)
+      Enum.map(socket.assigns.csv_data, fn row ->
+        [{_, timestamp}] = :ets.lookup(@user_cache_table, row["email"])
+        Map.put(row, "timestamp", timestamp)
+      end)
 
     csv_columns =
       csv_data
@@ -294,7 +304,6 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       |> Enum.uniq()
 
     socket
-    |> assign(:repo_cache, updated_cache)
     |> assign(:csv_data, csv_data)
     |> assign(:csv_columns, csv_columns)
   end
@@ -304,66 +313,34 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       socket.assigns.csv_data
       |> Enum.map(&repo_key/1)
       |> Enum.reject(&is_nil/1)
-      |> Enum.reject(&Map.has_key?(socket.assigns.repo_cache, &1))
+      |> Enum.reject(fn key -> :ets.lookup(@repo_cache_table, key) != [] end)
       |> Enum.uniq()
 
-    new_cache =
-      Map.new(new_keys, fn key ->
-        filter =
-          case key do
-            {owner, name} ->
-              token = Admin.token()
-
-              with {:ok, repository} <- Workspace.ensure_repository(token, owner, name),
-                   {:ok, _tech_stack} <- Workspace.ensure_repo_tech_stack(token, repository) do
-                dynamic([r, _u], r.id == ^repository.id)
-              else
-                _ -> false
-              end
-
-            org_handle ->
-              dynamic([r, u], u.handle == ^org_handle)
-          end
-
-        repo =
-          Repo.one(
-            from r in Repository,
-              join: u in assoc(r, :user),
-              where: ^filter,
-              order_by: [desc: fragment("(?->>'stargazers_count')::integer", r.provider_meta)],
-              select: %{
-                repo_owner: u.provider_login,
-                repo_name: r.name,
-                tech_stack: fragment("COALESCE(NULLIF(?, '{}'), ?)", u.tech_stack, r.tech_stack)
-              },
-              limit: 1
-          )
-
-        if repo && repo.tech_stack != [] do
-          matches = Settings.get_tech_matches(List.first(repo.tech_stack))
-          {key, {repo, matches}}
-        else
-          {key, nil}
-        end
-      end)
-
-    updated_cache = Map.merge(socket.assigns.repo_cache, new_cache)
+    Enum.each(new_keys, fn key ->
+      cache_value = fetch_repo_data(key)
+      :ets.insert(@repo_cache_table, {key, cache_value})
+    end)
 
     csv_data =
-      Enum.map(socket.assigns.csv_data, fn
-        row ->
-          case Map.get(updated_cache, repo_key(row)) do
-            {repo, matches} ->
-              Map.merge(row, %{
-                "repo_owner" => repo.repo_owner,
-                "repo_name" => repo.repo_name,
-                "tech_stack" => repo.tech_stack,
-                "matches" => Enum.map(matches, & &1.user.handle)
-              })
+      Enum.map(socket.assigns.csv_data, fn row ->
+        case repo_key(row) do
+          nil ->
+            row
 
-            _ ->
-              row
-          end
+          key ->
+            case :ets.lookup(@repo_cache_table, key) do
+              [{_, {repo, matches}}] ->
+                Map.merge(row, %{
+                  "repo_owner" => repo.repo_owner,
+                  "repo_name" => repo.repo_name,
+                  "tech_stack" => repo.tech_stack,
+                  "matches" => Enum.map(matches, & &1.user.handle)
+                })
+
+              _ ->
+                row
+            end
+        end
       end)
 
     csv_columns =
@@ -372,9 +349,45 @@ defmodule AlgoraWeb.Admin.CampaignLive do
       |> Enum.uniq()
 
     socket
-    |> assign(:repo_cache, updated_cache)
     |> assign(:csv_data, csv_data)
     |> assign(:csv_columns, csv_columns)
+  end
+
+  defp fetch_repo_data(key) do
+    filter =
+      case key do
+        {owner, name} ->
+          token = Admin.token()
+
+          with {:ok, repository} <- Workspace.ensure_repository(token, owner, name),
+               {:ok, _tech_stack} <- Workspace.ensure_repo_tech_stack(token, repository) do
+            dynamic([r, _u], r.id == ^repository.id)
+          else
+            _ -> false
+          end
+
+        org_handle ->
+          dynamic([r, u], u.handle == ^org_handle)
+      end
+
+    repo =
+      Repo.one(
+        from r in Repository,
+          join: u in assoc(r, :user),
+          where: ^filter,
+          order_by: [desc: fragment("(?->>'stargazers_count')::integer", r.provider_meta)],
+          select: %{
+            repo_owner: u.provider_login,
+            repo_name: r.name,
+            tech_stack: fragment("COALESCE(NULLIF(?, '{}'), ?)", u.tech_stack, r.tech_stack)
+          },
+          limit: 1
+      )
+
+    if repo && repo.tech_stack != [] do
+      matches = Settings.get_tech_matches(List.first(repo.tech_stack))
+      {repo, matches}
+    end
   end
 
   defp assign_csv_data(socket, data) do

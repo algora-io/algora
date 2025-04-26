@@ -141,4 +141,15 @@ defmodule Algora.Settings do
   def set_blocked_users(handles) when is_list(handles) do
     set("blocked_users", %{"handles" => handles})
   end
+
+  def get_featured_transactions do
+    case get("featured_transactions") do
+      %{"ids" => ids} when is_list(ids) -> ids
+      _ -> nil
+    end
+  end
+
+  def set_featured_transactions(ids) when is_list(ids) do
+    set("featured_transactions", %{"ids" => ids})
+  end
 end

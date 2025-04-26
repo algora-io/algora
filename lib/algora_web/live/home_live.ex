@@ -56,11 +56,10 @@ defmodule AlgoraWeb.HomeLive do
     featured_devs = Accounts.list_featured_developers()
     featured_collabs = list_featured_collabs()
 
-    transactions =
+    tx_query =
       from(tx in Transaction,
         where: tx.type == :credit,
         where: not is_nil(tx.succeeded_at),
-        where: tx.succeeded_at > ago(1, "week"),
         join: u in assoc(tx, :user),
         left_join: b in assoc(tx, :bounty),
         left_join: tip in assoc(tx, :tip),
@@ -71,6 +70,7 @@ defmodule AlgoraWeb.HomeLive do
         join: ltx in assoc(tx, :linked_transaction),
         join: ltx_user in assoc(ltx, :user),
         select: %{
+          id: tx.id,
           succeeded_at: tx.succeeded_at,
           net_amount: tx.net_amount,
           bounty_id: b.id,
@@ -78,12 +78,22 @@ defmodule AlgoraWeb.HomeLive do
           user: u,
           ticket: %{t | repository: %{r | user: o}},
           linked_transaction: %{ltx | user: ltx_user}
-        },
-        order_by: [desc: tx.net_amount],
-        limit: 5
+        }
       )
-      |> Repo.all()
-      |> Enum.sort_by(& &1.succeeded_at, {:desc, DateTime})
+
+    tx_query =
+      case Algora.Settings.get_featured_transactions() do
+        ids when is_list(ids) and ids != [] ->
+          where(tx_query, [tx], tx.id in ^ids)
+
+        _ ->
+          tx_query
+          |> where([tx], tx.succeeded_at > ago(1, "week"))
+          |> order_by([tx], desc: tx.net_amount)
+          |> limit(5)
+      end
+
+    transactions = tx_query |> Repo.all() |> Enum.sort_by(& &1.succeeded_at, {:desc, DateTime})
 
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->

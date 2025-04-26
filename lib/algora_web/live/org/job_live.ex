@@ -148,10 +148,8 @@ defmodule AlgoraWeb.Org.JobLive do
           </.card>
         <% else %>
           <div class="grid gap-8">
-            <%= for {application, index} <- Enum.with_index(@applicants) do %>
-              <div class={
-                if !@has_subscription && index > 2, do: "filter blur-sm pointer-events-none"
-              }>
+            <%= for {application, _index} <- Enum.with_index(@applicants) do %>
+              <div>
                 <.developer_card
                   user={application.user}
                   contributions={Map.get(@contributions_map, application.user.id, [])}
@@ -233,10 +231,9 @@ defmodule AlgoraWeb.Org.JobLive do
             <div>
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link navigate={User.url(@user)} class="font-semibold hover:underline">
-                  {@user.name}
+                  {@user.name} {Algora.Misc.CountryEmojis.get(@user.country)}
                 </.link>
               </div>
-
               <div
                 :if={@user.provider_meta}
                 class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm max-w-[250px] 2xl:max-w-none truncate"
@@ -304,17 +301,17 @@ defmodule AlgoraWeb.Org.JobLive do
         </div>
 
         <div :if={@contributions != []} class="pl-16 mt-4 space-y-4">
-          <div class="flex items-center gap-6 mt-2">
+          <div class="flex items-center gap-3 mt-2">
             <%= for c <- @contributions do %>
               <.link
                 href={"https://github.com/#{c.repository.user.provider_login}/#{c.repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border"
+                class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
               >
                 <img
                   src={c.repository.user.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none transition-all"
+                  class="h-12 w-12 rounded-xl rounded-r-none saturate-0 group-hover:saturate-100 transition-all"
                   alt={c.repository.user.name}
                 />
                 <div class="flex flex-col text-sm font-medium gap-0.5">

@@ -17,11 +17,18 @@ defmodule AlgoraWeb.Org.JobLive do
       # TODO: Replace with actual subscription check
       has_subscription = false
 
+      # Fetch all contributions for applicants upfront
+      contributions_map = fetch_applicants_contributions(applicants)
+
+      # Sort applicants by total contributions
+      sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
+
       {:ok,
        socket
        |> assign(:page_title, job.title)
        |> assign(:job, job)
-       |> assign(:applicants, applicants)
+       |> assign(:applicants, sorted_applicants)
+       |> assign(:contributions_map, contributions_map)
        |> assign(:total_applicants, length(applicants))
        |> assign(:matches, matches)
        |> assign(:total_matches, length(matches))
@@ -140,12 +147,15 @@ defmodule AlgoraWeb.Org.JobLive do
             </.card_header>
           </.card>
         <% else %>
-          <div class="grid gap-4">
+          <div class="grid gap-8">
             <%= for {application, index} <- Enum.with_index(@applicants) do %>
               <div class={
                 if !@has_subscription && index > 2, do: "filter blur-sm pointer-events-none"
               }>
-                <.developer_card user={application.user} />
+                <.developer_card
+                  user={application.user}
+                  contributions={Map.get(@contributions_map, application.user.id, [])}
+                />
               </div>
             <% end %>
           </div>
@@ -206,9 +216,6 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   defp developer_card(assigns) do
-    assigns =
-      assign(assigns, :contributions, Algora.Workspace.list_user_contributions(assigns.user.provider_login, limit: 5))
-
     ~H"""
     <tr class="border-b transition-colors">
       <td class="py-4 align-middle">
@@ -303,18 +310,26 @@ defmodule AlgoraWeb.Org.JobLive do
                 href={"https://github.com/#{c.repository.user.provider_login}/#{c.repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-3 group"
+                class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border"
               >
                 <img
-                  src={"https://github.com/#{c.repository.user.provider_login}.png"}
-                  class="h-9 w-9 rounded-xl saturate-0 group-hover:saturate-100 transition-all"
+                  src={c.repository.user.avatar_url}
+                  class="h-12 w-12 rounded-xl rounded-r-none transition-all"
                   alt={c.repository.user.name}
                 />
-                <div class="flex flex-col text-sm font-medium">
-                  <span>
-                    <span>{c.repository.user.name}</span><span class="text-muted-foreground">/{c.repository.name}</span>
+                <div class="flex flex-col text-sm font-medium gap-0.5">
+                  <span class="flex items-start gap-5">
+                    <span class="font-display">{c.repository.user.name}</span>
+                    <%= if tech = List.first(c.repository.tech_stack) do %>
+                      <span class="flex items-center text-foreground text-[11px] gap-1">
+                        <img
+                          src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
+                          class="w-4 h-4 invert saturate-0"
+                        /> {tech}
+                      </span>
+                    <% end %>
                   </span>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-2 font-semibold">
                     <span class="flex items-center text-amber-300 text-xs">
                       <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
                       {Algora.Util.format_number_compact(c.repository.stargazers_count)}
@@ -323,12 +338,6 @@ defmodule AlgoraWeb.Org.JobLive do
                       <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
                       {Algora.Util.format_number_compact(c.contribution_count)}
                     </span>
-                    <%= if tech = List.first(c.repository.tech_stack) do %>
-                      <span class="flex items-center text-foreground text-xs">
-                        <.icon name="tabler-code" class="h-4 w-4 mr-1" />
-                        {tech}
-                      </span>
-                    <% end %>
                   </div>
                 </div>
               </.link>
@@ -474,4 +483,18 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
   defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
+
+  # Fetch contributions for all applicants and create a map for quick lookup
+  defp fetch_applicants_contributions(applicants) do
+    Enum.reduce(applicants, %{}, fn application, acc ->
+      user = application.user
+      contributions = Algora.Workspace.list_user_contributions(user.provider_login, limit: 5)
+      Map.put(acc, user.id, contributions)
+    end)
+  end
+
+  # Sort applicants by their total number of contributions
+  defp sort_applicants_by_contributions(applicants, contributions_map) do
+    Enum.sort_by(applicants, fn application -> length(Map.get(contributions_map, application.user.id, [])) end, :desc)
+  end
 end

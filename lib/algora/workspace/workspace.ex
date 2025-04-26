@@ -627,6 +627,8 @@ defmodule Algora.Workspace do
         where: u.provider == "github",
         where: u.provider_login == ^github_handle,
         where: not ilike(r.name, "%awesome%"),
+        where: not ilike(r.name, "%algorithms%"),
+        where: not ilike(repo_owner.provider_login, "%algorithms%"),
         where: repo_owner.type == :organization or r.stargazers_count > 100,
         order_by: [desc: r.stargazers_count, desc: uc.contribution_count],
         select_merge: %{repository: %{r | user: repo_owner}}

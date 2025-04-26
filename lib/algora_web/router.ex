@@ -208,6 +208,7 @@ defmodule AlgoraWeb.Router do
         live "/contracts/:id", ContractLive
         live "/team", Org.TeamLive, :index
         live "/leaderboard", Org.LeaderboardLive, :index
+        live "/jobs/:id", Org.JobLive
       end
 
       live_session :org_admin,

@@ -107,4 +107,21 @@ defmodule Algora.Jobs do
     |> Repo.all()
     |> MapSet.new()
   end
+
+  def get_job_posting(id) do
+    case JobPosting |> Repo.get(id) |> Repo.preload(:user) do
+      nil -> {:error, :not_found}
+      job -> {:ok, job}
+    end
+  end
+
+  def list_job_applications(job) do
+    applications =
+      JobApplication
+      |> where([a], a.job_id == ^job.id)
+      |> preload(:user)
+      |> Repo.all()
+
+    {:ok, applications}
+  end
 end

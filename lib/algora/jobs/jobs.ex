@@ -15,7 +15,7 @@ defmodule Algora.Jobs do
 
   require Logger
 
-  def price, do: Money.new(:USD, 499, no_fraction_if_integer: true)
+  def price, do: Money.new(:USD, 999, no_fraction_if_integer: true)
 
   def list_jobs(opts \\ []) do
     JobPosting
@@ -46,7 +46,13 @@ defmodule Algora.Jobs do
   @spec create_payment_session(job_posting: JobPosting.t()) ::
           {:ok, String.t()} | {:error, atom()}
   def create_payment_session(job_posting) do
-    line_items = [%LineItem{amount: price(), title: "Job posting - #{job_posting.company_name}"}]
+    line_items = [
+      %LineItem{
+        amount: price(),
+        title: "Job posting - #{job_posting.company_name}",
+        description: "1 month"
+      }
+    ]
 
     gross_amount = LineItem.gross_amount(line_items)
     group_id = Nanoid.generate()

@@ -188,7 +188,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </ul>
               </div>
               <div class="flex flex-col justify-center items-center text-center">
-                <.button phx-click="upgrade_subscription" size="lg" class="w-full max-w-xs">
+                <.button phx-click="activate_subscription" size="lg" class="w-full max-w-xs">
                   Activate
                 </.button>
               </div>
@@ -201,8 +201,8 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def handle_event("create_job", _params, socket) do
-    case Jobs.create_payment_session(socket.assigns.job) do
+  def handle_event("activate_subscription", _params, socket) do
+    case Jobs.create_payment_session(%{socket.assigns.job | email: socket.assigns.current_user.email}) do
       {:ok, url} ->
         Algora.Admin.alert("Payment session created for job posting: #{socket.assigns.job.company_name}", :info)
         {:noreply, redirect(socket, external: url)}

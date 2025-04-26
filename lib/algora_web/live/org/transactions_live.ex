@@ -363,10 +363,12 @@ defmodule AlgoraWeb.Org.TransactionsLive do
                     </dd>
                   </div>
                   <div>
-                    <dt class="text-sm font-medium text-muted-foreground">Country</dt>
-                    <dd class="text-sm font-semibold">
-                      {Algora.PSP.ConnectCountries.from_code(@account.country)}
-                    </dd>
+                    <%= if @account.country do %>
+                      <dt class="text-sm font-medium text-muted-foreground">Country</dt>
+                      <dd class="text-sm font-semibold">
+                        {Algora.PSP.ConnectCountries.from_code(@account.country)}
+                      </dd>
+                    <% end %>
                   </div>
                   <div>
                     <dt class="text-sm font-medium text-muted-foreground">Can Accept Payments</dt>

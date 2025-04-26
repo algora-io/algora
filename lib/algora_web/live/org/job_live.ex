@@ -6,6 +6,8 @@ defmodule AlgoraWeb.Org.JobLive do
   alias Algora.Jobs
   alias Algora.Settings
 
+  require Logger
+
   @impl true
   def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
     with {:ok, job} <- Jobs.get_job_posting(id),
@@ -107,7 +109,7 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <%= for {match, index} <- Enum.with_index(@matches) do %>
               <div class={
-                if !@has_subscription && index != 1, do: "filter blur-sm pointer-events-none"
+                if !@has_subscription && index != 0, do: "filter blur-sm pointer-events-none"
               }>
                 <.match_card match={match} />
               </div>
@@ -141,7 +143,7 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="grid gap-4">
             <%= for {application, index} <- Enum.with_index(@applicants) do %>
               <div class={
-                if !@has_subscription && index > 1, do: "filter blur-sm pointer-events-none"
+                if !@has_subscription && index > 2, do: "filter blur-sm pointer-events-none"
               }>
                 <.developer_card user={application.user} />
               </div>
@@ -190,7 +192,23 @@ defmodule AlgoraWeb.Org.JobLive do
     """
   end
 
+  @impl true
+  def handle_event("create_job", _params, socket) do
+    case Jobs.create_payment_session(socket.assigns.job) do
+      {:ok, url} ->
+        Algora.Admin.alert("Payment session created for job posting: #{socket.assigns.job.company_name}", :info)
+        {:noreply, redirect(socket, external: url)}
+
+      {:error, reason} ->
+        Logger.error("Failed to create payment session: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+    end
+  end
+
   defp developer_card(assigns) do
+    assigns =
+      assign(assigns, :contributions, Algora.Workspace.list_user_contributions(assigns.user.provider_login, limit: 5))
+
     ~H"""
     <tr class="border-b transition-colors">
       <td class="py-4 align-middle">
@@ -275,6 +293,46 @@ defmodule AlgoraWeb.Org.JobLive do
             >
               Contract
             </.button>
+          </div>
+        </div>
+
+        <div :if={@contributions != []} class="pl-16 mt-4 space-y-4">
+          <div class="flex items-center gap-6 mt-2">
+            <%= for c <- @contributions do %>
+              <.link
+                href={"https://github.com/#{c.repository.user.provider_login}/#{c.repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                target="_blank"
+                rel="noopener"
+                class="flex items-center gap-3 group"
+              >
+                <img
+                  src={"https://github.com/#{c.repository.user.provider_login}.png"}
+                  class="h-9 w-9 rounded-xl saturate-0 group-hover:saturate-100 transition-all"
+                  alt={c.repository.user.name}
+                />
+                <div class="flex flex-col text-sm font-medium">
+                  <span>
+                    <span>{c.repository.user.name}</span><span class="text-muted-foreground">/{c.repository.name}</span>
+                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="flex items-center text-amber-300 text-xs">
+                      <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
+                      {Algora.Util.format_number_compact(c.repository.stargazers_count)}
+                    </span>
+                    <span class="flex items-center text-purple-400 text-xs">
+                      <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
+                      {Algora.Util.format_number_compact(c.contribution_count)}
+                    </span>
+                    <%= if tech = List.first(c.repository.tech_stack) do %>
+                      <span class="flex items-center text-foreground text-xs">
+                        <.icon name="tabler-code" class="h-4 w-4 mr-1" />
+                        {tech}
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </.link>
+            <% end %>
           </div>
         </div>
       </td>

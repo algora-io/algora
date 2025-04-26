@@ -15,6 +15,7 @@ defmodule Algora.Workspace do
   alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
+  alias Algora.Workspace.UserContribution
 
   require Logger
 
@@ -613,6 +614,45 @@ defmodule Algora.Workspace do
         Logger.error("Failed to remove label #{label} from #{owner}/#{repo}##{number}: #{inspect(reason)}")
 
         :error
+    end
+  end
+
+  @spec list_user_contributions(String.t(), map()) :: {:ok, list(map())} | {:error, term()}
+  def list_user_contributions(github_handle, opts \\ []) do
+    query =
+      from uc in UserContribution,
+        join: u in assoc(uc, :user),
+        join: r in assoc(uc, :repository),
+        join: repo_owner in assoc(r, :user),
+        where: u.provider == "github",
+        where: u.provider_login == ^github_handle,
+        where: not ilike(r.name, "%awesome%"),
+        where: repo_owner.type == :organization or r.stargazers_count > 100,
+        order_by: [desc: r.stargazers_count, desc: uc.contribution_count],
+        select_merge: %{repository: %{r | user: repo_owner}}
+
+    query =
+      case opts[:limit] do
+        nil -> query
+        limit -> limit(query, ^limit)
+      end
+
+    Repo.all(query)
+  end
+
+  @spec upsert_user_contribution(User.t(), Repository.t(), integer()) ::
+          {:ok, UserContribution.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_user_contribution(%User{} = user, %Repository{} = repository, contribution_count) do
+    attrs = %{
+      user_id: user.id,
+      repository_id: repository.id,
+      contribution_count: contribution_count,
+      last_fetched_at: DateTime.utc_now()
+    }
+
+    case Repo.get_by(UserContribution, user_id: user.id, repository_id: repository.id) do
+      nil -> %UserContribution{} |> UserContribution.changeset(attrs) |> Repo.insert()
+      contribution -> contribution |> UserContribution.changeset(attrs) |> Repo.update()
     end
   end
 end

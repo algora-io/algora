@@ -22,6 +22,16 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def add_contributions(handle, opts) do
+    {:ok, user} = Workspace.ensure_user(token!(), handle)
+
+    for {repo_owner, repo_name, contribution_count} <- opts do
+      {:ok, repo} = Workspace.ensure_repository(token!(), repo_owner, repo_name)
+      {:ok, _tech_stack} = Workspace.ensure_repo_tech_stack(token!(), repo)
+      Algora.Workspace.upsert_user_contribution(user, repo, contribution_count)
+    end
+  end
+
   def release_payment(tx_id) do
     Repo.transact(fn ->
       {_, [tx]} =

@@ -834,7 +834,19 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   defp aggregate_contributions(contributions) do
-    Enum.group_by(contributions, fn c -> c.repository.user end)
+    contributions
+    |> Enum.group_by(fn c -> c.repository.user end)
+    |> Enum.sort_by(
+      fn {owner, repos} ->
+        max(
+          owner.stargazers_count,
+          repos
+          |> Enum.map(& &1.repository.stargazers_count)
+          |> Enum.sum()
+        )
+      end,
+      :desc
+    )
   end
 
   defp total_stars(contributions) do

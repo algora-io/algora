@@ -2,41 +2,51 @@ defmodule AlgoraWeb.Org.JobLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Jobs
   alias Algora.Settings
 
   require Logger
 
+  defp assign_applicants(socket) do
+    applicants = Jobs.list_job_applications(socket.assigns.job)
+    contributions_map = fetch_applicants_contributions(applicants)
+    sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
+
+    socket
+    |> assign(:applicants, sorted_applicants)
+    |> assign(:contributions_map, contributions_map)
+    |> assign(:total_applicants, length(applicants))
+  end
+
   @impl true
   def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
-    with {:ok, job} <- Jobs.get_job_posting(id),
-         {:ok, applicants} <- Jobs.list_job_applications(job) do
-      matches = Settings.get_org_matches(job.user)
-      imported_applicants = []
-      # TODO: Replace with actual subscription check
-      has_subscription = false
+    case Jobs.get_job_posting(id) do
+      {:ok, job} ->
+        matches = Settings.get_org_matches(job.user)
+        imported_applicants = []
+        # TODO: Replace with actual subscription check
+        has_subscription = false
 
-      # Fetch all contributions for applicants upfront
-      contributions_map = fetch_applicants_contributions(applicants)
+        {:ok,
+         socket
+         |> assign(:page_title, job.title)
+         |> assign(:job, job)
+         |> assign(:matches, matches)
+         |> assign(:total_matches, length(matches))
+         |> assign(:imported_applicants, imported_applicants)
+         |> assign(:total_imported, length(imported_applicants))
+         |> assign(:has_subscription, has_subscription)
+         |> assign(:show_import_drawer, false)
+         |> assign(:import_form, to_form(%{"github_urls" => ""}, as: :import))
+         |> assign(:github_urls, "")
+         # Map of github_handle => %{status: :loading/:done, user: nil/User}
+         |> assign(:importing_users, %{})
+         |> assign_applicants()}
 
-      # Sort applicants by total contributions
-      sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
-
-      {:ok,
-       socket
-       |> assign(:page_title, job.title)
-       |> assign(:job, job)
-       |> assign(:applicants, sorted_applicants)
-       |> assign(:contributions_map, contributions_map)
-       |> assign(:total_applicants, length(applicants))
-       |> assign(:matches, matches)
-       |> assign(:total_matches, length(matches))
-       |> assign(:imported_applicants, imported_applicants)
-       |> assign(:total_imported, length(imported_applicants))
-       |> assign(:has_subscription, has_subscription)}
-    else
-      _ -> {:ok, push_navigate(socket, to: ~p"/#{handle}/home")}
+      _ ->
+        {:ok, push_navigate(socket, to: ~p"/#{handle}/home")}
     end
   end
 
@@ -127,7 +137,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
       <.section title="Applicants" subtitle="Developers who applied for this position">
         <:actions>
-          <.button variant="secondary" class="ml-auto">
+          <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
             Import
           </.button>
           <.button variant="default">
@@ -197,6 +207,104 @@ defmodule AlgoraWeb.Org.JobLive do
         </div>
       </.section>
     </div>
+
+    <.drawer show={@show_import_drawer} on_cancel={JS.push("toggle_import_drawer")} direction="right">
+      <.drawer_header>
+        <.drawer_title>Import Applicants</.drawer_title>
+        <.drawer_description>
+          Enter GitHub URLs or handles (comma or newline separated)
+        </.drawer_description>
+      </.drawer_header>
+
+      <.drawer_content>
+        <div class="space-y-4">
+          <.simple_form for={@import_form} phx-submit="submit_import" class="space-y-4">
+            <.input
+              type="textarea"
+              field={@import_form[:github_urls]}
+              placeholder={import_placeholder()}
+              phx-change="parse_github_urls"
+              phx-debounce="300"
+            />
+
+            <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
+              <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
+                <span>
+                  Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                    status == :done
+                  end)}/{map_size(@importing_users)}
+                </span>
+              </div>
+            <% else %>
+              <%= if map_size(@importing_users) > 0 do %>
+                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                  <.icon name="tabler-check" class="h-4 w-4" />
+                  <span>
+                    Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                      status == :done
+                    end)}/{map_size(@importing_users)}
+                  </span>
+                </div>
+              <% end %>
+            <% end %>
+
+            <div class="space-y-2">
+              <%= for {handle, data} <- Enum.sort_by(@importing_users, fn {_, %{order: order}} -> order end) do %>
+                <div class="flex items-center gap-2">
+                  <%= if data.status == :loading do %>
+                    <.avatar class="h-8 w-8">
+                      <.avatar_image src="/images/placeholder-avatar.png" />
+                      <.avatar_fallback>
+                        {handle}
+                      </.avatar_fallback>
+                    </.avatar>
+                    <span class="text-sm font-medium">{handle}</span>
+                  <% else %>
+                    <%= if data.user do %>
+                      <.link
+                        href={"https://github.com/#{data.user.provider_login}"}
+                        target="_blank"
+                        rel="noopener"
+                        class="flex items-center gap-2"
+                      >
+                        <.avatar class="h-8 w-8">
+                          <.avatar_image src={data.user.avatar_url} />
+                          <.avatar_fallback>
+                            {Algora.Util.initials(data.user.name)}
+                          </.avatar_fallback>
+                        </.avatar>
+                        <span class="text-sm font-medium">{data.user.name}</span>
+                        <span class="text-xs font-medium text-muted-foreground">
+                          @{data.user.provider_login}
+                        </span>
+                      </.link>
+                    <% else %>
+                      <.avatar class="h-8 w-8">
+                        <.avatar_fallback>?</.avatar_fallback>
+                      </.avatar>
+                      <span class="text-sm text-destructive">Failed to load @{handle}</span>
+                    <% end %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+
+            <:actions>
+              <.button
+                type="submit"
+                disabled={
+                  Enum.empty?(@importing_users) ||
+                    Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end)
+                }
+              >
+                Import
+              </.button>
+            </:actions>
+          </.simple_form>
+        </div>
+      </.drawer_content>
+    </.drawer>
     """
   end
 
@@ -210,6 +318,142 @@ defmodule AlgoraWeb.Org.JobLive do
       {:error, reason} ->
         Logger.error("Failed to create payment session: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+    end
+  end
+
+  @impl true
+  def handle_event("toggle_import_drawer", _, socket) do
+    {:noreply, assign(socket, :show_import_drawer, !socket.assigns.show_import_drawer)}
+  end
+
+  @impl true
+  def handle_event("parse_github_urls", %{"import" => %{"github_urls" => urls}}, socket) do
+    Algora.Admin.alert("Job applicant import initiated: #{inspect(urls)}", :info)
+    # Parse GitHub URLs/handles from input and maintain order
+    handles =
+      urls
+      |> String.split(~r/[\n,]/)
+      |> Enum.map(&extract_github_handle/1)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.with_index()
+      # Keep first occurrence if duplicate
+      |> Enum.uniq_by(fn {handle, _} -> handle end)
+      |> Map.new(fn {handle, index} -> {handle, %{status: :loading, user: nil, order: index}} end)
+
+    # Start async user fetching for first handle only
+    case Enum.min_by(handles, fn {_, %{order: order}} -> order end, &</2, fn -> nil end) do
+      {handle, _} -> send(self(), {:fetch_github_user, handle})
+      nil -> :ok
+    end
+
+    {:noreply,
+     socket
+     |> assign(:importing_users, handles)
+     |> assign(:import_form, to_form(%{"github_urls" => urls}, as: :import))}
+  end
+
+  @impl true
+  def handle_event("submit_import", _, socket) do
+    # Create applications for all successfully imported users in original order
+    results =
+      socket.assigns.importing_users
+      |> Enum.sort_by(fn {_handle, %{order: order}} -> order end)
+      |> Enum.filter(fn {_handle, %{status: status, user: user}} ->
+        status == :done && not is_nil(user)
+      end)
+      # TODO: batch this
+      |> Enum.map(fn {_handle, %{user: user}} -> Jobs.ensure_application(socket.assigns.job.id, user) end)
+
+    if Enum.all?(results, &match?({:ok, _}, &1)) do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Successfully imported applicants")
+       |> assign(:show_import_drawer, false)
+       |> assign(:importing_users, %{})
+       |> assign_applicants()}
+    else
+      {:noreply, put_flash(socket, :error, "Failed to import some applicants")}
+    end
+  end
+
+  @impl true
+  def handle_info({:fetch_github_user, handle}, socket) do
+    # TODO: handle expired token
+    case Accounts.get_access_token(socket.assigns.current_user) do
+      {:ok, token} ->
+        case Algora.Workspace.ensure_user(token, handle) do
+          {:ok, user} ->
+            importing_users =
+              update_in(
+                socket.assigns.importing_users,
+                [handle],
+                &%{&1 | status: :done, user: user}
+              )
+
+            # Find next handle to process based on order
+            next_handle =
+              importing_users
+              |> Enum.filter(fn {_, %{status: status}} -> status == :loading end)
+              |> Enum.min_by(fn {_, %{order: order}} -> order end, &</2, fn -> nil end)
+              |> case do
+                {handle, _} -> handle
+                nil -> nil
+              end
+
+            # Start fetching next handle if exists
+            if next_handle, do: send(self(), {:fetch_github_user, next_handle})
+
+            {:noreply, assign(socket, :importing_users, importing_users)}
+
+          {:error, _reason} ->
+            importing_users =
+              update_in(
+                socket.assigns.importing_users,
+                [handle],
+                &%{&1 | status: :done, user: nil}
+              )
+
+            # Find next handle to process based on order
+            next_handle =
+              importing_users
+              |> Enum.filter(fn {_, %{status: status}} -> status == :loading end)
+              |> Enum.min_by(fn {_, %{order: order}} -> order end, &>/2, fn -> nil end)
+              |> case do
+                {handle, _} -> handle
+                nil -> nil
+              end
+
+            # Start fetching next handle if exists
+            if next_handle, do: send(self(), {:fetch_github_user, next_handle})
+
+            {:noreply, assign(socket, :importing_users, importing_users)}
+        end
+
+      {:error, reason} ->
+        Logger.error("Failed to import job applicants: #{inspect(reason)}")
+        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+    end
+  end
+
+  defp extract_github_handle(url) do
+    cond do
+      # Handle github.com URLs
+      String.contains?(url, "github.com/") ->
+        url
+        |> String.split("github.com/")
+        |> List.last()
+        |> String.split("/")
+        |> List.first()
+        |> String.trim()
+
+      # Handle raw handles
+      String.match?(url, ~r/^@?[a-zA-Z0-9-]+$/) ->
+        url
+        |> String.trim_leading("@")
+        |> String.trim()
+
+      true ->
+        nil
     end
   end
 
@@ -332,9 +576,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     <span class="flex items-center text-amber-300 text-xs">
                       <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
                       {Algora.Util.format_number_compact(
-                        if owner.stargazers_count > 0,
-                          do: owner.stargazers_count,
-                          else: total_stars(contributions)
+                        max(owner.stargazers_count, total_stars(contributions))
                       )}
                     </span>
                     <span class="flex items-center text-purple-400 text-xs">
@@ -515,5 +757,13 @@ defmodule AlgoraWeb.Org.JobLive do
     contributions
     |> Enum.map(& &1.contribution_count)
     |> Enum.sum()
+  end
+
+  defp import_placeholder do
+    """
+    https://github.com/user1
+    https://github.com/user2
+    https://github.com/user3
+    """
   end
 end

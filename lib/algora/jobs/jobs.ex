@@ -106,6 +106,13 @@ defmodule Algora.Jobs do
     |> Repo.insert()
   end
 
+  def ensure_application(job_id, user) do
+    case JobApplication |> where([a], a.job_id == ^job_id and a.user_id == ^user.id) |> Repo.one() do
+      nil -> create_application(job_id, user)
+      application -> {:ok, application}
+    end
+  end
+
   def list_user_applications(user) do
     JobApplication
     |> where([a], a.user_id == ^user.id)
@@ -122,12 +129,9 @@ defmodule Algora.Jobs do
   end
 
   def list_job_applications(job) do
-    applications =
-      JobApplication
-      |> where([a], a.job_id == ^job.id)
-      |> preload(:user)
-      |> Repo.all()
-
-    {:ok, applications}
+    JobApplication
+    |> where([a], a.job_id == ^job.id)
+    |> preload(:user)
+    |> Repo.all()
   end
 end

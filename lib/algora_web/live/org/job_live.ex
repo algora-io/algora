@@ -200,12 +200,7 @@ defmodule AlgoraWeb.Org.JobLive do
                           tech_stack={@current_org.tech_stack |> Enum.take(1)}
                           application={application}
                           contributions={Map.get(@contributions_map, application.user.id, [])}
-                          contract_type={
-                            if(Enum.find(@matches, &(&1.user.id == application.user.id)),
-                              do: "marketplace",
-                              else: "bring_your_own"
-                            )
-                          }
+                          contract_type="bring_your_own"
                         />
                       </div>
                     <% end %>
@@ -242,12 +237,7 @@ defmodule AlgoraWeb.Org.JobLive do
                           tech_stack={@current_org.tech_stack |> Enum.take(1)}
                           application={application}
                           contributions={Map.get(@contributions_map, application.user.id, [])}
-                          contract_type={
-                            if(Enum.find(@matches, &(&1.user.id == application.user.id)),
-                              do: "marketplace",
-                              else: "bring_your_own"
-                            )
-                          }
+                          contract_type="bring_your_own"
                         />
                       </div>
                     <% end %>
@@ -284,12 +274,7 @@ defmodule AlgoraWeb.Org.JobLive do
                           user={match.user}
                           tech_stack={@current_org.tech_stack |> Enum.take(1)}
                           contributions={Map.get(@contributions_map, match.user.id, [])}
-                          contract_type={
-                            if(Enum.find(@matches, &(&1.user.id == match.user.id)),
-                              do: "marketplace",
-                              else: "bring_your_own"
-                            )
-                          }
+                          contract_type="bring_your_own"
                         />
                       </div>
                     <% end %>
@@ -537,6 +522,7 @@ defmodule AlgoraWeb.Org.JobLive do
     if Enum.all?(results, &match?({:ok, _}, &1)) do
       {:noreply,
        socket
+       |> push_patch(to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/imports")
        |> put_flash(:info, "Successfully imported applicants")
        |> assign(:show_import_drawer, false)
        |> assign(:importing_users, %{})
@@ -717,7 +703,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp developer_card(assigns) do
     ~H"""
-    <div class="h-full relative border bg-card rounded-xl text-card-foreground shadow p-6">
+    <div class="h-full relative border ring-1 ring-transparent hover:ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
       <div class="w-full truncate">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
@@ -763,12 +749,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 <div class="flex items-center gap-1">
                   <.icon name="tabler-calendar" class="shrink-0 h-4 w-4" />
                   <span class="line-clamp-1 text-xs">
-                    <%= if @application.imported_at do %>
-                      Imported
-                    <% else %>
-                      Applied
-                    <% end %>
-                    on {Calendar.strftime(
+                    {Calendar.strftime(
                       @application.imported_at || @application.inserted_at,
                       "%B %d"
                     )}
@@ -820,11 +801,11 @@ defmodule AlgoraWeb.Org.JobLive do
                 href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@application.user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+                class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
               >
                 <img
                   src={owner.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all"
+                  class="h-12 w-12 rounded-xl rounded-r-none saturate-0 group-hover:saturate-100 transition-all"
                   alt={owner.name}
                 />
                 <div class="w-full flex flex-col text-xs font-medium gap-0.5">
@@ -869,7 +850,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="h-full relative border bg-card rounded-xl text-card-foreground shadow p-6">
+    <div class="h-full relative border ring-1 ring-transparent hover:ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
       <div class="w-full truncate">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
@@ -958,11 +939,11 @@ defmodule AlgoraWeb.Org.JobLive do
                 href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+                class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
               >
                 <img
                   src={owner.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all"
+                  class="h-12 w-12 rounded-xl rounded-r-none saturate-0 group-hover:saturate-100 transition-all"
                   alt={owner.name}
                 />
                 <div class="w-full flex flex-col text-xs font-medium gap-0.5">

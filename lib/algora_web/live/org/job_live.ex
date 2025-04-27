@@ -136,231 +136,229 @@ defmodule AlgoraWeb.Org.JobLive do
         </.card>
       </.section>
 
-      <%= if @current_user_role in [:admin, :mod] do %>
-        <div>
-          <div class="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-            <%= for {tab, label, count} <- [
+      <div>
+        <div class="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+          <%= for {tab, label, count} <- [
             {"applicants", "Applicants", length(@applicants)},
             {"imports", "Imports", length(@imports)},
             {"matches", "Matches", length(@matches)}
           ] do %>
-              <label class={[
-                "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
-                "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
-                "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-              ]}>
-                <input
-                  type="radio"
-                  name="tab"
-                  value={tab}
-                  checked={@current_tab == tab}
-                  class="sr-only"
-                  phx-click="change_tab"
-                  phx-value-tab={tab}
-                />
-                <span class="flex items-center justify-between w-full gap-2">
-                  <span class="text-sm font-medium">{label}</span>
-                  <span class="text-xs text-muted-foreground">
-                    {count}
-                  </span>
+            <label class={[
+              "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
+              "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+              "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+            ]}>
+              <input
+                type="radio"
+                name="tab"
+                value={tab}
+                checked={@current_tab == tab}
+                class="sr-only"
+                phx-click="change_tab"
+                phx-value-tab={tab}
+              />
+              <span class="flex items-center justify-between w-full gap-2">
+                <span class="text-sm font-medium">{label}</span>
+                <span class="text-xs text-muted-foreground">
+                  {count}
                 </span>
-              </label>
-            <% end %>
-          </div>
-          <%= case @current_tab do %>
-            <% "applicants" -> %>
-              <.section title="Applicants" subtitle="Developers who applied for this position">
-                <:actions>
-                  <.button variant="secondary" phx-click="toggle_import_drawer">
-                    Import
-                  </.button>
-                  <.button variant="default" phx-click="screen_applicants">
-                    Screen
-                  </.button>
-                </:actions>
-                <%= if Enum.empty?(@applicants) do %>
-                  <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                    <.card_header>
-                      <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                        <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <.card_title>No applicants yet</.card_title>
-                      <.card_description>
-                        Share your job posting with your network
-                      </.card_description>
-                    </.card_header>
-                  </.card>
-                <% else %>
-                  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <%= for {application, index} <- Enum.with_index(@applicants) do %>
-                      <div class={
-                        if @current_org.hiring_subscription == :inactive && index >= 3,
-                          do: "filter blur-sm pointer-events-none"
-                      }>
-                        <.developer_card
-                          tech_stack={@current_org.tech_stack |> Enum.take(1)}
-                          application={application}
-                          contributions={Map.get(@contributions_map, application.user.id, [])}
-                          contract_type="bring_your_own"
-                        />
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-              </.section>
-            <% "imports" -> %>
-              <.section title="Imports" subtitle="Import applicants from external sources">
-                <:actions>
-                  <.button variant="secondary" phx-click="toggle_import_drawer">
-                    Import
-                  </.button>
-                  <.button variant="default" phx-click="screen_applicants">
-                    Screen
-                  </.button>
-                </:actions>
-                <%= if Enum.empty?(@imports) do %>
-                  <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                    <.card_header>
-                      <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                        <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <.card_title>No imports yet</.card_title>
-                      <.card_description>
-                        Import applicants from external sources
-                      </.card_description>
-                    </.card_header>
-                  </.card>
-                <% else %>
-                  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <%= for {application, index} <- Enum.with_index(@imports) do %>
-                      <div class={
-                        if @current_org.hiring_subscription == :inactive && index >= 3,
-                          do: "filter blur-sm pointer-events-none"
-                      }>
-                        <.developer_card
-                          tech_stack={@current_org.tech_stack |> Enum.take(1)}
-                          application={application}
-                          contributions={Map.get(@contributions_map, application.user.id, [])}
-                          contract_type="bring_your_own"
-                        />
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-              </.section>
-            <% "matches" -> %>
-              <.section title="Matches" subtitle="Top developers matching your requirements">
-                <:actions>
-                  <.button>
-                    Invite all
-                  </.button>
-                </:actions>
-                <%= if Enum.empty?(@matches) do %>
-                  <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                    <.card_header>
-                      <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                        <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <.card_title>No matches yet</.card_title>
-                      <.card_description>
-                        Matches will appear here once we find developers matching your requirements
-                      </.card_description>
-                    </.card_header>
-                  </.card>
-                <% else %>
-                  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <%= for {match, index} <- Enum.with_index(@matches) do %>
-                      <div class={
-                        if @current_org.hiring_subscription == :inactive && index != 0,
-                          do: "filter blur-sm pointer-events-none"
-                      }>
-                        <.match_card
-                          user={match.user}
-                          tech_stack={@current_org.tech_stack |> Enum.take(1)}
-                          contributions={Map.get(@contributions_map, match.user.id, [])}
-                          contract_type="bring_your_own"
-                        />
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-              </.section>
+              </span>
+            </label>
           <% end %>
         </div>
-
-        <.section :if={@current_org.hiring_subscription != :active}>
-          <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-            <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-              <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
-                <div>
-                  <h3 class="text-3xl font-semibold text-foreground">
-                    <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
-                    Annual Subscription
-                  </h3>
-                  <ul class="space-y-3 mt-4 text-base">
-                    <li class="flex items-center gap-2">
-                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                        <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />
-                      </div>
-                      <span>
-                        <span class="font-semibold text-success-300">Reach 50K+ devs</span>
-                        with unlimited job postings
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                        <.icon name="tabler-lock-open" class="h-5 w-5 text-success-300" />
-                      </div>
-                      <span>
-                        <span class="font-semibold text-success-300">Access top 1% users</span>
-                        matching your preferences
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                        <.icon name="tabler-wand" class="h-5 w-5 text-success-300" />
-                      </div>
-                      <span>
-                        <%!-- <span class="font-semibold">Screen and rank applicants on auto-pilot</span> --%>
-                        <span class="font-semibold text-success-300">
-                          Auto-rank applicants
-                        </span>
-                        for {if tech =
-                                  List.first(@current_org.tech_stack),
-                                do: String.capitalize(tech)} OSS contribution history
-                      </span>
-                    </li>
-                    <li class="flex items-center gap-2">
-                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                        <.icon name="tabler-currency-dollar" class="h-5 w-5 text-success-300" />
-                      </div>
-                      <span>
-                        <span class="font-semibold text-success-300">Trial top candidates</span>
-                        using contracts and bounties
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-                <div class="flex flex-col justify-center items-center text-center">
-                  <.button
-                    phx-click="activate_subscription"
-                    variant="none"
-                    class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
-                    size="xl"
-                  >
-                    <div class="flex flex-col items-center gap-1 font-semibold">
-                      <span>Activate subscription</span>
-                      <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                        {Jobs.price()} /mo
-                      </dd>
+        <%= case @current_tab do %>
+          <% "applicants" -> %>
+            <.section title="Applicants" subtitle="Developers who applied for this position">
+              <:actions>
+                <.button variant="secondary" phx-click="toggle_import_drawer">
+                  Import
+                </.button>
+                <.button variant="default" phx-click="screen_applicants">
+                  Screen
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@applicants) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
                     </div>
-                  </.button>
+                    <.card_title>No applicants yet</.card_title>
+                    <.card_description>
+                      Share your job posting with your network
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                  <%= for {application, index} <- Enum.with_index(@applicants) do %>
+                    <div class={
+                      if @current_org.hiring_subscription == :inactive && index >= 3,
+                        do: "filter blur-sm pointer-events-none"
+                    }>
+                      <.developer_card
+                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        application={application}
+                        contributions={Map.get(@contributions_map, application.user.id, [])}
+                        contract_type="bring_your_own"
+                      />
+                    </div>
+                  <% end %>
                 </div>
+              <% end %>
+            </.section>
+          <% "imports" -> %>
+            <.section title="Imports" subtitle="Import applicants from external sources">
+              <:actions>
+                <.button variant="secondary" phx-click="toggle_import_drawer">
+                  Import
+                </.button>
+                <.button variant="default" phx-click="screen_applicants">
+                  Screen
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@imports) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No imports yet</.card_title>
+                    <.card_description>
+                      Import applicants from external sources
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                  <%= for {application, index} <- Enum.with_index(@imports) do %>
+                    <div class={
+                      if @current_org.hiring_subscription == :inactive && index >= 3,
+                        do: "filter blur-sm pointer-events-none"
+                    }>
+                      <.developer_card
+                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        application={application}
+                        contributions={Map.get(@contributions_map, application.user.id, [])}
+                        contract_type="bring_your_own"
+                      />
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </.section>
+          <% "matches" -> %>
+            <.section title="Matches" subtitle="Top developers matching your requirements">
+              <:actions>
+                <.button>
+                  Invite all
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@matches) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No matches yet</.card_title>
+                    <.card_description>
+                      Matches will appear here once we find developers matching your requirements
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <%= for {match, index} <- Enum.with_index(@matches) do %>
+                    <div class={
+                      if @current_org.hiring_subscription == :inactive && index != 0,
+                        do: "filter blur-sm pointer-events-none"
+                    }>
+                      <.match_card
+                        user={match.user}
+                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        contributions={Map.get(@contributions_map, match.user.id, [])}
+                        contract_type="bring_your_own"
+                      />
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </.section>
+        <% end %>
+      </div>
+
+      <.section :if={@current_org.hiring_subscription != :active}>
+        <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
+          <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+            <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
+              <div>
+                <h3 class="text-3xl font-semibold text-foreground">
+                  <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
+                  Annual Subscription
+                </h3>
+                <ul class="space-y-3 mt-4 text-base">
+                  <li class="flex items-center gap-2">
+                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                      <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />
+                    </div>
+                    <span>
+                      <span class="font-semibold text-success-300">Reach 50K+ devs</span>
+                      with unlimited job postings
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                      <.icon name="tabler-lock-open" class="h-5 w-5 text-success-300" />
+                    </div>
+                    <span>
+                      <span class="font-semibold text-success-300">Access top 1% users</span>
+                      matching your preferences
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                      <.icon name="tabler-wand" class="h-5 w-5 text-success-300" />
+                    </div>
+                    <span>
+                      <%!-- <span class="font-semibold">Screen and rank applicants on auto-pilot</span> --%>
+                      <span class="font-semibold text-success-300">
+                        Auto-rank applicants
+                      </span>
+                      for {if tech =
+                                List.first(@current_org.tech_stack),
+                              do: String.capitalize(tech)} OSS contribution history
+                    </span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                      <.icon name="tabler-currency-dollar" class="h-5 w-5 text-success-300" />
+                    </div>
+                    <span>
+                      <span class="font-semibold text-success-300">Trial top candidates</span>
+                      using contracts and bounties
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div class="flex flex-col justify-center items-center text-center">
+                <.button
+                  phx-click="activate_subscription"
+                  variant="none"
+                  class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
+                  size="xl"
+                >
+                  <div class="flex flex-col items-center gap-1 font-semibold">
+                    <span>Activate subscription</span>
+                    <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
+                      {Jobs.price()} /mo
+                    </dd>
+                  </div>
+                </.button>
               </div>
             </div>
           </div>
-        </.section>
-      <% end %>
+        </div>
+      </.section>
     </div>
 
     {share_drawer(assigns)}
@@ -677,6 +675,12 @@ defmodule AlgoraWeb.Org.JobLive do
     developers = matches |> Enum.concat(all_applicants) |> Enum.map(& &1.user)
 
     contributions_map = fetch_applicants_contributions(developers, socket.assigns.current_org.tech_stack)
+
+    matches
+    |> sort_applicants_by_contributions(contributions_map)
+    |> Enum.each(fn applicant ->
+      IO.puts("#{applicant.user.provider_login}")
+    end)
 
     socket
     |> assign(:developers, developers)

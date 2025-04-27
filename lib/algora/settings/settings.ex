@@ -115,8 +115,9 @@ defmodule Algora.Settings do
 
   def load_matches(matches) do
     user_map =
-      [handles: Enum.map(matches, & &1["handle"])]
+      [handles: Enum.map(matches, & &1["handle"]), limit: :infinity]
       |> Accounts.list_developers()
+      |> Enum.filter(& &1.provider_login)
       |> Map.new(fn user -> {user.handle, user} end)
 
     Enum.flat_map(matches, fn match ->

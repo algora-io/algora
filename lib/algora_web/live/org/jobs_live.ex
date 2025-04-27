@@ -108,12 +108,18 @@ defmodule AlgoraWeb.Org.JobsLive do
                       <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div>
                           <div>
-                            <.link
-                              navigate={~p"/org/#{@current_org.handle}/jobs/#{job.id}"}
-                              class="text-lg font-semibold hover:underline"
-                            >
-                              {job.title}
-                            </.link>
+                            <%= if @current_user_role in [:admin, :mod] do %>
+                              <.link
+                                navigate={~p"/org/#{@current_org.handle}/jobs/#{job.id}"}
+                                class="text-lg font-semibold hover:underline"
+                              >
+                                {job.title}
+                              </.link>
+                            <% else %>
+                              <div class="text-lg font-semibold">
+                                {job.title}
+                              </div>
+                            <% end %>
                           </div>
                           <div :if={job.description} class="pt-1 text-sm text-muted-foreground">
                             {job.description}

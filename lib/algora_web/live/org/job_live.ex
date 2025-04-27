@@ -648,7 +648,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   class="h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all"
                   alt={owner.name}
                 />
-                <div class="w-full flex flex-col text-sm font-medium gap-0.5">
+                <div class="w-full flex flex-col text-xs font-medium gap-0.5">
                   <span class="flex items-start justify-between gap-5">
                     <span class="font-display">
                       {owner.name}

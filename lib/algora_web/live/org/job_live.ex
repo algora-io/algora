@@ -12,23 +12,6 @@ defmodule AlgoraWeb.Org.JobLive do
 
   require Logger
 
-  defp assign_applicants(socket) do
-    applicants = Jobs.list_job_applications(socket.assigns.job)
-    contributions_map = fetch_applicants_contributions(applicants)
-    sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
-
-    developers =
-      socket.assigns.matches
-      |> Enum.concat(applicants)
-      |> Enum.map(& &1.user)
-
-    socket
-    |> assign(:developers, developers)
-    |> assign(:applicants, sorted_applicants)
-    |> assign(:contributions_map, contributions_map)
-    |> assign(:total_applicants, length(applicants))
-  end
-
   @impl true
   def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
     case Jobs.get_job_posting(id) do
@@ -524,6 +507,23 @@ defmodule AlgoraWeb.Org.JobLive do
         Logger.error("Failed to import job applicants: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
     end
+  end
+
+  defp assign_applicants(socket) do
+    applicants = Jobs.list_job_applications(socket.assigns.job)
+    contributions_map = fetch_applicants_contributions(applicants)
+    sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
+
+    developers =
+      socket.assigns.matches
+      |> Enum.concat(applicants)
+      |> Enum.map(& &1.user)
+
+    socket
+    |> assign(:developers, developers)
+    |> assign(:applicants, sorted_applicants)
+    |> assign(:contributions_map, contributions_map)
+    |> assign(:total_applicants, length(applicants))
   end
 
   defp extract_github_handle(url) do

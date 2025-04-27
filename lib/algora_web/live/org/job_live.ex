@@ -176,7 +176,7 @@ defmodule AlgoraWeb.Org.JobLive do
                             value={@share_url}
                           />
                         </div>
-                        <div class="relative aspect-[1200/630] max-w-[16rem] rounded-lg ring-1 ring-input bg-black">
+                        <div class="relative aspect-[1200/630] max-w-[16rem] w-full rounded-lg ring-1 ring-input bg-black">
                           <img
                             src={~p"/og/#{@current_org.handle}/jobs/#{@job.id}"}
                             alt={@job.title}
@@ -371,30 +371,66 @@ defmodule AlgoraWeb.Org.JobLive do
               <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
                 <div>
                   <h3 class="text-2xl font-semibold text-foreground">
-                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
-                    Subscription
+                    <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
+                    Annual Subscription
                   </h3>
-                  <div class="pt-1 text-sm text-muted-foreground">
-                    Get access to all applicants and GitHub profiles
-                  </div>
-                  <ul class="space-y-3 mt-4 text-sm">
+                  <ul class="space-y-4 mt-4 text-base">
                     <li class="flex items-center gap-2">
-                      <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                      <span>Unlimited job postings</span>
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Reach 50K+ devs</span>
+                        with unlimited job postings
+                      </span>
                     </li>
                     <li class="flex items-center gap-2">
-                      <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                      <span>Access to all applicants and GitHub profiles</span>
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-lock-open" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Access top 1% users</span>
+                        matching your preferences
+                      </span>
                     </li>
                     <li class="flex items-center gap-2">
-                      <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                      <span>Embeddable job widget for your website</span>
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-wand" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <%!-- <span class="font-semibold">Screen and rank applicants on auto-pilot</span> --%>
+                        <span class="font-semibold text-success-300">
+                          Auto-rank applicants
+                        </span>
+                        for {if tech =
+                                  List.first(@current_org.tech_stack),
+                                do: String.capitalize(tech)} OSS contribution history
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-currency-dollar" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Trial top candidates</span>
+                        using contracts and bounties
+                      </span>
                     </li>
                   </ul>
                 </div>
                 <div class="flex flex-col justify-center items-center text-center">
-                  <.button phx-click="activate_subscription" size="lg" class="w-full max-w-xs">
-                    Activate
+                  <.button
+                    phx-click="activate_subscription"
+                    variant="none"
+                    class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
+                    size="xl"
+                  >
+                    <div class="flex flex-col items-center gap-1 font-semibold">
+                      <span>Activate subscription</span>
+                      <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
+                        {Jobs.price()} /mo
+                      </dd>
+                    </div>
                   </.button>
                 </div>
               </div>

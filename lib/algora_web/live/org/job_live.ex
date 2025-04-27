@@ -174,7 +174,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   <.button variant="secondary" phx-click="toggle_import_drawer">
                     Import
                   </.button>
-                  <.button variant="default">
+                  <.button variant="default" phx-click="screen_applicants">
                     Screen
                   </.button>
                 </:actions>
@@ -213,6 +213,9 @@ defmodule AlgoraWeb.Org.JobLive do
                 <:actions>
                   <.button variant="secondary" phx-click="toggle_import_drawer">
                     Import
+                  </.button>
+                  <.button variant="default" phx-click="screen_applicants">
+                    Screen
                   </.button>
                 </:actions>
                 <%= if Enum.empty?(@imports) do %>
@@ -403,7 +406,10 @@ defmodule AlgoraWeb.Org.JobLive do
               <% end %>
             <% end %>
 
-            <div class="space-y-2">
+            <div
+              :if={map_size(@importing_users) > 0}
+              class="space-y-2 max-h-[20rem] overflow-y-auto bg-card rounded-lg p-4 border"
+            >
               <%= for {handle, data} <- Enum.sort_by(@importing_users, fn {_, %{order: order}} -> order end) do %>
                 <div class="flex items-center gap-2">
                   <%= if data.status == :loading do %>
@@ -447,6 +453,7 @@ defmodule AlgoraWeb.Org.JobLive do
             <:actions>
               <.button
                 type="submit"
+                class="ml-auto"
                 disabled={
                   Enum.empty?(@importing_users) ||
                     Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end)
@@ -478,6 +485,12 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def handle_event("toggle_import_drawer", _, socket) do
     {:noreply, assign(socket, :show_import_drawer, !socket.assigns.show_import_drawer)}
+  end
+
+  @impl true
+  def handle_event("screen_applicants", _, socket) do
+    Algora.Admin.alert("Screen applicants initiated", :info)
+    {:noreply, put_flash(socket, :info, "We'll email you when the screening is complete")}
   end
 
   @impl true

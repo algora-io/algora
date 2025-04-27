@@ -36,9 +36,11 @@ defmodule Algora.Workspace.Ticket do
     |> generate_id()
   end
 
-  def github_changeset(meta, repo) do
+  def github_changeset(ticket \\ %Ticket{}, meta, repo) do
     params = %{
+      provider: "github",
       provider_id: to_string(meta["id"]),
+      provider_meta: meta,
       type: if(meta["pull_request"], do: :pull_request, else: :issue),
       title: meta["title"],
       description: meta["body"],
@@ -50,9 +52,11 @@ defmodule Algora.Workspace.Ticket do
       merged_at: get_in(meta, ["pull_request", "merged_at"])
     }
 
-    %Ticket{provider: "github", provider_meta: meta}
+    ticket
     |> cast(params, [
+      :provider,
       :provider_id,
+      :provider_meta,
       :type,
       :title,
       :description,

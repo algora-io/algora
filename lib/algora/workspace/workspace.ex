@@ -110,6 +110,16 @@ defmodule Algora.Workspace do
     end
   end
 
+  def update_ticket_from_github(token, owner, repo, number) do
+    with ticket when not is_nil(ticket) <- get_ticket(owner, repo, number),
+         {:ok, issue} <- Github.get_issue(token, owner, repo, number),
+         {:ok, repository} <- ensure_repository(token, owner, repo) do
+      ticket
+      |> Ticket.github_changeset(issue, repository)
+      |> Repo.update()
+    end
+  end
+
   def ensure_repository(token, owner, repo) do
     repository_query =
       from(r in Repository,

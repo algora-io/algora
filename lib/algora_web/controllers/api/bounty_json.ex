@@ -73,7 +73,7 @@ defmodule AlgoraWeb.API.BountyJSON do
       status: "open",
       title: bounty.ticket.title,
       url: bounty.ticket.url,
-      body: "",
+      body: bounty.ticket.description,
       type: "issue",
       hash: Bounty.path(bounty),
       tech: []

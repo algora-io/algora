@@ -133,6 +133,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   do: "filter blur-sm pointer-events-none"
               }>
                 <.developer_card
+                  tech_stack={@current_org.tech_stack |> Enum.take(1)}
                   application={application}
                   contributions={Map.get(@contributions_map, application.user.id, [])}
                   contract_type={
@@ -511,13 +512,10 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp assign_applicants(socket) do
     applicants = Jobs.list_job_applications(socket.assigns.job)
-    contributions_map = fetch_applicants_contributions(applicants)
+    contributions_map = fetch_applicants_contributions(applicants, socket.assigns.current_org.tech_stack)
     sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
 
-    developers =
-      socket.assigns.matches
-      |> Enum.concat(applicants)
-      |> Enum.map(& &1.user)
+    developers = socket.assigns.matches |> Enum.concat(applicants) |> Enum.map(& &1.user)
 
     socket
     |> assign(:developers, developers)
@@ -546,6 +544,13 @@ defmodule AlgoraWeb.Org.JobLive do
       true ->
         nil
     end
+  end
+
+  defp get_matching_tech(contribution, tech_stack) do
+    tech_stack = Enum.map(tech_stack, &String.downcase/1)
+
+    Enum.find(contribution.repository.tech_stack, &(String.downcase(&1) in tech_stack)) ||
+      List.first(contribution.repository.tech_stack)
   end
 
   defp developer_card(assigns) do
@@ -665,7 +670,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     <span class="font-display">
                       {owner.name}
                     </span>
-                    <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
+                    <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
                       <span class="flex items-center text-foreground text-[11px] gap-1">
                         <img
                           src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
@@ -832,10 +837,11 @@ defmodule AlgoraWeb.Org.JobLive do
   defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
 
   # Fetch contributions for all applicants and create a map for quick lookup
-  defp fetch_applicants_contributions(applicants) do
+  defp fetch_applicants_contributions(applicants, tech_stack) do
     Enum.reduce(applicants, %{}, fn application, acc ->
       user = application.user
-      contributions = Algora.Workspace.list_user_contributions(user.provider_login, limit: 5)
+
+      contributions = Algora.Workspace.list_user_contributions(user.provider_login, limit: 20, tech_stack: tech_stack)
       Map.put(acc, user.id, contributions)
     end)
   end
@@ -846,19 +852,11 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   defp aggregate_contributions(contributions) do
+    groups = Enum.group_by(contributions, fn c -> c.repository.user end)
+
     contributions
-    |> Enum.group_by(fn c -> c.repository.user end)
-    |> Enum.sort_by(
-      fn {owner, repos} ->
-        max(
-          owner.stargazers_count,
-          repos
-          |> Enum.map(& &1.repository.stargazers_count)
-          |> Enum.sum()
-        )
-      end,
-      :desc
-    )
+    |> Enum.map(fn c -> {c.repository.user, groups[c.repository.user]} end)
+    |> Enum.dedup_by(fn {owner, _} -> owner end)
   end
 
   defp total_stars(contributions) do

@@ -630,7 +630,11 @@ defmodule Algora.Workspace do
         where: not ilike(r.name, "%algorithms%"),
         where: not ilike(repo_owner.provider_login, "%algorithms%"),
         where: repo_owner.type == :organization or r.stargazers_count > 200,
-        order_by: [desc: r.stargazers_count],
+        where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
+        order_by: [
+          # desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
+          desc: r.stargazers_count
+        ],
         select_merge: %{repository: %{r | user: repo_owner}}
 
     query =

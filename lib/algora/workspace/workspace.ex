@@ -629,7 +629,7 @@ defmodule Algora.Workspace do
         where: not ilike(r.name, "%awesome%"),
         where: not ilike(r.name, "%algorithms%"),
         where: not ilike(repo_owner.provider_login, "%algorithms%"),
-        where: repo_owner.type == :organization or r.stargazers_count > 100,
+        where: repo_owner.type == :organization or r.stargazers_count > 200,
         order_by: [desc: r.stargazers_count, desc: uc.contribution_count],
         select_merge: %{repository: %{r | user: repo_owner}}
 

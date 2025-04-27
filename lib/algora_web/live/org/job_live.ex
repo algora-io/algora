@@ -302,22 +302,24 @@ defmodule AlgoraWeb.Org.JobLive do
 
         <div :if={@contributions != []} class="pl-16 mt-4 space-y-4">
           <div class="flex items-center gap-3 mt-2">
-            <%= for c <- @contributions do %>
+            <%= for {owner, contributions} <- aggregate_contributions(@contributions) do %>
               <.link
-                href={"https://github.com/#{c.repository.user.provider_login}/#{c.repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
               >
                 <img
-                  src={c.repository.user.avatar_url}
+                  src={owner.avatar_url}
                   class="h-12 w-12 rounded-xl rounded-r-none saturate-0 group-hover:saturate-100 transition-all"
-                  alt={c.repository.user.name}
+                  alt={owner.name}
                 />
                 <div class="flex flex-col text-sm font-medium gap-0.5">
                   <span class="flex items-start gap-5">
-                    <span class="font-display">{c.repository.user.name}</span>
-                    <%= if tech = List.first(c.repository.tech_stack) do %>
+                    <span class="font-display">
+                      {owner.name}
+                    </span>
+                    <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
                       <span class="flex items-center text-foreground text-[11px] gap-1">
                         <img
                           src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
@@ -329,11 +331,15 @@ defmodule AlgoraWeb.Org.JobLive do
                   <div class="flex items-center gap-2 font-semibold">
                     <span class="flex items-center text-amber-300 text-xs">
                       <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
-                      {Algora.Util.format_number_compact(c.repository.stargazers_count)}
+                      {Algora.Util.format_number_compact(
+                        if owner.stargazers_count > 0,
+                          do: owner.stargazers_count,
+                          else: total_stars(contributions)
+                      )}
                     </span>
                     <span class="flex items-center text-purple-400 text-xs">
                       <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
-                      {Algora.Util.format_number_compact(c.contribution_count)}
+                      {Algora.Util.format_number_compact(total_contributions(contributions))}
                     </span>
                   </div>
                 </div>
@@ -493,5 +499,21 @@ defmodule AlgoraWeb.Org.JobLive do
   # Sort applicants by their total number of contributions
   defp sort_applicants_by_contributions(applicants, contributions_map) do
     Enum.sort_by(applicants, fn application -> length(Map.get(contributions_map, application.user.id, [])) end, :desc)
+  end
+
+  defp aggregate_contributions(contributions) do
+    Enum.group_by(contributions, fn c -> c.repository.user end)
+  end
+
+  defp total_stars(contributions) do
+    contributions
+    |> Enum.map(& &1.repository.stargazers_count)
+    |> Enum.sum()
+  end
+
+  defp total_contributions(contributions) do
+    contributions
+    |> Enum.map(& &1.contribution_count)
+    |> Enum.sum()
   end
 end

@@ -141,87 +141,112 @@ defmodule AlgoraWeb.JobsLive do
         <.section class="pt-12">
           <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
             <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-              <div class="p-4 sm:p-6">
-                <div class="text-2xl font-semibold text-foreground">
-                  Post your job<br class="block sm:hidden" />
-                  <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-                    in seconds
-                  </span>
+              <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
+                <div>
+                  <h3 class="text-3xl font-semibold text-foreground">
+                    <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
+                      Hire top talent
+                    </span>
+                    on auto-pilot
+                  </h3>
+                  <ul class="space-y-3 mt-4 text-base">
+                    <li class="flex items-center gap-2">
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Reach 50K+ devs</span>
+                        with unlimited job postings
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-lock-open" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Access top 1% users</span>
+                        matching your preferences
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-wand" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Auto-rank applicants</span>
+                        for OSS contribution history
+                      </span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
+                        <.icon name="tabler-currency-dollar" class="h-5 w-5 text-success-300" />
+                      </div>
+                      <span>
+                        <span class="font-semibold text-success-300">Trial top candidates</span>
+                        using contracts and bounties
+                      </span>
+                    </li>
+                  </ul>
                 </div>
-                <div class="pt-1 text-base font-medium text-muted-foreground">
-                  Reach thousands of developers looking for their next opportunity versed in your tech stack
-                </div>
-                <.simple_form
-                  for={@form}
-                  phx-change="validate_job"
-                  phx-submit="create_job"
-                  class="mt-4 space-y-6"
-                >
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <.input
-                      field={@form[:email]}
-                      label="Email"
-                      data-domain-target
-                      phx-hook="DeriveDomain"
-                      phx-change="email_changed"
-                      phx-debounce="300"
-                    />
-                    <.input field={@form[:url]} label="Job Posting URL" />
-                    <.input field={@form[:company_url]} label="Company URL" data-domain-source />
-                    <.input field={@form[:company_name]} label="Company Name" />
-                  </div>
+                <div class="flex flex-col justify-center items-center">
+                  <.simple_form
+                    for={@form}
+                    phx-change="validate_job"
+                    phx-submit="create_job"
+                    class="w-full space-y-6"
+                  >
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <.input
+                        field={@form[:email]}
+                        label="Email"
+                        data-domain-target
+                        phx-hook="DeriveDomain"
+                        phx-change="email_changed"
+                        phx-debounce="300"
+                      />
+                      <.input field={@form[:url]} label="Job Posting URL" />
+                      <.input field={@form[:company_url]} label="Company URL" data-domain-source />
+                      <.input field={@form[:company_name]} label="Company Name" />
+                    </div>
 
-                  <div class="flex flex-col-reverse md:flex-row md:justify-between gap-4">
-                    <div>
-                      <div
-                        :if={
-                          @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
-                        }
-                        class="flex items-center gap-3"
-                      >
-                        <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
-                          <img src={logo} class="h-16 w-16 rounded-2xl" />
-                        <% end %>
-                        <div>
-                          <div class="text-lg text-foreground font-bold font-display line-clamp-1">
-                            {get_change(@form.source, :company_name)}
-                          </div>
-                          <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
-                            <div class="text-sm text-muted-foreground line-clamp-1">
-                              {description}
-                            </div>
+                    <div class="flex flex-col items-center gap-4">
+                      <div>
+                        <div
+                          :if={
+                            @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
+                          }
+                          class="flex items-center gap-3"
+                        >
+                          <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
+                            <img src={logo} class="h-16 w-16 rounded-2xl" />
                           <% end %>
-                          <div class="flex gap-2 items-center">
-                            <%= if url = get_change(@form.source, :company_url) do %>
-                              <.link
-                                href={"https://" <> url}
-                                target="_blank"
-                                class="text-muted-foreground hover:text-foreground"
-                              >
-                                <.icon name="tabler-world" class="size-4" />
-                              </.link>
-                            <% end %>
-
-                            <%= for {platform, icon} <- social_icons(),
-                      url = get_in(@user_metadata.result, [:org, :socials, platform]),
-                      not is_nil(url) do %>
-                              <.link
-                                href={url}
-                                target="_blank"
-                                class="text-muted-foreground hover:text-foreground"
-                              >
-                                <.icon name={icon} class="size-4" />
-                              </.link>
+                          <div>
+                            <div class="text-lg text-foreground font-bold font-display line-clamp-1">
+                              {get_change(@form.source, :company_name)}
+                            </div>
+                            <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
+                              <div class="text-sm text-muted-foreground line-clamp-1">
+                                {description}
+                              </div>
                             <% end %>
                           </div>
                         </div>
                       </div>
+                      <.button
+                        class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem] w-full"
+                        size="xl"
+                        phx-disable-with="Processing..."
+                      >
+                        <div class="flex flex-col items-center gap-1 font-semibold">
+                          <span>Activate subscription</span>
+                          <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
+                            {Jobs.price()} /mo
+                          </dd>
+                        </div>
+                      </.button>
                     </div>
-                    <.button class="flex items-center gap-2" phx-disable-with="Processing...">
-                      Post Job
-                    </.button>
-                  </div>
-                </.simple_form>
+                  </.simple_form>
+                </div>
               </div>
             </div>
           </div>

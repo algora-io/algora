@@ -13,11 +13,9 @@ defmodule AlgoraWeb.Org.JobLive do
   require Logger
 
   @impl true
-  def mount(%{"org_handle" => handle, "id" => id} = params, _session, socket) do
+  def mount(%{"org_handle" => handle, "id" => id, "tab" => tab}, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
-        current_tab = params["tab"] || "applicants"
-
         {:ok,
          socket
          |> assign(:share_url, ~p"/#{handle}/jobs/#{job.id}")
@@ -25,7 +23,7 @@ defmodule AlgoraWeb.Org.JobLive do
          |> assign(:job, job)
          |> assign(:show_import_drawer, false)
          |> assign(:show_share_drawer, false)
-         |> assign(:current_tab, current_tab)
+         |> assign(:current_tab, tab)
          |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
          |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
          |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
@@ -40,6 +38,16 @@ defmodule AlgoraWeb.Org.JobLive do
       _ ->
         {:ok, push_navigate(socket, to: ~p"/#{handle}/home")}
     end
+  end
+
+  @impl true
+  def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
+    {:ok, push_navigate(socket, to: ~p"/#{handle}/jobs/#{id}/applicants")}
+  end
+
+  @impl true
+  def handle_params(%{"tab" => tab}, _uri, socket) do
+    {:noreply, assign(socket, :current_tab, tab)}
   end
 
   @impl true
@@ -541,7 +549,7 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def handle_event("change_tab", %{"tab" => tab}, socket) do
     {:noreply,
-     push_navigate(socket,
+     push_patch(socket,
        to:
          "/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/#{tab}#{if socket.assigns[:return_to], do: "?return_to=#{socket.assigns.return_to}", else: ""}"
      )}

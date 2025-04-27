@@ -15,7 +15,7 @@ defmodule Algora.Jobs do
 
   require Logger
 
-  def price, do: Money.new(:USD, 999, no_fraction_if_integer: true)
+  def price, do: Money.new(:USD, 2_270, no_fraction_if_integer: true)
 
   def list_jobs(opts \\ []) do
     JobPosting

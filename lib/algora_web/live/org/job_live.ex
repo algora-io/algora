@@ -104,37 +104,6 @@ defmodule AlgoraWeb.Org.JobLive do
         </.card>
       </.section>
 
-      <.section title="Matches" subtitle="Top developers matching your requirements">
-        <:actions>
-          <.button>
-            Invite all
-          </.button>
-        </:actions>
-        <%= if Enum.empty?(@matches) do %>
-          <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-            <.card_header>
-              <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-              </div>
-              <.card_title>No matches yet</.card_title>
-              <.card_description>
-                Matches will appear here once we find developers matching your requirements
-              </.card_description>
-            </.card_header>
-          </.card>
-        <% else %>
-          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <%= for {match, index} <- Enum.with_index(@matches) do %>
-              <div class={
-                if !@has_subscription && index != 0, do: "filter blur-sm pointer-events-none"
-              }>
-                <.match_card match={match} />
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </.section>
-
       <.section title="Applicants" subtitle="Developers who applied for this position">
         <:actions>
           <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
@@ -164,6 +133,37 @@ defmodule AlgoraWeb.Org.JobLive do
                   application={application}
                   contributions={Map.get(@contributions_map, application.user.id, [])}
                 />
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </.section>
+
+      <.section title="Matches" subtitle="Top developers matching your requirements">
+        <:actions>
+          <.button>
+            Invite all
+          </.button>
+        </:actions>
+        <%= if Enum.empty?(@matches) do %>
+          <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+            <.card_header>
+              <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+              </div>
+              <.card_title>No matches yet</.card_title>
+              <.card_description>
+                Matches will appear here once we find developers matching your requirements
+              </.card_description>
+            </.card_header>
+          </.card>
+        <% else %>
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <%= for {match, index} <- Enum.with_index(@matches) do %>
+              <div class={
+                if !@has_subscription && index != 0, do: "filter blur-sm pointer-events-none"
+              }>
+                <.match_card match={match} />
               </div>
             <% end %>
           </div>

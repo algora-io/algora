@@ -91,6 +91,17 @@ defmodule Algora.Settings do
     set("org_matches:#{org_handle}", %{"matches" => matches})
   end
 
+  def get_job_matches(job_id) do
+    case get("job_matches:#{job_id}") do
+      %{"matches" => matches} when is_list(matches) -> load_matches(matches)
+      _ -> []
+    end
+  end
+
+  def set_job_matches(job_id, matches) when is_binary(job_id) and is_list(matches) do
+    set("job_matches:#{job_id}", %{"matches" => matches})
+  end
+
   def get_tech_matches(tech) do
     case get("tech_matches:#{String.downcase(tech)}") do
       %{"matches" => matches} when is_list(matches) -> load_matches(matches)

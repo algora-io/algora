@@ -16,17 +16,16 @@ defmodule AlgoraWeb.Org.JobLive do
   def mount(%{"org_handle" => handle, "id" => id} = params, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
-        matches = Settings.get_org_matches(job.user)
+        # matches = Settings.get_org_matches(job.user)
         imported_applicants = []
         # Default to "applicants" tab if none specified
         current_tab = params["tab"] || "applicants"
 
         {:ok,
          socket
+         |> assign(:share_url, ~p"/#{handle}/jobs/#{job.id}")
          |> assign(:page_title, job.title)
          |> assign(:job, job)
-         |> assign(:matches, matches)
-         |> assign(:total_matches, length(matches))
          |> assign(:imported_applicants, imported_applicants)
          |> assign(:total_imported, length(imported_applicants))
          |> assign(:show_import_drawer, false)
@@ -154,35 +153,37 @@ defmodule AlgoraWeb.Org.JobLive do
                     <.card_title>No applicants yet</.card_title>
                     <.card_description>
                       Share your job posting with your network
-                      <div class="pt-4 flex gap-3 items-center">
-                        <.social_share_button
-                          id="twitter-share-url"
-                          icon="tabler-brand-x"
-                          value={@share_url}
-                        />
-                        <.social_share_button
-                          id="reddit-share-url"
-                          icon="tabler-brand-reddit"
-                          value={@share_url}
-                        />
-                        <.social_share_button
-                          id="linkedin-share-url"
-                          icon="tabler-brand-linkedin"
-                          value={@share_url}
-                        />
-                        <.social_share_button
-                          id="hackernews-share-url"
-                          icon="tabler-brand-ycombinator"
-                          value={@share_url}
-                        />
-                      </div>
-                      <div class="relative aspect-[1200/630] max-w-[11rem] rounded-lg ring-1 ring-input bg-black">
-                        <img
-                          src={~p"/og/0/bounties/#{@bounty.id}"}
-                          alt={@bounty.ticket.title}
-                          class="object-cover"
-                          loading="lazy"
-                        />
+                      <div class="flex flex-col items-center justify-center">
+                        <div class="pt-4 flex gap-3">
+                          <.social_share_button
+                            id="twitter-share-url"
+                            icon="tabler-brand-x"
+                            value={@share_url}
+                          />
+                          <.social_share_button
+                            id="reddit-share-url"
+                            icon="tabler-brand-reddit"
+                            value={@share_url}
+                          />
+                          <.social_share_button
+                            id="linkedin-share-url"
+                            icon="tabler-brand-linkedin"
+                            value={@share_url}
+                          />
+                          <.social_share_button
+                            id="hackernews-share-url"
+                            icon="tabler-brand-ycombinator"
+                            value={@share_url}
+                          />
+                        </div>
+                        <div class="relative aspect-[1200/630] max-w-[16rem] rounded-lg ring-1 ring-input bg-black">
+                          <img
+                            src={~p"/og/#{@current_org.handle}/jobs/#{@job.id}"}
+                            alt={@job.title}
+                            class="object-cover"
+                            loading="lazy"
+                          />
+                        </div>
                       </div>
                     </.card_description>
                   </.card_header>
@@ -346,7 +347,17 @@ defmodule AlgoraWeb.Org.JobLive do
                       if @current_org.hiring_subscription == :inactive && index != 0,
                         do: "filter blur-sm pointer-events-none"
                     }>
-                      <.match_card match={match} />
+                      <.match_card
+                        user={match.user}
+                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        contributions={Map.get(@contributions_map, match.user.id, [])}
+                        contract_type={
+                          if(Enum.find(@matches, &(&1.user.id == match.user.id)),
+                            do: "marketplace",
+                            else: "bring_your_own"
+                          )
+                        }
+                      />
                     </div>
                   <% end %>
                 </div>
@@ -360,8 +371,8 @@ defmodule AlgoraWeb.Org.JobLive do
               <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
                 <div>
                   <h3 class="text-2xl font-semibold text-foreground">
-                    Unlock Full Hiring
-                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">Potential</span>
+                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
+                    Subscription
                   </h3>
                   <div class="pt-1 text-sm text-muted-foreground">
                     Get access to all applicants and GitHub profiles
@@ -689,14 +700,16 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp assign_applicants(socket) do
     applicants = Jobs.list_job_applications(socket.assigns.job)
-    contributions_map = fetch_applicants_contributions(applicants, socket.assigns.current_org.tech_stack)
-    sorted_applicants = sort_applicants_by_contributions(applicants, contributions_map)
+    matches = Settings.get_job_matches(socket.assigns.job.id)
 
-    developers = socket.assigns.matches |> Enum.concat(applicants) |> Enum.map(& &1.user)
+    developers = matches |> Enum.concat(applicants) |> Enum.map(& &1.user)
+
+    contributions_map = fetch_applicants_contributions(developers, socket.assigns.current_org.tech_stack)
 
     socket
     |> assign(:developers, developers)
-    |> assign(:applicants, sorted_applicants)
+    |> assign(:applicants, sort_applicants_by_contributions(applicants, contributions_map))
+    |> assign(:matches, sort_applicants_by_contributions(matches, contributions_map))
     |> assign(:contributions_map, contributions_map)
     |> assign(:total_applicants, length(applicants))
   end
@@ -884,118 +897,256 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="relative flex flex-col lg:flex-row xl:items-center lg:justify-between gap-4 sm:gap-8 lg:gap-4 xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-6">
+    <div class="h-full relative border bg-card rounded-xl text-card-foreground shadow p-6">
       <div class="w-full truncate">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex items-start gap-4">
-            <.link navigate={User.url(@match.user)}>
-              <.avatar class="h-16 w-16 rounded-full">
-                <.avatar_image src={@match.user.avatar_url} alt={@match.user.name} />
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <.link navigate={User.url(@user)}>
+              <.avatar class="h-12 w-12 rounded-full">
+                <.avatar_image src={@user.avatar_url} alt={@user.name} />
                 <.avatar_fallback class="rounded-lg">
-                  {Algora.Util.initials(@match.user.name)}
+                  {Algora.Util.initials(@user.name)}
                 </.avatar_fallback>
               </.avatar>
             </.link>
 
             <div>
-              <div class="flex items-center gap-4 text-foreground">
-                <.link
-                  navigate={User.url(@match.user)}
-                  class="text-base sm:text-lg font-semibold hover:underline"
-                >
-                  {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
+              <div class="flex items-center gap-1 text-base text-foreground">
+                <.link navigate={User.url(@user)} class="font-semibold hover:underline">
+                  {@user.name} {Algora.Misc.CountryEmojis.get(@user.country)}
                 </.link>
               </div>
               <div
-                :if={@match.user.provider_meta}
-                class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+                :if={@user.provider_meta}
+                class="pt-0.5 flex items-center gap-x-2 gap-y-1 text-xs text-muted-foreground max-w-[250px] 2xl:max-w-none truncate"
               >
                 <.link
-                  :if={@match.user.provider_login}
-                  href={"https://github.com/#{@match.user.provider_login}"}
+                  :if={@user.provider_login}
+                  href={"https://github.com/#{@user.provider_login}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="github" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">{@match.user.provider_login}</span>
+                  <span class="line-clamp-1">{@user.provider_login}</span>
                 </.link>
                 <.link
-                  :if={@match.user.provider_meta["twitter_handle"]}
-                  href={"https://x.com/#{@match.user.provider_meta["twitter_handle"]}"}
+                  :if={@user.provider_meta["twitter_handle"]}
+                  href={"https://x.com/#{@user.provider_meta["twitter_handle"]}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
+                  <span class="line-clamp-1">
+                    {@user.provider_meta["twitter_handle"]}
+                  </span>
                 </.link>
-              </div>
-              <div class="pt-1.5 flex gap-2 line-clamp-1">
-                <%= for tech <- @match.user.tech_stack |> Enum.take(4) do %>
-                  <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
-                    {tech}
-                  </div>
-                <% end %>
               </div>
             </div>
           </div>
         </div>
-        <div class="pt-4 text-sm sm:text-base text-muted-foreground font-medium">
-          Completed
-          <span class="font-semibold font-display text-foreground/80">
-            {@match.user.transactions_count}
-            {ngettext(
-              "bounty",
-              "bounties",
-              @match.user.transactions_count
-            )}
-          </span>
-          across
-          <span class="font-semibold font-display text-foreground/80">
-            {ngettext(
-              "%{count} project",
-              "%{count} projects",
-              @match.user.contributed_projects_count
-            )}
-          </span>
-        </div>
-        <div class="pt-4 flex flex-col gap-4">
-          <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
-            <.link
-              navigate={User.url(project)}
-              class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
-            >
-              <.avatar class="h-10 w-10 rounded-lg saturate-0 bg-gradient-to-br brightness-75">
-                <.avatar_image src={project.avatar_url} alt={project.name} />
-                <.avatar_fallback class="rounded-lg">
-                  {Algora.Util.initials(project.name)}
-                </.avatar_fallback>
-              </.avatar>
-              <div class="flex flex-col">
-                <div class="text-base font-medium text-foreground/80">
-                  {project.name}
-                </div>
 
-                <div class="flex items-center gap-2 whitespace-nowrap">
-                  <div class="text-sm text-muted-foreground font-display font-semibold">
-                    <.icon name="tabler-star-filled" class="size-4 text-amber-400 mr-1" />{format_number(
-                      project.stargazers_count
-                    )}
-                  </div>
-                  <div class="text-sm text-muted-foreground">
-                    <span class="text-foreground/80 font-display font-semibold">
-                      {total_earned}
+        <div class="pt-2 flex items-center justify-center gap-2">
+          <.button
+            phx-click="share_opportunity"
+            phx-value-user_id={@user.id}
+            phx-value-type="bounty"
+            variant="outline"
+            size="sm"
+          >
+            Bounty
+          </.button>
+          <.button
+            phx-click="share_opportunity"
+            phx-value-user_id={@user.id}
+            phx-value-type="tip"
+            variant="outline"
+            size="sm"
+          >
+            Interview
+          </.button>
+          <.button
+            phx-click="share_opportunity"
+            phx-value-user_id={@user.id}
+            phx-value-type="contract"
+            phx-value-contract_type={@contract_type}
+            variant="outline"
+            size="sm"
+          >
+            Contract
+          </.button>
+        </div>
+
+        <div :if={@contributions != []} class="mt-4">
+          <p class="text-xs text-muted-foreground uppercase font-semibold">
+            Top contributions
+          </p>
+          <div class="flex flex-col gap-3 mt-2">
+            <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
+              <.link
+                href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                target="_blank"
+                rel="noopener"
+                class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+              >
+                <img
+                  src={owner.avatar_url}
+                  class="h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all"
+                  alt={owner.name}
+                />
+                <div class="w-full flex flex-col text-xs font-medium gap-0.5">
+                  <span class="flex items-start justify-between gap-5">
+                    <span class="font-display">
+                      {if owner.type == :organization do
+                        owner.name
+                      else
+                        List.first(contributions).repository.name
+                      end}
                     </span>
-                    awarded
+                    <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
+                      <span class="flex items-center text-foreground text-[11px] gap-1">
+                        <img
+                          src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
+                          class="w-4 h-4 invert saturate-0"
+                        /> {tech}
+                      </span>
+                    <% end %>
+                  </span>
+                  <div class="flex items-center gap-2 font-semibold">
+                    <span class="flex items-center text-amber-300 text-xs">
+                      <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
+                      {Algora.Util.format_number_compact(
+                        max(owner.stargazers_count, total_stars(contributions))
+                      )}
+                    </span>
+                    <span class="flex items-center text-purple-400 text-xs">
+                      <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
+                      {Algora.Util.format_number_compact(total_contributions(contributions))}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </.link>
-          <% end %>
+              </.link>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
     """
   end
+
+  # defp match_card(assigns) do
+  #   ~H"""
+  #   <div class="relative flex flex-col lg:flex-row xl:items-center lg:justify-between gap-4 sm:gap-8 lg:gap-4 xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-6">
+  #     <div class="w-full truncate">
+  #       <div class="flex items-center justify-between gap-4">
+  #         <div class="flex items-start gap-4">
+  #           <.link navigate={User.url(@match.user)}>
+  #             <.avatar class="h-16 w-16 rounded-full">
+  #               <.avatar_image src={@match.user.avatar_url} alt={@match.user.name} />
+  #               <.avatar_fallback class="rounded-lg">
+  #                 {Algora.Util.initials(@match.user.name)}
+  #               </.avatar_fallback>
+  #             </.avatar>
+  #           </.link>
+
+  #           <div>
+  #             <div class="flex items-center gap-4 text-foreground">
+  #               <.link
+  #                 navigate={User.url(@match.user)}
+  #                 class="text-base sm:text-lg font-semibold hover:underline"
+  #               >
+  #                 {@match.user.name} {Algora.Misc.CountryEmojis.get(@match.user.country)}
+  #               </.link>
+  #             </div>
+  #             <div
+  #               :if={@match.user.provider_meta}
+  #               class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm"
+  #             >
+  #               <.link
+  #                 :if={@match.user.provider_login}
+  #                 href={"https://github.com/#{@match.user.provider_login}"}
+  #                 target="_blank"
+  #                 class="flex items-center gap-1 hover:underline"
+  #               >
+  #                 <.icon name="github" class="shrink-0 h-4 w-4" />
+  #                 <span class="line-clamp-1">{@match.user.provider_login}</span>
+  #               </.link>
+  #               <.link
+  #                 :if={@match.user.provider_meta["twitter_handle"]}
+  #                 href={"https://x.com/#{@match.user.provider_meta["twitter_handle"]}"}
+  #                 target="_blank"
+  #                 class="flex items-center gap-1 hover:underline"
+  #               >
+  #                 <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
+  #                 <span class="line-clamp-1">{@match.user.provider_meta["twitter_handle"]}</span>
+  #               </.link>
+  #             </div>
+  #             <div class="pt-1.5 flex gap-2 line-clamp-1">
+  #               <%= for tech <- @match.user.tech_stack |> Enum.take(4) do %>
+  #                 <div class="rounded-lg bg-foreground/5 px-2 py-1 text-xs font-medium text-foreground ring-1 ring-inset ring-foreground/25">
+  #                   {tech}
+  #                 </div>
+  #               <% end %>
+  #             </div>
+  #           </div>
+  #         </div>
+  #       </div>
+  #       <div class="pt-4 text-sm sm:text-base text-muted-foreground font-medium">
+  #         Completed
+  #         <span class="font-semibold font-display text-foreground/80">
+  #           {@match.user.transactions_count}
+  #           {ngettext(
+  #             "bounty",
+  #             "bounties",
+  #             @match.user.transactions_count
+  #           )}
+  #         </span>
+  #         across
+  #         <span class="font-semibold font-display text-foreground/80">
+  #           {ngettext(
+  #             "%{count} project",
+  #             "%{count} projects",
+  #             @match.user.contributed_projects_count
+  #           )}
+  #         </span>
+  #       </div>
+  #       <div class="pt-4 flex flex-col gap-4">
+  #         <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
+  #           <.link
+  #             navigate={User.url(project)}
+  #             class="flex flex-1 items-center gap-2 sm:gap-4 text-sm rounded-lg"
+  #           >
+  #             <.avatar class="h-10 w-10 rounded-lg saturate-0 bg-gradient-to-br brightness-75">
+  #               <.avatar_image src={project.avatar_url} alt={project.name} />
+  #               <.avatar_fallback class="rounded-lg">
+  #                 {Algora.Util.initials(project.name)}
+  #               </.avatar_fallback>
+  #             </.avatar>
+  #             <div class="flex flex-col">
+  #               <div class="text-base font-medium text-foreground/80">
+  #                 {project.name}
+  #               </div>
+
+  #               <div class="flex items-center gap-2 whitespace-nowrap">
+  #                 <div class="text-sm text-muted-foreground font-display font-semibold">
+  #                   <.icon name="tabler-star-filled" class="size-4 text-amber-400 mr-1" />{format_number(
+  #                     project.stargazers_count
+  #                   )}
+  #                 </div>
+  #                 <div class="text-sm text-muted-foreground">
+  #                   <span class="text-foreground/80 font-display font-semibold">
+  #                     {total_earned}
+  #                   </span>
+  #                   awarded
+  #                 </div>
+  #               </div>
+  #             </div>
+  #           </.link>
+  #         <% end %>
+  #       </div>
+  #     </div>
+  #   </div>
+  #   """
+  # end
 
   defp format_number(n) when n >= 1_000_000, do: "#{Float.round(n / 1_000_000, 1)}M"
   defp format_number(n) when n >= 1_000, do: "#{Float.round(n / 1_000, 1)}K"
@@ -1018,10 +1169,8 @@ defmodule AlgoraWeb.Org.JobLive do
   defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
 
   # Fetch contributions for all applicants and create a map for quick lookup
-  defp fetch_applicants_contributions(applicants, tech_stack) do
-    Enum.reduce(applicants, %{}, fn application, acc ->
-      user = application.user
-
+  defp fetch_applicants_contributions(users, tech_stack) do
+    Enum.reduce(users, %{}, fn user, acc ->
       contributions = Algora.Workspace.list_user_contributions(user.provider_login, limit: 20, tech_stack: tech_stack)
       Map.put(acc, user.id, contributions)
     end)

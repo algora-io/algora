@@ -11,6 +11,7 @@ defmodule Algora.Jobs do
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
+  alias Algora.Settings
   alias Algora.Util
 
   require Logger
@@ -46,11 +47,13 @@ defmodule Algora.Jobs do
   @spec create_payment_session(job_posting: JobPosting.t()) ::
           {:ok, String.t()} | {:error, atom()}
   def create_payment_session(job_posting) do
+    {amount, description} = get_job_price_and_description(job_posting.user_id)
+
     line_items = [
       %LineItem{
-        amount: price(),
+        amount: amount,
         title: "Job posting - #{job_posting.company_name}",
-        description: "1 month"
+        description: description
       }
     ]
 
@@ -133,5 +136,16 @@ defmodule Algora.Jobs do
     |> where([a], a.job_id == ^job.id)
     |> preload(:user)
     |> Repo.all()
+  end
+
+  def get_job_price_and_description(org_id) do
+    case Settings.get_org_job_settings(org_id) do
+      %{amount: amount, description: description} ->
+        {amount, description}
+
+      nil ->
+        # default values
+        {price(), "1 month"}
+    end
   end
 end

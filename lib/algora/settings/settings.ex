@@ -152,4 +152,19 @@ defmodule Algora.Settings do
   def set_featured_transactions(ids) when is_list(ids) do
     set("featured_transactions", %{"ids" => ids})
   end
+
+  def get_org_job_settings(org_id) when is_binary(org_id) do
+    case get("org_job_settings:#{org_id}") do
+      %{"amount" => amount, "description" => description} when is_binary(description) ->
+        %{amount: Algora.MoneyUtils.deserialize(amount), description: description}
+
+      _ ->
+        nil
+    end
+  end
+
+  def set_org_job_settings(org_id, amount, description)
+      when is_binary(org_id) and is_binary(description) and is_struct(amount, Money) do
+    set("org_job_settings:#{org_id}", %{"amount" => Algora.MoneyUtils.serialize(amount), "description" => description})
+  end
 end

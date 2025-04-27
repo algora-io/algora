@@ -141,10 +141,10 @@ defmodule AlgoraWeb.Org.JobLive do
       <%= if @current_user_role in [:admin, :mod] do %>
         <div>
           <div class="flex items-center gap-4 mb-8">
-            <%= for {tab, label} <- [
-            {"applicants", "Applicants"},
-            {"imports", "Imports"},
-            {"matches", "Matches"}
+            <%= for {tab, label, count} <- [
+            {"applicants", "Applicants", length(@applicants)},
+            {"imports", "Imports", length(@imports)},
+            {"matches", "Matches", length(@matches)}
           ] do %>
               <label class={[
                 "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
@@ -162,6 +162,9 @@ defmodule AlgoraWeb.Org.JobLive do
                 />
                 <span class="flex items-center gap-2">
                   <span class="text-sm font-medium">{label}</span>
+                  <span class="text-xs text-muted-foreground">
+                    {count}
+                  </span>
                 </span>
               </label>
             <% end %>

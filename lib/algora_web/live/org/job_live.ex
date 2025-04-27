@@ -16,9 +16,6 @@ defmodule AlgoraWeb.Org.JobLive do
   def mount(%{"org_handle" => handle, "id" => id} = params, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
-        # matches = Settings.get_org_matches(job.user)
-        imported_applicants = []
-        # Default to "applicants" tab if none specified
         current_tab = params["tab"] || "applicants"
 
         {:ok,
@@ -26,8 +23,6 @@ defmodule AlgoraWeb.Org.JobLive do
          |> assign(:share_url, ~p"/#{handle}/jobs/#{job.id}")
          |> assign(:page_title, job.title)
          |> assign(:job, job)
-         |> assign(:imported_applicants, imported_applicants)
-         |> assign(:total_imported, length(imported_applicants))
          |> assign(:show_import_drawer, false)
          |> assign(:show_share_drawer, false)
          |> assign(:current_tab, current_tab)
@@ -216,7 +211,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     Import
                   </.button>
                 </:actions>
-                <%= if Enum.empty?(@importing_users) do %>
+                <%= if Enum.empty?(@imports) do %>
                   <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
                     <.card_header>
                       <div class="mx-auto mb-2 rounded-full bg-muted p-4">
@@ -229,93 +224,25 @@ defmodule AlgoraWeb.Org.JobLive do
                     </.card_header>
                   </.card>
                 <% else %>
-                  <div class="space-y-4">
-                    <.simple_form for={@import_form} phx-submit="submit_import" class="space-y-4">
-                      <.input
-                        type="textarea"
-                        field={@import_form[:github_urls]}
-                        placeholder={import_placeholder()}
-                        phx-change="parse_github_urls"
-                        phx-debounce="300"
-                      />
-
-                      <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
-                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
-                          <span>
-                            Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
-                              status == :done
-                            end)}/{map_size(@importing_users)}
-                          </span>
-                        </div>
-                      <% else %>
-                        <%= if map_size(@importing_users) > 0 do %>
-                          <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                            <.icon name="tabler-check" class="h-4 w-4" />
-                            <span>
-                              Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
-                                status == :done
-                              end)}/{map_size(@importing_users)}
-                            </span>
-                          </div>
-                        <% end %>
-                      <% end %>
-
-                      <div class="space-y-2">
-                        <%= for {handle, data} <- Enum.sort_by(@importing_users, fn {_, %{order: order}} -> order end) do %>
-                          <div class="flex items-center gap-2">
-                            <%= if data.status == :loading do %>
-                              <.avatar class="h-8 w-8">
-                                <.avatar_image src="/images/placeholder-avatar.png" />
-                                <.avatar_fallback>
-                                  {handle}
-                                </.avatar_fallback>
-                              </.avatar>
-                              <span class="text-sm font-medium">{handle}</span>
-                            <% else %>
-                              <%= if data.user do %>
-                                <.link
-                                  href={"https://github.com/#{data.user.provider_login}"}
-                                  target="_blank"
-                                  rel="noopener"
-                                  class="flex items-center gap-2"
-                                >
-                                  <.avatar class="h-8 w-8">
-                                    <.avatar_image src={data.user.avatar_url} />
-                                    <.avatar_fallback>
-                                      {Algora.Util.initials(data.user.name)}
-                                    </.avatar_fallback>
-                                  </.avatar>
-                                  <span class="text-sm font-medium">{data.user.name}</span>
-                                  <span class="text-xs font-medium text-muted-foreground">
-                                    @{data.user.provider_login}
-                                  </span>
-                                </.link>
-                              <% else %>
-                                <.avatar class="h-8 w-8">
-                                  <.avatar_fallback>?</.avatar_fallback>
-                                </.avatar>
-                                <span class="text-sm text-destructive">Failed to load @{handle}</span>
-                              <% end %>
-                            <% end %>
-                          </div>
-                        <% end %>
-                      </div>
-
-                      <:actions>
-                        <.button
-                          type="submit"
-                          disabled={
-                            Enum.empty?(@importing_users) ||
-                              Enum.any?(@importing_users, fn {_, %{status: status}} ->
-                                status == :loading
-                              end)
+                  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    <%= for {application, index} <- Enum.with_index(@imports) do %>
+                      <div class={
+                        if @current_org.hiring_subscription == :inactive && index >= 3,
+                          do: "filter blur-sm pointer-events-none"
+                      }>
+                        <.developer_card
+                          tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                          application={application}
+                          contributions={Map.get(@contributions_map, application.user.id, [])}
+                          contract_type={
+                            if(Enum.find(@matches, &(&1.user.id == application.user.id)),
+                              do: "marketplace",
+                              else: "bring_your_own"
+                            )
                           }
-                        >
-                          Import
-                        </.button>
-                      </:actions>
-                    </.simple_form>
+                        />
+                      </div>
+                    <% end %>
                   </div>
                 <% end %>
               </.section>
@@ -734,19 +661,21 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   defp assign_applicants(socket) do
-    applicants = Jobs.list_job_applications(socket.assigns.job)
+    all_applicants = Jobs.list_job_applications(socket.assigns.job)
+    applicants = Enum.reject(all_applicants, & &1.imported_at)
+    imports = Enum.filter(all_applicants, & &1.imported_at)
     matches = Settings.get_job_matches(socket.assigns.job.id)
 
-    developers = matches |> Enum.concat(applicants) |> Enum.map(& &1.user)
+    developers = matches |> Enum.concat(all_applicants) |> Enum.map(& &1.user)
 
     contributions_map = fetch_applicants_contributions(developers, socket.assigns.current_org.tech_stack)
 
     socket
     |> assign(:developers, developers)
     |> assign(:applicants, sort_applicants_by_contributions(applicants, contributions_map))
+    |> assign(:imports, sort_applicants_by_contributions(imports, contributions_map))
     |> assign(:matches, sort_applicants_by_contributions(matches, contributions_map))
     |> assign(:contributions_map, contributions_map)
-    |> assign(:total_applicants, length(applicants))
   end
 
   defp extract_github_handle(url) do

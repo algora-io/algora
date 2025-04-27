@@ -50,7 +50,7 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto max-w-7xl space-y-8 xl:space-y-16 p-4 sm:p-6 lg:p-8">
+    <div class="container mx-auto max-w-7xl space-y-8 p-4 sm:p-6 lg:p-8">
       <.section>
         <.card class="flex flex-col p-6">
           <div class="flex justify-between">
@@ -100,8 +100,11 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
               </div>
             </div>
-            <div class="flex flex-col">
-              <div class="pt-4 flex gap-3">
+            <div class="flex flex-col items-center">
+              <h3 class="text-lg font-semibold">
+                Share on socials
+              </h3>
+              <div class="mt-2 flex gap-3">
                 <.social_share_button id="twitter-share-url" icon="tabler-brand-x" value={@share_url} />
                 <.social_share_button
                   id="reddit-share-url"
@@ -119,7 +122,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   value={@share_url}
                 />
               </div>
-              <div class="relative aspect-[1200/630] max-w-[16rem] w-full rounded-lg ring-1 ring-input bg-black">
+              <div class="mt-4 relative aspect-[1200/630] max-w-[12rem] w-full rounded-lg ring-1 ring-border bg-black overflow-hidden">
                 <img
                   src={~p"/og/#{@current_org.handle}/jobs/#{@job.id}"}
                   alt={@job.title}
@@ -366,11 +369,11 @@ defmodule AlgoraWeb.Org.JobLive do
             <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
               <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
                 <div>
-                  <h3 class="text-2xl font-semibold text-foreground">
+                  <h3 class="text-3xl font-semibold text-foreground">
                     <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
                     Annual Subscription
                   </h3>
-                  <ul class="space-y-4 mt-4 text-base">
+                  <ul class="space-y-3 mt-4 text-base">
                     <li class="flex items-center gap-2">
                       <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
                         <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />

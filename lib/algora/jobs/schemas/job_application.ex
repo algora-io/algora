@@ -7,7 +7,7 @@ defmodule Algora.Jobs.JobApplication do
 
   typed_schema "job_applications" do
     field :status, Ecto.Enum, values: [:pending], null: false, default: :pending
-
+    field :imported_at, :utc_datetime_usec
     belongs_to :job, JobPosting, null: false
     belongs_to :user, User, null: false
 
@@ -16,7 +16,7 @@ defmodule Algora.Jobs.JobApplication do
 
   def changeset(job_application, attrs) do
     job_application
-    |> cast(attrs, [:status, :job_id, :user_id])
+    |> cast(attrs, [:status, :job_id, :user_id, :imported_at])
     |> generate_id()
     |> validate_required([:status, :job_id, :user_id])
     |> unique_constraint([:job_id, :user_id])

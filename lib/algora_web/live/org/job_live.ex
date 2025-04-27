@@ -161,7 +161,7 @@ defmodule AlgoraWeb.Org.JobLive do
             <%= for {application, _index} <- Enum.with_index(@applicants) do %>
               <div>
                 <.developer_card
-                  user={application.user}
+                  application={application}
                   contributions={Map.get(@contributions_map, application.user.id, [])}
                 />
               </div>
@@ -362,7 +362,9 @@ defmodule AlgoraWeb.Org.JobLive do
         status == :done && not is_nil(user)
       end)
       # TODO: batch this
-      |> Enum.map(fn {_handle, %{user: user}} -> Jobs.ensure_application(socket.assigns.job.id, user) end)
+      |> Enum.map(fn {_handle, %{user: user}} ->
+        Jobs.ensure_application(socket.assigns.job.id, user, %{imported_at: DateTime.utc_now()})
+      end)
 
     if Enum.all?(results, &match?({:ok, _}, &1)) do
       {:noreply,
@@ -463,51 +465,66 @@ defmodule AlgoraWeb.Org.JobLive do
       <td class="py-4 align-middle">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="flex items-center gap-4">
-            <.link navigate={User.url(@user)}>
+            <.link navigate={User.url(@application.user)}>
               <.avatar class="h-12 w-12 rounded-full">
-                <.avatar_image src={@user.avatar_url} alt={@user.name} />
+                <.avatar_image src={@application.user.avatar_url} alt={@application.user.name} />
                 <.avatar_fallback class="rounded-lg">
-                  {Algora.Util.initials(@user.name)}
+                  {Algora.Util.initials(@application.user.name)}
                 </.avatar_fallback>
               </.avatar>
             </.link>
 
             <div>
               <div class="flex items-center gap-1 text-base text-foreground">
-                <.link navigate={User.url(@user)} class="font-semibold hover:underline">
-                  {@user.name} {Algora.Misc.CountryEmojis.get(@user.country)}
+                <.link navigate={User.url(@application.user)} class="font-semibold hover:underline">
+                  {@application.user.name} {Algora.Misc.CountryEmojis.get(@application.user.country)}
                 </.link>
+                <div class="flex items-center gap-1 text-muted-foreground">
+                  <span class="line-clamp-1 text-xs">
+                    <%= if @application.imported_at do %>
+                      Imported
+                    <% else %>
+                      Applied
+                    <% end %>
+                    on {Calendar.strftime(
+                      @application.imported_at || @application.inserted_at,
+                      "%B %d"
+                    )}
+                  </span>
+                </div>
               </div>
               <div
-                :if={@user.provider_meta}
+                :if={@application.user.provider_meta}
                 class="pt-0.5 flex items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm max-w-[250px] 2xl:max-w-none truncate"
               >
                 <.link
-                  :if={@user.provider_login}
-                  href={"https://github.com/#{@user.provider_login}"}
+                  :if={@application.user.provider_login}
+                  href={"https://github.com/#{@application.user.provider_login}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="github" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">{@user.provider_login}</span>
+                  <span class="line-clamp-1">{@application.user.provider_login}</span>
                 </.link>
                 <.link
-                  :if={@user.provider_meta["twitter_handle"]}
-                  href={"https://x.com/#{@user.provider_meta["twitter_handle"]}"}
+                  :if={@application.user.provider_meta["twitter_handle"]}
+                  href={"https://x.com/#{@application.user.provider_meta["twitter_handle"]}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">{@user.provider_meta["twitter_handle"]}</span>
+                  <span class="line-clamp-1">
+                    {@application.user.provider_meta["twitter_handle"]}
+                  </span>
                 </.link>
-                <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
+                <div :if={@application.user.provider_meta["location"]} class="flex items-center gap-1">
                   <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">{@user.provider_meta["location"]}</span>
+                  <span class="line-clamp-1">{@application.user.provider_meta["location"]}</span>
                 </div>
-                <div :if={@user.provider_meta["company"]} class="flex items-center gap-1">
+                <div :if={@application.user.provider_meta["company"]} class="flex items-center gap-1">
                   <.icon name="tabler-building" class="shrink-0 h-4 w-4" />
                   <span class="line-clamp-1">
-                    {@user.provider_meta["company"] |> String.trim_leading("@")}
+                    {@application.user.provider_meta["company"] |> String.trim_leading("@")}
                   </span>
                 </div>
               </div>
@@ -516,7 +533,7 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="flex gap-2">
             <.button
               phx-click="share_opportunity"
-              phx-value-user_id={@user.id}
+              phx-value-user_id={@application.user.id}
               phx-value-type="bounty"
               variant="outline"
               size="sm"
@@ -525,7 +542,7 @@ defmodule AlgoraWeb.Org.JobLive do
             </.button>
             <.button
               phx-click="share_opportunity"
-              phx-value-user_id={@user.id}
+              phx-value-user_id={@application.user.id}
               phx-value-type="tip"
               variant="outline"
               size="sm"
@@ -534,7 +551,7 @@ defmodule AlgoraWeb.Org.JobLive do
             </.button>
             <.button
               phx-click="share_opportunity"
-              phx-value-user_id={@user.id}
+              phx-value-user_id={@application.user.id}
               phx-value-type="contract"
               variant="outline"
               size="sm"
@@ -548,7 +565,7 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="flex items-center gap-3 mt-2">
             <%= for {owner, contributions} <- aggregate_contributions(@contributions) do %>
               <.link
-                href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@application.user.provider_login}+is%3Amerged+"}
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-3 group rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"

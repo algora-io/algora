@@ -100,15 +100,15 @@ defmodule Algora.Jobs do
     end)
   end
 
-  def create_application(job_id, user) do
-    %JobApplication{}
-    |> JobApplication.changeset(%{job_id: job_id, user_id: user.id})
+  def create_application(job_id, user, attrs \\ %{}) do
+    %JobApplication{job_id: job_id, user_id: user.id}
+    |> JobApplication.changeset(attrs)
     |> Repo.insert()
   end
 
-  def ensure_application(job_id, user) do
+  def ensure_application(job_id, user, attrs \\ %{}) do
     case JobApplication |> where([a], a.job_id == ^job_id and a.user_id == ^user.id) |> Repo.one() do
-      nil -> create_application(job_id, user)
+      nil -> create_application(job_id, user, attrs)
       application -> {:ok, application}
     end
   end

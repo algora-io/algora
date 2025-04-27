@@ -15,6 +15,9 @@ alias Algora.Contracts
 alias Algora.Contracts.Contract
 alias Algora.Contracts.Timesheet
 alias Algora.Github
+alias Algora.Jobs
+alias Algora.Jobs.JobApplication
+alias Algora.Jobs.JobPosting
 alias Algora.Organizations
 alias Algora.Organizations.Member
 alias Algora.Payments

@@ -13,12 +13,13 @@ defmodule AlgoraWeb.Org.JobLive do
   require Logger
 
   @impl true
-  def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
+  def mount(%{"org_handle" => handle, "id" => id} = params, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
         matches = Settings.get_org_matches(job.user)
         imported_applicants = []
-        # TODO: Replace with actual subscription check
+        # Default to "applicants" tab if none specified
+        current_tab = params["tab"] || "applicants"
 
         {:ok,
          socket
@@ -30,6 +31,7 @@ defmodule AlgoraWeb.Org.JobLive do
          |> assign(:total_imported, length(imported_applicants))
          |> assign(:show_import_drawer, false)
          |> assign(:show_share_drawer, false)
+         |> assign(:current_tab, current_tab)
          |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
          |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
          |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
@@ -100,129 +102,295 @@ defmodule AlgoraWeb.Org.JobLive do
         </.card>
       </.section>
 
-      <.section
-        :if={@current_user_role in [:admin, :mod]}
-        title="Applicants"
-        subtitle="Developers who applied for this position"
-      >
-        <:actions>
-          <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
-            Import
-          </.button>
-          <.button variant="default">
-            Screen
-          </.button>
-        </:actions>
-        <%= if Enum.empty?(@applicants) do %>
-          <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-            <.card_header>
-              <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-              </div>
-              <.card_title>No applicants yet</.card_title>
-              <.card_description>
-                Applications will appear here once developers apply
-              </.card_description>
-            </.card_header>
-          </.card>
-        <% else %>
-          <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <%= for {application, index} <- Enum.with_index(@applicants) do %>
-              <div class={
-                if @current_org.hiring_subscription == :inactive && index >= 3,
-                  do: "filter blur-sm pointer-events-none"
-              }>
-                <.developer_card
-                  tech_stack={@current_org.tech_stack |> Enum.take(1)}
-                  application={application}
-                  contributions={Map.get(@contributions_map, application.user.id, [])}
-                  contract_type={
-                    if(Enum.find(@matches, &(&1.user.id == application.user.id)),
-                      do: "marketplace",
-                      else: "bring_your_own"
-                    )
-                  }
+      <div :if={@current_user_role in [:admin, :mod]}>
+        <div class="flex items-center gap-4 mb-8">
+          <%= for {tab, label} <- [
+            {"applicants", "Applicants"},
+            {"imports", "Imports"},
+            {"matches", "Matches"}
+          ] do %>
+            <label class={[
+              "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
+              "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+              "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+            ]}>
+              <input
+                type="radio"
+                name="tab"
+                value={tab}
+                checked={@current_tab == tab}
+                class="sr-only"
+                phx-click="change_tab"
+                phx-value-tab={tab}
+              />
+              <span class="flex items-center gap-2">
+                <span class="text-sm font-medium">{label}</span>
+                <.icon
+                  name="tabler-check"
+                  class="invisible size-4 text-primary group-has-[:checked]:visible"
                 />
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </.section>
+              </span>
+            </label>
+          <% end %>
+        </div>
 
-      <.section
-        :if={@current_user_role in [:admin, :mod]}
-        title="Matches"
-        subtitle="Top developers matching your requirements"
-      >
-        <:actions>
-          <.button>
-            Invite all
-          </.button>
-        </:actions>
-        <%= if Enum.empty?(@matches) do %>
-          <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-            <.card_header>
-              <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-              </div>
-              <.card_title>No matches yet</.card_title>
-              <.card_description>
-                Matches will appear here once we find developers matching your requirements
-              </.card_description>
-            </.card_header>
-          </.card>
-        <% else %>
-          <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <%= for {match, index} <- Enum.with_index(@matches) do %>
-              <div class={
-                if @current_org.hiring_subscription == :inactive && index != 0,
-                  do: "filter blur-sm pointer-events-none"
-              }>
-                <.match_card match={match} />
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </.section>
-
-      <.section :if={
-        @current_user_role in [:admin, :mod] && @current_org.hiring_subscription != :active
-      }>
-        <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-          <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-            <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
-              <div>
-                <h3 class="text-2xl font-semibold text-foreground">
-                  Unlock Full Hiring
-                  <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">Potential</span>
-                </h3>
-                <div class="pt-1 text-sm text-muted-foreground">
-                  Get access to all applicants and GitHub profiles
-                </div>
-                <ul class="space-y-3 mt-4 text-sm">
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Unlimited job postings</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Access to all applicants and GitHub profiles</span>
-                  </li>
-                  <li class="flex items-center gap-2">
-                    <.icon name="tabler-check" class="h-5 w-5 text-success" />
-                    <span>Embeddable job widget for your website</span>
-                  </li>
-                </ul>
-              </div>
-              <div class="flex flex-col justify-center items-center text-center">
-                <.button phx-click="activate_subscription" size="lg" class="w-full max-w-xs">
-                  Activate
+        <%= case @current_tab do %>
+          <% "applicants" -> %>
+            <.section title="Applicants" subtitle="Developers who applied for this position">
+              <:actions>
+                <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
+                  Import
                 </.button>
+                <.button variant="default">
+                  Screen
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@applicants) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No applicants yet</.card_title>
+                    <.card_description>
+                      Share your job posting with your network
+                      <div class="pt-4 flex gap-3 items-center">
+                        <.social_share_button
+                          id="twitter-share-url"
+                          icon="tabler-brand-x"
+                          value={@share_url}
+                        />
+                        <.social_share_button
+                          id="reddit-share-url"
+                          icon="tabler-brand-reddit"
+                          value={@share_url}
+                        />
+                        <.social_share_button
+                          id="linkedin-share-url"
+                          icon="tabler-brand-linkedin"
+                          value={@share_url}
+                        />
+                        <.social_share_button
+                          id="hackernews-share-url"
+                          icon="tabler-brand-ycombinator"
+                          value={@share_url}
+                        />
+                      </div>
+                      <div class="relative aspect-[1200/630] max-w-[11rem] rounded-lg ring-1 ring-input bg-black">
+                        <img
+                          src={~p"/og/0/bounties/#{@bounty.id}"}
+                          alt={@bounty.ticket.title}
+                          class="object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                  <%= for {application, index} <- Enum.with_index(@applicants) do %>
+                    <div class={
+                      if @current_org.hiring_subscription == :inactive && index >= 3,
+                        do: "filter blur-sm pointer-events-none"
+                    }>
+                      <.developer_card
+                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        application={application}
+                        contributions={Map.get(@contributions_map, application.user.id, [])}
+                        contract_type={
+                          if(Enum.find(@matches, &(&1.user.id == application.user.id)),
+                            do: "marketplace",
+                            else: "bring_your_own"
+                          )
+                        }
+                      />
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </.section>
+          <% "imports" -> %>
+            <.section title="Imports" subtitle="Import applicants from external sources">
+              <:actions>
+                <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
+                  Import
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@importing_users) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No imports yet</.card_title>
+                    <.card_description>
+                      Import applicants from external sources
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="space-y-4">
+                  <.simple_form for={@import_form} phx-submit="submit_import" class="space-y-4">
+                    <.input
+                      type="textarea"
+                      field={@import_form[:github_urls]}
+                      placeholder={import_placeholder()}
+                      phx-change="parse_github_urls"
+                      phx-debounce="300"
+                    />
+
+                    <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
+                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                        <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
+                        <span>
+                          Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                            status == :done
+                          end)}/{map_size(@importing_users)}
+                        </span>
+                      </div>
+                    <% else %>
+                      <%= if map_size(@importing_users) > 0 do %>
+                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                          <.icon name="tabler-check" class="h-4 w-4" />
+                          <span>
+                            Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                              status == :done
+                            end)}/{map_size(@importing_users)}
+                          </span>
+                        </div>
+                      <% end %>
+                    <% end %>
+
+                    <div class="space-y-2">
+                      <%= for {handle, data} <- Enum.sort_by(@importing_users, fn {_, %{order: order}} -> order end) do %>
+                        <div class="flex items-center gap-2">
+                          <%= if data.status == :loading do %>
+                            <.avatar class="h-8 w-8">
+                              <.avatar_image src="/images/placeholder-avatar.png" />
+                              <.avatar_fallback>
+                                {handle}
+                              </.avatar_fallback>
+                            </.avatar>
+                            <span class="text-sm font-medium">{handle}</span>
+                          <% else %>
+                            <%= if data.user do %>
+                              <.link
+                                href={"https://github.com/#{data.user.provider_login}"}
+                                target="_blank"
+                                rel="noopener"
+                                class="flex items-center gap-2"
+                              >
+                                <.avatar class="h-8 w-8">
+                                  <.avatar_image src={data.user.avatar_url} />
+                                  <.avatar_fallback>
+                                    {Algora.Util.initials(data.user.name)}
+                                  </.avatar_fallback>
+                                </.avatar>
+                                <span class="text-sm font-medium">{data.user.name}</span>
+                                <span class="text-xs font-medium text-muted-foreground">
+                                  @{data.user.provider_login}
+                                </span>
+                              </.link>
+                            <% else %>
+                              <.avatar class="h-8 w-8">
+                                <.avatar_fallback>?</.avatar_fallback>
+                              </.avatar>
+                              <span class="text-sm text-destructive">Failed to load @{handle}</span>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+
+                    <:actions>
+                      <.button
+                        type="submit"
+                        disabled={
+                          Enum.empty?(@importing_users) ||
+                            Enum.any?(@importing_users, fn {_, %{status: status}} ->
+                              status == :loading
+                            end)
+                        }
+                      >
+                        Import
+                      </.button>
+                    </:actions>
+                  </.simple_form>
+                </div>
+              <% end %>
+            </.section>
+          <% "matches" -> %>
+            <.section title="Matches" subtitle="Top developers matching your requirements">
+              <:actions>
+                <.button>
+                  Invite all
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@matches) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No matches yet</.card_title>
+                    <.card_description>
+                      Matches will appear here once we find developers matching your requirements
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <%= for {match, index} <- Enum.with_index(@matches) do %>
+                    <div class={
+                      if @current_org.hiring_subscription == :inactive && index != 0,
+                        do: "filter blur-sm pointer-events-none"
+                    }>
+                      <.match_card match={match} />
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </.section>
+        <% end %>
+
+        <.section :if={@current_org.hiring_subscription != :active}>
+          <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
+            <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+              <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
+                <div>
+                  <h3 class="text-2xl font-semibold text-foreground">
+                    Unlock Full Hiring
+                    <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">Potential</span>
+                  </h3>
+                  <div class="pt-1 text-sm text-muted-foreground">
+                    Get access to all applicants and GitHub profiles
+                  </div>
+                  <ul class="space-y-3 mt-4 text-sm">
+                    <li class="flex items-center gap-2">
+                      <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                      <span>Unlimited job postings</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                      <span>Access to all applicants and GitHub profiles</span>
+                    </li>
+                    <li class="flex items-center gap-2">
+                      <.icon name="tabler-check" class="h-5 w-5 text-success" />
+                      <span>Embeddable job widget for your website</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="flex flex-col justify-center items-center text-center">
+                  <.button phx-click="activate_subscription" size="lg" class="w-full max-w-xs">
+                    Activate
+                  </.button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </.section>
+        </.section>
+      </div>
     </div>
 
     {share_drawer(assigns)}
@@ -395,6 +563,15 @@ defmodule AlgoraWeb.Org.JobLive do
     else
       {:noreply, put_flash(socket, :error, "Failed to import some applicants")}
     end
+  end
+
+  @impl true
+  def handle_event("change_tab", %{"tab" => tab}, socket) do
+    {:noreply,
+     push_navigate(socket,
+       to:
+         "/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/#{tab}#{if socket.assigns[:return_to], do: "?return_to=#{socket.assigns.return_to}", else: ""}"
+     )}
   end
 
   @impl true
@@ -668,7 +845,11 @@ defmodule AlgoraWeb.Org.JobLive do
                 <div class="w-full flex flex-col text-xs font-medium gap-0.5">
                   <span class="flex items-start justify-between gap-5">
                     <span class="font-display">
-                      {owner.name}
+                      {if owner.type == :organization do
+                        owner.name
+                      else
+                        List.first(contributions).repository.name
+                      end}
                     </span>
                     <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
                       <span class="flex items-center text-foreground text-[11px] gap-1">
@@ -1114,6 +1295,40 @@ defmodule AlgoraWeb.Org.JobLive do
         </div>
       </.drawer_content>
     </.drawer>
+    """
+  end
+
+  defp social_share_button(assigns) do
+    ~H"""
+    <.button
+      id={@id}
+      phx-hook="CopyToClipboard"
+      data-value={@value}
+      variant="secondary"
+      phx-click={
+        %JS{}
+        |> JS.hide(
+          to: "##{@id}-copy-icon",
+          transition: {"transition-opacity", "opacity-100", "opacity-0"}
+        )
+        |> JS.show(
+          to: "##{@id}-check-icon",
+          transition: {"transition-opacity", "opacity-0", "opacity-100"}
+        )
+      }
+      class="size-6 sm:size-9 relative cursor-pointer text-foreground/90 hover:text-foreground bg-muted"
+    >
+      <.icon
+        id={@id <> "-copy-icon"}
+        name={@icon}
+        class="absolute inset-0 m-auto size-6 sm:size-6 flex items-center justify-center"
+      />
+      <.icon
+        id={@id <> "-check-icon"}
+        name="tabler-check"
+        class="absolute inset-0 m-auto hidden size-6 sm:size-6 items-center justify-center"
+      />
+    </.button>
     """
   end
 end

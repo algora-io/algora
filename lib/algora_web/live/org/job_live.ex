@@ -211,7 +211,7 @@ defmodule AlgoraWeb.Org.JobLive do
             <% "imports" -> %>
               <.section title="Imports" subtitle="Import applicants from external sources">
                 <:actions>
-                  <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
+                  <.button variant="secondary" phx-click="toggle_import_drawer">
                     Import
                   </.button>
                 </:actions>

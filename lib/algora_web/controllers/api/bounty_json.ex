@@ -57,7 +57,7 @@ defmodule AlgoraWeb.API.BountyJSON do
           id: bounty.ticket.id,
           html_url: bounty.ticket.url,
           title: bounty.ticket.title,
-          body: "",
+          body: bounty.ticket.description,
           user: %{
             id: 0,
             login: "",

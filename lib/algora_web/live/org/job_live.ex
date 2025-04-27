@@ -53,317 +53,313 @@ defmodule AlgoraWeb.Org.JobLive do
     <div class="container mx-auto max-w-7xl space-y-8 xl:space-y-16 p-4 sm:p-6 lg:p-8">
       <.section>
         <.card class="flex flex-col p-6">
-          <div class="flex items-start md:items-center gap-3">
-            <.avatar class="h-16 w-16">
-              <.avatar_image src={@job.user.avatar_url} />
-              <.avatar_fallback>
-                {Algora.Util.initials(@job.user.name)}
-              </.avatar_fallback>
-            </.avatar>
+          <div class="flex justify-between">
             <div>
-              <div class="text-lg text-foreground font-bold font-display">
-                {@job.user.name}
-              </div>
-              <div class="text-sm text-muted-foreground line-clamp-2 md:line-clamp-1">
-                {@job.user.bio}
-              </div>
-              <div class="flex gap-2 items-center">
-                <%= for {platform, icon} <- social_links(),
+              <div class="flex items-start md:items-center gap-3">
+                <.avatar class="h-16 w-16">
+                  <.avatar_image src={@job.user.avatar_url} />
+                  <.avatar_fallback>
+                    {Algora.Util.initials(@job.user.name)}
+                  </.avatar_fallback>
+                </.avatar>
+                <div>
+                  <div class="text-lg text-foreground font-bold font-display">
+                    {@job.user.name}
+                  </div>
+                  <div class="text-sm text-muted-foreground line-clamp-2 md:line-clamp-1">
+                    {@job.user.bio}
+                  </div>
+                  <div class="flex gap-2 items-center">
+                    <%= for {platform, icon} <- social_links(),
                       url = social_link(@job.user, platform),
                       not is_nil(url) do %>
-                  <.link
-                    href={url}
-                    target="_blank"
-                    class="text-muted-foreground hover:text-foreground"
-                  >
-                    <.icon name={icon} class="size-4" />
+                      <.link
+                        href={url}
+                        target="_blank"
+                        class="text-muted-foreground hover:text-foreground"
+                      >
+                        <.icon name={icon} class="size-4" />
+                      </.link>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-8">
+                <div>
+                  <.link href={@job.url} class="text-lg font-semibold hover:underline" target="_blank">
+                    {@job.title}
                   </.link>
-                <% end %>
+                </div>
+                <div :if={@job.description} class="pt-1 text-sm text-muted-foreground">
+                  {@job.description}
+                </div>
+                <div class="pt-2 flex flex-wrap gap-2">
+                  <%= for tech <- @job.tech_stack do %>
+                    <.badge variant="outline">{tech}</.badge>
+                  <% end %>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="pt-8">
-            <div>
-              <.link href={@job.url} class="text-lg font-semibold hover:underline" target="_blank">
-                {@job.title}
-              </.link>
-            </div>
-            <div :if={@job.description} class="pt-1 text-sm text-muted-foreground">
-              {@job.description}
-            </div>
-            <div class="pt-2 flex flex-wrap gap-2">
-              <%= for tech <- @job.tech_stack do %>
-                <.badge variant="outline">{tech}</.badge>
-              <% end %>
+            <div class="flex flex-col">
+              <div class="pt-4 flex gap-3">
+                <.social_share_button id="twitter-share-url" icon="tabler-brand-x" value={@share_url} />
+                <.social_share_button
+                  id="reddit-share-url"
+                  icon="tabler-brand-reddit"
+                  value={@share_url}
+                />
+                <.social_share_button
+                  id="linkedin-share-url"
+                  icon="tabler-brand-linkedin"
+                  value={@share_url}
+                />
+                <.social_share_button
+                  id="hackernews-share-url"
+                  icon="tabler-brand-ycombinator"
+                  value={@share_url}
+                />
+              </div>
+              <div class="relative aspect-[1200/630] max-w-[16rem] w-full rounded-lg ring-1 ring-input bg-black">
+                <img
+                  src={~p"/og/#{@current_org.handle}/jobs/#{@job.id}"}
+                  alt={@job.title}
+                  class="object-cover"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </.card>
       </.section>
 
-      <div :if={@current_user_role in [:admin, :mod]}>
-        <div class="flex items-center gap-4 mb-8">
-          <%= for {tab, label} <- [
+      <%= if @current_user_role in [:admin, :mod] do %>
+        <div>
+          <div class="flex items-center gap-4 mb-8">
+            <%= for {tab, label} <- [
             {"applicants", "Applicants"},
             {"imports", "Imports"},
             {"matches", "Matches"}
           ] do %>
-            <label class={[
-              "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
-              "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
-              "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-            ]}>
-              <input
-                type="radio"
-                name="tab"
-                value={tab}
-                checked={@current_tab == tab}
-                class="sr-only"
-                phx-click="change_tab"
-                phx-value-tab={tab}
-              />
-              <span class="flex items-center gap-2">
-                <span class="text-sm font-medium">{label}</span>
-                <.icon
-                  name="tabler-check"
-                  class="invisible size-4 text-primary group-has-[:checked]:visible"
+              <label class={[
+                "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
+                "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+              ]}>
+                <input
+                  type="radio"
+                  name="tab"
+                  value={tab}
+                  checked={@current_tab == tab}
+                  class="sr-only"
+                  phx-click="change_tab"
+                  phx-value-tab={tab}
                 />
-              </span>
-            </label>
-          <% end %>
-        </div>
-
-        <%= case @current_tab do %>
-          <% "applicants" -> %>
-            <.section title="Applicants" subtitle="Developers who applied for this position">
-              <:actions>
-                <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
-                  Import
-                </.button>
-                <.button variant="default">
-                  Screen
-                </.button>
-              </:actions>
-              <%= if Enum.empty?(@applicants) do %>
-                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                  <.card_header>
-                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <.card_title>No applicants yet</.card_title>
-                    <.card_description>
-                      Share your job posting with your network
-                      <div class="flex flex-col items-center justify-center">
-                        <div class="pt-4 flex gap-3">
-                          <.social_share_button
-                            id="twitter-share-url"
-                            icon="tabler-brand-x"
-                            value={@share_url}
-                          />
-                          <.social_share_button
-                            id="reddit-share-url"
-                            icon="tabler-brand-reddit"
-                            value={@share_url}
-                          />
-                          <.social_share_button
-                            id="linkedin-share-url"
-                            icon="tabler-brand-linkedin"
-                            value={@share_url}
-                          />
-                          <.social_share_button
-                            id="hackernews-share-url"
-                            icon="tabler-brand-ycombinator"
-                            value={@share_url}
-                          />
-                        </div>
-                        <div class="relative aspect-[1200/630] max-w-[16rem] w-full rounded-lg ring-1 ring-input bg-black">
-                          <img
-                            src={~p"/og/#{@current_org.handle}/jobs/#{@job.id}"}
-                            alt={@job.title}
-                            class="object-cover"
-                            loading="lazy"
-                          />
-                        </div>
+                <span class="flex items-center gap-2">
+                  <span class="text-sm font-medium">{label}</span>
+                </span>
+              </label>
+            <% end %>
+          </div>
+          <%= case @current_tab do %>
+            <% "applicants" -> %>
+              <.section title="Applicants" subtitle="Developers who applied for this position">
+                <:actions>
+                  <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
+                    Import
+                  </.button>
+                  <.button variant="default">
+                    Screen
+                  </.button>
+                </:actions>
+                <%= if Enum.empty?(@applicants) do %>
+                  <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                    <.card_header>
+                      <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                        <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
                       </div>
-                    </.card_description>
-                  </.card_header>
-                </.card>
-              <% else %>
-                <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                  <%= for {application, index} <- Enum.with_index(@applicants) do %>
-                    <div class={
-                      if @current_org.hiring_subscription == :inactive && index >= 3,
-                        do: "filter blur-sm pointer-events-none"
-                    }>
-                      <.developer_card
-                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
-                        application={application}
-                        contributions={Map.get(@contributions_map, application.user.id, [])}
-                        contract_type={
-                          if(Enum.find(@matches, &(&1.user.id == application.user.id)),
-                            do: "marketplace",
-                            else: "bring_your_own"
-                          )
-                        }
+                      <.card_title>No applicants yet</.card_title>
+                      <.card_description>
+                        Share your job posting with your network
+                      </.card_description>
+                    </.card_header>
+                  </.card>
+                <% else %>
+                  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    <%= for {application, index} <- Enum.with_index(@applicants) do %>
+                      <div class={
+                        if @current_org.hiring_subscription == :inactive && index >= 3,
+                          do: "filter blur-sm pointer-events-none"
+                      }>
+                        <.developer_card
+                          tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                          application={application}
+                          contributions={Map.get(@contributions_map, application.user.id, [])}
+                          contract_type={
+                            if(Enum.find(@matches, &(&1.user.id == application.user.id)),
+                              do: "marketplace",
+                              else: "bring_your_own"
+                            )
+                          }
+                        />
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </.section>
+            <% "imports" -> %>
+              <.section title="Imports" subtitle="Import applicants from external sources">
+                <:actions>
+                  <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
+                    Import
+                  </.button>
+                </:actions>
+                <%= if Enum.empty?(@importing_users) do %>
+                  <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                    <.card_header>
+                      <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                        <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <.card_title>No imports yet</.card_title>
+                      <.card_description>
+                        Import applicants from external sources
+                      </.card_description>
+                    </.card_header>
+                  </.card>
+                <% else %>
+                  <div class="space-y-4">
+                    <.simple_form for={@import_form} phx-submit="submit_import" class="space-y-4">
+                      <.input
+                        type="textarea"
+                        field={@import_form[:github_urls]}
+                        placeholder={import_placeholder()}
+                        phx-change="parse_github_urls"
+                        phx-debounce="300"
                       />
-                    </div>
-                  <% end %>
-                </div>
-              <% end %>
-            </.section>
-          <% "imports" -> %>
-            <.section title="Imports" subtitle="Import applicants from external sources">
-              <:actions>
-                <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
-                  Import
-                </.button>
-              </:actions>
-              <%= if Enum.empty?(@importing_users) do %>
-                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                  <.card_header>
-                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <.card_title>No imports yet</.card_title>
-                    <.card_description>
-                      Import applicants from external sources
-                    </.card_description>
-                  </.card_header>
-                </.card>
-              <% else %>
-                <div class="space-y-4">
-                  <.simple_form for={@import_form} phx-submit="submit_import" class="space-y-4">
-                    <.input
-                      type="textarea"
-                      field={@import_form[:github_urls]}
-                      placeholder={import_placeholder()}
-                      phx-change="parse_github_urls"
-                      phx-debounce="300"
-                    />
 
-                    <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
-                      <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                        <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
-                        <span>
-                          Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
-                            status == :done
-                          end)}/{map_size(@importing_users)}
-                        </span>
-                      </div>
-                    <% else %>
-                      <%= if map_size(@importing_users) > 0 do %>
+                      <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
                         <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <.icon name="tabler-check" class="h-4 w-4" />
+                          <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
                           <span>
-                            Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                            Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
                               status == :done
                             end)}/{map_size(@importing_users)}
                           </span>
                         </div>
+                      <% else %>
+                        <%= if map_size(@importing_users) > 0 do %>
+                          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                            <.icon name="tabler-check" class="h-4 w-4" />
+                            <span>
+                              Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                                status == :done
+                              end)}/{map_size(@importing_users)}
+                            </span>
+                          </div>
+                        <% end %>
                       <% end %>
-                    <% end %>
 
-                    <div class="space-y-2">
-                      <%= for {handle, data} <- Enum.sort_by(@importing_users, fn {_, %{order: order}} -> order end) do %>
-                        <div class="flex items-center gap-2">
-                          <%= if data.status == :loading do %>
-                            <.avatar class="h-8 w-8">
-                              <.avatar_image src="/images/placeholder-avatar.png" />
-                              <.avatar_fallback>
-                                {handle}
-                              </.avatar_fallback>
-                            </.avatar>
-                            <span class="text-sm font-medium">{handle}</span>
-                          <% else %>
-                            <%= if data.user do %>
-                              <.link
-                                href={"https://github.com/#{data.user.provider_login}"}
-                                target="_blank"
-                                rel="noopener"
-                                class="flex items-center gap-2"
-                              >
-                                <.avatar class="h-8 w-8">
-                                  <.avatar_image src={data.user.avatar_url} />
-                                  <.avatar_fallback>
-                                    {Algora.Util.initials(data.user.name)}
-                                  </.avatar_fallback>
-                                </.avatar>
-                                <span class="text-sm font-medium">{data.user.name}</span>
-                                <span class="text-xs font-medium text-muted-foreground">
-                                  @{data.user.provider_login}
-                                </span>
-                              </.link>
-                            <% else %>
+                      <div class="space-y-2">
+                        <%= for {handle, data} <- Enum.sort_by(@importing_users, fn {_, %{order: order}} -> order end) do %>
+                          <div class="flex items-center gap-2">
+                            <%= if data.status == :loading do %>
                               <.avatar class="h-8 w-8">
-                                <.avatar_fallback>?</.avatar_fallback>
+                                <.avatar_image src="/images/placeholder-avatar.png" />
+                                <.avatar_fallback>
+                                  {handle}
+                                </.avatar_fallback>
                               </.avatar>
-                              <span class="text-sm text-destructive">Failed to load @{handle}</span>
+                              <span class="text-sm font-medium">{handle}</span>
+                            <% else %>
+                              <%= if data.user do %>
+                                <.link
+                                  href={"https://github.com/#{data.user.provider_login}"}
+                                  target="_blank"
+                                  rel="noopener"
+                                  class="flex items-center gap-2"
+                                >
+                                  <.avatar class="h-8 w-8">
+                                    <.avatar_image src={data.user.avatar_url} />
+                                    <.avatar_fallback>
+                                      {Algora.Util.initials(data.user.name)}
+                                    </.avatar_fallback>
+                                  </.avatar>
+                                  <span class="text-sm font-medium">{data.user.name}</span>
+                                  <span class="text-xs font-medium text-muted-foreground">
+                                    @{data.user.provider_login}
+                                  </span>
+                                </.link>
+                              <% else %>
+                                <.avatar class="h-8 w-8">
+                                  <.avatar_fallback>?</.avatar_fallback>
+                                </.avatar>
+                                <span class="text-sm text-destructive">Failed to load @{handle}</span>
+                              <% end %>
                             <% end %>
-                          <% end %>
-                        </div>
-                      <% end %>
-                    </div>
+                          </div>
+                        <% end %>
+                      </div>
 
-                    <:actions>
-                      <.button
-                        type="submit"
-                        disabled={
-                          Enum.empty?(@importing_users) ||
-                            Enum.any?(@importing_users, fn {_, %{status: status}} ->
-                              status == :loading
-                            end)
-                        }
-                      >
-                        Import
-                      </.button>
-                    </:actions>
-                  </.simple_form>
-                </div>
-              <% end %>
-            </.section>
-          <% "matches" -> %>
-            <.section title="Matches" subtitle="Top developers matching your requirements">
-              <:actions>
-                <.button>
-                  Invite all
-                </.button>
-              </:actions>
-              <%= if Enum.empty?(@matches) do %>
-                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                  <.card_header>
-                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <.card_title>No matches yet</.card_title>
-                    <.card_description>
-                      Matches will appear here once we find developers matching your requirements
-                    </.card_description>
-                  </.card_header>
-                </.card>
-              <% else %>
-                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <%= for {match, index} <- Enum.with_index(@matches) do %>
-                    <div class={
-                      if @current_org.hiring_subscription == :inactive && index != 0,
-                        do: "filter blur-sm pointer-events-none"
-                    }>
-                      <.match_card
-                        user={match.user}
-                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
-                        contributions={Map.get(@contributions_map, match.user.id, [])}
-                        contract_type={
-                          if(Enum.find(@matches, &(&1.user.id == match.user.id)),
-                            do: "marketplace",
-                            else: "bring_your_own"
-                          )
-                        }
-                      />
-                    </div>
-                  <% end %>
-                </div>
-              <% end %>
-            </.section>
-        <% end %>
+                      <:actions>
+                        <.button
+                          type="submit"
+                          disabled={
+                            Enum.empty?(@importing_users) ||
+                              Enum.any?(@importing_users, fn {_, %{status: status}} ->
+                                status == :loading
+                              end)
+                          }
+                        >
+                          Import
+                        </.button>
+                      </:actions>
+                    </.simple_form>
+                  </div>
+                <% end %>
+              </.section>
+            <% "matches" -> %>
+              <.section title="Matches" subtitle="Top developers matching your requirements">
+                <:actions>
+                  <.button>
+                    Invite all
+                  </.button>
+                </:actions>
+                <%= if Enum.empty?(@matches) do %>
+                  <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                    <.card_header>
+                      <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                        <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <.card_title>No matches yet</.card_title>
+                      <.card_description>
+                        Matches will appear here once we find developers matching your requirements
+                      </.card_description>
+                    </.card_header>
+                  </.card>
+                <% else %>
+                  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <%= for {match, index} <- Enum.with_index(@matches) do %>
+                      <div class={
+                        if @current_org.hiring_subscription == :inactive && index != 0,
+                          do: "filter blur-sm pointer-events-none"
+                      }>
+                        <.match_card
+                          user={match.user}
+                          tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                          contributions={Map.get(@contributions_map, match.user.id, [])}
+                          contract_type={
+                            if(Enum.find(@matches, &(&1.user.id == match.user.id)),
+                              do: "marketplace",
+                              else: "bring_your_own"
+                            )
+                          }
+                        />
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </.section>
+          <% end %>
+        </div>
 
         <.section :if={@current_org.hiring_subscription != :active}>
           <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
@@ -437,7 +433,7 @@ defmodule AlgoraWeb.Org.JobLive do
             </div>
           </div>
         </.section>
-      </div>
+      <% end %>
     </div>
 
     {share_drawer(assigns)}

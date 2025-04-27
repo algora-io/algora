@@ -36,7 +36,6 @@ defmodule AlgoraWeb.Org.JobLive do
         matches = Settings.get_org_matches(job.user)
         imported_applicants = []
         # TODO: Replace with actual subscription check
-        has_subscription = false
 
         {:ok,
          socket
@@ -46,7 +45,6 @@ defmodule AlgoraWeb.Org.JobLive do
          |> assign(:total_matches, length(matches))
          |> assign(:imported_applicants, imported_applicants)
          |> assign(:total_imported, length(imported_applicants))
-         |> assign(:has_subscription, has_subscription)
          |> assign(:show_import_drawer, false)
          |> assign(:show_share_drawer, false)
          |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
@@ -146,8 +144,11 @@ defmodule AlgoraWeb.Org.JobLive do
           </.card>
         <% else %>
           <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <%= for {application, _index} <- Enum.with_index(@applicants) do %>
-              <div>
+            <%= for {application, index} <- Enum.with_index(@applicants) do %>
+              <div class={
+                if @current_org.hiring_subscription == :inactive && index >= 3,
+                  do: "filter blur-sm pointer-events-none"
+              }>
                 <.developer_card
                   application={application}
                   contributions={Map.get(@contributions_map, application.user.id, [])}
@@ -190,7 +191,8 @@ defmodule AlgoraWeb.Org.JobLive do
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <%= for {match, index} <- Enum.with_index(@matches) do %>
               <div class={
-                if !@has_subscription && index != 0, do: "filter blur-sm pointer-events-none"
+                if @current_org.hiring_subscription == :inactive && index != 0,
+                  do: "filter blur-sm pointer-events-none"
               }>
                 <.match_card match={match} />
               </div>
@@ -199,7 +201,9 @@ defmodule AlgoraWeb.Org.JobLive do
         <% end %>
       </.section>
 
-      <.section :if={@current_user_role in [:admin, :mod]}>
+      <.section :if={
+        @current_user_role in [:admin, :mod] && @current_org.hiring_subscription != :active
+      }>
         <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
           <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
             <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">

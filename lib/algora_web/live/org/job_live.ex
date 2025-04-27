@@ -119,7 +119,11 @@ defmodule AlgoraWeb.Org.JobLive do
         </.card>
       </.section>
 
-      <.section title="Applicants" subtitle="Developers who applied for this position">
+      <.section
+        :if={@current_user_role in [:admin, :mod]}
+        title="Applicants"
+        subtitle="Developers who applied for this position"
+      >
         <:actions>
           <.button variant="secondary" class="ml-auto" phx-click="toggle_import_drawer">
             Import
@@ -160,7 +164,11 @@ defmodule AlgoraWeb.Org.JobLive do
         <% end %>
       </.section>
 
-      <.section title="Matches" subtitle="Top developers matching your requirements">
+      <.section
+        :if={@current_user_role in [:admin, :mod]}
+        title="Matches"
+        subtitle="Top developers matching your requirements"
+      >
         <:actions>
           <.button>
             Invite all
@@ -191,7 +199,7 @@ defmodule AlgoraWeb.Org.JobLive do
         <% end %>
       </.section>
 
-      <.section>
+      <.section :if={@current_user_role in [:admin, :mod]}>
         <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
           <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
             <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">

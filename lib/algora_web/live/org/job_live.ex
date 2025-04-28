@@ -43,6 +43,7 @@ defmodule AlgoraWeb.Org.JobLive do
          |> assign(:github_urls, "")
          # Map of github_handle => %{status: :loading/:done, user: nil/User}
          |> assign(:importing_users, %{})
+         |> assign(:loading_contribution_handle, nil)
          |> assign_applicants()}
 
       _ ->
@@ -211,6 +212,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         application={application}
                         contributions={Map.get(@contributions_map, application.user.id, [])}
                         contract_type="bring_your_own"
+                        loading_contribution_handle={@loading_contribution_handle}
                       />
                     </div>
                   <% end %>
@@ -251,6 +253,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         application={application}
                         contributions={Map.get(@contributions_map, application.user.id, [])}
                         contract_type="bring_your_own"
+                        loading_contribution_handle={@loading_contribution_handle}
                       />
                     </div>
                   <% end %>
@@ -505,6 +508,8 @@ defmodule AlgoraWeb.Org.JobLive do
     if Enum.any?(applicants_without_contributions) do
       Task.start(fn ->
         for handle <- applicants_without_contributions do
+          broadcast(socket.assigns.job, {:contributions_fetching, handle})
+
           with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
                :ok <- Algora.Admin.add_contributions(handle, contributions) do
             broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
@@ -514,9 +519,11 @@ defmodule AlgoraWeb.Org.JobLive do
               broadcast(socket.assigns.job, {:contributions_failed, handle})
           end
         end
+
+        broadcast(socket.assigns.job, {:contributions_fetched_all})
       end)
 
-      {:noreply, put_flash(socket, :info, "Screening applicants... This may take a few moments.")}
+      {:noreply, socket}
     else
       {:noreply, put_flash(socket, :info, "All applicants have already been screened.")}
     end
@@ -698,6 +705,11 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
+  def handle_info({:contributions_fetching, handle}, socket) do
+    {:noreply, assign(socket, :loading_contribution_handle, handle)}
+  end
+
+  @impl true
   def handle_info({:contributions_fetched, handle, contributions}, socket) do
     if user = Enum.find(socket.assigns.developers, &(&1.provider_login == handle)) do
       {:noreply,
@@ -707,6 +719,11 @@ defmodule AlgoraWeb.Org.JobLive do
     else
       {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_info({:contributions_fetched_all}, socket) do
+    {:noreply, assign(socket, :loading_contribution_handle, nil)}
   end
 
   @impl true
@@ -851,55 +868,66 @@ defmodule AlgoraWeb.Org.JobLive do
           </.button>
         </div>
 
-        <div :if={@contributions != []} class="mt-4">
+        <div
+          :if={
+            @contributions != [] or @loading_contribution_handle == @application.user.provider_login
+          }
+          class="mt-4"
+        >
           <p class="text-xs text-muted-foreground uppercase font-semibold">
             Top contributions
           </p>
           <div class="flex flex-col gap-3 mt-2">
-            <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
-              <.link
-                href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@application.user.provider_login}+is%3Amerged+"}
-                target="_blank"
-                rel="noopener"
-                class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
-              >
-                <img
-                  src={owner.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
-                  alt={owner.name}
-                />
-                <div class="w-full flex flex-col text-xs font-medium gap-0.5">
-                  <span class="flex items-start justify-between gap-5">
-                    <span class="font-display">
-                      {if owner.type == :organization do
-                        owner.name
-                      else
-                        List.first(contributions).repository.name
-                      end}
-                    </span>
-                    <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
-                      <span class="flex items-center text-foreground text-[11px] gap-1">
-                        <img
-                          src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
-                          class="w-4 h-4 invert saturate-0"
-                        /> {tech}
+            <%= if @loading_contribution_handle == @application.user.provider_login do %>
+              <%= for _ <- 1..3 do %>
+                <div class="h-[50px] animate-pulse rounded-xl bg-muted/50 border border-border/50" />
+              <% end %>
+            <% else %>
+              <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
+                <.link
+                  href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@application.user.provider_login}+is%3Amerged+"}
+                  target="_blank"
+                  rel="noopener"
+                  class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+                >
+                  <img
+                    src={owner.avatar_url}
+                    class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
+                    alt={owner.name}
+                  />
+                  <div class="w-full flex flex-col text-xs font-medium gap-0.5">
+                    <span class="flex items-start justify-between gap-5">
+                      <span class="font-display">
+                        {if owner.type == :organization do
+                          owner.name
+                        else
+                          List.first(contributions).repository.name
+                        end}
                       </span>
-                    <% end %>
-                  </span>
-                  <div class="flex items-center gap-2 font-semibold">
-                    <span class="flex items-center text-amber-300 text-xs">
-                      <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
-                      {Algora.Util.format_number_compact(
-                        max(owner.stargazers_count, total_stars(contributions))
-                      )}
+                      <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
+                        <span class="flex items-center text-foreground text-[11px] gap-1">
+                          <img
+                            src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
+                            class="w-4 h-4 invert saturate-0"
+                          /> {tech}
+                        </span>
+                      <% end %>
                     </span>
-                    <span class="flex items-center text-purple-400 text-xs">
-                      <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
-                      {Algora.Util.format_number_compact(total_contributions(contributions))}
-                    </span>
+                    <div class="flex items-center gap-2 font-semibold">
+                      <span class="flex items-center text-amber-300 text-xs">
+                        <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
+                        {Algora.Util.format_number_compact(
+                          max(owner.stargazers_count, total_stars(contributions))
+                        )}
+                      </span>
+                      <span class="flex items-center text-purple-400 text-xs">
+                        <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
+                        {Algora.Util.format_number_compact(total_contributions(contributions))}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </.link>
+                </.link>
+              <% end %>
             <% end %>
           </div>
         </div>

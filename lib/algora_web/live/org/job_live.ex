@@ -503,9 +503,7 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def handle_event("screen_applicants", _, socket) do
     applicants_without_contributions =
-      socket.assigns.developers
-      |> Enum.filter(&(socket.assigns.contributions_map |> Map.get(&1.id, []) |> Enum.empty?()))
-      |> Enum.map(& &1.provider_login)
+      Enum.filter(socket.assigns.developers, &(socket.assigns.contributions_map |> Map.get(&1.id, []) |> Enum.empty?()))
 
     socket = enqueue_screening(socket, applicants_without_contributions)
 
@@ -1049,7 +1047,7 @@ defmodule AlgoraWeb.Org.JobLive do
               >
                 <img
                   src={owner.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
+                  class="h-12 w-12 rounded-xl rounded-r-none xmd:saturate-0 group-hover:saturate-100 transition-all"
                   alt={owner.name}
                 />
                 <div class="w-full flex flex-col text-xs font-medium gap-0.5">

@@ -2,6 +2,7 @@ defmodule AlgoraWeb.JobsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import AlgoraWeb.Components.ModalVideo
   import Ecto.Changeset
 
   alias Algora.Accounts
@@ -225,13 +226,10 @@ defmodule AlgoraWeb.JobsLive do
                       <.button
                         class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem] w-full"
                         size="xl"
-                        phx-disable-with="Processing..."
+                        href={AlgoraWeb.Constants.get(:calendar_url)}
                       >
                         <div class="flex flex-col items-center gap-1 font-semibold">
                           <span>Activate subscription</span>
-                          <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                            {Jobs.price()} /mo
-                          </dd>
                         </div>
                       </.button>
                       <div>
@@ -263,6 +261,27 @@ defmodule AlgoraWeb.JobsLive do
             </div>
           </div>
         </.section>
+
+        <.section>
+          <%!-- <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
+            Auto-rank applicants for OSS contribution history
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Import and we'll do the rest
+          </p> --%>
+          <video
+            src={~p"/videos/import-applicants.mp4"}
+            autoplay
+            loop
+            muted
+            playsinline
+            class="mt-8 w-full h-full object-cover max-w-4xl mx-auto border border-border rounded-xl"
+            speed={2}
+            playbackspeed={2}
+          />
+        </.section>
+
+        <.cta_section />
       </div>
     </div>
     """
@@ -373,4 +392,72 @@ defmodule AlgoraWeb.JobsLive do
 
   defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
   defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
+
+  defp cta_section(assigns) do
+    ~H"""
+    <section class="relative isolate py-16 sm:py-40">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
+          Hire by building product
+        </h2>
+        <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+          Use bounties to evaluate developers based on actual contributions to your codebase.
+        </p>
+        <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6">
+          <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+            <div class="lg:col-span-6 order-first lg:order-last">
+              <.modal_video
+                class="aspect-[1200/630] rounded-xl lg:rounded-2xl lg:rounded-r-none"
+                src="https://www.youtube.com/embed/xObOGcUdtY0"
+                start={122}
+                title="$15,000 Open source bounty to hire a Rust engineer"
+                poster={~p"/images/people/john-de-goes-2.jpg"}
+                alt="John A De Goes"
+              />
+              <.modal_video_dialog />
+            </div>
+            <div class="lg:col-span-6 order-last lg:order-first">
+              <h3 class="text-xl sm:text-2xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                After a few decades of actively hiring engineers, what I found out is, a lot of times people who are very active in open source software, those engineers make fantastic additions to your team
+              </h3>
+              <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-6">
+                <div class="flex items-center gap-4">
+                  <div>
+                    <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                      John A De Goes
+                    </div>
+                    <div class="sm:pt-2 text-sm sm:text-lg font-medium text-muted-foreground">
+                      Founder &amp; CEO at Golem Cloud
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mx-auto mt-16 max-w-4xl gap-8 text-sm leading-6">
+          <div class="flex gap-4 sm:gap-8">
+            <div>
+              <a
+                href="https://github.com/golemcloud/golem/issues/1004"
+                target="_blank"
+                rel="noopener"
+                class="relative flex aspect-[1369/641] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
+                data-phx-id="m50-phx-GDqOYd-JM6dzJeWB"
+              >
+                <img
+                  src="/images/screenshots/bounty-to-hire-merged.png"
+                  alt="Golem bounty to hire"
+                  class="object-cover"
+                  loading="lazy"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    """
+  end
 end

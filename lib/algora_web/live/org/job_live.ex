@@ -222,11 +222,8 @@ defmodule AlgoraWeb.Org.JobLive do
           <% "imports" -> %>
             <.section title="Imports" subtitle="Import applicants from external sources">
               <:actions>
-                <.button variant="secondary" phx-click="toggle_import_drawer">
+                <.button variant="default" phx-click="toggle_import_drawer">
                   Import
-                </.button>
-                <.button variant="default" phx-click="screen_applicants">
-                  Screen
                 </.button>
               </:actions>
               <%= if Enum.empty?(@imports) do %>
@@ -281,17 +278,25 @@ defmodule AlgoraWeb.Org.JobLive do
                 </.card>
               <% else %>
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <%= for {match, index} <- Enum.with_index(@matches) do %>
-                    <div class={
-                      if @current_org.hiring_subscription == :inactive && index != 0,
-                        do: "filter blur-sm pointer-events-none"
-                    }>
+                  <%= for match <- @matches |> Enum.take(if @current_org.hiring_subscription == :active, do: length(@matches), else: 3) do %>
+                    <div>
                       <.match_card
                         user={match.user}
                         tech_stack={@current_org.tech_stack |> Enum.take(1)}
                         contributions={Map.get(@contributions_map, match.user.id, [])}
                         contract_type="bring_your_own"
                       />
+                    </div>
+                  <% end %>
+                  <%= if @current_org.hiring_subscription != :active do %>
+                    <div class="relative col-span-3">
+                      <img
+                        src={~p"/images/screenshots/job-matches.png"}
+                        class="w-full aspect-[1368/398]"
+                      />
+                      <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-4xl">
+                        + {length(@matches) - 3} more matches
+                      </div>
                     </div>
                   <% end %>
                 </div>
@@ -355,16 +360,13 @@ defmodule AlgoraWeb.Org.JobLive do
               </div>
               <div class="flex flex-col justify-center items-center text-center">
                 <.button
-                  phx-click="activate_subscription"
+                  href={AlgoraWeb.Constants.get(:calendar_url)}
                   variant="none"
                   class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
                   size="xl"
                 >
                   <div class="flex flex-col items-center gap-1 font-semibold">
                     <span>Activate subscription</span>
-                    <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                      {Jobs.price()} /mo
-                    </dd>
                   </div>
                 </.button>
               </div>
@@ -738,20 +740,25 @@ defmodule AlgoraWeb.Org.JobLive do
 
     if Enum.any?(users_without_contributions) do
       Task.start(fn ->
-        for handle <- users_without_contributions do
-          broadcast(socket.assigns.job, {:contributions_fetching, handle})
+        users_without_contributions
+        |> Task.async_stream(
+          fn handle ->
+            broadcast(socket.assigns.job, {:contributions_fetching, handle})
 
-          with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
-               :ok <- Algora.Admin.add_contributions(handle, contributions) do
-            broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
-          else
-            {:error, reason} ->
-              Logger.error("Failed to fetch contributions for #{handle}: #{inspect(reason)}")
-              broadcast(socket.assigns.job, {:contributions_failed, handle})
-          end
-        end
-
-        broadcast(socket.assigns.job, {:contributions_fetched_all})
+            with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
+                 :ok <- Algora.Admin.add_contributions(handle, contributions) do
+              broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
+            else
+              {:error, reason} ->
+                Logger.error("Failed to fetch contributions for #{handle}: #{inspect(reason)}")
+                broadcast(socket.assigns.job, {:contributions_failed, handle})
+            end
+          end,
+          timeout: length(users_without_contributions) * 10_000,
+          max_concurrency: 3,
+          ordered: true
+        )
+        |> Stream.run()
       end)
 
       socket
@@ -879,17 +886,12 @@ defmodule AlgoraWeb.Org.JobLive do
           </.button>
         </div>
 
-        <div
-          :if={
-            @contributions != [] or @loading_contribution_handle == @application.user.provider_login
-          }
-          class="mt-4"
-        >
+        <div :if={@contributions != [] or not is_nil(@loading_contribution_handle)} class="mt-4">
           <p class="text-xs text-muted-foreground uppercase font-semibold">
             Top contributions
           </p>
           <div class="flex flex-col gap-3 mt-2">
-            <%= if @loading_contribution_handle == @application.user.provider_login do %>
+            <%= if @contributions == [] do %>
               <%= for _ <- 1..3 do %>
                 <div class="h-[50px] animate-pulse rounded-xl bg-muted/50 border border-border/50" />
               <% end %>
@@ -903,7 +905,12 @@ defmodule AlgoraWeb.Org.JobLive do
                 >
                   <img
                     src={owner.avatar_url}
-                    class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
+                    class={
+                      classes([
+                        "h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all",
+                        if(is_nil(@loading_contribution_handle), do: "md:saturate-0")
+                      ])
+                    }
                     alt={owner.name}
                   />
                   <div class="w-full flex flex-col text-xs font-medium gap-0.5">

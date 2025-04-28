@@ -442,10 +442,10 @@ defmodule AlgoraWeb.Org.JobLive do
                         <.avatar class="h-8 w-8">
                           <.avatar_image src={data.user.avatar_url} />
                           <.avatar_fallback>
-                            {Algora.Util.initials(data.user.name)}
+                            {Algora.Util.initials(data.user.name || data.user.handle)}
                           </.avatar_fallback>
                         </.avatar>
-                        <span class="text-sm font-medium">{data.user.name}</span>
+                        <span class="text-sm font-medium">{data.user.name || data.user.handle}</span>
                         <span class="text-xs font-medium text-muted-foreground">
                           @{data.user.provider_login}
                         </span>
@@ -505,28 +505,9 @@ defmodule AlgoraWeb.Org.JobLive do
       |> Enum.filter(&(socket.assigns.contributions_map |> Map.get(&1.id, []) |> Enum.empty?()))
       |> Enum.map(& &1.provider_login)
 
-    if Enum.any?(applicants_without_contributions) do
-      Task.start(fn ->
-        for handle <- applicants_without_contributions do
-          broadcast(socket.assigns.job, {:contributions_fetching, handle})
+    socket = enqueue_screening(socket, applicants_without_contributions)
 
-          with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
-               :ok <- Algora.Admin.add_contributions(handle, contributions) do
-            broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
-          else
-            {:error, reason} ->
-              Logger.error("Failed to fetch contributions for #{handle}: #{inspect(reason)}")
-              broadcast(socket.assigns.job, {:contributions_failed, handle})
-          end
-        end
-
-        broadcast(socket.assigns.job, {:contributions_fetched_all})
-      end)
-
-      {:noreply, socket}
-    else
-      {:noreply, put_flash(socket, :info, "All applicants have already been screened.")}
-    end
+    {:noreply, socket}
   end
 
   @impl true
@@ -558,28 +539,28 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def handle_event("submit_import", _, socket) do
     # Create applications for all successfully imported users in original order
-    results =
+    applicants =
       socket.assigns.importing_users
       |> Enum.sort_by(fn {_handle, %{order: order}} -> order end)
       |> Enum.filter(fn {_handle, %{status: status, user: user}} ->
         status == :done && not is_nil(user)
       end)
       # TODO: batch this
-      |> Enum.map(fn {_handle, %{user: user}} ->
-        Jobs.ensure_application(socket.assigns.job.id, user, %{imported_at: DateTime.utc_now()})
+      |> Enum.flat_map(fn {_handle, %{user: user}} ->
+        case Jobs.ensure_application(socket.assigns.job.id, user, %{imported_at: DateTime.utc_now()}) do
+          {:ok, _application} -> [user]
+          {:error, _} -> []
+        end
       end)
 
-    if Enum.all?(results, &match?({:ok, _}, &1)) do
-      {:noreply,
-       socket
-       |> push_patch(to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/imports")
-       |> put_flash(:info, "Successfully imported applicants")
-       |> assign(:show_import_drawer, false)
-       |> assign(:importing_users, %{})
-       |> assign_applicants()}
-    else
-      {:noreply, put_flash(socket, :error, "Failed to import some applicants")}
-    end
+    {:noreply,
+     socket
+     |> push_patch(to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/imports")
+     |> put_flash(:info, "Successfully imported applicants")
+     |> assign(:show_import_drawer, false)
+     |> assign(:importing_users, %{})
+     |> assign_applicants()
+     |> enqueue_screening(applicants)}
   end
 
   @impl true
@@ -747,6 +728,36 @@ defmodule AlgoraWeb.Org.JobLive do
     |> assign(:imports, sort_applicants_by_contributions(imports, contributions_map))
     |> assign(:matches, sort_applicants_by_contributions(matches, contributions_map))
     |> assign(:contributions_map, contributions_map)
+  end
+
+  defp enqueue_screening(socket, users) do
+    users_without_contributions =
+      users
+      |> Enum.filter(&(socket.assigns.contributions_map |> Map.get(&1.id, []) |> Enum.empty?()))
+      |> Enum.map(& &1.provider_login)
+
+    if Enum.any?(users_without_contributions) do
+      Task.start(fn ->
+        for handle <- users_without_contributions do
+          broadcast(socket.assigns.job, {:contributions_fetching, handle})
+
+          with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
+               :ok <- Algora.Admin.add_contributions(handle, contributions) do
+            broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
+          else
+            {:error, reason} ->
+              Logger.error("Failed to fetch contributions for #{handle}: #{inspect(reason)}")
+              broadcast(socket.assigns.job, {:contributions_failed, handle})
+          end
+        end
+
+        broadcast(socket.assigns.job, {:contributions_fetched_all})
+      end)
+
+      socket
+    else
+      put_flash(socket, :info, "All applicants have already been screened.")
+    end
   end
 
   defp extract_github_handle(url) do

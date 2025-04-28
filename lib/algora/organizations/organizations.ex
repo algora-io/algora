@@ -30,18 +30,21 @@ defmodule Algora.Organizations do
   def onboard_organization(params) do
     user = Repo.get_by(User, email: params.user.email)
 
+    domain = params.user.email |> String.split("@") |> List.last()
+
     org =
       case user do
         nil ->
-          nil
+          Repo.one(from o in User, where: o.domain == ^domain, limit: 1)
 
         user ->
           Repo.one(
             from o in User,
-              join: m in assoc(o, :members),
-              join: u in assoc(m, :user),
-              where: o.handle in ^generate_unique_org_handle_candidates(params.organization.handle),
-              where: u.id == ^user.id,
+              left_join: m in assoc(o, :members),
+              left_join: u in assoc(m, :user),
+              where:
+                o.domain == ^domain or
+                  (o.handle in ^generate_unique_org_handle_candidates(params.organization.handle) and u.id == ^user.id),
               limit: 1
           )
       end

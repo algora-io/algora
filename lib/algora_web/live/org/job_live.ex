@@ -12,10 +12,20 @@ defmodule AlgoraWeb.Org.JobLive do
 
   require Logger
 
+  defp subscribe(job) do
+    Phoenix.PubSub.subscribe(Algora.PubSub, "job:#{job.id}")
+  end
+
+  defp broadcast(job, event) do
+    Phoenix.PubSub.broadcast(Algora.PubSub, "job:#{job.id}", event)
+  end
+
   @impl true
   def mount(%{"org_handle" => handle, "id" => id, "tab" => tab}, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
+        if connected?(socket), do: subscribe(job)
+
         {:ok,
          socket
          |> assign(:share_url, url(~p"/#{handle}/jobs/"))
@@ -487,8 +497,29 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_event("screen_applicants", _, socket) do
-    Algora.Admin.alert("Screen applicants initiated", :info)
-    {:noreply, put_flash(socket, :info, "We'll email you when the screening is complete")}
+    applicants_without_contributions =
+      socket.assigns.developers
+      |> Enum.filter(&(socket.assigns.contributions_map |> Map.get(&1.id, []) |> Enum.empty?()))
+      |> Enum.map(& &1.provider_login)
+
+    if Enum.any?(applicants_without_contributions) do
+      Task.start(fn ->
+        for handle <- applicants_without_contributions do
+          with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
+               :ok <- Algora.Admin.add_contributions(handle, contributions) do
+            broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
+          else
+            {:error, reason} ->
+              Logger.error("Failed to fetch contributions for #{handle}: #{inspect(reason)}")
+              broadcast(socket.assigns.job, {:contributions_failed, handle})
+          end
+        end
+      end)
+
+      {:noreply, put_flash(socket, :info, "Screening applicants... This may take a few moments.")}
+    else
+      {:noreply, put_flash(socket, :info, "All applicants have already been screened.")}
+    end
   end
 
   @impl true
@@ -666,6 +697,23 @@ defmodule AlgoraWeb.Org.JobLive do
     end
   end
 
+  @impl true
+  def handle_info({:contributions_fetched, handle, contributions}, socket) do
+    if user = Enum.find(socket.assigns.developers, &(&1.provider_login == handle)) do
+      {:noreply,
+       socket
+       |> assign(:contributions_map, Map.put(socket.assigns.contributions_map, user.id, contributions))
+       |> assign_applicants()}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:contributions_failed, _handle}, socket) do
+    {:noreply, socket}
+  end
+
   defp assign_applicants(socket) do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
     applicants = Enum.reject(all_applicants, & &1.imported_at)
@@ -675,12 +723,6 @@ defmodule AlgoraWeb.Org.JobLive do
     developers = matches |> Enum.concat(all_applicants) |> Enum.map(& &1.user)
 
     contributions_map = fetch_applicants_contributions(developers, socket.assigns.current_org.tech_stack)
-
-    matches
-    |> sort_applicants_by_contributions(contributions_map)
-    |> Enum.each(fn applicant ->
-      IO.puts("#{applicant.user.provider_login}")
-    end)
 
     socket
     |> assign(:developers, developers)

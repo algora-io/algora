@@ -23,12 +23,26 @@ defmodule Algora.Admin do
   require Logger
 
   def add_contributions(handle, opts) do
-    {:ok, user} = Workspace.ensure_user(token!(), handle)
+    token = token()
 
-    for {repo_owner, repo_name, contribution_count} <- opts do
-      {:ok, repo} = Workspace.ensure_repository(token!(), repo_owner, repo_name)
-      {:ok, _tech_stack} = Workspace.ensure_repo_tech_stack(token!(), repo)
-      Algora.Workspace.upsert_user_contribution(user, repo, contribution_count)
+    case Workspace.ensure_user(token, handle) do
+      {:ok, user} ->
+        results =
+          Enum.map(opts, fn opts ->
+            with %{repo_name: repo_name, contribution_count: contribution_count} <- opts,
+                 [repo_owner, repo_name] <- String.split(repo_name, "/"),
+                 {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
+                 {:ok, _tech_stack} <- Workspace.ensure_repo_tech_stack(token, repo),
+                 {:ok, _contribution} <- Algora.Workspace.upsert_user_contribution(user, repo, contribution_count) do
+              :ok
+            end
+          end)
+
+        if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
+
+      {:error, reason} ->
+        Logger.error("Failed to add contributions for #{handle}: #{inspect(reason)}")
+        {:error, reason}
     end
   end
 

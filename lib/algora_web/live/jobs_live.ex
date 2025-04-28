@@ -141,8 +141,8 @@ defmodule AlgoraWeb.JobsLive do
         <.section class="pt-12">
           <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
             <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-              <div class="grid md:grid-cols-2 gap-8 p-4 sm:p-6">
-                <div>
+              <div class="flex flex-col md:flex-row gap-8 p-4 sm:p-6">
+                <div class="flex-1">
                   <h3 class="text-3xl font-semibold text-foreground">
                     <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
                       Hire top talent
@@ -150,7 +150,7 @@ defmodule AlgoraWeb.JobsLive do
                     on auto-pilot
                   </h3>
                   <ul class="space-y-3 mt-4 text-base">
-                    <li class="flex items-center gap-2">
+                    <li class="flex items-start md:items-center gap-2">
                       <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
                         <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />
                       </div>
@@ -159,7 +159,7 @@ defmodule AlgoraWeb.JobsLive do
                         with unlimited job postings
                       </span>
                     </li>
-                    <li class="flex items-center gap-2">
+                    <li class="flex items-start md:items-center gap-2">
                       <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
                         <.icon name="tabler-lock-open" class="h-5 w-5 text-success-300" />
                       </div>
@@ -168,7 +168,7 @@ defmodule AlgoraWeb.JobsLive do
                         matching your preferences
                       </span>
                     </li>
-                    <li class="flex items-center gap-2">
+                    <li class="flex items-start md:items-center gap-2">
                       <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
                         <.icon name="tabler-wand" class="h-5 w-5 text-success-300" />
                       </div>
@@ -177,7 +177,7 @@ defmodule AlgoraWeb.JobsLive do
                         for OSS contribution history
                       </span>
                     </li>
-                    <li class="flex items-center gap-2">
+                    <li class="flex items-start md:items-center gap-2">
                       <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
                         <.icon name="tabler-currency-dollar" class="h-5 w-5 text-success-300" />
                       </div>
@@ -187,15 +187,27 @@ defmodule AlgoraWeb.JobsLive do
                       </span>
                     </li>
                   </ul>
+                  <%!-- <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]"> --%>
+                  <div class="my-auto pt-8">
+                    <img
+                      alt="Algora dashboard"
+                      width="1200"
+                      height="630"
+                      loading="lazy"
+                      class="my-auto border border-border rounded-lg [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
+                      src={~p"/images/screenshots/job.png"}
+                    />
+                  </div>
+                  <%!-- </div> --%>
                 </div>
-                <div class="flex flex-col justify-center items-center">
+                <div class="flex-1 flex flex-col justify-center items-center">
                   <.simple_form
                     for={@form}
                     phx-change="validate_job"
                     phx-submit="create_job"
                     class="w-full space-y-6"
                   >
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4">
                       <.input
                         field={@form[:email]}
                         label="Email"
@@ -210,6 +222,18 @@ defmodule AlgoraWeb.JobsLive do
                     </div>
 
                     <div class="flex flex-col items-center gap-4">
+                      <.button
+                        class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem] w-full"
+                        size="xl"
+                        phx-disable-with="Processing..."
+                      >
+                        <div class="flex flex-col items-center gap-1 font-semibold">
+                          <span>Activate subscription</span>
+                          <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
+                            {Jobs.price()} /mo
+                          </dd>
+                        </div>
+                      </.button>
                       <div>
                         <div
                           :if={
@@ -232,18 +256,6 @@ defmodule AlgoraWeb.JobsLive do
                           </div>
                         </div>
                       </div>
-                      <.button
-                        class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem] w-full"
-                        size="xl"
-                        phx-disable-with="Processing..."
-                      >
-                        <div class="flex flex-col items-center gap-1 font-semibold">
-                          <span>Activate subscription</span>
-                          <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                            {Jobs.price()} /mo
-                          </dd>
-                        </div>
-                      </.button>
                     </div>
                   </.simple_form>
                 </div>

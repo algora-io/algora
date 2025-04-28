@@ -14,7 +14,6 @@ defmodule AlgoraWeb.Org.JobsLive do
   @impl true
   def mount(_params, _session, socket) do
     # Group jobs by user
-    dbg(socket.assigns.current_org)
     jobs_by_user = Enum.group_by(Jobs.list_jobs(user_id: socket.assigns.current_org.id), & &1.user)
     changeset = JobPosting.changeset(%JobPosting{}, %{})
 

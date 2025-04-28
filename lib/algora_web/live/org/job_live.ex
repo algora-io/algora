@@ -1118,7 +1118,19 @@ defmodule AlgoraWeb.Org.JobLive do
 
   # Sort applicants by their total number of contributions
   defp sort_applicants_by_contributions(applicants, contributions_map) do
-    Enum.sort_by(applicants, fn application -> length(Map.get(contributions_map, application.user.id, [])) end, :desc)
+    Enum.sort_by(
+      applicants,
+      fn application ->
+        contributions = Map.get(contributions_map, application.user.id, [])
+
+        Enum.reduce(contributions, 0, fn contribution, acc ->
+          stars = contribution.repository.stargazers_count
+          contribution_count = contribution.contribution_count
+          acc + :math.log(stars + 1) * contribution_count * 100
+        end)
+      end,
+      :desc
+    )
   end
 
   defp aggregate_contributions(contributions) do

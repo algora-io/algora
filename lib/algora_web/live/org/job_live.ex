@@ -395,27 +395,40 @@ defmodule AlgoraWeb.Org.JobLive do
               phx-debounce="300"
             />
 
-            <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
-              <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
-                <span>
-                  Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
-                    status == :done
-                  end)}/{map_size(@importing_users)}
-                </span>
-              </div>
-            <% else %>
-              <%= if map_size(@importing_users) > 0 do %>
+            <div class="flex justify-between items-center">
+              <%= if Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end) do %>
                 <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                  <.icon name="tabler-check" class="h-4 w-4" />
+                  <.icon name="tabler-loader-2" class="h-4 w-4 animate-spin" />
                   <span>
-                    Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                    Loading users {Enum.count(@importing_users, fn {_, %{status: status}} ->
                       status == :done
                     end)}/{map_size(@importing_users)}
                   </span>
                 </div>
+              <% else %>
+                <%= if map_size(@importing_users) > 0 do %>
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <.icon name="tabler-check" class="h-4 w-4" />
+                    <span>
+                      Loaded users {Enum.count(@importing_users, fn {_, %{status: status}} ->
+                        status == :done
+                      end)}/{map_size(@importing_users)}
+                    </span>
+                  </div>
+                <% end %>
               <% end %>
-            <% end %>
+
+              <.button
+                type="submit"
+                class="ml-auto"
+                disabled={
+                  Enum.empty?(@importing_users) ||
+                    Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end)
+                }
+              >
+                Import
+              </.button>
+            </div>
 
             <div
               :if={map_size(@importing_users) > 0}
@@ -460,19 +473,6 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
               <% end %>
             </div>
-
-            <:actions>
-              <.button
-                type="submit"
-                class="ml-auto"
-                disabled={
-                  Enum.empty?(@importing_users) ||
-                    Enum.any?(@importing_users, fn {_, %{status: status}} -> status == :loading end)
-                }
-              >
-                Import
-              </.button>
-            </:actions>
           </.simple_form>
         </div>
       </.drawer_content>

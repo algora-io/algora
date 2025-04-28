@@ -375,7 +375,10 @@ defmodule AlgoraWeb.ContractLive do
               </div>
             </.card_content>
           </.card>
-          <.card :if={length(@transactions) == 0 and @can_create_bounty}>
+          <.card :if={
+            length(@transactions) == 0 and @can_create_bounty and
+              @bounty.contract_type == :marketplace
+          }>
             <.card_header>
               <.card_title>
                 Finalize offer

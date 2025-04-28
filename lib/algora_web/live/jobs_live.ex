@@ -142,128 +142,6 @@ defmodule AlgoraWeb.JobsLive do
         <.section class="pt-24">
           <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
             <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
-              Hire the best
-            </span>
-            <br />using open source
-          </h2>
-          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Source, screen, interview and onboard with Algora.<br />
-            Guarantee role fit and job performance.
-          </p>
-          <ul class="space-y-3 mt-4 text-xl grid grid-cols-1 md:grid-cols-2 gap-4">
-            <li class="flex items-center gap-4">
-              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
-                <.icon name="tabler-speakerphone" class="size-8 text-success-300" />
-              </div>
-              <span>
-                <span class="font-semibold text-success-300">Reach 50K+ devs</span>
-                <br class="md:hidden" /> with unlimited job postings
-              </span>
-            </li>
-            <li class="flex items-center gap-4">
-              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
-                <.icon name="tabler-lock-open" class="size-8 text-success-300" />
-              </div>
-              <span>
-                <span class="font-semibold text-success-300">Access top 1% users</span>
-                <br class="md:hidden" /> matching your preferences
-              </span>
-            </li>
-            <li class="flex items-center gap-4">
-              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
-                <.icon name="tabler-wand" class="size-8 text-success-300" />
-              </div>
-              <span>
-                <span class="font-semibold text-success-300">Auto-rank applicants</span>
-                <br class="md:hidden" /> for OSS contribution history
-              </span>
-            </li>
-            <li class="flex items-center gap-4">
-              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
-                <.icon name="tabler-currency-dollar" class="size-8 text-success-300" />
-              </div>
-              <span>
-                <span class="font-semibold text-success-300">Trial top candidates</span>
-                <br class="md:hidden" /> using contracts and bounties
-              </span>
-            </li>
-          </ul>
-        </.section>
-
-        <.section class="pt-12">
-          <div class="max-w-2xl mx-auto border ring-1 ring-transparent rounded-xl overflow-hidden">
-            <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-              <div class="flex flex-col md:flex-row gap-8 p-4 sm:p-6">
-                <div class="flex-1 flex flex-col justify-center items-center">
-                  <.simple_form
-                    for={@form}
-                    phx-change="validate_job"
-                    phx-submit="create_job"
-                    class="w-full space-y-6"
-                  >
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <.input
-                        id="final_section_email"
-                        field={@form[:email]}
-                        label="Email"
-                        data-domain-target
-                        phx-hook="DeriveDomain"
-                        phx-change="email_changed"
-                        phx-debounce="300"
-                      />
-                      <.input id="final_section_url" field={@form[:url]} label="Job Posting URL" />
-                      <.input
-                        id="final_section_company_url"
-                        field={@form[:company_url]}
-                        label="Company URL"
-                        data-domain-source
-                      />
-                      <.input
-                        id="final_section_company_name"
-                        field={@form[:company_name]}
-                        label="Company Name"
-                      />
-                    </div>
-
-                    <div class="flex flex-col items-center gap-4">
-                      <.button size="xl" class="w-full">
-                        <div class="flex flex-col items-center gap-1 font-semibold">
-                          <span>Hire now</span>
-                        </div>
-                      </.button>
-                      <div>
-                        <div
-                          :if={
-                            @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
-                          }
-                          class="flex items-center gap-3"
-                        >
-                          <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
-                            <img src={logo} class="h-16 w-16 rounded-2xl" />
-                          <% end %>
-                          <div>
-                            <div class="text-lg text-foreground font-bold font-display line-clamp-1">
-                              {get_change(@form.source, :company_name)}
-                            </div>
-                            <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
-                              <div class="text-sm text-muted-foreground line-clamp-1">
-                                {description}
-                              </div>
-                            <% end %>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </.simple_form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.section>
-
-        <.section class="pt-24">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
-            <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
               Autopilot screening
             </span>
             <br />for OSS contribution<span class="md:hidden">s</span>
@@ -293,7 +171,7 @@ defmodule AlgoraWeb.JobsLive do
             <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">invite top matches</span>
           </h2>
           <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Access your matches from Algora userbase based on your tech stack and preferences.
+            Access your top matches from Algora based on your tech stack and preferences
           </p>
 
           <img
@@ -464,7 +342,58 @@ defmodule AlgoraWeb.JobsLive do
           </section>
         </.section>
 
-        <.section class="pt-24 pb-20">
+        <.section class="pt-24">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
+              Hire the best
+            </span>
+            <br />using open source
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Source, screen, interview and onboard with Algora.<br />
+            Guarantee role fit and job performance.
+          </p>
+          <ul class="space-y-3 mt-4 text-xl grid grid-cols-1 md:grid-cols-2 gap-4">
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-speakerphone" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Reach 50K+ devs</span>
+                <br class="md:hidden" /> with unlimited job postings
+              </span>
+            </li>
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-lock-open" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Access top 1% users</span>
+                <br class="md:hidden" /> matching your preferences
+              </span>
+            </li>
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-wand" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Auto-rank applicants</span>
+                <br class="md:hidden" /> for OSS contribution history
+              </span>
+            </li>
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-currency-dollar" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Trial top candidates</span>
+                <br class="md:hidden" /> using contracts and bounties
+              </span>
+            </li>
+          </ul>
+        </.section>
+
+        <.section class="pt-12 pb-20">
           <div class="max-w-2xl mx-auto border ring-1 ring-transparent rounded-xl overflow-hidden">
             <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
               <div class="flex flex-col md:flex-row gap-8 p-4 sm:p-6">
@@ -477,6 +406,7 @@ defmodule AlgoraWeb.JobsLive do
                   >
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <.input
+                        id="final_section_email"
                         field={@form[:email]}
                         label="Email"
                         data-domain-target
@@ -484,9 +414,18 @@ defmodule AlgoraWeb.JobsLive do
                         phx-change="email_changed"
                         phx-debounce="300"
                       />
-                      <.input field={@form[:url]} label="Job Posting URL" />
-                      <.input field={@form[:company_url]} label="Company URL" data-domain-source />
-                      <.input field={@form[:company_name]} label="Company Name" />
+                      <.input id="final_section_url" field={@form[:url]} label="Job Posting URL" />
+                      <.input
+                        id="final_section_company_url"
+                        field={@form[:company_url]}
+                        label="Company URL"
+                        data-domain-source
+                      />
+                      <.input
+                        id="final_section_company_name"
+                        field={@form[:company_name]}
+                        label="Company Name"
+                      />
                     </div>
 
                     <div class="flex flex-col items-center gap-4">

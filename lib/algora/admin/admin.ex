@@ -31,6 +31,7 @@ defmodule Algora.Admin do
           Enum.map(opts, fn opts ->
             with %{repo_name: repo_name, contribution_count: contribution_count} <- opts,
                  [repo_owner, repo_name] <- String.split(repo_name, "/"),
+                 dbg("fetching repo #{repo_owner}/#{repo_name}"),
                  {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
                  {:ok, _tech_stack} <- Workspace.ensure_repo_tech_stack(token, repo),
                  {:ok, _contribution} <- Algora.Workspace.upsert_user_contribution(user, repo, contribution_count) do

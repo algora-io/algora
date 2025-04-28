@@ -57,6 +57,12 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
+  def handle_params(%{"tab" => "activate", "org_handle" => handle, "id" => id}, _uri, socket) do
+    Algora.Admin.alert("Activation request received for #{AlgoraWeb.Endpoint.url()}/#{handle}/jobs/#{id}", :info)
+    {:noreply, redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))}
+  end
+
+  @impl true
   def handle_params(%{"tab" => tab}, _uri, socket) do
     {:noreply, assign(socket, :current_tab, tab)}
   end
@@ -202,13 +208,10 @@ defmodule AlgoraWeb.Org.JobLive do
                 </.card>
               <% else %>
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                  <%= for {application, index} <- Enum.with_index(@applicants) do %>
-                    <div class={
-                      if @current_org.hiring_subscription == :inactive && index >= 3,
-                        do: "filter blur-sm pointer-events-none"
-                    }>
+                  <%= for application <- @applicants do %>
+                    <div>
                       <.developer_card
-                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        tech_stack={@job.tech_stack |> Enum.take(1)}
                         application={application}
                         contributions={Map.get(@contributions_map, application.user.id, [])}
                         contract_type="bring_your_own"
@@ -246,7 +249,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         do: "filter blur-sm pointer-events-none"
                     }>
                       <.developer_card
-                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        tech_stack={@job.tech_stack |> Enum.take(1)}
                         application={application}
                         contributions={Map.get(@contributions_map, application.user.id, [])}
                         contract_type="bring_your_own"
@@ -260,8 +263,8 @@ defmodule AlgoraWeb.Org.JobLive do
           <% "matches" -> %>
             <.section title="Matches" subtitle="Top developers matching your requirements">
               <:actions>
-                <.button>
-                  Invite all
+                <.button variant="default" phx-click="screen_applicants">
+                  Screen
                 </.button>
               </:actions>
               <%= if Enum.empty?(@matches) do %>
@@ -282,7 +285,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     <div>
                       <.match_card
                         user={match.user}
-                        tech_stack={@current_org.tech_stack |> Enum.take(1)}
+                        tech_stack={@job.tech_stack |> Enum.take(1)}
                         contributions={Map.get(@contributions_map, match.user.id, [])}
                         contract_type="bring_your_own"
                       />
@@ -343,7 +346,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         Auto-rank applicants
                       </span>
                       for {if tech =
-                                List.first(@current_org.tech_stack),
+                                List.first(@job.tech_stack),
                               do: String.capitalize(tech)} OSS contribution history
                     </span>
                   </li>
@@ -360,7 +363,7 @@ defmodule AlgoraWeb.Org.JobLive do
               </div>
               <div class="flex flex-col justify-center items-center text-center">
                 <.button
-                  href={AlgoraWeb.Constants.get(:calendar_url)}
+                  patch={~p"/#{@current_org.handle}/jobs/#{@job.id}/activate"}
                   variant="none"
                   class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
                   size="xl"
@@ -628,60 +631,52 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_info({:fetch_github_user, handle}, socket) do
-    # TODO: handle expired token
-    case Accounts.get_access_token(socket.assigns.current_user) do
-      {:ok, token} ->
-        case Algora.Workspace.ensure_user(token, handle) do
-          {:ok, user} ->
-            importing_users =
-              update_in(
-                socket.assigns.importing_users,
-                [handle],
-                &%{&1 | status: :done, user: user}
-              )
+    case Algora.Workspace.ensure_user(Algora.Admin.token(), handle) do
+      {:ok, user} ->
+        importing_users =
+          update_in(
+            socket.assigns.importing_users,
+            [handle],
+            &%{&1 | status: :done, user: user}
+          )
 
-            # Find next handle to process based on order
-            next_handle =
-              importing_users
-              |> Enum.filter(fn {_, %{status: status}} -> status == :loading end)
-              |> Enum.min_by(fn {_, %{order: order}} -> order end, &</2, fn -> nil end)
-              |> case do
-                {handle, _} -> handle
-                nil -> nil
-              end
+        # Find next handle to process based on order
+        next_handle =
+          importing_users
+          |> Enum.filter(fn {_, %{status: status}} -> status == :loading end)
+          |> Enum.min_by(fn {_, %{order: order}} -> order end, &</2, fn -> nil end)
+          |> case do
+            {handle, _} -> handle
+            nil -> nil
+          end
 
-            # Start fetching next handle if exists
-            if next_handle, do: send(self(), {:fetch_github_user, next_handle})
+        # Start fetching next handle if exists
+        if next_handle, do: send(self(), {:fetch_github_user, next_handle})
 
-            {:noreply, assign(socket, :importing_users, importing_users)}
+        {:noreply, assign(socket, :importing_users, importing_users)}
 
-          {:error, _reason} ->
-            importing_users =
-              update_in(
-                socket.assigns.importing_users,
-                [handle],
-                &%{&1 | status: :done, user: nil}
-              )
+      {:error, _reason} ->
+        importing_users =
+          update_in(
+            socket.assigns.importing_users,
+            [handle],
+            &%{&1 | status: :done, user: nil}
+          )
 
-            # Find next handle to process based on order
-            next_handle =
-              importing_users
-              |> Enum.filter(fn {_, %{status: status}} -> status == :loading end)
-              |> Enum.min_by(fn {_, %{order: order}} -> order end, &>/2, fn -> nil end)
-              |> case do
-                {handle, _} -> handle
-                nil -> nil
-              end
+        # Find next handle to process based on order
+        next_handle =
+          importing_users
+          |> Enum.filter(fn {_, %{status: status}} -> status == :loading end)
+          |> Enum.min_by(fn {_, %{order: order}} -> order end, &>/2, fn -> nil end)
+          |> case do
+            {handle, _} -> handle
+            nil -> nil
+          end
 
-            # Start fetching next handle if exists
-            if next_handle, do: send(self(), {:fetch_github_user, next_handle})
+        # Start fetching next handle if exists
+        if next_handle, do: send(self(), {:fetch_github_user, next_handle})
 
-            {:noreply, assign(socket, :importing_users, importing_users)}
-        end
-
-      {:error, reason} ->
-        Logger.error("Failed to import job applicants: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+        {:noreply, assign(socket, :importing_users, importing_users)}
     end
   end
 
@@ -720,13 +715,13 @@ defmodule AlgoraWeb.Org.JobLive do
 
     developers = matches |> Enum.concat(all_applicants) |> Enum.map(& &1.user)
 
-    contributions_map = fetch_applicants_contributions(developers, socket.assigns.current_org.tech_stack)
+    contributions_map = fetch_applicants_contributions(developers, socket.assigns.job.tech_stack)
 
     socket
     |> assign(:developers, developers)
-    |> assign(:applicants, sort_applicants_by_contributions(applicants, contributions_map))
-    |> assign(:imports, sort_applicants_by_contributions(imports, contributions_map))
-    |> assign(:matches, sort_applicants_by_contributions(matches, contributions_map))
+    |> assign(:applicants, sort_applicants_by_contributions(socket.assigns.job, applicants, contributions_map))
+    |> assign(:imports, sort_applicants_by_contributions(socket.assigns.job, imports, contributions_map))
+    |> assign(:matches, sort_applicants_by_contributions(socket.assigns.job, matches, contributions_map))
     |> assign(:contributions_map, contributions_map)
   end
 
@@ -752,7 +747,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 broadcast(socket.assigns.job, {:contributions_failed, handle})
             end
           end,
-          timeout: length(users_without_contributions) * 10_000,
+          timeout: length(users_without_contributions) * 60_000,
           max_concurrency: 3,
           ordered: true
         )
@@ -812,7 +807,10 @@ defmodule AlgoraWeb.Org.JobLive do
             <div>
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link navigate={User.url(@application.user)} class="font-semibold hover:underline">
-                  {@application.user.name} {Algora.Misc.CountryEmojis.get(@application.user.country)}
+                  {@application.user.name}
+                  <span :if={@application.user.country}>
+                    {Algora.Misc.CountryEmojis.get(@application.user.country)}
+                  </span>
                 </.link>
               </div>
               <div
@@ -1047,7 +1045,7 @@ defmodule AlgoraWeb.Org.JobLive do
               >
                 <img
                   src={owner.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none xmd:saturate-0 group-hover:saturate-100 transition-all"
+                  class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
                   alt={owner.name}
                 />
                 <div class="w-full flex flex-col text-xs font-medium gap-0.5">
@@ -1115,7 +1113,7 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   # Sort applicants by their total number of contributions
-  defp sort_applicants_by_contributions(applicants, contributions_map) do
+  defp sort_applicants_by_contributions(job, applicants, contributions_map) do
     Enum.sort_by(
       applicants,
       fn application ->
@@ -1124,7 +1122,15 @@ defmodule AlgoraWeb.Org.JobLive do
         Enum.reduce(contributions, 0, fn contribution, acc ->
           stars = contribution.repository.stargazers_count
           contribution_count = contribution.contribution_count
-          acc + :math.log(stars + 1) * contribution_count * 100
+
+          delta =
+            if Enum.any?(job.tech_stack, fn tech -> tech in Enum.take(contribution.repository.tech_stack, 1) end) do
+              :math.log(stars + 1) * contribution_count
+            else
+              :math.pow(:math.log(stars + 1) * contribution_count, 0.5)
+            end
+
+          acc + delta
         end)
       end,
       :desc

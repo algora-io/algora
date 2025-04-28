@@ -291,7 +291,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   <%= if @current_org.hiring_subscription != :active do %>
                     <div class="relative col-span-3">
                       <img
-                        src={~p"/images/screenshots/job-matches.png"}
+                        src={~p"/images/screenshots/job-matches-more.png"}
                         class="w-full aspect-[1368/398]"
                       />
                       <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-4xl">

@@ -189,16 +189,16 @@ defmodule AlgoraWeb.JobsLive do
                     </li>
                   </ul>
                   <%!-- <div class="[transform:perspective(4101px)_rotateX(51deg)_rotateY(-13deg)_rotateZ(40deg)]"> --%>
-                  <div class="my-auto pt-8">
+                  <%!-- <div class="my-auto pt-8">
                     <img
                       alt="Algora dashboard"
                       width="1200"
                       height="630"
                       loading="lazy"
                       class="my-auto border border-border rounded-lg [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
-                      src={~p"/images/screenshots/job.png"}
+                      src={~p"/images/screenshots/job-matches.png"}
                     />
-                  </div>
+                  </div> --%>
                   <%!-- </div> --%>
                 </div>
                 <div class="flex-1 flex flex-col justify-center items-center">
@@ -281,6 +281,25 @@ defmodule AlgoraWeb.JobsLive do
             class="mt-8 w-full h-full object-cover max-w-4xl mx-auto border border-border rounded-xl"
             speed={2}
             playbackspeed={2}
+          />
+        </.section>
+
+        <.section class="pt-24">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            Publish jobs <br />and
+            <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">invite top matches</span>
+            on Algora
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+          </p>
+
+          <img
+            alt="Algora dashboard"
+            width="1200"
+            height="630"
+            loading="lazy"
+            class="my-auto border border-border rounded-lg [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
+            src={~p"/images/screenshots/job-matches.png"}
           />
         </.section>
 

@@ -203,6 +203,7 @@ defmodule AlgoraWeb.JobsLive do
                   >
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <.input
+                        id="final_section_email"
                         field={@form[:email]}
                         label="Email"
                         data-domain-target
@@ -210,13 +211,22 @@ defmodule AlgoraWeb.JobsLive do
                         phx-change="email_changed"
                         phx-debounce="300"
                       />
-                      <.input field={@form[:url]} label="Job Posting URL" />
-                      <.input field={@form[:company_url]} label="Company URL" data-domain-source />
-                      <.input field={@form[:company_name]} label="Company Name" />
+                      <.input id="final_section_url" field={@form[:url]} label="Job Posting URL" />
+                      <.input
+                        id="final_section_company_url"
+                        field={@form[:company_url]}
+                        label="Company URL"
+                        data-domain-source
+                      />
+                      <.input
+                        id="final_section_company_name"
+                        field={@form[:company_name]}
+                        label="Company Name"
+                      />
                     </div>
 
                     <div class="flex flex-col items-center gap-4">
-                      <.button size="xl" class="w-full" href={AlgoraWeb.Constants.get(:calendar_url)}>
+                      <.button size="xl" class="w-full">
                         <div class="flex flex-col items-center gap-1 font-semibold">
                           <span>Hire now</span>
                         </div>
@@ -480,7 +490,7 @@ defmodule AlgoraWeb.JobsLive do
                     </div>
 
                     <div class="flex flex-col items-center gap-4">
-                      <.button size="xl" class="w-full" href={AlgoraWeb.Constants.get(:calendar_url)}>
+                      <.button size="xl" class="w-full">
                         <div class="flex flex-col items-center gap-1 font-semibold">
                           <span>Hire now</span>
                         </div>
@@ -548,10 +558,9 @@ defmodule AlgoraWeb.JobsLive do
   def handle_event("create_job", %{"job_posting" => params}, socket) do
     with {:ok, user} <-
            Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
-         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting(),
-         {:ok, url} <- Jobs.create_payment_session(job) do
+         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting() do
       Algora.Admin.alert("Job posting initialized: #{job.company_name}", :info)
-      {:noreply, redirect(socket, external: url)}
+      {:noreply, redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}

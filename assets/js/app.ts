@@ -389,7 +389,9 @@ const Hooks = {
   },
   DeriveDomain: {
     mounted() {
-      const domainInput = document.querySelector("[data-domain-source]");
+      const domainInput = (this.el.closest("form") || document).querySelector(
+        "[data-domain-source]"
+      );
       let shouldDerive = true;
 
       // Listen for manual edits to the domain field

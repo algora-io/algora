@@ -37,6 +37,13 @@ defmodule Algora.Admin do
         query
       end
 
+    query =
+      if limit = opts[:limit] do
+        limit(query, ^limit)
+      else
+        query
+      end
+
     Repo.transaction(
       fn ->
         if opts[:dry_run] do

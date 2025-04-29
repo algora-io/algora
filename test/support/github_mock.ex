@@ -41,7 +41,8 @@ defmodule Algora.Support.GithubMock do
        "html_url" => "https://github.com/#{owner}/#{repo}",
        "owner" => %{
          "login" => owner
-       }
+       },
+       "stargazers_count" => 1337
      }}
   end
 
@@ -57,7 +58,8 @@ defmodule Algora.Support.GithubMock do
        "html_url" => "https://github.com/#{owner}/#{name}",
        "owner" => %{
          "login" => owner
-       }
+       },
+       "stargazers_count" => 1337
      }}
   end
 

@@ -320,7 +320,7 @@ defmodule AlgoraWeb.JobsLive do
                   <div class="lg:col-span-6">
                     <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
                       Bounties help us control our burn rate, get work done & meet new hires. I've made
-                      <span class="text-success">3 full-time hires</span>
+                      <span class="text-success">4 full-time hires</span>
                       using Algora
                     </h3>
                     <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">

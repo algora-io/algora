@@ -244,10 +244,7 @@ defmodule AlgoraWeb.Org.JobLive do
               <% else %>
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
                   <%= for {application, index} <- Enum.with_index(@imports) do %>
-                    <div class={
-                      if @current_org.hiring_subscription == :inactive && index >= 3,
-                        do: "filter blur-sm pointer-events-none"
-                    }>
+                    <div>
                       <.developer_card
                         tech_stack={@job.tech_stack |> Enum.take(1)}
                         application={application}

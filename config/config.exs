@@ -8,7 +8,7 @@
 import Config
 
 config :algora,
-  title: "Algora - Hire the top 1% open source engineers",
+  title: "Algora",
   description: "Algora connects companies and engineers for full-time and contract work",
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec],

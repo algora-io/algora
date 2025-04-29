@@ -563,7 +563,7 @@ defmodule AlgoraWeb.ContractLive do
                         {Util.initials(message.sender.name)}
                       </.avatar_fallback>
                     </.avatar>
-                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3 break-words whitespace-pre-wrap">
+                    <div class="max-w-[80%] relative rounded-2xl rounded-tl-none bg-muted p-3 break-words">
                       {message.content}
                       <div class="text-[10px] mt-1 text-muted-foreground">
                         {message.inserted_at

@@ -14,6 +14,7 @@ defmodule AlgoraWeb.CommunityLive do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
+  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Data.PlatformStats
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
@@ -41,42 +42,105 @@ defmodule AlgoraWeb.CommunityLive do
   end
 
   @impl true
-  def handle_params(%{"tech" => tech}, _uri, socket) when is_binary(tech) do
-    selected_techs = tech |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
-    valid_techs = Enum.map(socket.assigns.techs, fn {tech, _} -> String.downcase(tech) end)
-    # Only keep valid techs that exist in the available tech list
-    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
-
-    query_opts =
-      if selected_techs == [] do
-        Keyword.delete(socket.assigns.query_opts, :tech_stack)
-      else
-        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
-      end
-
-    {:noreply,
-     socket
-     |> assign(:page_title, "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties")
-     |> assign(:selected_techs, selected_techs)
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()}
-  end
-
-  def handle_params(_params, _uri, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_title, "Bounties")
-     |> assign(:selected_techs, [])
-     |> assign(:query_opts, Keyword.delete(socket.assigns.query_opts, :tech_stack))
-     |> assign_bounties()}
-  end
-
-  @impl true
-  def mount(%{"tech" => tech}, _session, socket) when is_binary(tech) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
       Bounties.subscribe()
     end
 
+    total_contributors = get_contributors_count()
+    total_countries = get_countries_count()
+
+    stats = [
+      %{label: "Paid Out", value: format_money(get_total_paid_out())},
+      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())},
+      %{label: "Contributors", value: format_number(total_contributors)},
+      %{label: "Countries", value: format_number(total_countries)}
+    ]
+
+    featured_devs = Accounts.list_featured_developers()
+    featured_collabs = list_featured_collabs()
+
+    tx_query =
+      from(tx in Transaction,
+        where: tx.type == :credit,
+        where: not is_nil(tx.succeeded_at),
+        join: u in assoc(tx, :user),
+        left_join: b in assoc(tx, :bounty),
+        left_join: tip in assoc(tx, :tip),
+        join: t in Ticket,
+        on: t.id == b.ticket_id or t.id == tip.ticket_id,
+        join: r in assoc(t, :repository),
+        join: o in assoc(r, :user),
+        join: ltx in assoc(tx, :linked_transaction),
+        join: ltx_user in assoc(ltx, :user),
+        select: %{
+          id: tx.id,
+          succeeded_at: tx.succeeded_at,
+          net_amount: tx.net_amount,
+          bounty_id: b.id,
+          tip_id: tip.id,
+          user: u,
+          ticket: %{t | repository: %{r | user: o}},
+          linked_transaction: %{ltx | user: ltx_user}
+        }
+      )
+
+    tx_query =
+      case Algora.Settings.get_featured_transactions() do
+        ids when is_list(ids) and ids != [] ->
+          where(tx_query, [tx], tx.id in ^ids)
+
+        _ ->
+          tx_query
+          |> where([tx], tx.succeeded_at > ago(1, "week"))
+          |> order_by([tx], desc: tx.net_amount)
+          |> limit(5)
+      end
+
+    transactions = tx_query |> Repo.all() |> Enum.sort_by(& &1.succeeded_at, {:desc, DateTime})
+
+    {:ok,
+     socket
+     |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+     |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+     |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+     |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
+     |> assign(:stats, stats)
+     |> assign(:featured_collabs, featured_collabs)
+     |> assign(:featured_devs, featured_devs)
+     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
+     |> assign(:total_contributors, total_contributors)
+     |> assign(:total_countries, total_countries)
+     |> assign(:selected_developer, nil)
+     |> assign(:share_drawer_type, nil)
+     |> assign(:show_share_drawer, false)
+     |> assign(:transactions, transactions)
+     |> assign_query_opts(params["tech"])
+     |> assign_bounties()}
+  end
+
+  defp assign_query_opts(socket, nil) do
+    query_opts =
+      [
+        status: :open,
+        limit: page_size(),
+        current_user: socket.assigns[:current_user]
+      ] ++
+        if socket.assigns[:current_user] do
+          [amount_gt: Money.new(:USD, 100)]
+        else
+          [amount_gt: Money.new(:USD, 500)]
+        end
+
+    techs = Bounties.list_tech(query_opts)
+
+    socket
+    |> assign(:techs, techs)
+    |> assign(:selected_techs, [])
+    |> assign(:query_opts, query_opts)
+  end
+
+  defp assign_query_opts(socket, tech) do
     # Parse selected techs from URL params and ensure lowercase
     selected_techs =
       tech
@@ -104,92 +168,114 @@ defmodule AlgoraWeb.CommunityLive do
 
     query_opts = if selected_techs == [], do: query_opts, else: Keyword.put(query_opts, :tech_stack, selected_techs)
 
-    {:ok,
-     socket
-     |> assign(:techs, techs)
-     |> assign(:selected_techs, selected_techs)
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()
-     |> assign_misc()}
+    socket
+    |> assign(:techs, techs)
+    |> assign(:selected_techs, selected_techs)
+    |> assign(:query_opts, query_opts)
   end
 
-  def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Bounties.subscribe()
-    end
+  @impl true
+  def handle_params(%{"tech" => tech}, _uri, socket) when is_binary(tech) do
+    selected_techs = tech |> String.split(",") |> Enum.reject(&(&1 == "")) |> Enum.map(&String.downcase/1)
+    valid_techs = Enum.map(socket.assigns.techs, fn {tech, _} -> String.downcase(tech) end)
+    # Only keep valid techs that exist in the available tech list
+    selected_techs = Enum.filter(selected_techs, &(&1 in valid_techs))
 
     query_opts =
-      [
-        status: :open,
-        limit: page_size(),
-        current_user: socket.assigns[:current_user]
-      ] ++
-        if socket.assigns[:current_user] do
-          [amount_gt: Money.new(:USD, 100)]
-        else
-          [amount_gt: Money.new(:USD, 500)]
-        end
-
-    techs = Bounties.list_tech(query_opts)
-
-    {:ok,
-     socket
-     |> assign(:techs, techs)
-     |> assign(:selected_techs, [])
-     |> assign(:query_opts, query_opts)
-     |> assign_bounties()
-     |> assign_misc()}
-  end
-
-  def assign_misc(socket) do
-    total_contributors = get_contributors_count()
-    total_countries = get_countries_count()
-
-    stats = [
-      %{label: "Paid Out", value: format_money(get_total_paid_out())},
-      %{label: "Completed Bounties", value: format_number(get_completed_bounties_count())},
-      %{label: "Contributors", value: format_number(total_contributors)},
-      %{label: "Countries", value: format_number(total_countries)}
-    ]
-
-    featured_collabs = list_featured_collabs()
-
-    socket
-    |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-    |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
-    |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-    |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
-    |> assign(:stats, stats)
-    |> assign(:featured_collabs, featured_collabs)
-    |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
-    |> assign(:total_contributors, total_contributors)
-    |> assign(:total_countries, total_countries)
-    |> assign(:selected_developer, nil)
-    |> assign(:share_drawer_type, nil)
-    |> assign(:show_share_drawer, false)
-  end
-
-  defp list_featured_collabs do
-    developers =
-      case Algora.Settings.get_featured_collabs() do
-        handles when is_list(handles) and handles != [] ->
-          developers = Accounts.list_developers(handles: handles)
-          # Sort developers to match handles order
-          Enum.sort_by(developers, fn dev ->
-            Enum.find_index(handles, &(&1 == dev.provider_login))
-          end)
-
-        _ ->
-          Accounts.list_developers(limit: 5)
+      if selected_techs == [] do
+        Keyword.delete(socket.assigns.query_opts, :tech_stack)
+      else
+        Keyword.put(socket.assigns.query_opts, :tech_stack, selected_techs)
       end
 
-    Enum.map(developers, fn user -> %{user: user, projects: Accounts.list_contributed_projects(user, limit: 2)} end)
+    {:noreply,
+     socket
+     |> assign(:page_title, "#{Enum.map_join(selected_techs, "/", &String.capitalize/1)} Bounties")
+     |> assign(:selected_techs, selected_techs)
+     |> assign(:query_opts, query_opts)
+     |> assign_bounties()}
+  end
+
+  @impl true
+  def handle_params(_params, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign(:page_title, "Bounties")
+     |> assign(:selected_techs, [])
+     |> assign(:query_opts, Keyword.delete(socket.assigns.query_opts, :tech_stack))
+     |> assign_bounties()}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <main class="relative overflow-hidden">
+    <main class="bg-black relative overflow-hidden">
+      <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
+        <%!-- <.pattern /> --%>
+        <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-24">
+          <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center min-h-[calc(100svh-10rem)]">
+            <div class={
+              classes([
+                "px-6 lg:px-8 lg:pr-0 xl:py-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-[52rem]",
+                "flex flex-col items-center justify-center",
+                @screenshot? && "pt-24"
+              ])
+            }>
+              <.wordmark :if={@screenshot?} class="h-8 mb-6" />
+              <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
+                Join our community
+              </h1>
+              <p class="mt-4 sm:mt-8 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
+                And see what's poppin'
+              </p>
+              <%!-- <div :if={!@screenshot?} class="mt-6 sm:mt-10 flex gap-4">
+                <.button
+                  navigate={~p"/onboarding/org"}
+                  class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+                >
+                  Companies
+                </.button>
+                <.button
+                  navigate={~p"/onboarding/dev"}
+                  variant="secondary"
+                  class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+                >
+                  Developers
+                </.button>
+              </div> --%>
+              <div class="flex flex-col gap-4 pt-6 sm:pt-10">
+                <.events transactions={@transactions} />
+              </div>
+            </div>
+            <!-- Featured devs -->
+            <div class={
+              classes([
+                "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0",
+                "overflow-x-auto scrollbar-thin lg:overflow-x-visible px-6 lg:px-8"
+              ])
+            }>
+              <%= if length(@featured_devs) > 0 do %>
+                <div class="ml-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                  <.dev_card dev={List.first(@featured_devs)} />
+                </div>
+                <div class="flex flex-col mr-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 sm:mr-0 lg:pt-36">
+                  <%= if length(@featured_devs) >= 3 do %>
+                    <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
+                      <.dev_card dev={dev} />
+                    <% end %>
+                  <% end %>
+                </div>
+                <div class="flex flex-col w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 lg:pt-0">
+                  <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
+                    <.dev_card dev={dev} />
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
         <.section title="Bounties" subtitle="Open bounties for you">
           <div class="mb-4 flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
@@ -1088,195 +1174,8 @@ defmodule AlgoraWeb.CommunityLive do
 
       <section class="relative isolate py-16 sm:py-40">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
-            Hire by building product
-          </h2>
-          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-            Use bounties to evaluate developers based on actual contributions to your codebase.
-          </p>
-
-          <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
-            <div class="flex gap-4 sm:gap-8">
-              <div class="w-[40%]">
-                <.modal_video
-                  class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
-                  src="https://www.youtube.com/embed/xObOGcUdtY0"
-                  start={122}
-                  title="$15,000 Open source bounty to hire a Rust engineer"
-                  poster={~p"/images/people/john-de-goes.jpg"}
-                  alt="John A De Goes"
-                />
-              </div>
-              <div class="w-[60%]">
-                <.link
-                  href="https://github.com/golemcloud/golem/issues/1004"
-                  rel="noopener"
-                  target="_blank"
-                  class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
-                >
-                  <img
-                    src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
-                    alt="Golem bounty to hire"
-                    class="object-cover"
-                    loading="lazy"
-                  />
-                </.link>
-              </div>
-            </div>
-          </div>
-
-          <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-            <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
-              <div class="lg:col-span-6 order-first lg:order-last">
-                <.modal_video
-                  class="rounded-xl lg:rounded-2xl"
-                  src="https://www.youtube.com/embed/FXQVD02rfg8"
-                  start={8}
-                  title="How Nick got a job with Open Source Software"
-                  poster="https://img.youtube.com/vi/FXQVD02rfg8/maxresdefault.jpg"
-                  alt="Eric Allam"
-                />
-              </div>
-              <div class="lg:col-span-6 order-last lg:order-first">
-                <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
-                  It was the <span class="text-success">easiest hire</span>
-                  because we already knew how great he was
-                </h3>
-                <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
-                  <div class="flex items-center gap-4">
-                    <div>
-                      <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
-                        Eric Allam
-                      </div>
-                      <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
-                        Co-founder & CTO at Trigger.dev (YC W23)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-            <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-              <div class="lg:col-span-5">
-                <.modal_video
-                  class="rounded-xl lg:rounded-2xl"
-                  src="https://www.youtube.com/embed/3wZGDuoPajk"
-                  start={13}
-                  title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
-                  poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
-                  alt="Tushar Mathur"
-                />
-              </div>
-              <div class="lg:col-span-6">
-                <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
-                  Bounties help us control our burn rate, get work done & meet new hires. I've made
-                  <span class="text-success">3 full-time hires</span>
-                  using Algora
-                </h3>
-                <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
-                  <div class="flex items-center gap-4">
-                    <div>
-                      <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
-                        Tushar Mathur
-                      </div>
-                      <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
-                        Founder & CEO at Tailcall
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="relative isolate py-16 sm:py-40">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
-            <.link
-              class="font-bold font-display text-2xl whitespace-nowrap flex items-center justify-center brightness-0 invert"
-              aria-label="Logo"
-              navigate={~p"/mendableai"}
-            >
-              🔥
-              Firecrawl
-            </.link>
-            <h2 class="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-5xl text-center mb-4 !leading-[1.25]">
-              Open source contributor to full-time engineer
-            </h2>
-            <div class="flex items-center justify-center gap-8">
-              <div class="flex-1 flex flex-wrap items-center justify-end gap-x-8 gap-y-4">
-                <div class="flex items-center gap-2 sm:gap-4">
-                  <div class="text-right">
-                    <div class="text-sm sm:text-base font-medium text-foreground whitespace-nowrap">
-                      Nicolas Camara
-                    </div>
-                    <div class="pt-1 text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
-                      Founder & CTO
-                    </div>
-                  </div>
-                  <img
-                    src={~p"/images/people/nicolas-camara.jpg"}
-                    alt="Nicolas Camara"
-                    class="size-12 rounded-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-              <.icon name="tabler-git-merge" class="size-6 sm:size-8 text-purple-400 hidden sm:block" />
-              <div class="flex-1 flex flex-wrap items-center gap-x-8 gap-y-4">
-                <div class="flex items-center gap-2 sm:gap-4">
-                  <img
-                    src="https://github.com/mogery.png"
-                    alt="Gergő Móricz"
-                    class="size-12 rounded-full object-cover"
-                    loading="lazy"
-                  />
-                  <div>
-                    <div class="text-sm sm:text-base font-semibold text-foreground whitespace-nowrap">
-                      Gergő Móricz
-                    </div>
-                    <div class="pt-2 text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
-                      Contributor
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="pt-8 sm:pt-12 flex gap-4 sm:gap-8 lg:gap-x-16">
-              <div class="w-[24%]">
-                <.modal_video
-                  class="aspect-[9/16] rounded-xl lg:rounded-2xl"
-                  src="https://www.youtube.com/embed/j4fLNIJCywk"
-                  title="High school student solves #opensource bounties"
-                  poster="https://img.youtube.com/vi/j4fLNIJCywk/maxresdefault.jpg"
-                  alt="Gergő Móricz"
-                />
-              </div>
-              <div class="w-[76%]">
-                <.modal_video
-                  class="rounded-xl lg:rounded-2xl"
-                  src="https://www.youtube.com/embed/HhTT-GX5tjQ"
-                  start={293}
-                  title="🧑🏻‍💻 Building your bounty hunter reputation & Mendable contributions 💸"
-                  poster={~p"/images/people/mogery.png"}
-                  alt="Gergő Móricz"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="relative isolate py-16 sm:py-40">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
-            <span class="text-muted-foreground">The open source</span>
-            <span class="block sm:inline">Upwork for engineers</span>
+            Share jobs, bounties and contracts today
           </h2>
           <div class="flex justify-center gap-4">
             <.button navigate={~p"/auth/signup"}>
@@ -1289,26 +1188,6 @@ defmodule AlgoraWeb.CommunityLive do
         </div>
       </section>
     </main>
-    <%!-- <section class="relative isolate py-16 sm:py-40">
-      <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
-          <span class="text-muted-foreground">The open source</span>
-          <span class="block sm:inline">Upwork for engineers</span>
-        </h2>
-        <div class="flex justify-center gap-4">
-          <.button navigate={~p"/auth/signup"}>
-            Get started
-          </.button>
-          <.button
-            class={if !Algora.Stargazer.count(), do: "pointer-events-none opacity-75"}
-            href={AlgoraWeb.Constants.get(:github_repo_url)}
-            variant="secondary"
-          >
-            <.icon name="github" class="size-4 mr-2 -ml-1" /> View source code
-          </.button>
-        </div>
-      </div>
-    </section> --%>
 
     {share_drawer(assigns)}
     <.modal_video_dialog />
@@ -2634,5 +2513,128 @@ defmodule AlgoraWeb.CommunityLive do
       </div>
     </div>
     """
+  end
+
+  defp dev_card(assigns) do
+    ~H"""
+    <.link navigate={User.url(@dev)} target="_blank" class="relative">
+      <img
+        src={@dev.avatar_url}
+        alt={@dev.name}
+        class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
+      />
+      <div class="font-display mt-1 rounded-xl rounded-t-none bg-card/50 p-3 text-sm ring-1 ring-border backdrop-blur-sm">
+        <div class="font-semibold text-foreground">
+          {@dev.name} {Algora.Misc.CountryEmojis.get(@dev.country)}
+        </div>
+        <div class="mt-0.5 text-xs font-medium text-foreground line-clamp-2">{@dev.bio}</div>
+        <div class="hidden mt-1 text-sm">
+          <div class="-ml-1 flex h-6 flex-wrap gap-1 overflow-hidden p-px text-sm">
+            <%= for tech <- @dev.tech_stack do %>
+              <span class="rounded-xl bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground ring-1 ring-border">
+                {tech}
+              </span>
+            <% end %>
+          </div>
+        </div>
+        <div class="mt-0.5 text-xs text-muted-foreground">
+          <span class="font-medium">Total Earned:</span>
+          <span class="text-sm font-bold text-success">
+            {Money.to_string!(@dev.total_earned, no_fraction_if_integer: true)}
+          </span>
+        </div>
+      </div>
+    </.link>
+    """
+  end
+
+  defp events(assigns) do
+    ~H"""
+    <ul class="w-full pl-10 relative space-y-8">
+      <li :for={{transaction, index} <- @transactions |> Enum.with_index()} class="relative">
+        <div>
+          <div class="relative -ml-[2.75rem]">
+            <span
+              :if={index != length(@transactions) - 1}
+              class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
+              aria-hidden="true"
+            >
+            </span>
+            <.link
+              rel="noopener"
+              target="_blank"
+              class="w-full group inline-flex"
+              href={transaction.ticket.url}
+            >
+              <div class="w-full relative flex space-x-3">
+                <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                  <div class="w-full flex items-center gap-3">
+                    <div class="flex -space-x-1 ring-8 ring-[#050505]">
+                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-[#050505]">
+                        <img
+                          class="aspect-square h-full w-full"
+                          alt={transaction.user.name}
+                          src={transaction.user.avatar_url}
+                        />
+                      </span>
+                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-[#050505]">
+                        <img
+                          class="aspect-square h-full w-full"
+                          alt={transaction.linked_transaction.user.name}
+                          src={transaction.linked_transaction.user.avatar_url}
+                        />
+                      </span>
+                    </div>
+                    <div class="w-full z-10 flex gap-3 items-start xl:items-end">
+                      <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-base">
+                        <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                          {transaction.linked_transaction.user.name}
+                        </span>
+                        awarded
+                        <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                          {transaction.user.name}
+                        </span>
+                        a
+                        <span class="font-bold font-display text-success-400 group-hover:text-success-300 transition-colors">
+                          {Money.to_string!(transaction.net_amount)}
+                        </span>
+                        <%= if transaction.bounty_id do %>
+                          bounty
+                        <% else %>
+                          tip
+                        <% end %>
+                      </p>
+                      <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
+                        <time datetime={transaction.succeeded_at}>
+                          {Algora.Util.time_ago(transaction.succeeded_at)}
+                        </time>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </.link>
+          </div>
+        </div>
+      </li>
+    </ul>
+    """
+  end
+
+  defp list_featured_collabs do
+    developers =
+      case Algora.Settings.get_featured_collabs() do
+        handles when is_list(handles) and handles != [] ->
+          developers = Accounts.list_developers(handles: handles)
+          # Sort developers to match handles order
+          Enum.sort_by(developers, fn dev ->
+            Enum.find_index(handles, &(&1 == dev.provider_login))
+          end)
+
+        _ ->
+          Accounts.list_developers(limit: 5)
+      end
+
+    Enum.map(developers, fn user -> %{user: user, projects: Accounts.list_contributed_projects(user, limit: 2)} end)
   end
 end

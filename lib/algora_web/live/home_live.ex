@@ -37,45 +37,6 @@ defmodule AlgoraWeb.HomeLive do
 
     jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
 
-    tx_query =
-      from(tx in Transaction,
-        where: tx.type == :credit,
-        where: not is_nil(tx.succeeded_at),
-        join: u in assoc(tx, :user),
-        left_join: b in assoc(tx, :bounty),
-        left_join: tip in assoc(tx, :tip),
-        join: t in Ticket,
-        on: t.id == b.ticket_id or t.id == tip.ticket_id,
-        join: r in assoc(t, :repository),
-        join: o in assoc(r, :user),
-        join: ltx in assoc(tx, :linked_transaction),
-        join: ltx_user in assoc(ltx, :user),
-        select: %{
-          id: tx.id,
-          succeeded_at: tx.succeeded_at,
-          net_amount: tx.net_amount,
-          bounty_id: b.id,
-          tip_id: tip.id,
-          user: u,
-          ticket: %{t | repository: %{r | user: o}},
-          linked_transaction: %{ltx | user: ltx_user}
-        }
-      )
-
-    tx_query =
-      case Algora.Settings.get_featured_transactions() do
-        ids when is_list(ids) and ids != [] ->
-          where(tx_query, [tx], tx.id in ^ids)
-
-        _ ->
-          tx_query
-          |> where([tx], tx.succeeded_at > ago(1, "week"))
-          |> order_by([tx], desc: tx.net_amount)
-          |> limit(5)
-      end
-
-    transactions = tx_query |> Repo.all() |> Enum.sort_by(& &1.succeeded_at, {:desc, DateTime})
-
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->
         {:ok, redirect(socket, to: AlgoraWeb.UserAuth.signed_in_path(user))}
@@ -92,8 +53,7 @@ defmodule AlgoraWeb.HomeLive do
          |> assign(:form, to_form(JobPosting.changeset(%JobPosting{}, %{})))
          |> assign(:jobs_by_user, jobs_by_user)
          |> assign(:user_metadata, AsyncResult.loading())
-         |> assign_user_applications()
-         |> assign(:transactions, transactions)}
+         |> assign_user_applications()}
     end
   end
 

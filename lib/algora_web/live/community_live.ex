@@ -221,12 +221,12 @@ defmodule AlgoraWeb.CommunityLive do
           </.card>
         <% else %>
           <div id="bounties-container" phx-hook="InfiniteScroll">
-            <.bounties bounties={@bounties} />
-            <div :if={@has_more_bounties} class="flex justify-center mt-4" data-load-more-indicator>
+            <.bounties bounties={@bounties |> Enum.take(20)} />
+            <%!-- <div :if={@has_more_bounties} class="flex justify-center mt-4" data-load-more-indicator>
               <div class="animate-pulse text-muted-foreground">
                 <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
               </div>
-            </div>
+            </div> --%>
           </div>
         <% end %>
       </.section>
@@ -1280,11 +1280,7 @@ defmodule AlgoraWeb.CommunityLive do
             <.button navigate={~p"/auth/signup"}>
               Get started
             </.button>
-            <.button
-              class="pointer-events-none opacity-75"
-              href={AlgoraWeb.Constants.get(:github_repo_url)}
-              variant="secondary"
-            >
+            <.button href={AlgoraWeb.Constants.get(:github_repo_url)} variant="secondary">
               <.icon name="github" class="size-4 mr-2 -ml-1" /> View source code
             </.button>
           </div>
@@ -1359,7 +1355,7 @@ defmodule AlgoraWeb.CommunityLive do
       end
 
     # Update the URL with selected techs
-    path = if selected_techs == [], do: ~p"/bounties", else: ~p"/bounties/#{Enum.join(selected_techs, ",")}"
+    path = if selected_techs == [], do: ~p"/community", else: ~p"/community/#{Enum.join(selected_techs, ",")}"
 
     {:noreply,
      socket
@@ -1430,7 +1426,7 @@ defmodule AlgoraWeb.CommunityLive do
     |> assign(:has_more_bounties, length(bounties) >= page_size())
   end
 
-  defp page_size, do: 10
+  defp page_size, do: 20
 
   defp glow(assigns) do
     ~H"""

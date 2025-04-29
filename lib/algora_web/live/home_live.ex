@@ -109,22 +109,23 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
-          <.pattern />
+          <%!-- <.pattern /> --%>
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-24">
-            <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none">
+            <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center lg:justify-center min-h-[calc(100svh-10rem)] text-center">
               <div class={
                 classes([
-                  "px-6 lg:px-8 lg:pr-0 xl:py-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-[52rem]",
+                  # "px-6 lg:px-8 lg:pr-0 xl:py-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-[52rem]",
+                  "flex flex-col items-center justify-center",
                   @screenshot? && "pt-24"
                 ])
               }>
                 <.wordmark :if={@screenshot?} class="h-8 mb-6" />
                 <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
-                  <span class="text-emerald-400">Hire the top 1%</span> <br />open source engineers
+                  <span class="text-emerald-400">Hire the top 1%</span>
+                  <br />open source engineers
                 </h1>
                 <p class="mt-4 sm:mt-8 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
-                  Discover GitHub bounties, contract work and jobs.<br class="hidden sm:block" />
-                  Hire the top 1% open source developers.
+                  Algora connects companies and engineers for full-time and contract work
                 </p>
                 <div :if={!@screenshot?} class="mt-6 sm:mt-10 flex gap-4">
                   <.button
@@ -141,12 +142,12 @@ defmodule AlgoraWeb.HomeLive do
                     Developers
                   </.button>
                 </div>
-                <div class="flex flex-col gap-4 pt-6 sm:pt-10">
+                <%!-- <div class="flex flex-col gap-4 pt-6 sm:pt-10">
                   <.events transactions={@transactions} />
-                </div>
+                </div> --%>
               </div>
               <!-- Featured devs -->
-              <div class={
+              <%!-- <div class={
                 classes([
                   "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0",
                   "overflow-x-auto scrollbar-thin lg:overflow-x-visible px-6 lg:px-8"
@@ -169,16 +170,15 @@ defmodule AlgoraWeb.HomeLive do
                     <% end %>
                   </div>
                 <% end %>
-              </div>
+              </div> --%>
             </div>
           </div>
         </section>
 
         <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
-          <.section class="pt-8">
-            <%= if Enum.empty?(@jobs_by_user) do %>
-            <% else %>
-              <div class="grid gap-12">
+          <%= if not Enum.empty?(@jobs_by_user) do %>
+            <.section>
+              <div class="grid grid-cols-1 gap-12">
                 <%= for {user, jobs} <- @jobs_by_user do %>
                   <.card class="flex flex-col p-6">
                     <div class="flex items-start md:items-center gap-4">
@@ -216,7 +216,7 @@ defmodule AlgoraWeb.HomeLive do
                         <div class="flex flex-col md:flex-row justify-between gap-4">
                           <div>
                             <div>
-                              <div class="text-lg font-semibold">
+                              <div class="text-lg lg:text-2xl text-success font-semibold">
                                 {job.title}
                               </div>
                             </div>
@@ -225,7 +225,14 @@ defmodule AlgoraWeb.HomeLive do
                             </div>
                             <div class="pt-2 flex flex-wrap gap-2">
                               <%= for tech <- job.tech_stack do %>
-                                <.badge variant="outline">{tech}</.badge>
+                                <.badge variant="outline">
+                                  <span class="flex items-center text-foreground text-[11px] gap-1">
+                                    <img
+                                      src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
+                                      class="w-4 h-4 invert saturate-0"
+                                    /> {tech}
+                                  </span>
+                                </.badge>
                               <% end %>
                             </div>
                           </div>
@@ -244,13 +251,13 @@ defmodule AlgoraWeb.HomeLive do
                   </.card>
                 <% end %>
               </div>
-            <% end %>
-          </.section>
+            </.section>
+          <% end %>
 
           <.section class="pt-24">
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
-                Autopilot screening
+                Screen on autopilot
               </span>
               <br />for OSS contribution<span class="md:hidden">s</span>
               <span class="hidden md:inline">

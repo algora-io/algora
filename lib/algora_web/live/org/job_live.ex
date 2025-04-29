@@ -451,10 +451,12 @@ defmodule AlgoraWeb.Org.JobLive do
                         <.avatar class="h-8 w-8">
                           <.avatar_image src={data.user.avatar_url} />
                           <.avatar_fallback>
-                            {Algora.Util.initials(data.user.name || data.user.handle)}
+                            {Algora.Util.initials(data.user.name || data.user.provider_login)}
                           </.avatar_fallback>
                         </.avatar>
-                        <span class="text-sm font-medium">{data.user.name || data.user.handle}</span>
+                        <span class="text-sm font-medium">
+                          {data.user.name || data.user.provider_login}
+                        </span>
                         <span class="text-xs font-medium text-muted-foreground">
                           @{data.user.provider_login}
                         </span>

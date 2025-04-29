@@ -21,7 +21,7 @@ defmodule AlgoraWeb.Components.Header do
         class="-mt-3 mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
         aria-label="Global"
       >
-        <div class="flex">
+        <div class="flex lg:flex-1">
           <.wordmark class="h-8 w-auto text-foreground" />
         </div>
         <!-- Mobile menu button -->
@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Components.Header do
           </button>
         </div>
         <!-- Desktop nav -->
-        <div class="hidden lg:flex gap-4 mx-auto">
+        <div class="hidden lg:flex-1 lg:flex lg:justify-center gap-4 mx-auto">
           <%= for link <- nav_links() do %>
             <.button
               navigate={link.path}
@@ -48,7 +48,7 @@ defmodule AlgoraWeb.Components.Header do
           <% end %>
         </div>
 
-        <div class="hidden lg:flex lg:justify-end gap-2">
+        <div class="hidden lg:flex-1 lg:flex lg:justify-end gap-2">
           <.link
             :if={Algora.Stargazer.count()}
             class="group w-fit outline-none items-center hidden lg:flex"

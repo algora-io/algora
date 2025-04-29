@@ -334,7 +334,7 @@ defmodule AlgoraWeb.User.ProfileLive do
 
     contributions
     |> Enum.map(fn c -> {c.repository.user, groups[c.repository.user]} end)
-    |> Enum.dedup_by(fn {owner, _} -> owner end)
+    |> Enum.uniq_by(fn {owner, _} -> owner.id end)
   end
 
   defp total_stars(contributions) do

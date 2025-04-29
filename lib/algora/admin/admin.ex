@@ -22,29 +22,40 @@ defmodule Algora.Admin do
 
   require Logger
 
-  def add_contributions(handle, opts) do
-    token = token()
+  def sync_contributions(opts \\ []) do
+    query =
+      User
+      |> where([u], not is_nil(u.handle))
+      |> where([u], not is_nil(u.provider_login))
+      |> where([u], fragment("not exists (select 1 from user_contributions where user_contributions.user_id = ?)", u.id))
 
-    case Workspace.ensure_user(token, handle) do
-      {:ok, user} ->
-        results =
-          Enum.map(opts, fn opts ->
-            with %{repo_name: repo_name, contribution_count: contribution_count} <- opts,
-                 [repo_owner, repo_name] <- String.split(repo_name, "/"),
-                 dbg("fetching repo #{repo_owner}/#{repo_name}"),
-                 {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
-                 {:ok, _tech_stack} <- Workspace.ensure_repo_tech_stack(token, repo),
-                 {:ok, _contribution} <- Algora.Workspace.upsert_user_contribution(user, repo, contribution_count) do
-              :ok
+    query =
+      if handles = opts[:handles] do
+        where(query, [u], u.handle in ^handles)
+      else
+        query
+      end
+
+    Repo.transaction(
+      fn ->
+        query
+        |> Repo.stream()
+        |> Enum.each(fn user ->
+          if opts[:dry_run] do
+            IO.puts("Enqueued job for #{user.provider_login}")
+          else
+            %{provider_login: user.provider_login}
+            |> Workspace.Jobs.FetchTopContributions.new()
+            |> Oban.insert()
+            |> case do
+              {:ok, _job} -> IO.puts("Enqueued job for #{user.provider_login}")
+              {:error, error} -> IO.puts("Failed to enqueue job for #{user.provider_login}: #{inspect(error)}")
             end
-          end)
-
-        if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
-
-      {:error, reason} ->
-        Logger.error("Failed to add contributions for #{handle}: #{inspect(reason)}")
-        {:error, reason}
-    end
+          end
+        end)
+      end,
+      timeout: :infinity
+    )
   end
 
   def release_payment(tx_id) do

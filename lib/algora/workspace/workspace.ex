@@ -131,21 +131,13 @@ defmodule Algora.Workspace do
         preload: [user: u]
       )
 
-    res =
-      case Repo.one(repository_query) do
-        %Repository{} = repository -> {:ok, repository}
-        nil -> create_repository_from_github(token, owner, repo)
-      end
-
-    case res do
-      {:ok, repository} -> maybe_schedule_og_image_update(repository)
-      error -> error
+    case Repo.one(repository_query) do
+      %Repository{} = repository -> {:ok, repository}
+      nil -> create_repository_from_github(token, owner, repo)
     end
-
-    res
   end
 
-  defp maybe_schedule_og_image_update(%Repository{} = repository) do
+  def maybe_schedule_og_image_update(%Repository{} = repository) do
     one_day_ago = DateTime.add(DateTime.utc_now(), -1, :day)
 
     needs_update? =
@@ -646,19 +638,84 @@ defmodule Algora.Workspace do
     Repo.all(query)
   end
 
-  @spec upsert_user_contribution(User.t(), Repository.t(), integer()) ::
+  @spec upsert_user_contribution(String.t(), String.t(), integer()) ::
           {:ok, UserContribution.t()} | {:error, Ecto.Changeset.t()}
-  def upsert_user_contribution(%User{} = user, %Repository{} = repository, contribution_count) do
+  def upsert_user_contribution(user_id, repository_id, contribution_count) do
     attrs = %{
-      user_id: user.id,
-      repository_id: repository.id,
+      user_id: user_id,
+      repository_id: repository_id,
       contribution_count: contribution_count,
       last_fetched_at: DateTime.utc_now()
     }
 
-    case Repo.get_by(UserContribution, user_id: user.id, repository_id: repository.id) do
+    case Repo.get_by(UserContribution, user_id: user_id, repository_id: repository_id) do
       nil -> %UserContribution{} |> UserContribution.changeset(attrs) |> Repo.insert()
       contribution -> contribution |> UserContribution.changeset(attrs) |> Repo.update()
+    end
+  end
+
+  def fetch_top_contributions(provider_login) do
+    token = Algora.Admin.token()
+
+    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
+         {:ok, user} <- ensure_user(token, provider_login),
+         :ok <- add_contributions(user.id, contributions) do
+      {:ok, contributions}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def fetch_top_contributions_async(provider_login) do
+    token = Algora.Admin.token()
+
+    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
+         {:ok, user} <- ensure_user(token, provider_login),
+         {:ok, _} <- add_contributions_async(user.id, contributions) do
+      {:ok, nil}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def add_contributions_async(user_id, opts) do
+    Repo.transact(fn ->
+      Enum.reduce_while(opts, :ok, fn contribution, _ ->
+        case %{
+               "user_id" => user_id,
+               "repo_full_name" => contribution.repo_name,
+               "contribution_count" => contribution.contribution_count
+             }
+             |> Jobs.SyncContribution.new()
+             |> Oban.insert() do
+          {:ok, _job} -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    end)
+  end
+
+  def add_contributions(user_id, opts) do
+    results =
+      Enum.map(opts, fn %{repo_name: repo_name, contribution_count: contribution_count} ->
+        add_contribution(%{user_id: user_id, repo_full_name: repo_name, contribution_count: contribution_count})
+      end)
+
+    if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
+  end
+
+  def add_contribution(%{user_id: user_id, repo_full_name: repo_full_name, contribution_count: contribution_count}) do
+    token = Algora.Admin.token()
+
+    with [repo_owner, repo_name] <- String.split(repo_full_name, "/"),
+         {:ok, repo} <- ensure_repository(token, repo_owner, repo_name),
+         {:ok, _tech_stack} <- ensure_repo_tech_stack(token, repo),
+         {:ok, _contribution} <- upsert_user_contribution(user_id, repo.id, contribution_count) do
+      :ok
     end
   end
 end

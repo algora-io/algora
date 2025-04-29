@@ -729,13 +729,9 @@ defmodule AlgoraWeb.Org.JobLive do
           fn handle ->
             broadcast(socket.assigns.job, {:contributions_fetching, handle})
 
-            with {:ok, contributions} <- Algora.Cloud.top_contributions(handle),
-                 :ok <- Algora.Admin.add_contributions(handle, contributions) do
-              broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
-            else
-              {:error, reason} ->
-                Logger.error("Failed to fetch contributions for #{handle}: #{inspect(reason)}")
-                broadcast(socket.assigns.job, {:contributions_failed, handle})
+            case Algora.Workspace.fetch_top_contributions(handle) do
+              {:ok, contributions} -> broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
+              {:error, _reason} -> broadcast(socket.assigns.job, {:contributions_failed, handle})
             end
           end,
           timeout: length(users_without_contributions) * 60_000,

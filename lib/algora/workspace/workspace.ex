@@ -654,12 +654,10 @@ defmodule Algora.Workspace do
     end
   end
 
-  def fetch_top_contributions(provider_login) do
-    token = Algora.Admin.token()
-
+  def fetch_top_contributions(token, provider_login) do
     with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
          {:ok, user} <- ensure_user(token, provider_login),
-         :ok <- add_contributions(user.id, contributions) do
+         :ok <- add_contributions(token, user.id, contributions) do
       {:ok, contributions}
     else
       {:error, reason} ->
@@ -668,12 +666,10 @@ defmodule Algora.Workspace do
     end
   end
 
-  def fetch_top_contributions_async(provider_login) do
-    token = Algora.Admin.token()
-
+  def fetch_top_contributions_async(token, provider_login) do
     with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
          {:ok, user} <- ensure_user(token, provider_login),
-         {:ok, _} <- add_contributions_async(user.id, contributions) do
+         {:ok, _} <- add_contributions_async(token, user.id, contributions) do
       {:ok, nil}
     else
       {:error, reason} ->
@@ -682,7 +678,7 @@ defmodule Algora.Workspace do
     end
   end
 
-  def add_contributions_async(user_id, opts) do
+  def add_contributions_async(_token, user_id, opts) do
     Repo.transact(fn ->
       Enum.reduce_while(opts, :ok, fn contribution, _ ->
         case %{
@@ -699,18 +695,26 @@ defmodule Algora.Workspace do
     end)
   end
 
-  def add_contributions(user_id, opts) do
+  def add_contributions(token, user_id, opts) do
     results =
       Enum.map(opts, fn %{repo_name: repo_name, contribution_count: contribution_count} ->
-        add_contribution(%{user_id: user_id, repo_full_name: repo_name, contribution_count: contribution_count})
+        add_contribution(%{
+          token: token,
+          user_id: user_id,
+          repo_full_name: repo_name,
+          contribution_count: contribution_count
+        })
       end)
 
     if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
   end
 
-  def add_contribution(%{user_id: user_id, repo_full_name: repo_full_name, contribution_count: contribution_count}) do
-    token = Algora.Admin.token()
-
+  def add_contribution(%{
+        token: token,
+        user_id: user_id,
+        repo_full_name: repo_full_name,
+        contribution_count: contribution_count
+      }) do
     with [repo_owner, repo_name] <- String.split(repo_full_name, "/"),
          {:ok, repo} <- ensure_repository(token, repo_owner, repo_name),
          {:ok, _tech_stack} <- ensure_repo_tech_stack(token, repo),

@@ -59,7 +59,7 @@ config :algora, Oban,
     activity_discord: 10,
     campaign_emails: 1,
     fetch_top_contributions: 1,
-    sync_contribution: 3
+    sync_contribution: 20
   ]
 
 # Configures the mailer

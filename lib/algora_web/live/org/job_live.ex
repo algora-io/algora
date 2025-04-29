@@ -731,7 +731,7 @@ defmodule AlgoraWeb.Org.JobLive do
           fn handle ->
             broadcast(socket.assigns.job, {:contributions_fetching, handle})
 
-            case Algora.Workspace.fetch_top_contributions(handle) do
+            case Algora.Workspace.fetch_top_contributions(Algora.Admin.token(), handle) do
               {:ok, contributions} -> broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
               {:error, _reason} -> broadcast(socket.assigns.job, {:contributions_failed, handle})
             end

@@ -6,13 +6,14 @@ defmodule Algora.Workspace.Jobs.SyncContribution do
     # 30 days
     unique: [period: 30 * 24 * 60 * 60, fields: [:args]]
 
+  alias Algora.Github
   alias Algora.Workspace
 
   @impl Oban.Worker
   def perform(%Oban.Job{
         args: %{"user_id" => user_id, "repo_full_name" => repo_full_name, "contribution_count" => contribution_count}
       }) do
-    token = Algora.Admin.token()
+    token = Github.TokenPool.get_token()
 
     with [repo_owner, repo_name] <- String.split(repo_full_name, "/"),
          {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),

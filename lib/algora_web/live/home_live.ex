@@ -68,10 +68,10 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate min-h-[100svh] bg-gradient-to-b from-background to-black">
-          <%!-- <.pattern /> --%>
+        <section class="relative isolate lg:min-h-[100svh] bg-gradient-to-b from-background to-black">
+          <.pattern />
           <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-24">
-            <div class="mx-auto lg:mx-0 lg:flex lg:max-w-none lg:items-center lg:justify-center min-h-[calc(100svh-10rem)] text-center">
+            <div class="mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center min-h-[21rem] lg:min-h-[calc(100svh-10rem)] text-center">
               <div class={
                 classes([
                   # "px-6 lg:px-8 lg:pr-0 xl:py-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-[52rem]",
@@ -80,12 +80,13 @@ defmodule AlgoraWeb.HomeLive do
                 ])
               }>
                 <.wordmark :if={@screenshot?} class="h-8 mb-6" />
-                <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
+                <h1 class="font-display text-4xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
                   <span class="text-emerald-400">Hire the top 1%</span>
                   <br />open source engineers
                 </h1>
                 <p class="mt-4 sm:mt-8 text-base sm:text-lg xl:text-2xl/8 font-medium text-muted-foreground sm:max-w-md lg:max-w-none">
-                  Algora connects companies and engineers for full-time and contract work
+                  Algora connects companies and engineers<br class="lg:hidden" />
+                  for full-time and contract work
                 </p>
                 <div :if={!@screenshot?} class="mt-6 sm:mt-10 flex gap-4">
                   <.button
@@ -432,7 +433,7 @@ defmodule AlgoraWeb.HomeLive do
               <br />using open source
             </h2>
             <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Source, screen, interview and onboard with Algora.<br />
+              Source, screen, interview and onboard <span class="hidden lg:inline">with Algora</span>.<br />
               Guarantee role fit and job performance.
             </p>
             <ul class="space-y-3 mt-4 text-xl grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -474,78 +475,79 @@ defmodule AlgoraWeb.HomeLive do
               </li>
             </ul>
           </.section>
-        </div>
 
-        <.section class="pt-12 pb-20">
-          <div class="max-w-2xl mx-auto border ring-1 ring-transparent rounded-xl overflow-hidden">
-            <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-              <div class="flex flex-col md:flex-row gap-8 p-4 sm:p-6">
-                <div class="flex-1 flex flex-col justify-center items-center">
-                  <.simple_form
-                    for={@form}
-                    phx-change="validate_job"
-                    phx-submit="create_job"
-                    class="w-full space-y-6"
-                  >
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <.input
-                        id="final_section_email"
-                        field={@form[:email]}
-                        label="Email"
-                        data-domain-target
-                        phx-hook="DeriveDomain"
-                        phx-change="email_changed"
-                        phx-debounce="300"
-                      />
-                      <.input id="final_section_url" field={@form[:url]} label="Job Posting URL" />
-                      <.input
-                        id="final_section_company_url"
-                        field={@form[:company_url]}
-                        label="Company URL"
-                        data-domain-source
-                      />
-                      <.input
-                        id="final_section_company_name"
-                        field={@form[:company_name]}
-                        label="Company Name"
-                      />
-                    </div>
+          <.section class="pt-12 pb-20">
+            <div class="max-w-2xl mx-auto border ring-1 ring-transparent rounded-xl overflow-hidden">
+              <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+                <div class="flex flex-col md:flex-row gap-8 p-4 sm:p-6">
+                  <div class="flex-1 flex flex-col justify-center items-center">
+                    <.simple_form
+                      for={@form}
+                      phx-change="validate_job"
+                      phx-submit="create_job"
+                      class="w-full space-y-6"
+                    >
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <.input
+                          id="final_section_email"
+                          field={@form[:email]}
+                          label="Email"
+                          data-domain-target
+                          phx-hook="DeriveDomain"
+                          phx-change="email_changed"
+                          phx-debounce="300"
+                        />
+                        <.input id="final_section_url" field={@form[:url]} label="Job Posting URL" />
+                        <.input
+                          id="final_section_company_url"
+                          field={@form[:company_url]}
+                          label="Company URL"
+                          data-domain-source
+                        />
+                        <.input
+                          id="final_section_company_name"
+                          field={@form[:company_name]}
+                          label="Company Name"
+                        />
+                      </div>
 
-                    <div class="flex flex-col items-center gap-4">
-                      <.button size="xl" class="w-full">
-                        <div class="flex flex-col items-center gap-1 font-semibold">
-                          <span>Hire now</span>
-                        </div>
-                      </.button>
-                      <div>
-                        <div
-                          :if={
-                            @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
-                          }
-                          class="flex items-center gap-3"
-                        >
-                          <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
-                            <img src={logo} class="h-16 w-16 rounded-2xl" />
-                          <% end %>
-                          <div>
-                            <div class="text-lg text-foreground font-bold font-display line-clamp-1">
-                              {get_change(@form.source, :company_name)}
-                            </div>
-                            <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
-                              <div class="text-sm text-muted-foreground line-clamp-1">
-                                {description}
-                              </div>
+                      <div class="flex flex-col items-center gap-4">
+                        <.button size="xl" class="w-full">
+                          <div class="flex flex-col items-center gap-1 font-semibold">
+                            <span>Hire now</span>
+                          </div>
+                        </.button>
+                        <div>
+                          <div
+                            :if={
+                              @user_metadata.ok? &&
+                                get_in(@user_metadata.result, [:org, :favicon_url])
+                            }
+                            class="flex items-center gap-3"
+                          >
+                            <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
+                              <img src={logo} class="h-16 w-16 rounded-2xl" />
                             <% end %>
+                            <div>
+                              <div class="text-lg text-foreground font-bold font-display line-clamp-1">
+                                {get_change(@form.source, :company_name)}
+                              </div>
+                              <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
+                                <div class="text-sm text-muted-foreground line-clamp-1">
+                                  {description}
+                                </div>
+                              <% end %>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </.simple_form>
+                    </.simple_form>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </.section>
+          </.section>
+        </div>
 
         <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
           <Footer.footer />

@@ -4,11 +4,9 @@
     <img src="https://algora.io/images/og/home.png" alt="Homepage">
   </a>
 
-  <h3 align="center">Algora</h3>
+  <h4 align="center">Hire the top 1% open source engineers</h4>
 
   <p align="center">
-  The open source Upwork for engineers
-    <!-- Discover GitHub bounties, contract work and jobs. Hire the top 1% open source developers. -->
     <br/>
     <a href="https://algora.io">Website</a>
     ·
@@ -25,25 +23,39 @@
 
 </p>
 
-Algora exists to reduce the friction in hiring and collaborating with open source developers.
+Algora connects **companies** and **developers** for full-time and contract work.
 
-Algora combines:
+This codebase consists of the following:
 
-- a GitHub app to reward bounties and tips on issues/PRs
-- a payment processor to handle payouts, compliance & 1099s
-- a web app for sharing bounties, contracts and jobs
-- a history of transactions, invoices and peer reviews
-- a marketplace to meet and collaborate with top contributors
+- a **web app** to publish & manage SWE jobs, contracts & bounties
+- a **GitHub app** to create bounties & reward tips on issues and PRs
+- a **payment processor** to handle payouts, compliance & 1099s
+
+OSS communities and closed source teams can **self-host** or join **[Algora.io](https://algora.io)** to accomplish the following:
 
 | Use with your                | Benefit                                           |
 | ---------------------------- | ------------------------------------------------- |
-| **open source community**    | fund, solve and reward bounties on GitHub issues  |
+| **open source community**    | reward open source contributors & maintainers     |
 | **contractors**              | manage work and complete outcome based payments   |
 | **job candidates**           | collaborate on paid projects for interviews       |
 | **teammates**                | run an internal bounty program for fun and profit |
-| **Algora community experts** | get work done and grow your team                  |
 
-<table>
+**[Algora.io](https://algora.io)**, hosted by Algora Public Benefit Corporation, extends functionalities including:
+
+- developers' top OSS contributions are automatically displayed on their Algora profiles
+- companies' job applicants are automatically screened & ranked for OSS contributions
+- companies and developers are automatically matched for full-time & contract work based on tech/budget/location preferences
+
+**[Algora.io](https://algora.io)** is a complete solution for sourcing, screening, interviewing & onboarding engineers to your team.
+
+| Hiring proces                | Benefit                                           |
+| ---------------------------- | ------------------------------------------------- |
+| **sourcing**                 | publish jobs to 50K+ developers, access matches   |
+| **screening**                | auto screen job applicants for OSS contributions  |
+| **interviewing**             | trial your candidates using bounties & contracts  |
+| **onboarding**               | contribute-first hires are productive on day 1    |
+
+ <table>
 
   <!-- Dashboards -->
   <tr>
@@ -108,17 +120,14 @@ Algora combines:
 
 ## Roadmap & community requests
 
-- Profile enhancements
-  - Highlighting top non-bounty open source contributions
+- Profile Embed
   - Embeddable profile for GitHub and personal websites
   - One-click bounty and contract sharing
-- Hiring platform features
-  - Job posting and application management
-  - Developer ranking system using our ELO algorithm based on OSS contributions
-  - Technical interview tools with bounties and contract work
-  - Customizable career page embeds for seamless integration
+- Apply Embed
+  - One-click apply embed for careers pages
 - New payment/payout options
   - Alipay, Wise, crypto etc.
+- Localization of platform & matches
 - New workflow integrations
   - GitLab, Linear, Plane, Cursor etc.
 - New clients

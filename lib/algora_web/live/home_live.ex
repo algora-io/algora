@@ -44,7 +44,7 @@ defmodule AlgoraWeb.HomeLive do
       _ ->
         {:ok,
          socket
-         |> assign(:page_title, "Algora - The open source Upwork for engineers")
+         |> assign(:page_title, Algora.config([:title]))
          |> assign(:page_title_suffix, "")
          |> assign(:page_image, "#{AlgoraWeb.Endpoint.url()}/images/og/home.png")
          |> assign(:screenshot?, not is_nil(params["screenshot"]))

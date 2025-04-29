@@ -269,50 +269,42 @@ defmodule AlgoraWeb.CommunityLive do
           </div>
         </section>
 
-        <section class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
-          <.section title="Bounties" subtitle="Open bounties for you">
-            <div class="mb-4 flex sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
-              <%= for {tech, count} <- @techs do %>
-                <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
-                  <.badge
-                    variant={
-                      if String.downcase(tech) in @selected_techs, do: "success", else: "default"
-                    }
-                    class={
-                      if String.downcase(tech) in @selected_techs,
-                        do: "hover:bg-success/5 transition-colors",
-                        else: "hover:bg-accent/80 transition-colors"
-                    }
-                  >
-                    {tech} ({count})
-                  </.badge>
-                </div>
-              <% end %>
-            </div>
-            <%= if Enum.empty?(@bounties) do %>
-              <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
-                <.card_header>
-                  <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                    <.icon name="tabler-diamond" class="h-8 w-8 text-muted-foreground" />
+        <%= if not Enum.empty?(@bounties) do %>
+          <section class="relative">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+              <span class="drop-shadow-[0_1px_5px_#00000080]">
+                Bounties
+              </span>
+            </h2>
+            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mx-auto">
+              Discover GitHub bounties and contract work
+            </p>
+            <div class="container mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:px-8">
+              <div class="mb-4 flex sm:items-center sm:justify-center sm:flex-wrap gap-2 whitespace-nowrap overflow-x-auto scrollbar-thin">
+                <%= for {tech, count} <- @techs do %>
+                  <div phx-click="toggle_tech" phx-value-tech={tech} class="cursor-pointer">
+                    <.badge
+                      variant={
+                        if String.downcase(tech) in @selected_techs, do: "success", else: "default"
+                      }
+                      class={
+                        if String.downcase(tech) in @selected_techs,
+                          do: "hover:bg-success/5 transition-colors",
+                          else: "hover:bg-accent/80 transition-colors"
+                      }
+                    >
+                      {tech} ({count})
+                    </.badge>
                   </div>
-                  <.card_title>No bounties yet</.card_title>
-                  <.card_description>
-                    Open bounties will appear here once created
-                  </.card_description>
-                </.card_header>
-              </.card>
-            <% else %>
-              <div id="bounties-container" phx-hook="InfiniteScroll">
+                <% end %>
+              </div>
+
+              <div id="bounties-container">
                 <.bounties bounties={@bounties |> Enum.take(20)} />
-                <%!-- <div :if={@has_more_bounties} class="flex justify-center mt-4" data-load-more-indicator>
-              <div class="animate-pulse text-muted-foreground">
-                <.icon name="tabler-loader" class="h-6 w-6 animate-spin" />
               </div>
-            </div> --%>
-              </div>
-            <% end %>
-          </.section>
-        </section>
+            </div>
+          </section>
+        <% end %>
 
         <section class="relative isolate">
           <div class="relative isolate -z-10 py-[35vw] sm:py-[25vw]">

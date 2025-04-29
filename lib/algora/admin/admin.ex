@@ -27,6 +27,7 @@ defmodule Algora.Admin do
       User
       |> where([u], not is_nil(u.handle))
       |> where([u], not is_nil(u.provider_login))
+      |> where([u], u.type == :individual)
       |> where([u], fragment("not exists (select 1 from user_contributions where user_contributions.user_id = ?)", u.id))
 
     query =
@@ -38,12 +39,16 @@ defmodule Algora.Admin do
 
     Repo.transaction(
       fn ->
-        query
-        |> Repo.stream()
-        |> Enum.each(fn user ->
-          if opts[:dry_run] do
-            IO.puts("Enqueued job for #{user.provider_login}")
-          else
+        if opts[:dry_run] do
+          query
+          |> Repo.stream()
+          |> Enum.to_list()
+          |> length()
+          |> IO.puts()
+        else
+          query
+          |> Repo.stream()
+          |> Enum.each(fn user ->
             %{provider_login: user.provider_login}
             |> Workspace.Jobs.FetchTopContributions.new()
             |> Oban.insert()
@@ -51,8 +56,8 @@ defmodule Algora.Admin do
               {:ok, _job} -> IO.puts("Enqueued job for #{user.provider_login}")
               {:error, error} -> IO.puts("Failed to enqueue job for #{user.provider_login}: #{inspect(error)}")
             end
-          end
-        end)
+          end)
+        end
       end,
       timeout: :infinity
     )

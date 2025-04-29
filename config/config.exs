@@ -58,7 +58,7 @@ config :algora, Oban,
     activity_mailer: 1,
     activity_discord: 10,
     campaign_emails: 1,
-    fetch_top_contributions: 3,
+    fetch_top_contributions: 1,
     sync_contribution: 3
   ]
 

@@ -11,5 +11,5 @@ defmodule Algora.Workspace.Jobs.FetchTopContributions do
     Algora.Workspace.fetch_top_contributions_async(provider_login)
   end
 
-  def timeout(_), do: :timer.seconds(10)
+  def timeout(_), do: :timer.seconds(30)
 end

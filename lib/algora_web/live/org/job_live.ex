@@ -2,7 +2,6 @@ defmodule AlgoraWeb.Org.JobLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Jobs
   alias Algora.Settings
@@ -118,7 +117,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
               </div>
             </div>
-            <div class="flex flex-col items-center">
+            <div class="hidden md:flex flex-col items-center">
               <h3 class="text-lg font-semibold">
                 Share on socials
               </h3>
@@ -243,7 +242,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </.card>
               <% else %>
                 <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                  <%= for {application, index} <- Enum.with_index(@imports) do %>
+                  <%= for application <- @imports do %>
                     <div>
                       <.developer_card
                         tech_stack={@job.tech_stack |> Enum.take(1)}
@@ -289,12 +288,12 @@ defmodule AlgoraWeb.Org.JobLive do
                     </div>
                   <% end %>
                   <%= if @current_org.hiring_subscription != :active do %>
-                    <div class="relative col-span-3">
+                    <div class="relative lg:col-span-3">
                       <img
                         src={~p"/images/screenshots/job-matches-more.png"}
                         class="w-full aspect-[1368/398]"
                       />
-                      <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-4xl">
+                      <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-3xl md:text-4xl">
                         + {length(@matches) - 3} more matches
                       </div>
                     </div>
@@ -314,46 +313,41 @@ defmodule AlgoraWeb.Org.JobLive do
                   <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">Activate</span>
                   Annual Subscription
                 </h3>
-                <ul class="space-y-3 mt-4 text-base">
-                  <li class="flex items-center gap-2">
-                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                      <.icon name="tabler-speakerphone" class="h-5 w-5 text-success-300" />
+                <ul class="mt-4 text-base grid grid-cols-1 gap-3">
+                  <li class="flex items-center gap-4 md:gap-3">
+                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
+                      <.icon name="tabler-speakerphone" class="size-8 md:size-6 text-success-300" />
                     </div>
                     <span>
                       <span class="font-semibold text-success-300">Reach 50K+ devs</span>
-                      with unlimited job postings
+                      <br class="md:hidden" /> with unlimited job postings
                     </span>
                   </li>
-                  <li class="flex items-center gap-2">
-                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                      <.icon name="tabler-lock-open" class="h-5 w-5 text-success-300" />
+                  <li class="flex items-center gap-4 md:gap-3">
+                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
+                      <.icon name="tabler-lock-open" class="size-8 md:size-6 text-success-300" />
                     </div>
                     <span>
                       <span class="font-semibold text-success-300">Access top 1% users</span>
-                      matching your preferences
+                      <br class="md:hidden" /> matching your preferences
                     </span>
                   </li>
-                  <li class="flex items-center gap-2">
-                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                      <.icon name="tabler-wand" class="h-5 w-5 text-success-300" />
+                  <li class="flex items-center gap-4 md:gap-3">
+                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
+                      <.icon name="tabler-wand" class="size-8 md:size-6 text-success-300" />
                     </div>
                     <span>
-                      <%!-- <span class="font-semibold">Screen and rank applicants on auto-pilot</span> --%>
-                      <span class="font-semibold text-success-300">
-                        Auto-rank applicants
-                      </span>
-                      for {if tech =
-                                List.first(@job.tech_stack),
-                              do: String.capitalize(tech)} OSS contribution history
+                      <span class="font-semibold text-success-300">Auto-rank applicants</span>
+                      <br class="md:hidden" /> for OSS contribution history
                     </span>
                   </li>
-                  <li class="flex items-center gap-2">
-                    <div class="flex items-center justify-center rounded-full bg-success-300/10 size-8 border border-success-300/20">
-                      <.icon name="tabler-currency-dollar" class="h-5 w-5 text-success-300" />
+                  <li class="flex items-center gap-4 md:gap-3">
+                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
+                      <.icon name="tabler-currency-dollar" class="size-8 md:size-6 text-success-300" />
                     </div>
                     <span>
                       <span class="font-semibold text-success-300">Trial top candidates</span>
-                      using contracts and bounties
+                      <br class="md:hidden" /> using contracts and bounties
                     </span>
                   </li>
                 </ul>

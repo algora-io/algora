@@ -44,7 +44,7 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def mount(%{"org_handle" => handle, "id" => id, "tab" => tab}, _session, socket) do
+  def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
         if job.user_id == socket.assigns.current_org.id do
@@ -60,7 +60,6 @@ defmodule AlgoraWeb.Org.JobLive do
            |> assign(:show_share_drawer, false)
            |> assign(:show_payment_drawer, false)
            |> assign(:payment_form, to_form(%{"payment_type" => "stripe"}, as: :payment))
-           |> assign(:current_tab, tab)
            |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
            |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
            |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
@@ -97,16 +96,13 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
-    {:ok, push_navigate(socket, to: ~p"/#{handle}/jobs/#{id}/#{default_tab()}")}
-  end
-
-  @impl true
   def handle_params(%{"tab" => "activate"}, _uri, socket) do
-    {:noreply,
-     socket
-     |> assign(:current_tab, default_tab())
-     |> assign(:show_payment_drawer, true)}
+    socket =
+      if socket.assigns.current_org.subscription_price,
+        do: assign(socket, :show_payment_drawer, true),
+        else: redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))
+
+    {:noreply, assign_new(socket, :current_tab, fn -> default_tab() end)}
   end
 
   @impl true
@@ -119,6 +115,11 @@ defmodule AlgoraWeb.Org.JobLive do
       end
 
     {:noreply, assign(socket, :current_tab, tab)}
+  end
+
+  @impl true
+  def handle_params(%{"org_handle" => handle, "id" => id}, _uri, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/#{handle}/jobs/#{id}/#{default_tab()}")}
   end
 
   @impl true
@@ -241,11 +242,8 @@ defmodule AlgoraWeb.Org.JobLive do
           <% "applicants" -> %>
             <.section title="Applicants" subtitle="Developers who applied for this position">
               <:actions>
-                <.button variant="secondary" phx-click="toggle_import_drawer">
+                <.button variant="default" phx-click="toggle_import_drawer">
                   Import
-                </.button>
-                <.button variant="default" phx-click="screen_applicants">
-                  Screen
                 </.button>
               </:actions>
               <%= if Enum.empty?(@applicants) do %>
@@ -314,8 +312,8 @@ defmodule AlgoraWeb.Org.JobLive do
           <% "matches" -> %>
             <.section title="Matches" subtitle="Top developers matching your requirements">
               <:actions>
-                <.button variant="default" phx-click="screen_applicants">
-                  Screen
+                <.button variant="default" phx-click="toggle_import_drawer">
+                  Import
                 </.button>
               </:actions>
               <%= if Enum.empty?(@matches) do %>
@@ -409,7 +407,7 @@ defmodule AlgoraWeb.Org.JobLive do
               </div>
               <div class="flex flex-col justify-center items-center text-center">
                 <.button
-                  phx-click="toggle_payment_drawer"
+                  phx-click="show_payment_drawer"
                   variant="none"
                   class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
                   size="xl"
@@ -536,13 +534,8 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def handle_event("toggle_payment_drawer", _, socket) do
-    socket =
-      if socket.assigns.current_org.subscription_price,
-        do: assign(socket, :show_payment_drawer, !socket.assigns.show_payment_drawer),
-        else: redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))
-
-    {:noreply, socket}
+  def handle_event("show_payment_drawer", _, socket) do
+    {:noreply, push_patch(socket, to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/activate")}
   end
 
   @impl true
@@ -673,7 +666,10 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_event("close_payment_drawer", _, socket) do
-    {:noreply, assign(socket, :show_payment_drawer, false)}
+    {:noreply,
+     socket
+     |> assign(:show_payment_drawer, false)
+     |> push_patch(to: ~p"/#{socket.assigns.job.user.handle}/jobs/#{socket.assigns.job.id}/#{socket.assigns.current_tab}")}
   end
 
   @impl true

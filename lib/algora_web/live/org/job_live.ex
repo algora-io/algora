@@ -519,22 +519,6 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def handle_event("activate_subscription", _params, socket) do
-    case Jobs.create_payment_session(
-           %{socket.assigns.job | email: socket.assigns.current_user.email},
-           socket.assigns.current_org.subscription_price
-         ) do
-      {:ok, url} ->
-        Algora.Admin.alert("Payment session created for job posting: #{socket.assigns.job.company_name}", :info)
-        {:noreply, redirect(socket, external: url)}
-
-      {:error, reason} ->
-        Logger.error("Failed to create payment session: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
-    end
-  end
-
-  @impl true
   def handle_event("toggle_payment_drawer", _, socket) do
     socket =
       if socket.assigns.current_org.subscription_price,
@@ -709,7 +693,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
         {:noreply,
          socket
-         |> put_flash(:info, "We'll send you an invoice via email soon")
+         |> put_flash(:info, "We'll send you an invoice via email soon!")
          |> assign(:show_payment_drawer, false)}
 
       %{valid?: false} = changeset ->
@@ -1535,7 +1519,7 @@ defmodule AlgoraWeb.Org.JobLive do
       <.drawer_header>
         <.drawer_title>Activate Subscription</.drawer_title>
         <.drawer_description>
-          Choose your preferred payment method to activate your annual subscription
+          Choose your preferred payment method
         </.drawer_description>
       </.drawer_header>
 
@@ -1584,7 +1568,7 @@ defmodule AlgoraWeb.Org.JobLive do
                       <div class="flex justify-between items-center">
                         <span class="text-sm text-muted-foreground">Annual Subscription</span>
                         <span class="font-semibold font-display">
-                          {Money.to_string!(@current_org.subscription_price)}
+                          {Money.to_string!(price())}
                         </span>
                       </div>
                       <div class="flex justify-between items-center">
@@ -1595,6 +1579,21 @@ defmodule AlgoraWeb.Org.JobLive do
                           )}
                         </span>
                       </div>
+
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">
+                          Early Believer Discount:
+                        </span>
+                        <span class="font-semibold font-display -ml-1.5">
+                          -{Money.to_string!(
+                            Money.sub!(
+                              price(),
+                              @current_org.subscription_price
+                            )
+                          )}
+                        </span>
+                      </div>
+
                       <div class="border-t pt-4 flex justify-between items-center">
                         <span class="font-semibold">Total</span>
                         <span class="font-semibold font-display">
@@ -1626,31 +1625,31 @@ defmodule AlgoraWeb.Org.JobLive do
                   <.card_content class="pt-0">
                     <div class="space-y-4">
                       <div class="grid grid-cols-2 gap-2 text-sm">
-                        <span class="text-muted-foreground">Bank Name:</span>
+                        <span class="text-muted-foreground">Bank Name</span>
                         <span class="font-medium">{@wire_details["bank_name"]}</span>
 
-                        <span class="text-muted-foreground">Account Name:</span>
+                        <span class="text-muted-foreground">Account Name</span>
                         <span class="font-medium">{@wire_details["account_name"]}</span>
 
-                        <span class="text-muted-foreground">Account Number:</span>
+                        <span class="text-muted-foreground">Account Number</span>
                         <span class="font-medium">{@wire_details["account_number"]}</span>
 
-                        <span class="text-muted-foreground">Routing Number:</span>
+                        <span class="text-muted-foreground">Routing Number</span>
                         <span class="font-medium">{@wire_details["routing_number"]}</span>
 
-                        <span class="text-muted-foreground">SWIFT Code:</span>
+                        <span class="text-muted-foreground">SWIFT Code</span>
                         <span class="font-medium">{@wire_details["swift_code"]}</span>
                       </div>
 
                       <div class="border-t pt-4">
                         <div class="grid grid-cols-2 gap-2 text-sm">
-                          <span class="text-muted-foreground">Annual Subscription:</span>
+                          <span class="text-muted-foreground">Annual Subscription</span>
                           <span class="font-medium font-display">
-                            {Money.to_string!(@current_org.subscription_price)}
+                            {Money.to_string!(price())}
                           </span>
 
                           <span class="text-muted-foreground line-through block">
-                            Processing Fee:
+                            Stripe Processing Fee
                           </span>
                           <span class="font-medium font-display flex">
                             <span class="text-muted-foreground line-through">$0</span>
@@ -1661,15 +1660,35 @@ defmodule AlgoraWeb.Org.JobLive do
                             </span>
                           </span>
 
-                          <span class="text-muted-foreground">Total:</span>
-                          <span class="font-medium font-display">
-                            {Money.to_string!(@current_org.subscription_price)}
+                          <span class="text-muted-foreground block">
+                            Early Believer Discount
+                          </span>
+                          <span class="font-medium font-display flex">
+                            <span class="-ml-1.5">
+                              -{Money.to_string!(
+                                Money.sub!(
+                                  price(),
+                                  @current_org.subscription_price
+                                )
+                              )}
+                            </span>
                           </span>
                         </div>
                       </div>
 
                       <div class="border-t pt-4">
-                        <h4 class="font-medium mb-4">Billing Information</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                          <span class="text-foreground font-semibold">Total</span>
+                          <span class="font-semibold font-display">
+                            {Money.to_string!(@current_org.subscription_price)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="pt-6">
+                        <h4 class="tracking-tight font-semibold leading-none text-2xl mb-4">
+                          Billing Details
+                        </h4>
                         <div class="space-y-4">
                           <.input
                             type="text"
@@ -1731,4 +1750,6 @@ defmodule AlgoraWeb.Org.JobLive do
     </.drawer>
     """
   end
+
+  def price, do: Money.new!(:USD, 35_000, no_fraction_if_integer: true)
 end

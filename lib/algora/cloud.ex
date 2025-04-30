@@ -5,6 +5,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :top_contributions, [github_handle])
   end
 
+  def list_top_matches(opts \\ []) do
+    call(AlgoraCloud, :list_top_matches, [opts])
+  end
+
   defp call(module, function, args) do
     if :code.which(module) == :non_existing do
       # TODO: call algora API

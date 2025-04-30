@@ -674,8 +674,15 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_event("process_payment", %{"payment" => %{"payment_type" => "stripe"}}, socket) do
+    on_behalf_of =
+      if socket.assigns.current_user_role in [:admin, :mod] do
+        socket.assigns.current_org
+      else
+        socket.assigns.current_user
+      end
+
     case Jobs.create_payment_session(
-           socket.assigns.current_user,
+           on_behalf_of,
            socket.assigns.job,
            socket.assigns.current_org.subscription_price
          ) do

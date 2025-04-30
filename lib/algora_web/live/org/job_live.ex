@@ -32,6 +32,8 @@ defmodule AlgoraWeb.Org.JobLive do
          |> assign(:job, job)
          |> assign(:show_import_drawer, false)
          |> assign(:show_share_drawer, false)
+         |> assign(:show_payment_drawer, false)
+         |> assign(:payment_form, to_form(%{"payment_type" => "stripe"}, as: :payment))
          |> assign(:current_tab, tab)
          |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
          |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
@@ -53,12 +55,6 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
     {:ok, push_navigate(socket, to: ~p"/#{handle}/jobs/#{id}/applicants")}
-  end
-
-  @impl true
-  def handle_params(%{"tab" => "activate", "org_handle" => handle, "id" => id}, _uri, socket) do
-    Algora.Admin.alert("Activation request received for #{AlgoraWeb.Endpoint.url()}/#{handle}/jobs/#{id}", :info)
-    {:noreply, redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))}
   end
 
   @impl true
@@ -354,7 +350,7 @@ defmodule AlgoraWeb.Org.JobLive do
               </div>
               <div class="flex flex-col justify-center items-center text-center">
                 <.button
-                  patch={~p"/#{@current_org.handle}/jobs/#{@job.id}/activate"}
+                  phx-click="toggle_payment_drawer"
                   variant="none"
                   class="group bg-emerald-900/10 text-emerald-300 transition-colors duration-75 hover:bg-emerald-800/10 hover:text-emerald-300 hover:drop-shadow-[0_1px_5px_#34d39980] focus:bg-emerald-800/10 focus:text-emerald-300 focus:outline-none focus:drop-shadow-[0_1px_5px_#34d39980] border border-emerald-400/40 hover:border-emerald-400/50 focus:border-emerald-400/50 h-[8rem]"
                   size="xl"
@@ -475,12 +471,17 @@ defmodule AlgoraWeb.Org.JobLive do
         </div>
       </.drawer_content>
     </.drawer>
+
+    {payment_drawer(assigns)}
     """
   end
 
   @impl true
   def handle_event("activate_subscription", _params, socket) do
-    case Jobs.create_payment_session(%{socket.assigns.job | email: socket.assigns.current_user.email}) do
+    case Jobs.create_payment_session(
+           %{socket.assigns.job | email: socket.assigns.current_user.email},
+           socket.assigns.current_org.subscription_price
+         ) do
       {:ok, url} ->
         Algora.Admin.alert("Payment session created for job posting: #{socket.assigns.job.company_name}", :info)
         {:noreply, redirect(socket, external: url)}
@@ -489,6 +490,16 @@ defmodule AlgoraWeb.Org.JobLive do
         Logger.error("Failed to create payment session: #{inspect(reason)}")
         {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
     end
+  end
+
+  @impl true
+  def handle_event("toggle_payment_drawer", _, socket) do
+    socket =
+      if socket.assigns.current_org.subscription_price,
+        do: assign(socket, :show_payment_drawer, !socket.assigns.show_payment_drawer),
+        else: redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -615,6 +626,35 @@ defmodule AlgoraWeb.Org.JobLive do
   @impl true
   def handle_event("close_share_drawer", _params, socket) do
     {:noreply, assign(socket, :show_share_drawer, false)}
+  end
+
+  @impl true
+  def handle_event("close_payment_drawer", _, socket) do
+    {:noreply, assign(socket, :show_payment_drawer, false)}
+  end
+
+  @impl true
+  def handle_event("process_payment", %{"payment" => %{"payment_type" => "stripe"}}, socket) do
+    # Mock data for demonstration
+    case Jobs.create_payment_session(
+           %{socket.assigns.job | email: socket.assigns.current_user.email},
+           socket.assigns.current_org.subscription_price
+         ) do
+      {:ok, url} ->
+        {:noreply, redirect(socket, external: url)}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+    end
+  end
+
+  @impl true
+  def handle_event("process_payment", %{"payment" => %{"payment_type" => "wire"}}, socket) do
+    # Mock successful wire initiation
+    {:noreply,
+     socket
+     |> put_flash(:info, "Wire transfer details have been sent to your email")
+     |> assign(:show_payment_drawer, false)}
   end
 
   @impl true
@@ -1427,6 +1467,147 @@ defmodule AlgoraWeb.Org.JobLive do
         class="absolute inset-0 m-auto hidden size-6 sm:size-6 items-center justify-center"
       />
     </.button>
+    """
+  end
+
+  defp payment_drawer(assigns) do
+    ~H"""
+    <.drawer show={@show_payment_drawer} on_cancel={JS.push("close_payment_drawer")} direction="right">
+      <.drawer_header>
+        <.drawer_title>Activate Subscription</.drawer_title>
+        <.drawer_description>
+          Choose your preferred payment method to activate your annual subscription
+        </.drawer_description>
+      </.drawer_header>
+
+      <.drawer_content :if={@current_org.subscription_price} class="mt-4">
+        <.form for={@payment_form} phx-submit="process_payment">
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="payment-form-tabs">
+              <%= for {label, value} <- [{"Stripe", "stripe"}, {"Wire Transfer", "wire"}] do %>
+                <label class={[
+                  "group relative flex cursor-pointer rounded-lg px-3 py-2 shadow-sm focus:outline-none",
+                  "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
+                  "border-border has-[:checked]:border-primary has-[:checked]:bg-primary/10"
+                ]}>
+                  <.input
+                    type="radio"
+                    name="payment[payment_type]"
+                    checked={@payment_form[:payment_type].value == value}
+                    value={value}
+                    class="sr-only"
+                    phx-click={
+                      %JS{}
+                      |> JS.hide(to: "#payment-details [data-tab]:not([data-tab=#{value}])")
+                      |> JS.show(to: "#payment-details [data-tab=#{value}]")
+                    }
+                  />
+                  <span class="flex flex-1 items-center justify-between">
+                    <span class="text-sm font-medium">{label}</span>
+                    <.icon
+                      name="tabler-check"
+                      class="invisible size-5 text-primary group-has-[:checked]:visible"
+                    />
+                  </span>
+                </label>
+              <% end %>
+            </div>
+
+            <div id="payment-details">
+              <div data-tab="stripe">
+                <.card>
+                  <.card_header>
+                    <.card_title>Stripe Payment</.card_title>
+                    <.card_description>Pay with credit card or ACH using Stripe</.card_description>
+                  </.card_header>
+                  <.card_content>
+                    <div class="space-y-4">
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Annual Subscription</span>
+                        <span class="font-semibold font-display">
+                          {Money.to_string!(@current_org.subscription_price)}
+                        </span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Processing Fee (4%)</span>
+                        <span class="font-semibold font-display">
+                          {Money.to_string!(
+                            Money.mult!(@current_org.subscription_price, Decimal.new("0.04"))
+                          )}
+                        </span>
+                      </div>
+                      <div class="border-t pt-4 flex justify-between items-center">
+                        <span class="font-semibold">Total</span>
+                        <span class="font-semibold font-display">
+                          {Money.to_string!(
+                            Money.mult!(@current_org.subscription_price, Decimal.new("1.04"))
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </.card_content>
+                </.card>
+
+                <div class="pt-4 flex justify-end gap-4">
+                  <.button variant="secondary" phx-click="close_payment_drawer" type="button">
+                    Cancel
+                  </.button>
+                  <.button type="submit">
+                    Continue to checkout
+                  </.button>
+                </div>
+              </div>
+
+              <div data-tab="wire" class="hidden">
+                <.card>
+                  <.card_header>
+                    <.card_title>Wire Transfer Details</.card_title>
+                    <.card_description>Send payment to the following account</.card_description>
+                  </.card_header>
+                  <.card_content>
+                    <div class="space-y-4">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <span class="text-muted-foreground">Bank Name:</span>
+                        <span class="font-medium">Silicon Valley Bank</span>
+
+                        <span class="text-muted-foreground">Account Name:</span>
+                        <span class="font-medium">Algora Inc</span>
+
+                        <span class="text-muted-foreground">Account Number:</span>
+                        <span class="font-medium">XXXX-XXXX-1234</span>
+
+                        <span class="text-muted-foreground">Routing Number:</span>
+                        <span class="font-medium">XXXXXX123</span>
+
+                        <span class="text-muted-foreground">SWIFT Code:</span>
+                        <span class="font-medium">SVBKUS6S</span>
+
+                        <span class="text-muted-foreground">Amount:</span>
+                        <span class="font-medium font-display">
+                          {Money.to_string!(@current_org.subscription_price)}
+                        </span>
+                      </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground pt-4">
+                      You will receive an invoice and receipt via email once you confirm
+                    </p>
+                  </.card_content>
+                </.card>
+
+                <div class="pt-4 flex justify-end gap-4">
+                  <.button variant="secondary" phx-click="close_payment_drawer" type="button">
+                    Cancel
+                  </.button>
+                  <.button type="submit">
+                    I have wired
+                  </.button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     """
   end
 end

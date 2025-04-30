@@ -40,6 +40,7 @@ defmodule Algora.Accounts.User do
     field :priority, :integer, default: 0
     field :fee_pct, :integer, default: 9
     field :fee_pct_prev, :integer, default: 9
+    field :subscription_price, Money
     field :seeded, :boolean, default: false
     field :activated, :boolean, default: false
     field :max_open_attempts, :integer, default: 3

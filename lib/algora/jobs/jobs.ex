@@ -11,12 +11,9 @@ defmodule Algora.Jobs do
   alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Settings
   alias Algora.Util
 
   require Logger
-
-  def price, do: Money.new(:USD, 2_270, no_fraction_if_integer: true)
 
   def list_jobs(opts \\ []) do
     JobPosting
@@ -51,16 +48,18 @@ defmodule Algora.Jobs do
   defp maybe_limit(query, nil), do: query
   defp maybe_limit(query, limit), do: limit(query, ^limit)
 
-  @spec create_payment_session(job_posting: JobPosting.t()) ::
+  @spec create_payment_session(JobPosting.t(), Money.t()) ::
           {:ok, String.t()} | {:error, atom()}
-  def create_payment_session(job_posting) do
-    {amount, description} = get_job_price_and_description(job_posting.user_id)
-
+  def create_payment_session(job_posting, amount) do
     line_items = [
       %LineItem{
         amount: amount,
         title: "Job posting - #{job_posting.company_name}",
-        description: description
+        description: "Annual subscription"
+      },
+      %LineItem{
+        amount: Money.mult!(amount, Decimal.new("0.04")),
+        title: "Processing fee (4%)"
       }
     ]
 
@@ -143,16 +142,5 @@ defmodule Algora.Jobs do
     |> where([a], a.job_id == ^job.id)
     |> preload(:user)
     |> Repo.all()
-  end
-
-  def get_job_price_and_description(org_id) do
-    case Settings.get_org_job_settings(org_id) do
-      %{amount: amount, description: description} ->
-        {amount, description}
-
-      nil ->
-        # default values
-        {price(), "1 month"}
-    end
   end
 end

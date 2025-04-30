@@ -9,8 +9,6 @@ defmodule Algora.Discord do
 
   require Logger
 
-  defdelegate webhook_url, to: Client
-
   @doc """
   Sends a message to a Discord channel.
 

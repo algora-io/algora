@@ -45,44 +45,48 @@ defmodule AlgoraWeb.Org.JobLive do
   def mount(%{"org_handle" => handle, "id" => id, "tab" => tab}, _session, socket) do
     case Jobs.get_job_posting(id) do
       {:ok, job} ->
-        if connected?(socket), do: subscribe(job)
+        if job.user_id == socket.assigns.current_org.id do
+          if connected?(socket), do: subscribe(job)
 
-        {:ok,
-         socket
-         |> assign(:share_url, url(~p"/#{handle}/jobs/"))
-         |> assign(:page_title, job.title)
-         |> assign(:job, job)
-         |> assign(:show_import_drawer, false)
-         |> assign(:show_share_drawer, false)
-         |> assign(:show_payment_drawer, false)
-         |> assign(:payment_form, to_form(%{"payment_type" => "stripe"}, as: :payment))
-         |> assign(:current_tab, tab)
-         |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
-         |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
-         |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
-         |> assign(:share_drawer_type, nil)
-         |> assign(:selected_developer, nil)
-         |> assign(:import_form, to_form(%{"github_urls" => ""}, as: :import))
-         |> assign(:github_urls, "")
-         # Map of github_handle => %{status: :loading/:done, user: nil/User}
-         |> assign(:importing_users, %{})
-         |> assign(:loading_contribution_handle, nil)
-         |> assign(
-           :wire_form,
-           to_form(
-             WirePaymentForm.changeset(
-               %WirePaymentForm{
-                 payment_date: Date.utc_today(),
-                 billing_name: socket.assigns.current_org.billing_name,
-                 billing_address: socket.assigns.current_org.billing_address,
-                 executive_name: socket.assigns.current_org.executive_name,
-                 executive_role: socket.assigns.current_org.executive_role
-               },
-               %{}
+          {:ok,
+           socket
+           |> assign(:share_url, url(~p"/#{handle}/jobs/"))
+           |> assign(:page_title, job.title)
+           |> assign(:job, job)
+           |> assign(:show_import_drawer, false)
+           |> assign(:show_share_drawer, false)
+           |> assign(:show_payment_drawer, false)
+           |> assign(:payment_form, to_form(%{"payment_type" => "stripe"}, as: :payment))
+           |> assign(:current_tab, tab)
+           |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
+           |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
+           |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
+           |> assign(:share_drawer_type, nil)
+           |> assign(:selected_developer, nil)
+           |> assign(:import_form, to_form(%{"github_urls" => ""}, as: :import))
+           |> assign(:github_urls, "")
+           # Map of github_handle => %{status: :loading/:done, user: nil/User}
+           |> assign(:importing_users, %{})
+           |> assign(:loading_contribution_handle, nil)
+           |> assign(
+             :wire_form,
+             to_form(
+               WirePaymentForm.changeset(
+                 %WirePaymentForm{
+                   payment_date: Date.utc_today(),
+                   billing_name: socket.assigns.current_org.billing_name,
+                   billing_address: socket.assigns.current_org.billing_address,
+                   executive_name: socket.assigns.current_org.executive_name,
+                   executive_role: socket.assigns.current_org.executive_role
+                 },
+                 %{}
+               )
              )
            )
-         )
-         |> assign_applicants()}
+           |> assign_applicants()}
+        else
+          raise AlgoraWeb.NotFoundError
+        end
 
       _ ->
         {:ok, push_navigate(socket, to: ~p"/#{handle}/home")}

@@ -96,7 +96,9 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def handle_params(%{"tab" => "activate"}, _uri, socket) do
+  def handle_params(%{"tab" => "activate"}, uri, socket) do
+    Algora.Admin.alert("Activate clicked #{uri}", :warning)
+
     socket =
       if socket.assigns.current_org.subscription_price,
         do: assign(socket, :show_payment_drawer, true),

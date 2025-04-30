@@ -390,15 +390,6 @@ defmodule AlgoraWeb.JobsLive do
                 <br class="md:hidden" /> using contracts and bounties
               </span>
             </li>
-            <li class="flex items-center gap-4">
-              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
-                <.icon name="tabler-currency-dollar" class="size-8 text-success-300" />
-              </div>
-              <span>
-                <span class="font-semibold text-success-300">0% placement fee</span>
-                <br class="md:hidden" /> for successful hires
-              </span>
-            </li>
           </ul>
         </.section>
 

@@ -100,7 +100,14 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def handle_params(%{"tab" => tab}, _uri, socket) do
+  def handle_params(%{"tab" => tab} = params, _uri, socket) do
+    socket =
+      if params["status"] == "paid" do
+        put_flash(socket, :info, "Your annual subscription has been activated!")
+      else
+        socket
+      end
+
     {:noreply, assign(socket, :current_tab, tab)}
   end
 
@@ -661,9 +668,9 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_event("process_payment", %{"payment" => %{"payment_type" => "stripe"}}, socket) do
-    # Mock data for demonstration
     case Jobs.create_payment_session(
-           %{socket.assigns.job | email: socket.assigns.current_user.email},
+           socket.assigns.current_user,
+           socket.assigns.job,
            socket.assigns.current_org.subscription_price
          ) do
       {:ok, url} ->

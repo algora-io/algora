@@ -48,9 +48,9 @@ defmodule Algora.Jobs do
   defp maybe_limit(query, nil), do: query
   defp maybe_limit(query, limit), do: limit(query, ^limit)
 
-  @spec create_payment_session(JobPosting.t(), Money.t()) ::
+  @spec create_payment_session(User.t() | nil, JobPosting.t(), Money.t()) ::
           {:ok, String.t()} | {:error, atom()}
-  def create_payment_session(job_posting, amount) do
+  def create_payment_session(user, job_posting, amount) do
     line_items = [
       %LineItem{
         amount: amount,
@@ -66,20 +66,17 @@ defmodule Algora.Jobs do
     gross_amount = LineItem.gross_amount(line_items)
     group_id = Nanoid.generate()
 
+    job_posting = Repo.preload(job_posting, :user)
+
     Repo.transact(fn ->
-      with {:ok, user} <-
-             Accounts.get_or_register_user(job_posting.email, %{
-               type: :organization,
-               display_name: job_posting.company_name
-             }),
-           {:ok, _charge} <-
+      with {:ok, _charge} <-
              %Transaction{}
              |> change(%{
                id: Nanoid.generate(),
                provider: "stripe",
                type: :charge,
                status: :initialized,
-               user_id: user.id,
+               user_id: if(user, do: user.id),
                job_id: job_posting.id,
                gross_amount: gross_amount,
                net_amount: gross_amount,
@@ -101,8 +98,9 @@ defmodule Algora.Jobs do
                  description: "Job posting - #{job_posting.company_name}",
                  metadata: %{"version" => Payments.metadata_version(), "group_id" => group_id}
                },
-               success_url: "#{AlgoraWeb.Endpoint.url()}/jobs?status=paid",
-               cancel_url: "#{AlgoraWeb.Endpoint.url()}/jobs?status=canceled"
+               success_url:
+                 "#{AlgoraWeb.Endpoint.url()}/#{job_posting.user.handle}/jobs/#{job_posting.id}/applicants?status=paid",
+               cancel_url: "#{AlgoraWeb.Endpoint.url()}/#{job_posting.user.handle}/jobs/#{job_posting.id}/applicants"
              ) do
         {:ok, session.url}
       end

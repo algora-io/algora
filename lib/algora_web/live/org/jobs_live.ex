@@ -2,27 +2,19 @@ defmodule AlgoraWeb.Org.JobsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
-  import Ecto.Changeset
-
   alias Algora.Accounts
   alias Algora.Jobs
-  alias Algora.Jobs.JobPosting
-  alias Phoenix.LiveView.AsyncResult
 
   require Logger
 
   @impl true
   def mount(_params, _session, socket) do
-    # Group jobs by user
     jobs_by_user = Enum.group_by(Jobs.list_jobs(user_id: socket.assigns.current_org.id), & &1.user)
-    changeset = JobPosting.changeset(%JobPosting{}, %{})
 
     {:ok,
      socket
      |> assign(:page_title, "Jobs")
      |> assign(:jobs_by_user, jobs_by_user)
-     |> assign(:form, to_form(changeset))
-     |> assign(:user_metadata, AsyncResult.loading())
      |> assign_user_applications()}
   end
 
@@ -161,37 +153,6 @@ defmodule AlgoraWeb.Org.JobsLive do
     {:noreply, socket}
   end
 
-  def handle_event("email_changed", %{"job_posting" => %{"email" => email}}, socket) do
-    if String.match?(email, ~r/^[^\s]+@[^\s]+$/i) do
-      {:noreply, start_async(socket, :fetch_metadata, fn -> Algora.Crawler.fetch_user_metadata(email) end)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  @impl true
-  def handle_event("validate_job", %{"job_posting" => params}, socket) do
-    {:noreply, assign(socket, :form, to_form(JobPosting.changeset(socket.assigns.form.source, params)))}
-  end
-
-  @impl true
-  def handle_event("create_job", %{"job_posting" => params}, socket) do
-    with {:ok, user} <-
-           Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
-         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting(),
-         {:ok, url} <- Jobs.create_payment_session(job, socket.assigns.current_org.subscription_price) do
-      Algora.Admin.alert("Job posting initialized: #{job.company_name}", :info)
-      {:noreply, redirect(socket, external: url)}
-    else
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, :form, to_form(changeset))}
-
-      {:error, reason} ->
-        Logger.error("Failed to create job posting: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
-    end
-  end
-
   @impl true
   def handle_event("apply_job", %{"job-id" => job_id}, socket) do
     if socket.assigns[:current_user] do
@@ -220,19 +181,6 @@ defmodule AlgoraWeb.Org.JobsLive do
   @impl true
   def handle_event(_event, _params, socket) do
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_async(:fetch_metadata, {:ok, metadata}, socket) do
-    {:noreply,
-     socket
-     |> assign(:user_metadata, AsyncResult.ok(socket.assigns.user_metadata, metadata))
-     |> assign(:form, to_form(change(socket.assigns.form.source, company_name: get_in(metadata, [:org, :og_title]))))}
-  end
-
-  @impl true
-  def handle_async(:fetch_metadata, {:exit, reason}, socket) do
-    {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 
   defp assign_user_applications(socket) do

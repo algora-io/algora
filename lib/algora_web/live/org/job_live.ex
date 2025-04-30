@@ -1649,7 +1649,9 @@ defmodule AlgoraWeb.Org.JobLive do
                             {Money.to_string!(@current_org.subscription_price)}
                           </span>
 
-                          <span class="text-muted-foreground line-through">Processing Fee:</span>
+                          <span class="text-muted-foreground line-through block">
+                            Processing Fee:
+                          </span>
                           <span class="font-medium font-display flex">
                             <span class="text-muted-foreground line-through">$0</span>
                             <span class="text-success-400 ml-auto">

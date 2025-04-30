@@ -12,6 +12,8 @@ defmodule AlgoraWeb.Org.JobLive do
 
   require Logger
 
+  defp default_tab, do: "applicants"
+
   defmodule WirePaymentForm do
     @moduledoc false
     use Ecto.Schema
@@ -96,7 +98,15 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def mount(%{"org_handle" => handle, "id" => id}, _session, socket) do
-    {:ok, push_navigate(socket, to: ~p"/#{handle}/jobs/#{id}/applicants")}
+    {:ok, push_navigate(socket, to: ~p"/#{handle}/jobs/#{id}/#{default_tab()}")}
+  end
+
+  @impl true
+  def handle_params(%{"tab" => "activate"}, _uri, socket) do
+    {:noreply,
+     socket
+     |> assign(:current_tab, default_tab())
+     |> assign(:show_payment_drawer, true)}
   end
 
   @impl true
@@ -1578,14 +1588,6 @@ defmodule AlgoraWeb.Org.JobLive do
                           {Money.to_string!(price())}
                         </span>
                       </div>
-                      <div class="flex justify-between items-center">
-                        <span class="text-sm text-muted-foreground">Processing Fee (4%)</span>
-                        <span class="font-semibold font-display">
-                          {Money.to_string!(
-                            Money.mult!(@current_org.subscription_price, Decimal.new("0.04"))
-                          )}
-                        </span>
-                      </div>
 
                       <div class="flex justify-between items-center">
                         <span class="text-sm text-muted-foreground">
@@ -1597,6 +1599,15 @@ defmodule AlgoraWeb.Org.JobLive do
                               price(),
                               @current_org.subscription_price
                             )
+                          )}
+                        </span>
+                      </div>
+
+                      <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Processing Fee (4%)</span>
+                        <span class="font-semibold font-display">
+                          {Money.to_string!(
+                            Money.mult!(@current_org.subscription_price, Decimal.new("0.04"))
                           )}
                         </span>
                       </div>
@@ -1626,26 +1637,69 @@ defmodule AlgoraWeb.Org.JobLive do
               <div data-tab="wire" class="hidden">
                 <.card>
                   <.card_header>
-                    <.card_title>Wire Transfer Details</.card_title>
-                    <.card_description>Send payment to the following account</.card_description>
+                    <.card_title>Billing Details</.card_title>
+                    <.card_description>
+                      Enter your billing details to generate an invoice
+                    </.card_description>
                   </.card_header>
                   <.card_content class="pt-0">
                     <div class="space-y-4">
-                      <div class="grid grid-cols-2 gap-2 text-sm">
-                        <span class="text-muted-foreground">Bank Name</span>
-                        <span class="font-medium">{@wire_details["bank_name"]}</span>
+                      <.input
+                        type="text"
+                        label="Billing Name"
+                        field={@wire_form[:billing_name]}
+                        value={
+                          @current_org.billing_name || @current_org.display_name ||
+                            @current_org.handle
+                        }
+                      />
+                      <.input
+                        type="textarea"
+                        label="Billing Address"
+                        field={@wire_form[:billing_address]}
+                        value={@current_org.billing_address}
+                      />
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <.input
+                          type="text"
+                          label="Executive Name"
+                          field={@wire_form[:executive_name]}
+                          value={@current_org.executive_name}
+                        />
+                        <.input
+                          type="text"
+                          label="Executive Role"
+                          field={@wire_form[:executive_role]}
+                          value={@current_org.executive_role}
+                        />
+                      </div>
+                      <.input
+                        type="date"
+                        label="Invoice Date"
+                        field={@wire_form[:payment_date]}
+                        value={Date.utc_today()}
+                      />
+                    </div>
 
-                        <span class="text-muted-foreground">Account Name</span>
-                        <span class="font-medium">{@wire_details["account_name"]}</span>
+                    <h4 class="pt-6 tracking-tight font-semibold leading-none text-2xl mb-4">
+                      Wire Transfer Details
+                    </h4>
+                    <div class="space-y-4">
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <span class="text-muted-foreground">Beneficiary (Account Holder)</span>
+                        <span class="font-medium">{@wire_details["beneficiary"]}</span>
+
+                        <span class="text-muted-foreground">ACH and Wire Routing Number</span>
+                        <span class="font-medium">{@wire_details["routing_number"]}</span>
 
                         <span class="text-muted-foreground">Account Number</span>
                         <span class="font-medium">{@wire_details["account_number"]}</span>
 
-                        <span class="text-muted-foreground">Routing Number</span>
-                        <span class="font-medium">{@wire_details["routing_number"]}</span>
+                        <span class="text-muted-foreground">Account Type</span>
+                        <span class="font-medium">{@wire_details["account_type"]}</span>
 
-                        <span class="text-muted-foreground">SWIFT Code</span>
-                        <span class="font-medium">{@wire_details["swift_code"]}</span>
+                        <span class="text-muted-foreground">Bank Address</span>
+                        <span class="font-medium">{@wire_details["bank_address"]}</span>
                       </div>
 
                       <div class="border-t pt-4">
@@ -1653,18 +1707,6 @@ defmodule AlgoraWeb.Org.JobLive do
                           <span class="text-muted-foreground">Annual Subscription</span>
                           <span class="font-medium font-display">
                             {Money.to_string!(price())}
-                          </span>
-
-                          <span class="text-muted-foreground line-through block">
-                            Stripe Processing Fee
-                          </span>
-                          <span class="font-medium font-display flex">
-                            <span class="text-muted-foreground line-through">$0</span>
-                            <span class="text-success-400 ml-auto">
-                              ({Money.to_string!(
-                                Money.mult!(@current_org.subscription_price, Decimal.new("0.04"))
-                              )} saved!)
-                            </span>
                           </span>
 
                           <span class="text-muted-foreground block">
@@ -1680,6 +1722,18 @@ defmodule AlgoraWeb.Org.JobLive do
                               )}
                             </span>
                           </span>
+
+                          <span class="text-muted-foreground line-through block">
+                            Stripe Processing Fee
+                          </span>
+                          <span class="font-medium font-display flex">
+                            <span class="text-muted-foreground line-through">$0</span>
+                            <span class="text-success-400 ml-auto">
+                              ({Money.to_string!(
+                                Money.mult!(@current_org.subscription_price, Decimal.new("0.04"))
+                              )} saved!)
+                            </span>
+                          </span>
                         </div>
                       </div>
 
@@ -1689,49 +1743,6 @@ defmodule AlgoraWeb.Org.JobLive do
                           <span class="font-semibold font-display">
                             {Money.to_string!(@current_org.subscription_price)}
                           </span>
-                        </div>
-                      </div>
-
-                      <div class="pt-6">
-                        <h4 class="tracking-tight font-semibold leading-none text-2xl mb-4">
-                          Billing Details
-                        </h4>
-                        <div class="space-y-4">
-                          <.input
-                            type="text"
-                            label="Billing Name"
-                            field={@wire_form[:billing_name]}
-                            value={
-                              @current_org.billing_name || @current_org.display_name ||
-                                @current_org.handle
-                            }
-                          />
-                          <.input
-                            type="textarea"
-                            label="Billing Address"
-                            field={@wire_form[:billing_address]}
-                            value={@current_org.billing_address}
-                          />
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <.input
-                              type="text"
-                              label="Executive Name"
-                              field={@wire_form[:executive_name]}
-                              value={@current_org.executive_name}
-                            />
-                            <.input
-                              type="text"
-                              label="Executive Role"
-                              field={@wire_form[:executive_role]}
-                              value={@current_org.executive_role}
-                            />
-                          </div>
-                          <.input
-                            type="date"
-                            label="Invoice Date"
-                            field={@wire_form[:payment_date]}
-                            value={Date.utc_today()}
-                          />
                         </div>
                       </div>
                     </div>

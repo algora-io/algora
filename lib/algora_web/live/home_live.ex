@@ -13,7 +13,6 @@ defmodule AlgoraWeb.HomeLive do
   alias Algora.Jobs.JobPosting
   alias Algora.Payments.Transaction
   alias Algora.Repo
-  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.PlatformStats
@@ -627,39 +626,6 @@ defmodule AlgoraWeb.HomeLive do
     {:noreply, assign(socket, :user_metadata, AsyncResult.failed(socket.assigns.user_metadata, reason))}
   end
 
-  defp dev_card(assigns) do
-    ~H"""
-    <.link navigate={User.url(@dev)} target="_blank" class="relative">
-      <img
-        src={@dev.avatar_url}
-        alt={@dev.name}
-        class="aspect-square w-full rounded-xl rounded-b-none bg-muted object-cover shadow-lg ring-1 ring-border"
-      />
-      <div class="font-display mt-1 rounded-xl rounded-t-none bg-card/50 p-3 text-sm ring-1 ring-border backdrop-blur-sm">
-        <div class="font-semibold text-foreground">
-          {@dev.name} {Algora.Misc.CountryEmojis.get(@dev.country)}
-        </div>
-        <div class="mt-0.5 text-xs font-medium text-foreground line-clamp-2">{@dev.bio}</div>
-        <div class="hidden mt-1 text-sm">
-          <div class="-ml-1 flex h-6 flex-wrap gap-1 overflow-hidden p-px text-sm">
-            <%= for tech <- @dev.tech_stack do %>
-              <span class="rounded-xl bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground ring-1 ring-border">
-                {tech}
-              </span>
-            <% end %>
-          </div>
-        </div>
-        <div class="mt-0.5 text-xs text-muted-foreground">
-          <span class="font-medium">Total Earned:</span>
-          <span class="text-sm font-bold text-success">
-            {Money.to_string!(@dev.total_earned, no_fraction_if_integer: true)}
-          </span>
-        </div>
-      </div>
-    </.link>
-    """
-  end
-
   defp get_total_paid_out do
     subtotal =
       Repo.one(
@@ -768,79 +734,6 @@ defmodule AlgoraWeb.HomeLive do
       >
       </div>
     </div>
-    """
-  end
-
-  defp events(assigns) do
-    ~H"""
-    <ul class="w-full pl-10 relative space-y-8">
-      <li :for={{transaction, index} <- @transactions |> Enum.with_index()} class="relative">
-        <div>
-          <div class="relative -ml-[2.75rem]">
-            <span
-              :if={index != length(@transactions) - 1}
-              class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-              aria-hidden="true"
-            >
-            </span>
-            <.link
-              rel="noopener"
-              target="_blank"
-              class="w-full group inline-flex"
-              href={transaction.ticket.url}
-            >
-              <div class="w-full relative flex space-x-3">
-                <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                  <div class="w-full flex items-center gap-3">
-                    <div class="flex -space-x-1 ring-8 ring-[#050505]">
-                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-[#050505]">
-                        <img
-                          class="aspect-square h-full w-full"
-                          alt={transaction.user.name}
-                          src={transaction.user.avatar_url}
-                        />
-                      </span>
-                      <span class="relative shrink-0 overflow-hidden flex h-9 w-9 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-[#050505]">
-                        <img
-                          class="aspect-square h-full w-full"
-                          alt={transaction.linked_transaction.user.name}
-                          src={transaction.linked_transaction.user.avatar_url}
-                        />
-                      </span>
-                    </div>
-                    <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                      <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-base">
-                        <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                          {transaction.linked_transaction.user.name}
-                        </span>
-                        awarded
-                        <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                          {transaction.user.name}
-                        </span>
-                        a
-                        <span class="font-bold font-display text-success-400 group-hover:text-success-300 transition-colors">
-                          {Money.to_string!(transaction.net_amount)}
-                        </span>
-                        <%= if transaction.bounty_id do %>
-                          bounty
-                        <% else %>
-                          tip
-                        <% end %>
-                      </p>
-                      <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                        <time datetime={transaction.succeeded_at}>
-                          {Algora.Util.time_ago(transaction.succeeded_at)}
-                        </time>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </.link>
-          </div>
-        </div>
-      </li>
-    </ul>
     """
   end
 

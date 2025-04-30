@@ -403,6 +403,15 @@ defmodule AlgoraWeb.Org.JobLive do
                       <br class="md:hidden" /> using contracts and bounties
                     </span>
                   </li>
+                  <li class="flex items-center gap-4 md:gap-3">
+                    <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 md:size-10 border border-success-300/20">
+                      <.icon name="tabler-moneybag" class="size-8 md:size-6 text-success-300" />
+                    </div>
+                    <span>
+                      <span class="font-semibold text-success-300">0% placement fee</span>
+                      <br class="md:hidden" /> for successful hires
+                    </span>
+                  </li>
                 </ul>
               </div>
               <div class="flex flex-col justify-center items-center text-center">
@@ -1645,20 +1654,18 @@ defmodule AlgoraWeb.Org.JobLive do
                         </span>
                       </div>
 
-                      <div class="flex justify-between items-center">
-                        <span class="text-sm text-muted-foreground">
-                          Early Believer Discount:
-                        </span>
-                        <span class="font-semibold font-display -ml-1.5">
-                          -{Money.to_string!(
-                            Money.sub!(
-                              price(),
-                              @current_org.subscription_price
-                            )
-                          )}
-                        </span>
-                      </div>
-
+                      <%= if discount = Money.sub!(price(), @current_org.subscription_price) do %>
+                        <%= if Money.positive?(discount) do %>
+                          <div class="flex justify-between items-center">
+                            <span class="text-sm text-muted-foreground">
+                              Early Believer Discount:
+                            </span>
+                            <span class="font-semibold font-display -ml-1.5">
+                              -{Money.to_string!(discount)}
+                            </span>
+                          </div>
+                        <% end %>
+                      <% end %>
                       <div class="flex justify-between items-center">
                         <span class="text-sm text-muted-foreground">Processing Fee (4%)</span>
                         <span class="font-semibold font-display">
@@ -1765,19 +1772,18 @@ defmodule AlgoraWeb.Org.JobLive do
                             {Money.to_string!(price())}
                           </span>
 
-                          <span class="text-muted-foreground block">
-                            Early Believer Discount
-                          </span>
-                          <span class="font-medium font-display flex">
-                            <span class="-ml-1.5">
-                              -{Money.to_string!(
-                                Money.sub!(
-                                  price(),
-                                  @current_org.subscription_price
-                                )
-                              )}
-                            </span>
-                          </span>
+                          <%= if discount = Money.sub!(price(), @current_org.subscription_price) do %>
+                            <%= if Money.positive?(discount) do %>
+                              <span class="text-muted-foreground block">
+                                Early Believer Discount
+                              </span>
+                              <span class="font-medium font-display flex">
+                                <span class="-ml-1.5">
+                                  -{Money.to_string!(discount)}
+                                </span>
+                              </span>
+                            <% end %>
+                          <% end %>
 
                           <span class="text-muted-foreground line-through block">
                             Stripe Processing Fee

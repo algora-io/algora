@@ -609,15 +609,14 @@ defmodule Algora.Workspace do
     end
   end
 
-  @spec list_user_contributions(String.t(), map()) :: {:ok, list(map())} | {:error, term()}
-  def list_user_contributions(github_handle, opts \\ []) do
+  @spec list_user_contributions(list(String.t()), map()) :: {:ok, list(map())} | {:error, term()}
+  def list_user_contributions(ids, opts \\ []) do
     query =
       from uc in UserContribution,
         join: u in assoc(uc, :user),
         join: r in assoc(uc, :repository),
         join: repo_owner in assoc(r, :user),
-        where: u.provider == "github",
-        where: u.provider_login == ^github_handle,
+        where: u.id in ^ids,
         where: not ilike(r.name, "%awesome%"),
         where: not ilike(r.name, "%algorithms%"),
         where: not ilike(repo_owner.provider_login, "%algorithms%"),
@@ -627,7 +626,7 @@ defmodule Algora.Workspace do
           desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
           desc: r.stargazers_count
         ],
-        select_merge: %{repository: %{r | user: repo_owner}}
+        select_merge: %{user: u, repository: %{r | user: repo_owner}}
 
     query =
       case opts[:limit] do

@@ -1197,14 +1197,10 @@ defmodule AlgoraWeb.Org.JobLive do
 
   # Fetch contributions for all applicants and create a map for quick lookup
   defp fetch_applicants_contributions(users, tech_stack) do
-    Enum.reduce(users, %{}, fn user, acc ->
-      if user.provider_login do
-        contributions = Algora.Workspace.list_user_contributions(user.provider_login, limit: 20, tech_stack: tech_stack)
-        Map.put(acc, user.id, contributions)
-      else
-        acc
-      end
-    end)
+    users
+    |> Enum.map(& &1.id)
+    |> Algora.Workspace.list_user_contributions(tech_stack: tech_stack)
+    |> Enum.group_by(& &1.user.id)
   end
 
   # Sort applicants by their total number of contributions

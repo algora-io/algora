@@ -164,4 +164,15 @@ defmodule Algora.Settings do
   def set_featured_transactions(ids) when is_list(ids) do
     set("featured_transactions", %{"ids" => ids})
   end
+
+  def get_wire_details do
+    case get("wire_details") do
+      %{"details" => details} when is_map(details) -> details
+      _ -> nil
+    end
+  end
+
+  def set_wire_details(details) when is_map(details) do
+    set("wire_details", %{"details" => details})
+  end
 end

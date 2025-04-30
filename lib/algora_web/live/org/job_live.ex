@@ -50,6 +50,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
           {:ok,
            socket
+           |> assign(:wire_details, Settings.get_wire_details())
            |> assign(:share_url, url(~p"/#{handle}/jobs/"))
            |> assign(:page_title, job.title)
            |> assign(:job, job)
@@ -1626,19 +1627,19 @@ defmodule AlgoraWeb.Org.JobLive do
                     <div class="space-y-4">
                       <div class="grid grid-cols-2 gap-2 text-sm">
                         <span class="text-muted-foreground">Bank Name:</span>
-                        <span class="font-medium">Silicon Valley Bank</span>
+                        <span class="font-medium">{@wire_details["bank_name"]}</span>
 
                         <span class="text-muted-foreground">Account Name:</span>
-                        <span class="font-medium">Algora Inc</span>
+                        <span class="font-medium">{@wire_details["account_name"]}</span>
 
                         <span class="text-muted-foreground">Account Number:</span>
-                        <span class="font-medium">XXXX-XXXX-1234</span>
+                        <span class="font-medium">{@wire_details["account_number"]}</span>
 
                         <span class="text-muted-foreground">Routing Number:</span>
-                        <span class="font-medium">XXXXXX123</span>
+                        <span class="font-medium">{@wire_details["routing_number"]}</span>
 
                         <span class="text-muted-foreground">SWIFT Code:</span>
-                        <span class="font-medium">SVBKUS6S</span>
+                        <span class="font-medium">{@wire_details["swift_code"]}</span>
                       </div>
 
                       <div class="border-t pt-4">

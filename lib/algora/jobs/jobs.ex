@@ -54,8 +54,8 @@ defmodule Algora.Jobs do
     line_items = [
       %LineItem{
         amount: amount,
-        title: "Job posting - #{job_posting.company_name}",
-        description: "Annual subscription"
+        title: "Algora Annual Subscription",
+        description: "Hiring services annual package"
       },
       %LineItem{
         amount: Money.mult!(amount, Decimal.new("0.04")),

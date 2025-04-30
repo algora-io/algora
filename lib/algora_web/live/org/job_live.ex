@@ -1064,7 +1064,10 @@ defmodule AlgoraWeb.Org.JobLive do
             <div>
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link navigate={User.url(@user)} class="font-semibold hover:underline">
-                  {@user.name} {Algora.Misc.CountryEmojis.get(@user.country)}
+                  {@user.name}
+                  <span :if={@user.country}>
+                    {Algora.Misc.CountryEmojis.get(@user.country)}
+                  </span>
                 </.link>
               </div>
               <div
@@ -1419,7 +1422,9 @@ defmodule AlgoraWeb.Org.JobLive do
           <div>
             <div class="flex items-center gap-1 text-base text-foreground">
               <span class="font-semibold">{@selected_developer.name}</span>
-              {Algora.Misc.CountryEmojis.get(@selected_developer.country)}
+              <span :if={@selected_developer.country}>
+                {Algora.Misc.CountryEmojis.get(@selected_developer.country)}
+              </span>
             </div>
 
             <div
@@ -1537,14 +1542,62 @@ defmodule AlgoraWeb.Org.JobLive do
     ~H"""
     <.drawer show={@show_payment_drawer} on_cancel={JS.push("close_payment_drawer")} direction="right">
       <.drawer_header>
-        <.drawer_title>Activate Subscription</.drawer_title>
+        <.drawer_title>Annual Hiring Subscription</.drawer_title>
         <.drawer_description>
-          Choose your preferred payment method
+          Source, screen, interview and onboard with Algora
         </.drawer_description>
       </.drawer_header>
 
-      <.drawer_content :if={@current_org.subscription_price} class="mt-4">
-        <.form for={@payment_form} phx-submit="process_payment">
+      <.drawer_content :if={@current_org.subscription_price}>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-center gap-2">
+            <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-6 border border-success-300/20">
+              <.icon name="tabler-speakerphone" class="size-4 text-success-300" />
+            </div>
+            <span>
+              <span class="font-semibold text-success-300">Reach 50K+ devs</span>
+              <br class="md:hidden" /> with unlimited job postings
+            </span>
+          </li>
+          <li class="flex items-center gap-2">
+            <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-6 border border-success-300/20">
+              <.icon name="tabler-lock-open" class="size-4 text-success-300" />
+            </div>
+            <span>
+              <span class="font-semibold text-success-300">Access top 1% users</span>
+              <br class="md:hidden" /> matching your preferences
+            </span>
+          </li>
+          <li class="flex items-center gap-2">
+            <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-6 border border-success-300/20">
+              <.icon name="tabler-wand" class="size-4 text-success-300" />
+            </div>
+            <span>
+              <span class="font-semibold text-success-300">Auto-rank applicants</span>
+              <br class="md:hidden" /> for OSS contribution history
+            </span>
+          </li>
+          <li class="flex items-center gap-2">
+            <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-6 border border-success-300/20">
+              <.icon name="tabler-currency-dollar" class="size-4 text-success-300" />
+            </div>
+            <span>
+              <span class="font-semibold text-success-300">Trial top candidates</span>
+              <br class="md:hidden" /> using contracts and bounties
+            </span>
+          </li>
+          <li class="flex items-center gap-2">
+            <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-6 border border-success-300/20">
+              <.icon name="tabler-moneybag" class="size-4 text-success-300" />
+            </div>
+            <span>
+              <span class="font-semibold text-success-300">0% placement fee</span>
+              <br class="md:hidden" /> for successful hires
+            </span>
+          </li>
+        </ul>
+
+        <.form for={@payment_form} phx-submit="process_payment" class="mt-4">
           <div class="space-y-6">
             <div class="grid grid-cols-2 gap-4" phx-update="ignore" id="payment-form-tabs">
               <%= for {label, value} <- [{"Stripe", "stripe"}, {"Wire Transfer", "wire"}] do %>

@@ -704,9 +704,11 @@ defmodule AlgoraWeb.Org.JobLive do
           })
           |> Repo.update()
 
+        Algora.Admin.alert("Wire intent: #{inspect(changeset.changes)}", :info)
+
         {:noreply,
          socket
-         |> put_flash(:info, "Wire transfer details have been sent to your email")
+         |> put_flash(:info, "We'll send you an invoice via email soon")
          |> assign(:show_payment_drawer, false)}
 
       %{valid?: false} = changeset ->

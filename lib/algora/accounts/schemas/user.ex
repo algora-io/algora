@@ -83,6 +83,11 @@ defmodule Algora.Accounts.User do
     field :login_token, :string, virtual: true
     field :signup_token, :string, virtual: true
 
+    field :billing_name, :string
+    field :billing_address, :string
+    field :executive_name, :string
+    field :executive_role, :string
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id

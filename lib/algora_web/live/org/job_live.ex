@@ -4,12 +4,34 @@ defmodule AlgoraWeb.Org.JobLive do
 
   alias Algora.Accounts.User
   alias Algora.Jobs
+  alias Algora.Repo
   alias Algora.Settings
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
 
   require Logger
+
+  defmodule WirePaymentForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    embedded_schema do
+      field :billing_name, :string
+      field :billing_address, :string
+      field :executive_name, :string
+      field :executive_role, :string
+      field :payment_date, :date
+    end
+
+    def changeset(form, attrs \\ %{}) do
+      form
+      |> cast(attrs, [:billing_name, :billing_address, :executive_name, :executive_role, :payment_date])
+      |> validate_required([:billing_name, :billing_address, :executive_name, :executive_role, :payment_date])
+    end
+  end
 
   defp subscribe(job) do
     Phoenix.PubSub.subscribe(Algora.PubSub, "job:#{job.id}")
@@ -45,6 +67,21 @@ defmodule AlgoraWeb.Org.JobLive do
          # Map of github_handle => %{status: :loading/:done, user: nil/User}
          |> assign(:importing_users, %{})
          |> assign(:loading_contribution_handle, nil)
+         |> assign(
+           :wire_form,
+           to_form(
+             WirePaymentForm.changeset(
+               %WirePaymentForm{
+                 payment_date: Date.utc_today(),
+                 billing_name: socket.assigns.current_org.billing_name,
+                 billing_address: socket.assigns.current_org.billing_address,
+                 executive_name: socket.assigns.current_org.executive_name,
+                 executive_role: socket.assigns.current_org.executive_role
+               },
+               %{}
+             )
+           )
+         )
          |> assign_applicants()}
 
       _ ->
@@ -649,12 +686,31 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
-  def handle_event("process_payment", %{"payment" => %{"payment_type" => "wire"}}, socket) do
-    # Mock successful wire initiation
-    {:noreply,
-     socket
-     |> put_flash(:info, "Wire transfer details have been sent to your email")
-     |> assign(:show_payment_drawer, false)}
+  def handle_event("process_payment", %{"payment" => %{"payment_type" => "wire"}} = params, socket) do
+    case WirePaymentForm.changeset(%WirePaymentForm{}, params["wire_payment_form"]) do
+      %{valid?: true} = changeset ->
+        # Update user billing info
+        {:ok, _user} =
+          socket.assigns.current_org
+          |> Ecto.Changeset.change(%{
+            billing_name: changeset.changes.billing_name,
+            billing_address: changeset.changes.billing_address,
+            executive_name: changeset.changes.executive_name,
+            executive_role: changeset.changes.executive_role
+          })
+          |> Repo.update()
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Wire transfer details have been sent to your email")
+         |> assign(:show_payment_drawer, false)}
+
+      %{valid?: false} = changeset ->
+        {:noreply,
+         socket
+         |> assign(:wire_form, to_form(changeset))
+         |> put_flash(:error, "Please fill in all required fields")}
+    end
   end
 
   @impl true
@@ -1587,9 +1643,48 @@ defmodule AlgoraWeb.Org.JobLive do
                           {Money.to_string!(@current_org.subscription_price)}
                         </span>
                       </div>
+
+                      <div class="border-t pt-4">
+                        <h4 class="font-medium mb-4">Billing Information</h4>
+                        <div class="space-y-4">
+                          <.input
+                            type="text"
+                            label="Billing Name"
+                            field={@wire_form[:billing_name]}
+                            value={
+                              @current_org.billing_name || @current_org.display_name ||
+                                @current_org.handle
+                            }
+                          />
+                          <.input
+                            type="textarea"
+                            label="Billing Address"
+                            field={@wire_form[:billing_address]}
+                            value={@current_org.billing_address}
+                          />
+                          <.input
+                            type="text"
+                            label="Executive Name"
+                            field={@wire_form[:executive_name]}
+                            value={@current_org.executive_name}
+                          />
+                          <.input
+                            type="text"
+                            label="Executive Role"
+                            field={@wire_form[:executive_role]}
+                            value={@current_org.executive_role}
+                          />
+                          <.input
+                            type="date"
+                            label="Payment Date"
+                            field={@wire_form[:payment_date]}
+                            value={Date.utc_today()}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <p class="text-sm text-muted-foreground pt-4">
-                      You will receive an invoice and receipt via email once you confirm
+                      You will receive an invoice via email once you confirm
                     </p>
                   </.card_content>
                 </.card>
@@ -1599,7 +1694,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     Cancel
                   </.button>
                   <.button type="submit">
-                    I have wired
+                    Generate invoice
                   </.button>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 defmodule Algora.Admin do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts
@@ -10,6 +11,7 @@ defmodule Algora.Admin do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Github
+  alias Algora.Jobs.JobPosting
   alias Algora.Parser
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -21,6 +23,23 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Ticket
 
   require Logger
+
+  def seed_job(opts \\ %{}) do
+    with {:ok, user} <- Repo.fetch_by(User, handle: opts.org.handle),
+         {:ok, user} <- user |> change(opts.org) |> Repo.update(),
+         {:ok, job} <-
+           Repo.insert(%JobPosting{
+             id: Nanoid.generate(),
+             user_id: user.id,
+             company_name: user.name,
+             company_url: user.website_url,
+             title: opts.title,
+             description: opts.description,
+             tech_stack: opts.tech_stack || Enum.take(user.tech_stack, 1)
+           }) do
+      dbg("#{AlgoraWeb.Endpoint.url()}/#{user.handle}/jobs/#{job.id}")
+    end
+  end
 
   def sync_contributions(opts \\ []) do
     query =

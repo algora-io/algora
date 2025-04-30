@@ -53,12 +53,9 @@ defmodule Algora.Github.TokenPool do
 
       case Github.get_current_user(token) do
         {:ok, _} ->
-          dbg(token)
-          dbg("token is valid")
           {:reply, token, %{state | current_token_index: next_index}}
 
         _ ->
-          dbg("token is invalid")
           {:reply, nil, %{state | current_token_index: next_index}}
       end
     end

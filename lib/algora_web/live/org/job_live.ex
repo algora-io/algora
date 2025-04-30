@@ -704,7 +704,7 @@ defmodule AlgoraWeb.Org.JobLive do
           })
           |> Repo.update()
 
-        Algora.Admin.alert("Wire intent: #{inspect(changeset.changes)}", :info)
+        Algora.Admin.alert("Wire intent: #{inspect(changeset.changes)}", :critical)
 
         {:noreply,
          socket

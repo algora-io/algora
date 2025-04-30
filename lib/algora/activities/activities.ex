@@ -300,7 +300,12 @@ defmodule Algora.Activities do
 
     discord_job =
       if discord_payload = DiscordViews.render(activity) do
-        [Algora.Activities.SendDiscord.changeset(%{payload: discord_payload})]
+        [
+          Algora.Activities.SendDiscord.changeset(%{
+            url: Algora.config([:discord, :webhook_url]),
+            payload: discord_payload
+          })
+        ]
       else
         []
       end

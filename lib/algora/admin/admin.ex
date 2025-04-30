@@ -469,6 +469,7 @@ defmodule Algora.Admin do
     Logger.error(message)
 
     %{
+      url: Algora.config([:discord, :webhook_url]),
       payload: %{
         embeds: [
           %{
@@ -489,16 +490,19 @@ defmodule Algora.Admin do
 
     email_job =
       Algora.Activities.SendEmail.changeset(%{
-        title: "Error: #{message}",
+        title: "#{message}",
         body: message,
-        name: "Algora Alert",
+        name: "Action required",
         email: "info@algora.io"
       })
 
     discord_job =
       SendDiscord.changeset(%{
+        url: Algora.Settings.get("discord_webhook_url")["critical"] || Algora.config([:discord, :webhook_url]),
         payload: %{
-          embeds: [%{color: color(severity), title: "Error", description: message, timestamp: DateTime.utc_now()}]
+          embeds: [
+            %{color: color(severity), title: "Action required", description: message, timestamp: DateTime.utc_now()}
+          ]
         }
       })
 
@@ -509,6 +513,7 @@ defmodule Algora.Admin do
     Logger.info(message)
 
     %{
+      url: Algora.config([:discord, :webhook_url]),
       payload: %{
         embeds: [
           %{

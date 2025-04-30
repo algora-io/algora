@@ -11,7 +11,7 @@ defmodule Algora.Activities.SendDiscord do
   end
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"payload" => payload}}) do
-    Algora.Discord.send_message(payload)
+  def perform(%Oban.Job{args: %{"url" => url, "payload" => payload}}) do
+    Algora.Discord.send_message(url, payload)
   end
 end

@@ -1578,7 +1578,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     <.card_title>Stripe Payment</.card_title>
                     <.card_description>Pay with credit card or ACH using Stripe</.card_description>
                   </.card_header>
-                  <.card_content>
+                  <.card_content class="pt-0">
                     <div class="space-y-4">
                       <div class="flex justify-between items-center">
                         <span class="text-sm text-muted-foreground">Annual Subscription</span>
@@ -1622,7 +1622,7 @@ defmodule AlgoraWeb.Org.JobLive do
                     <.card_title>Wire Transfer Details</.card_title>
                     <.card_description>Send payment to the following account</.card_description>
                   </.card_header>
-                  <.card_content>
+                  <.card_content class="pt-0">
                     <div class="space-y-4">
                       <div class="grid grid-cols-2 gap-2 text-sm">
                         <span class="text-muted-foreground">Bank Name:</span>
@@ -1639,11 +1639,30 @@ defmodule AlgoraWeb.Org.JobLive do
 
                         <span class="text-muted-foreground">SWIFT Code:</span>
                         <span class="font-medium">SVBKUS6S</span>
+                      </div>
 
-                        <span class="text-muted-foreground">Amount:</span>
-                        <span class="font-medium font-display">
-                          {Money.to_string!(@current_org.subscription_price)}
-                        </span>
+                      <div class="border-t pt-4">
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                          <span class="text-muted-foreground">Annual Subscription:</span>
+                          <span class="font-medium font-display">
+                            {Money.to_string!(@current_org.subscription_price)}
+                          </span>
+
+                          <span class="text-muted-foreground line-through">Processing Fee:</span>
+                          <span class="font-medium font-display flex">
+                            <span class="text-muted-foreground line-through">$0</span>
+                            <span class="text-success-400 ml-auto">
+                              ({Money.to_string!(
+                                Money.mult!(@current_org.subscription_price, Decimal.new("0.04"))
+                              )} saved!)
+                            </span>
+                          </span>
+
+                          <span class="text-muted-foreground">Total:</span>
+                          <span class="font-medium font-display">
+                            {Money.to_string!(@current_org.subscription_price)}
+                          </span>
+                        </div>
                       </div>
 
                       <div class="border-t pt-4">
@@ -1664,21 +1683,23 @@ defmodule AlgoraWeb.Org.JobLive do
                             field={@wire_form[:billing_address]}
                             value={@current_org.billing_address}
                           />
-                          <.input
-                            type="text"
-                            label="Executive Name"
-                            field={@wire_form[:executive_name]}
-                            value={@current_org.executive_name}
-                          />
-                          <.input
-                            type="text"
-                            label="Executive Role"
-                            field={@wire_form[:executive_role]}
-                            value={@current_org.executive_role}
-                          />
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <.input
+                              type="text"
+                              label="Executive Name"
+                              field={@wire_form[:executive_name]}
+                              value={@current_org.executive_name}
+                            />
+                            <.input
+                              type="text"
+                              label="Executive Role"
+                              field={@wire_form[:executive_role]}
+                              value={@current_org.executive_role}
+                            />
+                          </div>
                           <.input
                             type="date"
-                            label="Payment Date"
+                            label="Invoice Date"
                             field={@wire_form[:payment_date]}
                             value={Date.utc_today()}
                           />
@@ -1686,7 +1707,7 @@ defmodule AlgoraWeb.Org.JobLive do
                       </div>
                     </div>
                     <p class="text-sm text-muted-foreground pt-4">
-                      You will receive an invoice via email once you confirm
+                      You will receive an invoice via email once you confirm.
                     </p>
                   </.card_content>
                 </.card>

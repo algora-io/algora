@@ -274,29 +274,33 @@ defmodule Algora.Activities do
   end
 
   def notify_users(activity, users_to_notify) do
-    title = Views.render(activity, :title)
-    body = Views.render(activity, :txt)
-
     email_jobs =
-      Enum.reduce(users_to_notify, [], fn
-        %{name: display_name, email: email, id: id}, acc ->
-          changeset =
-            Algora.Activities.SendEmail.changeset(%{
-              title: title,
-              body: body,
-              user_id: id,
-              activity_id: activity.id,
-              activity_type: activity.type,
-              activity_table: activity.assoc_name,
-              name: display_name,
-              email: email
-            })
+      if users_to_notify == [] do
+        []
+      else
+        title = Views.render(activity, :title)
+        body = Views.render(activity, :txt)
 
-          [changeset | acc]
+        Enum.reduce(users_to_notify, [], fn
+          %{name: display_name, email: email, id: id}, acc ->
+            changeset =
+              Algora.Activities.SendEmail.changeset(%{
+                title: title,
+                body: body,
+                user_id: id,
+                activity_id: activity.id,
+                activity_type: activity.type,
+                activity_table: activity.assoc_name,
+                name: display_name,
+                email: email
+              })
 
-        _user, acc ->
-          acc
-      end)
+            [changeset | acc]
+
+          _user, acc ->
+            acc
+        end)
+      end
 
     discord_job =
       if discord_payload = DiscordViews.render(activity) do

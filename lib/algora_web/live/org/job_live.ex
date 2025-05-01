@@ -836,9 +836,9 @@ defmodule AlgoraWeb.Org.JobLive do
 
     socket
     |> assign(:developers, developers)
-    |> assign(:applicants, sort_applicants_by_contributions(socket.assigns.job, applicants, contributions_map))
-    |> assign(:imports, sort_applicants_by_contributions(socket.assigns.job, imports, contributions_map))
-    |> assign(:matches, sort_applicants_by_contributions(socket.assigns.job, matches, contributions_map))
+    |> assign(:applicants, sort_by_contributions(socket.assigns.job, applicants, contributions_map))
+    |> assign(:imports, sort_by_contributions(socket.assigns.job, imports, contributions_map))
+    |> assign(:matches, sort_by_contributions(socket.assigns.job, matches, contributions_map))
     |> assign(:contributions_map, contributions_map)
   end
 
@@ -1228,27 +1228,10 @@ defmodule AlgoraWeb.Org.JobLive do
     |> Enum.group_by(& &1.user.id)
   end
 
-  # Sort applicants by their total number of contributions
-  defp sort_applicants_by_contributions(job, applicants, contributions_map) do
+  defp sort_by_contributions(job, applicants, contributions_map) do
     Enum.sort_by(
       applicants,
-      fn application ->
-        contributions = Map.get(contributions_map, application.user.id, [])
-
-        Enum.reduce(contributions, 0, fn contribution, acc ->
-          stars = contribution.repository.stargazers_count
-          contribution_count = contribution.contribution_count
-
-          delta =
-            if Enum.any?(job.tech_stack, fn tech -> tech in Enum.take(contribution.repository.tech_stack, 1) end) do
-              :math.log(stars + 1) * contribution_count
-            else
-              :math.pow(:math.log(stars + 1) * contribution_count, 0.5)
-            end
-
-          acc + delta
-        end)
-      end,
+      &Algora.Cloud.get_contribution_score(job.tech_stack, &1.user, contributions_map),
       :desc
     )
   end

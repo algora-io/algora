@@ -15,7 +15,14 @@ defmodule Algora.Github.TokenPool do
   end
 
   def get_token do
-    GenServer.call(__MODULE__, :get_token)
+    case maybe_get_token() do
+      token when is_binary(token) -> token
+      _ -> get_token()
+    end
+  end
+
+  def maybe_get_token do
+    GenServer.call(__MODULE__, :maybe_get_token)
   end
 
   def refresh_tokens do
@@ -35,7 +42,7 @@ defmodule Algora.Github.TokenPool do
   end
 
   @impl true
-  def handle_call(:get_token, _from, %{current_token_index: index, tokens: tokens} = state) do
+  def handle_call(:maybe_get_token, _from, %{current_token_index: index, tokens: tokens} = state) do
     token = Enum.at(tokens, index)
 
     if token == nil do
@@ -44,7 +51,13 @@ defmodule Algora.Github.TokenPool do
       next_index = rem(index + 1, length(tokens))
       if next_index == 0, do: refresh_tokens()
 
-      {:reply, token, %{state | current_token_index: next_index}}
+      case Github.get_current_user(token) do
+        {:ok, _} ->
+          {:reply, token, %{state | current_token_index: next_index}}
+
+        _ ->
+          {:reply, nil, %{state | current_token_index: next_index}}
+      end
     end
   end
 

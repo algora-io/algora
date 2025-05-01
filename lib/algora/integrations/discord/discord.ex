@@ -9,8 +9,6 @@ defmodule Algora.Discord do
 
   require Logger
 
-  defdelegate webhook_url, to: Client
-
   @doc """
   Sends a message to a Discord channel.
 
@@ -21,10 +19,10 @@ defmodule Algora.Discord do
 
   ## Examples
 
-      iex> Discord.send_message(%{content: "Hello, world!"})
+      iex> Discord.send_message("https://discord.com/api/webhooks/1234567890/abcdefg", %{content: "Hello, world!"})
       {:ok, response}
 
-      iex> Discord.send_message(%{
+      iex> Discord.send_message("https://discord.com/api/webhooks/1234567890/abcdefg", %{
       ...>   embeds: [
       ...>     %{
       ...>       color: 0x6366f1,
@@ -41,15 +39,15 @@ defmodule Algora.Discord do
       ...> })
       {:ok, response}
   """
-  @spec send_message(map()) :: {:ok, map() | nil} | {:error, any()}
-  def send_message(input) do
+  @spec send_message(String.t(), map()) :: {:ok, map() | nil} | {:error, any()}
+  def send_message(url, input) do
     input =
       Map.merge(
         %{username: "Algora.io", avatar_url: "https://algora.io/asset/storage/v1/object/public/images/logo-256px.png"},
         input
       )
 
-    case Client.post(input) do
+    case Client.post(url, input) do
       {:ok, response} ->
         {:ok, response}
 

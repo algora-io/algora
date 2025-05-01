@@ -3,15 +3,8 @@ defmodule Algora.Discord.Client do
 
   require Logger
 
-  def webhook_url, do: Algora.config([:discord, :webhook_url])
-
-  def post(data) do
-    if url = webhook_url() do
-      do_post(url, data)
-    else
-      {:ok, nil}
-    end
-  end
+  def post(nil, _data), do: {:ok, nil}
+  def post(url, data), do: do_post(url, data)
 
   defp do_post(url, data) do
     headers = [{"Content-Type", "application/json"}]

@@ -30,4 +30,14 @@ defmodule Algora.MoneyUtils do
       _ -> struct
     end
   end
+
+  def serialize(money) do
+    %{currency: money.currency, amount: money.amount}
+  end
+
+  def deserialize(%{"currency" => currency, "amount" => amount}) do
+    Money.new!(currency, amount, no_fraction_if_integer: true)
+  end
+
+  def deserialize(_), do: nil
 end

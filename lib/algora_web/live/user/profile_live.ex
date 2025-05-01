@@ -14,6 +14,8 @@ defmodule AlgoraWeb.User.ProfileLive do
       {:ok, user} ->
         transactions = Payments.list_received_transactions(user.id, limit: page_size())
 
+        contributions = Algora.Workspace.list_user_contributions([user.id], limit: 20)
+
         {:ok,
          socket
          |> assign(:user, user)
@@ -21,7 +23,8 @@ defmodule AlgoraWeb.User.ProfileLive do
          |> assign(:page_description, "Open source contributions and bounty history of #{user.name}")
          |> assign(:reviews, Reviews.list_reviews(reviewee_id: user.id, limit: 10))
          |> assign(:transactions, to_transaction_rows(transactions))
-         |> assign(:has_more_transactions, length(transactions) >= page_size())}
+         |> assign(:has_more_transactions, length(transactions) >= page_size())
+         |> assign(:contributions, contributions)}
 
       {:error, :not_found} ->
         raise AlgoraWeb.NotFoundError
@@ -188,46 +191,95 @@ defmodule AlgoraWeb.User.ProfileLive do
         <!-- Reviews Column -->
         <div class="space-y-4">
           <div class="grid grid-cols-1 gap-4">
-            <h2 class="text-lg font-semibold">Completed Contracts</h2>
-            <%= if Enum.empty?(@reviews) do %>
-              <.card class="text-center">
-                <.card_header>
-                  <div class="mx-auto mb-2 rounded-full bg-muted p-4">
-                    <.icon name="tabler-contract" class="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <.card_title>No completed contracts yet</.card_title>
-                  <.card_description>
-                    Contracts will appear here once completed
-                  </.card_description>
-                </.card_header>
-              </.card>
-            <% else %>
-              <%= for review <- @reviews do %>
-                <div class="w-full rounded-lg border border-border bg-card p-4 text-sm">
-                  <div class="mb-2 flex items-center gap-1">
-                    <%= for i <- 1..Review.max_rating() do %>
-                      <.icon
-                        name="tabler-star-filled"
-                        class={"#{if i <= review.rating, do: "text-foreground", else: "text-muted-foreground/25"} h-4 w-4"}
-                      />
-                    <% end %>
-                  </div>
-                  <p class="mb-2 text-sm">{review.content}</p>
-                  <div class="flex items-center gap-3">
-                    <.avatar class="h-8 w-8">
-                      <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
-                      <.avatar_fallback>
-                        {Algora.Util.initials(review.reviewer.name)}
-                      </.avatar_fallback>
-                    </.avatar>
-                    <div class="flex flex-col">
-                      <p class="text-sm font-medium">{review.reviewer.name}</p>
-                      <p class="text-xs text-muted-foreground">
-                        {review.organization.name}
-                      </p>
+            <%= if Enum.empty?(@contributions) do %>
+              <h2 class="text-lg font-semibold">Completed Contracts</h2>
+              <%= if Enum.empty?(@reviews) do %>
+                <.card class="text-center">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-contract" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No completed contracts yet</.card_title>
+                    <.card_description>
+                      Contracts will appear here once completed
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <%= for review <- @reviews do %>
+                  <div class="w-full rounded-lg border border-border bg-card p-4 text-sm">
+                    <div class="mb-2 flex items-center gap-1">
+                      <%= for i <- 1..Review.max_rating() do %>
+                        <.icon
+                          name="tabler-star-filled"
+                          class={"#{if i <= review.rating, do: "text-foreground", else: "text-muted-foreground/25"} h-4 w-4"}
+                        />
+                      <% end %>
+                    </div>
+                    <p class="mb-2 text-sm">{review.content}</p>
+                    <div class="flex items-center gap-3">
+                      <.avatar class="h-8 w-8">
+                        <.avatar_image src={review.reviewer.avatar_url} alt={review.reviewer.name} />
+                        <.avatar_fallback>
+                          {Algora.Util.initials(review.reviewer.name)}
+                        </.avatar_fallback>
+                      </.avatar>
+                      <div class="flex flex-col">
+                        <p class="text-sm font-medium">{review.reviewer.name}</p>
+                        <p class="text-xs text-muted-foreground">
+                          {review.organization.name}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                <% end %>
+              <% end %>
+            <% else %>
+              <h2 class="text-lg font-semibold">Top Contributions</h2>
+              <%= for {owner, contributions} <- aggregate_contributions(@contributions) do %>
+                <.link
+                  href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
+                  target="_blank"
+                  rel="noopener"
+                  class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+                >
+                  <img
+                    src={owner.avatar_url}
+                    class="h-12 w-12 rounded-xl rounded-r-none  transition-all"
+                    alt={owner.name}
+                  />
+                  <div class="w-full flex flex-col text-xs font-medium gap-0.5">
+                    <span class="flex items-start justify-between gap-5">
+                      <span class="font-display">
+                        {if owner.type == :organization do
+                          owner.name
+                        else
+                          List.first(contributions).repository.name
+                        end}
+                      </span>
+                      <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
+                        <span class="flex items-center text-foreground text-[11px] gap-1">
+                          <img
+                            src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
+                            class="w-4 h-4 invert saturate-0"
+                          /> {tech}
+                        </span>
+                      <% end %>
+                    </span>
+                    <div class="flex items-center gap-2 font-semibold">
+                      <span class="flex items-center text-amber-300 text-xs">
+                        <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
+                        {Algora.Util.format_number_compact(
+                          max(owner.stargazers_count, total_stars(contributions))
+                        )}
+                      </span>
+                      <span class="flex items-center text-purple-400 text-xs">
+                        <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
+                        {Algora.Util.format_number_compact(total_contributions(contributions))}
+                      </span>
+                    </div>
+                  </div>
+                </.link>
               <% end %>
             <% end %>
           </div>
@@ -275,5 +327,25 @@ defmodule AlgoraWeb.User.ProfileLive do
         end
       )
     end)
+  end
+
+  defp aggregate_contributions(contributions) do
+    groups = Enum.group_by(contributions, fn c -> c.repository.user end)
+
+    contributions
+    |> Enum.map(fn c -> {c.repository.user, groups[c.repository.user]} end)
+    |> Enum.uniq_by(fn {owner, _} -> owner.id end)
+  end
+
+  defp total_stars(contributions) do
+    contributions
+    |> Enum.map(& &1.repository.stargazers_count)
+    |> Enum.sum()
+  end
+
+  defp total_contributions(contributions) do
+    contributions
+    |> Enum.map(& &1.contribution_count)
+    |> Enum.sum()
   end
 end

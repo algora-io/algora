@@ -40,6 +40,7 @@ defmodule Algora.Accounts.User do
     field :priority, :integer, default: 0
     field :fee_pct, :integer, default: 9
     field :fee_pct_prev, :integer, default: 9
+    field :subscription_price, Money
     field :seeded, :boolean, default: false
     field :activated, :boolean, default: false
     field :max_open_attempts, :integer, default: 3
@@ -51,6 +52,7 @@ defmodule Algora.Accounts.User do
     field :seeking_contracts, :boolean, default: false
     field :seeking_jobs, :boolean, default: false
     field :hiring, :boolean, default: false
+    field :hiring_subscription, Ecto.Enum, values: [:inactive, :trial, :active], default: :inactive
 
     field :hourly_rate_min, Money
     field :hourly_rate_max, Money
@@ -80,6 +82,11 @@ defmodule Algora.Accounts.User do
 
     field :login_token, :string, virtual: true
     field :signup_token, :string, virtual: true
+
+    field :billing_name, :string
+    field :billing_address, :string
+    field :executive_name, :string
+    field :executive_role, :string
 
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id

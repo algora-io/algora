@@ -217,6 +217,7 @@ defmodule Algora.Factory do
       name: "middle-out",
       url: "https://github.com/piedpiper/middle-out",
       og_image_url: "https://algora.io/asset/storage/v1/object/public/mock/piedpiper-banner.jpg",
+      stargazers_count: 1337,
       provider_meta: %{}
     }
   end

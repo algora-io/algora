@@ -114,7 +114,7 @@ defmodule AlgoraWeb.Components.UI.Drawer do
 
   def drawer_content(assigns) do
     ~H"""
-    <div class={classes(["px-1 -mx-1", @class])} {@rest}>
+    <div class={classes(["px-1 -mx-1 pb-4 sm:pb-6 md:pb-8", @class])} {@rest}>
       {render_slot(@inner_block)}
     </div>
     """

@@ -91,6 +91,17 @@ defmodule Algora.Settings do
     set("org_matches:#{org_handle}", %{"matches" => matches})
   end
 
+  def get_job_matches(job_id) do
+    case get("job_matches:#{job_id}") do
+      %{"matches" => matches} when is_list(matches) -> load_matches(matches)
+      _ -> []
+    end
+  end
+
+  def set_job_matches(job_id, matches) when is_binary(job_id) and is_list(matches) do
+    set("job_matches:#{job_id}", %{"matches" => matches})
+  end
+
   def get_tech_matches(tech) do
     case get("tech_matches:#{String.downcase(tech)}") do
       %{"matches" => matches} when is_list(matches) -> load_matches(matches)
@@ -104,8 +115,9 @@ defmodule Algora.Settings do
 
   def load_matches(matches) do
     user_map =
-      [handles: Enum.map(matches, & &1["handle"])]
+      [handles: Enum.map(matches, & &1["handle"]), limit: :infinity]
       |> Accounts.list_developers()
+      |> Enum.filter(& &1.provider_login)
       |> Map.new(fn user -> {user.handle, user} end)
 
     Enum.flat_map(matches, fn match ->
@@ -151,5 +163,30 @@ defmodule Algora.Settings do
 
   def set_featured_transactions(ids) when is_list(ids) do
     set("featured_transactions", %{"ids" => ids})
+  end
+
+  def get_wire_details do
+    case get("wire_details") do
+      %{"details" => details} when is_map(details) -> details
+      _ -> nil
+    end
+  end
+
+  def set_wire_details(details) when is_map(details) do
+    set("wire_details", %{"details" => details})
+  end
+
+  def get_subscription_price do
+    case get("subscription") do
+      %{"price" => %{"amount" => _amount, "currency" => _currency} = price} ->
+        Algora.MoneyUtils.deserialize(price)
+
+      _ ->
+        nil
+    end
+  end
+
+  def set_subscription_price(price) do
+    set("subscription", %{"price" => Algora.MoneyUtils.serialize(price)})
   end
 end

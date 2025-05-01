@@ -59,3 +59,4 @@ npm-debug.log
 /priv/github
 /priv/migration
 /priv/dev
+/lib/algora_cloud*

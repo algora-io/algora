@@ -377,32 +377,8 @@ defmodule AlgoraWeb.CrowdfundLive do
           </div>
         </section>
 
-        <section class="relative isolate py-16 sm:py-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
-              <span class="text-muted-foreground">The open source</span>
-              <span class="block sm:inline">Upwork for engineers</span>
-            </h2>
-            <div class="flex justify-center gap-4">
-              <.button navigate={~p"/auth/signup"}>
-                Get started
-              </.button>
-              <.button
-                class="pointer-events-none opacity-75"
-                href={AlgoraWeb.Constants.get(:github_repo_url)}
-                variant="secondary"
-              >
-                <.icon name="github" class="size-4 mr-2 -ml-1" /> View source code
-              </.button>
-            </div>
-          </div>
-        </section>
-
         <div class="relative isolate overflow-hidden bg-gradient-to-br from-black to-background">
           <Footer.footer />
-          <div class="mx-auto max-w-2xl px-6 pb-4 text-center text-[0.6rem] text-muted-foreground/50">
-            Upwork® is a registered trademark of Upwork Global Inc. Algora is not affiliated with, sponsored by, or endorsed by Upwork Global Inc, mmmkay?
-          </div>
         </div>
       </main>
     </div>

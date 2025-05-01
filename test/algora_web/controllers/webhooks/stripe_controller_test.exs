@@ -10,7 +10,6 @@ defmodule AlgoraWeb.Webhooks.StripeControllerTest do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Tip
-  alias Algora.Contracts.Contract
   alias Algora.Payments
   alias Algora.Payments.PaymentMethod
   alias Algora.Payments.Transaction

@@ -1,5 +1,6 @@
 defmodule Algora.Admin do
   @moduledoc false
+  import Ecto.Changeset
   import Ecto.Query
 
   alias Algora.Accounts
@@ -10,6 +11,7 @@ defmodule Algora.Admin do
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Github
+  alias Algora.Jobs.JobPosting
   alias Algora.Parser
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -21,6 +23,71 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Ticket
 
   require Logger
+
+  def seed_job(opts \\ %{}) do
+    with {:ok, user} <- Repo.fetch_by(User, handle: opts.org.handle),
+         {:ok, user} <- user |> change(opts.org) |> Repo.update(),
+         {:ok, job} <-
+           Repo.insert(%JobPosting{
+             id: Nanoid.generate(),
+             user_id: user.id,
+             company_name: user.name,
+             company_url: user.website_url,
+             title: opts.title,
+             description: opts.description,
+             tech_stack: opts.tech_stack || Enum.take(user.tech_stack, 1)
+           }) do
+      dbg("#{AlgoraWeb.Endpoint.url()}/#{user.handle}/jobs/#{job.id}")
+    end
+  end
+
+  def sync_contributions(opts \\ []) do
+    query =
+      User
+      |> where([u], not is_nil(u.handle))
+      |> where([u], not is_nil(u.provider_login))
+      |> where([u], u.type == :individual)
+      |> where([u], fragment("not exists (select 1 from user_contributions where user_contributions.user_id = ?)", u.id))
+
+    query =
+      if handles = opts[:handles] do
+        where(query, [u], u.handle in ^handles)
+      else
+        query
+      end
+
+    query =
+      if limit = opts[:limit] do
+        limit(query, ^limit)
+      else
+        query
+      end
+
+    Repo.transaction(
+      fn ->
+        if opts[:dry_run] do
+          query
+          |> Repo.stream()
+          |> Enum.to_list()
+          |> length()
+          |> IO.puts()
+        else
+          query
+          |> Repo.stream()
+          |> Enum.each(fn user ->
+            %{provider_login: user.provider_login}
+            |> Workspace.Jobs.FetchTopContributions.new()
+            |> Oban.insert()
+            |> case do
+              {:ok, _job} -> IO.puts("Enqueued job for #{user.provider_login}")
+              {:error, error} -> IO.puts("Failed to enqueue job for #{user.provider_login}: #{inspect(error)}")
+            end
+          end)
+        end
+      end,
+      timeout: :infinity
+    )
+  end
 
   def release_payment(tx_id) do
     Repo.transact(fn ->
@@ -402,6 +469,7 @@ defmodule Algora.Admin do
     Logger.error(message)
 
     %{
+      url: Algora.config([:discord, :webhook_url]),
       payload: %{
         embeds: [
           %{
@@ -422,16 +490,19 @@ defmodule Algora.Admin do
 
     email_job =
       Algora.Activities.SendEmail.changeset(%{
-        title: "Error: #{message}",
+        title: "#{message}",
         body: message,
-        name: "Algora Alert",
+        name: "Action required",
         email: "info@algora.io"
       })
 
     discord_job =
       SendDiscord.changeset(%{
+        url: Algora.Settings.get("discord_webhook_url")["critical"] || Algora.config([:discord, :webhook_url]),
         payload: %{
-          embeds: [%{color: color(severity), title: "Error", description: message, timestamp: DateTime.utc_now()}]
+          embeds: [
+            %{color: color(severity), title: "Action required", description: message, timestamp: DateTime.utc_now()}
+          ]
         }
       })
 
@@ -442,6 +513,7 @@ defmodule Algora.Admin do
     Logger.info(message)
 
     %{
+      url: Algora.config([:discord, :webhook_url]),
       payload: %{
         embeds: [
           %{

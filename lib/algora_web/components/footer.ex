@@ -13,7 +13,7 @@ defmodule AlgoraWeb.Components.Footer do
     <footer aria-labelledby="footer-heading">
       <h2 id="footer-heading" class="sr-only">Footer</h2>
       <div class="mx-auto max-w-7xl px-6 pb-8 lg:px-8">
-        <div class="border-t border-white/10 pt-16 sm:pt-24">
+        <%!-- <div class="border-t border-white/10 pt-16 sm:pt-24">
           <div class="grid grid-cols-2 gap-x-12 gap-y-20 md:grid-cols-4">
             <div>
               <h3 class="text-base font-semibold leading-6 text-white">
@@ -166,8 +166,13 @@ defmodule AlgoraWeb.Components.Footer do
               </ul>
             </div>
           </div>
-        </div>
-        <div class="mt-16 border-t border-white/10 pt-8 sm:mt-20 flex flex-col md:flex-row md:justify-between md:items-start lg:mt-24 gap-8">
+        </div> --%>
+        <div class={
+          classes([
+            "pt-8 border-t border-white/10 flex flex-col md:flex-row md:justify-between md:items-start gap-8"
+            # "mt-16 sm:mt-20 lg:mt-24"
+          ])
+        }>
           <div class="flex gap-4 sm:gap-6 md:order-2">
             <.link
               class="rounded-xl border-2 border-gray-500 p-3 text-gray-400 transition-colors hover:border-gray-400 hover:text-gray-300 sm:p-3"

@@ -106,7 +106,6 @@ defmodule AlgoraWeb.Router do
       live "/bounties", BountiesLive, :index
       live "/bounties/:tech", BountiesLive, :index
       live "/jobs", JobsLive, :index
-      live "/community", CommunityLive, :index
       live "/leaderboard", LeaderboardLive, :index
       live "/projects", OrgsLive, :index
       live "/claims/:group_id", ClaimLive
@@ -120,8 +119,9 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.Analytics, :current_country}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
+      live "/community", CommunityLive, :index
+      live "/community/:tech", CommunityLive, :index
       live "/crowdfund", CrowdfundLive, :index
-      live "/testimonials", TestimonialsLive, :index
       live "/pricing", PricingLive
       live "/challenges", ChallengesLive
       live "/challenges/prettier", Challenges.PrettierLive
@@ -208,6 +208,9 @@ defmodule AlgoraWeb.Router do
         live "/contracts/:id", ContractLive
         live "/team", Org.TeamLive, :index
         live "/leaderboard", Org.LeaderboardLive, :index
+        live "/jobs", Org.JobsLive, :index
+        live "/jobs/:id", Org.JobLive
+        live "/jobs/:id/:tab", Org.JobLive
       end
 
       live_session :org_admin,

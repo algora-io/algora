@@ -17,6 +17,7 @@ defmodule Algora.Workspace.Repository do
     field :tech_stack, {:array, :string}, null: false, default: []
     field :og_image_url, :string, null: false
     field :og_image_updated_at, :utc_datetime_usec
+    field :stargazers_count, :integer, null: false, default: 0
 
     has_many :tickets, Algora.Workspace.Ticket
     has_many :activities, {"repository_activities", Activity}, foreign_key: :assoc_id
@@ -40,11 +41,21 @@ defmodule Algora.Workspace.Repository do
       og_image_url: default_og_image_url(meta["owner"]["login"], meta["name"]),
       og_image_updated_at: DateTime.utc_now(),
       url: meta["html_url"],
+      stargazers_count: meta["stargazers_count"],
       user_id: user.id
     }
 
     %Repository{provider: "github", provider_meta: meta}
-    |> cast(params, [:provider_id, :name, :url, :description, :og_image_url, :og_image_updated_at, :user_id])
+    |> cast(params, [
+      :provider_id,
+      :name,
+      :url,
+      :description,
+      :og_image_url,
+      :og_image_updated_at,
+      :stargazers_count,
+      :user_id
+    ])
     |> generate_id()
     |> validate_required([:provider_id, :name, :url, :user_id])
     |> foreign_key_constraint(:user_id)

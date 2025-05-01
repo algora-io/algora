@@ -15,6 +15,7 @@ defmodule Algora.Workspace do
   alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
+  alias Algora.Workspace.UserContribution
 
   require Logger
 
@@ -130,21 +131,13 @@ defmodule Algora.Workspace do
         preload: [user: u]
       )
 
-    res =
-      case Repo.one(repository_query) do
-        %Repository{} = repository -> {:ok, repository}
-        nil -> create_repository_from_github(token, owner, repo)
-      end
-
-    case res do
-      {:ok, repository} -> maybe_schedule_og_image_update(repository)
-      error -> error
+    case Repo.one(repository_query) do
+      %Repository{} = repository -> {:ok, repository}
+      nil -> create_repository_from_github(token, owner, repo)
     end
-
-    res
   end
 
-  defp maybe_schedule_og_image_update(%Repository{} = repository) do
+  def maybe_schedule_og_image_update(%Repository{} = repository) do
     one_day_ago = DateTime.add(DateTime.utc_now(), -1, :day)
 
     needs_update? =
@@ -613,6 +606,119 @@ defmodule Algora.Workspace do
         Logger.error("Failed to remove label #{label} from #{owner}/#{repo}##{number}: #{inspect(reason)}")
 
         :error
+    end
+  end
+
+  @spec list_user_contributions(list(String.t()), Keyword.t()) :: {:ok, list(map())} | {:error, term()}
+  def list_user_contributions(ids, opts \\ []) do
+    query =
+      from uc in UserContribution,
+        join: u in assoc(uc, :user),
+        join: r in assoc(uc, :repository),
+        join: repo_owner in assoc(r, :user),
+        where: u.id in ^ids,
+        where: not ilike(r.name, "%awesome%"),
+        where: not ilike(r.name, "%algorithms%"),
+        where: not ilike(repo_owner.provider_login, "%algorithms%"),
+        where: repo_owner.type == :organization or r.stargazers_count > 200,
+        # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
+        order_by: [
+          desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
+          desc: r.stargazers_count
+        ],
+        select_merge: %{user: u, repository: %{r | user: repo_owner}}
+
+    query =
+      case opts[:limit] do
+        nil -> query
+        limit -> limit(query, ^limit)
+      end
+
+    Repo.all(query)
+  end
+
+  @spec upsert_user_contribution(String.t(), String.t(), integer()) ::
+          {:ok, UserContribution.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_user_contribution(user_id, repository_id, contribution_count) do
+    attrs = %{
+      user_id: user_id,
+      repository_id: repository_id,
+      contribution_count: contribution_count,
+      last_fetched_at: DateTime.utc_now()
+    }
+
+    case Repo.get_by(UserContribution, user_id: user_id, repository_id: repository_id) do
+      nil -> %UserContribution{} |> UserContribution.changeset(attrs) |> Repo.insert()
+      contribution -> contribution |> UserContribution.changeset(attrs) |> Repo.update()
+    end
+  end
+
+  def fetch_top_contributions(token, provider_login) do
+    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
+         {:ok, user} <- ensure_user(token, provider_login),
+         :ok <- add_contributions(token, user.id, contributions) do
+      {:ok, contributions}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def fetch_top_contributions_async(token, provider_login) do
+    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
+         {:ok, user} <- ensure_user(token, provider_login),
+         {:ok, _} <- add_contributions_async(token, user.id, contributions) do
+      {:ok, nil}
+    else
+      {:error, reason} ->
+        Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  def add_contributions_async(_token, user_id, opts) do
+    Repo.transact(fn ->
+      Enum.reduce_while(opts, :ok, fn contribution, _ ->
+        case %{
+               "user_id" => user_id,
+               "repo_full_name" => contribution.repo_name,
+               "contribution_count" => contribution.contribution_count
+             }
+             |> Jobs.SyncContribution.new()
+             |> Oban.insert() do
+          {:ok, _job} -> {:cont, :ok}
+          error -> {:halt, error}
+        end
+      end)
+    end)
+  end
+
+  def add_contributions(token, user_id, opts) do
+    results =
+      Enum.map(opts, fn %{repo_name: repo_name, contribution_count: contribution_count} ->
+        add_contribution(%{
+          token: token,
+          user_id: user_id,
+          repo_full_name: repo_name,
+          contribution_count: contribution_count
+        })
+      end)
+
+    if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
+  end
+
+  def add_contribution(%{
+        token: token,
+        user_id: user_id,
+        repo_full_name: repo_full_name,
+        contribution_count: contribution_count
+      }) do
+    with [repo_owner, repo_name] <- String.split(repo_full_name, "/"),
+         {:ok, repo} <- ensure_repository(token, repo_owner, repo_name),
+         {:ok, _tech_stack} <- ensure_repo_tech_stack(token, repo),
+         {:ok, _contribution} <- upsert_user_contribution(user_id, repo.id, contribution_count) do
+      :ok
     end
   end
 end

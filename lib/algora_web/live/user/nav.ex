@@ -64,8 +64,8 @@ defmodule AlgoraWeb.User.Nav do
             label: "Profile"
           },
           %{href: "/bounties", tab: :bounties, icon: "tabler-diamond", label: "Bounties"},
+          %{href: "/jobs", tab: :jobs, icon: "tabler-briefcase", label: "Jobs"},
           %{href: "/projects", tab: :projects, icon: "tabler-rocket", label: "Projects"},
-          %{href: "/community", tab: :community, icon: "tabler-heart-code", label: "Community"},
           %{
             href: "/user/transactions",
             tab: :transactions,

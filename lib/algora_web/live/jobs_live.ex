@@ -2,6 +2,7 @@ defmodule AlgoraWeb.JobsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import AlgoraWeb.Components.ModalVideo
   import Ecto.Changeset
 
   alias Algora.Accounts
@@ -107,13 +108,9 @@ defmodule AlgoraWeb.JobsLive do
                       <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div>
                           <div>
-                            <.link
-                              href={job.url}
-                              class="text-lg font-semibold hover:underline"
-                              target="_blank"
-                            >
+                            <div class="text-lg font-semibold">
                               {job.title}
-                            </.link>
+                            </div>
                           </div>
                           <div :if={job.description} class="pt-1 text-sm text-muted-foreground">
                             {job.description}
@@ -142,96 +139,334 @@ defmodule AlgoraWeb.JobsLive do
           <% end %>
         </.section>
 
-        <.section class="pt-12">
-          <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-            <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
-              <div class="p-4 sm:p-6">
-                <div class="text-2xl font-semibold text-foreground">
-                  Post your job<br class="block sm:hidden" />
-                  <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
-                    in seconds
-                  </span>
-                </div>
-                <div class="pt-1 text-base font-medium text-muted-foreground">
-                  Reach thousands of developers looking for their next opportunity versed in your tech stack
-                </div>
-                <.simple_form
-                  for={@form}
-                  phx-change="validate_job"
-                  phx-submit="create_job"
-                  class="mt-4 space-y-6"
-                >
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <.input
-                      field={@form[:email]}
-                      label="Email"
-                      data-domain-target
-                      phx-hook="DeriveDomain"
-                      phx-change="email_changed"
-                      phx-debounce="300"
+        <.section class="pt-24">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
+              Autopilot screening
+            </span>
+            <br />for OSS contribution<span class="md:hidden">s</span>
+            <span class="hidden md:inline">
+              history
+            </span>
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Receive applications on Algora <br class="md:hidden" />
+            or import your existing applicants.<br />Algora will highlight applicants with relevant OSS contribution history in your tech stack.
+          </p>
+          <video
+            src={~p"/videos/import-applicants.mp4"}
+            autoplay
+            loop
+            muted
+            playsinline
+            class="mt-8 w-full h-full object-cover mx-auto border border-border rounded-xl"
+            speed={2}
+            playbackspeed={2}
+          />
+        </.section>
+
+        <.section class="pt-24">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            Publish jobs and <br />
+            <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">invite top matches</span>
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Access your top matches from Algora based on your tech stack and preferences
+          </p>
+
+          <img
+            alt="Algora dashboard"
+            width="1485"
+            height="995"
+            loading="lazy"
+            class="my-auto border border-border rounded-lg [box-shadow:0px_80px_60px_0px_rgba(0,0,0,0.35),0px_35px_28px_0px_rgba(0,0,0,0.25),0px_18px_15px_0px_rgba(0,0,0,0.20),0px_10px_8px_0px_rgba(0,0,0,0.17),0px_5px_4px_0px_rgba(0,0,0,0.14),0px_2px_2px_0px_rgba(0,0,0,0.10)]"
+            src={~p"/images/screenshots/job-matches-typescript.png"}
+          />
+        </.section>
+
+        <.section class="pt-24">
+          <section class="relative isolate">
+            <div class="mx-auto max-w-7xl px-6 lg:px-8">
+              <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-2 sm:mb-4">
+                Interview with <br />
+                <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">paid projects</span>
+              </h2>
+              <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+                Use bounties and contract work to trial your top candidates before hiring them full-time.
+              </p>
+
+              <div class="mx-auto max-w-6xl gap-8 text-sm leading-6">
+                <div class="flex gap-4 sm:gap-8">
+                  <div class="w-[40%]">
+                    <.modal_video
+                      class="aspect-[9/16] rounded-xl lg:rounded-2xl lg:rounded-r-none"
+                      src="https://www.youtube.com/embed/xObOGcUdtY0"
+                      start={122}
+                      title="$15,000 Open source bounty to hire a Rust engineer"
+                      poster={~p"/images/people/john-de-goes.jpg"}
+                      alt="John A De Goes"
                     />
-                    <.input field={@form[:url]} label="Job Posting URL" />
-                    <.input field={@form[:company_url]} label="Company URL" data-domain-source />
-                    <.input field={@form[:company_name]} label="Company Name" />
                   </div>
+                  <div class="w-[60%]">
+                    <.link
+                      href="https://github.com/golemcloud/golem/issues/1004"
+                      rel="noopener"
+                      target="_blank"
+                      class="relative flex aspect-[1121/1343] w-full items-center justify-center overflow-hidden rounded-xl lg:rounded-2xl lg:rounded-l-none"
+                    >
+                      <img
+                        src={~p"/images/screenshots/bounty-to-hire-golem2.png"}
+                        alt="Golem bounty to hire"
+                        class="object-cover"
+                        loading="lazy"
+                      />
+                    </.link>
+                  </div>
+                </div>
+              </div>
 
-                  <div class="flex flex-col-reverse md:flex-row md:justify-between gap-4">
-                    <div>
-                      <div
-                        :if={
-                          @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
-                        }
-                        class="flex items-center gap-3"
-                      >
-                        <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
-                          <img src={logo} class="h-16 w-16 rounded-2xl" />
-                        <% end %>
+              <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6">
+                <img
+                  class="aspect-[1200/500] object-cover object-top w-full rounded-xl lg:rounded-2xl"
+                  src={~p"/images/people/golem-team.jpeg"}
+                  alt="KubeCon"
+                />
+                <div class="pt-8 grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+                  <div class="lg:col-span-6 order-last lg:order-first">
+                    <h3 class="text-xl font-medium">
+                      I always wanted to work on some Rust project and get to use the language, but I never found a good opportunity to do so. Now with huge bounty attached to this issue, it was a very good opportunity to play around with Rust.
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-6">
+                      <div class="flex items-center gap-4">
+                        <img src="https://github.com/mschuwalow.png" class="h-12 w-12 rounded-full" />
                         <div>
-                          <div class="text-lg text-foreground font-bold font-display line-clamp-1">
-                            {get_change(@form.source, :company_name)}
+                          <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                            Maxim Schuwalow
                           </div>
-                          <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
-                            <div class="text-sm text-muted-foreground line-clamp-1">
-                              {description}
-                            </div>
-                          <% end %>
-                          <div class="flex gap-2 items-center">
-                            <%= if url = get_change(@form.source, :company_url) do %>
-                              <.link
-                                href={"https://" <> url}
-                                target="_blank"
-                                class="text-muted-foreground hover:text-foreground"
-                              >
-                                <.icon name="tabler-world" class="size-4" />
-                              </.link>
-                            <% end %>
+                          <div class="text-sm sm:text-lg font-medium text-muted-foreground">
+                            Software Engineer at Golem Cloud
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="lg:col-span-6 order-last lg:order-first">
+                    <h3 class="text-xl font-medium">
+                      After a few decades of actively hiring engineers, what I found out is, a lot of times people who are very active in open source software, those engineers make fantastic additions to your team.
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-6">
+                      <div class="flex items-center gap-4">
+                        <img src={~p"/images/people/john-de-goes.jpg"} class="h-12 w-12 rounded-full" />
 
-                            <%= for {platform, icon} <- social_icons(),
-                      url = get_in(@user_metadata.result, [:org, :socials, platform]),
-                      not is_nil(url) do %>
-                              <.link
-                                href={url}
-                                target="_blank"
-                                class="text-muted-foreground hover:text-foreground"
-                              >
-                                <.icon name={icon} class="size-4" />
-                              </.link>
+                        <div>
+                          <div class="text-xl sm:text-2xl font-semibold text-foreground">
+                            John A De Goes
+                          </div>
+                          <div class="text-sm sm:text-lg font-medium text-muted-foreground">
+                            Founder &amp; CEO at Golem Cloud
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+                <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
+                  <div class="lg:col-span-6 order-first lg:order-last">
+                    <.modal_video
+                      class="rounded-xl lg:rounded-2xl"
+                      src="https://www.youtube.com/embed/FXQVD02rfg8"
+                      start={8}
+                      title="How Nick got a job with Open Source Software"
+                      poster="https://img.youtube.com/vi/FXQVD02rfg8/maxresdefault.jpg"
+                      alt="Eric Allam"
+                    />
+                  </div>
+                  <div class="lg:col-span-6 order-last lg:order-first">
+                    <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                      It was the <span class="text-success">easiest hire</span>
+                      because we already knew how great he was
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
+                      <div class="flex items-center gap-4">
+                        <div>
+                          <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                            Eric Allam
+                          </div>
+                          <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                            Co-founder & CTO at Trigger.dev (YC W23)
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
+                <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
+                  <div class="lg:col-span-5">
+                    <.modal_video
+                      class="rounded-xl lg:rounded-2xl"
+                      src="https://www.youtube.com/embed/3wZGDuoPajk"
+                      start={13}
+                      title="OSS Bounties & Hiring engineers on Algora.io | Founder Testimonial"
+                      poster="https://img.youtube.com/vi/3wZGDuoPajk/maxresdefault.jpg"
+                      alt="Tushar Mathur"
+                    />
+                  </div>
+                  <div class="lg:col-span-6">
+                    <h3 class="text-xl sm:text-2xl xl:text-3xl font-display font-bold leading-[1.2] sm:leading-[2rem] xl:leading-[3rem]">
+                      Bounties help us control our burn rate, get work done & meet new hires. I've made
+                      <span class="text-success">4 full-time hires</span>
+                      using Algora
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-12">
+                      <div class="flex items-center gap-4">
+                        <div>
+                          <div class="text-xl sm:text-2xl xl:text-3xl font-semibold text-foreground">
+                            Tushar Mathur
+                          </div>
+                          <div class="sm:pt-2 text-sm sm:text-lg xl:text-2xl font-medium text-muted-foreground">
+                            Founder & CEO at Tailcall
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </.section>
+
+        <.section class="pt-24">
+          <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
+            <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
+              Hire the best
+            </span>
+            <br />using open source
+          </h2>
+          <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            Source, screen, interview and onboard with Algora.<br />
+            Guarantee role fit and job performance.
+          </p>
+          <ul class="space-y-3 mt-4 text-xl grid grid-cols-1 md:grid-cols-2 gap-4">
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-speakerphone" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Reach 50K+ devs</span>
+                <br class="md:hidden" /> with unlimited job postings
+              </span>
+            </li>
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-lock-open" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Access top 1% users</span>
+                <br class="md:hidden" /> matching your preferences
+              </span>
+            </li>
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-wand" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Auto-rank applicants</span>
+                <br class="md:hidden" /> for OSS contribution history
+              </span>
+            </li>
+            <li class="flex items-center gap-4">
+              <div class="shrink-0 flex items-center justify-center rounded-full bg-success-300/10 size-12 border border-success-300/20">
+                <.icon name="tabler-currency-dollar" class="size-8 text-success-300" />
+              </div>
+              <span>
+                <span class="font-semibold text-success-300">Trial top candidates</span>
+                <br class="md:hidden" /> using contracts and bounties
+              </span>
+            </li>
+          </ul>
+        </.section>
+
+        <.section class="pt-12 pb-20">
+          <div class="max-w-2xl mx-auto border ring-1 ring-transparent rounded-xl overflow-hidden">
+            <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-emerald-400">
+              <div class="flex flex-col md:flex-row gap-8 p-4 sm:p-6">
+                <div class="flex-1 flex flex-col justify-center items-center">
+                  <.simple_form
+                    for={@form}
+                    phx-change="validate_job"
+                    phx-submit="create_job"
+                    class="w-full space-y-6"
+                  >
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <.input
+                        id="final_section_email"
+                        field={@form[:email]}
+                        label="Email"
+                        data-domain-target
+                        phx-hook="DeriveDomain"
+                        phx-change="email_changed"
+                        phx-debounce="300"
+                      />
+                      <.input id="final_section_url" field={@form[:url]} label="Job Posting URL" />
+                      <.input
+                        id="final_section_company_url"
+                        field={@form[:company_url]}
+                        label="Company URL"
+                        data-domain-source
+                      />
+                      <.input
+                        id="final_section_company_name"
+                        field={@form[:company_name]}
+                        label="Company Name"
+                      />
+                    </div>
+
+                    <div class="flex flex-col items-center gap-4">
+                      <.button size="xl" class="w-full">
+                        <div class="flex flex-col items-center gap-1 font-semibold">
+                          <span>Hire now</span>
+                        </div>
+                      </.button>
+                      <div>
+                        <div
+                          :if={
+                            @user_metadata.ok? && get_in(@user_metadata.result, [:org, :favicon_url])
+                          }
+                          class="flex items-center gap-3"
+                        >
+                          <%= if logo = get_in(@user_metadata.result, [:org, :favicon_url]) do %>
+                            <img src={logo} class="h-16 w-16 rounded-2xl" />
+                          <% end %>
+                          <div>
+                            <div class="text-lg text-foreground font-bold font-display line-clamp-1">
+                              {get_change(@form.source, :company_name)}
+                            </div>
+                            <%= if description = get_in(@user_metadata.result, [:org, :og_description]) do %>
+                              <div class="text-sm text-muted-foreground line-clamp-1">
+                                {description}
+                              </div>
                             <% end %>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <.button class="flex items-center gap-2" phx-disable-with="Processing...">
-                      Post Job
-                    </.button>
-                  </div>
-                </.simple_form>
+                  </.simple_form>
+                </div>
               </div>
             </div>
           </div>
         </.section>
       </div>
     </div>
+
+    <.modal_video_dialog />
     """
   end
 
@@ -262,10 +497,9 @@ defmodule AlgoraWeb.JobsLive do
   def handle_event("create_job", %{"job_posting" => params}, socket) do
     with {:ok, user} <-
            Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
-         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting(),
-         {:ok, url} <- Jobs.create_payment_session(job) do
+         {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting() do
       Algora.Admin.alert("Job posting initialized: #{job.company_name}", :info)
-      {:noreply, redirect(socket, external: url)}
+      {:noreply, redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}

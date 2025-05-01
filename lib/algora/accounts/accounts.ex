@@ -43,6 +43,9 @@ defmodule Algora.Accounts do
       {:ids, ids}, query ->
         from([b] in query, where: b.id in ^ids)
 
+      {:limit, :infinity}, query ->
+        query
+
       {:limit, limit}, query ->
         from([b] in query, limit: ^limit)
 

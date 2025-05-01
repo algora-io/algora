@@ -35,7 +35,7 @@ defmodule Algora.Payments do
   end
 
   @spec create_stripe_session(
-          user :: User.t(),
+          user :: User.t() | nil,
           line_items :: [PSP.Session.line_item_data()],
           payment_intent_data :: PSP.Session.payment_intent_data(),
           opts :: [
@@ -44,7 +44,29 @@ defmodule Algora.Payments do
           ]
         ) ::
           {:ok, PSP.session()} | {:error, PSP.error()}
-  def create_stripe_session(user, line_items, payment_intent_data, opts \\ []) do
+  def create_stripe_session(user, line_items, payment_intent_data, opts \\ [])
+
+  def create_stripe_session(nil, line_items, payment_intent_data, opts) do
+    opts = %{
+      mode: "payment",
+      billing_address_collection: "required",
+      line_items: line_items,
+      success_url: opts[:success_url] || "#{AlgoraWeb.Endpoint.url()}/payment/success",
+      cancel_url: opts[:cancel_url] || "#{AlgoraWeb.Endpoint.url()}/payment/canceled",
+      payment_intent_data: payment_intent_data
+    }
+
+    opts =
+      if payment_intent_data[:capture_method] == :manual do
+        opts
+      else
+        Map.put(opts, :invoice_creation, %{enabled: true})
+      end
+
+    PSP.Session.create(opts)
+  end
+
+  def create_stripe_session(user, line_items, payment_intent_data, opts) do
     with {:ok, customer} <- fetch_or_create_customer(user) do
       opts = %{
         mode: "payment",
@@ -657,10 +679,16 @@ defmodule Algora.Payments do
       Repo.update_all(from(c in Claim, where: c.id in ^claim_ids), set: [status: :approved])
 
       {_, job_postings} =
-        Repo.update_all(from(j in JobPosting, where: j.id in ^job_ids, select: j), set: [status: :processing])
+        Repo.update_all(from(j in JobPosting, where: j.id in ^job_ids, select: j), set: [status: :active])
+
+      job_postings = Repo.preload(job_postings, :user)
+
+      Repo.update_all(from(u in User, where: u.id in ^Enum.map(job_postings, & &1.user_id)),
+        set: [hiring_subscription: :active]
+      )
 
       for job <- job_postings do
-        Algora.Admin.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :info)
+        Algora.Admin.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :critical)
       end
 
       auto_txs =

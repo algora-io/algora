@@ -9,8 +9,7 @@ import Config
 
 config :algora,
   title: "Algora",
-  description:
-    "Discover GitHub bounties, contract work and jobs. Hire the top 1% open source developers.",
+  description: "Algora connects companies and engineers for full-time and contract work",
   ecto_repos: [Algora.Repo],
   generators: [timestamp_type: :utc_datetime_usec],
   redirects: [
@@ -57,7 +56,9 @@ config :algora, Oban,
     activity_notifier: 1,
     activity_mailer: 1,
     activity_discord: 10,
-    campaign_emails: 1
+    campaign_emails: 1,
+    fetch_top_contributions: 1,
+    sync_contribution: 20
   ]
 
 # Configures the mailer

@@ -38,4 +38,6 @@ defmodule Algora.MoneyUtils do
   def deserialize(%{"currency" => currency, "amount" => amount}) do
     Money.new!(currency, amount, no_fraction_if_integer: true)
   end
+
+  def deserialize(_), do: nil
 end

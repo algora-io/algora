@@ -175,4 +175,18 @@ defmodule Algora.Settings do
   def set_wire_details(details) when is_map(details) do
     set("wire_details", %{"details" => details})
   end
+
+  def get_subscription_price do
+    case get("subscription") do
+      %{"price" => %{"amount" => _amount, "currency" => _currency} = price} ->
+        Algora.MoneyUtils.deserialize(price)
+
+      _ ->
+        nil
+    end
+  end
+
+  def set_subscription_price(price) do
+    set("subscription", %{"price" => Algora.MoneyUtils.serialize(price)})
+  end
 end

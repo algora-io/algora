@@ -1818,5 +1818,5 @@ defmodule AlgoraWeb.Org.JobLive do
     """
   end
 
-  def price, do: Money.new!(:USD, 35_000, no_fraction_if_integer: true)
+  def price, do: Algora.Settings.get_subscription_price()
 end

@@ -64,6 +64,8 @@ config :algora, :local_store,
   ttl: String.to_integer(System.get_env("LOCAL_STORE_TTL", "3600")),
   salt: System.get_env("LOCAL_STORE_SALT", "algora-local-store")
 
+config :algora, :discord, webhook_url: System.get_env("DISCORD_WEBHOOK_URL")
+
 config :algora,
   plausible_embed_url: System.get_env("PLAUSIBLE_EMBED_URL"),
   assets_url: System.get_env("ASSETS_URL"),

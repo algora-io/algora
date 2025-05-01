@@ -4,7 +4,7 @@ defmodule Algora.Jobs do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Bounties.LineItem
   alias Algora.Jobs.JobApplication
   alias Algora.Jobs.JobPosting

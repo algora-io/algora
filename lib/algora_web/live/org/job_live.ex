@@ -50,8 +50,14 @@ defmodule AlgoraWeb.Org.JobLive do
         if job.user_id == socket.assigns.current_org.id do
           if connected?(socket), do: subscribe(job)
 
+          discount =
+            if price = socket.assigns.current_org.subscription_price do
+              Money.sub!(price(), price)
+            end
+
           {:ok,
            socket
+           |> assign(:discount, discount)
            |> assign(:wire_details, Settings.get_wire_details())
            |> assign(:share_url, url(~p"/#{handle}/jobs/"))
            |> assign(:page_title, job.title)
@@ -1656,17 +1662,15 @@ defmodule AlgoraWeb.Org.JobLive do
                         </span>
                       </div>
 
-                      <%= if discount = Money.sub!(price(), @current_org.subscription_price) do %>
-                        <%= if Money.positive?(discount) do %>
-                          <div class="flex justify-between items-center">
-                            <span class="text-sm text-muted-foreground">
-                              Early Believer Discount:
-                            </span>
-                            <span class="font-semibold font-display -ml-1.5">
-                              -{Money.to_string!(discount)}
-                            </span>
-                          </div>
-                        <% end %>
+                      <%= if Money.positive?(@discount) do %>
+                        <div class="flex justify-between items-center">
+                          <span class="text-sm text-muted-foreground">
+                            Early Believer Discount:
+                          </span>
+                          <span class="font-semibold font-display -ml-1.5">
+                            -{Money.to_string!(@discount)}
+                          </span>
+                        </div>
                       <% end %>
                       <div class="flex justify-between items-center">
                         <span class="text-sm text-muted-foreground">Processing Fee (4%)</span>
@@ -1774,17 +1778,15 @@ defmodule AlgoraWeb.Org.JobLive do
                             {Money.to_string!(price())}
                           </span>
 
-                          <%= if discount = Money.sub!(price(), @current_org.subscription_price) do %>
-                            <%= if Money.positive?(discount) do %>
-                              <span class="text-muted-foreground block">
-                                Early Believer Discount
+                          <%= if Money.positive?(@discount) do %>
+                            <span class="text-muted-foreground block">
+                              Early Believer Discount
+                            </span>
+                            <span class="font-medium font-display flex">
+                              <span class="-ml-1.5">
+                                -{Money.to_string!(@discount)}
                               </span>
-                              <span class="font-medium font-display flex">
-                                <span class="-ml-1.5">
-                                  -{Money.to_string!(discount)}
-                                </span>
-                              </span>
-                            <% end %>
+                            </span>
                           <% end %>
 
                           <span class="text-muted-foreground line-through block">

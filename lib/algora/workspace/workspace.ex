@@ -609,7 +609,7 @@ defmodule Algora.Workspace do
     end
   end
 
-  @spec list_user_contributions(list(String.t()), map()) :: {:ok, list(map())} | {:error, term()}
+  @spec list_user_contributions(list(String.t()), Keyword.t()) :: {:ok, list(map())} | {:error, term()}
   def list_user_contributions(ids, opts \\ []) do
     query =
       from uc in UserContribution,

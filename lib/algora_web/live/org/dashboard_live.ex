@@ -92,7 +92,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       {:ok,
        socket
-       |> assign(:page_title, "#{header_prefix(current_org)}")
+       |> assign(:page_title, current_org.name)
        |> assign(
          :page_description,
          "Share bounties, tips or contracts with #{header_prefix(current_org)} contributors and Algora matches"

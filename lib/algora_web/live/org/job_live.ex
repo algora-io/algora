@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   alias Algora.Accounts.User
   alias Algora.Jobs
+  alias Algora.Markdown
   alias Algora.Repo
   alias Algora.Settings
   alias AlgoraWeb.Forms.BountyForm
@@ -171,8 +172,11 @@ defmodule AlgoraWeb.Org.JobLive do
                 <div class="text-lg font-semibold">
                   {@job.title}
                 </div>
-                <div :if={@job.description} class="pt-1 text-sm text-muted-foreground">
-                  {@job.description}
+                <div
+                  :if={@job.description}
+                  class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
+                >
+                  {Phoenix.HTML.raw(Markdown.render(@job.description))}
                 </div>
                 <div class="pt-2 flex flex-wrap gap-2">
                   <%= for tech <- @job.tech_stack do %>

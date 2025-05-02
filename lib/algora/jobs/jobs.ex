@@ -17,7 +17,6 @@ defmodule Algora.Jobs do
 
   def list_jobs(opts \\ []) do
     JobPosting
-    |> where([j], j.status == :active)
     |> order_by([j], desc: j.inserted_at)
     |> maybe_filter_by_user(opts[:user_id])
     |> maybe_filter_by_tech_stack(opts[:tech_stack])
@@ -32,10 +31,10 @@ defmodule Algora.Jobs do
     |> Repo.insert()
   end
 
-  defp maybe_filter_by_user(query, nil), do: query
+  defp maybe_filter_by_user(query, nil), do: where(query, [j], j.status in [:active])
 
   defp maybe_filter_by_user(query, user_id) do
-    where(query, [j], j.user_id == ^user_id)
+    where(query, [j], j.user_id == ^user_id and j.status in [:active, :processing])
   end
 
   defp maybe_filter_by_tech_stack(query, nil), do: query

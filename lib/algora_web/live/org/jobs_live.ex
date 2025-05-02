@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Org.JobsLive do
 
   alias Algora.Accounts
   alias Algora.Jobs
+  alias Algora.Markdown
 
   require Logger
 
@@ -112,8 +113,11 @@ defmodule AlgoraWeb.Org.JobsLive do
                               </div>
                             <% end %>
                           </div>
-                          <div :if={job.description} class="pt-1 text-sm text-muted-foreground">
-                            {job.description}
+                          <div
+                            :if={job.description}
+                            class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
+                          >
+                            {Phoenix.HTML.raw(Markdown.render(job.description))}
                           </div>
                           <div class="pt-2 flex flex-wrap gap-2">
                             <%= for tech <- job.tech_stack do %>

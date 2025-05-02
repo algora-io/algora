@@ -35,9 +35,11 @@ defmodule Algora.Admin do
              company_url: user.website_url,
              title: opts.title,
              description: opts.description,
-             tech_stack: opts.tech_stack || Enum.take(user.tech_stack, 1)
+             tech_stack: opts.tech_stack || Enum.take(user.tech_stack, 1),
+             status: opts[:status] || :initialized
            }) do
       dbg("#{AlgoraWeb.Endpoint.url()}/#{user.handle}/jobs/#{job.id}")
+      {:ok, job}
     end
   end
 

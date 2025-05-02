@@ -127,6 +127,7 @@ defmodule Algora.Settings do
         projects = Accounts.list_contributed_projects(user, limit: 2)
         avatar_url = profile["avatar_url"] || user.avatar_url
         hourly_rate = match["hourly_rate"] || profile["hourly_rate"]
+        hours_per_week = match["hours_per_week"] || profile["hours_per_week"] || user.hours_per_week
 
         [
           %{
@@ -134,7 +135,8 @@ defmodule Algora.Settings do
             projects: projects,
             badge_variant: match["badge_variant"],
             badge_text: match["badge_text"],
-            hourly_rate: if(hourly_rate, do: Money.new(:USD, hourly_rate, no_fraction_if_integer: true))
+            hourly_rate: if(hourly_rate, do: Money.new(:USD, hourly_rate, no_fraction_if_integer: true)),
+            hours_per_week: hours_per_week
           }
         ]
       else

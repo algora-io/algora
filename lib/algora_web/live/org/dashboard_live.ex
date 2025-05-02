@@ -82,6 +82,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       matches = Algora.Settings.get_org_matches(previewed_user)
 
+      contributions =
+        matches
+        |> Enum.map(& &1.user.id)
+        |> Algora.Workspace.list_user_contributions()
+        |> Enum.group_by(& &1.user.id)
+
       admins_last_active = Algora.Admin.admins_last_active()
 
       developers =
@@ -106,6 +112,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:contributors, contributors)
        |> assign(:previewed_user, previewed_user)
        |> assign(:matches, matches)
+       |> assign(:contributions, contributions)
        |> assign(:developers, developers)
        |> assign(:has_more_bounties, false)
        |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
@@ -390,7 +397,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </li>
                 <li class="flex items-center">
                   <.icon name="tabler-circle-number-3 mr-2" class="size-6 text-success-400 shrink-0" />
-                  Release/withhold escrow end of week
+                  Release/withhold escrow as you go
                 </li>
               </ul>
             </div>
@@ -398,6 +405,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
               <.match_card
                 match={match}
                 contract_for_user={contract_for_user(@contracts, match.user)}
+                contributions={@contributions[match.user.id]}
                 current_org={@current_org}
               />
             <% end %>
@@ -674,8 +682,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
     match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
     hourly_rate = match[:hourly_rate]
-
-    hours_per_week = developer.hours_per_week || 30
+    hours_per_week = match[:hours_per_week] || developer.hours_per_week || 30
 
     {:noreply,
      socket
@@ -691,8 +698,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
          hourly_rate: hourly_rate,
          contractor_handle: developer.provider_login,
          hours_per_week: hours_per_week,
-         title: "#{socket.assigns.current_org.name} OSS Development",
-         description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
+         title: "#{socket.assigns.current_org.name} Development",
+         description: "Contribution to #{socket.assigns.current_org.name} for #{hours_per_week} hours"
        })
        |> to_form()
      )}
@@ -1330,7 +1337,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp match_card(assigns) do
     ~H"""
-    <div class="relative flex flex-col lg:flex-row xl:items-center lg:justify-between gap-4 sm:gap-8 lg:gap-4 xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-4 pt-8">
+    <div class="group relative flex flex-col lg:flex-row xl:items-center lg:justify-between gap-4 sm:gap-8 lg:gap-4 xl:gap-6 border bg-card rounded-xl text-card-foreground shadow p-4 pt-8">
       <div class="lg:basis-[52%] w-full truncate">
         <div class="flex items-center justify-between gap-4">
           <div class="flex items-center gap-4">
@@ -1405,7 +1412,54 @@ defmodule AlgoraWeb.Org.DashboardLive do
             )}
           </span>
         </div>
-        <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap gap-4 lg:gap-4 xl:gap-8">
+        <div class="flex flex-col gap-3 mt-2">
+          <%= for {owner, contributions} <- aggregate_contributions(@contributions) |> Enum.take(3) do %>
+            <.link
+              href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@match.user.provider_login}+is%3Amerged+"}
+              target="_blank"
+              rel="noopener"
+              class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+            >
+              <img
+                src={owner.avatar_url}
+                class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
+                alt={owner.name}
+              />
+              <div class="w-full flex flex-col text-xs font-medium gap-0.5">
+                <span class="flex items-start justify-between gap-5">
+                  <span class="font-display">
+                    {if owner.type == :organization do
+                      owner.name
+                    else
+                      List.first(contributions).repository.name
+                    end}
+                  </span>
+                  <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
+                    <span class="flex items-center text-foreground text-[11px] gap-1">
+                      <img
+                        src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
+                        class="w-4 h-4 invert saturate-0"
+                      /> {tech}
+                    </span>
+                  <% end %>
+                </span>
+                <div class="flex items-center gap-2 font-semibold">
+                  <span class="flex items-center text-amber-300 text-xs">
+                    <.icon name="tabler-star-filled" class="h-4 w-4 mr-1" />
+                    {Algora.Util.format_number_compact(
+                      max(owner.stargazers_count, total_stars(contributions))
+                    )}
+                  </span>
+                  <span class="flex items-center text-purple-400 text-xs">
+                    <.icon name="tabler-git-pull-request" class="h-4 w-4 mr-1" />
+                    {Algora.Util.format_number_compact(total_contributions(contributions))}
+                  </span>
+                </div>
+              </div>
+            </.link>
+          <% end %>
+        </div>
+        <%!-- <div class="pt-4 flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap gap-4 lg:gap-4 xl:gap-8">
           <%= for {project, total_earned} <- @match.projects |> Enum.take(2) do %>
             <.link
               navigate={User.url(project)}
@@ -1438,18 +1492,20 @@ defmodule AlgoraWeb.Org.DashboardLive do
               </div>
             </.link>
           <% end %>
-        </div>
+        </div> --%>
       </div>
 
       <div class="pt-2 lg:pt-0 lg:pl-4 xl:pl-6 lg:basis-[48%] w-full lg:border-l lg:border-border">
         <dl :if={@match[:hourly_rate]} class="pt-4 lg:pt-0">
           <div class="flex flex-col-reverse 3xl:flex-row justify-between items-center gap-2">
             <dt class="text-foreground text-center">
-              Total payment for <span class="font-semibold">{@match.user.hours_per_week || 30}</span>
-              hours
-              <div class="text-[12px] text-muted-foreground">
-                (includes all platform and payment processing fees)
-              </div>
+              Minimum payment to collaborate: <br />
+              <span class="font-semibold font-display">
+                {@match[:hourly_rate]
+                |> Money.mult!(@match.hours_per_week || 30)
+                |> Money.to_string!()}
+              </span>
+              (<span class="font-semibold">{@match.hours_per_week || 30}</span> hours booked)
             </dt>
             <div class="flex flex-col items-center gap-2">
               <.button
@@ -1463,12 +1519,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
               >
                 <div class="flex flex-col items-center gap-1 font-semibold">
                   <span>Offer contract</span>
-                  <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                    {@match[:hourly_rate]
-                    |> Money.mult!(@match.user.hours_per_week || 30)
-                    |> Bounties.calculate_contract_amount()
-                    |> Money.to_string!(no_fraction_if_integer: false)} / week
+                  <dd class="font-display font-semibold tabular-nums text-xl">
+                    {@match[:hourly_rate]}/hr
                   </dd>
+                  <div class="text-xs text-emerald-400">
+                    (includes all fees)
+                  </div>
                 </div>
               </.button>
             </div>
@@ -2070,4 +2126,24 @@ defmodule AlgoraWeb.Org.DashboardLive do
   defp format_number(n) when n >= 1_000_000, do: "#{Float.round(n / 1_000_000, 1)}M"
   defp format_number(n) when n >= 1_000, do: "#{Float.round(n / 1_000, 1)}K"
   defp format_number(n), do: to_string(n)
+
+  defp aggregate_contributions(contributions) do
+    groups = Enum.group_by(contributions, fn c -> c.repository.user end)
+
+    contributions
+    |> Enum.map(fn c -> {c.repository.user, groups[c.repository.user]} end)
+    |> Enum.uniq_by(fn {owner, _} -> owner.id end)
+  end
+
+  defp total_stars(contributions) do
+    contributions
+    |> Enum.map(& &1.repository.stargazers_count)
+    |> Enum.sum()
+  end
+
+  defp total_contributions(contributions) do
+    contributions
+    |> Enum.map(& &1.contribution_count)
+    |> Enum.sum()
+  end
 end

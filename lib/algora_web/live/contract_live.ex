@@ -12,6 +12,7 @@ defmodule AlgoraWeb.ContractLive do
   alias Algora.Chat
   alias Algora.Organizations.Member
   alias Algora.Payments
+  alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Types.USD
   alias Algora.Util
@@ -38,6 +39,27 @@ defmodule AlgoraWeb.ContractLive do
       |> cast(attrs, [:amount, :tip_percentage])
       |> validate_required([:amount])
       |> validate_number(:tip_percentage, greater_than_or_equal_to: 0)
+      |> Algora.Validations.validate_money_positive(:amount)
+    end
+  end
+
+  defmodule ReleaseBountyForm do
+    @moduledoc false
+    use Ecto.Schema
+
+    import Ecto.Changeset
+
+    @primary_key false
+    embedded_schema do
+      field :amount, USD
+      field :hours, :decimal
+    end
+
+    def changeset(form, attrs) do
+      form
+      |> cast(attrs, [:amount, :hours])
+      |> validate_required([:amount])
+      |> validate_number(:hours, greater_than: 0)
       |> Algora.Validations.validate_money_positive(:amount)
     end
   end
@@ -111,6 +133,9 @@ defmodule AlgoraWeb.ContractLive do
 
     reward_changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{amount: bounty.amount, tip_percentage: 0})
 
+    release_changeset =
+      ReleaseBountyForm.changeset(%ReleaseBountyForm{}, %{amount: bounty.amount, hours: bounty.hours_per_week})
+
     {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
     participants = thread.id |> Chat.list_participants() |> Repo.preload(:user)
@@ -139,12 +164,15 @@ defmodule AlgoraWeb.ContractLive do
      |> assign(:ticket_body_html, ticket_body_html)
      |> assign(:show_reward_modal, false)
      |> assign(:show_authorize_modal, false)
+     |> assign(:show_release_modal, false)
      |> assign(:selected_context, nil)
+     |> assign(:tx_id, nil)
      |> assign(:line_items, [])
      |> assign(:thread, thread)
      |> assign(:messages, messages)
      |> assign(:participants, participants)
      |> assign(:reward_form, to_form(reward_changeset))
+     |> assign(:release_form, to_form(release_changeset))
      |> assign_contractor(bounty.shared_with)
      |> assign_transactions()
      |> assign_line_items(reward_changeset)}
@@ -207,6 +235,27 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
+  def handle_event("release", %{"tx_id" => tx_id}, socket) do
+    tx = Repo.get(Transaction, tx_id)
+
+    release_changeset =
+      ReleaseBountyForm.changeset(%ReleaseBountyForm{}, %{
+        amount: tx.net_amount,
+        hours:
+          tx.net_amount
+          |> Money.to_decimal()
+          |> Decimal.mult(socket.assigns.bounty.hours_per_week)
+          |> Decimal.div(Money.to_decimal(socket.assigns.bounty.amount))
+      })
+
+    {:noreply,
+     socket
+     |> assign(:release_form, to_form(release_changeset))
+     |> assign(:show_release_modal, true)
+     |> assign(:tx_id, tx_id)}
+  end
+
+  @impl true
   def handle_event("close_drawer", _params, socket) do
     {:noreply, close_drawers(socket)}
   end
@@ -218,6 +267,65 @@ defmodule AlgoraWeb.ContractLive do
     {:noreply,
      socket
      |> assign(:reward_form, to_form(changeset))
+     |> assign_line_items(changeset)}
+  end
+
+  @impl true
+  def handle_event("validate_hours", %{"release_bounty_form" => %{"hours" => hours}}, socket) do
+    hours =
+      Decimal.new(
+        case hours do
+          "" -> "0"
+          hours -> hours
+        end
+      )
+
+    changeset =
+      Ecto.Changeset.change(socket.assigns.release_form.source, %{
+        hours: hours,
+        amount: Money.mult!(socket.assigns.bounty.amount, Decimal.div(hours, socket.assigns.bounty.hours_per_week))
+      })
+
+    {:noreply,
+     socket
+     |> assign(:release_form, to_form(changeset))
+     |> assign_line_items(changeset)}
+  end
+
+  @impl true
+  def handle_event("validate_amount", %{"release_bounty_form" => %{"amount" => amount}}, socket) do
+    amount =
+      Money.new(
+        :USD,
+        case amount do
+          "" -> "0"
+          amount -> amount
+        end
+      )
+
+    changeset =
+      Ecto.Changeset.change(socket.assigns.release_form.source, %{
+        amount: amount,
+        hours:
+          amount
+          |> Money.to_decimal()
+          |> Decimal.mult(socket.assigns.bounty.hours_per_week)
+          |> Decimal.div(Money.to_decimal(socket.assigns.bounty.amount))
+      })
+
+    {:noreply,
+     socket
+     |> assign(:release_form, to_form(changeset))
+     |> assign_line_items(changeset)}
+  end
+
+  @impl true
+  def handle_event("validate_release", %{"release_bounty_form" => params}, socket) do
+    changeset = ReleaseBountyForm.changeset(%ReleaseBountyForm{}, params)
+
+    {:noreply,
+     socket
+     |> assign(:release_form, to_form(changeset))
      |> assign_line_items(changeset)}
   end
 
@@ -254,19 +362,31 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
-  def handle_event("release_funds", %{"tx_id" => tx_id}, socket) do
-    with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == tx_id)),
-         {:ok, charge} <- Algora.PSP.Charge.retrieve(tx.provider_charge_id),
-         {:ok, _} <- Algora.Payments.process_charge("charge.succeeded", charge, tx.group_id) do
-      {:noreply, socket}
-    else
-      {:error, reason} ->
-        Logger.error("Failed to release funds: #{inspect(reason)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong")}
+  def handle_event("release_funds", %{"release_bounty_form" => params}, socket) do
+    changeset = ReleaseBountyForm.changeset(%ReleaseBountyForm{}, params)
 
-      _ ->
-        Logger.error("Failed to release funds: transaction not found")
-        {:noreply, put_flash(socket, :error, "Something went wrong")}
+    case apply_action(changeset, :save) do
+      {:ok, data} ->
+        with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == socket.assigns.tx_id)),
+             {:ok, charge} <- Algora.PSP.Charge.retrieve(tx.provider_charge_id),
+             {:ok, _} <- Algora.Payments.process_release(charge, tx.group_id, data.amount, socket.assigns.contractor) do
+          {:noreply,
+           socket
+           |> assign(:show_release_modal, false)
+           |> put_flash(:info, "Funds released!")
+           |> assign_transactions()}
+        else
+          {:error, reason} ->
+            Logger.error("Failed to release funds: #{inspect(reason)}")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+
+          _ ->
+            Logger.error("Failed to release funds: transaction not found")
+            {:noreply, put_flash(socket, :error, "Something went wrong")}
+        end
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, :release_form, to_form(changeset))}
     end
   end
 
@@ -356,7 +476,7 @@ defmodule AlgoraWeb.ContractLive do
                 <% end %>
 
                 <%= if @can_create_bounty && @transactions == [] do %>
-                  <.button phx-click="reward">
+                  <.button phx-click="reward" variant="secondary">
                     Make payment
                   </.button>
                 <% end %>
@@ -484,11 +604,10 @@ defmodule AlgoraWeb.ContractLive do
                                     transaction.status == :requires_release
                                 }
                                 size="sm"
-                                phx-click="release_funds"
-                                phx-disable-with="Releasing..."
+                                phx-click="release"
                                 phx-value-tx_id={transaction.id}
                               >
-                                Release funds
+                                Partial release
                               </.button>
                             </div>
                           </td>
@@ -616,6 +735,93 @@ defmodule AlgoraWeb.ContractLive do
       </div>
     </div>
 
+    <.drawer :if={@current_user} show={@show_release_modal} on_cancel="close_drawer">
+      <.drawer_header>
+        <.drawer_title>Release funds</.drawer_title>
+        <.drawer_description>
+          {@contractor.name} will be paid once you release the funds.
+        </.drawer_description>
+      </.drawer_header>
+      <.drawer_content class="mt-4">
+        <.form for={@release_form} phx-change="validate_release" phx-submit="release_funds">
+          <div class="flex flex-col gap-8">
+            <div class="grid grid-cols-2 gap-8">
+              <.card>
+                <.card_header>
+                  <.card_title>Release Details</.card_title>
+                </.card_header>
+                <.card_content class="pt-0">
+                  <div class="space-y-4">
+                    <.input
+                      label="Hours"
+                      icon="tabler-clock"
+                      field={@release_form[:hours]}
+                      phx-change="validate_hours"
+                    />
+                    <.input
+                      label="Amount"
+                      icon="tabler-currency-dollar"
+                      field={@release_form[:amount]}
+                      phx-change="validate_amount"
+                    />
+                  </div>
+                </.card_content>
+              </.card>
+              <.card>
+                <.card_header>
+                  <.card_title>Payment Summary</.card_title>
+                </.card_header>
+                <.card_content class="pt-0">
+                  <dl class="space-y-4">
+                    <%= for line_item <- @line_items do %>
+                      <div class="flex justify-between">
+                        <dt class="flex items-center gap-4">
+                          <%= if line_item.image do %>
+                            <.avatar>
+                              <.avatar_image src={line_item.image} />
+                              <.avatar_fallback>
+                                {Util.initials(line_item.title)}
+                              </.avatar_fallback>
+                            </.avatar>
+                          <% else %>
+                            <div class="w-10" />
+                          <% end %>
+                          <div>
+                            <div class="font-medium">{line_item.title}</div>
+                            <div class="text-muted-foreground text-sm">{line_item.description}</div>
+                          </div>
+                        </dt>
+                        <dd class="font-display font-semibold tabular-nums">
+                          {Money.to_string!(line_item.amount)}
+                        </dd>
+                      </div>
+                    <% end %>
+                    <div class="h-px bg-border" />
+                    <div class="flex justify-between">
+                      <dt class="flex items-center gap-4">
+                        <div class="w-10" />
+                        <div class="font-medium">Total due</div>
+                      </dt>
+                      <dd class="font-display font-semibold tabular-nums">
+                        {LineItem.gross_amount(@line_items)}
+                      </dd>
+                    </div>
+                  </dl>
+                </.card_content>
+              </.card>
+            </div>
+            <div class="ml-auto flex gap-4">
+              <.button variant="secondary" phx-click="close_drawer" type="button">
+                Cancel
+              </.button>
+              <.button type="submit">
+                Release funds <.icon name="tabler-arrow-right" class="-mr-1 ml-2 h-4 w-4" />
+              </.button>
+            </div>
+          </div>
+        </.form>
+      </.drawer_content>
+    </.drawer>
     <.drawer :if={@current_user} show={@show_authorize_modal} on_cancel="close_drawer">
       <.drawer_header>
         <.drawer_title>Authorize payment</.drawer_title>
@@ -840,6 +1046,7 @@ defmodule AlgoraWeb.ContractLive do
     socket
     |> assign(:show_reward_modal, false)
     |> assign(:show_authorize_modal, false)
+    |> assign(:show_release_modal, false)
   end
 
   defp assign_contractor(socket, shared_with) do
@@ -859,12 +1066,24 @@ defmodule AlgoraWeb.ContractLive do
   defp assign_transactions(socket) do
     transactions =
       [
-        user_id: socket.assigns.bounty.owner.id,
         status: [:succeeded, :requires_capture, :requires_release],
         bounty_id: socket.assigns.bounty.id
       ]
       |> Payments.list_transactions()
-      |> Enum.filter(&(&1.type == :charge or &1.status in [:succeeded, :requires_release]))
+      |> Enum.filter(fn tx -> Money.positive?(tx.net_amount) end)
+      |> Enum.filter(fn tx ->
+        cond do
+          socket.assigns.can_create_bounty ->
+            tx.type == :charge or
+              (tx.type == :debit and tx.status in [:succeeded, :requires_release])
+
+          socket.assigns.current_user.id == socket.assigns.contractor.id ->
+            tx.type == :credit and tx.status == :succeeded
+
+          true ->
+            false
+        end
+      end)
 
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)

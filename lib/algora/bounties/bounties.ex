@@ -429,8 +429,12 @@ defmodule Algora.Bounties do
 
   @spec notify_bounty(%{owner: User.t(), bounty: Bounty.t()}, opts :: []) ::
           {:ok, nil} | {:error, atom()}
-  def notify_bounty(%{owner: _owner, bounty: bounty}, _opts) do
-    Algora.Admin.alert("Notify bounty: #{inspect(bounty)}", :error)
+  def notify_bounty(%{owner: owner, bounty: bounty}, _opts) do
+    Algora.Admin.alert(
+      "New contract offer: #{AlgoraWeb.Endpoint.url()}/#{owner.handle}/contracts/#{bounty.id}",
+      :critical
+    )
+
     {:ok, nil}
   end
 
@@ -906,11 +910,9 @@ defmodule Algora.Bounties do
     end
   end
 
-  def calculate_contract_amount(amount), do: Money.mult!(amount, Decimal.new("1.13"))
-
   def final_contract_amount(:marketplace, amount), do: amount
 
-  def final_contract_amount(:bring_your_own, amount), do: calculate_contract_amount(amount)
+  def final_contract_amount(:bring_your_own, amount), do: Money.mult!(amount, Decimal.new("1.13"))
 
   @spec create_payment_session(
           %{owner: User.t(), amount: Money.t(), description: String.t()},

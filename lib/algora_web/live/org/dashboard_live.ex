@@ -390,7 +390,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
                 </li>
                 <li class="flex items-center">
                   <.icon name="tabler-circle-number-3 mr-2" class="size-6 text-success-400 shrink-0" />
-                  Release/withhold escrow end of week
+                  Release/withhold escrow as you go
                 </li>
               </ul>
             </div>
@@ -674,8 +674,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     developer = Enum.find(socket.assigns.developers, &(&1.id == user_id))
     match = Enum.find(socket.assigns.matches, &(&1.user.id == user_id))
     hourly_rate = match[:hourly_rate]
-
-    hours_per_week = developer.hours_per_week || 30
+    hours_per_week = match[:hours_per_week] || developer.hours_per_week || 30
 
     {:noreply,
      socket
@@ -691,8 +690,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
          hourly_rate: hourly_rate,
          contractor_handle: developer.provider_login,
          hours_per_week: hours_per_week,
-         title: "#{socket.assigns.current_org.name} OSS Development",
-         description: "Open source contribution to #{socket.assigns.current_org.name} for a week"
+         title: "#{socket.assigns.current_org.name} Development",
+         description: "Contribution to #{socket.assigns.current_org.name} for #{hours_per_week} hours"
        })
        |> to_form()
      )}
@@ -1448,10 +1447,10 @@ defmodule AlgoraWeb.Org.DashboardLive do
               Minimum payment to collaborate: <br />
               <span class="font-semibold font-display">
                 {@match[:hourly_rate]
-                |> Money.mult!(@match.user.hours_per_week || 30)
+                |> Money.mult!(@match.hours_per_week || 30)
                 |> Money.to_string!()}
               </span>
-              (<span class="font-semibold">{@match.user.hours_per_week || 30}</span> hours booked)
+              (<span class="font-semibold">{@match.hours_per_week || 30}</span> hours booked)
             </dt>
             <div class="flex flex-col items-center gap-2">
               <.button

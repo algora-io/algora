@@ -1078,9 +1078,7 @@ defmodule AlgoraWeb.ContractLive do
               (tx.type == :debit and tx.status in [:succeeded, :requires_release])
 
           socket.assigns.current_user.id == socket.assigns.contractor.id ->
-            tx.type == :charge or
-              (tx.type == :debit and tx.status == :requires_release) or
-              (tx.type == :credit and tx.status == :succeeded)
+            tx.type == :credit and tx.status == :succeeded
 
           true ->
             false

@@ -225,9 +225,7 @@ defmodule AlgoraWeb.Forms.ContractForm do
                 </div>
               </dt>
               <dd class="font-display font-semibold tabular-nums text-lg">
-                {Money.to_string!(
-                  Bounties.calculate_contract_amount(get_change(@form.source, :amount))
-                )}
+                {Money.to_string!(get_change(@form.source, :amount))}
               </dd>
             </div>
           </dl>

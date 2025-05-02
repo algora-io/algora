@@ -1445,11 +1445,13 @@ defmodule AlgoraWeb.Org.DashboardLive do
         <dl :if={@match[:hourly_rate]} class="pt-4 lg:pt-0">
           <div class="flex flex-col-reverse 3xl:flex-row justify-between items-center gap-2">
             <dt class="text-foreground text-center">
-              Total payment for <span class="font-semibold">{@match.user.hours_per_week || 30}</span>
-              hours
-              <div class="text-[12px] text-muted-foreground">
-                (includes all platform and payment processing fees)
-              </div>
+              Minimum payment to collaborate: <br />
+              <span class="font-semibold font-display">
+                {@match[:hourly_rate]
+                |> Money.mult!(@match.user.hours_per_week || 30)
+                |> Money.to_string!()}
+              </span>
+              (<span class="font-semibold">{@match.user.hours_per_week || 30}</span> hours booked)
             </dt>
             <div class="flex flex-col items-center gap-2">
               <.button
@@ -1463,12 +1465,12 @@ defmodule AlgoraWeb.Org.DashboardLive do
               >
                 <div class="flex flex-col items-center gap-1 font-semibold">
                   <span>Offer contract</span>
-                  <dd class="font-display font-semibold tabular-nums text-lg text-emerald-400">
-                    {@match[:hourly_rate]
-                    |> Money.mult!(@match.user.hours_per_week || 30)
-                    |> Bounties.calculate_contract_amount()
-                    |> Money.to_string!(no_fraction_if_integer: false)} / week
+                  <dd class="font-display font-semibold tabular-nums text-xl">
+                    {@match[:hourly_rate]}/hr
                   </dd>
+                  <div class="text-xs text-emerald-400">
+                    (includes all fees)
+                  </div>
                 </div>
               </.button>
             </div>

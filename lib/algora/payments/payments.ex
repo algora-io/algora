@@ -6,7 +6,6 @@ defmodule Algora.Payments do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Admin
-  alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs.PromptPayoutConnect

@@ -2123,10 +2123,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
     end
   end
 
-  defp format_number(n) when n >= 1_000_000, do: "#{Float.round(n / 1_000_000, 1)}M"
-  defp format_number(n) when n >= 1_000, do: "#{Float.round(n / 1_000, 1)}K"
-  defp format_number(n), do: to_string(n)
-
   defp aggregate_contributions(contributions) do
     groups = Enum.group_by(contributions, fn c -> c.repository.user end)
 

@@ -6,7 +6,6 @@ defmodule AlgoraWeb.Forms.ContractForm do
   import Ecto.Changeset
 
   alias Algora.Accounts.User
-  alias Algora.Bounties
   alias Algora.Types.USD
   alias Algora.Validations
 

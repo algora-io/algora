@@ -9,6 +9,7 @@ defmodule Algora.Payments do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Jobs.PromptPayoutConnect
   alias Algora.Bounties.Tip
   alias Algora.Jobs.JobPosting
   alias Algora.MoneyUtils
@@ -737,7 +738,7 @@ defmodule Algora.Payments do
 
             {:error, :no_active_account} ->
               case %{credit_id: credit.id}
-                   |> Bounties.Jobs.PromptPayoutConnect.new()
+                   |> PromptPayoutConnect.new()
                    |> Oban.insert() do
                 {:ok, _job} -> {:cont, :ok}
                 error -> {:halt, error}
@@ -758,6 +759,83 @@ defmodule Algora.Payments do
         error ->
           Logger.error("Failed to update transactions: #{inspect(error)}")
           {:error, :failed_to_update_transactions}
+      end
+    end)
+  end
+
+  def process_release(
+        %Stripe.Charge{id: charge_id, captured: true, payment_intent: payment_intent_id},
+        group_id,
+        amount,
+        recipient
+      ) do
+    Repo.transact(fn ->
+      tx = Repo.get_by(Transaction, group_id: group_id, type: :charge, status: :succeeded)
+
+      user = Repo.get_by(User, id: tx.user_id)
+      bounty = Repo.get_by(Bounty, id: tx.bounty_id)
+
+      Algora.Admin.alert(
+        "Release #{amount} escrow to #{recipient.handle} for #{AlgoraWeb.Endpoint.url()}/#{user.handle}/contracts/#{bounty.id}",
+        :critical
+      )
+
+      debit_id = Nanoid.generate()
+      credit_id = Nanoid.generate()
+
+      with {:ok, debit0} <- Repo.fetch_by(Transaction, group_id: group_id, type: :debit, status: :requires_release),
+           {:ok, _} <-
+             debit0
+             |> change(%{
+               net_amount: Money.sub!(debit0.net_amount, amount),
+               gross_amount: Money.sub!(debit0.gross_amount, amount)
+             })
+             |> Repo.update(),
+           {:ok, credit0} <- Repo.fetch_by(Transaction, group_id: group_id, type: :credit, status: :requires_release),
+           {:ok, _} <-
+             credit0
+             |> change(%{
+               net_amount: Money.add!(credit0.net_amount, amount),
+               gross_amount: Money.add!(credit0.gross_amount, amount)
+             })
+             |> Repo.update(),
+           {:ok, _debit} <-
+             Repo.insert(%Transaction{
+               id: debit_id,
+               provider: "stripe",
+               provider_id: charge_id,
+               provider_charge_id: charge_id,
+               provider_payment_intent_id: payment_intent_id,
+               type: :debit,
+               status: :succeeded,
+               succeeded_at: DateTime.utc_now(),
+               bounty_id: tx.bounty_id,
+               user_id: tx.user_id,
+               gross_amount: amount,
+               net_amount: amount,
+               total_fee: Money.zero(:USD),
+               linked_transaction_id: credit_id,
+               group_id: group_id
+             }),
+           {:ok, _credit} <-
+             Repo.insert(%Transaction{
+               id: credit_id,
+               provider: "stripe",
+               provider_id: charge_id,
+               provider_charge_id: charge_id,
+               provider_payment_intent_id: payment_intent_id,
+               type: :credit,
+               status: :initialized,
+               succeeded_at: DateTime.utc_now(),
+               bounty_id: tx.bounty_id,
+               user_id: recipient.id,
+               gross_amount: amount,
+               net_amount: amount,
+               total_fee: Money.zero(:USD),
+               linked_transaction_id: debit_id,
+               group_id: group_id
+             }) do
+        {:ok, nil}
       end
     end)
   end

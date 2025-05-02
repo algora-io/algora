@@ -12,6 +12,7 @@ defmodule AlgoraWeb.ContractLive do
   alias Algora.Chat
   alias Algora.Organizations.Member
   alias Algora.Payments
+  alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Types.USD
   alias Algora.Util
@@ -235,8 +236,21 @@ defmodule AlgoraWeb.ContractLive do
 
   @impl true
   def handle_event("release", %{"tx_id" => tx_id}, socket) do
+    tx = Repo.get(Transaction, tx_id)
+
+    release_changeset =
+      ReleaseBountyForm.changeset(%ReleaseBountyForm{}, %{
+        amount: tx.net_amount,
+        hours:
+          tx.net_amount
+          |> Money.to_decimal()
+          |> Decimal.mult(socket.assigns.bounty.hours_per_week)
+          |> Decimal.div(Money.to_decimal(socket.assigns.bounty.amount))
+      })
+
     {:noreply,
      socket
+     |> assign(:release_form, to_form(release_changeset))
      |> assign(:show_release_modal, true)
      |> assign(:tx_id, tx_id)}
   end
@@ -352,11 +366,15 @@ defmodule AlgoraWeb.ContractLive do
     changeset = ReleaseBountyForm.changeset(%ReleaseBountyForm{}, params)
 
     case apply_action(changeset, :save) do
-      {:ok, _data} ->
+      {:ok, data} ->
         with tx when not is_nil(tx) <- Enum.find(socket.assigns.transactions, &(&1.id == socket.assigns.tx_id)),
              {:ok, charge} <- Algora.PSP.Charge.retrieve(tx.provider_charge_id),
-             {:ok, _} <- Algora.Payments.process_charge("charge.succeeded", charge, tx.group_id) do
-          {:noreply, socket |> assign(:show_release_modal, false) |> put_flash(:info, "Funds released!")}
+             {:ok, _} <- Algora.Payments.process_release(charge, tx.group_id, data.amount, socket.assigns.contractor) do
+          {:noreply,
+           socket
+           |> assign(:show_release_modal, false)
+           |> put_flash(:info, "Funds released!")
+           |> assign_transactions()}
         else
           {:error, reason} ->
             Logger.error("Failed to release funds: #{inspect(reason)}")
@@ -458,7 +476,7 @@ defmodule AlgoraWeb.ContractLive do
                 <% end %>
 
                 <%= if @can_create_bounty && @transactions == [] do %>
-                  <.button phx-click="reward">
+                  <.button phx-click="reward" variant="secondary">
                     Make payment
                   </.button>
                 <% end %>
@@ -1048,12 +1066,26 @@ defmodule AlgoraWeb.ContractLive do
   defp assign_transactions(socket) do
     transactions =
       [
-        user_id: socket.assigns.bounty.owner.id,
         status: [:succeeded, :requires_capture, :requires_release],
         bounty_id: socket.assigns.bounty.id
       ]
       |> Payments.list_transactions()
-      |> Enum.filter(&(&1.type == :charge or &1.status in [:succeeded, :requires_release]))
+      |> Enum.filter(fn tx -> Money.positive?(tx.net_amount) end)
+      |> Enum.filter(fn tx ->
+        cond do
+          socket.assigns.can_create_bounty ->
+            tx.type == :charge or
+              (tx.type == :debit and tx.status in [:succeeded, :requires_release])
+
+          socket.assigns.current_user.id == socket.assigns.contractor.id ->
+            tx.type == :charge or
+              (tx.type == :debit and tx.status == :requires_release) or
+              (tx.type == :credit and tx.status == :succeeded)
+
+          true ->
+            false
+        end
+      end)
 
     balance = calculate_balance(transactions)
     volume = calculate_volume(transactions)

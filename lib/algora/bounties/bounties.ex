@@ -429,8 +429,12 @@ defmodule Algora.Bounties do
 
   @spec notify_bounty(%{owner: User.t(), bounty: Bounty.t()}, opts :: []) ::
           {:ok, nil} | {:error, atom()}
-  def notify_bounty(%{owner: _owner, bounty: bounty}, _opts) do
-    Algora.Admin.alert("Notify bounty: #{inspect(bounty)}", :error)
+  def notify_bounty(%{owner: owner, bounty: bounty}, _opts) do
+    Algora.Admin.alert(
+      "New contract offer: #{AlgoraWeb.Endpoint.url()}/#{owner.handle}/contracts/#{bounty.id}",
+      :critical
+    )
+
     {:ok, nil}
   end
 

@@ -51,12 +51,14 @@ defmodule AlgoraWeb.ContractLive do
     @primary_key false
     embedded_schema do
       field :amount, USD
+      field :hours, :decimal
     end
 
     def changeset(form, attrs) do
       form
-      |> cast(attrs, [:amount])
+      |> cast(attrs, [:amount, :hours])
       |> validate_required([:amount])
+      |> validate_number(:hours, greater_than: 0)
       |> Algora.Validations.validate_money_positive(:amount)
     end
   end
@@ -129,7 +131,9 @@ defmodule AlgoraWeb.ContractLive do
     ticket_body_html = Algora.Markdown.render(bounty.ticket.description)
 
     reward_changeset = RewardBountyForm.changeset(%RewardBountyForm{}, %{amount: bounty.amount, tip_percentage: 0})
-    release_changeset = ReleaseBountyForm.changeset(%ReleaseBountyForm{}, %{amount: bounty.amount})
+
+    release_changeset =
+      ReleaseBountyForm.changeset(%ReleaseBountyForm{}, %{amount: bounty.amount, hours: bounty.hours_per_week})
 
     {:ok, thread} = Chat.get_or_create_bounty_thread(bounty)
     messages = thread.id |> Chat.list_messages() |> Repo.preload(:sender)
@@ -253,6 +257,55 @@ defmodule AlgoraWeb.ContractLive do
   end
 
   @impl true
+  def handle_event("validate_hours", %{"release_bounty_form" => %{"hours" => hours}}, socket) do
+    hours =
+      Decimal.new(
+        case hours do
+          "" -> "0"
+          hours -> hours
+        end
+      )
+
+    changeset =
+      Ecto.Changeset.change(socket.assigns.release_form.source, %{
+        hours: hours,
+        amount: Money.mult!(socket.assigns.bounty.amount, Decimal.div(hours, socket.assigns.bounty.hours_per_week))
+      })
+
+    {:noreply,
+     socket
+     |> assign(:release_form, to_form(changeset))
+     |> assign_line_items(changeset)}
+  end
+
+  @impl true
+  def handle_event("validate_amount", %{"release_bounty_form" => %{"amount" => amount}}, socket) do
+    amount =
+      Money.new(
+        :USD,
+        case amount do
+          "" -> "0"
+          amount -> amount
+        end
+      )
+
+    changeset =
+      Ecto.Changeset.change(socket.assigns.release_form.source, %{
+        amount: amount,
+        hours:
+          amount
+          |> Money.to_decimal()
+          |> Decimal.mult(socket.assigns.bounty.hours_per_week)
+          |> Decimal.div(Money.to_decimal(socket.assigns.bounty.amount))
+      })
+
+    {:noreply,
+     socket
+     |> assign(:release_form, to_form(changeset))
+     |> assign_line_items(changeset)}
+  end
+
+  @impl true
   def handle_event("validate_release", %{"release_bounty_form" => params}, socket) do
     changeset = ReleaseBountyForm.changeset(%ReleaseBountyForm{}, params)
 
@@ -296,7 +349,6 @@ defmodule AlgoraWeb.ContractLive do
 
   @impl true
   def handle_event("release_funds", %{"release_bounty_form" => params}, socket) do
-    dbg(params)
     changeset = ReleaseBountyForm.changeset(%ReleaseBountyForm{}, params)
 
     case apply_action(changeset, :save) do
@@ -537,7 +589,7 @@ defmodule AlgoraWeb.ContractLive do
                                 phx-click="release"
                                 phx-value-tx_id={transaction.id}
                               >
-                                Release funds
+                                Partial release
                               </.button>
                             </div>
                           </td>
@@ -683,9 +735,16 @@ defmodule AlgoraWeb.ContractLive do
                 <.card_content class="pt-0">
                   <div class="space-y-4">
                     <.input
+                      label="Hours"
+                      icon="tabler-clock"
+                      field={@release_form[:hours]}
+                      phx-change="validate_hours"
+                    />
+                    <.input
                       label="Amount"
                       icon="tabler-currency-dollar"
                       field={@release_form[:amount]}
+                      phx-change="validate_amount"
                     />
                   </div>
                 </.card_content>

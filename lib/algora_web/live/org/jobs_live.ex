@@ -41,7 +41,7 @@ defmodule AlgoraWeb.Org.JobsLive do
           ])
         }>
           <h2 class="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-6xl mb-2">
-            Jobs
+            Join {@current_org.name}
           </h2>
           <p class="font-medium text-base text-muted-foreground">
             Open positions at {@current_org.name}

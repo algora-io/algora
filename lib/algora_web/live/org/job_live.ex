@@ -832,7 +832,7 @@ defmodule AlgoraWeb.Org.JobLive do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
     applicants = Enum.reject(all_applicants, & &1.imported_at)
     imports = Enum.filter(all_applicants, & &1.imported_at)
-    matches = Settings.get_job_matches(socket.assigns.job.id)
+    matches = Settings.get_job_matches(socket.assigns.job)
 
     developers = matches |> Enum.concat(all_applicants) |> Enum.map(& &1.user)
 

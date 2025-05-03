@@ -2,7 +2,10 @@ defmodule Algora.Settings do
   @moduledoc false
   use Ecto.Schema
 
+  import Ecto.Query
+
   alias Algora.Accounts
+  alias Algora.Accounts.User
   alias Algora.Repo
 
   @primary_key {:key, :string, []}
@@ -91,10 +94,37 @@ defmodule Algora.Settings do
     set("org_matches:#{org_handle}", %{"matches" => matches})
   end
 
-  def get_job_matches(job_id) do
-    case get("job_matches:#{job_id}") do
-      %{"matches" => matches} when is_list(matches) -> load_matches(matches)
-      _ -> []
+  def get_job_matches(job) do
+    case get("job_matches:#{job.id}") do
+      %{"matches" => matches} when is_list(matches) ->
+        load_matches(matches)
+
+      _ ->
+        [
+          tech_stack: job.tech_stack,
+          limit: 50,
+          users: apply_job_criteria(User, get_job_criteria(job.id))
+        ]
+        |> Algora.Cloud.list_top_matches()
+        |> load_matches_2()
+    end
+  end
+
+  def apply_job_criteria(query, criteria) do
+    Enum.reduce(criteria, query, fn
+      {"country", country}, query ->
+        from([u] in query, where: u.country == ^country)
+    end)
+  end
+
+  def set_job_criteria(job_id, criteria) when is_binary(job_id) and is_map(criteria) do
+    set("job_criteria:#{job_id}", %{"criteria" => criteria})
+  end
+
+  def get_job_criteria(job_id) do
+    case get("job_criteria:#{job_id}") do
+      %{"criteria" => criteria} when is_map(criteria) -> criteria
+      _ -> %{}
     end
   end
 
@@ -139,6 +169,22 @@ defmodule Algora.Settings do
             hours_per_week: hours_per_week
           }
         ]
+      else
+        []
+      end
+    end)
+  end
+
+  def load_matches_2(matches) do
+    user_map =
+      [ids: Enum.map(matches, & &1[:user_id]), limit: :infinity]
+      |> Accounts.list_developers()
+      |> Enum.filter(& &1.provider_login)
+      |> Map.new(fn user -> {user.id, user} end)
+
+    Enum.flat_map(matches, fn match ->
+      if user = Map.get(user_map, match[:user_id]) do
+        [%{user: user, contribution_score: match["contribution_score"]}]
       else
         []
       end

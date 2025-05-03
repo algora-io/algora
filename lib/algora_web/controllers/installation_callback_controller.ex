@@ -155,7 +155,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
          {:ok, org} <-
            org
            |> change(
-             handle: Organizations.ensure_unique_org_handle(installation["account"]["login"]),
+             handle: org.handle || Organizations.ensure_unique_org_handle(installation["account"]["login"]),
              featured: org.featured || featured,
              provider: "github",
              provider_id: to_string(installation["account"]["id"]),
@@ -168,13 +168,25 @@ defmodule AlgoraWeb.InstallationCallbackController do
     end
   end
 
-  defp update_user_and_org(conn, %{last_context: last_context} = _user, installation, featured) do
-    with {:ok, org} <- Organizations.fetch_org_by(handle: last_context),
+  defp update_user_and_org(conn, %{last_context: last_context} = user, installation, featured) do
+    existing_org =
+      Repo.one(
+        from(u in User,
+          where: u.provider == "github",
+          where: u.provider_id == ^to_string(installation["account"]["id"])
+        )
+      )
+
+    with {:ok, org} <- if(existing_org, do: {:ok, existing_org}, else: Organizations.fetch_org_by(handle: last_context)),
+         {:ok, _member} <- fetch_or_create_member(user, org),
          {:ok, org} <-
            org
            |> change(
              Map.merge(
-               %{featured: org.featured || featured},
+               %{
+                 handle: org.handle || Organizations.ensure_unique_org_handle(installation["account"]["login"]),
+                 featured: org.featured || featured
+               },
                if is_nil(org.provider_id) do
                  %{
                    provider: "github",
@@ -187,8 +199,9 @@ defmodule AlgoraWeb.InstallationCallbackController do
                end
              )
            )
-           |> Repo.update() do
-      {:ok, conn, org}
+           |> Repo.update(),
+         {:ok, user} <- user |> change(last_context: org.handle) |> Repo.update() do
+      {:ok, UserAuth.put_current_user(conn, user), org}
     end
   end
 end

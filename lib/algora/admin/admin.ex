@@ -885,6 +885,14 @@ defmodule Algora.Admin do
     error -> {:error, error}
   end
 
+  def seed_installation(installation_id, user_id) do
+    with {:ok, installation} <- Github.get_installation(installation_id),
+         {:ok, user} <- Repo.fetch_by(User, id: user_id),
+         {:ok, org} <- Repo.fetch_by(User, provider: "github", provider_id: to_string(installation["target_id"])) do
+      Workspace.upsert_installation(installation, user, org, user)
+    end
+  end
+
   defp update_installation(installation) do
     target_user =
       Repo.get_by(User,

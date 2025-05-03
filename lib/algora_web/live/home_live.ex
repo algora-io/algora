@@ -308,7 +308,8 @@ defmodule AlgoraWeb.HomeLive do
                   <img
                     class="aspect-[1200/500] object-cover object-top w-full rounded-xl lg:rounded-2xl"
                     src={~p"/images/people/golem-team.jpeg"}
-                    alt="KubeCon"
+                    alt="Golem Team"
+                    loading="lazy"
                   />
                   <div class="pt-8 grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-12">
                     <div class="lg:col-span-6 order-last lg:order-first">
@@ -317,7 +318,7 @@ defmodule AlgoraWeb.HomeLive do
                       </h3>
                       <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-6">
                         <div class="flex items-center gap-4">
-                          <img src="https://github.com/mschuwalow.png" class="h-12 w-12 rounded-full" />
+                          <img src="https://github.com/mschuwalow.png" class="h-12 w-12 rounded-full" loading="lazy" />
                           <div>
                             <div class="text-xl sm:text-2xl font-semibold text-foreground">
                               Maxim Schuwalow
@@ -338,6 +339,7 @@ defmodule AlgoraWeb.HomeLive do
                           <img
                             src={~p"/images/people/john-de-goes.jpg"}
                             class="h-12 w-12 rounded-full"
+                            loading="lazy"
                           />
 
                           <div>

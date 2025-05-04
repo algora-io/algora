@@ -324,7 +324,7 @@ defmodule AlgoraWeb.CommunityLive do
               </div>
             </div>
             <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
-              <.glow class="absolute opacity-25 xl:opacity-75 top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" />
+              <.glow class="pointer-events-none absolute opacity-25 xl:opacity-75 top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" />
 
               <.form
                 for={@repo_form}
@@ -617,7 +617,7 @@ defmodule AlgoraWeb.CommunityLive do
               <div>algora.io/your/repo</div>
             </div>
             <div class="z-30 relative mx-auto max-w-7xl px-6 lg:px-8">
-              <.glow class="absolute opacity-25 xl:opacity-75 top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" />
+              <.glow class="pointer-events-none absolute opacity-25 xl:opacity-75 top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" />
 
               <.form
                 for={@repo_form}
@@ -1306,7 +1306,7 @@ defmodule AlgoraWeb.CommunityLive do
 
   defp glow(assigns) do
     ~H"""
-    <%!-- "absolute top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" --%>
+    <%!-- "pointer-events-none absolute top-[-320px] md:top-[-480px] xl:right-[120px] -z-[10]" --%>
     <div class={@class}>
       <svg
         xmlns="http://www.w3.org/2000/svg"

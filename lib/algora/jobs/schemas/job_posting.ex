@@ -15,6 +15,8 @@ defmodule Algora.Jobs.JobPosting do
     field :status, Ecto.Enum, values: [:initialized, :processing, :active, :expired], null: false, default: :initialized
     field :expires_at, :utc_datetime_usec
     field :location, :string
+    field :countries, {:array, :string}, default: []
+    field :regions, {:array, :string}, default: []
     field :compensation, :string
     field :seniority, :string
 
@@ -38,7 +40,9 @@ defmodule Algora.Jobs.JobPosting do
       :user_id,
       :location,
       :compensation,
-      :seniority
+      :seniority,
+      :countries,
+      :regions
     ])
     |> generate_id()
     |> validate_required([:url, :company_name, :company_url, :email])

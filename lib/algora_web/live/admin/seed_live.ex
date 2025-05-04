@@ -346,26 +346,23 @@ defmodule AlgoraWeb.Admin.SeedLive do
                end
              )
            )
-           |> Repo.update(),
-         {:ok, job} <-
-           Repo.insert(%JobPosting{
-             status: :processing,
-             id: Nanoid.generate(),
-             user_id: org.id,
-             company_name: org.name,
-             company_url: org.website_url,
-             title: row["title"],
-             url: row["url"],
-             description: row["description"],
-             tech_stack: row["tech_stack"],
-             location: row["location"],
-             compensation: row["compensation"],
-             seniority: row["seniority"]
-           }) do
-      if row["countries"] != [], do: Algora.Settings.set_job_criteria(job.id, %{"countries" => row["countries"]})
-      if row["regions"] != [], do: Algora.Settings.set_job_criteria(job.id, %{"regions" => row["regions"]})
-
-      {:ok, job}
+           |> Repo.update() do
+      Repo.insert(%JobPosting{
+        status: :processing,
+        id: Nanoid.generate(),
+        user_id: org.id,
+        company_name: org.name,
+        company_url: org.website_url,
+        title: row["title"],
+        url: row["url"],
+        description: row["description"],
+        tech_stack: row["tech_stack"],
+        location: row["location"],
+        compensation: row["compensation"],
+        seniority: row["seniority"],
+        countries: row["countries"],
+        regions: row["regions"]
+      })
     end
   end
 

@@ -119,10 +119,19 @@ defmodule Algora.Settings do
     set("job_criteria:#{job_id}", %{"criteria" => criteria})
   end
 
-  def get_job_criteria(job_id) do
-    case get("job_criteria:#{job_id}") do
-      %{"criteria" => criteria} when is_map(criteria) -> criteria
-      _ -> %{}
+  def get_job_criteria(job) do
+    cond do
+      job.countries != [] ->
+        %{"countries" => job.countries}
+
+      job.regions != [] ->
+        %{"regions" => job.regions}
+
+      true ->
+        case get("job_criteria:#{job.id}") do
+          %{"criteria" => criteria} when is_map(criteria) -> criteria
+          _ -> %{}
+        end
     end
   end
 

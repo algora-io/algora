@@ -6,6 +6,7 @@ defmodule Algora.Settings do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
+  alias Algora.PSP.ConnectCountries
   alias Algora.Repo
 
   @primary_key {:key, :string, []}

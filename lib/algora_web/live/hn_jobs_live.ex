@@ -21,7 +21,7 @@ defmodule AlgoraWeb.HNJobsLive do
   def mount(_params, _session, socket) do
     jobs =
       JobPosting
-      |> where([j], j.id in ^Settings.get_hn_job_ids())
+      # |> where([j], j.id in ^Settings.get_hn_job_ids())
       |> order_by([j], desc: j.inserted_at)
       |> Repo.all()
       |> Repo.preload(:user)

@@ -163,6 +163,8 @@ defmodule Algora.Organizations do
             org -> org.handle
           end
 
+        dbg(params)
+
         case org do
           nil ->
             %User{type: :organization}

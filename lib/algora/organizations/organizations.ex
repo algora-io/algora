@@ -104,6 +104,82 @@ defmodule Algora.Organizations do
     end)
   end
 
+  def onboard_organization_from_domain(domain, opts \\ %{}) do
+    case Algora.Crawler.fetch_site_metadata(domain) do
+      {:ok, metadata} ->
+        org_name =
+          case get_in(metadata, [:display_name]) do
+            nil ->
+              domain
+              |> String.split(".")
+              |> List.first()
+              |> String.capitalize()
+
+            name ->
+              name
+          end
+
+        org_handle =
+          case get_in(metadata, [:handle]) do
+            nil ->
+              domain
+              |> String.split(".")
+              |> List.first()
+              |> String.downcase()
+
+            handle ->
+              handle
+          end
+
+        params =
+          Map.merge(
+            %{
+              display_name: org_name,
+              bio:
+                get_in(metadata, [:bio]) || get_in(metadata, [:og_description]) ||
+                  get_in(metadata, [:og_title]),
+              avatar_url: get_in(metadata, [:avatar_url]) || get_in(metadata, [:favicon_url]),
+              handle: org_handle,
+              domain: domain,
+              og_title: get_in(metadata, [:og_title]),
+              og_image_url: get_in(metadata, [:og_image_url]),
+              website_url: get_in(metadata, [:website_url]),
+              twitter_url: get_in(metadata, [:socials, :twitter]),
+              github_url: get_in(metadata, [:socials, :github]),
+              youtube_url: get_in(metadata, [:socials, :youtube]),
+              twitch_url: get_in(metadata, [:socials, :twitch]),
+              discord_url: get_in(metadata, [:socials, :discord]),
+              slack_url: get_in(metadata, [:socials, :slack]),
+              linkedin_url: get_in(metadata, [:socials, :linkedin])
+            },
+            opts
+          )
+
+        org = Repo.one(from o in User, where: o.domain == ^domain, limit: 1)
+
+        org_handle =
+          case org do
+            nil -> ensure_unique_org_handle(params.handle)
+            org -> org.handle
+          end
+
+        case org do
+          nil ->
+            %User{type: :organization}
+            |> Org.changeset(Map.put(params, :handle, org_handle))
+            |> Repo.insert()
+
+          existing_org ->
+            existing_org
+            |> Org.changeset(Map.delete(params, :handle))
+            |> Repo.update()
+        end
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
   def generate_handle_from_email(email) do
     email
     |> String.split("@")

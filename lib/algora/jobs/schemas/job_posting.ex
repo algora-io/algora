@@ -14,8 +14,11 @@ defmodule Algora.Jobs.JobPosting do
     field :email, :string
     field :status, Ecto.Enum, values: [:initialized, :processing, :active, :expired], null: false, default: :initialized
     field :expires_at, :utc_datetime_usec
+    # e.g. "SF Bay Area (Remote)"
     field :location, :string
+    # e.g. ["US", "CA", "BR"]
     field :countries, {:array, :string}, default: []
+    # e.g. ["LATAM", "NA"]
     field :regions, {:array, :string}, default: []
     field :compensation, :string
     field :seniority, :string

@@ -125,6 +125,8 @@ defmodule AlgoraWeb.Router do
       live "/community", CommunityLive, :index
       live "/community/:tech", CommunityLive, :index
       live "/crowdfund", CrowdfundLive, :index
+      live "/hn", HNJobsLive, :index
+      live "/hn/:tab", HNJobsLive, :index
       live "/pricing", PricingLive
       live "/challenges", ChallengesLive
       live "/challenges/prettier", Challenges.PrettierLive

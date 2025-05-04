@@ -4,6 +4,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
   use AlgoraWeb, :live_view
 
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Algora.Accounts.User
   alias Algora.Jobs.JobPosting
@@ -234,8 +235,9 @@ defmodule AlgoraWeb.Admin.SeedLive do
     rows =
       rows
       |> Stream.map(fn row -> Enum.zip_reduce(cols, row, Map.new(), fn col, val, acc -> Map.put(acc, col, val) end) end)
-      |> Stream.map(&add_user/1)
       |> Stream.map(&process_row/1)
+      |> Task.async_stream(&add_user/1, max_concurrency: 10, timeout: :infinity)
+      |> Stream.map(fn {:ok, row} -> row end)
       |> Enum.to_list()
 
     socket
@@ -253,27 +255,64 @@ defmodule AlgoraWeb.Admin.SeedLive do
     )
   end
 
-  defp add_user(row) do
-    key = row["org_handle"]
-
+  defp add_user(%{"org_handle" => key} = row) when is_binary(key) and key != "" do
     user =
-      if not is_nil(key) do
-        case :ets.lookup(@user_cache_table, key) do
-          [{_, user}] ->
-            user
+      case :ets.lookup(@user_cache_table, key) do
+        [{_, user}] ->
+          user
 
-          _ ->
-            with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), key),
-                 {:ok, user} <- Repo.fetch(User, user.id) do
-              :ets.insert(@user_cache_table, {key, user})
-              user
-            else
-              _ -> nil
-            end
-        end
+        _ ->
+          with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), key),
+               {:ok, user} <- Repo.fetch(User, user.id) do
+            :ets.insert(@user_cache_table, {key, user})
+            user
+          else
+            _ -> nil
+          end
       end
 
     Map.put(row, "org", user)
+  end
+
+  defp add_user(%{"company_url" => url} = row) when is_binary(url) and url != "" do
+    user =
+      case :ets.lookup(@user_cache_table, url) do
+        [{_, user}] ->
+          user
+
+        _ ->
+          domain =
+            url
+            |> String.trim_leading("https://")
+            |> String.trim_leading("http://")
+            |> String.trim_leading("www.")
+
+          with {:ok, user} <-
+                 fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}),
+               {:ok, user} <- Repo.fetch(User, user.id) do
+            :ets.insert(@user_cache_table, {url, user})
+            user
+          else
+            _ ->
+              :ets.insert(@user_cache_table, {url, nil})
+              nil
+          end
+      end
+
+    Map.put(row, "org", user)
+  end
+
+  defp add_user(row), do: row
+
+  def fetch_or_create_user(domain, opts) do
+    case Repo.one(from o in User, where: o.domain == ^domain, limit: 1) do
+      %User{} = user ->
+        {:ok, user}
+
+      _ ->
+        res = Organizations.onboard_organization_from_domain(domain, opts)
+        res
+    end
   end
 
   defp list_from_string(s) when is_binary(s) and s != "" do
@@ -285,6 +324,14 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
   defp list_from_string(_s), do: []
 
+  defp money_from_string(s) when is_binary(s) and s != "" do
+    s
+    |> Decimal.new()
+    |> Money.new!(:USD)
+  end
+
+  defp money_from_string(_s), do: nil
+
   defp process_row(row) do
     Map.merge(row, %{
       "tech_stack" =>
@@ -295,7 +342,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
         end,
       "countries" => list_from_string(row["countries"]),
       "regions" => list_from_string(row["regions"]),
-      "price" => row["price"] |> Decimal.new() |> Money.new!(:USD)
+      "price" => money_from_string(row["price"])
     })
   end
 
@@ -303,6 +350,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
     Repo.transact(
       fn ->
         rows
+        |> Enum.filter(& &1["org"])
         |> Enum.map(&seed_row/1)
         |> Enum.reduce_while(:ok, fn result, _acc ->
           case result do

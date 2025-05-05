@@ -170,15 +170,11 @@ defmodule AlgoraWeb.Org.JobsLive do
         end
       else
         {:noreply,
-         socket
-         |> push_event("store-session", %{user_return_to: "/jobs"})
-         |> redirect(external: Algora.Github.authorize_url())}
+         redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/org/#{@current_org.handle}/jobs"}))}
       end
     else
       {:noreply,
-       socket
-       |> push_event("store-session", %{user_return_to: "/jobs"})
-       |> redirect(external: Algora.Github.authorize_url())}
+       redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/org/#{@current_org.handle}/jobs"}))}
     end
   end
 

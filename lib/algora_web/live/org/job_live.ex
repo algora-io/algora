@@ -842,7 +842,7 @@ defmodule AlgoraWeb.Org.JobLive do
     |> assign(:developers, developers)
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, applicants, contributions_map))
     |> assign(:imports, sort_by_contributions(socket.assigns.job, imports, contributions_map))
-    |> assign(:matches, sort_by_contributions(socket.assigns.job, matches, contributions_map))
+    |> assign(:matches, matches)
     |> assign(:contributions_map, contributions_map)
   end
 

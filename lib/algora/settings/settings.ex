@@ -103,32 +103,15 @@ defmodule Algora.Settings do
         [
           tech_stack: job.tech_stack,
           limit: 50,
-          users:
-            case get_job_criteria(job.id) do
-              criteria when map_size(criteria) > 0 ->
-                apply_job_criteria(User, criteria)
-
-              _ ->
-                from(u in User,
-                  where:
-                    not is_nil(u.hourly_rate_min) or
-                      fragment(
-                        "exists (select 1 from transactions t where t.user_id = ? and t.status = 'succeeded' and t.type = 'credit' and t.linked_transaction_id is not null)",
-                        u.id
-                      )
-                )
+          sort_by:
+            case get_job_criteria(job) do
+              criteria when map_size(criteria) > 0 -> criteria
+              _ -> [{"solver", true}]
             end
         ]
         |> Algora.Cloud.list_top_matches()
         |> load_matches_2()
     end
-  end
-
-  def apply_job_criteria(query, criteria) do
-    Enum.reduce(criteria, query, fn
-      {"country", country}, query ->
-        from([u] in query, where: u.country == ^country)
-    end)
   end
 
   def set_job_criteria(job_id, criteria) when is_binary(job_id) and is_map(criteria) do

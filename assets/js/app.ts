@@ -774,9 +774,7 @@ window.addEventListener("phx:store-session", (event) => {
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
-  console.log(event.detail);
-
-  fetch("/store-session", {
+  fetch("/api/store_session", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -54,4 +54,8 @@ defmodule AlgoraWeb.Util do
       _other -> nil
     end)
   end
+
+  def store_session(socket, data) do
+    AlgoraWeb.API.StoreSessionController.store_session(socket, data)
+  end
 end

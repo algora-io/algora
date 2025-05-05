@@ -21,6 +21,8 @@ defmodule AlgoraWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_session
+    plug Plug.Parsers, parsers: [:urlencoded, {:json, json_decoder: Jason}]
   end
 
   # Legacy tRPC pipeline
@@ -145,12 +147,11 @@ defmodule AlgoraWeb.Router do
 
     live "/0/bounties/:id", OG.BountyLive, :show
     get "/og/*path", OGImageController, :generate
-
-    post "/store-session", StoreSessionController, :create
   end
 
   scope "/api", AlgoraWeb.API do
     pipe_through :api
+    post "/store_session", StoreSessionController, :create
 
     # Legacy tRPC endpoints
     scope "/trpc" do

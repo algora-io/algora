@@ -318,6 +318,28 @@ defmodule Algora.Accounts.User do
     |> unique_constraint(:handle)
   end
 
+  def get_domain(%{"type" => type}) when type != "Organization", do: nil
+
+  def get_domain(%{"email" => email}) when is_binary(email) do
+    domain = email |> String.split("@") |> List.last()
+
+    if not Algora.Crawler.blacklisted?(domain), do: domain
+  end
+
+  def get_domain(%{"blog" => url}) when is_binary(url) do
+    domain =
+      with url when not is_nil(url) <- Algora.Util.normalize_url(url),
+           %URI{host: host} when is_binary(host) and host != "" <- URI.parse(url) do
+        host
+      else
+        _ -> nil
+      end
+
+    if not Algora.Crawler.blacklisted?(domain), do: domain
+  end
+
+  def get_domain(_meta), do: nil
+
   def github_changeset(meta) do
     params = %{
       provider_id: to_string(meta["id"]),
@@ -328,7 +350,8 @@ defmodule Algora.Accounts.User do
       location: meta["location"],
       avatar_url: meta["avatar_url"],
       website_url: Algora.Util.normalize_url(meta["blog"]),
-      github_url: meta["html_url"]
+      github_url: meta["html_url"],
+      domain: get_domain(meta)
     }
 
     %User{provider: "github", provider_meta: meta}
@@ -343,7 +366,8 @@ defmodule Algora.Accounts.User do
         :location,
         :avatar_url,
         :website_url,
-        :github_url
+        :github_url,
+        :domain
       ]
     )
     |> generate_id()

@@ -168,6 +168,20 @@ defmodule Algora.Util do
     |> String.replace(~r/\/(issues|pull|discussions)\//, "#")
   end
 
+  def normalize_url(nil), do: nil
+
+  def normalize_url(url) when is_binary(url) do
+    url = String.trim(url)
+
+    # Add https:// if no scheme present
+    url = if String.contains?(url, "://"), do: url, else: "https://" <> url
+
+    case URI.parse(url) do
+      %URI{scheme: scheme, host: host} when not is_nil(scheme) and scheme != "" and not is_nil(host) and host != "" -> url
+      _ -> nil
+    end
+  end
+
   def get_gravatar_url(email, opts \\ []) do
     default = Keyword.get(opts, :default, "")
     size = Keyword.get(opts, :size, 460)

@@ -327,7 +327,7 @@ defmodule Algora.Accounts.User do
       bio: meta["bio"],
       location: meta["location"],
       avatar_url: meta["avatar_url"],
-      website_url: meta["blog"],
+      website_url: Algora.Util.normalize_url(meta["blog"]),
       github_url: meta["html_url"]
     }
 

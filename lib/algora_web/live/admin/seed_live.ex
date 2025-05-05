@@ -171,9 +171,15 @@ defmodule AlgoraWeb.Admin.SeedLive do
             </.link>
           <% end %>
         </div>
-        <p class="text-muted-foreground line-clamp-1 font-medium text-sm">
-          {@value.domain}
-        </p>
+        <%= if @value.domain do %>
+          <p class="text-muted-foreground line-clamp-1 font-medium text-sm">
+            {@value.domain}
+          </p>
+        <% else %>
+          <p class="text-destructive-400 line-clamp-1 font-medium text-sm">
+            Domain not found
+          </p>
+        <% end %>
       </div>
     </div>
     """

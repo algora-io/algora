@@ -182,6 +182,15 @@ defmodule Algora.Util do
     end
   end
 
+  def to_domain(nil), do: nil
+
+  def to_domain(url) do
+    url
+    |> String.trim_leading("https://")
+    |> String.trim_leading("http://")
+    |> String.trim_leading("www.")
+  end
+
   def get_gravatar_url(email, opts \\ []) do
     default = Keyword.get(opts, :default, "")
     size = Keyword.get(opts, :size, 460)

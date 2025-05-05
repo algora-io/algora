@@ -11,6 +11,7 @@ defmodule Algora.Accounts.User do
   alias Algora.MoneyUtils
   alias Algora.Organizations.Member
   alias Algora.Types.Money
+  alias Algora.Util
   alias Algora.Workspace.Installation
   alias AlgoraWeb.Endpoint
 
@@ -321,16 +322,16 @@ defmodule Algora.Accounts.User do
   def get_domain(%{"type" => type}) when type != "Organization", do: nil
 
   def get_domain(%{"email" => email}) when is_binary(email) do
-    domain = email |> String.split("@") |> List.last()
+    domain = email |> String.split("@") |> List.last() |> Util.to_domain()
 
     if not Algora.Crawler.blacklisted?(domain), do: domain
   end
 
   def get_domain(%{"blog" => url}) when is_binary(url) do
     domain =
-      with url when not is_nil(url) <- Algora.Util.normalize_url(url),
+      with url when not is_nil(url) <- Util.normalize_url(url),
            %URI{host: host} when is_binary(host) and host != "" <- URI.parse(url) do
-        host
+        Util.to_domain(host)
       else
         _ -> nil
       end

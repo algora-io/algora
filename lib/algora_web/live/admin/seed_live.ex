@@ -171,8 +171,8 @@ defmodule AlgoraWeb.Admin.SeedLive do
             </.link>
           <% end %>
         </div>
-        <p class="text-muted-foreground line-clamp-1 max-w-[50ch] font-medium text-sm">
-          {@value.bio}
+        <p class="text-muted-foreground line-clamp-1 font-medium text-sm">
+          {@value.domain}
         </p>
       </div>
     </div>
@@ -234,11 +234,14 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
     rows =
       rows
-      |> Stream.map(fn row -> Enum.zip_reduce(cols, row, Map.new(), fn col, val, acc -> Map.put(acc, col, val) end) end)
-      |> Stream.map(&process_row/1)
-      |> Task.async_stream(&Map.put(&1, "org", get_user(&1)), max_concurrency: 10, timeout: :infinity)
-      |> Stream.map(fn {:ok, row} -> row end)
-      |> Enum.to_list()
+      |> Enum.map(fn row -> Enum.zip_reduce(cols, row, Map.new(), fn col, val, acc -> Map.put(acc, col, val) end) end)
+      |> Enum.map(&process_row/1)
+
+    rows
+    |> Enum.uniq_by(&lookup_key/1)
+    |> Task.async_stream(&get_user/1, max_concurrency: 10, timeout: :infinity)
+
+    rows = Enum.map(rows, &Map.put(&1, "org", get_user(&1)))
 
     socket
     |> assign(:csv_data, rows)
@@ -255,46 +258,49 @@ defmodule AlgoraWeb.Admin.SeedLive do
     )
   end
 
-  defp get_user(%{"org_handle" => handle} = _row) when is_binary(handle) and handle != "" do
-    case :ets.lookup(@user_cache_table, handle) do
+  defp lookup_key(%{"org_handle" => handle} = _row) when is_binary(handle) and handle != "" do
+    handle
+  end
+
+  defp lookup_key(%{"company_url" => url} = _row) when is_binary(url) and url != "" do
+    to_domain(url)
+  end
+
+  defp run_cached(key, fun) do
+    case :ets.lookup(@user_cache_table, key) do
       [{_, user}] ->
         user
 
       _ ->
-        with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), handle),
-             {:ok, user} <- Repo.fetch(User, user.id) do
-          :ets.insert(@user_cache_table, {handle, user})
-          user
-        else
-          _ ->
-            :ets.insert(@user_cache_table, {handle, nil})
+        case fun.() do
+          {:ok, user} ->
+            :ets.insert(@user_cache_table, {key, user})
+            user
+
+          error ->
+            Logger.error("Failed to fetch user #{key}: #{inspect(error)}")
+            :ets.insert(@user_cache_table, {key, nil})
             nil
         end
     end
   end
 
+  defp get_user(%{"org_handle" => handle} = _row) when is_binary(handle) and handle != "" do
+    run_cached(handle, fn ->
+      with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), handle) do
+        Repo.fetch(User, user.id)
+      end
+    end)
+  end
+
   defp get_user(%{"company_url" => url} = row) when is_binary(url) and url != "" do
-    case :ets.lookup(@user_cache_table, url) do
-      [{_, user}] ->
-        user
+    domain = to_domain(url)
 
-      _ ->
-        domain =
-          url
-          |> String.trim_leading("https://")
-          |> String.trim_leading("http://")
-          |> String.trim_leading("www.")
-
-        with {:ok, user} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}),
-             {:ok, user} <- Repo.fetch(User, user.id) do
-          :ets.insert(@user_cache_table, {url, user})
-          user
-        else
-          _ ->
-            :ets.insert(@user_cache_table, {url, nil})
-            nil
-        end
-    end
+    run_cached(domain, fn ->
+      with {:ok, user} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}) do
+        Repo.fetch(User, user.id)
+      end
+    end)
   end
 
   defp get_user(_row), do: nil

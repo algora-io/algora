@@ -236,7 +236,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
       rows
       |> Stream.map(fn row -> Enum.zip_reduce(cols, row, Map.new(), fn col, val, acc -> Map.put(acc, col, val) end) end)
       |> Stream.map(&process_row/1)
-      |> Task.async_stream(&add_user/1, max_concurrency: 10, timeout: :infinity)
+      |> Task.async_stream(&Map.put(&1, "org", get_user(&1)), max_concurrency: 10, timeout: :infinity)
       |> Stream.map(fn {:ok, row} -> row end)
       |> Enum.to_list()
 
@@ -255,54 +255,49 @@ defmodule AlgoraWeb.Admin.SeedLive do
     )
   end
 
-  defp add_user(%{"org_handle" => key} = row) when is_binary(key) and key != "" do
-    user =
-      case :ets.lookup(@user_cache_table, key) do
-        [{_, user}] ->
+  defp get_user(%{"org_handle" => handle} = _row) when is_binary(handle) and handle != "" do
+    case :ets.lookup(@user_cache_table, handle) do
+      [{_, user}] ->
+        user
+
+      _ ->
+        with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), handle),
+             {:ok, user} <- Repo.fetch(User, user.id) do
+          :ets.insert(@user_cache_table, {handle, user})
           user
-
-        _ ->
-          with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), key),
-               {:ok, user} <- Repo.fetch(User, user.id) do
-            :ets.insert(@user_cache_table, {key, user})
-            user
-          else
-            _ -> nil
-          end
-      end
-
-    Map.put(row, "org", user)
+        else
+          _ ->
+            :ets.insert(@user_cache_table, {handle, nil})
+            nil
+        end
+    end
   end
 
-  defp add_user(%{"company_url" => url} = row) when is_binary(url) and url != "" do
-    user =
-      case :ets.lookup(@user_cache_table, url) do
-        [{_, user}] ->
+  defp get_user(%{"company_url" => url} = row) when is_binary(url) and url != "" do
+    case :ets.lookup(@user_cache_table, url) do
+      [{_, user}] ->
+        user
+
+      _ ->
+        domain =
+          url
+          |> String.trim_leading("https://")
+          |> String.trim_leading("http://")
+          |> String.trim_leading("www.")
+
+        with {:ok, user} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}),
+             {:ok, user} <- Repo.fetch(User, user.id) do
+          :ets.insert(@user_cache_table, {url, user})
           user
-
-        _ ->
-          domain =
-            url
-            |> String.trim_leading("https://")
-            |> String.trim_leading("http://")
-            |> String.trim_leading("www.")
-
-          with {:ok, user} <-
-                 fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}),
-               {:ok, user} <- Repo.fetch(User, user.id) do
-            :ets.insert(@user_cache_table, {url, user})
-            user
-          else
-            _ ->
-              :ets.insert(@user_cache_table, {url, nil})
-              nil
-          end
-      end
-
-    Map.put(row, "org", user)
+        else
+          _ ->
+            :ets.insert(@user_cache_table, {url, nil})
+            nil
+        end
+    end
   end
 
-  defp add_user(row), do: row
+  defp get_user(_row), do: nil
 
   def fetch_or_create_user(domain, opts) do
     case Repo.one(from o in User, where: o.domain == ^domain, limit: 1) do

@@ -269,7 +269,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
   end
 
   defp lookup_key(%{"company_url" => url} = _row) when is_binary(url) and url != "" do
-    to_domain(url)
+    Algora.Util.to_domain(url)
   end
 
   defp run_cached(key, fun) do
@@ -300,7 +300,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
   end
 
   defp get_user(%{"company_url" => url} = row) when is_binary(url) and url != "" do
-    domain = to_domain(url)
+    domain = Algora.Util.to_domain(url)
 
     run_cached(domain, fn ->
       with {:ok, user} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}) do
@@ -370,15 +370,6 @@ defmodule AlgoraWeb.Admin.SeedLive do
     )
   end
 
-  defp to_domain(nil), do: nil
-
-  defp to_domain(url) do
-    url
-    |> String.trim_leading("https://")
-    |> String.trim_leading("http://")
-    |> String.trim_leading("www.")
-  end
-
   defp seed_row(row) do
     with {:ok, org} <- Repo.fetch(User, row["org"].id),
          {:ok, org} <-
@@ -386,7 +377,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
            |> change(
              Map.merge(
                %{
-                 domain: org.domain || to_domain(row["website_url"]),
+                 domain: org.domain || Algora.Util.to_domain(row["website_url"]),
                  hiring_subscription: :trial,
                  subscription_price: row["price"],
                  billing_name: org.billing_name || row["billing_name"],

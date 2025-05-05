@@ -68,7 +68,7 @@ defmodule Algora.Admin do
     end
 
     def seed(job) do
-      with domain when not is_nil(domain) <- to_domain(job.company_url),
+      with domain when not is_nil(domain) <- Util.to_domain(job.company_url),
            {:ok, org} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: job.tech_stack}),
            {:ok, org} <-
              org
@@ -106,15 +106,6 @@ defmodule Algora.Admin do
           regions: job.regions
         })
       end
-    end
-
-    defp to_domain(nil), do: nil
-
-    defp to_domain(url) do
-      url
-      |> String.trim_leading("https://")
-      |> String.trim_leading("http://")
-      |> String.trim_leading("www.")
     end
 
     def fetch_or_create_user(domain, opts) do

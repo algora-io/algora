@@ -187,11 +187,15 @@ defmodule AlgoraWeb.Org.JobsLive do
         end
       else
         {:noreply,
-         redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/org/#{@current_org.handle}/jobs"}))}
+         redirect(socket,
+           external: Algora.Github.authorize_url(%{return_to: "/org/#{socket.assigns.current_org.handle}/jobs"})
+         )}
       end
     else
       {:noreply,
-       redirect(socket, external: Algora.Github.authorize_url(%{return_to: "/org/#{@current_org.handle}/jobs"}))}
+       redirect(socket,
+         external: Algora.Github.authorize_url(%{return_to: "/org/#{socket.assigns.current_org.handle}/jobs"})
+       )}
     end
   end
 

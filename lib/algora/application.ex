@@ -38,6 +38,7 @@ defmodule Algora.Application do
 
     # Start the ETS tables
     AlgoraWeb.Admin.CampaignLive.start_link()
+    AlgoraWeb.Admin.SeedLive.start_link()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

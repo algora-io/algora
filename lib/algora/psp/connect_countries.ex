@@ -140,7 +140,7 @@ defmodule Algora.PSP.ConnectCountries do
   def account_type("BR"), do: :standard
   def account_type(_), do: :express
 
-  @spec regions() :: %{atom() => [String.t()]}
+  @spec regions() :: %{String.t() => [String.t()]}
   def regions do
     %{
       "LATAM" => [

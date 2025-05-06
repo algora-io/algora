@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Org.HomeLive do
   alias Algora.Accounts.User
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
+  alias Algora.Jobs
   alias Algora.Payments
 
   @impl true
@@ -23,6 +24,8 @@ defmodule AlgoraWeb.Org.HomeLive do
     top_earners = Accounts.list_developers(org_id: org.id, limit: 10, earnings_gt: Money.zero(:USD))
     stats = Bounties.fetch_stats(org_id: org.id, current_user: socket.assigns[:current_user])
     transactions = Payments.list_hosted_transactions(org.id, limit: page_size())
+
+    total_jobs = Jobs.count_jobs(user_id: org.id)
 
     total_awarded_subtext =
       [
@@ -47,6 +50,7 @@ defmodule AlgoraWeb.Org.HomeLive do
       |> assign(:top_earners, top_earners)
       |> assign(:stats, stats)
       |> assign(:total_awarded_subtext, total_awarded_subtext)
+      |> assign(:total_jobs, total_jobs)
 
     {:ok, socket}
   end
@@ -105,13 +109,23 @@ defmodule AlgoraWeb.Org.HomeLive do
           navigate={~p"/#{@org.handle}/leaderboard"}
           icon="tabler-user-code"
         />
-        <.stat_card
-          title="Members"
-          value={@stats.members_count}
-          subtext=""
-          navigate={~p"/#{@org.handle}/team"}
-          icon="tabler-users"
-        />
+        <%= if @total_jobs > 0 do %>
+          <.stat_card
+            title="Jobs"
+            value={@total_jobs}
+            subtext=""
+            navigate={~p"/#{@org.handle}/jobs"}
+            icon="tabler-briefcase"
+          />
+        <% else %>
+          <.stat_card
+            title="Members"
+            value={@stats.members_count}
+            subtext=""
+            navigate={~p"/#{@org.handle}/team"}
+            icon="tabler-users"
+          />
+        <% end %>
       </div>
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">

@@ -25,6 +25,14 @@ defmodule Algora.Jobs do
     |> Repo.preload(:user)
   end
 
+  def count_jobs(opts \\ []) do
+    JobPosting
+    |> order_by([j], desc: j.inserted_at)
+    |> maybe_filter_by_user(opts[:user_id])
+    |> maybe_filter_by_tech_stack(opts[:tech_stack])
+    |> Repo.aggregate(:count)
+  end
+
   def create_job_posting(attrs) do
     %JobPosting{}
     |> JobPosting.changeset(attrs)

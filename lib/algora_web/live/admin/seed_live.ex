@@ -21,6 +21,10 @@ defmodule AlgoraWeb.Admin.SeedLive do
     :ets.new(@user_cache_table, [:named_table, :set, :public])
   end
 
+  def reset_cache do
+    :ets.delete_all_objects(@user_cache_table)
+  end
+
   defmodule Form do
     @moduledoc false
     use Ecto.Schema
@@ -89,6 +93,12 @@ defmodule AlgoraWeb.Admin.SeedLive do
   end
 
   @impl true
+  def handle_event("reset_cache", _params, socket) do
+    reset_cache()
+    {:noreply, assign_preview(socket)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="bg-background" phx-hook="LocalStateStore" id="seed-page" data-storage="localStorage">
@@ -123,7 +133,10 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
           <div>
             <div class="-mx-4 overflow-x-auto">
-              <div class="flex justify-end mb-4">
+              <div class="flex justify-end gap-2 mb-4">
+                <.button type="button" phx-click="reset_cache" variant="secondary">
+                  Reset cache
+                </.button>
                 <.button type="button" phx-click="seed">
                   Seed {length(@csv_data)} entries
                 </.button>

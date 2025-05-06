@@ -294,6 +294,12 @@ defmodule AlgoraWeb.Admin.SeedLive do
   defp get_user(%{"org_handle" => handle} = _row) when is_binary(handle) and handle != "" do
     run_cached(handle, fn ->
       with {:ok, user} <- Workspace.ensure_user(Algora.Admin.token(), handle) do
+        if is_nil(user.domain) or String.trim(user.domain) == "" do
+          user
+          |> change(%{domain: Algora.Util.to_domain(user.website_url)})
+          |> Repo.update()
+        end
+
         Repo.fetch(User, user.id)
       end
     end)
@@ -304,6 +310,12 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
     run_cached(domain, fn ->
       with {:ok, user} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: row["tech_stack"]}) do
+        if is_nil(user.domain) or String.trim(user.domain) == "" do
+          user
+          |> change(%{domain: domain})
+          |> Repo.update()
+        end
+
         Repo.fetch(User, user.id)
       end
     end)

@@ -240,4 +240,26 @@ defmodule Algora.Settings do
   def set_subscription_price(price) do
     set("subscription", %{"price" => Algora.MoneyUtils.serialize(price)})
   end
+
+  def get_hn_job_ids do
+    case get("hn_job_ids") do
+      %{"ids" => ids} when is_list(ids) -> ids
+      _ -> nil
+    end
+  end
+
+  def set_hn_job_ids(ids) when is_list(ids) do
+    set("hn_job_ids", %{"ids" => ids})
+  end
+
+  def get_hn_job_seekers do
+    case get("hn_job_seekers") do
+      %{"handles" => handles} when is_list(handles) -> handles
+      _ -> nil
+    end
+  end
+
+  def set_hn_job_seekers(handles) when is_list(handles) do
+    set("hn_job_seekers", %{"handles" => handles})
+  end
 end

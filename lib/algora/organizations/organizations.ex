@@ -28,6 +28,8 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
+    Algora.Admin.alert("New organization: #{inspect(params)}", :critical)
+
     user = Repo.get_by(User, email: params.user.email)
 
     domain = params.user.email |> String.split("@") |> List.last()

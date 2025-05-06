@@ -94,6 +94,7 @@ defmodule AlgoraWeb.User.DashboardLive do
       |> assign(:settings_form, settings_form)
       |> assign(:availability_form, availability_form)
       |> assign(:total_earned, total_earned)
+      |> assign(:total_contributions, Algora.Workspace.count_user_contributions([socket.assigns.current_user.id]))
       |> assign_bounties()
       |> assign_achievements()
 
@@ -269,7 +270,7 @@ defmodule AlgoraWeb.User.DashboardLive do
           </nav>
         </div>
         <div
-          :if={not incomplete?(@achievements, :earn_first_bounty_status)}
+          :if={@total_contributions > 0 or not incomplete?(@achievements, :earn_first_bounty_status)}
           class="hidden lg:block pt-12"
         >
           <div class="flex items-center justify-between">

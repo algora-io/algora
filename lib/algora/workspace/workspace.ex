@@ -637,6 +637,28 @@ defmodule Algora.Workspace do
     Repo.all(query)
   end
 
+  @spec count_user_contributions(list(String.t()), Keyword.t()) :: {:ok, list(map())} | {:error, term()}
+  def count_user_contributions(ids, opts \\ []) do
+    query =
+      from uc in UserContribution,
+        join: u in assoc(uc, :user),
+        join: r in assoc(uc, :repository),
+        join: repo_owner in assoc(r, :user),
+        where: u.id in ^ids,
+        where: not ilike(r.name, "%awesome%"),
+        where: not ilike(r.name, "%algorithms%"),
+        where: not ilike(repo_owner.provider_login, "%algorithms%"),
+        where: repo_owner.type == :organization or r.stargazers_count > 200,
+        # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
+        order_by: [
+          desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
+          desc: r.stargazers_count
+        ],
+        select_merge: %{user: u, repository: %{r | user: repo_owner}}
+
+    Repo.aggregate(query, :sum, :contribution_count) || 0
+  end
+
   @spec upsert_user_contribution(String.t(), String.t(), integer()) ::
           {:ok, UserContribution.t()} | {:error, Ecto.Changeset.t()}
   def upsert_user_contribution(user_id, repository_id, contribution_count) do

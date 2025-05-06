@@ -396,7 +396,7 @@ defmodule Algora.Admin do
                      idempotency_key: "bounty-#{autopayable_bounty.id}"
                    },
                    ticket_ref: %{owner: owner, repo: repo, number: number},
-                   bounty_id: autopayable_bounty.id,
+                   bounty: autopayable_bounty,
                    claims: claims
                  ),
                {:ok, _invoice} <-

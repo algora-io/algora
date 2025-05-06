@@ -516,6 +516,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
       </div>
     </div>
     <.sidebar
+      admins_last_active={@admins_last_active}
       achievements={@achievements}
       current_user={@current_user}
       current_org={@current_org}

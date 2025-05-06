@@ -8,6 +8,7 @@ defmodule AlgoraWeb.JobsLive do
   alias Algora.Accounts
   alias Algora.Jobs
   alias Algora.Jobs.JobPosting
+  alias Algora.Markdown
   alias Phoenix.LiveView.AsyncResult
 
   require Logger
@@ -112,8 +113,28 @@ defmodule AlgoraWeb.JobsLive do
                               {job.title}
                             </div>
                           </div>
-                          <div :if={job.description} class="pt-1 text-sm text-muted-foreground">
-                            {job.description}
+                          <div
+                            :if={job.description}
+                            class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
+                          >
+                            <div
+                              id={"job-description-#{job.id}"}
+                              class="line-clamp-3 transition-all duration-200"
+                              phx-hook="ExpandableText"
+                              data-expand-id={"expand-#{job.id}"}
+                              data-class="line-clamp-3"
+                            >
+                              {Phoenix.HTML.raw(Markdown.render(job.description))}
+                            </div>
+                            <button
+                              id={"expand-#{job.id}"}
+                              type="button"
+                              class="text-xs text-foreground font-bold mt-2 hidden"
+                              data-content-id={"job-description-#{job.id}"}
+                              phx-hook="ExpandableTextButton"
+                            >
+                              ...see more
+                            </button>
                           </div>
                           <div class="pt-2 flex flex-wrap gap-2">
                             <%= for tech <- job.tech_stack do %>

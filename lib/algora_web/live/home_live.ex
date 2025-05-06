@@ -180,8 +180,28 @@ defmodule AlgoraWeb.HomeLive do
                                 {job.title}
                               </div>
                             </div>
-                            <div :if={job.description} class="pt-1 text-sm text-muted-foreground">
-                              {job.description}
+                            <div
+                              :if={job.description}
+                              class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
+                            >
+                              <div
+                                id={"job-description-#{job.id}"}
+                                class="line-clamp-2 transition-all duration-200"
+                                phx-hook="ExpandableText"
+                                data-expand-id={"expand-#{job.id}"}
+                                data-class="line-clamp-2"
+                              >
+                                {Phoenix.HTML.raw(Algora.Markdown.render(job.description))}
+                              </div>
+                              <button
+                                id={"expand-#{job.id}"}
+                                type="button"
+                                class="text-xs text-foreground font-bold mt-2 hidden"
+                                data-content-id={"job-description-#{job.id}"}
+                                phx-hook="ExpandableTextButton"
+                              >
+                                ...see more
+                              </button>
                             </div>
                             <div class="pt-2 flex flex-wrap gap-2">
                               <%= for tech <- job.tech_stack do %>
@@ -318,7 +338,11 @@ defmodule AlgoraWeb.HomeLive do
                       </h3>
                       <div class="flex flex-wrap items-center gap-x-8 gap-y-4 pt-4 sm:pt-6">
                         <div class="flex items-center gap-4">
-                          <img src="https://github.com/mschuwalow.png" class="h-12 w-12 rounded-full" loading="lazy" />
+                          <img
+                            src="https://github.com/mschuwalow.png"
+                            class="h-12 w-12 rounded-full"
+                            loading="lazy"
+                          />
                           <div>
                             <div class="text-xl sm:text-2xl font-semibold text-foreground">
                               Maxim Schuwalow

@@ -176,7 +176,24 @@ defmodule AlgoraWeb.Org.JobLive do
                   :if={@job.description}
                   class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
                 >
-                  {Phoenix.HTML.raw(Markdown.render(@job.description))}
+                  <div
+                    id={"job-description-#{@job.id}"}
+                    class="line-clamp-3 transition-all duration-200"
+                    phx-hook="ExpandableText"
+                    data-expand-id={"expand-#{@job.id}"}
+                    data-class="line-clamp-3"
+                  >
+                    {Phoenix.HTML.raw(Markdown.render(@job.description))}
+                  </div>
+                  <button
+                    id={"expand-#{@job.id}"}
+                    type="button"
+                    class="text-xs text-foreground font-bold mt-2 hidden"
+                    data-content-id={"job-description-#{@job.id}"}
+                    phx-hook="ExpandableTextButton"
+                  >
+                    ...see more
+                  </button>
                 </div>
                 <div class="pt-2 flex flex-wrap gap-2">
                   <%= for tech <- @job.tech_stack do %>

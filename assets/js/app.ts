@@ -570,6 +570,41 @@ const Hooks = {
       });
     },
   },
+  ExpandableText: {
+    mounted() {
+      const button = document.querySelector(`#${this.el.dataset.expandId}`);
+
+      // Check if content is truncated
+      const isTruncated = this.el.scrollHeight > this.el.clientHeight;
+
+      if (isTruncated && button) {
+        button.classList.remove("hidden");
+      }
+    },
+  },
+
+  ExpandableTextButton: {
+    mounted() {
+      this.el.addEventListener("click", () => {
+        const content = document.querySelector<HTMLElement>(
+          `#${this.el.dataset.contentId}`
+        );
+        if (!content) return;
+
+        const className = content.dataset.class;
+
+        if (content.classList.contains(className)) {
+          // Expand
+          content.classList.remove(className);
+          this.el.classList.add("hidden");
+        } else {
+          // Collapse
+          content.classList.add(className);
+          this.el.classList.remove("hidden");
+        }
+      });
+    },
+  },
 } satisfies Record<string, Partial<ViewHook> & Record<string, unknown>>;
 
 // Accessible focus handling

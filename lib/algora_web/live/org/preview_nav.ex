@@ -20,6 +20,7 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
         {:cont,
          socket
+         |> assign(:has_fresh_token?, Accounts.has_fresh_token?(user))
          |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
          |> assign(:main_bounty_form_open?, false)
          |> assign(:main_contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
@@ -45,6 +46,7 @@ defmodule AlgoraWeb.Org.PreviewNav do
 
     socket =
       socket
+      |> assign(:has_fresh_token?, false)
       |> assign(:main_bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
       |> assign(:main_bounty_form_open?, false)
       |> assign(:main_contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))

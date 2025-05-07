@@ -6,6 +6,7 @@ defmodule AlgoraWeb.Org.Nav do
   import Ecto.Changeset
   import Phoenix.LiveView
 
+  alias Algora.Accounts
   alias Algora.Bounties
   alias Algora.Organizations
   alias Algora.Organizations.Member
@@ -35,6 +36,7 @@ defmodule AlgoraWeb.Org.Nav do
       {:cont,
        socket
        |> assign(:screenshot?, not is_nil(params["screenshot"]))
+       |> assign(:has_fresh_token?, Accounts.has_fresh_token?(current_user))
        |> assign(:main_bounty_form, main_bounty_form)
        |> assign(:main_bounty_form_open?, false)
        |> assign(:main_contract_form, main_contract_form)

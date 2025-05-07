@@ -27,6 +27,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
+  alias AlgoraWeb.LocalStore
 
   require Logger
 
@@ -67,10 +68,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
     %{current_org: current_org} = socket.assigns
 
     if Member.can_create_bounty?(socket.assigns.current_user_role) do
-      if connected?(socket) do
-        Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
-      end
-
       previewed_user = get_previewed_user(current_org)
 
       _experts = Accounts.list_developers(org_id: current_org.id, earnings_gt: Money.zero(:USD))
@@ -96,6 +93,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
         |> Enum.concat(experts)
         |> Enum.concat(Enum.map(matches, & &1.user))
 
+      oauth_url = Github.authorize_url(%{return_to: "/#{current_org.handle}/dashboard"})
+
       {:ok,
        socket
        |> assign(:page_title, current_org.name)
@@ -104,6 +103,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
          "Share bounties, tips or contracts with #{header_prefix(current_org)} contributors and Algora matches"
        )
        |> assign(:screenshot?, not is_nil(params["screenshot"]))
+       |> assign(:pending_action, nil)
        |> assign(:ip_address, AlgoraWeb.Util.get_ip(socket))
        |> assign(:admins_last_active, admins_last_active)
        |> assign(:has_fresh_token?, Accounts.has_fresh_token?(socket.assigns.current_user))
@@ -115,7 +115,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:contributions, contributions)
        |> assign(:developers, developers)
        |> assign(:has_more_bounties, false)
-       |> assign(:oauth_url, Github.authorize_url(%{socket_id: socket.id}))
+       |> assign(:oauth_url, oauth_url)
        |> assign(:bounty_form, to_form(BountyForm.changeset(%BountyForm{}, %{})))
        |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
        |> assign(:contract_form, to_form(ContractForm.changeset(%ContractForm{}, %{})))
@@ -143,18 +143,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    %{current_org: current_org, previewed_user: previewed_user} = socket.assigns
-
-    stats = Bounties.fetch_stats(org_id: current_org.id, current_user: socket.assigns[:current_user])
-
-    bounties =
-      Bounties.list_bounties(
-        owner_id: previewed_user.id,
-        limit: page_size(),
-        status: :open,
-        current_user: socket.assigns[:current_user]
-      )
-
     socket =
       if params["action"] == "create_contract" do
         assign(socket, :main_contract_form_open?, true)
@@ -173,9 +161,9 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     {:noreply,
      socket
-     |> assign(:bounty_rows, to_bounty_rows(bounties))
-     |> assign(:has_more_bounties, length(bounties) >= page_size())
-     |> assign(:stats, stats)}
+     |> LocalStore.init(key: __MODULE__)
+     |> LocalStore.subscribe()
+     |> assign_bounties()}
   end
 
   @impl true
@@ -206,7 +194,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="lg:pr-96">
+    <div class="lg:pr-96" id="org-dashboard" phx-hook="LocalStateStore">
       <div class="container mx-auto max-w-7xl space-y-8 xl:space-y-16 p-4 sm:p-6 lg:p-8">
         <.section :if={@payable_bounties != %{}}>
           <.card>
@@ -531,28 +519,24 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   @impl true
-  def handle_info({:authenticated, user}, socket) do
-    socket =
-      socket
-      |> assign(:current_user, user)
-      |> assign(:has_fresh_token?, true)
-
-    case socket.assigns.pending_action do
-      {event, params} ->
-        socket = assign(socket, :pending_action, nil)
-        handle_event(event, params, socket)
-
-      nil ->
-        {:noreply, socket}
-    end
-  end
-
-  @impl true
   def handle_info(%Chat.MessageCreated{message: message}, socket) do
     if message.id in Enum.map(socket.assigns.messages, & &1.id) do
       {:noreply, socket}
     else
       {:noreply, Phoenix.Component.update(socket, :messages, &(&1 ++ [message]))}
+    end
+  end
+
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
+
+    case socket.assigns.pending_action do
+      nil ->
+        {:noreply, socket}
+
+      {event, params} ->
+        socket = LocalStore.assign_cached(socket, :pending_action, nil)
+        handle_event(event, params, socket)
     end
   end
 
@@ -563,8 +547,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
        redirect(socket, external: Github.install_url_select_target())
      else
        socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})
+       |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+       |> redirect(external: socket.assigns.oauth_url)
      end}
   end
 
@@ -614,6 +598,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
         {:noreply,
          socket
          |> assign_achievements()
+         |> assign_bounties()
          |> put_flash(:info, "Bounty created")}
       else
         %{valid?: false} ->
@@ -628,8 +613,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
     else
       {:noreply,
        socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+       |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+       |> redirect(external: socket.assigns.oauth_url)}
     end
   end
 
@@ -669,8 +654,8 @@ defmodule AlgoraWeb.Org.DashboardLive do
     else
       {:noreply,
        socket
-       |> assign(:pending_action, {event, unsigned_params})
-       |> push_event("open_popup", %{url: socket.assigns.oauth_url})}
+       |> LocalStore.assign_cached(:pending_action, {event, unsigned_params})
+       |> redirect(external: socket.assigns.oauth_url)}
     end
   end
 
@@ -934,8 +919,25 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp to_bounty_rows(bounties), do: bounties
 
+  defp assign_bounties(socket) do
+    stats = Bounties.fetch_stats(org_id: socket.assigns.previewed_user.id, current_user: socket.assigns[:current_user])
+
+    bounties =
+      Bounties.list_bounties(
+        owner_id: socket.assigns.previewed_user.id,
+        limit: page_size(),
+        status: :open,
+        current_user: socket.assigns[:current_user]
+      )
+
+    socket
+    |> assign(:bounty_rows, to_bounty_rows(bounties))
+    |> assign(:has_more_bounties, length(bounties) >= page_size())
+    |> assign(:stats, stats)
+  end
+
   defp assign_more_bounties(socket) do
-    %{bounty_rows: rows, current_org: current_org} = socket.assigns
+    %{bounty_rows: rows} = socket.assigns
 
     last_bounty = List.last(rows)
 
@@ -946,7 +948,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
     more_bounties =
       Bounties.list_bounties(
-        owner_id: current_org.id,
+        owner_id: socket.assigns.previewed_user.id,
         limit: page_size(),
         status: :open,
         before: cursor,

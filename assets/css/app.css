@@ -115,9 +115,9 @@
   transition: opacity 1s ease-out;
 }
 
-.phx-loading {
+/* .phx-loading {
   cursor: wait;
-}
+} */
 
 .phx-modal {
   opacity: 1 !important;

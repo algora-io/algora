@@ -92,9 +92,9 @@ defmodule AlgoraWeb.Org.JobsLive do
         </div>
 
         <%= if not Enum.empty?(@media) do %>
-          <div class="max-w-xl mx-auto mt-8 flex flex-col lg:flex-row justify-center gap-4">
+          <div class="max-w-xl mx-auto mt-8 flex flex-row justify-center gap-4">
             <%= for media <- @media |> Enum.take(3) do %>
-              <div class="lg:w-1/3 aspect-video w-full rounded-lg overflow-hidden">
+              <div class="w-1/3 aspect-video w-full rounded-lg overflow-hidden">
                 <%= if media.url |> String.contains?("youtube") do %>
                   <.modal_video
                     src={media.url}
@@ -127,7 +127,7 @@ defmodule AlgoraWeb.Org.JobsLive do
             <.card class="mt-4 flex flex-col p-6">
               <div class="grid gap-8">
                 <%= for job <- @jobs do %>
-                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div>
                         <%= if @current_user_role in [:admin, :mod] do %>
@@ -169,7 +169,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                       <div class="pt-2 flex flex-wrap gap-2">
                         <%= for tech <- job.tech_stack do %>
                           <.badge variant="outline">
-                            <.avatar class="w-4 h-4 invert saturate-0 mr-1.5 rounded-sm">
+                            <.avatar class="w-4 h-4 invert saturate-0 mr-1 rounded-sm">
                               <.avatar_image src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"} />
                               <.avatar_fallback>
                                 {Algora.Util.initials(tech)}

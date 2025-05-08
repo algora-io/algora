@@ -119,7 +119,7 @@ defmodule AlgoraWeb.JobsLive do
                           >
                             <div
                               id={"job-description-#{job.id}"}
-                              class="line-clamp-3 transition-all duration-200"
+                              class="line-clamp-3 transition-all duration-200 [&>p]:m-0"
                               phx-hook="ExpandableText"
                               data-expand-id={"expand-#{job.id}"}
                               data-class="line-clamp-3"

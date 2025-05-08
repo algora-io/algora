@@ -137,7 +137,7 @@ defmodule AlgoraWeb.Org.JobLive do
     <div class="container mx-auto max-w-7xl space-y-8 p-4 sm:p-6 lg:p-8">
       <.section>
         <.card class="flex flex-col p-6">
-          <div class="flex flex-col md:flex-row md:justify-between">
+          <div class="flex flex-col md:flex-row md:justify-between gap-2">
             <div>
               <div class="flex items-start md:items-center gap-3">
                 <.avatar class="h-16 w-16">
@@ -178,7 +178,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 >
                   <div
                     id={"job-description-#{@job.id}"}
-                    class="line-clamp-3 transition-all duration-200"
+                    class="line-clamp-3 transition-all duration-200 [&>p]:m-0"
                     phx-hook="ExpandableText"
                     data-expand-id={"expand-#{@job.id}"}
                     data-class="line-clamp-3"

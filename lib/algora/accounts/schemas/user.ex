@@ -4,6 +4,7 @@ defmodule Algora.Accounts.User do
 
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Accounts.UserMedia
   alias Algora.Activities.Activity
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Tip
@@ -108,6 +109,8 @@ defmodule Algora.Accounts.User do
     has_many :activities, {"user_activities", Activity}, foreign_key: :assoc_id
 
     has_one :customer, Algora.Payments.Customer, foreign_key: :user_id
+
+    has_many :media, UserMedia
 
     timestamps()
   end

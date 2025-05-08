@@ -5,6 +5,7 @@ defmodule Algora.Accounts do
 
   alias Algora.Accounts.Identity
   alias Algora.Accounts.User
+  alias Algora.Accounts.UserMedia
   alias Algora.Bounties.Bounty
   alias Algora.Contracts.Contract
   alias Algora.Github
@@ -739,5 +740,19 @@ defmodule Algora.Accounts do
       """)
 
     Algora.Mailer.deliver(email)
+  end
+
+  def list_user_media(%User{} = user) do
+    Repo.all(from m in UserMedia, where: m.user_id == ^user.id)
+  end
+
+  def create_user_media(%User{} = user, attrs) do
+    %UserMedia{}
+    |> UserMedia.changeset(Map.put(attrs, "user_id", user.id))
+    |> Repo.insert()
+  end
+
+  def delete_user_media(%UserMedia{} = media) do
+    Repo.delete(media)
   end
 end

@@ -374,7 +374,8 @@ defmodule AlgoraWeb.Admin.SeedLive do
         end,
       "countries" => list_from_string(row["countries"]),
       "regions" => list_from_string(row["regions"]),
-      "price" => money_from_string(row["price"])
+      "price" => money_from_string(row["price"]),
+      "media" => list_from_string(row["media"])
     })
   end
 
@@ -418,6 +419,8 @@ defmodule AlgoraWeb.Admin.SeedLive do
              )
            )
            |> Repo.update() do
+      Enum.each(row["media"], fn url -> {:ok, _media} = Algora.Accounts.create_user_media(org, %{"url" => url}) end)
+
       Repo.insert(%JobPosting{
         status: :processing,
         id: Nanoid.generate(),

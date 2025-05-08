@@ -39,7 +39,7 @@ defmodule AlgoraWeb.Org.JobsLive do
       }>
         <div class={
           classes([
-            if(!@current_user, do: "text-center", else: "")
+            if(!@current_user, do: "text-center", else: "text-center")
           ])
         }>
           <div class="flex items-start md:items-center justify-center gap-4">

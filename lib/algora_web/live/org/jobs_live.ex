@@ -2,6 +2,8 @@ defmodule AlgoraWeb.Org.JobsLive do
   @moduledoc false
   use AlgoraWeb, :live_view
 
+  import AlgoraWeb.Components.ModalVideo
+
   alias Algora.Accounts
   alias Algora.Jobs
   alias Algora.Markdown
@@ -90,10 +92,18 @@ defmodule AlgoraWeb.Org.JobsLive do
         </div>
 
         <%= if not Enum.empty?(@media) do %>
-          <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="max-w-xl mx-auto mt-8 flex flex-col lg:flex-row justify-center gap-4">
             <%= for media <- @media |> Enum.take(3) do %>
-              <div class="aspect-video w-full rounded-lg overflow-hidden">
-                <img src={media.url} class="w-full h-full object-cover object-center" />
+              <div class="lg:w-1/3 aspect-video w-full rounded-lg overflow-hidden">
+                <%= if media.url |> String.contains?("youtube") do %>
+                  <.modal_video
+                    src={media.url}
+                    poster={"https://img.youtube.com/vi/#{media.url |> String.split("/") |> List.last()}/maxresdefault.jpg"}
+                  />
+                  <.modal_video_dialog />
+                <% else %>
+                  <img src={media.url} class="w-full h-full object-cover object-cover" />
+                <% end %>
               </div>
             <% end %>
           </div>
@@ -113,69 +123,76 @@ defmodule AlgoraWeb.Org.JobsLive do
               </.card_header>
             </.card>
           <% else %>
-            <div class="grid gap-12">
-              <.card class="flex flex-col p-6">
-                <div class="pt-8 grid gap-8">
-                  <%= for job <- @jobs do %>
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
+            <h2 class="text-sm font-semibold uppercase text-muted-foreground">Open positions</h2>
+            <.card class="mt-4 flex flex-col p-6">
+              <div class="grid gap-8">
+                <%= for job <- @jobs do %>
+                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <div>
                       <div>
-                        <div>
-                          <%= if @current_user_role in [:admin, :mod] do %>
-                            <.link
-                              navigate={~p"/org/#{@current_org.handle}/jobs/#{job.id}"}
-                              class="text-lg font-semibold hover:underline"
-                            >
-                              {job.title}
-                            </.link>
-                          <% else %>
-                            <div class="text-lg font-semibold">
-                              {job.title}
-                            </div>
-                          <% end %>
-                        </div>
-                        <div
-                          :if={job.description}
-                          class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
-                        >
-                          <div
-                            id={"job-description-#{job.id}"}
-                            class="line-clamp-3 transition-all duration-200"
-                            phx-hook="ExpandableText"
-                            data-expand-id={"expand-#{job.id}"}
-                            data-class="line-clamp-3"
+                        <%= if @current_user_role in [:admin, :mod] do %>
+                          <.link
+                            navigate={~p"/org/#{@current_org.handle}/jobs/#{job.id}"}
+                            class="text-lg sm:text-2xl font-semibold underline"
                           >
-                            {Phoenix.HTML.raw(Markdown.render(job.description))}
+                            {job.title}
+                          </.link>
+                        <% else %>
+                          <div class="text-lg font-semibold">
+                            {job.title}
                           </div>
-                          <button
-                            id={"expand-#{job.id}"}
-                            type="button"
-                            class="text-xs text-foreground font-bold mt-2 hidden"
-                            data-content-id={"job-description-#{job.id}"}
-                            phx-hook="ExpandableTextButton"
-                          >
-                            ...see more
-                          </button>
-                        </div>
-                        <div class="pt-2 flex flex-wrap gap-2">
-                          <%= for tech <- job.tech_stack do %>
-                            <.badge variant="outline">{tech}</.badge>
-                          <% end %>
-                        </div>
+                        <% end %>
                       </div>
-                      <%= if MapSet.member?(@user_applications, job.id) do %>
-                        <.button disabled class="opacity-50">
-                          <.icon name="tabler-check" class="h-4 w-4 mr-2 -ml-1" /> Applied
-                        </.button>
-                      <% else %>
-                        <.button phx-click="apply_job" phx-value-job-id={job.id}>
-                          <.icon name="github" class="h-4 w-4 mr-2" /> Apply with GitHub
-                        </.button>
-                      <% end %>
+                      <div
+                        :if={job.description}
+                        class="pt-1 text-sm text-muted-foreground prose prose-invert max-w-none"
+                      >
+                        <div
+                          id={"job-description-#{job.id}"}
+                          class="line-clamp-3 transition-all duration-200 [&>p]:m-0"
+                          phx-hook="ExpandableText"
+                          data-expand-id={"expand-#{job.id}"}
+                          data-class="line-clamp-3"
+                        >
+                          {Phoenix.HTML.raw(Markdown.render(job.description))}
+                        </div>
+                        <button
+                          id={"expand-#{job.id}"}
+                          type="button"
+                          class="text-xs text-foreground font-bold mt-2 hidden"
+                          data-content-id={"job-description-#{job.id}"}
+                          phx-hook="ExpandableTextButton"
+                        >
+                          ...see more
+                        </button>
+                      </div>
+                      <div class="pt-2 flex flex-wrap gap-2">
+                        <%= for tech <- job.tech_stack do %>
+                          <.badge variant="outline">
+                            <.avatar class="w-4 h-4 invert saturate-0 mr-1.5 rounded-sm">
+                              <.avatar_image src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"} />
+                              <.avatar_fallback>
+                                {Algora.Util.initials(tech)}
+                              </.avatar_fallback>
+                            </.avatar>
+                            {tech}
+                          </.badge>
+                        <% end %>
+                      </div>
                     </div>
-                  <% end %>
-                </div>
-              </.card>
-            </div>
+                    <%= if MapSet.member?(@user_applications, job.id) do %>
+                      <.button disabled class="opacity-50" size="lg">
+                        <.icon name="tabler-check" class="h-6 w-6 mr-2 -ml-1" /> Applied
+                      </.button>
+                    <% else %>
+                      <.button phx-click="apply_job" phx-value-job-id={job.id} size="lg">
+                        <.icon name="github" class="h-6 w-6 mr-2" /> Apply with GitHub
+                      </.button>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </.card>
           <% end %>
         </.section>
       </div>

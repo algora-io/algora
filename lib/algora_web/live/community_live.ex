@@ -11,6 +11,7 @@ defmodule AlgoraWeb.CommunityLive do
   alias Algora.Accounts
   alias Algora.Accounts.User
   alias Algora.Bounties
+  alias Algora.Payments
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
@@ -62,45 +63,6 @@ defmodule AlgoraWeb.CommunityLive do
     featured_devs = Accounts.list_featured_developers()
     featured_collabs = list_featured_collabs()
 
-    tx_query =
-      from(tx in Transaction,
-        where: tx.type == :credit,
-        where: not is_nil(tx.succeeded_at),
-        join: u in assoc(tx, :user),
-        left_join: b in assoc(tx, :bounty),
-        left_join: tip in assoc(tx, :tip),
-        join: t in Ticket,
-        on: t.id == b.ticket_id or t.id == tip.ticket_id,
-        join: r in assoc(t, :repository),
-        join: o in assoc(r, :user),
-        join: ltx in assoc(tx, :linked_transaction),
-        join: ltx_user in assoc(ltx, :user),
-        select: %{
-          id: tx.id,
-          succeeded_at: tx.succeeded_at,
-          net_amount: tx.net_amount,
-          bounty_id: b.id,
-          tip_id: tip.id,
-          user: u,
-          ticket: %{t | repository: %{r | user: o}},
-          linked_transaction: %{ltx | user: ltx_user}
-        }
-      )
-
-    tx_query =
-      case Algora.Settings.get_featured_transactions() do
-        ids when is_list(ids) and ids != [] ->
-          where(tx_query, [tx], tx.id in ^ids)
-
-        _ ->
-          tx_query
-          |> where([tx], tx.succeeded_at > ago(1, "week"))
-          |> order_by([tx], desc: tx.net_amount)
-          |> limit(5)
-      end
-
-    transactions = tx_query |> Repo.all() |> Enum.sort_by(& &1.succeeded_at, {:desc, DateTime})
-
     {:ok,
      socket
      |> assign(:screenshot?, not is_nil(params["screenshot"]))
@@ -117,7 +79,7 @@ defmodule AlgoraWeb.CommunityLive do
      |> assign(:selected_developer, nil)
      |> assign(:share_drawer_type, nil)
      |> assign(:show_share_drawer, false)
-     |> assign(:transactions, transactions)
+     |> assign(:transactions, Payments.list_featured_transactions())
      |> assign_query_opts(params["tech"])
      |> assign_bounties()}
   end
@@ -1192,6 +1154,18 @@ defmodule AlgoraWeb.CommunityLive do
   @impl true
   def handle_info(:bounties_updated, socket) do
     {:noreply, assign_bounties(socket)}
+  end
+
+  @impl true
+  def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
+    Algora.Admin.alert("Bounty intent: #{inspect(params)}", :critical)
+    {:noreply, redirect(socket, to: ~p"/auth/signup")}
+  end
+
+  @impl true
+  def handle_event("create_tip", %{"tip_form" => params}, socket) do
+    Algora.Admin.alert("Tip intent: #{inspect(params)}", :critical)
+    {:noreply, redirect(socket, to: ~p"/auth/signup")}
   end
 
   @impl true

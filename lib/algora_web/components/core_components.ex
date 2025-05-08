@@ -636,7 +636,7 @@ defmodule AlgoraWeb.CoreComponents do
     <.flash kind={:info} title="Success!" flash={@flash} />
     <.flash kind={:warning} title="Warning!" flash={@flash} />
     <.flash kind={:error} title="Error!" flash={@flash} />
-    <.flash
+    <%!-- <.flash
       id="disconnected"
       kind={:error}
       title="We can't find the internet"
@@ -646,7 +646,7 @@ defmodule AlgoraWeb.CoreComponents do
       phx-connected={hide("#disconnected")}
     >
       Attempting to reconnect <.icon name="tabler-refresh" class="ml-auto h-4 w-4 animate-spin" />
-    </.flash>
+    </.flash> --%>
     """
   end
 

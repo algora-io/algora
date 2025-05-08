@@ -175,40 +175,40 @@ defmodule AlgoraWeb.HomeLive do
         </section>
 
         <section class="relative isolate py-24 sm:py-48">
-          <div class="mx-auto max-w-3xl px-6 lg:px-8 pt-24 xl:pt-0">
-            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl text-center mb-4 sm:mb-6">
+          <div class="lg:text-center mx-auto max-w-3xl px-6 lg:px-8 pt-24 xl:pt-0">
+            <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-7xl mb-4 sm:mb-6">
               Fund GitHub issues
             </h2>
-            <p class="text-center font-medium text-lg sm:text-2xl text-muted-foreground mb-12 sm:mb-20">
+            <p class="font-medium text-lg sm:text-2xl text-muted-foreground mb-12 sm:mb-20">
               Add USD rewards on issues and pay when work is merged
             </p>
             <div class="flex flex-col">
               <div class="relative grid items-center w-full gap-8 lg:gap-x-12 rounded-xl bg-black/25 p-6 sm:p-10 lg:p-14 ring-2 ring-success/20 transition-colors">
                 <div class="lg:col-span-2 text-lg leading-7 flex-1 flex flex-col">
-                  <div class="text-3xl sm:text-4xl font-semibold text-foreground text-center">
-                    Fund any issue
+                  <div class="text-3xl sm:text-4xl font-semibold text-foreground">
+                    Fund any issue<br class="sm:hidden" />
                     <span class="text-success drop-shadow-[0_1px_5px_#34d39980]">
                       in seconds
                     </span>
                   </div>
-                  <div class="pt-3 text-lg sm:text-xl xl:text-2xl font-medium text-muted-foreground text-center">
+                  <div class="pt-3 text-lg sm:text-xl xl:text-2xl font-medium text-muted-foreground">
                     Help improve the OSS you love and rely on
                   </div>
                   <div class="pt-6 col-span-3 text-base sm:text-lg text-muted-foreground space-y-2 flex flex-col mx-auto">
-                    <div>
-                      <.icon name="tabler-check" class="h-5 w-5 mr-2 text-success-400" />
+                    <div class="flex sm:items-center gap-2 text-base sm:text-lg text-muted-foreground">
+                      <.icon name="tabler-check" class="h-5 w-5 text-success-400 flex-none" />
                       Pay when PRs are merged
                     </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-5 w-5 mr-2 text-success-400" />
+                    <div class="flex sm:items-center gap-2 text-base sm:text-lg text-muted-foreground">
+                      <.icon name="tabler-check" class="h-5 w-5 text-success-400 flex-none" />
                       Pool bounties with other sponsors
                     </div>
-                    <div>
-                      <.icon name="tabler-check" class="h-5 w-5 mr-2 text-success-400" />
-                      Algora handles invoices, payouts, compliance<span class="hidden sm:inline"> & 1099s</span>
+                    <div class="flex sm:items-center gap-2 text-base sm:text-lg text-muted-foreground">
+                      <.icon name="tabler-check" class="h-5 w-5 text-success-400 flex-none" />
+                      <span>Algora handles payouts, compliance & 1099s</span>
                     </div>
                   </div>
-                  <div class="pt-8 flex flex-col items-center mx-auto gap-3">
+                  <div class="pt-8 flex flex-col items-center lg:mx-auto gap-3">
                     <.button
                       phx-click="create_bounty"
                       size="xl"
@@ -345,11 +345,11 @@ defmodule AlgoraWeb.HomeLive do
                       Support the maintainers of your favorite projects
                     </p>
                     <div class="mt-4 sm:mt-6 space-y-3">
-                      <div class="flex items-center gap-2 text-base sm:text-lg text-muted-foreground">
+                      <div class="flex sm:items-center gap-2 text-base sm:text-lg text-muted-foreground">
                         <.icon name="tabler-check" class="h-5 w-5 text-indigo-400 flex-none" />
                         <span>Send tips directly to GitHub usernames</span>
                       </div>
-                      <div class="flex items-center gap-2 text-base sm:text-lg text-muted-foreground">
+                      <div class="flex sm:items-center gap-2 text-base sm:text-lg text-muted-foreground">
                         <.icon name="tabler-check" class="h-5 w-5 text-indigo-400 flex-none" />
                         <span>Algora handles payouts, compliance & 1099s</span>
                       </div>
@@ -450,7 +450,7 @@ defmodule AlgoraWeb.HomeLive do
             </p>
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid grid-cols-1 items-center gap-x-8 sm:gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-5">
+                <div class="w-[12rem] sm:w-auto lg:col-span-5">
                   <div class="relative flex aspect-[791/576] items-center justify-center overflow-hidden rounded-xl sm:rounded-2xl bg-gray-800">
                     <img
                       src={~p"/images/people/louis-beaumont.png"}
@@ -484,7 +484,7 @@ defmodule AlgoraWeb.HomeLive do
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-5 order-first lg:order-last">
+                <div class="w-[12rem] sm:w-auto lg:col-span-5 order-first lg:order-last">
                   <div class="relative flex aspect-[1091/1007] items-center justify-center overflow-hidden rounded-2xl bg-gray-800">
                     <img
                       src={~p"/images/people/josh-pigford.png"}
@@ -519,7 +519,7 @@ defmodule AlgoraWeb.HomeLive do
 
             <div class="mx-auto mt-16 max-w-6xl gap-8 text-sm leading-6 sm:mt-32">
               <div class="grid grid-cols-1 items-center gap-x-16 gap-y-8 lg:grid-cols-11">
-                <div class="lg:col-span-4">
+                <div class="w-[12rem] sm:w-auto lg:col-span-4">
                   <div class="relative flex items-center justify-center">
                     <img
                       src={~p"/images/people/john-de-goes-2.jpg"}

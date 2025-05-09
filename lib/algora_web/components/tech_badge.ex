@@ -73,7 +73,14 @@ defmodule AlgoraWeb.Components.TechBadge do
       "OCaml",
       "Crystal",
       "PureScript",
-      "Elm"
+      "Elm",
+      "Kubernetes",
+      "Docker",
+      "Terraform",
+      "Ansible",
+      "Linux",
+      "LLVM",
+      "WASM"
     ]
   end
 end

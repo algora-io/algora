@@ -168,15 +168,7 @@ defmodule AlgoraWeb.Org.JobsLive do
                       </div>
                       <div class="pt-2 flex flex-wrap gap-2">
                         <%= for tech <- job.tech_stack do %>
-                          <.badge variant="outline">
-                            <.avatar class="w-4 h-4 invert saturate-0 mr-1 rounded-sm">
-                              <.avatar_image src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"} />
-                              <.avatar_fallback>
-                                {Algora.Util.initials(tech)}
-                              </.avatar_fallback>
-                            </.avatar>
-                            {tech}
-                          </.badge>
+                          <.tech_badge tech={tech} />
                         <% end %>
                       </div>
                     </div>

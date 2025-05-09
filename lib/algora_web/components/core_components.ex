@@ -1294,6 +1294,8 @@ defmodule AlgoraWeb.CoreComponents do
     """
   end
 
+  defdelegate tech_badge(assigns), to: AlgoraWeb.Components.TechBadge
+
   defdelegate accordion_item(assigns), to: Accordion
   defdelegate accordion_trigger(assigns), to: Accordion
   defdelegate accordion(assigns), to: Accordion

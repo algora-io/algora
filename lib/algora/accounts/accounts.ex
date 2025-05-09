@@ -746,7 +746,7 @@ defmodule Algora.Accounts do
     Repo.all(from m in UserMedia, where: m.user_id == ^user.id)
   end
 
-  defp youtube_url?(url) do
+  def youtube_url?(url) do
     String.contains?(url, "youtube.com") or String.contains?(url, "youtu.be")
   end
 

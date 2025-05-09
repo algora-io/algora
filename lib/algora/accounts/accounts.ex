@@ -746,10 +746,52 @@ defmodule Algora.Accounts do
     Repo.all(from m in UserMedia, where: m.user_id == ^user.id)
   end
 
+  defp youtube_url?(url) do
+    String.contains?(url, "youtube.com") or String.contains?(url, "youtu.be")
+  end
+
   def create_user_media(%User{} = user, attrs) do
-    %UserMedia{}
-    |> UserMedia.changeset(Map.put(attrs, "user_id", user.id))
-    |> Repo.insert()
+    if youtube_url?(attrs["url"]) do
+      %UserMedia{}
+      |> UserMedia.changeset(Map.put(attrs, "user_id", user.id))
+      |> Repo.insert()
+    else
+      with {:ok, %{body: body, headers: headers}} <- fetch_media(attrs["url"]),
+           object_path = media_object_path(user.id, body),
+           {:ok, _} <-
+             Algora.S3.upload(body, object_path,
+               content_type: extract_content_type(headers),
+               cache_control: "public, max-age=31536000, immutable"
+             ) do
+        s3_url = Path.join(Algora.S3.bucket_url(), object_path)
+
+        %UserMedia{}
+        |> UserMedia.changeset(attrs |> Map.put("user_id", user.id) |> Map.put("url", s3_url))
+        |> Repo.insert()
+      else
+        error ->
+          Logger.error("Failed to process media: #{inspect(error)}")
+          {:error, :media_processing_failed}
+      end
+    end
+  end
+
+  defp media_object_path(user_id, body) do
+    hash = :md5 |> :crypto.hash(body) |> Base.encode16(case: :lower)
+    Path.join(["media", to_string(user_id), hash])
+  end
+
+  defp fetch_media(url) do
+    :get
+    |> Finch.build(url)
+    |> Finch.request(Algora.Finch)
+  end
+
+  defp extract_content_type(headers) do
+    case List.keyfind(headers, "content-type", 0) do
+      {_, content_type} -> content_type
+      nil -> "application/octet-stream"
+    end
   end
 
   def delete_user_media(%UserMedia{} = media) do

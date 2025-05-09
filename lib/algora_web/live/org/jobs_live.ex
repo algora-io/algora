@@ -95,7 +95,7 @@ defmodule AlgoraWeb.Org.JobsLive do
           <div class="max-w-xl mx-auto mt-8 flex flex-row justify-center gap-4">
             <%= for media <- @media |> Enum.take(3) do %>
               <div class="w-1/3 aspect-video w-full rounded-lg overflow-hidden">
-                <%= if media.url |> String.contains?("youtube") do %>
+                <%= if Algora.Accounts.youtube_url?(media.url) do %>
                   <.modal_video
                     src={media.url}
                     poster={"https://img.youtube.com/vi/#{media.url |> String.split("/") |> List.last()}/maxresdefault.jpg"}

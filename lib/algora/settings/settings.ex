@@ -207,7 +207,7 @@ defmodule Algora.Settings do
 
   def get_featured_transactions do
     case get("featured_transactions") do
-      %{"ids" => ids} when is_list(ids) -> nil
+      %{"ids" => ids} when is_list(ids) -> ids
       _ -> nil
     end
   end

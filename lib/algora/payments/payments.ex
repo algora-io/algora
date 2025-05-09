@@ -865,17 +865,17 @@ defmodule Algora.Payments do
         }
       )
 
+    # case Algora.Settings.get_featured_transactions() do
+    #   ids when is_list(ids) and ids != [] ->
+    #     where(tx_query, [tx], tx.id in ^ids)
+    #   _ ->
     tx_query =
-      case Algora.Settings.get_featured_transactions() do
-        ids when is_list(ids) and ids != [] ->
-          where(tx_query, [tx], tx.id in ^ids)
+      tx_query
+      |> where([tx], tx.succeeded_at > ago(2, "week"))
+      |> order_by([tx], desc: tx.net_amount)
+      |> limit(10)
 
-        _ ->
-          tx_query
-          |> where([tx], tx.succeeded_at > ago(2, "week"))
-          |> order_by([tx], desc: tx.net_amount)
-          |> limit(10)
-      end
+    # end
 
     transactions =
       tx_query

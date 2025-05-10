@@ -12,6 +12,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
   alias Algora.Repo
   alias Algora.Workspace
   alias AlgoraWeb.LocalStore
+  alias Phoenix.LiveView.AsyncResult
 
   require Logger
 
@@ -42,6 +43,11 @@ defmodule AlgoraWeb.Admin.SeedLive do
     end
   end
 
+  defmodule RowStatus do
+    @moduledoc false
+    defstruct [:row, :status]
+  end
+
   @impl true
   def mount(_params, _session, socket) do
     timezone = if(params = get_connect_params(socket), do: params["timezone"])
@@ -51,6 +57,8 @@ defmodule AlgoraWeb.Admin.SeedLive do
      |> assign(:timezone, timezone)
      |> assign(:page_title, "Seed")
      |> assign(:form, to_form(Form.changeset(%Form{}, %{visible_columns: []})))
+     |> assign(:logs, [])
+     |> assign(:row_statuses, %{})
      |> assign_preview()}
   end
 
@@ -80,22 +88,83 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
   @impl true
   def handle_event("seed", _params, socket) do
-    case seed_rows(socket.assigns.csv_data) do
-      {:ok, _} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Jobs created successfully")
-         |> assign_preview()}
+    pid = self()
 
-      {:error, reason} ->
-        {:noreply, put_flash(socket, :error, "Failed to create jobs: #{inspect(reason)}")}
-    end
+    Task.start(fn ->
+      socket.assigns.csv_data
+      |> Enum.filter(& &1["org"])
+      |> Task.async_stream(
+        fn row ->
+          key = lookup_key(row)
+          send(pid, {:update_row_status, key, :loading})
+
+          try do
+            case seed_row(row, pid) do
+              {:ok, _job} ->
+                send(pid, {:update_row_status, key, :ok})
+                {:ok, row}
+
+              {:error, reason} = error ->
+                send(pid, {:update_row_status, key, {:error, reason}})
+                error
+            end
+          rescue
+            e ->
+              send(pid, {:update_row_status, key, {:error, e}})
+              {:error, e}
+          end
+        end,
+        max_concurrency: 1,
+        timeout: :infinity
+      )
+      |> Stream.run()
+    end)
+
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("reset_cache", _params, socket) do
     reset_cache()
     {:noreply, assign_preview(socket)}
+  end
+
+  @impl true
+  def handle_info({:seed_log, message}, socket) do
+    {:noreply, update_log(socket, message)}
+  end
+
+  @impl true
+  def handle_info({:EXIT, _pid, reason}, socket) do
+    Logger.error("LiveView crashed: #{inspect(reason)}")
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:update_row_status, key, status}, socket) do
+    new_statuses =
+      Map.put(
+        socket.assigns.row_statuses,
+        key,
+        case status do
+          :ok -> AsyncResult.ok(key)
+          :loading -> AsyncResult.loading(key)
+          {:error, reason} -> AsyncResult.failed(key, reason)
+        end
+      )
+
+    {:noreply, assign(socket, :row_statuses, new_statuses)}
+  end
+
+  @impl true
+  def handle_info({:seed_complete, result}, socket) do
+    case result do
+      :ok ->
+        {:noreply, put_flash(socket, :info, "Jobs created successfully")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Failed to create jobs: #{inspect(reason)}")}
+    end
   end
 
   @impl true
@@ -137,10 +206,31 @@ defmodule AlgoraWeb.Admin.SeedLive do
                 <.button type="button" phx-click="reset_cache" variant="secondary">
                   Reset cache
                 </.button>
-                <.button type="button" phx-click="seed">
-                  Seed {length(@csv_data)} entries
+                <.button
+                  type="button"
+                  phx-click="seed"
+                  disabled={@row_statuses |> Enum.any?(&elem(&1, 1).loading)}
+                >
+                  <%= if @row_statuses |> Enum.any?(& elem(&1, 1).loading) do %>
+                    <.icon name="tabler-loader-2" class="animate-spin size-4 mr-2 -ml-1" /> Seeding
+                  <% else %>
+                    Seed {length(@csv_data)} entries
+                  <% end %>
                 </.button>
               </div>
+
+              <%= if @logs != [] do %>
+                <div
+                  id="logs-container"
+                  phx-hook="ScrollToBottom"
+                  class="max-h-[100px] bg-muted/50 flex flex-1 flex-col-reverse gap-2 p-4 font-mono rounded-lg text-sm overflow-y-auto scrollbar-thin"
+                >
+                  <%= for log <- @logs do %>
+                    <div>{log}</div>
+                  <% end %>
+                </div>
+              <% end %>
+
               <.table id="csv-data" rows={@csv_data}>
                 <:col
                   :let={row}
@@ -150,7 +240,12 @@ defmodule AlgoraWeb.Admin.SeedLive do
                   }
                   label={key}
                 >
-                  <.cell value={row[key]} timezone={@timezone} column={key} />
+                  <.cell
+                    value={row[key]}
+                    timezone={@timezone}
+                    column={key}
+                    status={@row_statuses[lookup_key(row)]}
+                  />
                 </:col>
               </.table>
             </div>
@@ -163,38 +258,40 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
   defp cell(%{value: %User{}} = assigns) do
     ~H"""
-    <div class="flex flex-col gap-3 md:flex-row">
-      <div class="flex-shrink-0">
-        <.avatar class="h-12 w-12">
-          <.avatar_image src={@value.avatar_url} alt={@value.name} />
-          <.avatar_fallback>
-            {Algora.Util.initials(@value.name)}
-          </.avatar_fallback>
-        </.avatar>
-      </div>
+    <.maybe_link href={if @value.handle, do: ~p"/#{@value.handle}/jobs"}>
+      <div class="flex flex-col gap-3 md:flex-row">
+        <div class="flex-shrink-0">
+          <.avatar class="h-12 w-12">
+            <.avatar_image src={@value.avatar_url} alt={@value.name} />
+            <.avatar_fallback>
+              {Algora.Util.initials(@value.name)}
+            </.avatar_fallback>
+          </.avatar>
+        </div>
 
-      <div class="flex-1">
-        <div class="flex gap-2 items-center">
-          <h1 class="text-base font-bold whitespace-nowrap">{@value.name}</h1>
-          <%= for {platform, icon} <- social_links(),
+        <div class="flex-1">
+          <div class="flex gap-2 items-center">
+            <h1 class="text-base font-bold whitespace-nowrap">{@value.name}</h1>
+            <%= for {platform, icon} <- social_links(),
                       url = social_link(@value, platform),
                       not is_nil(url) do %>
-            <.link href={url} target="_blank" class="text-muted-foreground hover:text-foreground">
-              <.icon name={icon} class="size-5" />
-            </.link>
+              <.link href={url} target="_blank" class="text-muted-foreground hover:text-foreground">
+                <.icon name={icon} class="size-5" />
+              </.link>
+            <% end %>
+          </div>
+          <%= if @value.domain do %>
+            <p class="text-muted-foreground line-clamp-1 font-medium text-sm">
+              {@value.domain}
+            </p>
+          <% else %>
+            <p class="text-destructive-400 line-clamp-1 font-medium text-sm">
+              Domain not found
+            </p>
           <% end %>
         </div>
-        <%= if @value.domain do %>
-          <p class="text-muted-foreground line-clamp-1 font-medium text-sm">
-            {@value.domain}
-          </p>
-        <% else %>
-          <p class="text-destructive-400 line-clamp-1 font-medium text-sm">
-            Domain not found
-          </p>
-        <% end %>
       </div>
-    </div>
+    </.maybe_link>
     """
   end
 
@@ -224,6 +321,25 @@ defmodule AlgoraWeb.Admin.SeedLive do
     <.link href={@value} target="_blank" class="text-foreground">
       {@value}
     </.link>
+    """
+  end
+
+  defp cell(%{column: "status"} = assigns) do
+    ~H"""
+    <div class="flex items-center justify-center w-6">
+      <%= cond do %>
+        <% is_nil(@status) -> %>
+          <.icon name="tabler-minus" class="text-gray-300 size-4" />
+        <% @status.loading -> %>
+          <.icon name="tabler-loader-2" class="animate-spin size-4" />
+        <% @status.failed -> %>
+          <.icon name="tabler-x" class="text-red-500 size-4" />
+        <% @status.ok? -> %>
+          <.icon name="tabler-check" class="text-green-500 size-4" />
+        <% true -> %>
+          <.icon name="tabler-minus" class="text-gray-300 size-4" />
+      <% end %>
+    </div>
     """
   end
 
@@ -264,7 +380,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
     socket
     |> assign(:csv_data, rows)
-    |> assign(:csv_columns, ["org" | cols])
+    |> assign(:csv_columns, ["status", "org" | cols])
   end
 
   defp assign_preview(socket) do
@@ -348,8 +464,13 @@ defmodule AlgoraWeb.Admin.SeedLive do
   end
 
   defp list_from_string(s) when is_binary(s) and s != "" do
-    s
-    |> String.split(",")
+    values =
+      case String.split(s, " , ") do
+        [_s] -> String.split(s, ",")
+        xs -> xs
+      end
+
+    values
     |> Enum.map(&String.trim/1)
     |> Enum.reject(&(&1 == ""))
   end
@@ -379,24 +500,7 @@ defmodule AlgoraWeb.Admin.SeedLive do
     })
   end
 
-  defp seed_rows(rows) do
-    Repo.transact(
-      fn ->
-        rows
-        |> Enum.filter(& &1["org"])
-        |> Enum.map(&seed_row/1)
-        |> Enum.reduce_while(:ok, fn result, _acc ->
-          case result do
-            {:ok, _job} -> {:cont, :ok}
-            {:error, reason} -> {:halt, {:error, reason}}
-          end
-        end)
-      end,
-      timeout: :infinity
-    )
-  end
-
-  defp seed_row(row) do
+  defp seed_row(row, pid) do
     with {:ok, org} <- Repo.fetch(User, row["org"].id),
          {:ok, org} <-
            org
@@ -419,7 +523,15 @@ defmodule AlgoraWeb.Admin.SeedLive do
              )
            )
            |> Repo.update() do
-      Enum.each(row["media"], fn url -> {:ok, _media} = Algora.Accounts.create_user_media(org, %{"url" => url}) end)
+      Enum.each(row["media"], fn url ->
+        case Algora.Accounts.fetch_or_create_user_media(org, %{"url" => url}) do
+          {:ok, _media} ->
+            :ok
+
+          {:error, reason} ->
+            broadcast_log(pid, "❌ Failed to create media for #{url}: #{inspect(reason)}")
+        end
+      end)
 
       Repo.insert(%JobPosting{
         status: :processing,
@@ -455,4 +567,13 @@ defmodule AlgoraWeb.Admin.SeedLive do
 
   defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
   defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
+
+  defp broadcast_log(pid, message) do
+    Logger.info(message)
+    send(pid, {:seed_log, message})
+  end
+
+  defp update_log(socket, message) do
+    Phoenix.Component.update(socket, :logs, fn logs -> [message | logs] end)
+  end
 end

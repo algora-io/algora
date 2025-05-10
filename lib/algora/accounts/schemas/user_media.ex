@@ -6,6 +6,7 @@ defmodule Algora.Accounts.UserMedia do
 
   typed_schema "user_media" do
     field :url, :string
+    field :original_url, :string
 
     belongs_to :user, User
 
@@ -14,7 +15,7 @@ defmodule Algora.Accounts.UserMedia do
 
   def changeset(user_media, attrs) do
     user_media
-    |> cast(attrs, [:url, :user_id])
+    |> cast(attrs, [:url, :original_url, :user_id])
     |> validate_required([:url, :user_id])
     |> generate_id()
     |> foreign_key_constraint(:user_id)

@@ -750,13 +750,40 @@ defmodule Algora.Accounts do
     String.contains?(url, "youtube.com") or String.contains?(url, "youtu.be")
   end
 
+  def canonicalize_youtube_url(url) do
+    cond do
+      # Handle youtu.be URLs
+      String.contains?(url, "youtu.be/") ->
+        id = url |> String.split("youtu.be/") |> List.last() |> String.split("?") |> List.first()
+        "https://youtube.com/embed/#{id}"
+
+      # Handle youtube.com/watch?v= URLs
+      String.contains?(url, "youtube.com/watch?v=") ->
+        id = url |> String.split("v=") |> List.last() |> String.split("&") |> List.first()
+        "https://youtube.com/embed/#{id}"
+
+      # Handle youtube.com/embed/ URLs
+      String.contains?(url, "youtube.com/embed/") ->
+        "https://youtube.com/embed/#{url |> String.split("embed/") |> List.last()}"
+
+      true ->
+        url
+    end
+  end
+
   def create_user_media(%User{} = user, attrs) do
     if youtube_url?(attrs["url"]) do
       %UserMedia{}
-      |> UserMedia.changeset(Map.put(attrs, "user_id", user.id))
+      |> UserMedia.changeset(
+        attrs
+        |> Map.put("user_id", user.id)
+        |> Map.put("original_url", attrs["url"])
+        |> Map.update!("url", &canonicalize_youtube_url/1)
+      )
       |> Repo.insert()
     else
-      with {:ok, %{body: body, headers: headers}} <- fetch_media(attrs["url"]),
+      with {:ok, %{body: body, headers: headers, status: status}} when status in 200..299 <-
+             fetch_media(attrs["url"]),
            object_path = media_object_path(user.id, body),
            {:ok, _} <-
              Algora.S3.upload(body, object_path,
@@ -766,13 +793,30 @@ defmodule Algora.Accounts do
         s3_url = Path.join(Algora.S3.bucket_url(), object_path)
 
         %UserMedia{}
-        |> UserMedia.changeset(attrs |> Map.put("user_id", user.id) |> Map.put("url", s3_url))
+        |> UserMedia.changeset(
+          attrs
+          |> Map.put("user_id", user.id)
+          |> Map.put("original_url", attrs["url"])
+          |> Map.put("url", s3_url)
+        )
         |> Repo.insert()
       else
+        {:ok, %{status: status}} ->
+          Logger.error("Failed to process media: #{inspect(status)}")
+          {:error, status}
+
         error ->
           Logger.error("Failed to process media: #{inspect(error)}")
           {:error, :media_processing_failed}
       end
+    end
+  end
+
+  def fetch_or_create_user_media(%User{} = user, attrs) do
+    # TODO: persist and compare against original URL
+    case Repo.fetch_by(UserMedia, user_id: user.id, original_url: attrs["url"]) do
+      {:ok, media} -> {:ok, media}
+      _ -> create_user_media(user, attrs)
     end
   end
 
@@ -781,10 +825,30 @@ defmodule Algora.Accounts do
     Path.join(["media", to_string(user_id), hash])
   end
 
-  defp fetch_media(url) do
-    :get
-    |> Finch.build(url)
-    |> Finch.request(Algora.Finch)
+  def fetch_media(url, redirect_count \\ 0) do
+    if redirect_count > 3 do
+      {:error, :too_many_redirects}
+    else
+      case :get |> Finch.build(url) |> Finch.request(Algora.Finch) do
+        {:ok, %{status: status, headers: headers}} when status in 300..399 ->
+          case List.keyfind(headers, "location", 0) do
+            {_, location} -> fetch_media(location, redirect_count + 1)
+            nil -> {:error, :missing_redirect_location}
+          end
+
+        {:ok, %{status: status}} when status in 400..499 ->
+          new_url = url |> URI.parse() |> Map.put(:query, nil) |> to_string()
+
+          if new_url == url do
+            {:error, status}
+          else
+            fetch_media(new_url, redirect_count + 1)
+          end
+
+        other ->
+          other
+      end
+    end
   end
 
   defp extract_content_type(headers) do

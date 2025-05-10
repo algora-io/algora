@@ -31,7 +31,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(:page_title, "Crawl Organizations")
+     |> assign(:page_title, "Org Crawl Agent")
      |> assign(:form, to_form(Form.changeset(%Form{}, %{})))
      |> assign(:crawl_results, %AsyncResult{})
      |> assign(:jobs, [])
@@ -62,7 +62,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
       |> Enum.map(&String.trim/1)
       |> Enum.reject(&(&1 == ""))
 
-    broadcast_log(pid, "🎯 Starting crawl of #{length(urls)} URLs")
+    broadcast_log(pid, "🤖 Collecting data for #{length(urls)} companies")
 
     socket =
       socket
@@ -74,15 +74,17 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           urls
           |> Task.async_stream(
             fn url ->
-              broadcast_log(pid, "🔄 Processing URL: #{url}")
-              {url, OrgSeeder.fetch_org_data(url, fn x -> send(pid, {:update_data, x}) end)}
+              broadcast_log(pid, "🔍 Browsing #{url}")
+              data = OrgSeeder.fetch_org_data(url, fn x -> send(pid, {:update_data, x}) end)
+              broadcast_log(pid, "✨ Collected data for #{url}")
+              {url, data}
             end,
             max_concurrency: 5,
             timeout: :infinity
           )
           |> Enum.to_list()
 
-        broadcast_log(pid, "✅ Completed processing #{length(results)} URLs")
+        broadcast_log(pid, "✅ Crawl completed")
         results
       end)
 
@@ -130,7 +132,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
 
   @impl true
   def handle_info({:update_data, {:images, images}}, socket) do
-    {:noreply, assign(socket, :images, images)}
+    {:noreply, update(socket, :images, &(&1 ++ images))}
   end
 
   @impl true
@@ -139,23 +141,25 @@ defmodule AlgoraWeb.Admin.CrawlLive do
     <div class="bg-background" phx-hook="LocalStateStore" id="crawl-page" data-storage="localStorage">
       <div class="max-w-7xl mx-auto py-8 space-y-8">
         <.header>
-          Crawl Organizations
-          <:subtitle>Crawl organization data from multiple URLs</:subtitle>
+          Org Crawl Agent
+          <:subtitle>
+            Collect data about orgs
+          </:subtitle>
         </.header>
 
         <.form for={@form} phx-submit="crawl" class="space-y-4">
           <.input
             type="textarea"
             field={@form[:urls]}
-            label="URLs"
-            placeholder="Enter URLs (one per line)"
-            helptext="Enter organization URLs to crawl (one per line)"
+            label="Company URLs"
+            placeholder="Enter company URLs (one per line)"
+            helptext="Input organization website URLs to analyze (one per line)"
             phx-hook="CtrlEnterSubmit"
           />
 
           <div class="flex justify-between items-center">
             <.button type="submit" disabled={@crawl_results.loading}>
-              {if @crawl_results.loading, do: "Crawling...", else: "Start Crawl"}
+              {if @crawl_results.loading, do: "Collecting data...", else: "Collect data"}
             </.button>
           </div>
         </.form>

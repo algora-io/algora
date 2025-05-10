@@ -29,10 +29,6 @@ defmodule AlgoraWeb.Admin.CrawlLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Phoenix.PubSub.subscribe(Algora.PubSub, "crawl_logs")
-    end
-
     {:ok,
      socket
      |> assign(:page_title, "Crawl Organizations")
@@ -66,7 +62,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
       |> Enum.map(&String.trim/1)
       |> Enum.reject(&(&1 == ""))
 
-    broadcast_log("🎯 Starting crawl of #{length(urls)} URLs")
+    broadcast_log(pid, "🎯 Starting crawl of #{length(urls)} URLs")
 
     socket =
       socket
@@ -78,7 +74,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           urls
           |> Task.async_stream(
             fn url ->
-              broadcast_log("🔄 Processing URL: #{url}")
+              broadcast_log(pid, "🔄 Processing URL: #{url}")
               {url, OrgSeeder.fetch_org_data(url, fn x -> send(pid, {:update_data, x}) end)}
             end,
             max_concurrency: 5,
@@ -86,7 +82,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           )
           |> Enum.to_list()
 
-        broadcast_log("✅ Completed processing #{length(results)} URLs")
+        broadcast_log(pid, "✅ Completed processing #{length(results)} URLs")
         results
       end)
 
@@ -248,9 +244,9 @@ defmodule AlgoraWeb.Admin.CrawlLive do
     |> Enum.join("")
   end
 
-  defp broadcast_log(message) do
+  defp broadcast_log(pid, message) do
     Logger.info(message)
-    Phoenix.PubSub.broadcast(Algora.PubSub, "crawl_logs", {:crawl_log, message})
+    send(pid, {:crawl_log, message})
   end
 
   defp update_log(socket, message) do

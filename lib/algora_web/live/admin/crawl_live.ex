@@ -81,7 +81,6 @@ defmodule AlgoraWeb.Admin.CrawlLive do
 
               {url,
                OrgSeeder.fetch_org_data(url, fn x ->
-                 dbg(x)
                  send(pid, {:update_jobs, x})
                  :ok
                end)}
@@ -142,13 +141,11 @@ defmodule AlgoraWeb.Admin.CrawlLive do
 
   @impl true
   def handle_info({:update_jobs, {:ok, %AlgoraCloud.JobCrawler{job_postings: jobs}}}, socket) do
-    dbg(jobs)
     {:noreply, assign(socket, :jobs, jobs)}
   end
 
   @impl true
   def handle_info({:update_jobs, {:partial, %AlgoraCloud.JobCrawler{job_postings: jobs}}}, socket) do
-    dbg(jobs)
     {:noreply, assign(socket, :jobs, jobs)}
   end
 
@@ -179,8 +176,12 @@ defmodule AlgoraWeb.Admin.CrawlLive do
         </.form>
 
         <%= if @logs != [] do %>
-          <div class="bg-muted flex flex-col-reverse font-mono gap-2 overflow-y-auto p-4 rounded-lg text-sm max-h-[100px]">
-            <%= for log <- Enum.reverse(@logs) do %>
+          <div
+            id="logs-container"
+            phx-hook="ScrollToBottom"
+            class="max-h-[100px] bg-muted/50 flex flex-1 flex-col-reverse gap-2 p-4 font-mono rounded-lg text-sm overflow-y-auto scrollbar-thin"
+          >
+            <%= for log <- @logs do %>
               <div>{log}</div>
             <% end %>
           </div>

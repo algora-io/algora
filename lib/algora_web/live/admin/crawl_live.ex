@@ -166,6 +166,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
             label="URLs"
             placeholder="Enter URLs (one per line)"
             helptext="Enter organization URLs to crawl (one per line)"
+            phx-hook="CtrlEnterSubmit"
           />
 
           <div class="flex justify-between items-center">

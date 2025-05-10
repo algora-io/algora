@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
     {:ok,
      socket
      |> assign(:page_title, "Crawl Organizations")
-     |> assign(:form, to_form(Form.changeset(%Form{}, %{})))
+     |> assign(:form, to_form(Form.changeset(%Form{}, %{urls: "https://infisical.com"})))
      |> assign(:crawl_results, AsyncResult.loading())
      |> assign(:jobs, [])
      |> assign(:images, [])
@@ -58,6 +58,8 @@ defmodule AlgoraWeb.Admin.CrawlLive do
 
   @impl true
   def handle_event("crawl", %{"form" => params}, socket) do
+    pid = self()
+
     urls =
       params["urls"]
       |> String.split("\n")
@@ -76,7 +78,13 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           |> Task.async_stream(
             fn url ->
               broadcast_log("🔄 Processing URL: #{url}")
-              {url, OrgSeeder.fetch_org_data(url)}
+
+              {url,
+               OrgSeeder.fetch_org_data(url, fn x ->
+                 dbg(x)
+                 send(pid, {:update_jobs, x})
+                 :ok
+               end)}
             end,
             max_concurrency: 5,
             timeout: :infinity
@@ -94,41 +102,17 @@ defmodule AlgoraWeb.Admin.CrawlLive do
   def handle_async(:crawl_task, {:ok, results}, socket) do
     Logger.info("✅ Crawl task completed successfully")
 
-    {jobs, images} =
-      Enum.reduce(results, {[], []}, fn
-        # The actual format we're receiving
-        {"ok", {url, {jobs, images}}}, {jobs_acc, images_acc} ->
-          Logger.info("Processing successful result from #{url}: #{length(jobs)} jobs, #{length(images)} images")
-          {jobs_acc ++ jobs, images_acc ++ images}
-
-        {url, {:ok, {jobs, images}}}, {jobs_acc, images_acc} ->
-          Logger.info("Processing successful result from #{url}: #{length(jobs)} jobs, #{length(images)} images")
-          {jobs_acc ++ jobs, images_acc ++ images}
+    images =
+      Enum.reduce(results, [], fn
+        {:ok, {_url, {_jobs, images}}}, images_acc ->
+          images_acc ++ images
 
         {url, {:error, error}}, acc ->
           Logger.error("❌ Failed to process #{url}: #{inspect(error)}")
           acc
-
-        {key, value}, acc ->
-          Logger.error("❌ Unexpected result format: key=#{inspect(key)}, value=#{inspect(value)}")
-
-          # Try to extract data even if format is unexpected
-          case value do
-            {_url, {jobs, images}} when is_list(jobs) and is_list(images) ->
-              {acc_jobs, acc_images} = acc
-              {acc_jobs ++ jobs, acc_images ++ images}
-
-            _ ->
-              acc
-          end
       end)
 
-    Logger.info("Total results: #{length(jobs)} jobs, #{length(images)} images")
-
-    {:noreply,
-     socket
-     |> assign(:jobs, jobs)
-     |> assign(:images, images)}
+    {:noreply, assign(socket, :images, images)}
   end
 
   @impl true
@@ -141,6 +125,18 @@ defmodule AlgoraWeb.Admin.CrawlLive do
   @impl true
   def handle_info({:crawl_log, message}, socket) do
     {:noreply, update_log(socket, message)}
+  end
+
+  @impl true
+  def handle_info({:update_jobs, {:ok, %AlgoraCloud.JobCrawler{job_postings: jobs}}}, socket) do
+    dbg(jobs)
+    {:noreply, assign(socket, :jobs, jobs)}
+  end
+
+  @impl true
+  def handle_info({:update_jobs, {:partial, %AlgoraCloud.JobCrawler{job_postings: jobs}}}, socket) do
+    dbg(jobs)
+    {:noreply, assign(socket, :jobs, jobs)}
   end
 
   @impl true

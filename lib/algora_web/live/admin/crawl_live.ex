@@ -36,7 +36,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
     {:ok,
      socket
      |> assign(:page_title, "Crawl Organizations")
-     |> assign(:form, to_form(Form.changeset(%Form{}, %{urls: "https://infisical.com"})))
+     |> assign(:form, to_form(Form.changeset(%Form{}, %{})))
      |> assign(:crawl_results, %AsyncResult{})
      |> assign(:jobs, [])
      |> assign(:images, [])

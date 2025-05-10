@@ -112,7 +112,20 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           acc
       end)
 
-    {:noreply, assign(socket, :images, images)}
+    jobs =
+      Enum.reduce(results, [], fn
+        {:ok, {_url, {jobs, _images}}}, jobs_acc ->
+          jobs_acc ++ jobs
+
+        {url, {:error, error}}, acc ->
+          Logger.error("❌ Failed to process #{url}: #{inspect(error)}")
+          acc
+      end)
+
+    {:noreply,
+     socket
+     |> assign(:images, images)
+     |> assign(:jobs, jobs)}
   end
 
   @impl true

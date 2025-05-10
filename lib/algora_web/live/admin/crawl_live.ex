@@ -37,7 +37,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
      socket
      |> assign(:page_title, "Crawl Organizations")
      |> assign(:form, to_form(Form.changeset(%Form{}, %{urls: "https://infisical.com"})))
-     |> assign(:crawl_results, AsyncResult.loading())
+     |> assign(:crawl_results, %AsyncResult{})
      |> assign(:jobs, [])
      |> assign(:images, [])
      |> assign(:logs, [])}
@@ -72,6 +72,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
       socket
       |> assign(:jobs, [])
       |> assign(:images, [])
+      |> assign(:crawl_results, AsyncResult.loading())
       |> start_async(:crawl_task, fn ->
         results =
           urls
@@ -106,7 +107,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           acc
       end)
 
-    {:noreply, assign(socket, :jobs, jobs)}
+    {:noreply, socket |> assign(:jobs, jobs) |> assign(:crawl_results, AsyncResult.ok(:ok))}
   end
 
   @impl true
@@ -157,8 +158,8 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           />
 
           <div class="flex justify-between items-center">
-            <.button type="submit">
-              Start Crawl
+            <.button type="submit" disabled={@crawl_results.loading}>
+              {if @crawl_results.loading, do: "Crawling...", else: "Start Crawl"}
             </.button>
           </div>
         </.form>

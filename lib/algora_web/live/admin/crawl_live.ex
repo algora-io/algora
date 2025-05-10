@@ -78,12 +78,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           |> Task.async_stream(
             fn url ->
               broadcast_log("🔄 Processing URL: #{url}")
-
-              {url,
-               OrgSeeder.fetch_org_data(url, fn x ->
-                 send(pid, {:update_jobs, x})
-                 :ok
-               end)}
+              {url, OrgSeeder.fetch_org_data(url, fn x -> send(pid, {:update_data, x}) end)}
             end,
             max_concurrency: 5,
             timeout: :infinity
@@ -101,16 +96,6 @@ defmodule AlgoraWeb.Admin.CrawlLive do
   def handle_async(:crawl_task, {:ok, results}, socket) do
     Logger.info("✅ Crawl task completed successfully")
 
-    images =
-      Enum.reduce(results, [], fn
-        {:ok, {_url, {_jobs, images}}}, images_acc ->
-          images_acc ++ images
-
-        {url, {:error, error}}, acc ->
-          Logger.error("❌ Failed to process #{url}: #{inspect(error)}")
-          acc
-      end)
-
     jobs =
       Enum.reduce(results, [], fn
         {:ok, {_url, {jobs, _images}}}, jobs_acc ->
@@ -121,10 +106,7 @@ defmodule AlgoraWeb.Admin.CrawlLive do
           acc
       end)
 
-    {:noreply,
-     socket
-     |> assign(:images, images)
-     |> assign(:jobs, jobs)}
+    {:noreply, assign(socket, :jobs, jobs)}
   end
 
   @impl true
@@ -140,13 +122,18 @@ defmodule AlgoraWeb.Admin.CrawlLive do
   end
 
   @impl true
-  def handle_info({:update_jobs, {:ok, %AlgoraCloud.JobCrawler{job_postings: jobs}}}, socket) do
+  def handle_info({:update_data, {:job, {:ok, %AlgoraCloud.JobCrawler{job_postings: jobs}}}}, socket) do
     {:noreply, assign(socket, :jobs, jobs)}
   end
 
   @impl true
-  def handle_info({:update_jobs, {:partial, %AlgoraCloud.JobCrawler{job_postings: jobs}}}, socket) do
+  def handle_info({:update_data, {:job, {:partial, %AlgoraCloud.JobCrawler{job_postings: jobs}}}}, socket) do
     {:noreply, assign(socket, :jobs, jobs)}
+  end
+
+  @impl true
+  def handle_info({:update_data, {:images, images}}, socket) do
+    {:noreply, assign(socket, :images, images)}
   end
 
   @impl true

@@ -7,8 +7,8 @@ defmodule AlgoraWeb.Admin.DevsLive do
   @impl true
   def mount(_params, _session, socket) do
     # Define available options
-    available_techs = Enum.take(AlgoraWeb.Components.TechBadge.langs(), 20)
-    available_countries = Algora.PSP.ConnectCountries.list_codes()
+    available_techs = Enum.take(AlgoraWeb.Components.TechBadge.langs(), 33)
+    available_countries = Enum.sort(Algora.PSP.ConnectCountries.list_codes() ++ ["CN"])
 
     # Start with empty selections
     selected_techs = []

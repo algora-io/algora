@@ -73,7 +73,7 @@ defmodule AlgoraWeb.Router do
     live_session :admin_cloud,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
-      if Code.ensure_loaded?(AlgoraCloud.CrawlLive) do
+      if {:module, _} = Code.ensure_compiled(AlgoraCloud.CrawlLive) do
         live "/crawl", CrawlLive
       end
     end

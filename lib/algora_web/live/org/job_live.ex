@@ -359,7 +359,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </.card>
               <% else %>
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <%= for match <- @matches |> Enum.take(if @current_org.hiring_subscription == :active, do: length(@matches), else: 3) do %>
+                  <%= for match <- @matches |> Enum.take(if @current_org.hiring_subscription == :active, do: length(@matches), else: 15) do %>
                     <div>
                       <.match_card
                         user={match.user}
@@ -376,7 +376,7 @@ defmodule AlgoraWeb.Org.JobLive do
                         class="w-full aspect-[1368/398]"
                       />
                       <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-3xl md:text-4xl">
-                        + {length(@matches) - 3} more matches
+                        + {length(@matches) - 15} more matches
                       </div>
                     </div>
                   <% end %>

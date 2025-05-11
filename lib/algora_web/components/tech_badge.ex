@@ -19,7 +19,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       <% else %>
         <%= if Enum.any?(langs(), &(normalize(&1) == @tech_lower)) do %>
           <.avatar class="w-4 h-4 mr-1 rounded-sm">
-            <.avatar_image src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{@tech_lower}/#{@tech_lower}-original.svg"} />
+            <.avatar_image src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(@tech_lower)}"} />
             <.avatar_fallback>
               {Algora.Util.initials(@tech, 1)}
             </.avatar_fallback>
@@ -31,12 +31,17 @@ defmodule AlgoraWeb.Components.TechBadge do
     """
   end
 
+  defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
+  defp icon_path("gcp"), do: "googlecloud/googlecloud-original.svg"
+  defp icon_path(tech), do: "#{tech}/#{tech}-original.svg"
+
   defp normalize(tech) do
     tech
     |> String.downcase()
     |> String.replace("+", "plus")
     |> String.replace("#", "sharp")
     |> String.replace("-", "")
+    |> String.replace(".", "")
   end
 
   defp langs do
@@ -80,7 +85,16 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Ansible",
       "Linux",
       "LLVM",
-      "WASM"
+      "WASM",
+      "Pulumi",
+      "TensorFlow",
+      "PyTorch",
+      "Azure",
+      "AWS",
+      "GCP",
+      "React",
+      "Svelte",
+      "Vue.js"
     ]
   end
 end

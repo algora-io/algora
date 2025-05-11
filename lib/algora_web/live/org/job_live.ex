@@ -197,7 +197,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </div>
                 <div class="pt-2 flex flex-wrap gap-2">
                   <%= for tech <- @job.tech_stack do %>
-                    <.badge variant="outline">{tech}</.badge>
+                    <.tech_badge tech={tech} />
                   <% end %>
                 </div>
               </div>

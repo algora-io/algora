@@ -54,9 +54,7 @@ defmodule AlgoraWeb.User.ProfileLive do
 
             <div class="flex flex-wrap gap-4">
               <%= for tech <- @user.tech_stack do %>
-                <.badge>
-                  {tech}
-                </.badge>
+                <.tech_badge tech={tech} />
               <% end %>
             </div>
           </div>

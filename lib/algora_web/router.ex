@@ -67,6 +67,18 @@ defmodule AlgoraWeb.Router do
     oban_dashboard("/oban", resolver: AlgoraWeb.ObanDashboardResolver)
   end
 
+  scope "/admin", AlgoraCloud do
+    pipe_through [:browser]
+
+    live_session :admin_cloud,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
+      if Code.ensure_loaded?(AlgoraCloud.CrawlLive) do
+        live "/crawl", CrawlLive
+      end
+    end
+  end
+
   scope "/", AlgoraWeb do
     pipe_through [:browser]
 

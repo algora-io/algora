@@ -25,6 +25,69 @@ defmodule Algora.Admin do
 
   require Logger
 
+  defmodule Jobs do
+    @moduledoc false
+    alias Algora.Organizations
+
+    def seed_jobs(jobs) do
+      jobs
+      |> Task.async_stream(&seed/1, timeout: :infinity, max_concurrency: 50)
+      |> Enum.to_list()
+    end
+
+    def seed(job) do
+      with domain when not is_nil(domain) <- Util.to_domain(job.company_url),
+           {:ok, org} <- fetch_or_create_user(domain, %{hiring: true, tech_stack: job.tech_stack}),
+           {:ok, org} <-
+             org
+             |> change(
+               Map.merge(
+                 %{
+                   domain: org.domain || domain,
+                   hiring_subscription: :trial,
+                   billing_name: org.billing_name || job.company_name,
+                   billing_address: org.billing_address || job.location,
+                   executive_name: org.executive_name || job.company_name,
+                   executive_role: org.executive_role || job.seniority
+                 },
+                 if org.handle do
+                   %{}
+                 else
+                   %{handle: Organizations.ensure_unique_org_handle(job.company_name)}
+                 end
+               )
+             )
+             |> Repo.update() do
+        Repo.insert(%JobPosting{
+          status: :processing,
+          id: Nanoid.generate(),
+          user_id: org.id,
+          company_name: org.name,
+          company_url: org.website_url,
+          title: job.title,
+          description: job.description,
+          tech_stack: job.tech_stack,
+          location: job.location,
+          compensation: job.compensation,
+          seniority: job.seniority,
+          countries: job.countries,
+          regions: job.regions
+        })
+      end
+    end
+
+    def fetch_or_create_user(domain, opts) do
+      case Repo.one(from o in User, where: o.domain == ^domain, limit: 1) do
+        %User{} = user ->
+          {:ok, user}
+
+        _ ->
+          res = Organizations.onboard_organization_from_domain(domain, opts)
+          res
+      end
+    end
+  end
+
   def seed_job(opts \\ %{}) do
     with {:ok, user} <- Repo.fetch_by(User, handle: opts.org.handle),
          {:ok, user} <- user |> change(opts.org) |> Repo.update(),

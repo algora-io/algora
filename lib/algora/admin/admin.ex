@@ -10,6 +10,7 @@ defmodule Algora.Admin do
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
+  alias Algora.Bounties.Jobs.NotifyTransfer
   alias Algora.Github
   alias Algora.Jobs.JobPosting
   alias Algora.Parser
@@ -92,6 +93,25 @@ defmodule Algora.Admin do
       end,
       timeout: :infinity
     )
+  end
+
+  def notify_transfer(tx_id) do
+    with {:ok, _} <- Oban.insert(NotifyTransfer.new(%{transfer_id: tx_id})) do
+      :ok
+    end
+  end
+
+  def mark_as_paid(tx_id) do
+    Repo.transact(fn ->
+      with {:ok, transfer} <- Repo.fetch_by(Transaction, id: tx_id, type: :transfer),
+           {:ok, _transfer} <-
+             transfer
+             |> change(%{status: :succeeded, succeeded_at: DateTime.utc_now()})
+             |> Repo.update(),
+           {:ok, _} <- notify_transfer(tx_id) do
+        :ok
+      end
+    end)
   end
 
   def release_payment(tx_id) do

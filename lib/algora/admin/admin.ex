@@ -107,9 +107,8 @@ defmodule Algora.Admin do
            {:ok, _transfer} <-
              transfer
              |> change(%{status: :succeeded, succeeded_at: DateTime.utc_now()})
-             |> Repo.update(),
-           {:ok, _} <- notify_transfer(tx_id) do
-        :ok
+             |> Repo.update() do
+        notify_transfer(tx_id)
       end
     end)
   end

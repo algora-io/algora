@@ -1525,7 +1525,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
             >
               <img
                 src={owner.avatar_url}
-                class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
+                class="h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all"
                 alt={owner.name}
               />
               <div class="w-full flex flex-col text-xs font-medium gap-0.5">
@@ -1538,12 +1538,11 @@ defmodule AlgoraWeb.Org.DashboardLive do
                     end}
                   </span>
                   <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
-                    <span class="flex items-center text-foreground text-[11px] gap-1">
-                      <img
-                        src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
-                        class="w-4 h-4 invert saturate-0"
-                      /> {tech}
-                    </span>
+                    <.tech_badge
+                      variant="ghost"
+                      class="saturate-0 text-[11px] group-hover:saturate-100 transition-all"
+                      tech={tech}
+                    />
                   <% end %>
                 </span>
                 <div class="flex items-center gap-2 font-semibold">

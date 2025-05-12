@@ -931,7 +931,7 @@ defmodule AlgoraWeb.Org.JobLive do
   defp get_matching_tech(contribution, tech_stack) do
     tech_stack = Enum.map(tech_stack, &String.downcase/1)
 
-    Enum.find(contribution.repository.tech_stack, &(String.downcase(&1) in tech_stack)) ||
+    Enum.find(Enum.take(contribution.repository.tech_stack, 2), &(String.downcase(&1) in tech_stack)) ||
       List.first(contribution.repository.tech_stack)
   end
 
@@ -1187,12 +1187,12 @@ defmodule AlgoraWeb.Org.JobLive do
               >
                 <img
                   src={owner.avatar_url}
-                  class="h-12 w-12 rounded-xl rounded-r-none md:saturate-0 group-hover:saturate-100 transition-all"
+                  class="h-12 w-12 rounded-xl rounded-r-none group-hover:saturate-100 transition-all"
                   alt={owner.name}
                 />
-                <div class="w-full flex flex-col text-xs font-medium gap-0.5">
+                <div class="w-full flex flex-col text-xs font-medium gap-0.5 truncate">
                   <span class="flex items-start justify-between gap-5">
-                    <span class="font-display">
+                    <span class="font-display truncate">
                       {if owner.type == :organization do
                         owner.name
                       else
@@ -1200,12 +1200,11 @@ defmodule AlgoraWeb.Org.JobLive do
                       end}
                     </span>
                     <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
-                      <span class="flex items-center text-foreground text-[11px] gap-1">
-                        <img
-                          src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
-                          class="w-4 h-4 invert saturate-0"
-                        /> {tech}
-                      </span>
+                      <.tech_badge
+                        variant="ghost"
+                        class="saturate-0 text-[11px] group-hover:saturate-100 transition-all"
+                        tech={tech}
+                      />
                     <% end %>
                   </span>
                   <div class="flex items-center gap-2 font-semibold">

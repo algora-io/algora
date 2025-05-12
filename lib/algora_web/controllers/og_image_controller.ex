@@ -11,6 +11,7 @@ defmodule AlgoraWeb.OGImageController do
   defp max_age(path) do
     case path do
       ["go" | _] -> 2_147_483_648
+      [_, "jobs" | _] -> 2_629_800
       _ -> Algora.config([AlgoraWeb.OGImageController, :max_age])
     end
   end

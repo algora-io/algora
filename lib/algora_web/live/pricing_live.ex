@@ -98,31 +98,33 @@ defmodule AlgoraWeb.PricingLive do
               href={AlgoraWeb.Constants.get(:calendar_url)}
               class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden"
             >
-              <div class="bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer divide-y sm:divide-y-0 sm:divide-x sm:divide-default">
-                <div class="flex-1 p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
-                  <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground mb-4">
-                    Talent Matching
-                  </h3>
-                  <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
-                    Match with developers for issue-based, contract and full-time work
-                  </p>
-                  <div class="flex items-center justify-between">
-                    <p class="font-display text-2xl text-purple-400">Contact us</p>
+              <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer divide-y sm:divide-y-0">
+                <div class="p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <div class="mb-4 flex flex-col sm:flex-row sm:justify-between gap-4">
+                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                      Talent Matching
+                    </h3>
+                    <.button variant="purple" size="lg" class="font-display text-lg mr-auto sm:mr-0">
+                      Contact us
+                    </.button>
                   </div>
+                  <p class="text-foreground-light text-sm sm:text-base 2xl:pr-4">
+                    Connect with top engineers for your project
+                  </p>
                 </div>
-                <div class="flex-1 p-4 sm:px-6">
-                  <ul class="border-default text-sm text-foreground-lighter flex-1">
-                    <li class="flex flex-col py-2">
+                <div class="p-4 sm:pt-2 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <ul class="border-default text-sm text-foreground-lighter flex-1 space-y-3">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
                         <span class="text-sm xl:text-base mb-0 text-foreground">
-                          Hypermatch using natural language and granular GitHub data, work history and personal interests and preferences
+                          Match based on tech stack, location and granular GitHub OSS contribution data
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -132,23 +134,13 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
                         <span class="text-sm xl:text-base mb-0 text-foreground">
                           Closed source: Project spec hypermatch
-                        </span>
-                      </div>
-                    </li>
-                    <li class="flex flex-col py-2">
-                      <div class="flex items-start">
-                        <div class="flex w-7 shrink-0">
-                          <.icon name="tabler-check" class="size-5 text-purple-400" />
-                        </div>
-                        <span class="text-sm xl:text-base mb-0 text-foreground">
-                          Engage top matches and stand out
                         </span>
                       </div>
                     </li>
@@ -161,21 +153,23 @@ defmodule AlgoraWeb.PricingLive do
               href={AlgoraWeb.Constants.get(:calendar_url)}
               class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden"
             >
-              <div class="bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer divide-y sm:divide-y-0 sm:divide-x sm:divide-default">
-                <div class="flex-1 p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
-                  <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground mb-4">
-                    Hiring Platform
-                  </h3>
-                  <p class="text-foreground-light mb-4 text-sm 2xl:pr-4">
+              <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer divide-y sm:divide-y-0">
+                <div class="p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <div class="mb-4 flex flex-col sm:flex-row sm:justify-between gap-4">
+                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                      Hiring Platform
+                    </h3>
+                    <.button variant="purple" size="lg" class="font-display text-lg mr-auto sm:mr-0">
+                      Contact us
+                    </.button>
+                  </div>
+                  <p class="text-foreground-light text-sm sm:text-base 2xl:pr-4">
                     End-to-end hiring with 0% placement fees
                   </p>
-                  <div class="flex items-center justify-between">
-                    <p class="font-display text-2xl text-purple-400">Contact us</p>
-                  </div>
                 </div>
-                <div class="flex-1 p-4 sm:px-6">
-                  <ul class="border-default text-sm text-foreground-lighter flex-1">
-                    <li class="flex flex-col py-2">
+                <div class="p-4 sm:pt-2 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <ul class="border-default text-sm text-foreground-lighter flex-1 space-y-3">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -185,7 +179,7 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -195,7 +189,7 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -205,7 +199,7 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -215,7 +209,7 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -225,7 +219,17 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Engage top matches and stand out
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -235,7 +239,7 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -245,7 +249,7 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col py-2">
+                    <li class="flex flex-col">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
@@ -271,7 +275,7 @@ defmodule AlgoraWeb.PricingLive do
                   <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-purple-400/10 rounded-full">
                     <.icon name="tabler-filter" class="h-8 w-8 text-purple-400" />
                   </div>
-                  <h4 class="font-medium text-foreground mb-2">High Signal</h4>
+                  <h4 class="font-semibold text-foreground mb-1">High Signal</h4>
                   <p class="text-sm text-foreground-light">
                     Access pre-vetted developers with proven OSS track records
                   </p>
@@ -280,7 +284,7 @@ defmodule AlgoraWeb.PricingLive do
                   <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-purple-400/10 rounded-full">
                     <.icon name="tabler-clock" class="h-8 w-8 text-purple-400" />
                   </div>
-                  <h4 class="font-medium text-foreground mb-2">Save Time & Money</h4>
+                  <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
                   <p class="text-sm text-foreground-light">
                     0% placement fees and efficient matching process
                   </p>
@@ -289,7 +293,7 @@ defmodule AlgoraWeb.PricingLive do
                   <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-purple-400/10 rounded-full">
                     <.icon name="tabler-shield-check" class="h-8 w-8 text-purple-400" />
                   </div>
-                  <h4 class="font-medium text-foreground mb-2">Reduce Risk</h4>
+                  <h4 class="font-semibold text-foreground mb-1">Reduce Risk</h4>
                   <p class="text-sm text-foreground-light">
                     Trial with bounties before committing to full-time hires
                   </p>

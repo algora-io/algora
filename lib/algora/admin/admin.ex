@@ -25,6 +25,22 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def backfill_charge(id) do
+    with {:ok, tx} <- Repo.fetch_by(Transaction, id: id),
+         {:ok,
+          %Stripe.Charge{
+            balance_transaction: %Stripe.BalanceTransaction{currency: "usd", amount: gross_amount, fee: provider_fee}
+          }} <- PSP.Charge.retrieve(tx.provider_id, expand: ["balance_transaction"]) do
+      tx
+      |> change(%{
+        gross_amount: gross_amount,
+        total_fee: gross_amount - tx.net_amount,
+        provider_fee: provider_fee
+      })
+      |> Repo.update()
+    end
+  end
+
   def seed_job(opts \\ %{}) do
     with {:ok, user} <- Repo.fetch_by(User, handle: opts.org.handle),
          {:ok, user} <- user |> change(opts.org) |> Repo.update(),

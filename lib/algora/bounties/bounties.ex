@@ -1271,6 +1271,37 @@ defmodule Algora.Bounties do
     end)
   end
 
+  def list_contracts_query(base_query, criteria \\ []) do
+    criteria = Keyword.merge([order: :date, limit: 10], criteria)
+
+    base_bounties = select(base_query, [b], b.id)
+
+    query =
+      from(b in Bounty)
+      |> join(:inner, [b], bb in subquery(base_bounties), on: b.id == bb.id)
+      |> join(:inner, [b], t in assoc(b, :ticket), as: :t)
+      |> join(:inner, [b], o in assoc(b, :owner), as: :o)
+      |> where([b], not is_nil(b.amount))
+      |> where([b], b.status != :cancelled)
+      |> where([b], not is_nil(b.contract_type))
+
+    if criteria[:org_id] do
+      where(query, [b], b.owner_id == ^criteria[:org_id])
+    else
+      query
+    end
+  end
+
+  def list_contracts(criteria \\ []) do
+    base_query()
+    |> list_contracts_query(criteria)
+    |> select_merge([b, o: o, t: t], %{
+      owner: o,
+      ticket: t
+    })
+    |> Repo.all()
+  end
+
   def list_bounties_query(base_query, criteria \\ []) do
     criteria = Keyword.merge([order: :date, limit: 10], criteria)
 

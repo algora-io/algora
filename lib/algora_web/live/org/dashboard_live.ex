@@ -95,6 +95,21 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
       oauth_url = Github.authorize_url(%{return_to: "/#{current_org.handle}/dashboard"})
 
+      contracts =
+        [org_id: socket.assigns.current_org.id]
+        |> Bounties.list_contracts()
+        |> Enum.map(fn c ->
+          case c.shared_with do
+            [user_id] ->
+              user = Repo.one(from u in User, where: u.provider_id == ^user_id)
+              %{contract: c, user: user}
+
+            _ ->
+              nil
+          end
+        end)
+        |> Enum.filter(& &1)
+
       {:ok,
        socket
        |> assign(:page_title, current_org.name)
@@ -111,6 +126,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:experts, experts)
        |> assign(:contributors, contributors)
        |> assign(:previewed_user, previewed_user)
+       |> assign(:contracts, contracts)
        |> assign(:matches, matches)
        |> assign(:contributions, contributions)
        |> assign(:developers, developers)
@@ -125,7 +141,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
        |> assign(:secret, nil)
        |> assign_login_form(User.login_changeset(%User{}, %{}))
        |> assign_payable_bounties()
-       |> assign_contracts()
        |> assign_achievements()
        # Will be initialized when chat starts
        |> assign(:thread, nil)
@@ -316,6 +331,25 @@ defmodule AlgoraWeb.Org.DashboardLive do
             </.card_content>
           </.card>
         </.section>
+
+        <.section
+          :if={length(@contracts) > 0}
+          title="Active contracts"
+          subtitle="List of your ongoing contracts"
+        >
+          <div class="-ml-4">
+            <div class="relative w-full overflow-auto">
+              <table class="w-full caption-bottom text-sm">
+                <tbody>
+                  <%= for %{contract: contract, user: user} <- @contracts do %>
+                    <.contract_card contract={contract} user={user} />
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </.section>
+
         <.section
           :if={@contributors != []}
           title={"#{header_prefix(@previewed_user)} Contributors"}
@@ -998,13 +1032,6 @@ defmodule AlgoraWeb.Org.DashboardLive do
     assign(socket, :payable_bounties, payable_bounties)
   end
 
-  defp assign_contracts(socket) do
-    contracts =
-      Contracts.list_contracts(client_id: socket.assigns.current_org.id, status: {:in, [:draft, :active, :paid]})
-
-    assign(socket, :contracts, contracts)
-  end
-
   defp achievement_todo(%{achievement: %{status: status}} = assigns) when status != :current do
     ~H"""
     """
@@ -1200,6 +1227,79 @@ defmodule AlgoraWeb.Org.DashboardLive do
 
   defp embed_algora_status(_socket), do: :upcoming
   defp share_with_friend_status(_socket), do: :upcoming
+
+  defp contract_card(assigns) do
+    ~H"""
+    <tr class="border-b transition-colors hover:bg-muted/10">
+      <td class="p-4 align-middle">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div>
+              <div class="flex items-center -space-x-2">
+                <.avatar class="aspect-square h-12 w-auto rounded-lg ring-2 ring-black">
+                  <.avatar_image
+                    src={@contract.owner.og_image_url || @contract.owner.avatar_url}
+                    alt={@contract.owner.name}
+                    class="object-cover bg-transparent"
+                  />
+                  <.avatar_fallback class="rounded-lg">
+                    {Algora.Util.initials(@contract.owner.name)}
+                  </.avatar_fallback>
+                </.avatar>
+                <.avatar class="aspect-square h-12 w-auto rounded-full ring-2 ring-black">
+                  <.avatar_image
+                    src={@user.avatar_url}
+                    alt={@user.name}
+                    class="object-cover bg-transparent"
+                  />
+                  <.avatar_fallback class="rounded-lg">
+                    {Algora.Util.initials(@user.name)}
+                  </.avatar_fallback>
+                </.avatar>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <div class="flex items-center gap-1 text-base text-foreground">
+                <.link
+                  navigate={~p"/#{@contract.owner.handle}/contracts/#{@contract.id}"}
+                  class="font-semibold hover:underline"
+                >
+                  {@contract.ticket.title}
+                </.link>
+              </div>
+              <div class="line-clamp-2 text-muted-foreground">
+                {@contract.ticket.description}
+              </div>
+              <div class="mt-1 flex flex-wrap gap-2 saturate-0">
+                <%= for tech <- @contract.owner.tech_stack || [] do %>
+                  <.tech_badge tech={String.capitalize(tech)} />
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-start sm:items-end gap-3">
+            <div class="hidden sm:block sm:text-right">
+              <div class="whitespace-nowrap text-sm text-muted-foreground">Total contract value</div>
+              <div class="font-display text-lg font-semibold text-foreground">
+                {Money.to_string!(@contract.amount)} / wk
+              </div>
+            </div>
+            <.button
+              navigate={~p"/#{@contract.owner.handle}/contracts/#{@contract.id}"}
+              phx-click="view_contract"
+              phx-value-org={@contract.owner.handle}
+              size="sm"
+            >
+              View contract
+            </.button>
+          </div>
+        </div>
+      </td>
+    </tr>
+    """
+  end
 
   defp developer_card(assigns) do
     ~H"""
@@ -1539,7 +1639,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
   end
 
   defp contract_for_user(contracts, user) do
-    Enum.find(contracts, fn contract -> contract.contractor_id == user.id end)
+    nil
   end
 
   defp create_bounty(assigns) do

@@ -73,11 +73,233 @@ defmodule AlgoraWeb.PricingLive do
               </div>
             </div>
           </div>
-
           <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
             <%= for plan <- @plans1 do %>
               <.pricing_card1 plan={plan} plans={@plans1} />
             <% end %>
+          </div>
+
+          <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8 lg:mt-16">
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <div class="flex items-center gap-2">
+                    <.icon name="tabler-users" class="h-6 w-6 text-purple-400" /> Matching & Hiring
+                  </div>
+                </h2>
+                <p class="text-base text-foreground-light">
+                  Find and hire top 1% OSS engineers with confidence
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
+            <.link
+              href={AlgoraWeb.Constants.get(:calendar_url)}
+              class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden"
+            >
+              <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer divide-y sm:divide-y-0">
+                <div class="p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <div class="mb-4 flex flex-col sm:flex-row sm:justify-between gap-4">
+                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                      Talent Matching
+                    </h3>
+                    <.button variant="purple" size="lg" class="font-display text-lg mr-auto sm:mr-0">
+                      Contact us
+                    </.button>
+                  </div>
+                  <p class="text-foreground-light text-sm sm:text-base 2xl:pr-4">
+                    Connect with top engineers for your project
+                  </p>
+                </div>
+                <div class="p-4 sm:pt-2 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <ul class="border-default text-sm text-foreground-lighter flex-1 space-y-3">
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Match based on tech stack, location and granular GitHub OSS contribution data
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Open source: GitHub issue hypermatch
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Closed source: Project spec hypermatch
+                        </span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </.link>
+
+            <.link
+              href={AlgoraWeb.Constants.get(:calendar_url)}
+              class="group border ring-1 ring-transparent hover:ring-purple-400 rounded-xl overflow-hidden"
+            >
+              <div class="bg-card/75 flex flex-col h-full p-4 rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400 group-hover:border-purple-300 group-hover:sm:border-l-8 transition-all cursor-pointer divide-y sm:divide-y-0">
+                <div class="p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <div class="mb-4 flex flex-col sm:flex-row sm:justify-between gap-4">
+                    <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
+                      Hiring Platform
+                    </h3>
+                    <.button variant="purple" size="lg" class="font-display text-lg mr-auto sm:mr-0">
+                      Contact us
+                    </.button>
+                  </div>
+                  <p class="text-foreground-light text-sm sm:text-base 2xl:pr-4">
+                    End-to-end hiring with 0% placement fees
+                  </p>
+                </div>
+                <div class="p-4 sm:pt-2 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
+                  <ul class="border-default text-sm text-foreground-lighter flex-1 space-y-3">
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Job board that highlights applicant's OSS contributions
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Embed 1-click apply on careers page
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Automatically screen & rank candidates
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Schedule interviews and chat in-app
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Trial with bounties and contract-to-hire
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Engage top matches and stand out
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Publish jobs on Algora platform
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          0% placement fees
+                        </span>
+                      </div>
+                    </li>
+                    <li class="flex flex-col">
+                      <div class="flex items-start">
+                        <div class="flex w-7 shrink-0">
+                          <.icon name="tabler-check" class="size-5 text-purple-400" />
+                        </div>
+                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                          Recruiting partner option available
+                        </span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </.link>
+          </div>
+
+          <div class="mx-auto lg:max-w-[95rem] mt-8 text-center">
+            <div class="bg-card/75 rounded-xl p-6 border">
+              <h3 class="text-xl font-semibold text-foreground mb-4">
+                Why Choose Algora for Hiring?
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-purple-400/10 rounded-full">
+                    <.icon name="tabler-filter" class="h-8 w-8 text-purple-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">High Signal</h4>
+                  <p class="text-sm text-foreground-light">
+                    Access pre-vetted developers with proven OSS track records
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-purple-400/10 rounded-full">
+                    <.icon name="tabler-clock" class="h-8 w-8 text-purple-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">Save Time & Money</h4>
+                  <p class="text-sm text-foreground-light">
+                    0% placement fees and efficient matching process
+                  </p>
+                </div>
+                <div>
+                  <div class="mb-2 mx-auto flex items-center justify-center h-12 w-12 bg-purple-400/10 rounded-full">
+                    <.icon name="tabler-shield-check" class="h-8 w-8 text-purple-400" />
+                  </div>
+                  <h4 class="font-semibold text-foreground mb-1">Reduce Risk</h4>
+                  <p class="text-sm text-foreground-light">
+                    Trial with bounties before committing to full-time hires
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -146,7 +368,6 @@ defmodule AlgoraWeb.PricingLive do
         screenshot?: not is_nil(params["screenshot"]),
         page_title: "Pricing",
         plans1: get_plans1(),
-        plans2: get_plans2(),
         faq_items: get_faq_items(),
         active_faq: nil
       )
@@ -165,7 +386,7 @@ defmodule AlgoraWeb.PricingLive do
         @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
         "divide-y sm:divide-y-0 sm:divide-x sm:divide-default"
       ]}>
-        <div class="flex-1 p-4 sm:px-6">
+        <div class="flex-1 p-4 sm:px-6 group-hover:sm:-ml-[4px] transition-all">
           <div class="flex items-center gap-2">
             <div class="flex items-center gap-2 pb-2">
               <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
@@ -207,14 +428,6 @@ defmodule AlgoraWeb.PricingLive do
                         </p>
                       </div>
                     </div>
-                  <% "grow-your-team" -> %>
-                    <div class="flex justify-between">
-                      <div class="flex items-end">
-                        <p class="font-display text-4xl">
-                          Custom
-                        </p>
-                      </div>
-                    </div>
                 <% end %>
               </div>
             </div>
@@ -225,7 +438,7 @@ defmodule AlgoraWeb.PricingLive do
             <%= for feature <- @plan.features do %>
               <li class="flex flex-col py-2 first:mt-0">
                 <div class="flex items-start">
-                  <div class="flex w-7">
+                  <div class="flex w-7 shrink-0">
                     <.icon name="tabler-check" class="size-5 text-emerald-400" />
                   </div>
                   <span class="text-sm xl:text-base mb-0 text-foreground truncate">
@@ -241,89 +454,6 @@ defmodule AlgoraWeb.PricingLive do
         </div>
       </div>
     </.link>
-    """
-  end
-
-  def pricing_card2(assigns) do
-    ~H"""
-    <div class="border ring-1 ring-transparent rounded-xl overflow-hidden">
-      <div class={[
-        "bg-card/75 flex flex-col h-full p-4 sm:flex-row sm:justify-between rounded-xl border-t-4 sm:border-t-0 sm:border-l-4 border-purple-400",
-        @plan.popular && "border-foreground-muted !border-2 !rounded-xl xl:-my-8",
-        "divide-y sm:divide-y-0 sm:divide-x sm:divide-default"
-      ]}>
-        <div class="sm:w-1/2 xl:w-1/3 p-4 pb-8 sm:pb-4 sm:px-6 flex flex-col justify-center">
-          <div class="flex items-center gap-2">
-            <div class="flex items-center gap-2 pb-2">
-              <h3 class="flex items-center gap-4 text-2xl font-semibold text-foreground">
-                {@plan.name}
-              </h3>
-              <%= if @plan.popular do %>
-                <span class="bg-foreground-light text-[13px] rounded-md px-2 py-0.5 leading-4 text-background">
-                  Most Popular
-                </span>
-              <% end %>
-            </div>
-          </div>
-          <p class="text-foreground-light text-sm pt-2 2xl:pr-4">
-            {@plan.description}
-          </p>
-          <div class="flex gap-2 pt-4">
-            <.button
-              navigate={@plan.cta_url}
-              variant="purple"
-              size="xl"
-              class="drop-shadow-[0_1px_5px_#c084fc80]"
-            >
-              {@plan.cta_text}
-            </.button>
-          </div>
-        </div>
-        <div class="sm:w-1/2 xl:w-2/3 p-4 pt-8 sm:pt-4 sm:px-6">
-          <ul class="border-default text-base text-foreground-lighter flex-1 grid grid-cols-1 xl:grid-cols-3 gap-4 xl:divide-x xl:divide-default">
-            <li class="py-2 flex flex-col xl:items-center xl:justify-center">
-              <div class="flex items-center xl:flex-col gap-4">
-                <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                  <.icon name="tabler-world" class="size-8 text-purple-400" />
-                </div>
-                <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
-                  <div class="text-2xl xl:text-3xl font-semibold font-display">Publish</div>
-                  <div class="text-sm sm:text-base xl:text-lg font-medium text-muted-foreground">
-                    Bounties and contracts <span class="hidden 2xl:inline">on Algora</span>
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li class="py-2 flex flex-col xl:items-center xl:justify-center">
-              <div class="flex items-center xl:flex-col gap-4">
-                <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                  <.icon name="tabler-bolt" class="size-8 text-purple-400" />
-                </div>
-                <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
-                  <div class="text-2xl xl:text-3xl font-semibold font-display">Match</div>
-                  <div class="text-sm sm:text-base xl:text-lg font-medium text-muted-foreground">
-                    Proven Algora experts
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li class="py-2 flex flex-col xl:items-center xl:justify-center">
-              <div class="flex items-center xl:flex-col gap-4">
-                <div class="shrink-0 flex items-center justify-center size-16 bg-purple-400/10 drop-shadow-[0_1px_5px_#c084fc80] rounded-full">
-                  <.icon name="tabler-briefcase" class="size-8 text-purple-400" />
-                </div>
-                <div class="flex flex-col xl:items-center xl:justify-center xl:gap-2">
-                  <div class="text-2xl xl:text-3xl font-semibold font-display">Hire</div>
-                  <div class="text-sm sm:text-base xl:text-lg font-medium text-muted-foreground">
-                    Top 1% OSS engineers
-                  </div>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
     """
   end
 
@@ -356,21 +486,6 @@ defmodule AlgoraWeb.PricingLive do
           %Feature{name: "Contract work (fixed/hourly)"},
           %Feature{name: "Invoices, payouts, compliance, 1099s"}
         ]
-      }
-    ]
-  end
-
-  def get_plans2 do
-    [
-      %Plan{
-        id: "grow-your-team",
-        name: "Growing your team?",
-        description: "You're in the right place.",
-        price: "Custom",
-        cta_text: "Contact us",
-        cta_url: AlgoraWeb.Constants.get(:calendar_url),
-        popular: false,
-        features: []
       }
     ]
   end

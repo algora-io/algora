@@ -58,6 +58,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "vuejs" ->
         "vuejs"
 
+      "reactjs" ->
+        "react"
+
       "shell" ->
         "bash"
 
@@ -123,6 +126,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Vue.js",
       "Astro",
       "Node.js",
+      "Next.js",
       "HTML",
       "CSS",
       "PostgreSQL"

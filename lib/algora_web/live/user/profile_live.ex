@@ -239,7 +239,7 @@ defmodule AlgoraWeb.User.ProfileLive do
                   href={"https://github.com/#{owner.provider_login}/#{List.first(contributions).repository.name}/pulls?q=author%3A#{@user.provider_login}+is%3Amerged+"}
                   target="_blank"
                   rel="noopener"
-                  class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all"
+                  class="flex items-center gap-3 rounded-xl pr-2 bg-card/50 border border-border/50 hover:border-border transition-all group"
                 >
                   <img
                     src={owner.avatar_url}
@@ -256,12 +256,11 @@ defmodule AlgoraWeb.User.ProfileLive do
                         end}
                       </span>
                       <%= if tech = List.first(List.first(contributions).repository.tech_stack) do %>
-                        <span class="flex items-center text-foreground text-[11px] gap-1">
-                          <img
-                            src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
-                            class="w-4 h-4 invert saturate-0"
-                          /> {tech}
-                        </span>
+                        <.tech_badge
+                          variant="ghost"
+                          class="saturate-0 text-[11px] group-hover:saturate-100 transition-all"
+                          tech={tech}
+                        />
                       <% end %>
                     </span>
                     <div class="flex items-center gap-2 font-semibold">

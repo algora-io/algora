@@ -1064,12 +1064,11 @@ defmodule AlgoraWeb.Org.JobLive do
                         end}
                       </span>
                       <%= if tech = get_matching_tech(List.first(contributions), @tech_stack) do %>
-                        <span class="flex items-center text-foreground text-[11px] gap-1">
-                          <img
-                            src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{String.downcase(tech)}/#{String.downcase(tech)}-original.svg"}
-                            class="w-4 h-4 invert saturate-0"
-                          /> {tech}
-                        </span>
+                        <.tech_badge
+                          variant="ghost"
+                          class="saturate-0 text-[11px] group-hover:saturate-100 transition-all"
+                          tech={tech}
+                        />
                       <% end %>
                     </span>
                     <div class="flex items-center gap-2 font-semibold">

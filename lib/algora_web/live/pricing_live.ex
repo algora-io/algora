@@ -145,7 +145,8 @@ defmodule AlgoraWeb.PricingLive do
                             <.icon name="tabler-circle-filled" class="size-1.5 text-purple-300" />
                           </div>
                           <span class="text-sm text-foreground-light">
-                            Granular GitHub OSS contribution data
+                            Granular GitHub <span class="hidden md:inline">OSS</span>
+                            contribution data
                           </span>
                         </li>
                       </ul>

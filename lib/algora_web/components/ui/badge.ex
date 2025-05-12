@@ -13,7 +13,7 @@ defmodule AlgoraWeb.Components.UI.Badge do
   attr :class, :string, default: nil
 
   attr :variant, :string,
-    values: ~w(default secondary destructive success warning outline),
+    values: ~w(default secondary destructive success warning outline ghost),
     default: "default",
     doc: "the badge variant style"
 
@@ -47,6 +47,7 @@ defmodule AlgoraWeb.Components.UI.Badge do
       "success" => "bg-success/10 text-success border-success/20",
       "warning" => "bg-warning/10 text-warning border-warning/20",
       "outline" => "bg-transparent text-foreground border-foreground/30",
+      "ghost" => "bg-transparent text-foreground border-transparent px-0 py-0",
       "indigo" => "bg-indigo-400/10 text-indigo-400 border-indigo-400/20",
       "purple" => "bg-purple-400/10 text-purple-400 border-purple-400/20",
       "blue" => "bg-blue-400/10 text-blue-400 border-blue-400/20"

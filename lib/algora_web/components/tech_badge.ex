@@ -44,12 +44,22 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("groovy"), do: "bg-white invert saturate-0"
   defp icon_class("objectivec"), do: "bg-white invert saturate-0"
   defp icon_class("purescript"), do: "bg-white invert saturate-0"
+  defp icon_class("astro"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
     case String.downcase(tech) do
       "postgres" ->
         "postgresql"
+
+      "vue" ->
+        "vuejs"
+
+      "vuejs" ->
+        "vuejs"
+
+      "shell" ->
+        "bash"
 
       t ->
         t
@@ -111,6 +121,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "React",
       "Svelte",
       "Vue.js",
+      "Astro",
       "Node.js",
       "HTML",
       "CSS",

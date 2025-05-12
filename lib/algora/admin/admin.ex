@@ -25,6 +25,15 @@ defmodule Algora.Admin do
 
   require Logger
 
+  def sync_user(provider_login) do
+    with {:ok, data} <- Github.get_user_by_username(token(), provider_login),
+         {:ok, user} <- Workspace.ensure_user(token(), data["login"]) do
+      user
+      |> change(%{display_name: data["name"], location: data["location"]})
+      |> Repo.update()
+    end
+  end
+
   def backfill_charge(id) do
     with {:ok, tx} <- Repo.fetch_by(Transaction, id: id),
          {:ok,

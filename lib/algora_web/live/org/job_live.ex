@@ -654,6 +654,18 @@ defmodule AlgoraWeb.Org.JobLive do
   end
 
   @impl true
+  def handle_event("interview", %{"user_id" => user_id}, socket) do
+    dev = Enum.find(socket.assigns.developers, &(&1.id == user_id))
+
+    Algora.Admin.alert(
+      "#{if socket.assigns.current_user, do: "#{socket.assigns.current_user.name} ", else: "#{socket.assigns.current_org.name} "}wants to interview #{dev.provider_login} for #{socket.assigns.job.title}",
+      :critical
+    )
+
+    {:noreply, put_flash(socket, :info, "#{dev.provider_login} is invited to an interview")}
+  end
+
+  @impl true
   def handle_event(
         "share_opportunity",
         %{"user_id" => user_id, "type" => "contract", "contract_type" => contract_type},
@@ -996,9 +1008,8 @@ defmodule AlgoraWeb.Org.JobLive do
             Bounty
           </.button>
           <.button
-            phx-click="share_opportunity"
+            phx-click="interview"
             phx-value-user_id={@application.user.id}
-            phx-value-type="tip"
             variant="outline"
             size="sm"
           >
@@ -1147,13 +1158,7 @@ defmodule AlgoraWeb.Org.JobLive do
           >
             Bounty
           </.button>
-          <.button
-            phx-click="share_opportunity"
-            phx-value-user_id={@user.id}
-            phx-value-type="tip"
-            variant="outline"
-            size="sm"
-          >
+          <.button phx-click="interview" phx-value-user_id={@user.id} variant="outline" size="sm">
             Interview
           </.button>
           <.button

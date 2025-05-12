@@ -34,6 +34,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
   defp icon_path("gcp"), do: "googlecloud/googlecloud-original.svg"
   defp icon_path("objectivec"), do: "objectivec/objectivec-plain.svg"
+  defp icon_path("html"), do: "html5/html5-original.svg"
+  defp icon_path("css"), do: "css3/css3-original.svg"
   defp icon_path(tech), do: "#{tech}/#{tech}-original.svg"
 
   defp icon_class("rust"), do: "bg-white invert saturate-0"
@@ -45,12 +47,17 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
-    tech
-    |> String.downcase()
-    |> String.replace("+", "plus")
-    |> String.replace("#", "sharp")
-    |> String.replace("-", "")
-    |> String.replace(".", "")
+    case String.downcase(tech) do
+      "postgres" ->
+        "postgresql"
+
+      t ->
+        t
+        |> String.replace("+", "plus")
+        |> String.replace("#", "sharp")
+        |> String.replace("-", "")
+        |> String.replace(".", "")
+    end
   end
 
   def langs do
@@ -103,7 +110,11 @@ defmodule AlgoraWeb.Components.TechBadge do
       "GCP",
       "React",
       "Svelte",
-      "Vue.js"
+      "Vue.js",
+      "Node.js",
+      "HTML",
+      "CSS",
+      "PostgreSQL"
     ]
   end
 end

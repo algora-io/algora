@@ -283,7 +283,6 @@ defmodule Algora.PSP.ConnectCountries do
         "DE",
         "DK",
         "EE",
-        "EG",
         "ES",
         "FI",
         "FR",

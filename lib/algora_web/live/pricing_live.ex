@@ -171,6 +171,29 @@ defmodule AlgoraWeb.PricingLive do
                       </div>
                     </li>
                   </ul>
+
+                  <div class="mt-6 pt-6 border-t">
+                    <figure class="relative">
+                      <blockquote class="text-lg font-medium text-foreground/90">
+                        <p>
+                          "I've used Algora in the past for bounties, and recently used them to hire a contract engineer. Every time the process has yield fantastic results, with high quality code and fast turn arounds. I'm a big fan."
+                        </p>
+                      </blockquote>
+                      <figcaption class="mt-4 flex items-center gap-x-4">
+                        <img
+                          src="/images/people/drew-baker.jpeg"
+                          alt="Drew Baker"
+                          class="h-16 w-16 rounded-full object-cover bg-gray-800"
+                          loading="lazy"
+                        />
+                        <div class="text-sm">
+                          <div class="text-base font-semibold text-foreground">Drew Baker</div>
+                          <div class="text-foreground/90 font-medium">Technical Partner</div>
+                          <div class="text-muted-foreground font-medium">Funkhaus</div>
+                        </div>
+                      </figcaption>
+                    </figure>
+                  </div>
                 </div>
               </div>
             </.link>

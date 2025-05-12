@@ -73,10 +73,28 @@ defmodule AlgoraWeb.PricingLive do
               </div>
             </div>
           </div>
-
           <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem] lg:grid-cols-2">
             <%= for plan <- @plans1 do %>
               <.pricing_card1 plan={plan} plans={@plans1} />
+            <% end %>
+          </div>
+          <div class="mx-auto lg:max-w-[95rem] mb-8 mt-8">
+            <div class="flex items-start gap-4">
+              <div class="flex-1">
+                <h2 class="text-2xl font-semibold text-foreground mb-2">
+                  <div class="flex items-center gap-2">
+                    <.icon name="tabler-world" class="h-6 w-6 text-purple-400" /> Hiring
+                  </div>
+                </h2>
+                <p class="text-base text-foreground-light">
+                  Hire top 1% OSS engineers
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="mx-auto grid grid-cols-1 gap-4 lg:gap-8 lg:max-w-[95rem]">
+            <%= for plan <- @plans2 do %>
+              <.pricing_card2 plan={plan} plans={@plans2} />
             <% end %>
           </div>
         </div>

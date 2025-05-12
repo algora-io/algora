@@ -29,12 +29,15 @@ defmodule Algora.Admin do
     with {:ok, tx} <- Repo.fetch_by(Transaction, id: id),
          {:ok,
           %Stripe.Charge{
-            balance_transaction: %Stripe.BalanceTransaction{currency: "usd", amount: gross_amount, fee: provider_fee}
-          }} <- PSP.Charge.retrieve(tx.provider_id, expand: ["balance_transaction"]) do
+            balance_transaction: %Stripe.BalanceTransaction{currency: currency, amount: gross_amount, fee: provider_fee}
+          }} <- Algora.PSP.Charge.retrieve(tx.provider_id, expand: ["balance_transaction"]) do
+      gross_amount = Money.from_integer(gross_amount, currency)
+      provider_fee = Money.from_integer(provider_fee, currency)
+
       tx
       |> change(%{
         gross_amount: gross_amount,
-        total_fee: gross_amount - tx.net_amount,
+        total_fee: Money.sub!(gross_amount, tx.net_amount),
         provider_fee: provider_fee
       })
       |> Repo.update()

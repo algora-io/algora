@@ -120,9 +120,35 @@ defmodule AlgoraWeb.PricingLive do
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
                         <span class="text-sm xl:text-base mb-0 text-foreground">
-                          Match based on tech stack, location and granular GitHub OSS contribution data
+                          Smart matching based on:
                         </span>
                       </div>
+                      <ul class="ml-7 mt-2 space-y-2">
+                        <li class="flex items-center">
+                          <div class="flex w-7 shrink-0 items-center justify-center">
+                            <.icon name="tabler-circle-filled" class="size-1.5 text-purple-300" />
+                          </div>
+                          <span class="text-sm text-foreground-light">
+                            Tech stack and skills
+                          </span>
+                        </li>
+                        <li class="flex items-center">
+                          <div class="flex w-7 shrink-0 items-center justify-center">
+                            <.icon name="tabler-circle-filled" class="size-1.5 text-purple-300" />
+                          </div>
+                          <span class="text-sm text-foreground-light">
+                            Location and budget
+                          </span>
+                        </li>
+                        <li class="flex items-center">
+                          <div class="flex w-7 shrink-0 items-center justify-center">
+                            <.icon name="tabler-circle-filled" class="size-1.5 text-purple-300" />
+                          </div>
+                          <span class="text-sm text-foreground-light">
+                            Granular GitHub OSS contribution data
+                          </span>
+                        </li>
+                      </ul>
                     </li>
                     <li class="flex flex-col">
                       <div class="flex items-start">
@@ -219,42 +245,42 @@ defmodule AlgoraWeb.PricingLive do
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col">
+                    <li class="flex flex-col pt-1">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
-                        <span class="text-sm xl:text-base mb-0 text-foreground">
-                          Engage top matches and stand out
+                        <span class="text-sm xl:text-base mb-0 text-foreground font-medium bg-purple-500/30 px-2 py-0.5 rounded-md -mt-1">
+                          Access your matches and stand out
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col">
+                    <li class="flex flex-col pt-1">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
-                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                        <span class="text-sm xl:text-base mb-0 text-foreground font-medium bg-purple-500/30 px-2 py-0.5 rounded-md -mt-1">
                           Publish jobs on Algora platform
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col">
+                    <li class="flex flex-col pt-1">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
-                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                        <span class="text-sm xl:text-base mb-0 text-foreground font-medium bg-purple-500/30 px-2 py-0.5 rounded-md -mt-1">
                           0% placement fees
                         </span>
                       </div>
                     </li>
-                    <li class="flex flex-col">
+                    <li class="flex flex-col pt-1">
                       <div class="flex items-start">
                         <div class="flex w-7 shrink-0">
                           <.icon name="tabler-check" class="size-5 text-purple-400" />
                         </div>
-                        <span class="text-sm xl:text-base mb-0 text-foreground">
+                        <span class="text-sm xl:text-base mb-0 text-foreground font-medium bg-purple-500/30 px-2 py-0.5 rounded-md -mt-1">
                           Recruiting partner option available
                         </span>
                       </div>

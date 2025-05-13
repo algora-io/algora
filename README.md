@@ -1,7 +1,7 @@
 <!-- PROJECT LOGO -->
 <p align="center">
   <a href="https://algora.io">
-    <img src="https://algora.io/images/og/home.png" alt="Homepage">
+    <img src="https://algora.io/images/og/home.png?v=2" alt="Homepage">
   </a>
 
   <h4 align="center">Hire the top 1% open source engineers</h4>

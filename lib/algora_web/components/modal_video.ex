@@ -11,6 +11,7 @@ defmodule AlgoraWeb.Components.ModalVideo do
   attr :class, :string, default: nil
   attr :autoplay, :boolean, default: true
   attr :start, :integer, default: 0
+  attr :loading, :string, default: "lazy"
 
   def modal_video(assigns) do
     ~H"""
@@ -30,7 +31,7 @@ defmodule AlgoraWeb.Components.ModalVideo do
         |> show_modal("video-modal")
       }
     >
-      <img src={@poster} alt={@alt} class="object-cover w-full h-full" loading="lazy" />
+      <img src={@poster} alt={@alt} class="object-cover w-full h-full" loading={@loading} />
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="size-10 sm:size-16 rounded-full bg-black/50 flex items-center justify-center group-hover:bg-black/70 transition-colors">
           <.icon name="tabler-player-play-filled" class="size-5 sm:size-8 text-white" />

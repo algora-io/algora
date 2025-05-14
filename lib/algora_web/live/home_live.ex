@@ -103,134 +103,106 @@ defmodule AlgoraWeb.HomeLive do
       <% end %>
 
       <main class="bg-black relative overflow-hidden">
-        <section class="relative isolate lg:min-h-[100svh]k">
-          <div class="mx-auto max-w-7xl pt-24 pb-12 xl:pt-24">
-            <div class="mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center min-h-[21rem] lg:min-h-[calc(100svh-10rem)] text-center">
-              <div class={
-                classes([
-                  # "px-6 lg:px-8 lg:pr-0 xl:py-20 relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-[52rem]",
-                  "flex flex-col items-center justify-center",
-                  @screenshot? && "pt-24",
-                  "pt-24"
-                ])
-              }>
-                <.wordmark :if={@screenshot?} class="h-8 mb-6" />
-                <%!-- <h1 class="font-display text-4xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
-                  <span class="text-emerald-400">Bounties, contracts &amp; jobs</span>
-                  <br />for open source engineers
-                </h1> --%>
-                <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-semibold tracking-tight text-foreground">
-                  <div class="text-emerald-400">Leverage open source</div>
-                  <div class="md:mt-2">to hire the best engineers</div>
-                </h1>
-                <p class="mt-2 sm:mt-4 md:mt-6 text-sm sm:text-lg xl:text-2xl/8 font-medium text-foreground/90 sm:max-w-md lg:max-w-none">
-                  Algora is an open source tech recruiting platform.<br />We use granular GitHub OSS contribution data
-                  to help you<br /> hire the perfect engineer for your role, fast and affordably.
-                </p>
-                <div :if={!@screenshot?} class="mt-6 sm:mt-10 flex gap-4">
-                  <.button
-                    navigate={~p"/onboarding/org"}
-                    class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
-                  >
-                    Companies
-                  </.button>
-                  <.button
-                    navigate={~p"/onboarding/dev"}
-                    variant="secondary"
-                    class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
-                  >
-                    Developers
-                  </.button>
+        <section class="relative isolate">
+          <div class="h-full mx-auto max-w-7xl flex flex-col items-center justify-center pt-48 pb-12">
+            <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+                <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
+                  <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-5xl font-semibold tracking-tight text-foreground">
+                    <div class="text-emerald-400">Leverage open source</div>
+                    <div class="md:mt-2">to hire the best engineers</div>
+                  </h1>
+                  <p class="mt-2 sm:mt-4 md:mt-6 text-sm sm:text-lg xl:text-xl font-medium text-foreground/90 sm:max-w-md lg:max-w-none">
+                    Algora is an open source tech recruiting platform.<br />We use granular GitHub OSS contribution data
+                    to help you<br /> hire the perfect engineer for your role, fast and affordably.
+                  </p>
+                  <div class="mt-6 sm:mt-10 flex gap-4">
+                    <.button
+                      navigate={~p"/onboarding/org"}
+                      class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+                    >
+                      Companies
+                    </.button>
+                    <.button
+                      navigate={~p"/onboarding/dev"}
+                      variant="secondary"
+                      class="h-10 sm:h-14 rounded-md px-8 sm:px-12 text-sm sm:text-xl"
+                    >
+                      Developers
+                    </.button>
+                  </div>
                 </div>
 
-                <div class="mt-6 sm:mt-10 px-4 sm:px-6 md:px-8">
-                  <div class="grid w-full grid-cols-5 gap-4 md:gap-8 max-w-2xl mx-auto items-center justify-center">
-                    <a class="relative flex items-center justify-center" href={~p"/cal"}>
-                      <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/qdrant"}>
-                      <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/remotion"}>
-                      <img
-                        src={~p"/images/wordmarks/remotion.png"}
-                        alt="Remotion"
-                        class="col-auto w-full saturate-0"
-                      />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/zio"}>
-                      <img
-                        src={~p"/images/wordmarks/zio.png"}
-                        alt="ZIO"
-                        class="w-[6rem] col-auto brightness-0 invert"
-                      />
-                    </a>
-                    <.link
-                      class="relative flex items-center justify-center"
-                      navigate={~p"/triggerdotdev"}
-                    >
-                      <img
-                        src={~p"/images/wordmarks/activepieces.svg"}
-                        alt="Activepieces"
-                        class="col-auto w-[12rem] brightness-0 invert"
-                        loading="lazy"
-                      />
-                    </.link>
-                    <a class="relative flex items-center justify-center" href={~p"/tembo"}>
-                      <img
-                        src={~p"/images/wordmarks/tembo.png"}
-                        alt="Tembo"
-                        class="w-[13rem] col-auto saturate-0"
-                      />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
-                      <img
-                        src={~p"/images/wordmarks/maybe.png"}
-                        alt="Maybe"
-                        class="col-auto w-full saturate-0"
-                      />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/golemcloud"}>
-                      <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/aidenybai"}>
-                      <img
-                        src={~p"/images/wordmarks/million.png"}
-                        alt="Million"
-                        class="col-auto w-44 saturate-0"
-                      />
-                    </a>
-                    <a class="relative flex items-center justify-center" href={~p"/tailcallhq"}>
-                      <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
-                    </a>
-                  </div>
+                <div class="flex-1 relative w-full max-w-2xl lg:max-w-none lg:flex-1 rounded-xl overflow-hidden px-4">
+                  <.modal_video
+                    class="aspect-video rounded-xl border-2 border-border/20"
+                    src="https://www.youtube.com/embed/Jne9mVas9i0"
+                    title="Algora Demo"
+                    poster="https://i.ytimg.com/vi/Jne9mVas9i0/maxresdefault.jpg"
+                    alt="Algora Demo"
+                    loading="eager"
+                  />
                 </div>
               </div>
-              <!-- Featured devs -->
-              <%!-- <div class={
-                classes([
-                  "mt-8 sm:mt-14 flex justify-start md:justify-center gap-4 sm:gap-8 lg:justify-start lg:mt-0 lg:pl-0",
-                  "overflow-x-auto scrollbar-thin lg:overflow-x-visible px-6 lg:px-8"
-                ])
-              }>
-                <%= if length(@featured_devs) > 0 do %>
-                  <div class="ml-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 sm:ml-0 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                    <.dev_card dev={List.first(@featured_devs)} />
-                  </div>
-                  <div class="flex flex-col mr-auto w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 sm:mr-0 lg:pt-36">
-                    <%= if length(@featured_devs) >= 3 do %>
-                      <%= for dev <- Enum.slice(@featured_devs, 1..2) do %>
-                        <.dev_card dev={dev} />
-                      <% end %>
-                    <% end %>
-                  </div>
-                  <div class="flex flex-col w-28 min-[500px]:w-40 sm:w-56 lg:w-44 flex-none space-y-6 sm:space-y-8 pt-16 sm:pt-32 lg:pt-0">
-                    <%= for dev <- Enum.slice(@featured_devs, 3..4) do %>
-                      <.dev_card dev={dev} />
-                    <% end %>
-                  </div>
-                <% end %>
-              </div> --%>
+            </div>
+
+            <div class="px-4 sm:px-6 md:px-8 pt-16 sm:pt-40">
+              <div class="grid w-full grid-cols-5 gap-4 md:gap-8 max-w-2xl mx-auto items-center justify-center">
+                <a class="relative flex items-center justify-center" href={~p"/cal"}>
+                  <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/qdrant"}>
+                  <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/remotion"}>
+                  <img
+                    src={~p"/images/wordmarks/remotion.png"}
+                    alt="Remotion"
+                    class="col-auto w-full saturate-0"
+                  />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/zio"}>
+                  <img
+                    src={~p"/images/wordmarks/zio.png"}
+                    alt="ZIO"
+                    class="w-[6rem] col-auto brightness-0 invert"
+                  />
+                </a>
+                <.link class="relative flex items-center justify-center" navigate={~p"/triggerdotdev"}>
+                  <img
+                    src={~p"/images/wordmarks/activepieces.svg"}
+                    alt="Activepieces"
+                    class="col-auto w-[12rem] brightness-0 invert"
+                  />
+                </.link>
+                <a class="relative flex items-center justify-center" href={~p"/tembo"}>
+                  <img
+                    src={~p"/images/wordmarks/tembo.png"}
+                    alt="Tembo"
+                    class="w-[13rem] col-auto saturate-0"
+                  />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
+                  <img
+                    src={~p"/images/wordmarks/maybe.png"}
+                    alt="Maybe"
+                    class="col-auto w-full saturate-0"
+                  />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/golemcloud"}>
+                  <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/aidenybai"}>
+                  <img
+                    src={~p"/images/wordmarks/million.png"}
+                    alt="Million"
+                    class="col-auto w-44 saturate-0"
+                  />
+                </a>
+                <a class="relative flex items-center justify-center" href={~p"/tailcallhq"}>
+                  <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
+                </a>
+              </div>
             </div>
           </div>
         </section>

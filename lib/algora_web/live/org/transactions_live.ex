@@ -193,10 +193,6 @@ defmodule AlgoraWeb.Org.TransactionsLive do
             <.button phx-click="show_manage_payout_drawer">
               Manage payout settings
             </.button>
-          <% else %>
-            <.button phx-click="show_create_payout_drawer">
-              Create payout account
-            </.button>
           <% end %>
         </div>
         <%= if @account do %>

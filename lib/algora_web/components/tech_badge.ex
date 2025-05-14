@@ -49,6 +49,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
   defp normalize(tech) do
     case String.downcase(tech) do
+      "plpgsql" ->
+        "postgresql"
+
       "postgres" ->
         "postgresql"
 
@@ -129,7 +132,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Next.js",
       "HTML",
       "CSS",
-      "PostgreSQL"
+      "PostgreSQL",
+      "Figma"
     ]
   end
 end

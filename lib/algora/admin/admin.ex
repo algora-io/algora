@@ -964,4 +964,43 @@ defmodule Algora.Admin do
   rescue
     error -> {:error, error}
   end
+
+  def backfill_charges(start_date \\ ~D[2025-04-01]) do
+    Logger.info("Starting charge backfill from #{start_date}")
+
+    query =
+      from t in Transaction,
+        where: t.type == :charge,
+        where: t.status == :succeeded,
+        where: not is_nil(t.provider_id),
+        where: fragment("date(?) >= ?", t.inserted_at, ^start_date),
+        order_by: [asc: t.inserted_at]
+
+    transactions = Repo.all(query)
+    Logger.info("Found #{length(transactions)} transactions to backfill")
+
+    transactions
+    |> Enum.reduce_while(0, fn tx, processed ->
+      Logger.info("Processing transaction #{tx.id} (#{processed + 1}/#{length(transactions)})")
+
+      case backfill_charge(tx.id) do
+        {:ok, _updated_tx} ->
+          Logger.info("Successfully backfilled transaction #{tx.id}")
+          {:cont, processed + 1}
+
+        {:error, error} ->
+          Logger.error("Failed to backfill transaction #{tx.id}: #{inspect(error)}")
+          {:halt, processed}
+      end
+    end)
+    |> case do
+      processed when is_integer(processed) and processed == length(transactions) ->
+        Logger.info("Charge backfill complete: all #{processed} transactions processed successfully")
+        {:ok, processed}
+
+      processed when is_integer(processed) ->
+        Logger.error("Charge backfill halted: processed #{processed} out of #{length(transactions)} transactions")
+        {:error, :backfill_incomplete}
+    end
+  end
 end

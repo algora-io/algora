@@ -43,9 +43,6 @@ defmodule AlgoraWeb.Org.SettingsLive do
                 </li>
               </ul>
             </div>
-            <div>
-              <AlgoraWeb.Components.Autopay.autopay />
-            </div>
           </div>
         </.card_header>
         <.card_content>

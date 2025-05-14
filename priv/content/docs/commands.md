@@ -46,26 +46,6 @@ title: Slash commands reference
       >
         <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
           <div class="whitespace-nowrap font-mono text-sm font-semibold leading-6 text-emerald-300">
-            /bounty
-          </div>
-        </td>
-        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-          <div class="whitespace-nowrap font-mono text-sm font-normal text-gray-300">
-            Create a biddable bounty
-          </div>
-        </td>
-        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-          <div class="whitespace-nowrap font-mono text-sm font-normal text-gray-300">
-            Issue/PR comment
-          </div>
-        </td>
-      </tr>
-      <tr
-        class="border-b transition-colors hover:bg-gray-100/50 data-[state=selected]:bg-gray-100 dark:hover:bg-white/[2.5%] dark:data-[state=selected]:bg-gray-800"
-        data-state="false"
-      >
-        <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-          <div class="whitespace-nowrap font-mono text-sm font-semibold leading-6 text-emerald-300">
             /tip $100
           </div>
         </td>

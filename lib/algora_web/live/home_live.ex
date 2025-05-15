@@ -104,17 +104,20 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate">
-          <div class="h-full mx-auto max-w-7xl flex flex-col items-center justify-center pt-48 pb-12">
+          <div class="h-full mx-auto max-w-7xl flex flex-col items-center justify-center pt-36 sm:pt-48 xl:pt-52 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
-                  <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-5xl font-semibold tracking-tight text-foreground">
+                  <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
                     <div class="text-emerald-400">Leverage open source</div>
                     <div class="md:mt-2">to hire the best engineers</div>
                   </h1>
-                  <p class="mt-2 sm:mt-4 md:mt-6 text-sm sm:text-lg xl:text-xl font-medium text-foreground/90 sm:max-w-md lg:max-w-none">
-                    Algora is an open source tech recruiting platform.<br />We use granular GitHub OSS contribution data
-                    to help you<br /> hire the perfect engineer for your role, fast and affordably.
+                  <p class="mt-2 sm:mt-4 md:mt-6 text-sm sm:text-lg xl:text-xl font-medium text-foreground/90 lg:max-w-none">
+                    Algora is an open source tech recruiting platform.<br />We use granular GitHub
+                    <span class="hidden sm:inline">OSS</span>
+                    contribution data
+                    to help you<br /> hire the perfect engineer for your role,<br class="sm:hidden" />
+                    fast and affordably.
                   </p>
                   <div class="mt-6 sm:mt-10 flex gap-4">
                     <.button
@@ -145,63 +148,196 @@ defmodule AlgoraWeb.HomeLive do
                 </div>
               </div>
             </div>
-
-            <div class="px-4 sm:px-6 md:px-8 pt-16 sm:pt-40">
-              <div class="grid w-full grid-cols-5 gap-4 md:gap-8 max-w-2xl mx-auto items-center justify-center">
-                <a class="relative flex items-center justify-center" href={~p"/cal"}>
-                  <Wordmarks.calcom class="w-[10rem] col-auto mt-3" alt="Cal.com" />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/qdrant"}>
-                  <Wordmarks.qdrant class="w-[11rem] col-auto" alt="Qdrant" />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/remotion"}>
+            <div class="px-4 sm:px-0 pt-16 sm:pt-20 xl:pt-28 2xl:pt-40">
+              <div class="grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-6 gap-x-4 sm:gap-8 mx-auto items-center justify-center">
+                <.link class="relative flex items-center justify-center" href={~p"/cal"}>
+                  <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
+                  <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/remotion"}>
                   <img
+                    loading="eager"
                     src={~p"/images/wordmarks/remotion.png"}
                     alt="Remotion"
                     class="col-auto w-full saturate-0"
                   />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/zio"}>
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/zio"}>
                   <img
+                    loading="eager"
                     src={~p"/images/wordmarks/zio.png"}
                     alt="ZIO"
-                    class="w-[6rem] col-auto brightness-0 invert"
-                  />
-                </a>
-                <.link class="relative flex items-center justify-center" navigate={~p"/triggerdotdev"}>
-                  <img
-                    src={~p"/images/wordmarks/activepieces.svg"}
-                    alt="Activepieces"
-                    class="col-auto w-[12rem] brightness-0 invert"
+                    class="mt-1 sm:mt-3 w-[70%] col-auto brightness-0 invert"
                   />
                 </.link>
-                <a class="relative flex items-center justify-center" href={~p"/tembo"}>
+                <.link class="relative flex items-center justify-center" navigate={~p"/activepieces"}>
                   <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/activepieces.svg"}
+                    alt="Activepieces"
+                    class="col-auto brightness-0 invert"
+                  />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/tembo"}>
+                  <img
+                    loading="eager"
                     src={~p"/images/wordmarks/tembo.png"}
                     alt="Tembo"
-                    class="w-[13rem] col-auto saturate-0"
+                    class="col-auto saturate-0"
                   />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
                   <img
+                    loading="eager"
                     src={~p"/images/wordmarks/maybe.png"}
                     alt="Maybe"
                     class="col-auto w-full saturate-0"
                   />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/golemcloud"}>
-                  <Wordmarks.golemcloud class="col-auto w-full" alt="Golem Cloud" />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/aidenybai"}>
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
+                  <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/deskflow"}>
                   <img
-                    src={~p"/images/wordmarks/million.png"}
-                    alt="Million"
-                    class="col-auto w-44 saturate-0"
+                    loading="eager"
+                    src={~p"/images/wordmarks/synergy.svg"}
+                    alt="Synergy"
+                    class="col-auto saturate-0 invert w-[80%]"
                   />
-                </a>
-                <a class="relative flex items-center justify-center" href={~p"/tailcallhq"}>
-                  <Wordmarks.tailcall class="w-[10rem] col-auto" fill="white" alt="Tailcall" />
-                </a>
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/Capgo"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/capgo.png"}
+                    alt="Capgo"
+                    class="col-auto w-[80%]"
+                  />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/tracemachina"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/nativelink.png"}
+                    alt="Nativelink"
+                    class="col-auto saturate-0"
+                  />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/softwaremill"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/softwaremill.png"}
+                    alt="Softwaremill"
+                    class="col-auto invert"
+                  />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/CapSoftware"}>
+                  <Wordmarks.cap class="col-auto saturate-0 invert w-[80%]" alt="Cap" />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/spaceandtimelabs"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/spaceandtimelabs.svg"}
+                    alt="Space and Time"
+                    class="col-auto saturate-0"
+                  />
+                </.link>
+                <.link
+                  class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/getkyo"}
+                >
+                  <img
+                    loading="eager"
+                    src={~p"/images/logos/kyo.png"}
+                    alt="Kyo"
+                    class="size-6 sm:size-10 mr-1 sm:mr-2 saturate-0 invert"
+                  /> Kyo
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/permitio"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/permit.svg"}
+                    alt="Permit"
+                    class="col-auto saturate-0"
+                  />
+                </.link>
+                <.link
+                  class="font-bold font-display text-lg sm:text-4xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/coollabsio"}
+                >
+                  Coolify
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/encoredev"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/encore.svg"}
+                    alt="Encore"
+                    class="col-auto invert w-[70%]"
+                  />
+                </.link>
+                <.link class="relative flex items-center justify-center" href={~p"/tolgee"}>
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/tolgee.png"}
+                    alt="Tolgee"
+                    class="col-auto w-[80%]"
+                  />
+                </.link>
+                <.link
+                  class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/keygen-sh"}
+                >
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/keygen.svg"}
+                    alt="Keygen"
+                    class="saturate-0 w-5 sm:w-7 mr-1 sm:mr-3"
+                  /> keygen
+                </.link>
+                <.link
+                  class="font-bold font-display text-sm sm:text-2xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/browser-use"}
+                >
+                  <img
+                    loading="eager"
+                    src={~p"/images/wordmarks/browser-use.svg"}
+                    alt="Browser Use"
+                    class="saturate-0 w-4 sm:w-7 mr-1 sm:mr-3"
+                  /> Browser Use
+                </.link>
+                <.link
+                  class="font-bold font-display text-base sm:text-2xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/tscircuit"}
+                >
+                  <img
+                    loading="eager"
+                    src={~p"/images/logos/tscircuit.svg"}
+                    alt="TSC"
+                    class="saturate-0 invert w-5 sm:w-6 mr-1 sm:mr-2"
+                  /> tscircuit
+                </.link>
+                <.link
+                  class="font-bold font-display text-sm sm:text-2xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/prefix-dev"}
+                >
+                  <img
+                    loading="eager"
+                    src={~p"/images/logos/prefix.svg"}
+                    alt="TSC"
+                    class="saturate-0 w-6 sm:w-9 mr-1 sm:mr-2"
+                  /> Prefix.dev
+                </.link>
+                <.link
+                  class="font-extrabold font-mono text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
+                  navigate={~p"/mediar-ai"}
+                >
+                  <img
+                    loading="eager"
+                    src={~p"/images/logos/screenpipe.webp"}
+                    alt="Screenpipe"
+                    class="shrink-0 saturate-0 w-5 sm:w-9 mr-1 sm:mr-2"
+                  /> screenpipe
+                </.link>
               </div>
             </div>
           </div>
@@ -210,13 +346,14 @@ defmodule AlgoraWeb.HomeLive do
           <div class="mx-auto max-w-7xl px-6 lg:px-8 pt-24 xl:pt-0">
             <h2 class="font-display text-4xl font-semibold tracking-tight text-foreground sm:text-6xl text-center mb-2 sm:mb-4">
               Hire
-              <span class="text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
+              <span class="block sm:inline text-success-300 drop-shadow-[0_1px_5px_#34d39980]">
                 with confidence
               </span>
             </h2>
-            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
-              Highlight your applicants' open source contributions<br />
-              and match with the top developers on Algora
+            <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
+              Highlight your applicants'
+              <span class="hidden sm:inline"> open source</span><span class="inline sm:hidden">OSS</span>
+              contributions<br /> and match with the top developers on Algora
             </p>
             <video
               src={~p"/videos/jobs.mp4"}
@@ -289,7 +426,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
 
-            <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8">
+            <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8 px-4">
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
@@ -357,7 +494,7 @@ defmodule AlgoraWeb.HomeLive do
               </span>
               <br />contract work
             </h2>
-            <p class="text-center font-medium text-base text-muted-foreground sm:text-xl mb-12 mx-auto">
+            <p class="text-center font-medium text-[15px] text-muted-foreground sm:text-xl mb-12 mx-auto">
               Complete outcome-based contract work with your contributors and Algora matches
             </p>
             <video
@@ -429,7 +566,7 @@ defmodule AlgoraWeb.HomeLive do
               </div>
             </div>
 
-            <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8">
+            <div class="pt-12 sm:pt-24 flex flex-col md:flex-row gap-8 px-4">
               <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between">
                 <figure class="relative">
                   <blockquote class="text-lg font-medium text-foreground/90">
@@ -437,7 +574,7 @@ defmodule AlgoraWeb.HomeLive do
                       "I've used Algora in the past for bounties, and recently used them to hire a contract engineer. Every time the process has yield fantastic results, with high quality code and fast turn arounds. I'm a big fan."
                     </p>
                   </blockquote>
-                  <figcaption class="mt-4 flex items-center justify-center gap-x-4">
+                  <figcaption class="mt-4 flex md:items-center md:justify-center gap-x-4">
                     <img
                       src="/images/people/drew-baker.jpeg"
                       alt="Drew Baker"

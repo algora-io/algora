@@ -11,7 +11,18 @@ defmodule Algora.Workspace.Jobs.ImportStargazer do
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"provider_logins" => provider_logins, "repo_id" => repo_id}}) do
     with {:ok, users} <- Algora.Workspace.fetch_top_contributions_async(Github.TokenPool.get_token(), provider_logins) do
-      Repo.insert_all(Stargazer, Enum.map(users, fn user -> %{user_id: user.id, repository_id: repo_id} end))
+      Repo.insert_all(
+        Stargazer,
+        Enum.map(users, fn user ->
+          %{
+            id: Nanoid.generate(),
+            inserted_at: DateTime.utc_now(),
+            updated_at: DateTime.utc_now(),
+            user_id: user.id,
+            repository_id: repo_id
+          }
+        end)
+      )
     end
   end
 

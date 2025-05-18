@@ -67,6 +67,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "shell" ->
         "bash"
 
+      "liveview" ->
+        "phoenix"
+
       t ->
         t
         |> String.replace("+", "plus")
@@ -133,7 +136,10 @@ defmodule AlgoraWeb.Components.TechBadge do
       "HTML",
       "CSS",
       "PostgreSQL",
-      "Figma"
+      "Figma",
+      "Prometheus",
+      "Grafana",
+      "LiveView"
     ]
   end
 end

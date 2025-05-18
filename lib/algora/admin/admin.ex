@@ -22,18 +22,31 @@ defmodule Algora.Admin do
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs.FetchTopContributions
   alias Algora.Workspace.Jobs.ImportStargazer
+  alias Algora.Workspace.Jobs.SyncUser
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
   require Logger
 
-  def sync_user(provider_login) do
-    with {:ok, data} <- Github.get_user_by_username(token(), provider_login),
-         {:ok, user} <- Workspace.ensure_user(token(), data["login"]) do
-      user
-      |> change(%{display_name: data["name"], location: data["location"]})
-      |> Repo.update()
-    end
+  def sync_users do
+    Repo.transact(
+      fn ->
+        User
+        # |> where([u], is_nil(u.display_name))
+        |> where([u], not is_nil(u.provider_login))
+        |> where([u], not is_nil(u.display_name))
+        |> where([u], u.display_name == u.provider_login)
+        |> where([u], not is_nil(u.provider_id))
+        |> where([u], u.type == :individual)
+        |> Repo.stream()
+        |> Enum.each(fn user -> sync_user(provider_id: user.provider_id) end)
+      end,
+      timeout: :infinity
+    )
+  end
+
+  def sync_user(opts) do
+    opts |> Map.new() |> SyncUser.new() |> Oban.insert()
   end
 
   def backfill_charge(id) do

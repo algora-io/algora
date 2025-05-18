@@ -13,8 +13,8 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :truncate_matches, [org, matches])
   end
 
-  def get_contribution_score(tech_stack, user, contributions_map) do
-    call(AlgoraCloud, :get_contribution_score, [tech_stack, user, contributions_map])
+  def get_contribution_score(job, user, contributions_map) do
+    call(AlgoraCloud, :get_contribution_score, [job, user, contributions_map])
   end
 
   defp call(module, function, args) do

@@ -1299,7 +1299,7 @@ defmodule AlgoraWeb.Org.JobLive do
   defp sort_by_contributions(job, applicants, contributions_map) do
     Enum.sort_by(
       applicants,
-      &Algora.Cloud.get_contribution_score(job.tech_stack, &1.user, contributions_map),
+      &Algora.Cloud.get_contribution_score(job, &1.user, contributions_map),
       :desc
     )
   end

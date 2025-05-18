@@ -133,7 +133,7 @@ defmodule AlgoraWeb.Router do
     end
 
     live_session :onboarding,
-      on_mount: [{AlgoraWeb.Analytics, :current_country}] do
+      on_mount: [{AlgoraWeb.Analytics, :current_country}, {AlgoraWeb.UserAuth, :current_user}] do
       live "/onboarding/org", Onboarding.OrgLive
       live "/onboarding/dev", Onboarding.DevLive
       live "/community", CommunityLive, :index

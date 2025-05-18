@@ -45,6 +45,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("objectivec"), do: "bg-white invert saturate-0"
   defp icon_class("purescript"), do: "bg-white invert saturate-0"
   defp icon_class("astro"), do: "bg-white invert saturate-0"
+  defp icon_class("apple"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -69,6 +70,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "liveview" ->
         "phoenix"
+
+      "ios" ->
+        "apple"
 
       t ->
         t
@@ -139,7 +143,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Figma",
       "Prometheus",
       "Grafana",
-      "LiveView"
+      "LiveView",
+      "Apple",
+      "Android"
     ]
   end
 end

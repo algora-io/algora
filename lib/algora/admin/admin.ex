@@ -20,6 +20,8 @@ defmodule Algora.Admin do
   alias Algora.Util
   alias Algora.Workspace
   alias Algora.Workspace.Installation
+  alias Algora.Workspace.Jobs.FetchTopContributions
+  alias Algora.Workspace.Jobs.ImportStargazer
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
 
@@ -110,7 +112,7 @@ defmodule Algora.Admin do
           |> Repo.stream()
           |> Enum.each(fn user ->
             %{provider_login: user.provider_login}
-            |> Workspace.Jobs.FetchTopContributions.new()
+            |> FetchTopContributions.new()
             |> Oban.insert()
             |> case do
               {:ok, _job} -> IO.puts("Enqueued job for #{user.provider_login}")
@@ -1001,6 +1003,57 @@ defmodule Algora.Admin do
       processed when is_integer(processed) ->
         Logger.error("Charge backfill halted: processed #{processed} out of #{length(transactions)} transactions")
         {:error, :backfill_incomplete}
+    end
+  end
+
+  def import_stargazers(repo_url, max_pages \\ nil) when is_binary(repo_url) do
+    with {:ok, [owner: repo_owner, repo: repo_name]} <- parse_repo_url(repo_url),
+         {:ok, repo} <- Workspace.ensure_repository(token(), repo_owner, repo_name) do
+      fetch_and_import_stargazers(repo_owner, repo_name, repo.id, 1, max_pages)
+    else
+      error ->
+        Logger.error("Failed to import stargazers: #{inspect(error)}")
+        {:error, :failed_to_import_stargazers}
+    end
+  end
+
+  defp fetch_and_import_stargazers(repo_owner, repo_name, repo_id, page, max_pages) do
+    if max_pages && page > max_pages do
+      Logger.info("Reached maximum page number #{max_pages}, stopping import")
+      :ok
+    else
+      url = "/repos/#{repo_owner}/#{repo_name}/stargazers?per_page=100&page=#{page}"
+
+      case Github.Client.fetch(token(), url) do
+        {:ok, []} ->
+          Logger.info("Finished importing stargazers - no more pages")
+          :ok
+
+        {:ok, stargazers} ->
+          Enum.each(stargazers, fn user ->
+            %{provider_login: user["login"], repo_id: repo_id}
+            |> ImportStargazer.new()
+            |> Oban.insert()
+            |> case do
+              {:ok, _job} -> Logger.info("Enqueued job for #{user["login"]}")
+              {:error, error} -> Logger.error("Failed to enqueue job for #{user["login"]}: #{inspect(error)}")
+            end
+          end)
+
+          # Process next page
+          fetch_and_import_stargazers(repo_owner, repo_name, repo_id, page + 1, max_pages)
+
+        error ->
+          Logger.error("Failed to fetch stargazers page #{page}: #{inspect(error)}")
+          {:error, :failed_to_fetch_stargazers}
+      end
+    end
+  end
+
+  defp parse_repo_url(url) do
+    case Regex.run(~r{github\.com/([^/]+)/([^/]+)}, url) do
+      [_, owner, repo] -> {:ok, [owner: owner, repo: String.replace(repo, ".git", "")]}
+      _ -> {:error, :invalid_repo_url}
     end
   end
 end

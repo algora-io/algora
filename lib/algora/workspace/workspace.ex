@@ -14,6 +14,7 @@ defmodule Algora.Workspace do
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs
   alias Algora.Workspace.Repository
+  alias Algora.Workspace.Stargazer
   alias Algora.Workspace.Ticket
   alias Algora.Workspace.UserContribution
 
@@ -569,6 +570,27 @@ defmodule Algora.Workspace do
     )
   end
 
+  def list_stargazers(id) do
+    Repo.all(
+      from(s in Stargazer,
+        join: r in assoc(s, :repository),
+        where: r.provider == "github",
+        join: ro in assoc(r, :user),
+        where: ro.id == ^id,
+        join: u in assoc(s, :user),
+        where: u.type != :bot,
+        where: not ilike(u.provider_login, "%bot"),
+        left_join: m in Member,
+        on: m.user_id == u.id and m.org_id == r.user_id,
+        where: is_nil(m.id),
+        distinct: [s.user_id],
+        select_merge: %{user: u},
+        order_by: [desc: s.inserted_at, asc: s.id],
+        limit: 100
+      )
+    )
+  end
+
   def fetch_contributor(repository_id, user_id) do
     Repo.fetch_by(Contributor, repository_id: repository_id, user_id: user_id)
   end
@@ -691,7 +713,7 @@ defmodule Algora.Workspace do
     with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
          {:ok, user} <- ensure_user(token, provider_login),
          {:ok, _} <- add_contributions_async(token, user.id, contributions) do
-      {:ok, nil}
+      {:ok, user}
     else
       {:error, reason} ->
         Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")

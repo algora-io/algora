@@ -242,8 +242,9 @@ defmodule AlgoraWeb.Org.JobLive do
           <%= for {tab, label, count} <- [
             {"applicants", "Applicants", length(@applicants)},
             {"imports", "Imports", length(@imports)},
+            if(length(@stargazers) > 0, do: {"stargazers", "Stargazers", length(@stargazers)}, else: nil),
             {"matches", "Matches", length(@matches)}
-          ] do %>
+          ] |> Enum.reject(& is_nil(&1)) do %>
             <label class={[
               "group relative flex cursor-pointer rounded-lg px-4 py-2 shadow-sm focus:outline-none",
               "border-2 bg-background transition-all duration-200 hover:border-primary hover:bg-primary/10",
@@ -359,7 +360,7 @@ defmodule AlgoraWeb.Org.JobLive do
                 </.card>
               <% else %>
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <%= for match <- @matches |> Enum.take(if @current_org.hiring_subscription == :active, do: length(@matches), else: 15) do %>
+                  <%= for match <- @truncated_matches do %>
                     <div>
                       <.match_card
                         user={match.user}
@@ -369,15 +370,49 @@ defmodule AlgoraWeb.Org.JobLive do
                       />
                     </div>
                   <% end %>
-                  <%= if @current_org.hiring_subscription != :active do %>
+                  <%= if @current_org.hiring_subscription != :active && length(@truncated_matches) > 0 do %>
                     <div class="relative lg:col-span-3">
                       <img
                         src={~p"/images/screenshots/job-matches-more.png"}
                         class="w-full aspect-[1368/398]"
                       />
                       <div class="absolute inset-0 flex items-center font-bold text-foreground justify-center text-3xl md:text-4xl">
-                        + {length(@matches) - 15} more matches
+                        + {length(@matches) - length(@truncated_matches)} more matches
                       </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </.section>
+          <% "stargazers" -> %>
+            <.section title="Stargazers" subtitle="Top stargazers of your repositories">
+              <:actions>
+                <.button variant="default" phx-click="toggle_import_drawer">
+                  Import
+                </.button>
+              </:actions>
+              <%= if Enum.empty?(@stargazers) do %>
+                <.card class="rounded-lg bg-card py-12 text-center lg:rounded-[2rem]">
+                  <.card_header>
+                    <div class="mx-auto mb-2 rounded-full bg-muted p-4">
+                      <.icon name="tabler-users" class="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <.card_title>No stargazers yet</.card_title>
+                    <.card_description>
+                      Stargazers will appear here once you import your repositories
+                    </.card_description>
+                  </.card_header>
+                </.card>
+              <% else %>
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <%= for stargazer <- @stargazers do %>
+                    <div>
+                      <.match_card
+                        user={stargazer.user}
+                        tech_stack={@job.tech_stack |> Enum.take(1)}
+                        contributions={Map.get(@contributions_map, stargazer.user.id, [])}
+                        contract_type="bring_your_own"
+                      />
                     </div>
                   <% end %>
                 </div>
@@ -859,11 +894,22 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp assign_applicants(socket) do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
+    stargazers = Algora.Workspace.list_stargazers(socket.assigns.current_org.id)
     applicants = Enum.reject(all_applicants, & &1.imported_at)
     imports = Enum.filter(all_applicants, & &1.imported_at)
     matches = Settings.get_job_matches(socket.assigns.job)
 
-    developers = matches |> Enum.concat(all_applicants) |> Enum.map(& &1.user)
+    truncated_matches =
+      case Code.ensure_compiled(AlgoraCloud) do
+        {:module, _} -> AlgoraCloud.truncate_matches(socket.assigns.current_org, matches)
+        _ -> Enum.take(matches, 3)
+      end
+
+    developers =
+      matches
+      |> Enum.concat(all_applicants)
+      |> Enum.concat(stargazers)
+      |> Enum.map(& &1.user)
 
     contributions_map = fetch_applicants_contributions(developers, socket.assigns.job.tech_stack)
 
@@ -871,7 +917,9 @@ defmodule AlgoraWeb.Org.JobLive do
     |> assign(:developers, developers)
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, applicants, contributions_map))
     |> assign(:imports, sort_by_contributions(socket.assigns.job, imports, contributions_map))
+    |> assign(:stargazers, sort_by_contributions(socket.assigns.job, stargazers, contributions_map))
     |> assign(:matches, matches)
+    |> assign(:truncated_matches, truncated_matches)
     |> assign(:contributions_map, contributions_map)
   end
 

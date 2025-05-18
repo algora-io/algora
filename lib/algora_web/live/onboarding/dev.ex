@@ -49,10 +49,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
-    end
-
     context = %{
       country: socket.assigns.current_country,
       tech_stack: [],
@@ -95,6 +91,35 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
+  def render(%{current_user: current_user} = assigns) when not is_nil(current_user) do
+    ~H"""
+    <div
+      class="w-screen h-screen fixed inset-0 bg-background z-[100]"
+      phx-hook="LocalStateStore"
+      id="onboarding-dev-page"
+    >
+      <div class="flex items-center justify-center h-full">
+        <svg
+          class="mr-3 -ml-1 size-12 animate-spin text-success"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+          </circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          >
+          </path>
+        </svg>
+      </div>
+    </div>
+    """
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-card" phx-hook="LocalStateStore" id="onboarding-dev-page">
@@ -128,36 +153,36 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
-  def handle_info({:authenticated, user}, socket) do
-    tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
-    intentions = get_field(socket.assigns.info_form.source, :intentions) || []
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
 
-    case user
-         |> change(
-           tech_stack: tech_stack,
-           seeking_bounties: "bounties" in intentions,
-           seeking_contracts: "contracts" in intentions,
-           seeking_jobs: "jobs" in intentions
-         )
-         |> Repo.update() do
-      {:ok, user} ->
-        {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
+    if user = socket.assigns[:current_user] do
+      tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
+      intentions = get_field(socket.assigns.info_form.source, :intentions) || []
 
-      {:error, changeset} ->
-        Logger.error("Failed to update user #{user.id} on onboarding: #{inspect(changeset)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+      case user
+           |> change(
+             tech_stack: tech_stack,
+             seeking_bounties: "bounties" in intentions,
+             seeking_contracts: "contracts" in intentions,
+             seeking_jobs: "jobs" in intentions
+           )
+           |> Repo.update() do
+        {:ok, user} ->
+          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
+
+        {:error, changeset} ->
+          Logger.error("Failed to update user #{user.id} on onboarding: #{inspect(changeset)}")
+          {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_event("restore_settings", params, socket) do
-    {:noreply, LocalStore.restore(socket, params)}
-  end
-
-  @impl true
   def handle_event("sign_in_with_github", _params, socket) do
-    popup_url = Github.authorize_url(%{socket_id: socket.id})
-    {:noreply, push_event(socket, "open_popup", %{url: popup_url})}
+    {:noreply, redirect(socket, external: Github.authorize_url(%{return_to: ~p"/onboarding/dev?checkpoint=1"}))}
   end
 
   @impl true

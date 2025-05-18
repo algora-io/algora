@@ -136,7 +136,7 @@ defmodule AlgoraWeb.CoreComponents do
     ~H"""
     <!-- User account dropdown -->
     <div class={classes(["relative w-full text-left", @class])}>
-      <div>
+      <div class="flex">
         <button
           id={@id}
           type="button"

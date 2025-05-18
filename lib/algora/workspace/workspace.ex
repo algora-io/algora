@@ -203,7 +203,7 @@ defmodule Algora.Workspace do
   end
 
   def ensure_user_by_provider_id(token, provider_id) do
-    case Repo.get_by(User, provider: "github", provider_id: provider_id) do
+    case Repo.get_by(User, provider: "github", provider_id: to_string(provider_id)) do
       %User{} = user -> {:ok, user}
       nil -> create_user_from_github(token, provider_id)
     end
@@ -642,6 +642,7 @@ defmodule Algora.Workspace do
         where: not ilike(r.name, "%awesome%"),
         where: not ilike(r.name, "%algorithms%"),
         where: not ilike(repo_owner.provider_login, "%algorithms%"),
+        where: not ilike(repo_owner.provider_login, "%firstcontributions%"),
         where: repo_owner.type == :organization or r.stargazers_count > 200,
         # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
         order_by: [

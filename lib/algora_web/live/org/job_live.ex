@@ -262,7 +262,7 @@ defmodule AlgoraWeb.Org.JobLive do
               <span class="flex items-center justify-between w-full gap-2">
                 <span class="text-sm font-medium">{label}</span>
                 <span class="text-xs text-muted-foreground">
-                  {count}
+                  {count}{if count == 100, do: "+", else: ""}
                 </span>
               </span>
             </label>

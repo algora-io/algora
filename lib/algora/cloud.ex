@@ -9,6 +9,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :list_top_matches, [opts])
   end
 
+  def truncate_matches(org, matches) do
+    call(AlgoraCloud, :truncate_matches, [org, matches])
+  end
+
   def get_contribution_score(tech_stack, user, contributions_map) do
     call(AlgoraCloud, :get_contribution_score, [tech_stack, user, contributions_map])
   end

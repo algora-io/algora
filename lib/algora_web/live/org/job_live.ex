@@ -899,11 +899,7 @@ defmodule AlgoraWeb.Org.JobLive do
     imports = Enum.filter(all_applicants, & &1.imported_at)
     matches = Settings.get_job_matches(socket.assigns.job)
 
-    truncated_matches =
-      case Code.ensure_compiled(AlgoraCloud) do
-        {:module, _} -> AlgoraCloud.truncate_matches(socket.assigns.current_org, matches)
-        _ -> Enum.take(matches, 3)
-      end
+    truncated_matches = Algora.Cloud.truncate_matches(socket.assigns.current_org, matches)
 
     developers =
       matches

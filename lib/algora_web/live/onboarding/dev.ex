@@ -49,10 +49,6 @@ defmodule AlgoraWeb.Onboarding.DevLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    if connected?(socket) do
-      Phoenix.PubSub.subscribe(Algora.PubSub, "auth:#{socket.id}")
-    end
-
     context = %{
       country: socket.assigns.current_country,
       tech_stack: [],
@@ -128,36 +124,36 @@ defmodule AlgoraWeb.Onboarding.DevLive do
   end
 
   @impl true
-  def handle_info({:authenticated, user}, socket) do
-    tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
-    intentions = get_field(socket.assigns.info_form.source, :intentions) || []
+  def handle_event("restore_settings", params, socket) do
+    socket = LocalStore.restore(socket, params)
 
-    case user
-         |> change(
-           tech_stack: tech_stack,
-           seeking_bounties: "bounties" in intentions,
-           seeking_contracts: "contracts" in intentions,
-           seeking_jobs: "jobs" in intentions
-         )
-         |> Repo.update() do
-      {:ok, user} ->
-        {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
+    if user = socket.assigns[:current_user] do
+      tech_stack = get_field(socket.assigns.info_form.source, :tech_stack) || []
+      intentions = get_field(socket.assigns.info_form.source, :intentions) || []
 
-      {:error, changeset} ->
-        Logger.error("Failed to update user #{user.id} on onboarding: #{inspect(changeset)}")
-        {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+      case user
+           |> change(
+             tech_stack: tech_stack,
+             seeking_bounties: "bounties" in intentions,
+             seeking_contracts: "contracts" in intentions,
+             seeking_jobs: "jobs" in intentions
+           )
+           |> Repo.update() do
+        {:ok, user} ->
+          {:noreply, redirect(socket, to: AlgoraWeb.UserAuth.generate_login_path(user.email))}
+
+        {:error, changeset} ->
+          Logger.error("Failed to update user #{user.id} on onboarding: #{inspect(changeset)}")
+          {:noreply, put_flash(socket, :error, "Something went wrong. Please try again.")}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
   @impl true
-  def handle_event("restore_settings", params, socket) do
-    {:noreply, LocalStore.restore(socket, params)}
-  end
-
-  @impl true
   def handle_event("sign_in_with_github", _params, socket) do
-    popup_url = Github.authorize_url(%{socket_id: socket.id})
-    {:noreply, push_event(socket, "open_popup", %{url: popup_url})}
+    {:noreply, redirect(socket, external: Github.authorize_url(%{return_to: ~p"/onboarding/dev?checkpoint=1"}))}
   end
 
   @impl true

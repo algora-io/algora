@@ -927,14 +927,19 @@ defmodule AlgoraWeb.Org.JobLive do
 
     if Enum.any?(users_without_contributions) do
       Task.start(fn ->
+        # Process in batches of 10 users
         users_without_contributions
+        |> Enum.chunk_every(10)
         |> Task.async_stream(
-          fn handle ->
-            broadcast(socket.assigns.job, {:contributions_fetching, handle})
+          fn handles ->
+            Enum.each(handles, &broadcast(socket.assigns.job, {:contributions_fetching, &1}))
 
-            case Algora.Workspace.fetch_top_contributions(Algora.Admin.token(), handle) do
-              {:ok, contributions} -> broadcast(socket.assigns.job, {:contributions_fetched, handle, contributions})
-              {:error, _reason} -> broadcast(socket.assigns.job, {:contributions_failed, handle})
+            case Algora.Workspace.fetch_top_contributions(Algora.Admin.token(), handles) do
+              {:ok, contributions} ->
+                Enum.each(handles, &broadcast(socket.assigns.job, {:contributions_fetched, &1, contributions}))
+
+              {:error, _reason} ->
+                Enum.each(handles, &broadcast(socket.assigns.job, {:contributions_failed, &1}))
             end
           end,
           timeout: length(users_without_contributions) * 60_000,

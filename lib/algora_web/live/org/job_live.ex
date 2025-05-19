@@ -7,6 +7,7 @@ defmodule AlgoraWeb.Org.JobLive do
   alias Algora.Markdown
   alias Algora.Repo
   alias Algora.Settings
+  alias Algora.Workspace
   alias AlgoraWeb.Forms.BountyForm
   alias AlgoraWeb.Forms.ContractForm
   alias AlgoraWeb.Forms.TipForm
@@ -242,7 +243,7 @@ defmodule AlgoraWeb.Org.JobLive do
           <%= for {tab, label, count} <- [
             {"applicants", "Applicants", length(@applicants)},
             {"imports", "Imports", length(@imports)},
-            if(length(@stargazers) > 0, do: {"stargazers", "Stargazers", length(@stargazers)}, else: nil),
+            if(@stargazers_count > 0, do: {"stargazers", "Stargazers", @stargazers_count}, else: nil),
             {"matches", "Matches", length(@matches)}
           ] |> Enum.reject(& is_nil(&1)) do %>
             <label class={[
@@ -262,7 +263,7 @@ defmodule AlgoraWeb.Org.JobLive do
               <span class="flex items-center justify-between w-full gap-2">
                 <span class="text-sm font-medium">{label}</span>
                 <span class="text-xs text-muted-foreground">
-                  {count}{if count == 100, do: "+", else: ""}
+                  {Algora.Util.format_number_compact(count)}
                 </span>
               </span>
             </label>
@@ -894,7 +895,8 @@ defmodule AlgoraWeb.Org.JobLive do
 
   defp assign_applicants(socket) do
     all_applicants = Jobs.list_job_applications(socket.assigns.job)
-    stargazers = Algora.Workspace.list_stargazers(socket.assigns.current_org.id)
+    stargazers = Settings.get_top_stargazers(socket.assigns.job)
+    stargazers_count = Workspace.count_stargazers(socket.assigns.job.user_id)
     applicants = Enum.reject(all_applicants, & &1.imported_at)
     imports = Enum.filter(all_applicants, & &1.imported_at)
     matches = Settings.get_job_matches(socket.assigns.job)
@@ -914,6 +916,7 @@ defmodule AlgoraWeb.Org.JobLive do
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, applicants, contributions_map))
     |> assign(:imports, sort_by_contributions(socket.assigns.job, imports, contributions_map))
     |> assign(:stargazers, sort_by_contributions(socket.assigns.job, stargazers, contributions_map))
+    |> assign(:stargazers_count, stargazers_count)
     |> assign(:matches, matches)
     |> assign(:truncated_matches, truncated_matches)
     |> assign(:contributions_map, contributions_map)

@@ -570,25 +570,33 @@ defmodule Algora.Workspace do
     )
   end
 
-  def list_stargazers(id) do
-    Repo.all(
-      from(s in Stargazer,
-        join: r in assoc(s, :repository),
-        where: r.provider == "github",
-        join: ro in assoc(r, :user),
-        where: ro.id == ^id,
-        join: u in assoc(s, :user),
-        where: u.type != :bot,
-        where: not ilike(u.provider_login, "%bot"),
-        left_join: m in Member,
-        on: m.user_id == u.id and m.org_id == r.user_id,
-        where: is_nil(m.id),
-        distinct: [s.user_id],
-        select_merge: %{user: u},
-        order_by: [desc: s.inserted_at, asc: s.id],
-        limit: 100
-      )
+  def stargazers_query(id) do
+    from(s in Stargazer,
+      join: r in assoc(s, :repository),
+      where: r.provider == "github",
+      join: ro in assoc(r, :user),
+      where: ro.id == ^id,
+      join: u in assoc(s, :user),
+      where: u.type != :bot,
+      where: not ilike(u.provider_login, "%bot"),
+      left_join: m in Member,
+      on: m.user_id == u.id and m.org_id == r.user_id,
+      where: is_nil(m.id),
+      distinct: [s.user_id]
     )
+  end
+
+  def list_stargazers(id) do
+    id
+    |> stargazers_query()
+    |> select_merge([s, r, ro, u], %{user: u})
+    |> limit(100)
+    |> order_by([s], desc: s.inserted_at, asc: s.id)
+    |> Repo.all()
+  end
+
+  def count_stargazers(id) do
+    id |> stargazers_query() |> Repo.aggregate(:count)
   end
 
   def fetch_contributor(repository_id, user_id) do
@@ -641,6 +649,8 @@ defmodule Algora.Workspace do
         where: u.id in ^ids,
         where: not ilike(r.name, "%awesome%"),
         where: not ilike(r.name, "%algorithms%"),
+        where: not ilike(r.name, "%exercises%"),
+        where: not ilike(r.name, "%tutorials%"),
         where: not ilike(repo_owner.provider_login, "%algorithms%"),
         where: not ilike(repo_owner.provider_login, "%firstcontributions%"),
         where: repo_owner.type == :organization or r.stargazers_count > 200,

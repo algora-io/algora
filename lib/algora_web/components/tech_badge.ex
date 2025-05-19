@@ -74,6 +74,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "ios" ->
         "apple"
 
+      "jupyter notebook" ->
+        "jupyter"
+
       t ->
         t
         |> String.replace("+", "plus")
@@ -145,7 +148,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Grafana",
       "LiveView",
       "Apple",
-      "Android"
+      "Android",
+      "Jupyter"
     ]
   end
 end

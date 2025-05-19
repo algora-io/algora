@@ -26,7 +26,7 @@ defmodule AlgoraWeb.OAuthCallbackController do
          {:ok, info} <- Github.OAuth.exchange_access_token(code: code, state: state),
          %{info: info, primary_email: primary, emails: emails, token: token} = info,
          {:ok, user} <- Accounts.register_github_user(conn.assigns[:current_user], primary, info, emails, token) do
-      %{provider_login: info["login"]}
+      %{provider_logins: [info["login"]]}
       |> Algora.Workspace.Jobs.FetchTopContributions.new()
       |> Oban.insert()
 

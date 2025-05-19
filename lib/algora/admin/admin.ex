@@ -123,13 +123,16 @@ defmodule Algora.Admin do
         else
           query
           |> Repo.stream()
-          |> Enum.each(fn user ->
-            %{provider_login: user.provider_login}
+          |> Enum.chunk_every(10)
+          |> Enum.each(fn users ->
+            logins = Enum.map(users, fn user -> user.provider_login end)
+
+            %{provider_logins: logins}
             |> FetchTopContributions.new()
             |> Oban.insert()
             |> case do
-              {:ok, _job} -> IO.puts("Enqueued job for #{user.provider_login}")
-              {:error, error} -> IO.puts("Failed to enqueue job for #{user.provider_login}: #{inspect(error)}")
+              {:ok, _job} -> IO.puts("Enqueued job for #{logins}")
+              {:error, error} -> IO.puts("Failed to enqueue job for #{logins}: #{inspect(error)}")
             end
           end)
         end
@@ -1043,13 +1046,17 @@ defmodule Algora.Admin do
           :ok
 
         {:ok, stargazers} ->
-          Enum.each(stargazers, fn user ->
-            %{provider_login: user["login"], repo_id: repo_id}
+          stargazers
+          |> Enum.chunk_every(10)
+          |> Enum.each(fn users ->
+            logins = Enum.map(users, fn user -> user["login"] end)
+
+            %{provider_logins: logins, repo_id: repo_id}
             |> ImportStargazer.new()
             |> Oban.insert()
             |> case do
-              {:ok, _job} -> Logger.info("Enqueued job for #{user["login"]}")
-              {:error, error} -> Logger.error("Failed to enqueue job for #{user["login"]}: #{inspect(error)}")
+              {:ok, _job} -> Logger.info("Enqueued job for #{logins}")
+              {:error, error} -> Logger.error("Failed to enqueue job for #{logins}: #{inspect(error)}")
             end
           end)
 

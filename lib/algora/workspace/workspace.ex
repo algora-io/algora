@@ -698,72 +698,97 @@ defmodule Algora.Workspace do
     end
   end
 
-  def fetch_top_contributions(token, provider_login) do
-    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
-         {:ok, user} <- ensure_user(token, provider_login),
-         :ok <- add_contributions(token, user.id, contributions) do
+  def fetch_top_contributions(token, provider_logins) when is_list(provider_logins) do
+    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_logins),
+         {:ok, users} <- ensure_users(token, provider_logins),
+         :ok <- add_contributions(token, users, contributions) do
       {:ok, contributions}
     else
       {:error, reason} ->
-        Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")
+        Logger.error("Failed to fetch contributions for #{inspect(provider_logins)}: #{inspect(reason)}")
         {:error, reason}
     end
   end
 
-  def fetch_top_contributions_async(token, provider_login) do
-    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_login),
-         {:ok, user} <- ensure_user(token, provider_login),
-         {:ok, _} <- add_contributions_async(token, user.id, contributions) do
-      {:ok, user}
+  def fetch_top_contributions_async(token, provider_logins) when is_list(provider_logins) do
+    with {:ok, contributions} <- Algora.Cloud.top_contributions(provider_logins),
+         {:ok, users} <- ensure_users(token, provider_logins),
+         :ok <- add_contributions_async(token, users, contributions) do
+      {:ok, users}
     else
       {:error, reason} ->
-        Logger.error("Failed to fetch contributions for #{provider_login}: #{inspect(reason)}")
+        Logger.error("Failed to fetch contributions for #{inspect(provider_logins)}: #{inspect(reason)}")
         {:error, reason}
     end
   end
 
-  def add_contributions_async(_token, user_id, opts) do
-    Repo.transact(fn ->
-      Enum.reduce_while(opts, :ok, fn contribution, _ ->
-        case %{
-               "user_id" => user_id,
-               "repo_full_name" => contribution.repo_name,
-               "contribution_count" => contribution.contribution_count
-             }
-             |> Jobs.SyncContribution.new()
-             |> Oban.insert() do
-          {:ok, _job} -> {:cont, :ok}
-          error -> {:halt, error}
+  defp add_contributions_async(_token, users, contributions) do
+    users_map = Enum.group_by(users, & &1.provider_login)
+
+    results =
+      Enum.map(contributions, fn contribution ->
+        case users_map[contribution.provider_login] do
+          [user] ->
+            %{
+              "user_id" => user.id,
+              "repo_full_name" => contribution.repo_name,
+              "contribution_count" => contribution.contribution_count
+            }
+            |> Jobs.SyncContribution.new()
+            |> Oban.insert()
+
+          _ ->
+            {:error, :user_not_found}
         end
       end)
-    end)
+
+    if Enum.any?(results, &match?({:ok, _}, &1)), do: :ok, else: {:error, :failed}
   end
 
-  def add_contributions(token, user_id, opts) do
+  defp add_contributions(token, users, contributions) do
+    users_map = Enum.group_by(users, & &1.provider_login)
+
     results =
-      Enum.map(opts, fn %{repo_name: repo_name, contribution_count: contribution_count} ->
-        add_contribution(%{
-          token: token,
-          user_id: user_id,
-          repo_full_name: repo_name,
-          contribution_count: contribution_count
-        })
+      Enum.map(contributions, fn contribution ->
+        case users_map[contribution.provider_login] do
+          [user] ->
+            add_contribution(%{
+              token: token,
+              user_id: user.id,
+              repo_full_name: contribution.repo_name,
+              contribution_count: contribution.contribution_count
+            })
+
+          _ ->
+            {:error, :user_not_found}
+        end
       end)
 
     if Enum.any?(results, fn result -> result == :ok end), do: :ok, else: {:error, :failed}
   end
 
-  def add_contribution(%{
-        token: token,
-        user_id: user_id,
-        repo_full_name: repo_full_name,
-        contribution_count: contribution_count
-      }) do
+  defp add_contribution(%{
+         token: token,
+         user_id: user_id,
+         repo_full_name: repo_full_name,
+         contribution_count: contribution_count
+       }) do
     with [repo_owner, repo_name] <- String.split(repo_full_name, "/"),
          {:ok, repo} <- ensure_repository(token, repo_owner, repo_name),
          {:ok, _tech_stack} <- ensure_repo_tech_stack(token, repo),
          {:ok, _contribution} <- upsert_user_contribution(user_id, repo.id, contribution_count) do
       :ok
     end
+  end
+
+  def ensure_users(token, provider_logins) do
+    Repo.transact(fn ->
+      provider_logins
+      |> Enum.map(&ensure_user(token, &1))
+      |> Enum.reduce_while({:ok, []}, fn
+        {:ok, user}, {:ok, users} -> {:cont, {:ok, [user | users]}}
+        {:error, reason}, _ -> {:halt, {:error, reason}}
+      end)
+    end)
   end
 end

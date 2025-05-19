@@ -1,8 +1,8 @@
 defmodule Algora.Cloud do
   @moduledoc false
 
-  def top_contributions(github_handle) do
-    call(AlgoraCloud, :top_contributions, [github_handle])
+  def top_contributions(github_handles) do
+    call(AlgoraCloud, :top_contributions, [github_handles])
   end
 
   def list_top_matches(opts \\ []) do

@@ -42,23 +42,25 @@ config :algora, Oban,
   notifier: Oban.Notifiers.PG,
   repo: Algora.Repo,
   queues: [
+    # --- #
     event_consumers: 1,
     comment_consumers: 1,
     search_consumers: 1,
     delivery_consumers: 1,
-    github_og_image: 5,
     notify_bounty: 1,
     notify_tip_intent: 1,
     notify_claim: 1,
-    notify_transfer: 100,
-    prompt_payout_connect: 100,
     transfers: 1,
     activity_notifier: 1,
     activity_mailer: 1,
-    activity_discord: 10,
     campaign_emails: 1,
     fetch_top_contributions: 1,
-    sync_contribution: 20
+    # --- #
+    github_og_image: 1,
+    notify_transfer: 1,
+    prompt_payout_connect: 1,
+    activity_discord: 1,
+    sync_contribution: 1
   ]
 
 # Configures the mailer

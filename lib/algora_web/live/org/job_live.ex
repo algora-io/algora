@@ -364,6 +364,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   <%= for match <- @truncated_matches do %>
                     <div>
                       <.match_card
+                        current_user={@current_user}
                         user={match.user}
                         tech_stack={@job.tech_stack |> Enum.take(1)}
                         contributions={Map.get(@contributions_map, match.user.id, [])}
@@ -409,6 +410,7 @@ defmodule AlgoraWeb.Org.JobLive do
                   <%= for stargazer <- @stargazers do %>
                     <div>
                       <.match_card
+                        current_user={@current_user}
                         user={stargazer.user}
                         tech_stack={@job.tech_stack |> Enum.take(1)}
                         contributions={Map.get(@contributions_map, stargazer.user.id, [])}
@@ -1168,6 +1170,11 @@ defmodule AlgoraWeb.Org.JobLive do
                   <span :if={@user.country}>
                     {Algora.Misc.CountryEmojis.get(@user.country)}
                   </span>
+                  <%= if @current_user && @current_user.is_admin && @user.provider_meta["hireable"] do %>
+                    <.badge variant="success">
+                      Hireable
+                    </.badge>
+                  <% end %>
                 </.link>
               </div>
               <div
@@ -1194,6 +1201,12 @@ defmodule AlgoraWeb.Org.JobLive do
                     {@user.provider_meta["twitter_handle"]}
                   </span>
                 </.link>
+                <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
+                  <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
+                  <span class="line-clamp-1">
+                    {@user.provider_meta["location"]}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

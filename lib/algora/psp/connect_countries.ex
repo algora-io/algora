@@ -302,7 +302,6 @@ defmodule Algora.PSP.ConnectCountries do
         "LT",
         "LU",
         "LV",
-        "MA",
         "MC",
         "MD",
         "MK",

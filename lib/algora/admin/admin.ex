@@ -21,7 +21,7 @@ defmodule Algora.Admin do
   alias Algora.Workspace
   alias Algora.Workspace.Installation
   alias Algora.Workspace.Jobs.FetchTopContributions
-  alias Algora.Workspace.Jobs.ImportStargazer
+  alias Algora.Workspace.Jobs.ProcessStargazers
   alias Algora.Workspace.Jobs.SyncUser
   alias Algora.Workspace.Repository
   alias Algora.Workspace.Ticket
@@ -1029,10 +1029,10 @@ defmodule Algora.Admin do
     end
   end
 
-  def import_stargazers(repo_url, max_pages \\ nil) when is_binary(repo_url) do
+  def import_stargazers(repo_url, page \\ 1, max_pages \\ nil) when is_binary(repo_url) do
     with {:ok, [owner: repo_owner, repo: repo_name]} <- parse_repo_url(repo_url),
-         {:ok, repo} <- Workspace.ensure_repository(token(), repo_owner, repo_name) do
-      fetch_and_import_stargazers(repo_owner, repo_name, repo.id, 1, max_pages)
+         {:ok, repo} <- Workspace.ensure_repository(Github.TokenPool.get_token(), repo_owner, repo_name) do
+      fetch_and_import_stargazers(repo_owner, repo_name, repo.id, page, max_pages)
     else
       error ->
         Logger.error("Failed to import stargazers: #{inspect(error)}")
@@ -1047,28 +1047,25 @@ defmodule Algora.Admin do
     else
       url = "/repos/#{repo_owner}/#{repo_name}/stargazers?per_page=100&page=#{page}"
 
-      case Github.Client.fetch(token(), url) do
+      case Github.Client.fetch(Github.TokenPool.get_token(), url) do
         {:ok, []} ->
           Logger.info("Finished importing stargazers - no more pages")
           :ok
 
         {:ok, stargazers} ->
-          stargazers
-          |> Enum.chunk_every(10)
-          |> Enum.each(fn users ->
-            logins = Enum.map(users, fn user -> user["login"] end)
+          logins = Enum.map(stargazers, fn user -> user["login"] end)
 
-            %{provider_logins: logins, repo_id: repo_id}
-            |> ImportStargazer.new()
-            |> Oban.insert()
-            |> case do
-              {:ok, _job} -> Logger.info("Enqueued job for #{logins}")
-              {:error, error} -> Logger.error("Failed to enqueue job for #{logins}: #{inspect(error)}")
-            end
-          end)
+          case %{provider_logins: logins, repo_id: repo_id}
+               |> ProcessStargazers.new()
+               |> Oban.insert() do
+            {:ok, _job} ->
+              Logger.info("Enqueued job for #{logins}")
+              fetch_and_import_stargazers(repo_owner, repo_name, repo_id, page + 1, max_pages)
 
-          # Process next page
-          fetch_and_import_stargazers(repo_owner, repo_name, repo_id, page + 1, max_pages)
+            {:error, error} ->
+              Logger.error("Failed to enqueue job for #{logins}: #{inspect(error)}")
+              {:error, :failed_to_enqueue_job}
+          end
 
         error ->
           Logger.error("Failed to fetch stargazers page #{page}: #{inspect(error)}")

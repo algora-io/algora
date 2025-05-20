@@ -2,7 +2,8 @@ defmodule Algora.Workspace.Jobs.FetchTopContributions do
   @moduledoc false
   use Oban.Worker,
     queue: :fetch_top_contributions,
-    max_attempts: 3
+    max_attempts: 2,
+    unique: [period: 30 * 24 * 60 * 60, fields: [:args]]
 
   alias Algora.Github
 

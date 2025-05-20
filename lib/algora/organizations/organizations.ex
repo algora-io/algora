@@ -82,8 +82,15 @@ defmodule Algora.Organizations do
             |> Repo.insert()
 
           existing_org ->
+            updated_params =
+              params.organization
+              |> Map.take([:hiring, :categories, :tech_stack])
+              |> Map.update(:hiring, existing_org.hiring, &(existing_org.hiring || &1))
+              |> Map.update(:categories, existing_org.categories, &Enum.uniq(existing_org.categories ++ &1))
+              |> Map.update(:tech_stack, existing_org.tech_stack, &Enum.uniq(existing_org.tech_stack ++ &1))
+
             existing_org
-            |> Org.changeset(Map.delete(params.organization, :handle))
+            |> Org.changeset(updated_params)
             |> Repo.update()
         end
 

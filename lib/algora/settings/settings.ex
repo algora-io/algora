@@ -102,7 +102,7 @@ defmodule Algora.Settings do
       _ ->
         [
           tech_stack: job.tech_stack,
-          limit: 50,
+          limit: Algora.Cloud.count_matches(job),
           sort_by:
             case get_job_criteria(job) do
               criteria when map_size(criteria) > 0 -> criteria
@@ -116,31 +116,11 @@ defmodule Algora.Settings do
 
   def get_top_stargazers(job) do
     [
+      job: job,
       tech_stack: job.tech_stack,
-      limit: 100,
-      sort_by:
-        case get_job_criteria(job) do
-          criteria when map_size(criteria) > 0 -> criteria
-          _ -> [{"solver", true}]
-        end,
-      users:
-        from(u in User,
-          where:
-            fragment(
-              """
-              exists (
-                select 1
-                from stargazers s
-                inner join repositories r on s.repository_id = r.id
-                where s.user_id = ? and r.user_id = ?
-              )
-              """,
-              u.id,
-              ^job.user_id
-            )
-        )
+      limit: 50
     ]
-    |> Algora.Cloud.list_top_matches()
+    |> Algora.Cloud.list_top_stargazers()
     |> load_matches_2()
   end
 

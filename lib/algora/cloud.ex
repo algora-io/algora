@@ -9,8 +9,16 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :list_top_matches, [opts])
   end
 
+  def list_top_stargazers(opts \\ []) do
+    call(AlgoraCloud, :list_top_stargazers, [opts])
+  end
+
   def truncate_matches(org, matches) do
     call(AlgoraCloud, :truncate_matches, [org, matches])
+  end
+
+  def count_matches(job) do
+    call(AlgoraCloud, :count_matches, [job])
   end
 
   def get_contribution_score(job, user, contributions_map) do

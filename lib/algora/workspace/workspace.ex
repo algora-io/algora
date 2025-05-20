@@ -643,23 +643,35 @@ defmodule Algora.Workspace do
   def list_user_contributions(ids, opts \\ []) do
     query =
       from uc in UserContribution,
+        where: uc.user_id in ^ids,
         join: u in assoc(uc, :user),
         join: r in assoc(uc, :repository),
         join: repo_owner in assoc(r, :user),
-        where: u.id in ^ids,
-        where: not ilike(r.name, "%awesome%"),
-        where: not ilike(r.name, "%algorithms%"),
-        where: not ilike(r.name, "%exercises%"),
-        where: not ilike(r.name, "%tutorials%"),
-        where: not ilike(repo_owner.provider_login, "%algorithms%"),
-        where: not ilike(repo_owner.provider_login, "%firstcontributions%"),
         where: repo_owner.type == :organization or r.stargazers_count > 200,
         # where: fragment("? && ?::citext[]", r.tech_stack, ^(opts[:tech_stack] || [])),
+        where:
+          not (ilike(r.name, "%awesome%") or
+                 ilike(r.name, "%algorithms%") or
+                 ilike(r.name, "%exercises%") or
+                 ilike(r.name, "%tutorials%")),
+        where:
+          not (ilike(repo_owner.provider_login, "%algorithms%") or
+                 ilike(repo_owner.provider_login, "%firstcontributions%")),
         order_by: [
           desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
           desc: r.stargazers_count
         ],
-        select_merge: %{user: u, repository: %{r | user: repo_owner}}
+        select: %UserContribution{
+          contribution_count: uc.contribution_count,
+          user: map(u, [:id, :provider_login]),
+          repository: %{
+            id: r.id,
+            name: r.name,
+            stargazers_count: r.stargazers_count,
+            tech_stack: r.tech_stack,
+            user: map(repo_owner, [:id, :provider_login, :type, :name, :avatar_url, :stargazers_count])
+          }
+        }
 
     query =
       case opts[:limit] do
@@ -748,11 +760,17 @@ defmodule Algora.Workspace do
             |> Oban.insert()
 
           _ ->
+            Logger.error("User not found for #{contribution.provider_login}")
             {:error, :user_not_found}
         end
       end)
 
-    if Enum.any?(results, &match?({:ok, _}, &1)), do: :ok, else: {:error, :failed}
+    if Enum.any?(results, &match?({:ok, _}, &1)) do
+      :ok
+    else
+      Logger.error("Failed to add contributions: #{inspect(results)}")
+      {:error, :failed}
+    end
   end
 
   defp add_contributions(token, users, contributions) do

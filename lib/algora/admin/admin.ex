@@ -147,16 +147,23 @@ defmodule Algora.Admin do
     end
   end
 
-  def mark_as_paid(tx_id) do
+  def mark_as_paid(transfer_id) do
     Repo.transact(fn ->
-      with {:ok, transfer} <- Repo.fetch_by(Transaction, id: tx_id, type: :transfer),
+      with {:ok, transfer} <- Repo.fetch_by(Transaction, id: transfer_id, type: :transfer),
            {:ok, _transfer} <-
              transfer
              |> change(%{status: :succeeded, succeeded_at: DateTime.utc_now()})
              |> Repo.update() do
-        notify_transfer(tx_id)
+        notify_transfer(transfer_id)
       end
     end)
+  end
+
+  def mark_credit_as_paid(credit_id) do
+    with {:ok, credit} <- Repo.fetch_by(Transaction, id: credit_id, type: :credit),
+         {:ok, transfer} <- Payments.fetch_or_create_transfer(credit) do
+      mark_as_paid(transfer.id)
+    end
   end
 
   def release_payment(tx_id) do

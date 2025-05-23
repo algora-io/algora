@@ -845,7 +845,7 @@ defmodule AlgoraWeb.CoreComponents do
           type={@type}
           name={@name}
           id={@id || @name}
-          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          value={normalize_value(@type, @value)}
           class={
             classes([
               "py-[7px] px-[11px] block w-full rounded-lg border-input bg-background",
@@ -864,6 +864,14 @@ defmodule AlgoraWeb.CoreComponents do
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
+  end
+
+  def normalize_value(type, value) when is_list(value) do
+    Phoenix.HTML.Form.normalize_value(type, Enum.join(value, ", "))
+  end
+
+  def normalize_value(type, value) do
+    Phoenix.HTML.Form.normalize_value(type, value)
   end
 
   @doc """

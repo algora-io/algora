@@ -118,7 +118,8 @@ defmodule Algora.Settings do
     [
       job: job,
       tech_stack: job.tech_stack,
-      limit: 50
+      limit: 50,
+      sort_by: get_job_criteria(job)
     ]
     |> Algora.Cloud.list_top_stargazers()
     |> load_matches_2()

@@ -4,8 +4,8 @@ defmodule AlgoraWeb.Router do
   import AlgoraWeb.Analytics, only: [fetch_current_country: 2, fetch_current_page: 2]
   import AlgoraWeb.RedirectPlug
   import AlgoraWeb.UserAuth, only: [fetch_current_user: 2]
-  import Oban.Web.Router
-  import Phoenix.LiveDashboard.Router, only: [live_dashboard: 2]
+
+  require Algora.Cloud
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -36,68 +36,14 @@ defmodule AlgoraWeb.Router do
     redirect(from, to, :temporary)
   end
 
+  Algora.Cloud.use_if_available(AlgoraCloud.Router)
+
   scope "/" do
     forward "/asset", AlgoraWeb.Plugs.RewriteAssetsPlug, upstream: :assets_url
     forward "/ingest/static", AlgoraWeb.Plugs.RewriteIngestStaticPlug, upstream: :ingest_static_url
     forward "/ingest", AlgoraWeb.Plugs.RewriteIngestPlug, upstream: :ingest_url
     forward "/observe/script.js", AlgoraWeb.Plugs.RewriteObserveJSPlug, upstream: "https://plausible.io/js/script.js"
     forward "/observe/event", AlgoraWeb.Plugs.RewriteObserveEventPlug, upstream: "https://plausible.io/api/event"
-  end
-
-  scope "/admin", AlgoraWeb do
-    pipe_through [:browser]
-
-    live_session :admin,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
-      live "/", Admin.AdminLive
-      live "/leaderboard", Admin.LeaderboardLive
-      live "/chat/:id", Chat.ThreadLive
-      live "/campaign", Admin.CampaignLive
-      live "/devs", Admin.DevsLive
-    end
-
-    live_dashboard "/dashboard",
-      metrics: AlgoraWeb.Telemetry,
-      additional_pages: [],
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}]
-
-    oban_dashboard("/oban", resolver: AlgoraWeb.ObanDashboardResolver)
-  end
-
-  scope "/", AlgoraCloud do
-    pipe_through [:browser]
-
-    live_session :admin_cloud,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
-      scope "/admin" do
-        case Code.ensure_compiled(AlgoraCloud.CrawlLive) do
-          {:module, _} -> live "/crawl", CrawlLive
-          _ -> nil
-        end
-
-        case Code.ensure_compiled(AlgoraCloud.SeedLive) do
-          {:module, _} -> live "/seed", SeedLive
-          _ -> nil
-        end
-
-        case Code.ensure_compiled(AlgoraCloud.SeedCSVLive) do
-          {:module, _} -> live "/seed/csv", SeedCSVLive
-          _ -> nil
-        end
-      end
-    end
-
-    live_session :misc,
-      layout: {AlgoraWeb.Layouts, :user},
-      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
-      case Code.ensure_compiled(AlgoraCloud.DemoLive) do
-        {:module, _} -> live "/demo/:company", DemoLive
-        _ -> nil
-      end
-    end
   end
 
   scope "/", AlgoraWeb do

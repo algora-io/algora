@@ -37,4 +37,14 @@ defmodule Algora.Cloud do
       apply(module, function, args)
     end
   end
+
+  defmacro use_if_available(quoted_module, opts \\ []) do
+    module = Macro.expand(quoted_module, __CALLER__)
+
+    if Code.ensure_loaded?(module) do
+      quote do
+        use unquote(quoted_module), unquote(opts)
+      end
+    end
+  end
 end

@@ -13,6 +13,7 @@ module.exports = {
     "./js/**/*.ts",
     "../lib/*_web.ex",
     "../lib/*_web/**/*.*ex",
+    "../lib/*_cloud/**/*.*ex",
     "./svelte/**/*.svelte",
     "../priv/content/**/*.md",
   ],

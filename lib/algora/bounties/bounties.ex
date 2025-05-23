@@ -31,6 +31,7 @@ defmodule Algora.Bounties do
           | {:limit, non_neg_integer() | :infinity}
           | {:ticket_id, String.t()}
           | {:owner_id, String.t()}
+          | {:owner_handles, [String.t()]}
           | {:status, :open | :paid}
           | {:tech_stack, [String.t()]}
           | {:before, %{inserted_at: DateTime.t(), id: String.t()}}
@@ -1191,6 +1192,9 @@ defmodule Algora.Bounties do
 
       {:owner_handle, owner_handle}, query ->
         from([b, o: o, ro: ro] in query, where: o.handle == ^owner_handle or ro.handle == ^owner_handle)
+
+      {:owner_handles, owner_handles}, query ->
+        from([b, o: o, ro: ro] in query, where: o.handle in ^owner_handles or ro.handle in ^owner_handles)
 
       {:status, status}, query ->
         query = where(query, [b], b.status == ^status)

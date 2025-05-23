@@ -41,12 +41,20 @@ defmodule AlgoraWeb.HomeLive do
 
     jobs_by_user = Enum.group_by(Jobs.list_jobs(), & &1.user)
 
-    bounties =
+    bounties0 =
+      Bounties.list_bounties(
+        status: :open,
+        owner_handles: Algora.Settings.get_featured_orgs()
+      )
+
+    bounties1 =
       Bounties.list_bounties(
         status: :open,
         limit: 3,
         amount_gt: Money.new(:USD, 500)
       )
+
+    bounties = bounties0 ++ bounties1
 
     case socket.assigns[:current_user] do
       %{handle: handle} = user when is_binary(handle) ->

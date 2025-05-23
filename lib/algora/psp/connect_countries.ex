@@ -130,7 +130,10 @@ defmodule Algora.PSP.ConnectCountries do
 
   @spec from_code(String.t()) :: String.t()
   def from_code(code) do
-    list() |> Enum.find(&(elem(&1, 1) == code)) |> elem(0) || code
+    case Enum.find(list(), &(elem(&1, 1) == code)) do
+      nil -> code
+      {name, _} -> name
+    end
   end
 
   @spec list_codes() :: [String.t()]
@@ -144,23 +147,39 @@ defmodule Algora.PSP.ConnectCountries do
   def regions do
     %{
       "LATAM" => [
-        "AR",
-        "BO",
         "BR",
-        "CL",
-        "CO",
-        "CR",
-        "DO",
-        "EC",
-        "GT",
-        "GY",
         "MX",
-        "PA",
+        "CO",
+        "AR",
         "PE",
+        "VE",
+        "CL",
+        "GT",
+        "EC",
+        "BO",
+        "HT",
+        "DO",
+        "HN",
+        "CU",
         "PY",
+        "NI",
         "SV",
+        "CR",
+        "PA",
+        "UY",
+        "JM",
         "TT",
-        "UY"
+        "GY",
+        "SR",
+        "BZ",
+        "BS",
+        "BB",
+        "LC",
+        "GD",
+        "VC",
+        "AG",
+        "DM",
+        "KN"
       ],
       "APAC" => [
         "AU",

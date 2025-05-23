@@ -446,7 +446,7 @@ defmodule AlgoraWeb.HomeLive do
                     />
                     <div class="text-sm">
                       <div class="text-base font-semibold text-foreground">Eric Allam</div>
-                      <div class="text-foreground/90 font-medium">Co-founder & CEO</div>
+                      <div class="text-foreground/90 font-medium">Co-founder & CTO</div>
                       <div class="text-muted-foreground font-medium">
                         Trigger.dev <span class="text-orange-400">(YC W23)</span>
                       </div>

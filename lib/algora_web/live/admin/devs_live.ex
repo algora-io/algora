@@ -123,9 +123,16 @@ defmodule AlgoraWeb.Admin.DevsLive do
   defp match_card(assigns) do
     ~H"""
     <div class="h-full relative border ring-1 ring-transparent hover:ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
-      <div class="w-full truncate">
+      <%= if @user.provider_meta["hireable"] do %>
+        <div class="absolute top-0 right-0">
+          <.badge variant="success">
+            Hireable
+          </.badge>
+        </div>
+      <% end %>
+      <div class="w-full">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex items-center gap-4">
+          <div class="flex gap-4 truncate">
             <.link navigate={User.url(@user)}>
               <.avatar class="h-12 w-12 rounded-full">
                 <.avatar_image src={@user.avatar_url} alt={@user.name} />
@@ -135,7 +142,7 @@ defmodule AlgoraWeb.Admin.DevsLive do
               </.avatar>
             </.link>
 
-            <div>
+            <div class="truncate w-full">
               <div class="flex items-center gap-1 text-base text-foreground">
                 <.link navigate={User.url(@user)} class="font-semibold hover:underline">
                   {@user.name}
@@ -145,8 +152,14 @@ defmodule AlgoraWeb.Admin.DevsLive do
                 </.link>
               </div>
               <div
+                :if={@user.provider_meta["company"]}
+                class="flex group-hover:hidden items-center gap-1 font-semibold text-sm text-muted-foreground"
+              >
+                {@user.provider_meta["company"] |> String.trim_leading("https://")}
+              </div>
+              <div
                 :if={@user.provider_meta}
-                class="pt-0.5 flex items-center gap-x-2 gap-y-1 text-xs text-muted-foreground max-w-[250px] 2xl:max-w-none truncate"
+                class="hidden group-hover:flex pt-0.5 items-center gap-x-2 gap-y-2 text-xs text-muted-foreground truncate"
               >
                 <.link
                   :if={@user.provider_login}
@@ -155,53 +168,24 @@ defmodule AlgoraWeb.Admin.DevsLive do
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="github" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">{@user.provider_login}</span>
                 </.link>
                 <.link
-                  :if={@user.provider_meta["twitter_handle"]}
-                  href={"https://x.com/#{@user.provider_meta["twitter_handle"]}"}
+                  :if={@user.provider_meta["twitter_username"]}
+                  href={"https://x.com/#{@user.provider_meta["twitter_username"]}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
-                  <span class="line-clamp-1">
-                    {@user.provider_meta["twitter_handle"]}
-                  </span>
                 </.link>
+                <div :if={@user.provider_meta["location"]} class="flex items-center gap-1 truncate">
+                  <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
+                  <span class="truncate">
+                    {@user.provider_meta["location"]}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="pt-2 flex items-center justify-center gap-2">
-          <.button
-            phx-click="share_opportunity"
-            phx-value-user_id={@user.id}
-            phx-value-type="bounty"
-            variant="outline"
-            size="sm"
-          >
-            Bounty
-          </.button>
-          <.button
-            phx-click="share_opportunity"
-            phx-value-user_id={@user.id}
-            phx-value-type="tip"
-            variant="outline"
-            size="sm"
-          >
-            Interview
-          </.button>
-          <.button
-            phx-click="share_opportunity"
-            phx-value-user_id={@user.id}
-            phx-value-type="contract"
-            phx-value-contract_type={@contract_type}
-            variant="outline"
-            size="sm"
-          >
-            Contract
-          </.button>
         </div>
 
         <div :if={@contributions != []} class="mt-4">
@@ -254,6 +238,13 @@ defmodule AlgoraWeb.Admin.DevsLive do
               </.link>
             <% end %>
           </div>
+        </div>
+
+        <div
+          :if={@user.provider_meta["bio"]}
+          class="mt-4 font-medium text-sm text-muted-foreground line-clamp-3"
+        >
+          {@user.provider_meta["bio"]}
         </div>
       </div>
     </div>

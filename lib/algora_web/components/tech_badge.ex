@@ -65,6 +65,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "reactjs" ->
         "react"
 
+      "react.js" ->
+        "react"
+
       "shell" ->
         "bash"
 

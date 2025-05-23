@@ -917,7 +917,7 @@ defmodule AlgoraWeb.Org.JobLive do
     |> assign(:developers, developers)
     |> assign(:applicants, sort_by_contributions(socket.assigns.job, applicants, contributions_map))
     |> assign(:imports, sort_by_contributions(socket.assigns.job, imports, contributions_map))
-    |> assign(:stargazers, sort_by_contributions(socket.assigns.job, stargazers, contributions_map))
+    |> assign(:stargazers, stargazers)
     |> assign(:stargazers_count, stargazers_count)
     |> assign(:matches, matches)
     |> assign(:truncated_matches, truncated_matches)
@@ -1170,11 +1170,11 @@ defmodule AlgoraWeb.Org.JobLive do
                   <span :if={@user.country}>
                     {Algora.Misc.CountryEmojis.get(@user.country)}
                   </span>
-                  <%= if @current_user && @current_user.is_admin && @user.provider_meta["hireable"] do %>
+                  <%!-- <%= if @current_user && @current_user.is_admin && @user.provider_meta["hireable"] do %>
                     <.badge variant="success">
                       Hireable
                     </.badge>
-                  <% end %>
+                  <% end %> --%>
                 </.link>
               </div>
               <div
@@ -1190,17 +1190,17 @@ defmodule AlgoraWeb.Org.JobLive do
                   <.icon name="github" class="shrink-0 h-4 w-4" />
                   <span class="line-clamp-1">{@user.provider_login}</span>
                 </.link>
-                <.link
-                  :if={@user.provider_meta["twitter_handle"]}
-                  href={"https://x.com/#{@user.provider_meta["twitter_handle"]}"}
+                <%!-- <.link
+                  :if={@user.provider_meta["twitter_username"]}
+                  href={"https://x.com/#{@user.provider_meta["twitter_username"]}"}
                   target="_blank"
                   class="flex items-center gap-1 hover:underline"
                 >
                   <.icon name="tabler-brand-x" class="shrink-0 h-4 w-4" />
                   <span class="line-clamp-1">
-                    {@user.provider_meta["twitter_handle"]}
+                    {@user.provider_meta["twitter_username"]}
                   </span>
-                </.link>
+                </.link> --%>
                 <div :if={@user.provider_meta["location"]} class="flex items-center gap-1">
                   <.icon name="tabler-map-pin" class="shrink-0 h-4 w-4" />
                   <span class="line-clamp-1">

@@ -68,27 +68,33 @@ defmodule AlgoraWeb.Router do
     oban_dashboard("/oban", resolver: AlgoraWeb.ObanDashboardResolver)
   end
 
-  scope "/admin", AlgoraCloud do
+  scope "/", AlgoraCloud do
     pipe_through [:browser]
 
     live_session :admin_cloud,
       layout: {AlgoraWeb.Layouts, :user},
       on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
-      case Code.ensure_compiled(AlgoraCloud.CrawlLive) do
-        {:module, _} -> live "/crawl", CrawlLive
-        _ -> nil
-      end
+      scope "/admin" do
+        case Code.ensure_compiled(AlgoraCloud.CrawlLive) do
+          {:module, _} -> live "/crawl", CrawlLive
+          _ -> nil
+        end
 
-      case Code.ensure_compiled(AlgoraCloud.SeedLive) do
-        {:module, _} -> live "/seed", SeedLive
-        _ -> nil
-      end
+        case Code.ensure_compiled(AlgoraCloud.SeedLive) do
+          {:module, _} -> live "/seed", SeedLive
+          _ -> nil
+        end
 
-      case Code.ensure_compiled(AlgoraCloud.SeedCSVLive) do
-        {:module, _} -> live "/seed/csv", SeedCSVLive
-        _ -> nil
+        case Code.ensure_compiled(AlgoraCloud.SeedCSVLive) do
+          {:module, _} -> live "/seed/csv", SeedCSVLive
+          _ -> nil
+        end
       end
+    end
 
+    live_session :misc,
+      layout: {AlgoraWeb.Layouts, :user},
+      on_mount: [{AlgoraWeb.UserAuth, :current_user}] do
       case Code.ensure_compiled(AlgoraCloud.DemoLive) do
         {:module, _} -> live "/demo/:company", DemoLive
         _ -> nil

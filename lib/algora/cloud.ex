@@ -25,6 +25,10 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :get_contribution_score, [job, user, contributions_map])
   end
 
+  def start do
+    call(AlgoraCloud, :start, [])
+  end
+
   defp call(module, function, args) do
     if :code.which(module) == :non_existing do
       # TODO: call algora API

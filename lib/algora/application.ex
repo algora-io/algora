@@ -36,9 +36,7 @@ defmodule Algora.Application do
         tunnel -> children ++ [{Algora.Tunnel, tunnel}]
       end
 
-    # Start the ETS tables
-    AlgoraWeb.Admin.CampaignLive.start_link()
-    AlgoraWeb.Admin.SeedLive.start_link()
+    Algora.Cloud.start()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

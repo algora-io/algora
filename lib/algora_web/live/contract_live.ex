@@ -441,18 +441,18 @@ defmodule AlgoraWeb.ContractLive do
                     </h1>
                     <div class="text-sm text-muted-foreground space-x-2">
                       <span>Created {Calendar.strftime(@bounty.inserted_at, "%b %d, %Y")}</span>
-                      <span
+                      <%!-- <span
                         :if={@bounty.hours_per_week && @bounty.hours_per_week > 0}
                         class="space-x-2"
                       >
                         <.icon name="tabler-clock" class="h-4 w-4" />
                         {@bounty.hours_per_week} hours per week
-                      </span>
+                      </span> --%>
                     </div>
                   </div>
                 </div>
                 <%= if transaction = Enum.find(@transactions, fn tx -> tx.type == :charge and tx.status == :requires_capture end) do %>
-                  <%= if @current_user && @current_user.id == @contractor.id do %>
+                  <%= if @current_user && @current_user.is_admin do %>
                     <.button
                       phx-click="accept_contract"
                       phx-disable-with="Accepting..."
@@ -475,23 +475,11 @@ defmodule AlgoraWeb.ContractLive do
                   </div>
                 <% end %>
 
-                <%= if @can_create_bounty && @transactions == [] do %>
+                <%= if @can_create_bounty && @transactions == [] && @bounty.contract_type != :marketplace do %>
                   <.button phx-click="reward" variant="secondary">
                     Make payment
                   </.button>
                 <% end %>
-              </div>
-            </.card_content>
-          </.card>
-          <.card :if={@ticket_body_html}>
-            <.card_header>
-              <.card_title>
-                Description
-              </.card_title>
-            </.card_header>
-            <.card_content class="pt-0">
-              <div class="prose prose-invert">
-                {Phoenix.HTML.raw(@ticket_body_html)}
               </div>
             </.card_content>
           </.card>
@@ -507,13 +495,17 @@ defmodule AlgoraWeb.ContractLive do
             <.card_content class="pt-0">
               <div class="flex flex-col xl:flex-row xl:justify-between gap-4">
                 <ul class="space-y-2">
-                  <li class="flex items-center">
-                    <.icon name="tabler-circle-number-1 mr-2" class="size-8 text-success-400" />
-                    Authorize the payment to share the contract offer with {@contractor.name}
+                  <li class="lg:flex">
+                    <.icon
+                      name="tabler-circle-number-1 mr-2"
+                      class="shrink-0 size-8 text-success-400"
+                    /> Authorize the payment to share the contract offer with {@contractor.name}
                   </li>
-                  <li class="flex items-center">
-                    <.icon name="tabler-circle-number-2 mr-2" class="size-8 text-success-400" />
-                    When {@contractor.name} accepts, you will be charged
+                  <li class="lg:flex">
+                    <.icon
+                      name="tabler-circle-number-2 mr-2"
+                      class="shrink-0 size-8 text-success-400"
+                    /> When {@contractor.name} accepts, you will be charged
                     <span class="font-semibold font-display px-1">
                       {Money.to_string!(
                         Bounties.final_contract_amount(@bounty.contract_type, @bounty.amount)
@@ -521,13 +513,16 @@ defmodule AlgoraWeb.ContractLive do
                     </span>
                     into escrow
                   </li>
-                  <li class="flex items-center">
-                    <.icon name="tabler-circle-number-3 mr-2" class="size-8 text-success-400" />
+                  <li class="lg:flex">
+                    <.icon
+                      name="tabler-circle-number-3 mr-2"
+                      class="shrink-0 size-8 text-success-400"
+                    />
                     At the end of the week, release or withhold the funds based on {@contractor.name}'s performance
                   </li>
                 </ul>
 
-                <dl class="-mt-12 space-y-4">
+                <dl class="lg:-mt-12 space-y-4">
                   <dd class="font-display tabular-nums text-5xl text-success-400 font-bold">
                     {Money.to_string!(
                       Bounties.final_contract_amount(@bounty.contract_type, @bounty.amount)
@@ -546,6 +541,18 @@ defmodule AlgoraWeb.ContractLive do
                     Authorize
                   </.button>
                 </dl>
+              </div>
+            </.card_content>
+          </.card>
+          <.card :if={@ticket_body_html}>
+            <.card_header>
+              <.card_title>
+                Description
+              </.card_title>
+            </.card_header>
+            <.card_content class="pt-0">
+              <div class="prose prose-invert">
+                {Phoenix.HTML.raw(@ticket_body_html)}
               </div>
             </.card_content>
           </.card>
@@ -1077,7 +1084,7 @@ defmodule AlgoraWeb.ContractLive do
             tx.type == :charge or
               (tx.type == :debit and tx.status in [:succeeded, :requires_release])
 
-          socket.assigns.current_user.id == socket.assigns.contractor.id ->
+          socket.assigns[:current_user] && socket.assigns.current_user.id == socket.assigns.contractor.id ->
             tx.type == :credit and tx.status == :succeeded
 
           true ->

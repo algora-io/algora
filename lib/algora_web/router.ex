@@ -55,6 +55,7 @@ defmodule AlgoraWeb.Router do
       live "/chat/:id", Chat.ThreadLive
       live "/campaign", Admin.CampaignLive
       live "/seed", Admin.SeedLive
+      live "/seed/csv", Admin.SeedCSVLive
       live "/devs", Admin.DevsLive
     end
 
@@ -75,6 +76,21 @@ defmodule AlgoraWeb.Router do
       on_mount: [{AlgoraWeb.UserAuth, :ensure_admin}, AlgoraWeb.Admin.Nav] do
       case Code.ensure_compiled(AlgoraCloud.CrawlLive) do
         {:module, _} -> live "/crawl", CrawlLive
+        _ -> nil
+      end
+
+      case Code.ensure_compiled(AlgoraCloud.SeedLive) do
+        {:module, _} -> live "/seed", SeedLive
+        _ -> nil
+      end
+
+      case Code.ensure_compiled(AlgoraCloud.SeedCSVLive) do
+        {:module, _} -> live "/seed/csv", SeedCSVLive
+        _ -> nil
+      end
+
+      case Code.ensure_compiled(AlgoraCloud.DemoLive) do
+        {:module, _} -> live "/demo/:company", DemoLive
         _ -> nil
       end
     end

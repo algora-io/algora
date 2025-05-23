@@ -54,8 +54,6 @@ defmodule AlgoraWeb.Router do
       live "/leaderboard", Admin.LeaderboardLive
       live "/chat/:id", Chat.ThreadLive
       live "/campaign", Admin.CampaignLive
-      live "/seed", Admin.SeedLive
-      live "/seed/csv", Admin.SeedCSVLive
       live "/devs", Admin.DevsLive
     end
 

@@ -90,6 +90,9 @@ defmodule Algora.Accounts.User do
     field :executive_name, :string
     field :executive_role, :string
 
+    field :system_bio, :string
+    field :system_bio_meta, :map, default: %{}
+
     has_many :identities, Identity
     has_many :memberships, Member, foreign_key: :user_id
     has_many :members, Member, foreign_key: :org_id

@@ -157,6 +157,7 @@ defmodule Algora.Accounts do
       provider_meta: u.provider_meta,
       avatar_url: u.avatar_url,
       bio: u.bio,
+      system_bio: u.system_bio,
       country: u.country,
       tech_stack: u.tech_stack,
       total_earned: Algora.SQL.money_or_zero(e.total_earned),

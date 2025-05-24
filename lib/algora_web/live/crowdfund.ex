@@ -65,8 +65,7 @@ defmodule AlgoraWeb.CrowdfundLive do
      |> assign(:tip_form, to_form(TipForm.changeset(%TipForm{}, %{})))
      |> assign(:repo_form, to_form(RepoForm.changeset(%RepoForm{}, %{})))
      |> assign(:pending_action, nil)
-     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())
-     |> assign(:plans2, AlgoraWeb.PricingLive.get_plans2())}
+     |> assign(:plans1, AlgoraWeb.PricingLive.get_plans1())}
   end
 
   attr :src, :string, required: true

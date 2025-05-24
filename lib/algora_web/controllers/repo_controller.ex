@@ -16,7 +16,7 @@ defmodule AlgoraWeb.RepoController do
           raise AlgoraWeb.NotFoundError
         end
 
-        case Workspace.ensure_repository(Algora.Admin.token(), repo_owner, repo_name) do
+        case Workspace.ensure_repository(Algora.Cloud.token(), repo_owner, repo_name) do
           {:ok, _repo} ->
             redirect(conn, to: ~p"/go/#{repo_owner}/#{repo_name}")
 

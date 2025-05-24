@@ -28,7 +28,7 @@ defmodule Algora.Organizations do
   end
 
   def onboard_organization(params) do
-    Algora.Admin.alert("New organization: #{inspect(params)}", :critical)
+    Algora.Activities.alert("New organization: #{inspect(params)}", :critical)
 
     user = Repo.get_by(User, email: params.user.email)
 
@@ -346,7 +346,7 @@ defmodule Algora.Organizations do
   end
 
   def init_preview(repo_owner, repo_name) do
-    token = Algora.Admin.token()
+    token = Algora.Cloud.token()
 
     with {:ok, repo} <- Workspace.ensure_repository(token, repo_owner, repo_name),
          {:ok, owner} <- Workspace.ensure_user(token, repo_owner),
@@ -382,12 +382,12 @@ defmodule Algora.Organizations do
       end)
     else
       {:error, error} ->
-        Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
+        Algora.Activities.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
         {:error, error}
     end
   rescue
     error ->
-      Algora.Admin.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
+      Algora.Activities.alert("Error initializing preview for #{repo_owner}/#{repo_name}: #{inspect(error)}", :error)
       {:error, error}
   end
 end

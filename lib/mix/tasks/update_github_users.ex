@@ -4,7 +4,7 @@ defmodule Mix.Tasks.UpdateGithubUsers do
   @moduledoc false
   use Mix.Task
 
-  alias Algora.Admin
+  alias Algora.Cloud
   alias Algora.Github
 
   require Logger
@@ -43,7 +43,7 @@ defmodule Mix.Tasks.UpdateGithubUsers do
         fn user ->
           id = user["github_id"]
 
-          case Github.get_user(Admin.token!(), id) do
+          case Github.get_user(Cloud.token!(), id) do
             {:ok, user} ->
               user
               |> Map.put("github_handle", user["login"])

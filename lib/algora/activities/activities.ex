@@ -7,9 +7,13 @@ defmodule Algora.Activities do
   alias Algora.Activities.Activity
   alias Algora.Activities.DiscordViews
   alias Algora.Activities.Router
+  alias Algora.Activities.SendDiscord
+  alias Algora.Activities.SendEmail
   alias Algora.Activities.Views
   alias Algora.Bounties.Bounty
   alias Algora.Repo
+
+  require Logger
 
   @schema_from_table %{
     identity_activities: Identity,
@@ -284,7 +288,7 @@ defmodule Algora.Activities do
         Enum.reduce(users_to_notify, [], fn
           %{name: display_name, email: email, id: id}, acc ->
             changeset =
-              Algora.Activities.SendEmail.changeset(%{
+              SendEmail.changeset(%{
                 title: title,
                 body: body,
                 user_id: id,
@@ -337,4 +341,76 @@ defmodule Algora.Activities do
     |> String.split("_")
     |> Enum.map_join(" ", &String.capitalize(&1))
   end
+
+  def alert(message, severity \\ :error)
+
+  def alert(message, :error = severity) do
+    Logger.error(message)
+
+    %{
+      url: Algora.config([:discord, :webhook_url]),
+      payload: %{
+        embeds: [
+          %{
+            color: color(severity),
+            title: severity |> to_string() |> String.capitalize(),
+            description: message,
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+    |> SendDiscord.changeset()
+    |> Oban.insert()
+  end
+
+  def alert(message, :critical = severity) do
+    Logger.error(message)
+
+    email_job =
+      SendEmail.changeset(%{
+        title: "#{message}",
+        body: message,
+        name: "Action required",
+        email: "info@algora.io"
+      })
+
+    discord_job =
+      SendDiscord.changeset(%{
+        url: Algora.Settings.get("discord_webhook_url")["critical"] || Algora.config([:discord, :webhook_url]),
+        payload: %{
+          embeds: [
+            %{color: color(severity), title: "Action required", description: message, timestamp: DateTime.utc_now()}
+          ]
+        }
+      })
+
+    Oban.insert_all([email_job, discord_job])
+  end
+
+  def alert(message, severity) do
+    Logger.info(message)
+
+    %{
+      url: Algora.config([:discord, :webhook_url]),
+      payload: %{
+        embeds: [
+          %{
+            color: color(severity),
+            title: severity |> to_string() |> String.capitalize(),
+            description: message,
+            timestamp: DateTime.utc_now()
+          }
+        ]
+      }
+    }
+    |> SendDiscord.changeset()
+    |> Oban.insert()
+  end
+
+  def color(:critical), do: 0xEF4444
+  def color(:error), do: 0xEF4444
+  def color(:debug), do: 0x64748B
+  def color(:info), do: 0xF59E0B
+  def color(_), do: 0xF59E0B
 end

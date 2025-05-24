@@ -4,7 +4,7 @@ defmodule Algora.Github.Poller.Search do
 
   import Ecto.Query, warn: false
 
-  alias Algora.Admin
+  alias Algora.Cloud
   alias Algora.Github
   alias Algora.Github.Command
   alias Algora.Parser
@@ -276,6 +276,6 @@ defmodule Algora.Github.Poller.Search do
     """
 
     body = %{query: query, variables: %{search_query: search_query}}
-    Github.Client.fetch(Admin.token!(), "/graphql", "POST", body)
+    Github.Client.fetch(Cloud.token!(), "/graphql", "POST", body)
   end
 end

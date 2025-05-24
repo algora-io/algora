@@ -227,7 +227,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                        off_session: true
                      }
                    ) do
-              Algora.Admin.alert(
+              Algora.Activities.alert(
                 "Autopay successful (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}).",
                 :debug
               )
@@ -235,7 +235,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
               :ok
             else
               {:error, reason} ->
-                Algora.Admin.alert(
+                Algora.Activities.alert(
                   "Autopay failed (#{autopayable_bounty.owner.name} - #{autopayable_bounty.amount}): #{inspect(reason)}",
                   :error
                 )
@@ -458,7 +458,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
                  ),
                {:ok, _invoice} <-
                  Invoice.pay(invoice, %{payment_method: customer.default_payment_method.provider_id, off_session: true}) do
-            Algora.Admin.alert(
+            Algora.Activities.alert(
               "Autopay successful (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}).",
               :debug
             )
@@ -466,7 +466,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
             {:ok, tip}
           else
             {:error, reason} ->
-              Algora.Admin.alert(
+              Algora.Activities.alert(
                 "Autopay failed (#{payload["repository"]["full_name"]}##{ticket_ref.number} - #{amount}): #{inspect(reason)}",
                 :error
               )
@@ -577,7 +577,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
   defp execute_command(webhook, command) do
     github_ticket = get_github_ticket(webhook)
 
-    Algora.Admin.alert(
+    Algora.Activities.alert(
       "Received unknown command: #{inspect(command)}. Ticket: #{github_ticket["html_url"]}. Hook ID: #{webhook.hook_id}",
       :error
     )
@@ -709,7 +709,7 @@ defmodule AlgoraWeb.Webhooks.GithubController do
           "Error processing event: #{event_action}. Hook ID: #{webhook.hook_id}. Error: #{inspect(error)}"
       end
 
-    Algora.Admin.alert(message, :error)
+    Algora.Activities.alert(message, :error)
   end
 
   defp get_github_ticket(%Webhook{event: event, payload: payload}) do

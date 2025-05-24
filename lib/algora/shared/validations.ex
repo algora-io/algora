@@ -49,7 +49,7 @@ defmodule Algora.Validations do
         if existing_user && existing_user.provider_login == handle do
           changeset
         else
-          case Algora.Workspace.ensure_user(Algora.Admin.token!(), handle) do
+          case Algora.Workspace.ensure_user(Algora.Cloud.token!(), handle) do
             {:ok, user} ->
               if embed_field do
                 put_embed(changeset, embed_field, user)

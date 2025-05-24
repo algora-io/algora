@@ -105,7 +105,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_params(%{"tab" => "activate"}, uri, socket) do
-    Algora.Admin.alert("Activate clicked #{uri}", :warning)
+    Algora.Activities.alert("Activate clicked #{uri}", :warning)
 
     socket =
       if socket.assigns.current_org.subscription_price,
@@ -631,7 +631,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_event("parse_github_urls", %{"import" => %{"github_urls" => urls}}, socket) do
-    Algora.Admin.alert("Job applicant import initiated: #{inspect(urls)}", :info)
+    Algora.Activities.alert("Job applicant import initiated: #{inspect(urls)}", :info)
     # Parse GitHub URLs/handles from input and maintain order
     handles =
       urls
@@ -695,7 +695,7 @@ defmodule AlgoraWeb.Org.JobLive do
   def handle_event("interview", %{"user_id" => user_id}, socket) do
     dev = Enum.find(socket.assigns.developers, &(&1.id == user_id))
 
-    Algora.Admin.alert(
+    Algora.Activities.alert(
       "#{if socket.assigns.current_user, do: "#{socket.assigns.current_user.name} ", else: "#{socket.assigns.current_org.name} "}wants to interview #{dev.provider_login} for #{socket.assigns.job.title}",
       :critical
     )
@@ -797,7 +797,7 @@ defmodule AlgoraWeb.Org.JobLive do
           })
           |> Repo.update()
 
-        Algora.Admin.alert("Wire intent: #{inspect(changeset.changes)}", :critical)
+        Algora.Activities.alert("Wire intent: #{inspect(changeset.changes)}", :critical)
 
         {:noreply,
          socket
@@ -819,7 +819,7 @@ defmodule AlgoraWeb.Org.JobLive do
 
   @impl true
   def handle_info({:fetch_github_user, handle}, socket) do
-    case Algora.Workspace.ensure_user(Algora.Admin.token(), handle) do
+    case Algora.Workspace.ensure_user(Algora.Cloud.token(), handle) do
       {:ok, user} ->
         importing_users =
           update_in(
@@ -939,7 +939,7 @@ defmodule AlgoraWeb.Org.JobLive do
           fn handles ->
             Enum.each(handles, &broadcast(socket.assigns.job, {:contributions_fetching, &1}))
 
-            case Algora.Workspace.fetch_top_contributions(Algora.Admin.token(), handles) do
+            case Algora.Workspace.fetch_top_contributions(Algora.Cloud.token(), handles) do
               {:ok, contributions} ->
                 Enum.each(handles, &broadcast(socket.assigns.job, {:contributions_fetched, &1, contributions}))
 

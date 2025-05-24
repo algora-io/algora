@@ -5,11 +5,11 @@ defmodule AlgoraWeb.ContractLive do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Algora.Admin
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
   alias Algora.Chat
+  alias Algora.Cloud
   alias Algora.Organizations.Member
   alias Algora.Payments
   alias Algora.Payments.Transaction
@@ -1060,7 +1060,7 @@ defmodule AlgoraWeb.ContractLive do
     contractor =
       shared_with
       |> Enum.flat_map(fn provider_id ->
-        case Workspace.ensure_user_by_provider_id(Admin.token!(), provider_id) do
+        case Workspace.ensure_user_by_provider_id(Cloud.token!(), provider_id) do
           {:ok, user} -> [user]
           _ -> []
         end

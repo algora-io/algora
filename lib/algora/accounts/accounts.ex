@@ -433,10 +433,10 @@ defmodule Algora.Accounts do
     Enum.each(orgs, fn org ->
       case Organizations.create_member(org, user, :mod) do
         {:ok, _member} ->
-          Algora.Admin.alert("#{user.email} joined #{org.name}", :info)
+          Algora.Activities.alert("#{user.email} joined #{org.name}", :info)
 
         {:error, _reason} ->
-          Algora.Admin.alert("#{user.email} failed to join #{org.name}", :error)
+          Algora.Activities.alert("#{user.email} failed to join #{org.name}", :error)
       end
     end)
 
@@ -860,5 +860,15 @@ defmodule Algora.Accounts do
 
   def delete_user_media(%UserMedia{} = media) do
     Repo.delete(media)
+  end
+
+  def admins_last_active do
+    Algora.Repo.one(
+      from u in User,
+        where: u.is_admin == true,
+        order_by: [desc: u.last_active_at],
+        select: u.last_active_at,
+        limit: 1
+    )
   end
 end

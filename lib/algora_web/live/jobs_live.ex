@@ -519,7 +519,7 @@ defmodule AlgoraWeb.JobsLive do
     with {:ok, user} <-
            Accounts.get_or_register_user(params["email"], %{type: :organization, display_name: params["company_name"]}),
          {:ok, job} <- params |> Map.put("user_id", user.id) |> Jobs.create_job_posting() do
-      Algora.Admin.alert("Job posting initialized: #{job.company_name}", :info)
+      Algora.Activities.alert("Job posting initialized: #{job.company_name}", :info)
       {:noreply, redirect(socket, external: AlgoraWeb.Constants.get(:calendar_url))}
     else
       {:error, %Ecto.Changeset{} = changeset} ->

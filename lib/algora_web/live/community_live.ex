@@ -1158,13 +1158,13 @@ defmodule AlgoraWeb.CommunityLive do
 
   @impl true
   def handle_event("create_bounty", %{"bounty_form" => params}, socket) do
-    Algora.Admin.alert("Bounty intent: #{inspect(params)}", :critical)
+    Algora.Activities.alert("Bounty intent: #{inspect(params)}", :critical)
     {:noreply, redirect(socket, to: ~p"/auth/signup")}
   end
 
   @impl true
   def handle_event("create_tip", %{"tip_form" => params}, socket) do
-    Algora.Admin.alert("Tip intent: #{inspect(params)}", :critical)
+    Algora.Activities.alert("Tip intent: #{inspect(params)}", :critical)
     {:noreply, redirect(socket, to: ~p"/auth/signup")}
   end
 
@@ -1227,7 +1227,7 @@ defmodule AlgoraWeb.CommunityLive do
 
       case Algora.Util.parse_github_url(url) do
         {:ok, {repo_owner, repo_name}} ->
-          token = Algora.Admin.token()
+          token = Algora.Cloud.token()
 
           case Workspace.ensure_repository(token, repo_owner, repo_name) do
             {:ok, _repo} ->

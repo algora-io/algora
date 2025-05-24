@@ -495,7 +495,7 @@ defmodule AlgoraWeb.CrowdfundLive do
 
       case Algora.Util.parse_github_url(url) do
         {:ok, {repo_owner, repo_name}} ->
-          token = Algora.Admin.token()
+          token = Algora.Cloud.token()
 
           case Workspace.ensure_repository(token, repo_owner, repo_name) do
             {:ok, _repo} ->

@@ -7,11 +7,11 @@ defmodule AlgoraWeb.BountyLive do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
-  alias Algora.Admin
   alias Algora.Bounties
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.LineItem
   alias Algora.Chat
+  alias Algora.Cloud
   alias Algora.Organizations.Member
   alias Algora.Repo
   alias Algora.Util
@@ -715,7 +715,7 @@ defmodule AlgoraWeb.BountyLive do
   end
 
   defp assign_recipient(socket, github_handle) do
-    case Workspace.ensure_user(Admin.token!(), github_handle) do
+    case Workspace.ensure_user(Cloud.token!(), github_handle) do
       {:ok, recipient} ->
         assign(socket, :recipient, recipient)
 
@@ -816,7 +816,7 @@ defmodule AlgoraWeb.BountyLive do
   defp assign_exclusives(socket, shared_with) do
     exclusives =
       Enum.flat_map(shared_with, fn provider_id ->
-        case Workspace.ensure_user_by_provider_id(Admin.token!(), provider_id) do
+        case Workspace.ensure_user_by_provider_id(Cloud.token!(), provider_id) do
           {:ok, user} -> [user]
           _ -> []
         end

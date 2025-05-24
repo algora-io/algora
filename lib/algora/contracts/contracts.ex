@@ -41,11 +41,11 @@ defmodule Algora.Contracts do
   def create_contract(attrs) do
     case %Contract{} |> Contract.changeset(attrs) |> Repo.insert() do
       {:ok, contract} ->
-        Algora.Admin.alert("Contract created: #{contract.id}", :info)
+        Algora.Activities.alert("Contract created: #{contract.id}", :info)
         {:ok, contract}
 
       {:error, error} ->
-        Algora.Admin.alert("Error creating contract: #{inspect(error)}", :error)
+        Algora.Activities.alert("Error creating contract: #{inspect(error)}", :error)
         {:error, error}
     end
   end

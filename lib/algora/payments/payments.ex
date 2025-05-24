@@ -5,11 +5,11 @@ defmodule Algora.Payments do
 
   alias Algora.Accounts
   alias Algora.Accounts.User
-  alias Algora.Admin
   alias Algora.Bounties.Bounty
   alias Algora.Bounties.Claim
   alias Algora.Bounties.Jobs.PromptPayoutConnect
   alias Algora.Bounties.Tip
+  alias Algora.Cloud
   alias Algora.Jobs.JobPosting
   alias Algora.MoneyUtils
   alias Algora.Payments.Account
@@ -688,7 +688,7 @@ defmodule Algora.Payments do
       )
 
       for job <- job_postings do
-        Algora.Admin.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :critical)
+        Algora.Activities.alert("Job payment received! #{job.company_name} #{job.email} #{job.url}", :critical)
       end
 
       auto_txs =
@@ -698,7 +698,7 @@ defmodule Algora.Payments do
           manual? = tx.bounty_id in manual_bounty_ids
 
           if tx.type == :credit and manual? do
-            Admin.alert(
+            Algora.Activities.alert(
               "Contract payment received. URL: #{AlgoraWeb.Endpoint.url()}/#{bounty.owner.handle}/contracts/#{bounty.id}",
               :info
             )
@@ -774,7 +774,7 @@ defmodule Algora.Payments do
       user = Repo.get_by(User, id: tx.user_id)
       bounty = Repo.get_by(Bounty, id: tx.bounty_id)
 
-      Algora.Admin.alert(
+      Algora.Activities.alert(
         "Release #{amount} escrow to #{recipient.handle} for #{AlgoraWeb.Endpoint.url()}/#{user.handle}/contracts/#{bounty.id}",
         :critical
       )

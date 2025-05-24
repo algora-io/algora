@@ -101,7 +101,7 @@ defmodule Algora.Chat do
         participant: Repo.preload(participant, :user)
       })
 
-      Algora.Admin.alert(
+      Algora.Activities.alert(
         "Message received by #{message.sender.email}: #{AlgoraWeb.Endpoint.url()}/admin/chat/#{thread_id}",
         :info
       )

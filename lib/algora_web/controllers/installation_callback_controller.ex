@@ -119,7 +119,7 @@ defmodule AlgoraWeb.InstallationCallbackController do
     # TODO: handle nil last_context
     with {:ok, access_token} <- Accounts.get_access_token(user),
          {:ok, installation} <- Github.find_installation(access_token, installation_id),
-         Algora.Admin.alert(
+         Algora.Activities.alert(
            "New installation for https://github.com/#{installation["account"]["login"]} by #{user.handle} (#{user.email})",
            :info
          ),

@@ -94,13 +94,13 @@ defmodule AlgoraWeb.Webhooks.StripeController do
            data: %{object: %Stripe.Session{customer_details: %{name: name, email: email}}}
          } = event
        ) do
-    Algora.Admin.alert("#{event.type} #{event.id} by #{name} (#{email})", :info)
+    Algora.Activities.alert("#{event.type} #{event.id} by #{name} (#{email})", :info)
     :ok
   end
 
   defp process_event(%Stripe.Event{type: type} = event)
        when type in ["charge.succeeded", "charge.captured", "transfer.created", "checkout.session.completed"] do
-    Algora.Admin.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
+    Algora.Activities.alert("Unhandled Stripe event: #{event.type} #{event.id}", :error)
     :ok
   end
 
@@ -121,11 +121,14 @@ defmodule AlgoraWeb.Webhooks.StripeController do
   end
 
   defp alert(%Stripe.Event{} = event, :ok) do
-    Algora.Admin.alert("Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=true", :debug)
+    Algora.Activities.alert(
+      "Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=true",
+      :debug
+    )
   end
 
   defp alert(%Stripe.Event{} = event, {:error, error}) do
-    Algora.Admin.alert(
+    Algora.Activities.alert(
       "Stripe event: #{event.type} #{event.id} https://dashboard.stripe.com/logs?success=false Error: #{inspect(error)}",
       :error
     )

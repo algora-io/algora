@@ -29,10 +29,22 @@ defmodule Algora.Cloud do
     call(AlgoraCloud, :start, [])
   end
 
+  def alert(message, level \\ :info) do
+    call(AlgoraCloud, :alert, [message, level])
+  end
+
+  def token! do
+    call(AlgoraCloud, :token!, [])
+  end
+
+  def token do
+    call(AlgoraCloud, :token, [])
+  end
+
   defp call(module, function, args) do
     if :code.which(module) == :non_existing do
       # TODO: call algora API
-      {:error, :not_loaded}
+      :ok
     else
       apply(module, function, args)
     end

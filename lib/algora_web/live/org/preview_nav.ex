@@ -67,9 +67,9 @@ defmodule AlgoraWeb.Org.PreviewNav do
         case socket.assigns[:preview_user] do
           nil ->
             if email = params["email"] do
-              Algora.Admin.alert("New preview for #{repo_owner}/#{repo_name} by #{email}", :info)
+              Algora.Activities.alert("New preview for #{repo_owner}/#{repo_name} by #{email}", :info)
             else
-              Algora.Admin.alert("New preview for #{repo_owner}/#{repo_name}", :debug)
+              Algora.Activities.alert("New preview for #{repo_owner}/#{repo_name}", :debug)
             end
 
             case Organizations.init_preview(repo_owner, repo_name) do

@@ -186,7 +186,7 @@ defmodule Algora.Bounties do
         {:ok, bounty}
       else
         {:error, _reason} = error ->
-          Algora.Admin.alert("Error creating bounty: #{inspect(error)}", :error)
+          Algora.Activities.alert("Error creating bounty: #{inspect(error)}", :error)
           error
       end
     end)
@@ -235,7 +235,7 @@ defmodule Algora.Bounties do
         {:ok, bounty}
       else
         {:error, _reason} = error ->
-          Algora.Admin.alert("Error creating bounty: #{inspect(error)}", :error)
+          Algora.Activities.alert("Error creating bounty: #{inspect(error)}", :error)
           error
       end
     end)
@@ -431,7 +431,7 @@ defmodule Algora.Bounties do
   @spec notify_bounty(%{owner: User.t(), bounty: Bounty.t()}, opts :: []) ::
           {:ok, nil} | {:error, atom()}
   def notify_bounty(%{owner: owner, bounty: bounty}, _opts) do
-    Algora.Admin.alert(
+    Algora.Activities.alert(
       "New contract offer: #{AlgoraWeb.Endpoint.url()}/#{owner.handle}/contracts/#{bounty.id}",
       :critical
     )
@@ -744,7 +744,7 @@ defmodule Algora.Bounties do
           )
 
         {:error, reason} ->
-          Algora.Admin.alert("Error creating tip: #{inspect(reason)}", :error)
+          Algora.Activities.alert("Error creating tip: #{inspect(reason)}", :error)
           {:error, reason}
       end
     end)

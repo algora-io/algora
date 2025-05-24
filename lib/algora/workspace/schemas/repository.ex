@@ -15,6 +15,7 @@ defmodule Algora.Workspace.Repository do
     field :url, :string, null: false
     field :description, :string
     field :tech_stack, {:array, :string}, null: false, default: []
+    field :topics, {:array, :string}, null: false, default: []
     field :og_image_url, :string, null: false
     field :og_image_updated_at, :utc_datetime_usec
     field :stargazers_count, :integer, null: false, default: 0
@@ -42,6 +43,7 @@ defmodule Algora.Workspace.Repository do
       og_image_updated_at: DateTime.utc_now(),
       url: meta["html_url"],
       stargazers_count: meta["stargazers_count"],
+      topics: meta["topics"] || [],
       user_id: user.id
     }
 
@@ -54,6 +56,7 @@ defmodule Algora.Workspace.Repository do
       :og_image_url,
       :og_image_updated_at,
       :stargazers_count,
+      :topics,
       :user_id
     ])
     |> generate_id()

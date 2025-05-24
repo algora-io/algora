@@ -34,6 +34,7 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
   defp icon_path("gcp"), do: "googlecloud/googlecloud-original.svg"
   defp icon_path("objectivec"), do: "objectivec/objectivec-plain.svg"
+  defp icon_path("rails"), do: "rails/rails-plain.svg"
   defp icon_path("html"), do: "html5/html5-original.svg"
   defp icon_path("css"), do: "css3/css3-original.svg"
   defp icon_path(tech), do: "#{tech}/#{tech}-original.svg"
@@ -100,6 +101,7 @@ defmodule AlgoraWeb.Components.TechBadge do
       "C++",
       "PHP",
       "Ruby",
+      "Rails",
       "Scala",
       "C",
       "Dart",

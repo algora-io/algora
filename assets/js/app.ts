@@ -570,6 +570,17 @@ const Hooks = {
       });
     },
   },
+  EnterSubmit: {
+    mounted() {
+      this.el.addEventListener("keydown", (e) => {
+        if (e.key == "Enter") {
+          this.el.form.dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+          );
+        }
+      });
+    },
+  },
   ExpandableText: {
     mounted() {
       const button = document.querySelector(`#${this.el.dataset.expandId}`);

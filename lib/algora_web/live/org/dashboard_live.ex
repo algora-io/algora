@@ -1637,7 +1637,7 @@ defmodule AlgoraWeb.Org.DashboardLive do
     """
   end
 
-  defp contract_for_user(contracts, user) do
+  defp contract_for_user(_contracts, _user) do
     nil
   end
 

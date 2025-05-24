@@ -1255,61 +1255,6 @@ defmodule AlgoraWeb.HomeLive do
 
   defp format_number(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 
-  defp pattern(assigns) do
-    ~H"""
-    <div
-      class="absolute inset-x-0 -top-40 -z-10 transform overflow-hidden blur-3xl sm:-top-80"
-      aria-hidden="true"
-    >
-      <div
-        class="left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] rotate-[30deg] relative -translate-x-1/2 bg-gradient-to-tr from-gray-400 to-secondary opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-      >
-      </div>
-    </div>
-
-    <div class="[mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)] absolute inset-x-0 -z-10 h-screen w-full stroke-border">
-      <defs>
-        <pattern
-          id="grid-pattern"
-          width="200"
-          height="200"
-          x="50%"
-          y="-1"
-          patternUnits="userSpaceOnUse"
-        >
-          <path d="M.5 200V.5H200" fill="none" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" stroke-width="0" fill="url(#grid-pattern)" opacity="0.25" />
-    </div>
-
-    <div class="absolute inset-x-0 -z-10 transform overflow-hidden blur-3xl" aria-hidden="true">
-      <div
-        class="left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] relative -translate-x-1/2 bg-gradient-to-tr from-gray-400 to-secondary opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-      >
-      </div>
-    </div>
-    """
-  end
-
-  defp social_icons do
-    %{
-      website: "tabler-world",
-      github: "github",
-      twitter: "tabler-brand-x",
-      youtube: "tabler-brand-youtube",
-      twitch: "tabler-brand-twitch",
-      discord: "tabler-brand-discord",
-      slack: "tabler-brand-slack",
-      linkedin: "tabler-brand-linkedin"
-    }
-  end
-
-  defp social_link(user, :github), do: if(login = user.provider_login, do: "https://github.com/#{login}")
-  defp social_link(user, platform), do: Map.get(user, :"#{platform}_url")
-
   defp assign_user_applications(socket) do
     user_applications =
       if socket.assigns[:current_user] do
@@ -1552,30 +1497,30 @@ defmodule AlgoraWeb.HomeLive do
     """
   end
 
-  defp user_features do
-    [
-      %{
-        title: "Bounties & contracts",
-        description: "Work on new projects and grow your career",
-        src: ~p"/images/screenshots/user-dashboard.png"
-      },
-      %{
-        title: "Your new resume",
-        description: "Showcase your open source contributions",
-        src: ~p"/images/screenshots/profile.png"
-      },
-      %{
-        title: "Embed on your site",
-        description: "Let anyone share a bounty/contract with you",
-        src: ~p"/images/screenshots/embed-profile.png"
-      },
-      %{
-        title: "Payment history",
-        description: "Monitor your earnings in real-time",
-        src: ~p"/images/screenshots/user-transactions.png"
-      }
-    ]
-  end
+  # defp user_features do
+  #   [
+  #     %{
+  #       title: "Bounties & contracts",
+  #       description: "Work on new projects and grow your career",
+  #       src: ~p"/images/screenshots/user-dashboard.png"
+  #     },
+  #     %{
+  #       title: "Your new resume",
+  #       description: "Showcase your open source contributions",
+  #       src: ~p"/images/screenshots/profile.png"
+  #     },
+  #     %{
+  #       title: "Embed on your site",
+  #       description: "Let anyone share a bounty/contract with you",
+  #       src: ~p"/images/screenshots/embed-profile.png"
+  #     },
+  #     %{
+  #       title: "Payment history",
+  #       description: "Monitor your earnings in real-time",
+  #       src: ~p"/images/screenshots/user-transactions.png"
+  #     }
+  #   ]
+  # end
 
   defp yc_logo_cloud(assigns) do
     ~H"""

@@ -2,10 +2,7 @@ defmodule Algora.Settings do
   @moduledoc false
   use Ecto.Schema
 
-  import Ecto.Query
-
   alias Algora.Accounts
-  alias Algora.Accounts.User
   alias Algora.Repo
 
   @primary_key {:key, :string, []}

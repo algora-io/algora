@@ -15,7 +15,6 @@ defmodule AlgoraWeb.CommunityLive do
   alias Algora.Payments.Transaction
   alias Algora.Repo
   alias Algora.Workspace
-  alias Algora.Workspace.Ticket
   alias AlgoraWeb.Components.Footer
   alias AlgoraWeb.Components.Header
   alias AlgoraWeb.Data.PlatformStats

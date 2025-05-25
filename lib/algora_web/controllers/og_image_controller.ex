@@ -134,7 +134,7 @@ defmodule AlgoraWeb.OGImageController do
     conn |> put_status(:not_found) |> text("Not found")
   end
 
-  def take_and_upload_screenshot(path, params \\ "") do
+  def take_and_upload_screenshot(path, params \\ "", opts \\ []) do
     clean_path = Enum.map(path, &(&1 |> String.split("?", parts: 2) |> List.first()))
     dir = Path.join([System.tmp_dir!(), "og"] ++ clean_path)
     File.mkdir_p!(dir)
@@ -150,7 +150,7 @@ defmodule AlgoraWeb.OGImageController do
     url = Path.join([AlgoraWeb.Endpoint.url() | path]) <> params
     object_path = Path.join(["og"] ++ path ++ ["og.png"])
 
-    case ScreenshotQueue.generate_image(url, Keyword.put(@opts, :path, filepath)) do
+    case ScreenshotQueue.generate_image(url, @opts |> Keyword.put(:path, filepath) |> Keyword.merge(opts)) do
       {:ok, _log} ->
         case File.read(filepath) do
           {:ok, body} ->

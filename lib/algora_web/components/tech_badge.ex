@@ -154,7 +154,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "LiveView",
       "Apple",
       "Android",
-      "Jupyter"
+      "Jupyter",
+      "Nomad"
     ]
   end
 end

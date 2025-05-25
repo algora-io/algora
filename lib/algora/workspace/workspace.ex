@@ -653,7 +653,8 @@ defmodule Algora.Workspace do
           not (ilike(r.name, "%awesome%") or
                  ilike(r.name, "%algorithms%") or
                  ilike(r.name, "%exercises%") or
-                 ilike(r.name, "%tutorials%")),
+                 ilike(r.name, "%tutorials%") or
+                 r.name == "developer-roadmap"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or
                  ilike(repo_owner.provider_login, "%firstcontributions%")),

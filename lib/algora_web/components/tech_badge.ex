@@ -81,6 +81,9 @@ defmodule AlgoraWeb.Components.TechBadge do
       "jupyter notebook" ->
         "jupyter"
 
+      "dockerfile" ->
+        "docker"
+
       t ->
         t
         |> String.replace("+", "plus")

@@ -675,6 +675,13 @@ defmodule Algora.Workspace do
         }
 
     query =
+      if opts[:exclude_personal] do
+        where(query, [uc, u, r, repo_owner], repo_owner.type == :organization)
+      else
+        query
+      end
+
+    query =
       case opts[:limit] do
         nil -> query
         limit -> limit(query, ^limit)

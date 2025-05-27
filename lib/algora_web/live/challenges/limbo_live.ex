@@ -75,6 +75,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                     src={~p"/images/challenges/limbo/bg.webp"}
                     alt="Background"
                     class="h-full w-full object-cover object-[60%_100%] md:object-[50%_100%] lg:object-[40%_100%] xl:object-[29%_100%] 2xl:object-[20%_100%]"
+                    style="aspect-ratio: 4096/1326;"
                   />
                 </div>
               </section>

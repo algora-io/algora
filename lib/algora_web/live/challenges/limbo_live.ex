@@ -134,7 +134,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
                         Submit a PR improving the DST to catch the bug for an
-                        <span class="font-display font-bold text-success-400">$800</span>
+                        <span class="font-display font-bold text-[#4ff7d3]">$800</span>
                         reward
                       </span>
                     </li>
@@ -142,7 +142,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       <.icon name="tabler-square-rounded-number-5" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
                         Fix the identified bug for an additional
-                        <span class="font-display font-bold text-success-400">$200</span>
+                        <span class="font-display font-bold text-[#4ff7d3]">$200</span>
                         reward
                       </span>
                     </li>
@@ -367,7 +367,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       </h2>
                       <div class="flex gap-4 sm:gap-6">
                         <.link
-                          class="rounded-xl border-2 border-success-500 p-3 text-success-400 transition-colors hover:border-success-400 hover:text-success-300 sm:p-5"
+                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
                           href="https://discord.gg/jgjmyYgHwB"
                           rel="noopener"
                           target="_blank"
@@ -376,7 +376,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           <.icon name="tabler-brand-discord-filled" class="h-6 w-6 sm:h-12 sm:w-12" />
                         </.link>
                         <.link
-                          class="rounded-xl border-2 border-success-500 p-3 text-success-400 transition-colors hover:border-success-400 hover:text-success-300 sm:p-5"
+                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
                           href="https://x.com/tursodatabase"
                           rel="noopener"
                           target="_blank"
@@ -385,7 +385,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           <.icon name="tabler-brand-x" class="h-6 w-6 sm:h-12 sm:w-12" />
                         </.link>
                         <.link
-                          class="rounded-xl border-2 border-success-500 p-3 text-success-400 transition-colors hover:border-success-400 hover:text-success-300 sm:p-5"
+                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
                           href="https://github.com/tursodatabase/limbo"
                           rel="noopener"
                           target="_blank"
@@ -394,7 +394,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           <.icon name="github" class="h-6 w-6 sm:h-12 sm:w-12" />
                         </.link>
                         <.link
-                          class="rounded-xl border-2 border-success-500 p-3 text-success-400 transition-colors hover:border-success-400 hover:text-success-300 sm:p-5"
+                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
                           href="https://www.youtube.com/@tursodatabase"
                           rel="noopener"
                           target="_blank"
@@ -403,7 +403,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                           <.icon name="tabler-brand-youtube-filled" class="h-6 w-6 sm:h-12 sm:w-12" />
                         </.link>
                         <.link
-                          class="rounded-xl border-2 border-success-500 p-3 text-success-400 transition-colors hover:border-success-400 hover:text-success-300 sm:p-5"
+                          class="rounded-xl border-2 border-[#1ebba2] p-3 text-[#4ff7d3] transition-colors hover:border-[#4ff7d3] hover:text-[#75ffe1] sm:p-5"
                           href="https://www.linkedin.com/company/turso"
                         >
                           <span class="sr-only">LinkedIn</span>

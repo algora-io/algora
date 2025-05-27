@@ -15,15 +15,19 @@ defmodule AlgoraWeb.Components.Header do
   end
 
   attr :class, :string, default: nil
+  attr :hide_banner, :boolean, default: false
 
   def header(assigns) do
     ~H"""
     <header class="absolute inset-x-0 top-0 z-50">
-      <AlgoraWeb.Components.Banner.banner />
+      <%= if !@hide_banner do %>
+        <AlgoraWeb.Components.Banner.banner />
+      <% end %>
       <nav
         class={
           classes([
-            "-mt-3 mx-auto container flex items-center justify-between p-6 lg:px-8",
+            "mx-auto flex container items-center justify-between p-6 lg:px-8",
+            !@hide_banner && "-mt-3",
             @class
           ])
         }

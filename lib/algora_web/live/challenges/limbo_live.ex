@@ -17,59 +17,64 @@ defmodule AlgoraWeb.Challenges.LimboLive do
   def render(assigns) do
     ~H"""
     <div class="relative bg-background">
-      <div class="absolute top-0 z-10 w-full"><Header.header /></div>
+      <div class="absolute top-0 z-10 w-full">
+        <Header.header class="max-w-[100rem]" hide_banner />
+      </div>
       <main class="relative z-0">
         <article>
           <div class="text-white">
             <div class="relative z-20">
               <section class="mb-24 md:mb-36 min-h-[calc(100svh-36px)] md:min-h-0">
-                <div class="relative z-20 mx-auto max-w-7xl px-6 lg:px-8">
+                <div class="relative z-20 mx-auto max-w-[100rem] px-6 lg:px-8">
                   <div class="max-w-5xl pt-28 md:pt-36 2xl:pt-72">
-                    <p class="inline border border-foreground/50 py-2 px-4 rounded-full text-foreground/90">
+                    <a
+                      rel="noopener"
+                      target="_blank"
+                      href="https://turso.tech"
+                      class="inline-flex items-center bg-[#1b252e]/75 hover:bg-[#11181f] ring-1 ring-[#4ff7d3] hover:ring-[#75ffe1] py-2 px-4 rounded-full font-medium text-[#4ff7d3]/90 hover:text-[#4ff7d3] text-sm sm:text-base transition-colors"
+                    >
                       Challenge brought to you by
-                      <a
-                        rel="noopener"
-                        target="_blank"
-                        class="font-semibold text-foreground"
-                        href="https://turso.tech"
-                      >
-                        Turso <.icon name="tabler-external-link" class="mb-1 w-4 h-4" />
-                      </a>
-                    </p>
-                    <h1 class="mt-8 mb-2 text-[1.70rem] font-black leading-9 tracking-tighter mix-blend-exclusion sm:text-5xl md:text-6xl lg:text-7xl">
-                      We rewrote SQLite in Rust<br />
+                      <img
+                        src={~p"/images/wordmarks/turso-aqua.svg"}
+                        alt="Turso"
+                        class="ml-1 h-6 sm:h-7"
+                        style="aspect-ratio: 821/240;"
+                      />
+                    </a>
+                    <h1 class="mt-8 mb-2 text-[1.4rem] font-black tracking-tighter mix-blend-exclusion sm:text-5xl/[3rem] md:text-6xl/[4rem] lg:text-7xl/[5rem]">
+                      Turso is rewriting SQLite in Rust<br />
                       <span style="background: radial-gradient(53.44% 245.78% at 13.64% 46.56%, rgb(110, 231, 183) 0%, rgb(45, 212, 191) 100%) text; -webkit-text-fill-color: transparent;">
                         Find a bug to win <span class="font-display">$1,000</span>
                       </span>
                     </h1>
                     <p class="max-w-xl xl:max-w-2xl mt-6 text-base font-medium tracking-tight text-white/90 shadow-black [text-shadow:_0_1px_0_var(--tw-shadow-color)] md:mt-8 md:text-lg md:text-white/80">
-                      SQLite, while legendary, has remained closed to community contributions. We're changing that by building a modern
+                      SQLite, while legendary, has remained closed to community contributions. We at Turso are changing that by building a modern
                       SQLite alternative in Rust - one that's open source and community-driven. Our goal isn't just features, but
                       rock-solid reliability through <a
                         href="https://turso.tech/blog/a-deep-look-into-our-new-massive-multitenant-architecture"
                         class="font-semibold text-white underline"
                       >Deterministic Simulation Testing</a>. <br /><br />
-                      We're so confident in our testing that we're offering bounties
-                      starting at <span class="font-display font-bold text-foreground">$1,000</span>
-                      for any bugs that lead to data corruption. After our first release, both the scope and bounty amounts will increase as our simulation coverage expands.
+                      We are so confident in DST's ability to find the rarest bugs, that we are offering cash bounties for those who can find cases where a bug survived this testing. In this initial phase of the project, we will offer
+                      <span class="font-display font-bold text-foreground">$1,000</span>
+                      for any bugs that lead to data corruption. After our first official release, we will expand the scope of bugs and size of the bounty.
                     </p>
                   </div>
                 </div>
-                <div class="hidden lg:block top-[36px] absolute inset-0 z-10 h-[calc(100svh-36px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-1% to-transparent to-[69%]">
+                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-r from-background from-1% to-transparent to-[69%]">
                 </div>
-                <div class="hidden lg:block top-[36px] absolute inset-0 z-10 h-[calc(100svh-36px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-[30%]">
+                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-[30%]">
                 </div>
-                <div class="hidden lg:block top-[36px] absolute inset-0 z-10 h-[calc(100svh-36px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-b from-background from-1% to-transparent to-[30%]">
+                <div class="hidden lg:block top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-b from-background from-1% to-transparent to-[30%]">
                 </div>
-                <div class="block lg:hidden top-[36px] absolute inset-0 z-10 h-[calc(100svh-36px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-b from-background from-1% to-transparent to-100%">
+                <div class="block lg:hidden top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-b from-background from-1% to-transparent to-100%">
                 </div>
-                <div class="block lg:hidden top-[36px] absolute inset-0 z-10 h-[calc(100svh-36px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-100%">
+                <div class="block lg:hidden top-[0px] absolute inset-0 z-10 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px] bg-gradient-to-t from-background from-1% to-transparent to-100%">
                 </div>
-                <div class="top-[36px] absolute inset-0 z-0 h-[calc(100svh-36px)] md:h-[750px] 2xl:h-[900px]">
+                <div class="top-[0px] absolute inset-0 z-0 h-[calc(100svh-0px)] md:h-[750px] 2xl:h-[900px]">
                   <img
                     src={~p"/images/challenges/limbo/bg.webp"}
                     alt="Background"
-                    class="h-full w-full object-cover object-[60%_100%] md:object-[50%_100%] lg:object-[40%_100%] xl:object-[30%_100%] 2xl:object-[20%_100%]"
+                    class="h-full w-full object-cover object-[60%_100%] md:object-[50%_100%] lg:object-[40%_100%] xl:object-[29%_100%] 2xl:object-[20%_100%]"
                   />
                 </div>
               </section>

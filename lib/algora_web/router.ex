@@ -109,6 +109,7 @@ defmodule AlgoraWeb.Router do
       live "/crowdfund", CrowdfundLive, :index
       live "/pricing", PricingLive
       live "/challenges", ChallengesLive
+      live "/challenges/limbo", Challenges.LimboLive
       live "/challenges/prettier", Challenges.PrettierLive
       live "/challenges/golem", Challenges.GolemLive
       live "/challenges/tsperf", Challenges.TsperfLive

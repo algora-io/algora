@@ -51,7 +51,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       SQLite, while legendary, has remained closed to community contributions. We at Turso are changing that by building a modern
                       SQLite alternative in Rust - one that's open source and community-driven. Our goal isn't just features, but
                       rock-solid reliability through <a
-                        href="https://turso.tech/blog/a-deep-look-into-our-new-massive-multitenant-architecture"
+                        href="https://turso.tech/blog/introducing-limbo-a-complete-rewrite-of-sqlite-in-rust"
                         class="font-semibold text-white underline"
                       >Deterministic Simulation Testing</a>. <br /><br />
                       We are so confident in DST's ability to find the rarest bugs, that we are offering cash bounties for those who can find cases where a bug survived this testing. In this initial phase of the project, we will offer
@@ -94,7 +94,7 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                       Join us on Discord!
                     </a>
                   </p>
-                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-3xl">
+                  <ul class="mt-4 md:mt-8 space-y-4 md:space-y-2 mx-auto max-w-5xl">
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-1" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
@@ -127,13 +127,13 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Discover a seed value through the simulator that exposes a bug which leads to data corruption
+                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Submit a PR improving the DST to catch the bug for an
+                        Submit a PR with the Deterministic Simulator improvements to catch the bug for an
                         <span class="font-display font-bold text-[#4ff7d3]">$800</span>
                         reward
                       </span>

@@ -47,6 +47,8 @@ defmodule AlgoraWeb.Components.TechBadge do
   defp icon_class("purescript"), do: "bg-white invert saturate-0"
   defp icon_class("astro"), do: "bg-white invert saturate-0"
   defp icon_class("apple"), do: "bg-white invert saturate-0"
+  defp icon_class("github"), do: "bg-white invert saturate-0"
+  defp icon_class("bash"), do: "bg-white invert saturate-0"
   defp icon_class(_tech), do: "bg-transparent"
 
   defp normalize(tech) do
@@ -83,6 +85,9 @@ defmodule AlgoraWeb.Components.TechBadge do
 
       "dockerfile" ->
         "docker"
+
+      "shell" ->
+        "bash"
 
       t ->
         t
@@ -158,7 +163,10 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Apple",
       "Android",
       "Jupyter",
-      "Nomad"
+      "Nomad",
+      "JIRA",
+      "GitHub",
+      "Shell"
     ]
   end
 end

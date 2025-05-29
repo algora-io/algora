@@ -127,13 +127,13 @@ defmodule AlgoraWeb.Challenges.LimboLive do
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before
+                        Improve the Deterministic Simulator to expose a new data corruption bug that the simulator would not have been able to catch before. A data corruption bug is a bug in which the database loses data in a way that cannot be recovered by a future patch
                       </span>
                     </li>
                     <li class="flex w-full items-start pt-2 text-left text-white">
                       <.icon name="tabler-square-rounded-number-4" class="size-8 mr-2 shrink-0" />
                       <span class="text-base font-medium leading-7">
-                        Submit a PR with the Deterministic Simulator improvements to catch the bug for an
+                        Submit a PR with the Deterministic Simulator improvements to catch the bug. If your PR is merged, you'll receive an
                         <span class="font-display font-bold text-[#4ff7d3]">$800</span>
                         reward
                       </span>

@@ -657,7 +657,8 @@ defmodule Algora.Workspace do
                  r.name == "developer-roadmap"),
         where:
           not (ilike(repo_owner.provider_login, "%algorithms%") or
-                 ilike(repo_owner.provider_login, "%firstcontributions%")),
+                 ilike(repo_owner.provider_login, "%firstcontributions%") or
+                 repo_owner.provider_login == "up-for-grabs"),
         order_by: [
           desc: fragment("CASE WHEN ? && ?::citext[] THEN 1 ELSE 0 END", r.tech_stack, ^(opts[:tech_stack] || [])),
           desc: r.stargazers_count

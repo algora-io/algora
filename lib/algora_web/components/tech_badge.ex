@@ -166,7 +166,8 @@ defmodule AlgoraWeb.Components.TechBadge do
       "Nomad",
       "JIRA",
       "GitHub",
-      "Shell"
+      "Shell",
+      "FastAPI"
     ]
   end
 end

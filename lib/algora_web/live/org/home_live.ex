@@ -71,10 +71,15 @@ defmodule AlgoraWeb.Org.HomeLive do
           <div class="flex-1 space-y-2">
             <div>
               <h1 class="text-2xl font-bold">{@org.name}</h1>
-              <p class="mt-1 text-muted-foreground">{@org.bio}</p>
+              <div
+                class="mt-1 text-muted-foreground max-w-none whitespace-pre-line [&_p]:m-0 prose prose-invert"
+                style="margin-top: -28px;"
+              >
+                {Phoenix.HTML.raw(Algora.Markdown.render(@org.bio))}
+              </div>
             </div>
 
-            <div class="flex gap-4 items-center">
+            <div class="flex gap-4 items-center" style="margin-top: -28px;">
               <%= for {platform, icon} <- social_links(),
                       url = social_link(@org, platform),
                       not is_nil(url) do %>

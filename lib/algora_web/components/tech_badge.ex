@@ -17,10 +17,7 @@ defmodule AlgoraWeb.Components.TechBadge do
     <.badge variant={@variant} {@rest}>
       <%= if Enum.any?(langs(), &(normalize(&1) == @tech_lower)) do %>
         <.avatar class="w-4 h-4 mr-1 rounded-sm">
-          <.avatar_image
-            src={"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(@tech_lower)}"}
-            class={icon_class(@tech_lower)}
-          />
+          <.avatar_image src={icon_url(@tech_lower)} class={icon_class(@tech_lower)} />
           <.avatar_fallback>
             {Algora.Util.initials(@tech, 1)}
           </.avatar_fallback>
@@ -30,6 +27,13 @@ defmodule AlgoraWeb.Components.TechBadge do
     </.badge>
     """
   end
+
+  defp icon_url("nvidia"), do: "/images/logos/nvidia.svg"
+  defp icon_url("firecracker"), do: "/images/logos/firecracker.png"
+  defp icon_url("ray"), do: "/images/logos/ray.png"
+  defp icon_url("vllm"), do: "/images/logos/vllm.png"
+  defp icon_url("huggingface"), do: "/images/logos/huggingface.png"
+  defp icon_url(tech), do: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/#{icon_path(tech)}"
 
   defp icon_path("aws"), do: "amazonwebservices/amazonwebservices-plain-wordmark.svg"
   defp icon_path("gcp"), do: "googlecloud/googlecloud-original.svg"
@@ -86,8 +90,14 @@ defmodule AlgoraWeb.Components.TechBadge do
       "dockerfile" ->
         "docker"
 
-      "shell" ->
-        "bash"
+      "nix" ->
+        "nixos"
+
+      "cuda" ->
+        "nvidia"
+
+      "transformers" ->
+        "huggingface"
 
       t ->
         t
@@ -167,7 +177,13 @@ defmodule AlgoraWeb.Components.TechBadge do
       "JIRA",
       "GitHub",
       "Shell",
-      "FastAPI"
+      "FastAPI",
+      "NixOS",
+      "Nvidia",
+      "Firecracker",
+      "Ray",
+      "vLLM",
+      "Huggingface"
     ]
   end
 end

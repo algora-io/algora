@@ -164,6 +164,7 @@ if config_env() == :prod do
     plausible_embed_url: System.get_env("PLAUSIBLE_EMBED_URL"),
     posthog_project_id: System.get_env("POSTHOG_PROJECT_ID"),
     assets_url: System.get_env("ASSETS_URL"),
+    storage_url: System.get_env("STORAGE_URL"),
     ingest_url: System.get_env("INGEST_URL"),
     ingest_static_url: System.get_env("INGEST_STATIC_URL"),
     ingest_token: System.get_env("INGEST_TOKEN")

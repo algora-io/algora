@@ -121,14 +121,14 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate">
-          <div class="h-full mx-auto max-w-[90rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
+          <div class="h-full mx-auto max-w-[88rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
-              <div class="w-full flex flex-col lg:flex-row gap-6">
-                <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div class="w-full flex flex-col lg:flex-row lg:justify-center gap-6">
+                <div class="w-full flex flex-col items-center lg:items-start text-center lg:text-left">
                   <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
                     Meet your new <span class="text-emerald-400">hire today</span>
                   </h1>
-                  <p class="mt-6 text-lg leading-8 text-muted-foreground max-w-xl">
+                  <p class="mt-4 text-lg leading-8 text-muted-foreground max-w-xl">
                     Access a curated network of top 1% engineers, pre-vetted through their open source contributions.
                     <span class="font-semibold">Only pay when you hire.</span>
                   </p>
@@ -357,7 +357,7 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
 
-                <div class="flex-1 max-w-2xl text-left -mt-4">
+                <div class="max-w-[38rem] text-left -mt-4">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
                       <h2 class="text-3xl text-center font-semibold leading-7 text-white">

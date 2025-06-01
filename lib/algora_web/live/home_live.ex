@@ -149,7 +149,7 @@ defmodule AlgoraWeb.HomeLive do
                       </figcaption>
                     </figure>
                   </div>
-                  <div class="pt-4 grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-6 gap-x-4 mx-auto items-center justify-center">
+                  <div class="sm:max-w-2xl grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
                     <.link class="relative flex items-center justify-center" href={~p"/cal"}>
                       <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
                     </.link>
@@ -347,10 +347,10 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
 
-                <div class="flex-1 max-w-lg text-left">
+                <div class="flex-1 max-w-md text-left">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
-                      <h2 class="text-xl font-semibold leading-7 text-white">
+                      <h2 class="text-2xl font-semibold leading-7 text-white">
                         View your candidates today
                       </h2>
                       <ul class="mt-4 space-y-4 md:space-y-1 text-sm">

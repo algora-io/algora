@@ -112,7 +112,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate">
-          <div class="h-full mx-auto max-w-7xl px-6 lg:px-8 flex flex-col items-center justify-center pt-36 pb-12">
+          <div class="h-full mx-auto max-w-7xl px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row gap-6">
                 <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -122,7 +122,7 @@ defmodule AlgoraWeb.HomeLive do
                   <p class="mt-6 text-lg leading-8 text-muted-foreground max-w-xl">
                     Access a curated network of top 1% engineers, pre-vetted through their open source contributions. Only pay when you hire.
                   </p>
-                  <div class="pt-6 flex-1 mr-auto max-w-xl flex flex-col justify-between">
+                  <div class="pt-6 mr-auto max-w-xl flex flex-col justify-between">
                     <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
                       <blockquote class="text-base font-medium text-foreground/90 flex-grow">
                         <p>
@@ -149,7 +149,7 @@ defmodule AlgoraWeb.HomeLive do
                       </figcaption>
                     </figure>
                   </div>
-                  <div class="sm:max-w-2xl grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
+                  <div class="pt-6 sm:max-w-2xl grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
                     <.link class="relative flex items-center justify-center" href={~p"/cal"}>
                       <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
                     </.link>
@@ -347,26 +347,26 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
 
-                <div class="flex-1 max-w-md text-left">
+                <div class="flex-1 max-w-md text-left -mt-4">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
                       <h2 class="text-2xl font-semibold leading-7 text-white">
-                        View your candidates today
+                        Get started now
                       </h2>
                       <ul class="mt-4 space-y-4 md:space-y-1 text-sm">
-                        <li class="flex w-full items-center text-left text-white">
+                        <li class="flex w-full items-center text-left text-foreground/80">
                           <.icon name="tabler-square-rounded-number-1" class="size-6 mr-2 shrink-0" />
                           <span class="font-medium leading-7">
                             Submit your job description
                           </span>
                         </li>
-                        <li class="flex w-full items-center text-left text-white">
+                        <li class="flex w-full items-center text-left text-foreground/80">
                           <.icon name="tabler-square-rounded-number-2" class="size-6 mr-2 shrink-0" />
                           <span class="font-medium leading-7">
                             Receive your candidates <span class="text-emerald-300">within hours</span>
                           </span>
                         </li>
-                        <li class="flex w-full items-center text-left text-white">
+                        <li class="flex w-full items-center text-left text-foreground/80">
                           <.icon name="tabler-square-rounded-number-3" class="size-6 mr-2 shrink-0" />
                           <span class="font-medium leading-7">
                             Interview <span class="text-emerald-300">within days</span>

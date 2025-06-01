@@ -434,6 +434,99 @@ defmodule AlgoraWeb.HomeLive do
         <section class="relative isolate pb-16 sm:pb-40">
           <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
+              Latest from the community
+            </h2>
+            <div class="grid gap-4 max-w-2xl mx-auto">
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://notes.fm/images/favicon.png"
+                  alt="Notes"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">Notes hired with Algora</p>
+                  <p class="text-sm text-muted-foreground">May 5, 2025</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://notes.fm/images/favicon.png"
+                  alt="Notes"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">Notes hired with Algora</p>
+                  <p class="text-sm text-muted-foreground">May 5, 2025</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://avatars.githubusercontent.com/u/181807673?s=200&v=4"
+                  alt="Outspeed"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">Outspeed is hiring with Algora</p>
+                  <p class="text-sm text-muted-foreground">May 12, 2025</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://avatars.githubusercontent.com/u/142257755?s=200&v=4"
+                  alt="DotTxt"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">.txt is hiring with Algora</p>
+                  <p class="text-sm text-muted-foreground">May 15, 2025</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://avatars.githubusercontent.com/u/139391156?s=200&v=4"
+                  alt="Turso"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">Turso launches open source challenge</p>
+                  <p class="text-sm text-muted-foreground">May 18, 2025</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://avatars.githubusercontent.com/u/129894407?v=4"
+                  alt="Prequel"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">Prequel launches bounty program</p>
+                  <p class="text-sm text-muted-foreground">May 22, 2025</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg bg-card p-4">
+                <img
+                  src="https://avatars.githubusercontent.com/u/194294730?s=200&v=4"
+                  alt="Unsiloed"
+                  class="size-12 rounded-lg bg-background p-2"
+                />
+                <div class="flex-1">
+                  <p class="text-foreground">Unsiloed launches bounty program</p>
+                  <p class="text-sm text-muted-foreground">May 25, 2025</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="relative isolate pb-16 sm:pb-40">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <h2 class="mb-8 text-3xl font-bold text-card-foreground text-center">
               Join the open source economy
             </h2>
             <div class="mt-6 sm:mt-10 flex gap-4 justify-center">
@@ -626,237 +719,6 @@ defmodule AlgoraWeb.HomeLive do
       end
 
     assign(socket, :user_applications, user_applications)
-  end
-
-  defp events(assigns) do
-    ~H"""
-    <ul class="w-full pl-10 relative space-y-8">
-      <li :for={{event, index} <- @events |> Enum.with_index()} class="relative">
-        <.event_item type={event.type} event={event} last?={index == length(@events) - 1} />
-      </li>
-    </ul>
-    """
-  end
-
-  defp event_item(%{type: :transaction} = assigns) do
-    assigns = assign(assigns, :transaction, assigns.event.item)
-
-    ~H"""
-    <div>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={
-            if @transaction.ticket.repository,
-              do: @transaction.ticket.url,
-              else: ~p"/#{@transaction.linked_transaction.user.handle}/home"
-          }
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
-                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@transaction.user.name}
-                      src={@transaction.user.avatar_url}
-                    />
-                  </span>
-                  <span class="relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl ring-4 bg-gray-950 ring-black">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@transaction.linked_transaction.user.name}
-                      src={@transaction.linked_transaction.user.avatar_url}
-                    />
-                  </span>
-                </div>
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@transaction.linked_transaction.user.name}
-                    </span>
-                    awarded
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@transaction.user.name}
-                    </span>
-                    a
-                    <span class={
-                      classes([
-                        "font-bold font-display transition-colors",
-                        cond do
-                          @transaction.bounty_id && @transaction.ticket.repository ->
-                            "text-success-400 group-hover:text-success-300"
-
-                          @transaction.bounty_id && !@transaction.ticket.repository ->
-                            "text-blue-400 group-hover:text-blue-300"
-
-                          true ->
-                            "text-red-400 group-hover:text-red-300"
-                        end
-                      ])
-                    }>
-                      {Money.to_string!(@transaction.net_amount)}
-                      <%= if @transaction.bounty_id do %>
-                        <%= if @transaction.ticket.repository do %>
-                          bounty
-                        <% else %>
-                          contract
-                        <% end %>
-                      <% else %>
-                        tip
-                      <% end %>
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@transaction.succeeded_at}>
-                      {cond do
-                        @transaction.bounty_id && !@transaction.ticket.repository ->
-                          start_month = Calendar.strftime(@transaction.succeeded_at, "%B")
-                          end_date = Date.add(@transaction.succeeded_at, 30)
-                          end_month = Calendar.strftime(end_date, "%B")
-
-                          if start_month == end_month do
-                            "#{start_month} #{Calendar.strftime(end_date, "%Y")}"
-                          else
-                            "#{start_month} - #{end_month} #{Calendar.strftime(end_date, "%Y")}"
-                          end
-
-                        true ->
-                          Algora.Util.time_ago(@transaction.succeeded_at)
-                      end}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
-  defp event_item(%{type: :job} = assigns) do
-    assigns = assign(assigns, :job, assigns.event.item)
-
-    ~H"""
-    <div>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={~p"/#{@job.user.handle}/jobs"}
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
-                  <span class="ml-6 relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@job.user.name}
-                      src={@job.user.avatar_url}
-                    />
-                  </span>
-                </div>
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@job.user.name}
-                    </span>
-                    is hiring!
-                    <span class="font-semibold text-purple-400 group-hover:text-purple-300 transition-colors">
-                      {@job.title}
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@job.inserted_at}>
-                      {Algora.Util.time_ago(@job.inserted_at)}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
-  end
-
-  defp event_item(%{type: :bounty} = assigns) do
-    assigns = assign(assigns, :bounty, assigns.event.item)
-
-    ~H"""
-    <div>
-      <div class="relative -ml-[2.75rem]">
-        <span
-          :if={!@last?}
-          class="absolute left-1 top-6 h-full w-0.5 block ml-[2.75rem] bg-muted-foreground/25"
-          aria-hidden="true"
-        >
-        </span>
-        <.link
-          rel="noopener"
-          target="_blank"
-          class="w-full group inline-flex"
-          href={
-            if @bounty.repository,
-              do: @bounty.ticket.url,
-              else: ~p"/#{@bounty.owner.handle}/home"
-          }
-        >
-          <div class="w-full relative flex space-x-3">
-            <div class="w-full flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-              <div class="w-full flex items-center gap-3">
-                <div class="flex -space-x-1 ring-8 ring-black">
-                  <span class="ml-6 relative shrink-0 overflow-hidden flex h-9 w-9 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gray-950">
-                    <img
-                      class="aspect-square h-full w-full"
-                      alt={@bounty.owner.name}
-                      src={@bounty.owner.avatar_url}
-                    />
-                  </span>
-                </div>
-                <div class="w-full z-10 flex gap-3 items-start xl:items-end">
-                  <p class="text-xs transition-colors text-muted-foreground group-hover:text-foreground/90 sm:text-xl text-left">
-                    <span class="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
-                      {@bounty.owner.name}
-                    </span>
-                    shared a
-                    <span class="font-bold font-display transition-colors text-cyan-400 group-hover:text-cyan-300">
-                      {Money.to_string!(@bounty.amount)} bounty
-                    </span>
-                  </p>
-                  <div class="ml-auto xl:ml-0 xl:mb-[2px] whitespace-nowrap text-xs text-muted-foreground sm:text-sm">
-                    <time datetime={@bounty.inserted_at}>
-                      {Algora.Util.time_ago(@bounty.inserted_at)}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </.link>
-      </div>
-    </div>
-    """
   end
 
   # defp user_features do

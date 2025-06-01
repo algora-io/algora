@@ -25,6 +25,15 @@ defmodule AlgoraWeb.HomeLive do
 
   require Logger
 
+  defp placeholder_text do
+    """
+    - GitHub looks like a green carpet, red flag if wearing suit
+    - Great communication skills, can talk to customers
+    - Must be a shark, aggressive, has urgency and agency
+    - Has contributions to open source inference engines (like vLLM)
+    """
+  end
+
   @impl true
   def mount(params, _session, socket) do
     total_contributors = get_contributors_count()
@@ -112,7 +121,7 @@ defmodule AlgoraWeb.HomeLive do
 
       <main class="bg-black relative overflow-hidden">
         <section class="relative isolate">
-          <div class="h-full mx-auto max-w-7xl px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
+          <div class="h-full mx-auto max-w-[90rem] px-6 lg:px-8 flex flex-col items-center justify-center pt-32 pb-12">
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row gap-6">
                 <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -120,11 +129,12 @@ defmodule AlgoraWeb.HomeLive do
                     Meet your new <span class="text-emerald-400">hire today</span>
                   </h1>
                   <p class="mt-6 text-lg leading-8 text-muted-foreground max-w-xl">
-                    Access a curated network of top 1% engineers, pre-vetted through their open source contributions. Only pay when you hire.
+                    Access a curated network of top 1% engineers, pre-vetted through their open source contributions.
+                    <span class="font-semibold">Only pay when you hire.</span>
                   </p>
                   <div class="pt-6 mr-auto max-w-xl flex flex-col justify-between">
                     <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
-                      <blockquote class="text-sm font-medium text-foreground/90 flex-grow">
+                      <blockquote class="text-base font-medium text-foreground/90 flex-grow">
                         <p>
                           "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
                         </p>
@@ -149,7 +159,7 @@ defmodule AlgoraWeb.HomeLive do
                       </figcaption>
                     </figure>
                   </div>
-                  <div class="pt-6 sm:max-w-2xl grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
+                  <div class="pt-6 sm:max-w-[40rem] grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4 mx-auto items-center justify-center sm:ml-0">
                     <.link class="relative flex items-center justify-center" href={~p"/cal"}>
                       <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
                     </.link>
@@ -347,44 +357,59 @@ defmodule AlgoraWeb.HomeLive do
                   </div>
                 </div>
 
-                <div class="flex-1 max-w-md text-left -mt-4">
+                <div class="flex-1 max-w-2xl text-left -mt-4">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
-                      <h2 class="text-3xl font-semibold leading-7 text-white">
+                      <h2 class="text-3xl text-center font-semibold leading-7 text-white">
                         Get started in seconds
                       </h2>
-                      <ul class="mt-4 space-y-4 md:space-y-1 text-sm">
-                        <li class="flex w-full items-center text-left text-foreground/80">
-                          <.icon name="tabler-square-rounded-number-1" class="size-6 mr-2 shrink-0" />
-                          <span class="font-medium leading-7">
-                            Submit your job description
+                      <ul class="mt-2 flex items-center justify-center gap-6 text-sm">
+                        <li class="flex items-center text-left text-foreground/80">
+                          <.icon
+                            name="tabler-square-rounded-number-1"
+                            class="size-6 mr-2 shrink-0 text-emerald-300"
+                          />
+                          <span class="font-medium leading-7 whitespace-nowrap">
+                            Submit JD
                           </span>
                         </li>
-                        <li class="flex w-full items-center text-left text-foreground/80">
-                          <.icon name="tabler-square-rounded-number-2" class="size-6 mr-2 shrink-0" />
-                          <span class="font-medium leading-7">
-                            Receive your candidates <span class="text-emerald-300">within hours</span>
+                        <li class="flex items-center text-left text-foreground/80">
+                          <.icon
+                            name="tabler-square-rounded-number-2"
+                            class="size-6 mr-2 shrink-0 text-emerald-300"
+                          />
+                          <span class="font-medium leading-7 whitespace-nowrap">
+                            Receive matches <span class="text-emerald-300">within hours</span>
                           </span>
                         </li>
-                        <li class="flex w-full items-center text-left text-foreground/80">
-                          <.icon name="tabler-square-rounded-number-3" class="size-6 mr-2 shrink-0" />
-                          <span class="font-medium leading-7">
+                        <li class="flex items-center text-left text-foreground/80">
+                          <.icon
+                            name="tabler-square-rounded-number-3"
+                            class="size-6 mr-2 shrink-0 text-emerald-300"
+                          />
+                          <span class="font-medium leading-7 whitespace-nowrap">
                             Interview <span class="text-emerald-300">within days</span>
                           </span>
                         </li>
                       </ul>
 
-                      <form class="mt-8 flex flex-col gap-6">
-                        <div>
-                          <.input
-                            type="textarea"
-                            name="job_description"
-                            value=""
-                            label="Job description / careers URL"
-                            rows="4"
-                            placeholder="Tell us about the role and your requirements..."
-                          />
-                        </div>
+                      <form class="mt-6 flex flex-col gap-6">
+                        <.input
+                          type="textarea"
+                          name="job_description"
+                          value=""
+                          label="Job description / careers URL"
+                          rows="3"
+                          placeholder="Tell us about the role and your requirements..."
+                        />
+                        <.input
+                          type="textarea"
+                          name="job_description"
+                          value=""
+                          label="Describe your ideal candidate, heuristics, green/red flags etc."
+                          rows="4"
+                          placeholder={placeholder_text()}
+                        />
                         <.input
                           name="email"
                           value=""

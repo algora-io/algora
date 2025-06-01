@@ -149,6 +149,202 @@ defmodule AlgoraWeb.HomeLive do
                       </figcaption>
                     </figure>
                   </div>
+                  <div class="pt-4 grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-6 gap-x-4 mx-auto items-center justify-center">
+                    <.link class="relative flex items-center justify-center" href={~p"/cal"}>
+                      <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
+                      <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/remotion"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/remotion.png"}
+                        alt="Remotion"
+                        class="col-auto w-full saturate-0"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/zio"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/zio.png"}
+                        alt="ZIO"
+                        class="mt-1 sm:mt-3 w-[70%] col-auto brightness-0 invert"
+                      />
+                    </.link>
+                    <.link
+                      class="relative flex items-center justify-center"
+                      navigate={~p"/activepieces"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/activepieces.svg"}
+                        alt="Activepieces"
+                        class="col-auto brightness-0 invert"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/tembo"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/tembo.png"}
+                        alt="Tembo"
+                        class="col-auto saturate-0"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/maybe.png"}
+                        alt="Maybe"
+                        class="col-auto w-full saturate-0"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
+                      <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/deskflow"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/synergy.svg"}
+                        alt="Synergy"
+                        class="col-auto saturate-0 invert w-[80%]"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/Capgo"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/capgo.png"}
+                        alt="Capgo"
+                        class="col-auto w-[80%]"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/tracemachina"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/nativelink.png"}
+                        alt="Nativelink"
+                        class="col-auto saturate-0"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/softwaremill"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/softwaremill.png"}
+                        alt="Softwaremill"
+                        class="col-auto invert"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/CapSoftware"}>
+                      <Wordmarks.cap class="col-auto saturate-0 invert w-[80%]" alt="Cap" />
+                    </.link>
+                    <.link
+                      class="relative flex items-center justify-center"
+                      href={~p"/spaceandtimelabs"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/spaceandtimelabs.svg"}
+                        alt="Space and Time"
+                        class="col-auto saturate-0"
+                      />
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-base sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/getkyo"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/logos/kyo.png"}
+                        alt="Kyo"
+                        class="size-6 sm:size-5 mr-1 sm:mr-1 saturate-0 invert"
+                      /> Kyo
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/permitio"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/permit.svg"}
+                        alt="Permit"
+                        class="col-auto saturate-0"
+                      />
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-lg sm:text-lg whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/coollabsio"}
+                    >
+                      Coolify
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/encoredev"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/encore.svg"}
+                        alt="Encore"
+                        class="col-auto invert w-[70%]"
+                      />
+                    </.link>
+                    <.link class="relative flex items-center justify-center" href={~p"/tolgee"}>
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/tolgee.png"}
+                        alt="Tolgee"
+                        class="col-auto w-[80%]"
+                      />
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-base sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/keygen-sh"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/keygen.svg"}
+                        alt="Keygen"
+                        class="saturate-0 w-5 sm:w-4 mr-1 sm:mr-1"
+                      /> keygen
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/browser-use"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/wordmarks/browser-use.svg"}
+                        alt="Browser Use"
+                        class="saturate-0 w-4 sm:w-4 mr-1 sm:mr-1"
+                      /> Browser Use
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-base sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/tscircuit"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/logos/tscircuit.svg"}
+                        alt="TSC"
+                        class="saturate-0 invert w-5 sm:w-5 mr-1 sm:mr-1"
+                      /> tscircuit
+                    </.link>
+                    <.link
+                      class="font-bold font-display text-sm sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/prefix-dev"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/logos/prefix.svg"}
+                        alt="TSC"
+                        class="saturate-0 w-6 sm:w-5 mr-1 sm:mr-1"
+                      /> Prefix.dev
+                    </.link>
+                    <.link
+                      class="font-extrabold font-mono text-base sm:text-base whitespace-nowrap flex items-center justify-center"
+                      navigate={~p"/mediar-ai"}
+                    >
+                      <img
+                        loading="eager"
+                        src={~p"/images/logos/screenpipe.webp"}
+                        alt="Screenpipe"
+                        class="shrink-0 saturate-0 w-5 sm:w-6 mr-1 sm:mr-1"
+                      /> screenpipe
+                    </.link>
+                  </div>
                 </div>
 
                 <div class="flex-1 max-w-lg text-left">
@@ -209,203 +405,6 @@ defmodule AlgoraWeb.HomeLive do
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="relative isolate pb-16 sm:pb-40">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="px-4 sm:px-0 pt-16 sm:pt-20 xl:pt-28 2xl:pt-40">
-              <div class="grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-y-6 gap-x-4 sm:gap-8 mx-auto items-center justify-center">
-                <.link class="relative flex items-center justify-center" href={~p"/cal"}>
-                  <Wordmarks.calcom class="w-[80%] col-auto" alt="Cal.com" />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/qdrant"}>
-                  <Wordmarks.qdrant class="w-[80%] col-auto" alt="Qdrant" />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/remotion"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/remotion.png"}
-                    alt="Remotion"
-                    class="col-auto w-full saturate-0"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/zio"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/zio.png"}
-                    alt="ZIO"
-                    class="mt-1 sm:mt-3 w-[70%] col-auto brightness-0 invert"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" navigate={~p"/activepieces"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/activepieces.svg"}
-                    alt="Activepieces"
-                    class="col-auto brightness-0 invert"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/tembo"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/tembo.png"}
-                    alt="Tembo"
-                    class="col-auto saturate-0"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/maybe-finance"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/maybe.png"}
-                    alt="Maybe"
-                    class="col-auto w-full saturate-0"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/golemcloud"}>
-                  <Wordmarks.golemcloud class="col-auto w-[80%]" alt="Golem Cloud" />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/deskflow"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/synergy.svg"}
-                    alt="Synergy"
-                    class="col-auto saturate-0 invert w-[80%]"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/Capgo"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/capgo.png"}
-                    alt="Capgo"
-                    class="col-auto w-[80%]"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/tracemachina"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/nativelink.png"}
-                    alt="Nativelink"
-                    class="col-auto saturate-0"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/softwaremill"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/softwaremill.png"}
-                    alt="Softwaremill"
-                    class="col-auto invert"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/CapSoftware"}>
-                  <Wordmarks.cap class="col-auto saturate-0 invert w-[80%]" alt="Cap" />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/spaceandtimelabs"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/spaceandtimelabs.svg"}
-                    alt="Space and Time"
-                    class="col-auto saturate-0"
-                  />
-                </.link>
-                <.link
-                  class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/getkyo"}
-                >
-                  <img
-                    loading="eager"
-                    src={~p"/images/logos/kyo.png"}
-                    alt="Kyo"
-                    class="size-6 sm:size-10 mr-1 sm:mr-2 saturate-0 invert"
-                  /> Kyo
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/permitio"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/permit.svg"}
-                    alt="Permit"
-                    class="col-auto saturate-0"
-                  />
-                </.link>
-                <.link
-                  class="font-bold font-display text-lg sm:text-4xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/coollabsio"}
-                >
-                  Coolify
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/encoredev"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/encore.svg"}
-                    alt="Encore"
-                    class="col-auto invert w-[70%]"
-                  />
-                </.link>
-                <.link class="relative flex items-center justify-center" href={~p"/tolgee"}>
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/tolgee.png"}
-                    alt="Tolgee"
-                    class="col-auto w-[80%]"
-                  />
-                </.link>
-                <.link
-                  class="font-bold font-display text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/keygen-sh"}
-                >
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/keygen.svg"}
-                    alt="Keygen"
-                    class="saturate-0 w-5 sm:w-7 mr-1 sm:mr-3"
-                  /> keygen
-                </.link>
-                <.link
-                  class="font-bold font-display text-sm sm:text-2xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/browser-use"}
-                >
-                  <img
-                    loading="eager"
-                    src={~p"/images/wordmarks/browser-use.svg"}
-                    alt="Browser Use"
-                    class="saturate-0 w-4 sm:w-7 mr-1 sm:mr-3"
-                  /> Browser Use
-                </.link>
-                <.link
-                  class="font-bold font-display text-base sm:text-2xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/tscircuit"}
-                >
-                  <img
-                    loading="eager"
-                    src={~p"/images/logos/tscircuit.svg"}
-                    alt="TSC"
-                    class="saturate-0 invert w-5 sm:w-6 mr-1 sm:mr-2"
-                  /> tscircuit
-                </.link>
-                <.link
-                  class="font-bold font-display text-sm sm:text-2xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/prefix-dev"}
-                >
-                  <img
-                    loading="eager"
-                    src={~p"/images/logos/prefix.svg"}
-                    alt="TSC"
-                    class="saturate-0 w-6 sm:w-9 mr-1 sm:mr-2"
-                  /> Prefix.dev
-                </.link>
-                <.link
-                  class="font-extrabold font-mono text-base sm:text-3xl whitespace-nowrap flex items-center justify-center"
-                  navigate={~p"/mediar-ai"}
-                >
-                  <img
-                    loading="eager"
-                    src={~p"/images/logos/screenpipe.webp"}
-                    alt="Screenpipe"
-                    class="shrink-0 saturate-0 w-5 sm:w-9 mr-1 sm:mr-2"
-                  /> screenpipe
-                </.link>
               </div>
             </div>
           </div>

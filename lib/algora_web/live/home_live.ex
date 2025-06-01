@@ -122,37 +122,17 @@ defmodule AlgoraWeb.HomeLive do
                   <p class="mt-6 text-lg leading-8 text-muted-foreground max-w-xl">
                     Access a curated network of top 1% engineers, pre-vetted through their open source contributions. Only pay when you hire.
                   </p>
-                  <ul class="mt-4 space-y-4 md:space-y-2">
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-1" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Submit your job description
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-2" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Receive your candidates <span class="text-emerald-300">within hours</span>
-                      </span>
-                    </li>
-                    <li class="flex w-full items-start pt-2 text-left text-white">
-                      <.icon name="tabler-square-rounded-number-3" class="size-8 mr-2 shrink-0" />
-                      <span class="text-base font-medium leading-7">
-                        Interview <span class="text-emerald-300">within days</span>
-                      </span>
-                    </li>
-                  </ul>
                   <div class="pt-8 flex-1 mr-auto max-w-xl flex flex-col justify-between">
-                    <figure class="relative flex flex-col h-full rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
+                    <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
                       <blockquote class="text-base font-medium text-foreground/90 flex-grow">
                         <p>
-                          "Algora helped us meet Nick, who started as an open source contributor, and after being contracted a few months, joined the Trigger founding team full-time.
+                          "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
                         </p>
                         <p class="pt-4">
                           It was the easiest hire and turned out to be very very good."
                         </p>
                       </blockquote>
-                      <figcaption class="mt-2 flex items-center gap-x-4">
+                      <figcaption class="mt-4 flex items-center gap-x-4">
                         <img
                           src="/images/people/eric-allam.jpg"
                           alt="Eric Allam"
@@ -174,12 +154,29 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="flex-1 max-w-lg text-left">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
-                      <h2 class="text-lg font-semibold leading-7 text-white">
+                      <h2 class="text-xl font-semibold leading-7 text-white">
                         View your candidates today
                       </h2>
-                      <p class="mt-2 text-sm leading-6 text-muted-foreground">
-                        Share your JD to view your candidate matches
-                      </p>
+                      <ul class="mt-4 space-y-4 md:space-y-1 text-sm">
+                        <li class="flex w-full items-center text-left text-white">
+                          <.icon name="tabler-square-rounded-number-1" class="size-6 mr-2 shrink-0" />
+                          <span class="font-medium leading-7">
+                            Submit your job description
+                          </span>
+                        </li>
+                        <li class="flex w-full items-center text-left text-white">
+                          <.icon name="tabler-square-rounded-number-2" class="size-6 mr-2 shrink-0" />
+                          <span class="font-medium leading-7">
+                            Receive your candidates <span class="text-emerald-300">within hours</span>
+                          </span>
+                        </li>
+                        <li class="flex w-full items-center text-left text-white">
+                          <.icon name="tabler-square-rounded-number-3" class="size-6 mr-2 shrink-0" />
+                          <span class="font-medium leading-7">
+                            Interview <span class="text-emerald-300">within days</span>
+                          </span>
+                        </li>
+                      </ul>
 
                       <form class="mt-8 flex flex-col gap-6">
                         <div>

@@ -116,13 +116,13 @@ defmodule AlgoraWeb.HomeLive do
             <div class="h-full mx-auto lg:mx-0 flex lg:max-w-none items-center justify-center text-center w-full">
               <div class="w-full flex flex-col lg:flex-row gap-6">
                 <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
-                  <h1 class="font-display text-3xl sm:text-4xl md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
+                  <h1 class="font-display text-3xl sm:text-lg md:text-5xl xl:text-[3.25rem] font-semibold tracking-tight text-foreground">
                     Meet your new <span class="text-emerald-400">hire today</span>
                   </h1>
                   <p class="mt-6 text-lg leading-8 text-muted-foreground max-w-xl">
                     Access a curated network of top 1% engineers, pre-vetted through their open source contributions. Only pay when you hire.
                   </p>
-                  <div class="pt-8 flex-1 mr-auto max-w-xl flex flex-col justify-between">
+                  <div class="pt-6 flex-1 mr-auto max-w-xl flex flex-col justify-between">
                     <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
                       <blockquote class="text-base font-medium text-foreground/90 flex-grow">
                         <p>
@@ -186,11 +186,8 @@ defmodule AlgoraWeb.HomeLive do
                             value=""
                             label="Job description / careers URL"
                             rows="4"
-                            placeholder="Tell us about the role and requirements..."
+                            placeholder="Tell us about the role and your requirements..."
                           />
-                          <p class="mt-2 text-xs text-muted-foreground">
-                            Include key technologies, experience level, and any must-have requirements.
-                          </p>
                         </div>
                         <.input
                           name="email"

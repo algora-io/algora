@@ -124,7 +124,7 @@ defmodule AlgoraWeb.HomeLive do
                   </p>
                   <div class="pt-6 mr-auto max-w-xl flex flex-col justify-between">
                     <figure class="relative flex flex-col rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10 p-6">
-                      <blockquote class="text-base font-medium text-foreground/90 flex-grow">
+                      <blockquote class="text-sm font-medium text-foreground/90 flex-grow">
                         <p>
                           "Algora helped us meet Nick, who after being contracted a few months, joined the Trigger founding team full-time.
                         </p>
@@ -132,7 +132,7 @@ defmodule AlgoraWeb.HomeLive do
                           It was the easiest hire and turned out to be very very good."
                         </p>
                       </blockquote>
-                      <figcaption class="mt-4 flex items-center gap-x-4">
+                      <figcaption class="mt-4 flex items-center gap-x-2">
                         <img
                           src="/images/people/eric-allam.jpg"
                           alt="Eric Allam"
@@ -350,8 +350,8 @@ defmodule AlgoraWeb.HomeLive do
                 <div class="flex-1 max-w-md text-left -mt-4">
                   <div class="rounded-xl bg-card text-card-foreground shadow-2xl ring-1 ring-white/10">
                     <div class="p-8">
-                      <h2 class="text-2xl font-semibold leading-7 text-white">
-                        Get started now
+                      <h2 class="text-3xl font-semibold leading-7 text-white">
+                        Get started in seconds
                       </h2>
                       <ul class="mt-4 space-y-4 md:space-y-1 text-sm">
                         <li class="flex w-full items-center text-left text-foreground/80">
@@ -391,17 +391,13 @@ defmodule AlgoraWeb.HomeLive do
                           label="Work email"
                           placeholder="you@company.com"
                         />
-                        <.button class="w-full">Receive your candidates</.button>
-                      </form>
-                    </div>
-
-                    <div class="border-t border-white/10 px-8 py-4">
-                      <div class="flex items-center gap-x-3">
-                        <.icon name="tabler-shield-check" class="size-5 text-emerald-400" />
-                        <div class="text-xs text-muted-foreground">
-                          Your information is secure and will never be shared
+                        <div class="flex flex-col gap-4">
+                          <.button class="w-full">Receive your candidates</.button>
+                          <div class="text-xs text-muted-foreground text-center">
+                            No credit card required - only pay when you hire
+                          </div>
                         </div>
-                      </div>
+                      </form>
                     </div>
                   </div>
                 </div>

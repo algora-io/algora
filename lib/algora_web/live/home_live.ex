@@ -271,7 +271,7 @@ defmodule AlgoraWeb.HomeLive do
             </h2>
 
             <div class="pt-4 sm:pt-8 flex flex-col md:flex-row gap-8 px-4">
-              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-transparent hover:ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
+              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
                     <p>
@@ -301,7 +301,7 @@ defmodule AlgoraWeb.HomeLive do
                 </figure>
               </div>
 
-              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-transparent hover:ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
+              <div class="flex-1 mx-auto max-w-xl flex flex-col justify-between border ring-1 ring-border transition-all bg-card group rounded-xl text-card-foreground shadow p-6">
                 <figure class="relative flex flex-col h-full">
                   <blockquote class="text-lg font-medium text-foreground/90 flex-grow">
                     <p>
@@ -757,8 +757,8 @@ defmodule AlgoraWeb.HomeLive do
     ~H"""
     <.link
       navigate={@event.link}
-      class="group relative flex items-center gap-4 bg-card p-6 rounded-xl border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] border-[color:var(--event-theme-color)] shadow-[0px_0px_6px_var(--event-theme-color-10),_0px_0px_12px_var(--event-theme-color-15),_0px_0px_16px_var(--event-theme-color-20)]"
-      style={"--event-theme-color: #{@event.theme_color}; --event-theme-color-05: #{@event.theme_color}0D; --event-theme-color-08: #{@event.theme_color}14; --event-theme-color-10: #{@event.theme_color}1A; --event-theme-color-15: #{@event.theme_color}26; --event-theme-color-20: #{@event.theme_color}33;"}
+      class="group relative flex items-center gap-4 bg-card p-6 rounded-xl border-l-8 transition-all mb-6 z-10 hover:scale-[1.03] border-[color:var(--event-theme-color)] shadow-[0px_0px_3px_var(--event-theme-color-10),_0px_0px_6px_var(--event-theme-color-15),_0px_0px_8px_var(--event-theme-color-20)]"
+      style={"--event-theme-color: #{@event.theme_color}; --event-theme-color-05: #ffffff0D; --event-theme-color-08: #ffffff14; --event-theme-color-10: #ffffff1A; --event-theme-color-15: #ffffff26; --event-theme-color-20: #ffffff33;"}
     >
       <div class="size-16 rounded-xl bg-background flex-shrink-0 overflow-hidden">
         <img src={@event.logo} alt={@event.alt} class="w-full h-full object-contain" />

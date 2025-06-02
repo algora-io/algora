@@ -627,7 +627,7 @@ defmodule Algora.Workspace do
   def remove_amount_label(token, owner, repo, number, amount) do
     label = "$#{amount |> Money.to_decimal() |> Util.format_number_compact()}"
 
-    case Github.remove_label(token, owner, repo, label) do
+    case Github.Client.fetch(token, "/repos/#{owner}/#{repo}/issues/#{number}/labels/#{Money.parse(amount)}", "DELETE") do
       # TODO: properly parse DELETE responses in Github.Client
       {:error, %Jason.DecodeError{data: ""}} ->
         :ok
